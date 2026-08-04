@@ -2,11 +2,6 @@ name: Repository planning policy
 
 on:
   pull_request:
-    paths:
-      - .github/**
-      - strategy/monorepo-architecture.md
-      - strategy/milestone-roadmap.md
-      - strategy/product-scope.md
   workflow_dispatch:
 
 permissions:
