@@ -1,0 +1,46 @@
+import { loadJsonDocument } from './contracts.mjs';
+
+const artifactRefSchema = loadJsonDocument('artifact-ref.schema.json');
+const errorCodeSchema = loadJsonDocument('error-code.schema.json');
+
+export const ARTIFACT_KINDS = Object.freeze([...artifactRefSchema['x-core-ui-kinds']]);
+export const ENABLED_RECORD_KINDS = Object.freeze([
+  ...artifactRefSchema['x-core-ui-enabled-record-kinds'],
+]);
+export const ARTIFACT_REF_PATTERN = artifactRefSchema.pattern;
+export const ERROR_CODES = Object.freeze([...errorCodeSchema.enum]);
+export const SCHEMA_VERSION = '1.0.0';
+export const API_VERSION = '1.0.0';
+
+export function parseArtifactRef(value, { requireEnabledRecordKind = false } = {}) {
+  const match = new RegExp(ARTIFACT_REF_PATTERN).exec(value);
+  if (!match) throw new Error(`CORE_ARTIFACT_ID_INVALID: ${value}`);
+  const [, kind, slug] = /^core:([^:]+):(.+)$/.exec(value);
+  if (requireEnabledRecordKind && !ENABLED_RECORD_KINDS.includes(kind)) {
+    throw new Error(`CORE_SCHEMA_INVALID: ${kind} record behavior is unavailable in G0.1`);
+  }
+  return { value, kind, slug };
+}
+
+export {
+  CanonicalJsonError,
+  canonicalDigest,
+  canonicalJson,
+  parseJsonStrict,
+  sha256Digest,
+} from './canonical.mjs';
+export {
+  classifySchemaChange,
+  negotiateSchemaVersion,
+  parseSchemaVersion,
+} from './evolution.mjs';
+export { bindingSpecRevision, contentRevision } from './revisions.mjs';
+export {
+  SchemaValidationError,
+  assertAppendOnlyErrorCodes,
+  relationEdges,
+  validateCatalogRecords,
+  validateFamily,
+  validateFieldOwnershipRegistry,
+  validateRelationRegistry,
+} from './validation.mjs';

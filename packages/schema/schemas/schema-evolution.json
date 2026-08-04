@@ -1,0 +1,14 @@
+{
+  "schemaVersion": "1.0.0",
+  "effects": {
+    "description-or-annotation": { "versionEffect": "patch", "migration": "none" },
+    "optional-stable-field": { "versionEffect": "minor", "migration": "existing-source-valid" },
+    "relaxed-constraint": { "versionEffect": "minor", "migration": "existing-source-valid" },
+    "capability-gated-kind": { "versionEffect": "minor", "migration": "capability-gated" },
+    "required-field": { "versionEffect": "major", "migration": "explicit-source-migrator" },
+    "tightened-constraint": { "versionEffect": "major", "migration": "explicit-source-migrator" },
+    "changed-interpretation": { "versionEffect": "major", "migration": "explicit-source-migrator" },
+    "closed-enum-value": { "versionEffect": "major", "migration": "explicit-source-migrator" },
+    "field-removal": { "versionEffect": "major", "migration": "deprecate-in-minor-remove-next-major" }
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "name": "@core-ui/schema",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24.19.0 <25"
+  },
+  "exports": {
+    ".": "./src/index.mjs",
+    "./schemas/*": "./schemas/*",
+    "./types": "./generated/types.d.ts"
+  },
+  "scripts": {
+    "check": "node src/generate.mjs --check && node --test test/*.test.mjs",
+    "generate": "node src/generate.mjs",
+    "generate:check": "node src/generate.mjs --check"
+  }
+}

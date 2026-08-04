@@ -8,4 +8,6 @@ importers:
 
   .: {}
 
+  packages/schema: {}
+
   tooling/audits/repository-policy: {}

@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://core-ui.dev/schema/diagnostic.schema.json",
+  "title": "Core UI diagnostic",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["code", "ruleId", "message", "retryable", "details"],
+  "properties": {
+    "code": { "$ref": "error-code.schema.json" },
+    "ruleId": { "type": "string", "pattern": "^[a-z][a-z0-9-]*(?:\\.[a-z][a-z0-9-]*)+$" },
+    "message": { "type": "string", "minLength": 1 },
+    "retryable": { "type": "boolean" },
+    "details": { "type": "object", "additionalProperties": true },
+    "nextCommand": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["command", "effect", "requiresConfirmation"],
+      "properties": {
+        "command": { "type": "string", "minLength": 1 },
+        "effect": { "enum": ["read-only", "project-write", "dependency-install"] },
+        "requiresConfirmation": { "type": "boolean" }
+      }
+    }
+  }
+}

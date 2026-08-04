@@ -7,11 +7,11 @@ const publishable = packages.filter(({ manifest }) => manifest.private !== true)
 
 if (publishable.length > 0) {
   console.error(
-    `FOUNDATION_RELEASE_FORBIDDEN: G0.0 has unexpected publishable packages: ${publishable.map(({ name }) => name).join(', ')}`,
+    `FOUNDATION_RELEASE_FORBIDDEN: packages cannot become publishable before G2.1: ${publishable.map(({ name }) => name).join(', ')}`,
   );
   process.exit(1);
 }
 
 console.log(
-  'Foundation checks passed; no publishable package or public release candidate exists at G0.0.',
+  'Foundation checks passed; no publishable package or public release candidate exists.',
 );
