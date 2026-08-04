@@ -1,0 +1,34 @@
+name: Deterministic workspace checks
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+
+      - name: Activate pinned pnpm
+        run: |
+          corepack enable
+          corepack prepare pnpm@10.33.0 --activate
+
+      - name: Install workspace
+        run: pnpm install --frozen-lockfile
+
+      - name: Run affected deterministic checks
+        run: pnpm check
+
+      - name: Verify generation identity
+        run: pnpm generate:check

@@ -3,3 +3,17 @@
 /strategy/milestone-roadmap.md @ndrewtran
 /strategy/product-scope.md @ndrewtran
 /.github/ @ndrewtran
+
+# G0.0 workspace, navigation, decision, and repository-policy owners.
+/AGENTS.md @ndrewtran
+/.node-version @ndrewtran
+/.npmrc @ndrewtran
+/package.json @ndrewtran
+/pnpm-lock.yaml @ndrewtran
+/pnpm-workspace.yaml @ndrewtran
+/decisions/ @ndrewtran
+/catalog/ @ndrewtran
+/packages/ @ndrewtran
+/apps/ @ndrewtran
+/tooling/ @ndrewtran
+/tests/ @ndrewtran

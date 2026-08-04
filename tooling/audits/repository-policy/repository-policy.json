@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "requiredRootCommands": [
+    "check",
+    "check:all",
+    "generate",
+    "generate:check",
+    "test:agent",
+    "release:prepare"
+  ],
+  "majorOwners": [
+    { "path": "strategy", "classification": "authority" },
+    { "path": "decisions", "classification": "canonical" },
+    { "path": "catalog", "classification": "canonical" },
+    { "path": "packages", "classification": "source" },
+    { "path": "apps", "classification": "projection-source" },
+    { "path": "tooling", "classification": "source" },
+    { "path": "tests", "classification": "proof" }
+  ],
+  "projectionPathSegments": [
+    "build",
+    "coverage",
+    "dist",
+    "generated"
+  ],
+  "slugPattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+  "artifactIdPattern": "^core:(?:component|pattern|token|foundation|guide|example|pitfall|migration|capability):([a-z0-9]+(?:-[a-z0-9]+)*)$",
+  "generatedMarkers": {
+    "source": "@generated-from:",
+    "digest": "@generated-content-sha256:"
+  },
+  "globalTaskInputs": [
+    ".github/",
+    "decisions/",
+    "strategy/",
+    ".node-version",
+    ".npmrc",
+    "AGENTS.md",
+    "package.json",
+    "pnpm-lock.yaml",
+    "pnpm-workspace.yaml"
+  ],
+  "toolchain": {
+    "node": "24.19.0",
+    "nodeRange": ">=24.19.0 <25",
+    "pnpm": "10.33.0"
+  }
+}
