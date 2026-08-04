@@ -55,7 +55,27 @@ test('E-G0.1-01: minimum records, envelopes, diagnostics, ownership, and relatio
   assert.equal(graph.records.length, 5);
   assert.equal(relationEdges(graph.records).length, 8);
   assert.equal(validateRelationRegistry().relations.length, 4);
-  assert.equal(validateFieldOwnershipRegistry().classes.length, 3);
+  const ownership = validateFieldOwnershipRegistry();
+  assert.equal(ownership.classes.length, 3);
+  assert.ok(ownership.fields.length > 100);
+  const missingOwnership = structuredClone(ownership);
+  missingOwnership.fields.pop();
+  assert.throws(
+    () => validateFieldOwnershipRegistry(missingOwnership),
+    expectCode('CORE_FIELD_OWNERSHIP_INVALID'),
+  );
+  const duplicateOwnership = structuredClone(ownership);
+  duplicateOwnership.fields.push(structuredClone(duplicateOwnership.fields[0]));
+  assert.throws(
+    () => validateFieldOwnershipRegistry(duplicateOwnership),
+    expectCode('CORE_FIELD_OWNERSHIP_INVALID'),
+  );
+  const misowned = structuredClone(ownership);
+  misowned.fields[0].owner = 'not-the-canonical-owner';
+  assert.throws(
+    () => validateFieldOwnershipRegistry(misowned),
+    expectCode('CORE_FIELD_OWNERSHIP_INVALID'),
+  );
   assert.deepEqual(parseArtifactRef('core:component:button'), {
     value: 'core:component:button',
     kind: 'component',
@@ -167,21 +187,52 @@ test('E-G0.1-01 negative: unknown, duplicate, invalid-relation, and unowned fiel
     ]),
     expectCode('CORE_RELATION_INVALID'),
   );
-  assert.deepEqual(validateFamily('binding', {
-    schemaVersion: '1.0.0',
-    strategy: 'unsupported',
-    alternative: 'core:component:button',
-  }), {
-    schemaVersion: '1.0.0',
-    strategy: 'unsupported',
-    alternative: 'core:component:button',
-  });
+  assert.throws(
+    () => validateFamily('binding', {
+      schemaVersion: '1.0.0',
+      strategy: 'unsupported',
+      alternative: 'core:component:button',
+    }),
+    expectCode('CORE_SCHEMA_INVALID'),
+  );
   assert.throws(
     () => validateFamily('binding', { schemaVersion: '1.0.0', strategy: 'unsupported' }),
     expectCode('CORE_SCHEMA_INVALID'),
   );
   assert.throws(
     () => validateFamily('binding', { ...unsupportedBinding, lifecycle: 'experimental' }),
+    expectCode('CORE_SCHEMA_INVALID'),
+  );
+  for (const field of ['reason', 'alternative']) {
+    assert.throws(
+      () => validateFamily('binding', {
+        ...component().bindings['web.react'],
+        [field]: field === 'reason' ? 'Not applicable.' : 'core:component:button',
+      }),
+      expectCode('CORE_SCHEMA_INVALID'),
+    );
+    const implementedProfile = component().bindings['native.react-native'].runtimeProfiles.ios;
+    assert.throws(
+      () => validateFamily('binding', {
+        ...component().bindings['native.react-native'],
+        runtimeProfiles: {
+          ...component().bindings['native.react-native'].runtimeProfiles,
+          ios: {
+            ...implementedProfile,
+            [field]: field === 'reason' ? 'Not applicable.' : 'core:component:button',
+          },
+        },
+      }),
+      expectCode('CORE_SCHEMA_INVALID'),
+    );
+  }
+  const alternativeOnlyProfile = component().bindings['native.react-native'];
+  alternativeOnlyProfile.runtimeProfiles['native.react-native-web'] = {
+    strategy: 'unsupported',
+    alternative: 'core:component:button',
+  };
+  assert.throws(
+    () => validateFamily('binding', alternativeOnlyProfile),
     expectCode('CORE_SCHEMA_INVALID'),
   );
   const forbiddenUnsupportedFields = {
@@ -215,6 +266,7 @@ test('E-G0.1-01 negative: unknown, duplicate, invalid-relation, and unowned fiel
   danglingAlternative.bindings['web.react'] = {
     schemaVersion: '1.0.0',
     strategy: 'unsupported',
+    reason: 'No responsible implementation exists.',
     alternative: 'core:component:missing',
   };
   assert.throws(
@@ -265,6 +317,41 @@ test('E-G0.1-02: canonical bytes ignore key order and whitespace but preserve me
     () => validateFamily('component', nestedPrototype),
     expectCode('CORE_SCHEMA_INVALID'),
   );
+  for (const inheritedKey of [
+    'toString',
+    'valueOf',
+    'hasOwnProperty',
+    '__defineGetter__',
+    '__lookupSetter__',
+  ]) {
+    const hostileRecord = parseJsonStrict(
+      `${JSON.stringify(component()).slice(0, -1)},${JSON.stringify(inheritedKey)}:true}`,
+    );
+    assert.throws(
+      () => validateFamily('component', hostileRecord),
+      expectCode('CORE_SCHEMA_INVALID'),
+    );
+
+    const hostileBinding = component();
+    hostileBinding.bindings[inheritedKey] = structuredClone(
+      hostileBinding.bindings['web.react'],
+    );
+    assert.throws(
+      () => validateFamily('component', hostileBinding),
+      expectCode('CORE_SCHEMA_INVALID'),
+    );
+
+    const hostileRuntimeProfile = component();
+    hostileRuntimeProfile.bindings['native.react-native'].runtimeProfiles[inheritedKey] = {
+      strategy: 'adapted',
+      lifecycle: 'experimental',
+      validationProfile: 'native.ios',
+    };
+    assert.throws(
+      () => validateFamily('component', hostileRuntimeProfile),
+      expectCode('CORE_SCHEMA_INVALID'),
+    );
+  }
   assert.throws(
     () => canonicalJson({ 'line\r\n': 1, 'line\n': 2 }),
     /CANONICAL_KEY_COLLISION/,
@@ -423,6 +510,12 @@ test('E-G0.1-05: schema evolution and append-only response policy enforce declar
   assert.equal(classifySchemaChange('optional-stable-field').versionEffect, 'minor');
   assert.equal(classifySchemaChange('required-field').versionEffect, 'major');
   assert.equal(classifySchemaChange('field-removal').migration, 'deprecate-in-minor-remove-next-major');
+  for (const inheritedChangeType of ['toString', 'constructor', '__proto__']) {
+    assert.throws(
+      () => classifySchemaChange(inheritedChangeType),
+      expectCode('CORE_SCHEMA_VERSION_UNSUPPORTED'),
+    );
+  }
   assert.deepEqual(
     negotiateSchemaVersion('1.2.3', { minimum: '1.0.0', maximumExclusive: '2.0.0' }),
     { version: '1.2.3', compatibility: 'readable' },

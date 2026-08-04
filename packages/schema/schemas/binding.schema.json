@@ -8,12 +8,17 @@
     "oneOf": [
       {
       "required": ["schemaVersion", "lifecycle", "strategy", "api", "behavior", "accessibility", "tokenSources", "runtimeProfiles"],
-      "properties": { "strategy": { "enum": ["direct", "adapted", "native-alternative"] } }
+      "properties": { "strategy": { "enum": ["direct", "adapted", "native-alternative"] } },
+      "not": {
+        "anyOf": [
+          { "required": ["reason"] },
+          { "required": ["alternative"] }
+        ]
+      }
       },
       {
-      "required": ["schemaVersion", "strategy"],
+      "required": ["schemaVersion", "strategy", "reason"],
       "properties": { "strategy": { "const": "unsupported" } },
-      "anyOf": [{ "required": ["reason"] }, { "required": ["alternative"] }],
       "not": {
         "anyOf": [
           { "required": ["lifecycle"] },
@@ -78,7 +83,30 @@
     "runtimeProfile": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["strategy"],
+      "allOf": [{
+        "oneOf": [
+          {
+            "required": ["strategy", "lifecycle", "validationProfile"],
+            "properties": { "strategy": { "enum": ["direct", "adapted", "native-alternative"] } },
+            "not": {
+              "anyOf": [
+                { "required": ["reason"] },
+                { "required": ["alternative"] }
+              ]
+            }
+          },
+          {
+            "required": ["strategy", "reason"],
+            "properties": { "strategy": { "const": "unsupported" } },
+            "not": {
+              "anyOf": [
+                { "required": ["lifecycle"] },
+                { "required": ["validationProfile"] }
+              ]
+            }
+          }
+        ]
+      }],
       "properties": {
         "strategy": { "enum": ["direct", "adapted", "native-alternative", "unsupported"] },
         "lifecycle": { "enum": ["experimental", "stable", "deprecated", "removed"] },

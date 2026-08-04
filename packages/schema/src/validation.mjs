@@ -126,8 +126,10 @@ function evaluate(schema, value, path, currentFile, issues) {
       if (schema.propertyNames) {
         evaluate(schema.propertyNames, key, `${path}/{propertyName}`, currentFile, issues);
       }
-      const propertySchema = schema.properties?.[key];
-      if (propertySchema) {
+      const propertySchema = Object.hasOwn(schema.properties ?? {}, key)
+        ? schema.properties[key]
+        : undefined;
+      if (propertySchema !== undefined) {
         evaluate(propertySchema, value[key], `${path}/${key}`, currentFile, issues);
         continue;
       }
@@ -174,7 +176,7 @@ function semanticIssues(family, value) {
   if (['binding', 'capability', 'component', 'example', 'guide', 'token-source'].includes(family)) {
     const ownership = loadJsonDocument('field-ownership.json');
     const forbidden = new Set(
-      ownership.fields
+      [...ownership.fields, ...(ownership.reservedFields ?? [])]
         .filter((field) => field.forbiddenInAuthoredSource)
         .map((field) => field.name),
     );
@@ -199,20 +201,31 @@ function semanticIssues(family, value) {
           if (object.lifecycle !== undefined || object.validationProfile !== undefined) {
             issues.push({ path, message: 'unsupported disposition must omit lifecycle and validationProfile' });
           }
-          if (!object.reason && !object.alternative) {
-            issues.push({ path, message: 'unsupported disposition requires a reason or alternative' });
+          if (!object.reason) {
+            issues.push({ path, message: 'unsupported disposition requires a reason' });
           }
         } else {
+          if (object.reason !== undefined || object.alternative !== undefined) {
+            issues.push({ path, message: 'implemented disposition must omit reason and alternative' });
+          }
           if (!object.lifecycle) issues.push({ path, message: 'implemented disposition requires lifecycle' });
           if (runtimeProfile && !object.validationProfile) {
             issues.push({ path, message: 'supported runtime profile requires validationProfile' });
           } else if (
             runtimeProfile
-            && object.validationProfile !== expectedValidationProfiles[runtimeProfileId]
+            && object.validationProfile !== (
+              Object.hasOwn(expectedValidationProfiles, runtimeProfileId)
+                ? expectedValidationProfiles[runtimeProfileId]
+                : undefined
+            )
           ) {
             issues.push({
               path: `${path}/validationProfile`,
-              message: `must equal ${expectedValidationProfiles[runtimeProfileId]}`,
+              message: `must equal ${
+                Object.hasOwn(expectedValidationProfiles, runtimeProfileId)
+                  ? expectedValidationProfiles[runtimeProfileId]
+                  : 'a declared validation profile'
+              }`,
             });
           }
         }
@@ -265,21 +278,105 @@ export function validateFamily(family, value) {
   return value;
 }
 
-export function validateFieldOwnershipRegistry() {
-  const registry = loadJsonDocument('field-ownership.json');
-  const names = new Set();
+function escapeJsonPointer(segment) {
+  return segment.replaceAll('~', '~0').replaceAll('/', '~1');
+}
+
+function collectSchemaFieldDeclarations(schema, pointer = '#', declarations = []) {
+  if (Array.isArray(schema)) {
+    schema.forEach((item, index) => collectSchemaFieldDeclarations(
+      item,
+      `${pointer}/${index}`,
+      declarations,
+    ));
+    return declarations;
+  }
+  if (!isObject(schema)) return declarations;
+  for (const [keyword, value] of Object.entries(schema)) {
+    const keywordPointer = `${pointer}/${escapeJsonPointer(keyword)}`;
+    if (keyword === 'properties' && isObject(value)) {
+      for (const [name, propertySchema] of Object.entries(value)) {
+        const schemaPointer = `${keywordPointer}/${escapeJsonPointer(name)}`;
+        declarations.push({ name, schemaPointer });
+        collectSchemaFieldDeclarations(propertySchema, schemaPointer, declarations);
+      }
+    } else {
+      collectSchemaFieldDeclarations(value, keywordPointer, declarations);
+    }
+  }
+  return declarations;
+}
+
+export function validateFieldOwnershipRegistry(
+  registry = loadJsonDocument('field-ownership.json'),
+) {
+  const contexts = new Map();
+  for (const governed of registry.governedSchemas ?? []) {
+    if (
+      contexts.has(governed.file)
+      || !registry.classes.includes(governed.class)
+      || !governed.owner
+    ) {
+      throw new SchemaValidationError('CORE_FIELD_OWNERSHIP_INVALID', [
+        { path: `$/governedSchemas/${governed.file}`, message: 'must declare one class and owner' },
+      ]);
+    }
+    contexts.set(governed.file, governed);
+  }
+  const expected = new Map();
+  for (const governed of contexts.values()) {
+    for (const declaration of collectSchemaFieldDeclarations(loadJsonDocument(governed.file))) {
+      const key = `${governed.file}${declaration.schemaPointer}`;
+      expected.set(key, { ...declaration, ...governed });
+    }
+  }
+  const declared = new Set();
   for (const field of registry.fields) {
-    if (names.has(field.name)) {
+    const key = `${field.schema}${field.schemaPointer}`;
+    const context = expected.get(key);
+    if (declared.has(key)) {
       throw new SchemaValidationError('CORE_FIELD_OWNERSHIP_INVALID', [
-        { path: `$/fields/${field.name}`, message: 'has more than one owner declaration' },
+        { path: `$/fields/${key}`, message: 'has more than one owner declaration' },
       ]);
     }
-    names.add(field.name);
-    if (!registry.classes.includes(field.class) || !field.owner) {
+    declared.add(key);
+    if (
+      !context
+      || field.name !== context.name
+      || field.class !== context.class
+      || field.owner !== context.owner
+    ) {
       throw new SchemaValidationError('CORE_FIELD_OWNERSHIP_INVALID', [
-        { path: `$/fields/${field.name}`, message: 'must have one known class and owner' },
+        {
+          path: `$/fields/${key}`,
+          message: 'must match one governed schema field, class, and canonical owner',
+        },
       ]);
     }
+  }
+  for (const key of expected.keys()) {
+    if (!declared.has(key)) {
+      throw new SchemaValidationError('CORE_FIELD_OWNERSHIP_INVALID', [
+        { path: `$/fields/${key}`, message: 'is missing an ownership declaration' },
+      ]);
+    }
+  }
+  const reservedNames = new Set();
+  for (const field of registry.reservedFields ?? []) {
+    if (
+      reservedNames.has(field.name)
+      || !registry.classes.includes(field.class)
+      || !field.owner
+      || field.forbiddenInAuthoredSource !== true
+    ) {
+      throw new SchemaValidationError('CORE_FIELD_OWNERSHIP_INVALID', [
+        {
+          path: `$/reservedFields/${field.name}`,
+          message: 'must declare one reserved name, known class, owner, and authored-source prohibition',
+        },
+      ]);
+    }
+    reservedNames.add(field.name);
   }
   return registry;
 }
@@ -397,7 +494,9 @@ export function validateCatalogRecords(records) {
       }
       const targetProfiles = binding.runtimeProfiles ?? {};
       for (const runtimeProfileId of example.binding.runtimeProfiles ?? []) {
-        const runtimeProfile = targetProfiles[runtimeProfileId];
+        const runtimeProfile = Object.hasOwn(targetProfiles, runtimeProfileId)
+          ? targetProfiles[runtimeProfileId]
+          : undefined;
         if (!runtimeProfile || runtimeProfile.strategy === 'unsupported') {
           issues.push({
             path: '$/binding/runtimeProfiles',

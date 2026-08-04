@@ -3,7 +3,9 @@ import { SchemaValidationError } from './validation.mjs';
 
 export function classifySchemaChange(changeType) {
   const policy = loadJsonDocument('schema-evolution.json');
-  const result = policy.effects[changeType];
+  const result = Object.hasOwn(policy.effects, changeType)
+    ? policy.effects[changeType]
+    : undefined;
   if (!result) {
     throw new SchemaValidationError('CORE_SCHEMA_VERSION_UNSUPPORTED', [
       { path: '$/changeType', message: `${changeType} is not declared` },

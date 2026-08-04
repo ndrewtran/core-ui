@@ -30,7 +30,7 @@ export function loadJsonDocument(fileName) {
 }
 
 export function loadFamilySchema(family) {
-  const fileName = familyFiles[family];
+  const fileName = Object.hasOwn(familyFiles, family) ? familyFiles[family] : undefined;
   if (!fileName) throw new Error(`SCHEMA_FAMILY_UNKNOWN: ${family}`);
   return { fileName, schema: loadJsonDocument(fileName) };
 }

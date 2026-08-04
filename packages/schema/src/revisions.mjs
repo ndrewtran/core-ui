@@ -20,7 +20,9 @@ export function bindingSpecRevision({
   tokenSources = [],
 }) {
   validateCatalogRecords([component, ...examples, ...tokenSources]);
-  const binding = component.bindings[bindingId];
+  const binding = Object.hasOwn(component.bindings, bindingId)
+    ? component.bindings[bindingId]
+    : undefined;
   if (!binding) throw new Error(`CORE_RELATION_INVALID: missing ${component.id}#${bindingId}`);
   if (binding.strategy === 'unsupported') {
     throw new Error(`CORE_RELATION_INVALID: unsupported binding ${component.id}#${bindingId} has no specRevision`);
