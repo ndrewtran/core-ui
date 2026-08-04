@@ -1,0 +1,14 @@
+{
+  "name": "@core-ui/repository-policy",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24.19.0 <25"
+  },
+  "scripts": {
+    "check": "node src/cli.mjs && node --test test/*.test.mjs ../../../.github/scripts/validate-planning-pr.test.cjs",
+    "generate": "node src/generate.mjs",
+    "generate:check": "node src/generate.mjs --check"
+  }
+}

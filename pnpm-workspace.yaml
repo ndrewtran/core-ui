@@ -1,0 +1,9 @@
+packages:
+  - packages/**
+  - apps/**
+  - tooling/**
+
+disallowWorkspaceCycles: true
+failIfNoMatch: false
+linkWorkspacePackages: false
+sharedWorkspaceLockfile: true
