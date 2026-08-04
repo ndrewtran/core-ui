@@ -1,5 +1,5 @@
 name: Architecture maintenance
-description: Propose a controlled amendment to architecture or roadmap authority.
+description: Propose a controlled amendment to architecture, roadmap, Product Scope, or repository planning authority.
 title: "[Architecture] "
 labels:
   - type:architecture-maintenance
@@ -16,7 +16,7 @@ body:
     id: current_authority
     attributes:
       label: Current authority and conflict
-      description: Cite exact architecture and roadmap headings and explain why implementation cannot remain conformant.
+      description: Cite exact architecture, roadmap, and Product Scope headings as applicable and explain why the current authority chain cannot remain unchanged.
     validations:
       required: true
   - type: textarea
@@ -52,6 +52,13 @@ body:
     attributes:
       label: Roadmap impact
       description: Name changed entry conditions, deliverables, assertions, scope controls, or deferred capabilities.
+    validations:
+      required: true
+  - type: textarea
+    id: product_scope
+    attributes:
+      label: Product Scope impact and change packet
+      description: State scopeVersion effect, affected immutable IDs and commitment transitions, roadmap/evidence effect, release additions/removals, and open-tracker migration; state N/A with rationale when Product Scope is unaffected.
     validations:
       required: true
   - type: textarea

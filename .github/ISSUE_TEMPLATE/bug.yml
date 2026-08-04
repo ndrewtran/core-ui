@@ -11,6 +11,20 @@ body:
       description: Cite the schema, API, roadmap assertion, architecture heading, or public package contract.
     validations:
       required: true
+  - type: input
+    id: scope_ids
+    attributes:
+      label: Scope ID(s)
+      placeholder: SCOPE-FOUNDATION-001
+    validations:
+      required: true
+  - type: input
+    id: roadmap_evidence
+    attributes:
+      label: Owning roadmap milestone and evidence ID(s)
+      placeholder: G0.0; E-G0.0-03
+    validations:
+      required: true
   - type: textarea
     id: reproduce
     attributes:

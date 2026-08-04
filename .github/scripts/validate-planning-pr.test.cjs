@@ -1,0 +1,71 @@
+'use strict';
+
+const assert = require('node:assert/strict');
+const test = require('node:test');
+
+const { validatePlanningPullRequest } = require('./validate-planning-pr.cjs');
+
+const completeBody = `
+- Authority change record: #1
+- Scope version effect: none — publishes accepted scopeVersion 1.0.0 unchanged
+- Affected Scope IDs / commitment transitions: all accepted IDs; no commitment transitions
+- Roadmap / evidence effect: no semantic changes; tracker references are reconciled
+- Release additions / removals: None — accepted release boundary remains unchanged
+- Open tracker migration: issues #1–#19 and the Core UI Delivery Project
+`;
+
+test('ignores pull requests outside authority sources', () => {
+  assert.deepEqual(
+    validatePlanningPullRequest({
+      files: ['README.md'],
+      labels: [],
+      body: '',
+    }),
+    [],
+  );
+});
+
+test('accepts a complete Product Scope authority publication', () => {
+  assert.deepEqual(
+    validatePlanningPullRequest({
+      files: ['strategy/product-scope.md'],
+      labels: ['type:architecture-maintenance'],
+      body: completeBody,
+    }),
+    [],
+  );
+});
+
+test('rejects an authority change without a label or change record', () => {
+  const errors = validatePlanningPullRequest({
+    files: ['strategy/milestone-roadmap.md'],
+    labels: [],
+    body: '',
+  });
+
+  assert.equal(errors.length, 2);
+  assert.match(errors[0], /label/);
+  assert.match(errors[1], /change record/);
+});
+
+test('rejects incomplete Product Scope change metadata', () => {
+  const errors = validatePlanningPullRequest({
+    files: ['strategy/product-scope.md'],
+    labels: ['type:decision'],
+    body: `
+- Authority change record: #12
+- Scope version effect: someday
+- Affected Scope IDs / commitment transitions: Pending
+- Roadmap / evidence effect: TBD
+- Release additions / removals: None
+- Open tracker migration: N/A
+`,
+  });
+
+  assert.equal(errors.length, 5);
+  assert.match(errors[0], /Scope version effect/);
+  assert.match(errors[1], /Affected Scope IDs/);
+  assert.match(errors[2], /Roadmap \/ evidence effect/);
+  assert.match(errors[3], /Release additions \/ removals/);
+  assert.match(errors[4], /Open tracker migration/);
+});

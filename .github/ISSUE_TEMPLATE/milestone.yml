@@ -3,7 +3,6 @@ description: Track one architecture-roadmap milestone or gate exit.
 title: "[G?.?] "
 labels:
   - type:milestone
-  - scope:pending
 body:
   - type: markdown
     attributes:
@@ -60,8 +59,15 @@ body:
     id: product_scope
     attributes:
       label: Product Scope IDs
-      description: Do not infer or invent IDs while the Product Scope companion is unfinished.
-      value: Pending — not assigned
+      description: Use immutable IDs from strategy/product-scope.md; do not use Pending, TBD, or inferred IDs.
+      placeholder: SCOPE-FOUNDATION-001
+    validations:
+      required: true
+  - type: textarea
+    id: architecture_requirements
+    attributes:
+      label: Architecture requirements
+      description: Cite the governing sections and non-negotiable invariants.
     validations:
       required: true
   - type: textarea
@@ -75,6 +81,20 @@ body:
     id: exit
     attributes:
       label: Exit condition
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance_commands
+    attributes:
+      label: Acceptance commands
+      description: Name deterministic commands, fixtures, negative paths, environments, and evidence owners.
+    validations:
+      required: true
+  - type: input
+    id: change_record
+    attributes:
+      label: Pull request or change record
+      placeholder: "#123 or branch/change-record reference"
     validations:
       required: true
   - type: checkboxes

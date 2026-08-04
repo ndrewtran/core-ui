@@ -14,8 +14,49 @@ body:
   - type: input
     id: scope_ids
     attributes:
-      label: Roadmap, evidence, and Product Scope IDs
-      placeholder: G1.3; E-G1.3-01; Product Scope pending
+      label: Scope ID(s)
+      placeholder: SCOPE-COMP-BUTTON; SCOPE-SYSTEM-CURRICULUM
+    validations:
+      required: true
+  - type: input
+    id: roadmap_milestone
+    attributes:
+      label: Roadmap milestone
+      placeholder: G1.3
+    validations:
+      required: true
+  - type: textarea
+    id: architecture_requirements
+    attributes:
+      label: Architecture requirements
+      description: Cite exact headings and non-negotiable invariants governing the change.
+    validations:
+      required: true
+  - type: input
+    id: evidence_ids
+    attributes:
+      label: Evidence ID(s)
+      placeholder: E-G1.3-01; E-G1.3-02
+    validations:
+      required: true
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependencies
+    validations:
+      required: true
+  - type: textarea
+    id: deliverables
+    attributes:
+      label: Deliverables
+      description: Name the bounded canonical owners, derived projections, packages, and supported platforms.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance_commands
+    attributes:
+      label: Acceptance commands
+      description: Include required positive, negative, generation, parity, compatibility, accessibility, and packed checks as applicable.
     validations:
       required: true
   - type: textarea
@@ -36,6 +77,13 @@ body:
     id: non_goals
     attributes:
       label: Non-goals
+    validations:
+      required: true
+  - type: input
+    id: change_record
+    attributes:
+      label: Pull request or change record
+      placeholder: "#123 or branch/change-record reference"
     validations:
       required: true
   - type: checkboxes

@@ -24,6 +24,13 @@ body:
     validations:
       required: true
   - type: textarea
+    id: authority_refs
+    attributes:
+      label: Authority, scope, and evidence references
+      description: Cite affected architecture sections, roadmap milestones/evidence IDs, immutable Product Scope IDs, dependencies, release boundary, and explicit non-goals.
+    validations:
+      required: true
+  - type: textarea
     id: options
     attributes:
       label: Options and trade-offs
@@ -33,5 +40,12 @@ body:
     id: outcome
     attributes:
       label: Proposed outcome and reversal conditions
+    validations:
+      required: true
+  - type: textarea
+    id: tracker_migration
+    attributes:
+      label: Open-tracker migration
+      description: Name affected issues and Project items, or state N/A with rationale.
     validations:
       required: true

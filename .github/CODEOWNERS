@@ -1,4 +1,5 @@
 # Architecture authority and planning policy require explicit maintainer review.
 /strategy/monorepo-architecture.md @ndrewtran
 /strategy/milestone-roadmap.md @ndrewtran
+/strategy/product-scope.md @ndrewtran
 /.github/ @ndrewtran

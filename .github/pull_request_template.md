@@ -1,16 +1,33 @@
+## Summary
+
+Describe the important changes across the complete branch diff.
+
+## Why
+
+State the problem, goal, and why this bounded change is required now.
+
 ## Authority and intent
 
 - Roadmap milestone / parent issue:
 - Evidence IDs affected:
-- Product Scope IDs: `Pending — not assigned` or approved IDs
-- Architecture-maintenance issue: `N/A` or `#…`
+- Product Scope IDs:
+- Authority change record: `N/A`, `#…`, or decision record
 - Canonical owners changed:
 - Generated projections changed:
+- Scope version effect: `none`, `patch`, `minor`, or `major`
+- Affected Scope IDs / commitment transitions:
+- Roadmap / evidence effect:
+- Release additions / removals:
+- Open tracker migration:
 
 ## Change summary
 
 Describe the bounded change, why it is required now, and the exact platforms,
 runtime profiles, packages, and query surfaces affected.
+
+## Validation
+
+- `command` — observed result
 
 ## Proof packet
 
@@ -36,3 +53,7 @@ Evidence links:
 - Invalidated evidence:
 - Migration / deprecation:
 - Rollback or narrowing strategy:
+
+## Impact and risks
+
+Describe compatibility, rollout, governance, and operational risk, or explain why risk is bounded.
