@@ -1,0 +1,37 @@
+name: Bounded decision
+description: Record a decision needed to activate or complete roadmap work.
+title: "[Decision] "
+labels:
+  - type:decision
+body:
+  - type: input
+    id: parent
+    attributes:
+      label: Parent milestone or architecture issue
+      placeholder: "#123"
+    validations:
+      required: true
+  - type: textarea
+    id: question
+    attributes:
+      label: Decision question
+    validations:
+      required: true
+  - type: textarea
+    id: constraints
+    attributes:
+      label: Architectural constraints and evidence
+    validations:
+      required: true
+  - type: textarea
+    id: options
+    attributes:
+      label: Options and trade-offs
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Proposed outcome and reversal conditions
+    validations:
+      required: true

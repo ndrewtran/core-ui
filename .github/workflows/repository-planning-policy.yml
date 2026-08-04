@@ -1,0 +1,62 @@
+name: Repository planning policy
+
+on:
+  pull_request:
+    paths:
+      - .github/**
+      - strategy/monorepo-architecture.md
+      - strategy/milestone-roadmap.md
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  validate-planning-artifacts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate issue-form YAML
+        run: >-
+          ruby -e 'require "yaml";
+          Dir[".github/ISSUE_TEMPLATE/*.{yml,yaml}"].sort.each {
+            |path| YAML.safe_load(File.read(path), permitted_classes: [], aliases: false)
+          }'
+
+      - name: Require architecture authority files
+        run: |
+          test -s strategy/monorepo-architecture.md
+          test -s strategy/milestone-roadmap.md
+
+      - name: Enforce architecture-change metadata
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const files = await github.paginate(
+              github.rest.pulls.listFiles,
+              {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: context.payload.pull_request.number,
+                per_page: 100,
+              },
+            );
+
+            const authorityFiles = new Set([
+              'strategy/monorepo-architecture.md',
+              'strategy/milestone-roadmap.md',
+            ]);
+            if (!files.some((file) => authorityFiles.has(file.filename))) return;
+
+            const labels = context.payload.pull_request.labels.map((label) => label.name);
+            if (!labels.includes('type:architecture-maintenance')) {
+              core.setFailed('Architecture-source changes require the type:architecture-maintenance label.');
+            }
+
+            const body = context.payload.pull_request.body || '';
+            if (!/Architecture-maintenance issue:\s*#\d+/i.test(body)) {
+              core.setFailed('Architecture-source changes require an Architecture-maintenance issue: #… reference.');
+            }

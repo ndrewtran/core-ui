@@ -1,0 +1,38 @@
+name: Invariant or implementation bug
+description: Report reproducible behavior that violates a declared contract.
+title: "[Bug] "
+labels:
+  - type:bug
+body:
+  - type: textarea
+    id: contract
+    attributes:
+      label: Violated contract or invariant
+      description: Cite the schema, API, roadmap assertion, architecture heading, or public package contract.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Minimal reproduction
+      description: Include exact versions, revisions, platform/runtime profile, inputs, and commands.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior and diagnostics
+    validations:
+      required: true
+  - type: textarea
+    id: impact
+    attributes:
+      label: Compatibility, safety, integrity, or proof impact
+    validations:
+      required: true

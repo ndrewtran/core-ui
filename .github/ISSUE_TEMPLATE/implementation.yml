@@ -1,0 +1,49 @@
+name: Bounded implementation task
+description: Propose an implementation task under an activated roadmap milestone.
+title: "[Implementation] "
+labels:
+  - type:implementation
+body:
+  - type: input
+    id: parent
+    attributes:
+      label: Parent milestone issue
+      placeholder: "#123"
+    validations:
+      required: true
+  - type: input
+    id: scope_ids
+    attributes:
+      label: Roadmap, evidence, and Product Scope IDs
+      placeholder: G1.3; E-G1.3-01; Product Scope pending
+    validations:
+      required: true
+  - type: textarea
+    id: change
+    attributes:
+      label: Bounded change
+      description: Name canonical owners, projections, packages, and platforms affected.
+    validations:
+      required: true
+  - type: textarea
+    id: proof
+    attributes:
+      label: Required proof
+      description: Include positive paths, negative paths, compatibility, accessibility, and deterministic-output evidence as applicable.
+    validations:
+      required: true
+  - type: textarea
+    id: non_goals
+    attributes:
+      label: Non-goals
+    validations:
+      required: true
+  - type: checkboxes
+    id: ownership
+    attributes:
+      label: Ownership checks
+      options:
+        - label: I identified the earliest editable canonical owner.
+          required: true
+        - label: I am not introducing a second registry or hand-maintained projection.
+          required: true
