@@ -3,7 +3,9 @@ import { resolve } from 'node:path';
 import { loadPolicy, normalizePath } from './policy.mjs';
 import { discoverWorkspacePackages } from './workspace-packages.mjs';
 
-const repositoryRoot = resolve(import.meta.dirname, '../../../..');
+const repositoryRoot = resolve(
+  process.env.CORE_UI_TASK_REPOSITORY_ROOT ?? resolve(import.meta.dirname, '../../../..'),
+);
 const task = process.argv[2];
 const affected = process.argv.includes('--affected');
 

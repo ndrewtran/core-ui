@@ -2,8 +2,13 @@ import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { mkdtemp, mkdir, readFile, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { join, resolve } from 'node:path';
 import test from 'node:test';
+
+const affectedTaskRunner = resolve(
+  import.meta.dirname,
+  '../src/run-workspace-task.mjs',
+);
 
 function run(command, args, options) {
   const result = spawnSync(command, args, {
@@ -23,8 +28,13 @@ test('E-G0.0-02: affected selection runs a changed package before every dependen
   await mkdir(join(root, 'packages/leaf'), { recursive: true });
   await mkdir(join(root, 'packages/middle'), { recursive: true });
   await mkdir(join(root, 'packages/app'), { recursive: true });
+  await mkdir(join(root, 'tooling/audits/repository-policy'), { recursive: true });
 
   await writeFile(join(root, 'pnpm-workspace.yaml'), 'packages:\n  - packages/*\n');
+  await writeFile(
+    join(root, 'tooling/audits/repository-policy/repository-policy.json'),
+    JSON.stringify({ globalTaskInputs: [] }),
+  );
   await writeFile(
     join(root, 'record.mjs'),
     "import { appendFileSync } from 'node:fs';\nappendFileSync(process.env.CORE_UI_TASK_LOG, `${process.argv[2]}\\n`);\n",
@@ -58,24 +68,21 @@ test('E-G0.0-02: affected selection runs a changed package before every dependen
   run('git', ['commit', '--quiet', '-m', 'change leaf'], { cwd: root });
 
   const logPath = join(root, 'task-order.txt');
-  run(
-    'pnpm',
-    [
-      '--recursive',
-      '--sort',
-      '--workspace-concurrency=1',
-      '--filter',
-      '...[HEAD~1]',
-      '--if-present',
-      'run',
-      'check',
-    ],
+  const result = run(
+    process.execPath,
+    [affectedTaskRunner, 'check', '--affected'],
     {
       cwd: root,
-      env: { ...process.env, CORE_UI_TASK_LOG: logPath },
+      env: {
+        ...process.env,
+        CORE_UI_BASE_REF: 'HEAD~1',
+        CORE_UI_TASK_LOG: logPath,
+        CORE_UI_TASK_REPOSITORY_ROOT: root,
+      },
     },
   );
 
+  assert.match(result.stdout, /\[workspace-task\] check: changed packages plus dependents/);
   assert.deepEqual(
     (await readFile(logPath, 'utf8')).trim().split('\n'),
     ['leaf', 'middle', 'app'],
