@@ -97,13 +97,49 @@ test('E-G0.1-01: minimum records, envelopes, diagnostics, ownership, and relatio
       expectCode('CORE_FIELD_OWNERSHIP_INVALID'),
     );
   }
-  for (const name of ['contentRevision', 'sourceLocation', 'specRevision']) {
+  for (const name of ownership.reservedFields.map((field) => field.name)) {
     const missingReserved = structuredClone(ownership);
     missingReserved.reservedFields = missingReserved.reservedFields.filter(
       (field) => field.name !== name,
     );
     assert.throws(
       () => validateFieldOwnershipRegistry(missingReserved),
+      expectCode('CORE_FIELD_OWNERSHIP_INVALID'),
+    );
+    for (const mutation of [
+      { owner: 'not-the-canonical-owner' },
+      { class: 'authored' },
+      { forbiddenInAuthoredSource: false },
+    ]) {
+      const mutatedReserved = structuredClone(ownership);
+      Object.assign(
+        mutatedReserved.reservedFields.find((field) => field.name === name),
+        mutation,
+      );
+      assert.throws(
+        () => validateFieldOwnershipRegistry(mutatedReserved),
+        expectCode('CORE_FIELD_OWNERSHIP_INVALID'),
+      );
+    }
+  }
+  for (const mutation of [
+    { owner: 'coordinated-mutated-owner' },
+    { class: 'proved' },
+  ]) {
+    const coordinatedMutation = structuredClone(ownership);
+    Object.assign(
+      coordinatedMutation.governedSchemas.find(
+        (context) => context.file === 'component.schema.json',
+      ),
+      mutation,
+    );
+    for (const field of coordinatedMutation.fields.filter(
+      (entry) => entry.schema === 'component.schema.json',
+    )) {
+      Object.assign(field, mutation);
+    }
+    assert.throws(
+      () => validateFieldOwnershipRegistry(coordinatedMutation),
       expectCode('CORE_FIELD_OWNERSHIP_INVALID'),
     );
   }

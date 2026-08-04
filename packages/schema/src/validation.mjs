@@ -2,8 +2,8 @@ import { canonicalJson } from './canonical.mjs';
 import {
   loadFamilySchema,
   loadJsonDocument,
-  requiredFieldOwnershipSchemas,
-  requiredReservedFieldNames,
+  requiredFieldOwnershipContexts,
+  requiredReservedFields,
   resolveSchemaReference,
 } from './contracts.mjs';
 
@@ -340,27 +340,38 @@ export function validateFieldOwnershipRegistry(
       { path: '$', message: 'must declare classes and contextual fields' },
     ]);
   }
+  const requiredContexts = new Map(
+    requiredFieldOwnershipContexts.map((context) => [context.file, context]),
+  );
   const contexts = new Map();
   for (const governed of registry.governedSchemas ?? []) {
+    const requiredContext = requiredContexts.get(governed.file);
     if (
       contexts.has(governed.file)
       || !registry.classes.includes(governed.class)
       || !governed.owner
+      || governed.class !== requiredContext?.class
+      || governed.owner !== requiredContext?.owner
     ) {
       throw new SchemaValidationError('CORE_FIELD_OWNERSHIP_INVALID', [
-        { path: `$/governedSchemas/${governed.file}`, message: 'must declare one class and owner' },
+        {
+          path: `$/governedSchemas/${governed.file}`,
+          message: 'must match the locked canonical class and owner',
+        },
       ]);
     }
     contexts.set(governed.file, governed);
   }
   if (
-    contexts.size !== requiredFieldOwnershipSchemas.length
-    || requiredFieldOwnershipSchemas.some((file) => !contexts.has(file))
+    contexts.size !== requiredFieldOwnershipContexts.length
+    || requiredFieldOwnershipContexts.some(({ file }) => !contexts.has(file))
   ) {
     throw new SchemaValidationError('CORE_FIELD_OWNERSHIP_INVALID', [
       {
         path: '$/governedSchemas',
-        message: `must cover the locked schemas: ${requiredFieldOwnershipSchemas.join(', ')}`,
+        message: `must cover the locked schemas: ${requiredFieldOwnershipContexts
+          .map(({ file }) => file)
+          .join(', ')}`,
       },
     ]);
   }
@@ -402,31 +413,39 @@ export function validateFieldOwnershipRegistry(
       ]);
     }
   }
+  const requiredReserved = new Map(
+    requiredReservedFields.map((field) => [field.name, field]),
+  );
   const reservedNames = new Set();
   for (const field of registry.reservedFields ?? []) {
+    const requiredField = requiredReserved.get(field.name);
     if (
       reservedNames.has(field.name)
       || !registry.classes.includes(field.class)
       || !field.owner
-      || field.forbiddenInAuthoredSource !== true
+      || field.class !== requiredField?.class
+      || field.owner !== requiredField?.owner
+      || field.forbiddenInAuthoredSource !== requiredField?.forbiddenInAuthoredSource
     ) {
       throw new SchemaValidationError('CORE_FIELD_OWNERSHIP_INVALID', [
         {
           path: `$/reservedFields/${field.name}`,
-          message: 'must declare one reserved name, known class, owner, and authored-source prohibition',
+          message: 'must match one locked reserved class, owner, and authored-source prohibition',
         },
       ]);
     }
     reservedNames.add(field.name);
   }
   if (
-    reservedNames.size !== requiredReservedFieldNames.length
-    || requiredReservedFieldNames.some((name) => !reservedNames.has(name))
+    reservedNames.size !== requiredReservedFields.length
+    || requiredReservedFields.some(({ name }) => !reservedNames.has(name))
   ) {
     throw new SchemaValidationError('CORE_FIELD_OWNERSHIP_INVALID', [
       {
         path: '$/reservedFields',
-        message: `must cover the locked reserved fields: ${requiredReservedFieldNames.join(', ')}`,
+        message: `must cover the locked reserved fields: ${requiredReservedFields
+          .map(({ name }) => name)
+          .join(', ')}`,
       },
     ]);
   }
