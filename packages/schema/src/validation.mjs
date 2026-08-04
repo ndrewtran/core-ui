@@ -2,6 +2,8 @@ import { canonicalJson } from './canonical.mjs';
 import {
   loadFamilySchema,
   loadJsonDocument,
+  requiredFieldOwnershipSchemas,
+  requiredReservedFieldNames,
   resolveSchemaReference,
 } from './contracts.mjs';
 
@@ -180,7 +182,26 @@ function semanticIssues(family, value) {
         .filter((field) => field.forbiddenInAuthoredSource)
         .map((field) => field.name),
     );
-    walkObjects(value, (object, path) => {
+    const sourceContexts = [{ object: value, path: '$' }];
+    const bindingContexts = [];
+    if (family === 'binding') {
+      bindingContexts.push({ object: value, path: '$' });
+    } else if (family === 'component') {
+      for (const [bindingId, binding] of Object.entries(value.bindings ?? {})) {
+        bindingContexts.push({ object: binding, path: `$/bindings/${bindingId}` });
+      }
+    }
+    const runtimeProfileContexts = bindingContexts.flatMap(({ object, path }) =>
+      Object.entries(object.runtimeProfiles ?? {}).map(([runtimeProfileId, runtimeProfile]) => ({
+        object: runtimeProfile,
+        path: `${path}/runtimeProfiles/${runtimeProfileId}`,
+        runtimeProfileId,
+      })));
+    sourceContexts.push(...bindingContexts, ...runtimeProfileContexts);
+    const uniqueSourceContexts = new Map(
+      sourceContexts.map((context) => [context.path, context]),
+    );
+    for (const { object, path } of uniqueSourceContexts.values()) {
       for (const key of Object.keys(object)) {
         if (forbidden.has(key)) {
           issues.push({ path: `${path}/${key}`, message: 'is derived or proved and cannot be authored' });
@@ -189,9 +210,13 @@ function semanticIssues(family, value) {
       if (object.extensions && object.lifecycle !== 'experimental') {
         issues.push({ path: `${path}/extensions`, message: 'requires experimental lifecycle' });
       }
+    }
+    for (const { object, path, runtimeProfileId } of [
+      ...bindingContexts,
+      ...runtimeProfileContexts,
+    ]) {
       if (object.strategy) {
-        const runtimeProfile = path.includes('/runtimeProfiles/');
-        const runtimeProfileId = runtimeProfile ? path.split('/').at(-1) : undefined;
+        const runtimeProfile = runtimeProfileId !== undefined;
         const expectedValidationProfiles = {
           ios: 'native.ios',
           android: 'native.android',
@@ -230,7 +255,7 @@ function semanticIssues(family, value) {
           }
         }
       }
-    });
+    }
   }
   if (family === 'example') {
     const implementationPurposes = new Set(['generation', 'validation', 'migration']);
@@ -310,6 +335,11 @@ function collectSchemaFieldDeclarations(schema, pointer = '#', declarations = []
 export function validateFieldOwnershipRegistry(
   registry = loadJsonDocument('field-ownership.json'),
 ) {
+  if (!Array.isArray(registry.classes) || !Array.isArray(registry.fields)) {
+    throw new SchemaValidationError('CORE_FIELD_OWNERSHIP_INVALID', [
+      { path: '$', message: 'must declare classes and contextual fields' },
+    ]);
+  }
   const contexts = new Map();
   for (const governed of registry.governedSchemas ?? []) {
     if (
@@ -322,6 +352,17 @@ export function validateFieldOwnershipRegistry(
       ]);
     }
     contexts.set(governed.file, governed);
+  }
+  if (
+    contexts.size !== requiredFieldOwnershipSchemas.length
+    || requiredFieldOwnershipSchemas.some((file) => !contexts.has(file))
+  ) {
+    throw new SchemaValidationError('CORE_FIELD_OWNERSHIP_INVALID', [
+      {
+        path: '$/governedSchemas',
+        message: `must cover the locked schemas: ${requiredFieldOwnershipSchemas.join(', ')}`,
+      },
+    ]);
   }
   const expected = new Map();
   for (const governed of contexts.values()) {
@@ -378,6 +419,17 @@ export function validateFieldOwnershipRegistry(
     }
     reservedNames.add(field.name);
   }
+  if (
+    reservedNames.size !== requiredReservedFieldNames.length
+    || requiredReservedFieldNames.some((name) => !reservedNames.has(name))
+  ) {
+    throw new SchemaValidationError('CORE_FIELD_OWNERSHIP_INVALID', [
+      {
+        path: '$/reservedFields',
+        message: `must cover the locked reserved fields: ${requiredReservedFieldNames.join(', ')}`,
+      },
+    ]);
+  }
   return registry;
 }
 
@@ -428,7 +480,9 @@ export function validateCatalogRecords(records) {
   validateRelationRegistry();
   const ids = new Map();
   for (const record of records) {
-    const family = kindFamilies[record.kind];
+    const family = Object.hasOwn(kindFamilies, record.kind)
+      ? kindFamilies[record.kind]
+      : undefined;
     if (!family) {
       throw new SchemaValidationError('CORE_SCHEMA_INVALID', [
         { path: '$/kind', message: `${record.kind} record behavior is unavailable in G0.1` },

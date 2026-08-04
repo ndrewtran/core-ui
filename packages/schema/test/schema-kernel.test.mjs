@@ -58,6 +58,12 @@ test('E-G0.1-01: minimum records, envelopes, diagnostics, ownership, and relatio
   const ownership = validateFieldOwnershipRegistry();
   assert.equal(ownership.classes.length, 3);
   assert.ok(ownership.fields.length > 100);
+  const nestedStrategy = component();
+  nestedStrategy.bindings['web.react'].api.defaults.strategy = 'compact';
+  nestedStrategy.bindings['web.react'].extensions = {
+    'core.experimental.g01-proof': { strategy: 'memo' },
+  };
+  assert.equal(validateCatalogRecords([nestedStrategy, tokenSource()]).records.length, 2);
   const missingOwnership = structuredClone(ownership);
   missingOwnership.fields.pop();
   assert.throws(
@@ -76,6 +82,31 @@ test('E-G0.1-01: minimum records, envelopes, diagnostics, ownership, and relatio
     () => validateFieldOwnershipRegistry(misowned),
     expectCode('CORE_FIELD_OWNERSHIP_INVALID'),
   );
+  for (const schema of [
+    'binding.schema.json',
+    'component.schema.json',
+    'query-envelope.schema.json',
+  ]) {
+    const missingSchema = structuredClone(ownership);
+    missingSchema.governedSchemas = missingSchema.governedSchemas.filter(
+      (entry) => entry.file !== schema,
+    );
+    missingSchema.fields = missingSchema.fields.filter((field) => field.schema !== schema);
+    assert.throws(
+      () => validateFieldOwnershipRegistry(missingSchema),
+      expectCode('CORE_FIELD_OWNERSHIP_INVALID'),
+    );
+  }
+  for (const name of ['contentRevision', 'sourceLocation', 'specRevision']) {
+    const missingReserved = structuredClone(ownership);
+    missingReserved.reservedFields = missingReserved.reservedFields.filter(
+      (field) => field.name !== name,
+    );
+    assert.throws(
+      () => validateFieldOwnershipRegistry(missingReserved),
+      expectCode('CORE_FIELD_OWNERSHIP_INVALID'),
+    );
+  }
   assert.deepEqual(parseArtifactRef('core:component:button'), {
     value: 'core:component:button',
     kind: 'component',
@@ -114,6 +145,15 @@ test('E-G0.1-01 negative: unknown, duplicate, invalid-relation, and unowned fiel
     () => validateCatalogRecords([duplicate, structuredClone(duplicate), tokenSource()]),
     expectCode('CORE_ARTIFACT_ID_INVALID'),
   );
+
+  for (const hostileKind of ['toString', 'constructor', '__proto__']) {
+    const invalidKind = component();
+    invalidKind.kind = hostileKind;
+    assert.throws(
+      () => validateCatalogRecords([invalidKind, tokenSource()]),
+      expectCode('CORE_SCHEMA_INVALID'),
+    );
+  }
 
   const badRelation = example();
   badRelation.binding.ref = 'core:component:missing#web.react';
@@ -391,7 +431,9 @@ test('E-G0.1-03: editorial content and normative binding closure affect the corr
   }), baseSpec);
 
   const inertExtension = structuredClone(concept);
-  inertExtension.extensions = { 'core.experimental.g01-proof': { note: 'inert' } };
+  inertExtension.extensions = {
+    'core.experimental.g01-proof': { note: 'inert', strategy: 'memo' },
+  };
   assert.notEqual(contentRevision('component', inertExtension), baseContent);
   assert.equal(bindingSpecRevision({
     ...revisionInput({

@@ -19,6 +19,24 @@ export const familyFiles = Object.freeze({
   'token-source': 'token-source.schema.json',
 });
 
+export const requiredFieldOwnershipSchemas = Object.freeze([
+  ...new Set([
+    ...Object.values(familyFiles),
+    'error-code.schema.json',
+    'relation.schema.json',
+  ]),
+].sort((left, right) => left.localeCompare(right)));
+
+export const requiredReservedFieldNames = Object.freeze([
+  'contentRevision',
+  'evidenceResults',
+  'evidenceStatus',
+  'exportPath',
+  'packageVersion',
+  'sourceLocation',
+  'specRevision',
+]);
+
 const documentCache = new Map();
 
 export function loadJsonDocument(fileName) {
