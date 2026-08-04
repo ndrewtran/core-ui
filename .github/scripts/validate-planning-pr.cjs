@@ -11,6 +11,20 @@ const AUTHORITY_LABELS = new Set([
   'type:decision',
 ]);
 
+const PLANNING_CONTROL_FILES = new Set([
+  '.github/CODEOWNERS',
+  '.github/pull_request_template.md',
+  '.github/workflows/repository-planning-policy.yml',
+  '.github/scripts/validate-planning-pr.cjs',
+  '.github/scripts/validate-planning-pr.test.cjs',
+]);
+
+function isProtectedPlanningFile(file) {
+  return AUTHORITY_FILES.has(file)
+    || PLANNING_CONTROL_FILES.has(file)
+    || file.startsWith('.github/ISSUE_TEMPLATE/');
+}
+
 function fieldValue(body, label) {
   const escaped = label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   const match = body.match(new RegExp(`^\\s*-?\\s*${escaped}:\\s*(.+?)\\s*$`, 'im'));
@@ -23,10 +37,10 @@ function hasSubstantiveValue(value) {
 
 function validatePlanningPullRequest({ files = [], labels = [], body = '' }) {
   const errors = [];
-  const authorityChanged = files.some((file) => AUTHORITY_FILES.has(file));
+  const planningControlChanged = files.some(isProtectedPlanningFile);
   const productScopeChanged = files.includes('strategy/product-scope.md');
 
-  if (!authorityChanged) return errors;
+  if (!planningControlChanged) return errors;
 
   if (!labels.some((label) => AUTHORITY_LABELS.has(label))) {
     errors.push(
@@ -62,5 +76,7 @@ function validatePlanningPullRequest({ files = [], labels = [], body = '' }) {
 
 module.exports = {
   AUTHORITY_FILES,
+  PLANNING_CONTROL_FILES,
+  isProtectedPlanningFile,
   validatePlanningPullRequest,
 };

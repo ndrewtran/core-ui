@@ -48,6 +48,18 @@ test('rejects an authority change without a label or change record', () => {
   assert.match(errors[1], /change record/);
 });
 
+test('rejects a planning-control-only change without governance metadata', () => {
+  const errors = validatePlanningPullRequest({
+    files: ['.github/workflows/repository-planning-policy.yml'],
+    labels: [],
+    body: '',
+  });
+
+  assert.equal(errors.length, 2);
+  assert.match(errors[0], /label/);
+  assert.match(errors[1], /change record/);
+});
+
 test('rejects incomplete Product Scope change metadata', () => {
   const errors = validatePlanningPullRequest({
     files: ['strategy/product-scope.md'],
