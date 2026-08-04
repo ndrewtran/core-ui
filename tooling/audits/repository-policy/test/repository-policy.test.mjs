@@ -11,6 +11,7 @@ import {
   loadPolicy,
   validateGeneratedFile,
 } from '../src/policy.mjs';
+import { GenerationProofError, verifyGenerationState } from '../src/generation-proof.mjs';
 
 const repositoryRoot = resolve(import.meta.dirname, '../../../..');
 const policy = await loadPolicy(repositoryRoot);
@@ -90,4 +91,22 @@ test('E-G0.0-03 negative: duplicate aliases fail deterministically', async () =>
     assert.match(error.message, /core:pattern:form/);
     return true;
   });
+});
+
+test('E-G0.0-04 negative: an untracked non-projection output fails clean generation', () => {
+  assert.throws(
+    () => verifyGenerationState({
+      beforeDigest: 'same',
+      firstDigest: 'different',
+      secondDigest: 'different',
+      firstStatus: '?? unexpected-output.txt\n',
+      secondStatus: '?? unexpected-output.txt\n',
+    }),
+    (error) => {
+      assert.ok(error instanceof GenerationProofError);
+      assert.equal(error.code, 'GENERATION_WORKTREE_DIRTY');
+      assert.match(error.message, /unexpected-output\.txt/);
+      return true;
+    },
+  );
 });

@@ -1,60 +1,95 @@
 import { createHash } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
-import { readFile } from 'node:fs/promises';
-import { resolve } from 'node:path';
-import { classifyPath, loadPolicy, normalizePath, walkFiles } from './policy.mjs';
+import { mkdtemp, readFile, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join, resolve } from 'node:path';
+import { walkFiles } from './policy.mjs';
+import { verifyGenerationState } from './generation-proof.mjs';
 
 const repositoryRoot = resolve(import.meta.dirname, '../../../..');
 
-async function snapshot() {
-  const trackedResult = spawnSync('git', ['ls-files', '-z'], {
-    cwd: repositoryRoot,
-    encoding: 'utf8',
-  });
-  if (trackedResult.status !== 0) {
-    throw new Error(`GIT_INDEX_UNAVAILABLE: ${trackedResult.stderr.trim()}`);
-  }
-  const policy = await loadPolicy(repositoryRoot);
-  const tracked = trackedResult.stdout.split('\0').map(normalizePath).filter(Boolean);
-  const projections = (await walkFiles(repositoryRoot)).filter(
-    (path) => classifyPath(path, policy) === 'projection',
-  );
-  const files = [...new Set([...tracked, ...projections])].sort();
+async function snapshot(cleanRoot) {
+  const files = (await walkFiles(cleanRoot))
+    .filter((path) => path !== '.git' && !path.startsWith('.git/'))
+    .sort();
   const digest = createHash('sha256');
   for (const path of files) {
     digest.update(path);
     digest.update('\0');
-    digest.update(await readFile(resolve(repositoryRoot, path)));
+    digest.update(await readFile(resolve(cleanRoot, path)));
     digest.update('\0');
   }
   return digest.digest('hex');
 }
 
-function generate() {
+function run(command, args, cwd, stdio = 'inherit') {
+  const result = spawnSync(command, args, { cwd, encoding: 'utf8', stdio });
+  if (result.error) throw result.error;
+  if (result.status !== 0) {
+    throw new Error(
+      `${command.toUpperCase()}_FAILED: ${result.stderr?.trim() || `exit ${result.status}`}`,
+    );
+  }
+  return result.stdout ?? '';
+}
+
+function generate(cleanRoot) {
   const result = spawnSync(
     process.execPath,
-    [resolve(import.meta.dirname, 'run-workspace-task.mjs'), 'generate'],
-    { cwd: repositoryRoot, stdio: 'inherit' },
+    [
+      resolve(cleanRoot, 'tooling/audits/repository-policy/src/run-workspace-task.mjs'),
+      'generate',
+    ],
+    { cwd: cleanRoot, stdio: 'inherit' },
   );
   if (result.error) throw result.error;
-  if (result.status !== 0) process.exit(result.status ?? 1);
+  if (result.status !== 0) {
+    throw new Error(`GENERATION_COMMAND_FAILED: exit ${result.status ?? 1}`);
+  }
 }
 
-const before = await snapshot();
-generate();
-const first = await snapshot();
-generate();
-const second = await snapshot();
-
-if (before !== first) {
-  console.error(
-    'GENERATION_DRIFT: generation changed the worktree; repair the earliest source and commit its projection',
+function status(cleanRoot) {
+  return run(
+    'git',
+    ['status', '--porcelain=v1', '--untracked-files=all'],
+    cleanRoot,
+    'pipe',
   );
-  process.exit(1);
-}
-if (first !== second) {
-  console.error('GENERATION_NONDETERMINISTIC: repeated generation produced a different repository digest');
-  process.exit(1);
 }
 
-console.log(`[E-G0.0-04] repeated generation is a no-op (sha256:${second})`);
+const sourceRevision = run('git', ['rev-parse', 'HEAD'], repositoryRoot, 'pipe').trim();
+const temporaryRoot = await mkdtemp(join(tmpdir(), 'core-ui-generation-proof-'));
+const cleanRoot = join(temporaryRoot, 'checkout');
+
+try {
+  run('git', ['worktree', 'add', '--quiet', '--detach', cleanRoot, sourceRevision], repositoryRoot);
+  const beforeDigest = await snapshot(cleanRoot);
+  generate(cleanRoot);
+  const firstDigest = await snapshot(cleanRoot);
+  const firstStatus = status(cleanRoot);
+  generate(cleanRoot);
+  const secondDigest = await snapshot(cleanRoot);
+  const secondStatus = status(cleanRoot);
+
+  verifyGenerationState({
+    beforeDigest,
+    firstDigest,
+    secondDigest,
+    firstStatus,
+    secondStatus,
+  });
+
+  console.log(
+    `[E-G0.0-04] isolated clean checkout ${sourceRevision} remained clean after two `
+      + `generation runs (sha256:${secondDigest})`,
+  );
+} catch (error) {
+  console.error(error.message);
+  process.exitCode = 1;
+} finally {
+  spawnSync('git', ['worktree', 'remove', '--force', cleanRoot], {
+    cwd: repositoryRoot,
+    stdio: 'ignore',
+  });
+  await rm(temporaryRoot, { recursive: true, force: true });
+}
