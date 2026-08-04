@@ -12,8 +12,11 @@ function normalize(value, seen) {
   if (value === null || typeof value === 'boolean') return value;
   if (typeof value === 'string') return value.replace(/\r\n?/g, '\n');
   if (typeof value === 'number') {
-    if (!Number.isFinite(value)) {
-      throw new CanonicalJsonError('CANONICAL_NUMBER_INVALID', 'numbers must be finite');
+    if (!Number.isFinite(value) || (Number.isInteger(value) && !Number.isSafeInteger(value))) {
+      throw new CanonicalJsonError(
+        'CANONICAL_NUMBER_INVALID',
+        'numbers must be finite and integers must be within the safe range',
+      );
     }
     return value;
   }
@@ -35,7 +38,7 @@ function normalize(value, seen) {
     if (prototype !== Object.prototype && prototype !== null) {
       throw new CanonicalJsonError('CANONICAL_OBJECT_INVALID', 'objects must be plain');
     }
-    result = {};
+    result = Object.create(null);
     for (const key of Object.keys(value).sort()) {
       const normalizedKey = key.replace(/\r\n?/g, '\n');
       if (Object.hasOwn(result, normalizedKey)) {
@@ -124,7 +127,7 @@ export function parseJsonStrict(source) {
   function object() {
     index += 1;
     whitespace();
-    const result = {};
+    const result = Object.create(null);
     const keys = new Set();
     if (source[index] === '}') {
       index += 1;
@@ -140,7 +143,12 @@ export function parseJsonStrict(source) {
       if (source[index] !== ':') fail('expected colon');
       index += 1;
       whitespace();
-      result[key] = value();
+      Object.defineProperty(result, key, {
+        configurable: true,
+        enumerable: true,
+        value: value(),
+        writable: true,
+      });
       whitespace();
       if (source[index] === '}') {
         index += 1;
@@ -169,6 +177,12 @@ export function parseJsonStrict(source) {
       index += number[0].length;
       const parsed = Number(number[0]);
       if (!Number.isFinite(parsed)) fail('non-finite number');
+      if (!sameDecimalValue(number[0], String(parsed))) {
+        throw new CanonicalJsonError(
+          'JSON_NUMBER_LOSSY',
+          `number ${number[0]} is not identity-preserving`,
+        );
+      }
       return parsed;
     }
     fail('unexpected token');
@@ -178,4 +192,25 @@ export function parseJsonStrict(source) {
   whitespace();
   if (index !== source.length) fail('trailing input');
   return parsed;
+}
+
+function decimalIdentity(value) {
+  const match = /^(-?)(\d+)(?:\.(\d+))?(?:[eE]([+-]?\d+))?$/.exec(value);
+  if (!match) return undefined;
+  const [, sign, integer, fraction = '', exponent = '0'] = match;
+  let coefficient = BigInt(`${sign}${integer}${fraction}`);
+  let scale = Number(exponent) - fraction.length;
+  if (coefficient === 0n) return { coefficient: 0n, scale: 0 };
+  while (coefficient % 10n === 0n) {
+    coefficient /= 10n;
+    scale += 1;
+  }
+  return { coefficient, scale };
+}
+
+function sameDecimalValue(left, right) {
+  const leftIdentity = decimalIdentity(left);
+  const rightIdentity = decimalIdentity(right);
+  return leftIdentity?.coefficient === rightIdentity?.coefficient
+    && leftIdentity?.scale === rightIdentity?.scale;
 }

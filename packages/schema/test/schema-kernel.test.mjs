@@ -184,6 +184,54 @@ test('E-G0.1-01 negative: unknown, duplicate, invalid-relation, and unowned fiel
     () => validateFamily('binding', { ...unsupportedBinding, lifecycle: 'experimental' }),
     expectCode('CORE_SCHEMA_INVALID'),
   );
+  const forbiddenUnsupportedFields = {
+    api: { props: [], events: [], parts: [], defaults: {} },
+    behavior: [],
+    accessibility: [],
+    tokenSources: [],
+    runtimeProfiles: {
+      ios: {
+        strategy: 'adapted',
+        lifecycle: 'experimental',
+        validationProfile: 'native.ios',
+      },
+    },
+  };
+  for (const [field, fieldValue] of Object.entries(forbiddenUnsupportedFields)) {
+    assert.throws(
+      () => validateFamily('binding', { ...unsupportedBinding, [field]: fieldValue }),
+      expectCode('CORE_SCHEMA_INVALID'),
+    );
+  }
+
+  const danglingPrerequisite = example();
+  danglingPrerequisite.prerequisites = ['core:component:missing'];
+  assert.throws(
+    () => validateCatalogRecords([component(), danglingPrerequisite, tokenSource()]),
+    expectCode('CORE_RELATION_INVALID'),
+  );
+
+  const danglingAlternative = component();
+  danglingAlternative.bindings['web.react'] = {
+    schemaVersion: '1.0.0',
+    strategy: 'unsupported',
+    alternative: 'core:component:missing',
+  };
+  assert.throws(
+    () => validateCatalogRecords([danglingAlternative, tokenSource()]),
+    expectCode('CORE_RELATION_INVALID'),
+  );
+
+  const unsupportedProfileExample = example();
+  unsupportedProfileExample.binding.runtimeProfiles = ['ios'];
+  assert.throws(
+    () => validateCatalogRecords([
+      componentWithUnsupportedBinding,
+      unsupportedProfileExample,
+      tokenSource(),
+    ]),
+    expectCode('CORE_RELATION_INVALID'),
+  );
 });
 
 test('E-G0.1-02: canonical bytes ignore key order and whitespace but preserve meaning', () => {
@@ -195,6 +243,28 @@ test('E-G0.1-02: canonical bytes ignore key order and whitespace but preserve me
   assert.throws(() => parseJsonStrict('{"a":1,"a":2}'), /JSON_DUPLICATE_KEY/);
   assert.throws(() => parseJsonStrict('{\u00a0"a":1}'), /JSON_PARSE_INVALID/);
   assert.throws(() => parseJsonStrict('{\f"a":1}'), /JSON_PARSE_INVALID/);
+  assert.throws(() => parseJsonStrict('{"value":9007199254740993}'), /JSON_NUMBER_LOSSY/);
+  assert.throws(() => parseJsonStrict('{"value":0.10000000000000001}'), /JSON_NUMBER_LOSSY/);
+  const prototypeObject = parseJsonStrict('{"__proto__":{"polluted":true}}');
+  assert.equal(Object.getPrototypeOf(prototypeObject), null);
+  assert.equal(Object.hasOwn(prototypeObject, '__proto__'), true);
+  const topLevelPrototype = parseJsonStrict(
+    `${JSON.stringify(component()).slice(0, -1)},"__proto__":{"polluted":true}}`,
+  );
+  assert.throws(
+    () => validateFamily('component', topLevelPrototype),
+    expectCode('CORE_SCHEMA_INVALID'),
+  );
+  const nestedPrototype = parseJsonStrict(
+    JSON.stringify(component()).replace(
+      '"defaults":{"disabled":false}',
+      '"defaults":{"disabled":false,"__proto__":{"polluted":true}}',
+    ),
+  );
+  assert.throws(
+    () => validateFamily('component', nestedPrototype),
+    expectCode('CORE_SCHEMA_INVALID'),
+  );
   assert.throws(
     () => canonicalJson({ 'line\r\n': 1, 'line\n': 2 }),
     /CANONICAL_KEY_COLLISION/,
@@ -294,6 +364,27 @@ test('E-G0.1-03: editorial content and normative binding closure affect the corr
       exampleSources: { [normative.id]: normativeExampleSource },
     }),
   }), baseSpec);
+
+  const unsafeTokenNumber = structuredClone(token);
+  unsafeTokenNumber.tokens['semantic.action.background'].value = Number.MAX_SAFE_INTEGER + 1;
+  assert.throws(
+    () => contentRevision('token-source', unsafeTokenNumber),
+    /CANONICAL_NUMBER_INVALID/,
+  );
+
+  const unsafeDefault = structuredClone(concept);
+  unsafeDefault.bindings['web.react'].api.defaults.disabled = Number.MAX_SAFE_INTEGER + 1;
+  assert.throws(
+    () => bindingSpecRevision({
+      ...revisionInput({
+        concept: unsafeDefault,
+        examples: [normative],
+        tokenSources: [token],
+        exampleSources: { [normative.id]: normativeExampleSource },
+      }),
+    }),
+    /CANONICAL_NUMBER_INVALID/,
+  );
 
   const editorialExample = example({ guidanceImpact: 'editorial', purposes: ['explanation'] });
   editorialExample.summary = 'An editorial explanation only.';

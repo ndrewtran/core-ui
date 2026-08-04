@@ -40,7 +40,6 @@ function evaluate(schema, value, path, currentFile, issues) {
   if (schema.$ref) {
     const resolved = resolveSchemaReference(schema.$ref, currentFile);
     evaluate(resolved.schema, value, path, resolved.fileName, issues);
-    return;
   }
   if (schema.allOf) {
     for (const item of schema.allOf) evaluate(item, value, path, currentFile, issues);
@@ -52,7 +51,6 @@ function evaluate(schema, value, path, currentFile, issues) {
       return candidateIssues.length === 0;
     });
     if (!matches) issues.push({ path, message: 'matches no allowed schema' });
-    return;
   }
   if (schema.oneOf) {
     const matches = schema.oneOf.filter((item) => {
@@ -61,7 +59,6 @@ function evaluate(schema, value, path, currentFile, issues) {
       return candidateIssues.length === 0;
     }).length;
     if (matches !== 1) issues.push({ path, message: `must match exactly one schema; matched ${matches}` });
-    return;
   }
   if (schema.not) {
     const candidateIssues = [];
@@ -166,6 +163,14 @@ function walkObjects(value, visit, path = '$') {
 
 function semanticIssues(family, value) {
   const issues = [];
+  const prototypeKeys = new Set(['__proto__', 'constructor', 'prototype']);
+  walkObjects(value, (object, path) => {
+    for (const key of Object.keys(object)) {
+      if (prototypeKeys.has(key)) {
+        issues.push({ path: `${path}/${key}`, message: 'prototype-bearing keys are forbidden' });
+      }
+    }
+  });
   if (['binding', 'capability', 'component', 'example', 'guide', 'token-source'].includes(family)) {
     const ownership = loadJsonDocument('field-ownership.json');
     const forbidden = new Set(
@@ -348,6 +353,34 @@ export function validateCatalogRecords(records) {
     }
   }
   const issues = [];
+  for (const record of records) {
+    if (record.kind === 'example') {
+      for (const prerequisite of record.prerequisites) {
+        if (!ids.has(prerequisite)) {
+          issues.push({
+            path: '$/prerequisites',
+            message: `${prerequisite} does not exist`,
+          });
+        }
+      }
+    }
+    if (record.kind === 'component') {
+      for (const [bindingId, binding] of Object.entries(record.bindings)) {
+        const alternatives = [
+          binding.alternative,
+          ...Object.values(binding.runtimeProfiles ?? {}).map((profile) => profile.alternative),
+        ].filter(Boolean);
+        for (const alternative of alternatives) {
+          if (!ids.has(alternative)) {
+            issues.push({
+              path: `$/bindings/${bindingId}/alternative`,
+              message: `${alternative} does not exist`,
+            });
+          }
+        }
+      }
+    }
+  }
   for (const edge of relationEdges(records)) {
     if (edge.type === 'implemented-by' && !bindingRefs.has(edge.target)) {
       issues.push({ path: '$/relations', message: `${edge.target} does not exist` });
@@ -362,8 +395,9 @@ export function validateCatalogRecords(records) {
           message: `${edge.target} is unsupported and cannot own an example`,
         });
       }
+      const targetProfiles = binding.runtimeProfiles ?? {};
       for (const runtimeProfileId of example.binding.runtimeProfiles ?? []) {
-        const runtimeProfile = binding.runtimeProfiles[runtimeProfileId];
+        const runtimeProfile = targetProfiles[runtimeProfileId];
         if (!runtimeProfile || runtimeProfile.strategy === 'unsupported') {
           issues.push({
             path: '$/binding/runtimeProfiles',
