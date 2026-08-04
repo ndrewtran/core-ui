@@ -194,7 +194,9 @@ function semanticIssues(family, value) {
           if (object.lifecycle !== undefined || object.validationProfile !== undefined) {
             issues.push({ path, message: 'unsupported disposition must omit lifecycle and validationProfile' });
           }
-          if (!object.reason) issues.push({ path, message: 'unsupported disposition requires a reason' });
+          if (!object.reason && !object.alternative) {
+            issues.push({ path, message: 'unsupported disposition requires a reason or alternative' });
+          }
         } else {
           if (!object.lifecycle) issues.push({ path, message: 'implemented disposition requires lifecycle' });
           if (runtimeProfile && !object.validationProfile) {
@@ -222,6 +224,28 @@ function semanticIssues(family, value) {
         path: '$/binding/guidanceImpact',
         message: 'implementation-relevant examples must be normative',
       });
+    }
+  }
+  if (family === 'component') {
+    const requiredNativeProfiles = ['ios', 'android', 'native.react-native-web'];
+    for (const [bindingId, binding] of Object.entries(value.bindings ?? {})) {
+      const runtimeProfileIds = Object.keys(binding.runtimeProfiles ?? {});
+      if (bindingId !== 'native.react-native' && runtimeProfileIds.length > 0) {
+        issues.push({
+          path: `$/bindings/${bindingId}/runtimeProfiles`,
+          message: 'runtime profiles are owned only by native.react-native',
+        });
+      }
+      if (bindingId === 'native.react-native' && binding.strategy !== 'unsupported') {
+        for (const profileId of requiredNativeProfiles) {
+          if (!runtimeProfileIds.includes(profileId)) {
+            issues.push({
+              path: `$/bindings/${bindingId}/runtimeProfiles`,
+              message: `is missing required disposition ${profileId}`,
+            });
+          }
+        }
+      }
     }
   }
   return issues;
@@ -282,7 +306,7 @@ export function relationEdges(records) {
       for (const [bindingId, binding] of Object.entries(record.bindings)) {
         const bindingRef = `${record.id}#${bindingId}`;
         edges.push({ type: 'implemented-by', source: record.id, target: bindingRef });
-        for (const token of binding.tokenSources) {
+        for (const token of binding.tokenSources ?? []) {
           edges.push({ type: 'uses', source: bindingRef, target: token });
         }
       }
@@ -332,6 +356,12 @@ export function validateCatalogRecords(records) {
     } else if (edge.type === 'example-of') {
       const example = ids.get(edge.source);
       const binding = bindingRefs.get(edge.target);
+      if (binding.strategy === 'unsupported') {
+        issues.push({
+          path: '$/binding/ref',
+          message: `${edge.target} is unsupported and cannot own an example`,
+        });
+      }
       for (const runtimeProfileId of example.binding.runtimeProfiles ?? []) {
         const runtimeProfile = binding.runtimeProfiles[runtimeProfileId];
         if (!runtimeProfile || runtimeProfile.strategy === 'unsupported') {

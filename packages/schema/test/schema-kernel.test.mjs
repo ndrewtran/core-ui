@@ -128,6 +128,62 @@ test('E-G0.1-01 negative: unknown, duplicate, invalid-relation, and unowned fiel
     () => validateCatalogRecords([component(), unsupportedApplicability, tokenSource()]),
     expectCode('CORE_RELATION_INVALID'),
   );
+
+  const crossBindingProfile = component();
+  crossBindingProfile.bindings['web.react'].runtimeProfiles.ios = {
+    strategy: 'adapted',
+    lifecycle: 'experimental',
+    validationProfile: 'native.ios',
+  };
+  assert.throws(
+    () => validateCatalogRecords([crossBindingProfile, tokenSource()]),
+    expectCode('CORE_SCHEMA_INVALID'),
+  );
+
+  const missingNativeDisposition = component();
+  delete missingNativeDisposition.bindings['native.react-native'].runtimeProfiles.android;
+  assert.throws(
+    () => validateCatalogRecords([missingNativeDisposition, tokenSource()]),
+    expectCode('CORE_SCHEMA_INVALID'),
+  );
+
+  const unsupportedBinding = {
+    schemaVersion: '1.0.0',
+    strategy: 'unsupported',
+    reason: 'No responsible implementation exists.',
+  };
+  assert.deepEqual(validateFamily('binding', unsupportedBinding), unsupportedBinding);
+  const componentWithUnsupportedBinding = component();
+  componentWithUnsupportedBinding.bindings['web.react'] = unsupportedBinding;
+  assert.equal(
+    validateCatalogRecords([componentWithUnsupportedBinding, tokenSource()]).records.length,
+    2,
+  );
+  assert.throws(
+    () => validateCatalogRecords([
+      componentWithUnsupportedBinding,
+      example(),
+      tokenSource(),
+    ]),
+    expectCode('CORE_RELATION_INVALID'),
+  );
+  assert.deepEqual(validateFamily('binding', {
+    schemaVersion: '1.0.0',
+    strategy: 'unsupported',
+    alternative: 'core:component:button',
+  }), {
+    schemaVersion: '1.0.0',
+    strategy: 'unsupported',
+    alternative: 'core:component:button',
+  });
+  assert.throws(
+    () => validateFamily('binding', { schemaVersion: '1.0.0', strategy: 'unsupported' }),
+    expectCode('CORE_SCHEMA_INVALID'),
+  );
+  assert.throws(
+    () => validateFamily('binding', { ...unsupportedBinding, lifecycle: 'experimental' }),
+    expectCode('CORE_SCHEMA_INVALID'),
+  );
 });
 
 test('E-G0.1-02: canonical bytes ignore key order and whitespace but preserve meaning', () => {

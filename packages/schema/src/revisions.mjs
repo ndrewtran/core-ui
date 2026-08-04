@@ -22,6 +22,9 @@ export function bindingSpecRevision({
   validateCatalogRecords([component, ...examples, ...tokenSources]);
   const binding = component.bindings[bindingId];
   if (!binding) throw new Error(`CORE_RELATION_INVALID: missing ${component.id}#${bindingId}`);
+  if (binding.strategy === 'unsupported') {
+    throw new Error(`CORE_RELATION_INVALID: unsupported binding ${component.id}#${bindingId} has no specRevision`);
+  }
   const bindingRef = `${component.id}#${bindingId}`;
   const normativeExamples = examples
     .filter((example) => (

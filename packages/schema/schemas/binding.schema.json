@@ -4,11 +4,35 @@
   "title": "Core UI platform binding",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schemaVersion", "strategy", "api", "behavior", "accessibility", "tokenSources", "runtimeProfiles"],
+  "allOf": [{
+    "oneOf": [
+      {
+      "required": ["schemaVersion", "lifecycle", "strategy", "api", "behavior", "accessibility", "tokenSources", "runtimeProfiles"],
+      "properties": { "strategy": { "enum": ["direct", "adapted", "native-alternative"] } }
+      },
+      {
+      "required": ["schemaVersion", "strategy"],
+      "properties": { "strategy": { "const": "unsupported" } },
+      "anyOf": [{ "required": ["reason"] }, { "required": ["alternative"] }],
+      "not": {
+        "anyOf": [
+          { "required": ["lifecycle"] },
+          { "required": ["api"] },
+          { "required": ["behavior"] },
+          { "required": ["accessibility"] },
+          { "required": ["tokenSources"] },
+          { "required": ["runtimeProfiles"] }
+        ]
+      }
+      }
+    ]
+  }],
   "properties": {
     "schemaVersion": { "const": "1.0.0" },
     "lifecycle": { "enum": ["experimental", "stable", "deprecated", "removed"] },
     "strategy": { "enum": ["direct", "adapted", "native-alternative", "unsupported"] },
+    "reason": { "type": "string", "minLength": 1 },
+    "alternative": { "$ref": "artifact-ref.schema.json" },
     "api": {
       "type": "object",
       "additionalProperties": false,
@@ -59,7 +83,8 @@
         "strategy": { "enum": ["direct", "adapted", "native-alternative", "unsupported"] },
         "lifecycle": { "enum": ["experimental", "stable", "deprecated", "removed"] },
         "validationProfile": { "enum": ["native.ios", "native.android", "native.react-native-web"] },
-        "reason": { "type": "string", "minLength": 1 }
+        "reason": { "type": "string", "minLength": 1 },
+        "alternative": { "$ref": "artifact-ref.schema.json" }
       }
     },
     "extensions": {
