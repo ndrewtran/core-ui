@@ -15,7 +15,25 @@ const DEFAULT_LIMIT = 20;
 const MAX_LIMIT = 100;
 const MAX_QUERY_LENGTH = 256;
 const MAX_QUERY_TERMS = 16;
-const COMMON_KEYS = ['cursor', 'detail', 'limit', 'platform', 'purpose', 'section'];
+const OPERATIONS = {
+  getManifest: { available: true, requestKeys: ['detail'], responseType: 'catalog.manifest' },
+  listArtifacts: {
+    available: true,
+    requestKeys: ['cursor', 'detail', 'kind', 'limit', 'platform', 'purpose'],
+    responseType: 'artifact.list',
+  },
+  searchArtifacts: {
+    available: true,
+    requestKeys: ['cursor', 'detail', 'limit', 'platform', 'purpose', 'query'],
+    responseType: 'artifact.search',
+  },
+  getArtifact: {
+    available: true,
+    requestKeys: ['detail', 'id', 'platform', 'purpose', 'section'],
+    responseType: 'artifact.detail',
+  },
+  planComposition: { available: false, requestKeys: [], responseType: null },
+};
 
 function compareText(left, right) {
   return left < right ? -1 : left > right ? 1 : 0;
@@ -56,7 +74,7 @@ function success(type, data, meta) {
   return deepFreeze(response);
 }
 
-function normalizeRequest(request, operation, operationKeys = []) {
+function normalizeRequest(request, operation) {
   if (request === undefined) request = {};
   if (request === null || typeof request !== 'object' || Array.isArray(request)) {
     return { error: queryError(
@@ -66,7 +84,8 @@ function normalizeRequest(request, operation, operationKeys = []) {
       { operation },
     ) };
   }
-  const allowed = new Set([...COMMON_KEYS, ...operationKeys]);
+  const operationKeys = OPERATIONS[operation]?.requestKeys ?? [];
+  const allowed = new Set(operationKeys);
   const unknown = Object.keys(request).filter((key) => !allowed.has(key)).sort(compareText);
   if (unknown.length > 0) {
     return { error: queryError(
@@ -84,7 +103,9 @@ function normalizeRequest(request, operation, operationKeys = []) {
     section: request.section ?? null,
     cursor: request.cursor ?? null,
   };
-  for (const key of operationKeys) normalized[key] = request[key] ?? null;
+  for (const key of operationKeys) {
+    if (!Object.hasOwn(normalized, key)) normalized[key] = request[key] ?? null;
+  }
   const failures = [];
   if (!QUERY_SELECTORS.detail.includes(normalized.detail)) failures.push('detail');
   if (normalized.platform !== null && !QUERY_SELECTORS.platform.includes(normalized.platform)) {
@@ -281,24 +302,69 @@ function baseMeta(bundle, request = {}, revisions = {}) {
   };
 }
 
+function resolvedCliRegistry(bundle) {
+  const registry = structuredClone(bundle.commandRegistry);
+  const available = bundle.artifacts
+    .find(({ id }) => id === 'core:capability:query-baseline')
+    .record.availableOn.includes('cli');
+  const capability = {
+    available,
+    effect: registry.surfacePolicy.cli.effect,
+    requiresConfirmation: registry.surfacePolicy.cli.requiresConfirmation,
+  };
+  registry.surfacePolicy.cli = capability;
+  registry.commands = registry.commands.map((command) => ({
+    ...command,
+    responseType: OPERATIONS[command.operation]?.responseType ?? null,
+    capability,
+  }));
+  registry.unavailableCommands = registry.unavailableCommands.map((command) => ({
+    ...command,
+    capability: { available: false },
+  }));
+  return registry;
+}
+
+function cliRegistryForDetail(bundle, detail) {
+  const registry = resolvedCliRegistry(bundle);
+  if (detail === 'brief') {
+    return {
+      name: registry.cli.name,
+      version: registry.cli.version,
+      commands: registry.commands.map(({ name }) => name),
+    };
+  }
+  if (detail === 'compact') {
+    return {
+      cli: registry.cli,
+      commands: registry.commands.map(({ name, summary, responseType, tokenBudgets }) => ({
+        name,
+        summary,
+        responseType,
+        tokenBudgets,
+      })),
+      outputModes: registry.outputModes,
+      unavailableCommands: registry.unavailableCommands,
+    };
+  }
+  return registry;
+}
+
 export function createCatalogApi(inputBundle) {
   const bundle = assertBundle(inputBundle);
   const artifactsById = new Map(bundle.artifacts.map((artifact) => [artifact.id, artifact]));
   const indexById = new Map(bundle.searchIndex.map((entry) => [entry.id, entry]));
 
-  function getManifest() {
+  function getManifest(request) {
+    const parsed = normalizeRequest(request, 'getManifest');
+    if (parsed.error) return parsed.error;
+    const { normalized } = parsed;
     return success('catalog.manifest', {
       formatVersion: bundle.formatVersion,
       catalogVersion: bundle.catalogVersion,
       catalogDigest: bundle.catalogDigest,
       sourceRevision: bundle.sourceRevision,
-      operations: {
-        getManifest: { available: true, responseType: 'catalog.manifest' },
-        listArtifacts: { available: true, responseType: 'artifact.list' },
-        searchArtifacts: { available: true, responseType: 'artifact.search' },
-        getArtifact: { available: true, responseType: 'artifact.detail' },
-        planComposition: { available: false, responseType: null },
-      },
+      operations: OPERATIONS,
       responseTypes: QUERY_RESPONSE_TYPES,
       selectors: QUERY_SELECTORS,
       artifactKinds: [...new Set(bundle.artifacts.map(({ kind }) => kind))].sort(compareText),
@@ -306,11 +372,12 @@ export function createCatalogApi(inputBundle) {
       capabilities: bundle.artifacts
         .filter(({ kind }) => kind === 'capability')
         .map(({ record }) => record),
-    }, baseMeta(bundle));
+      cli: cliRegistryForDetail(bundle, normalized.detail),
+    }, baseMeta(bundle, normalized));
   }
 
   function listArtifacts(request) {
-    const parsed = normalizeRequest(request, 'listArtifacts', ['kind']);
+    const parsed = normalizeRequest(request, 'listArtifacts');
     if (parsed.error) return parsed.error;
     const { normalized } = parsed;
     if (normalized.kind !== null && !ARTIFACT_KINDS.includes(normalized.kind)) {
@@ -338,7 +405,7 @@ export function createCatalogApi(inputBundle) {
   }
 
   function searchArtifacts(request) {
-    const parsed = normalizeRequest(request, 'searchArtifacts', ['query']);
+    const parsed = normalizeRequest(request, 'searchArtifacts');
     if (parsed.error) return parsed.error;
     const { normalized } = parsed;
     if (
@@ -408,32 +475,21 @@ export function createCatalogApi(inputBundle) {
   }
 
   function getArtifact(request) {
-    const parsed = normalizeRequest(request, 'getArtifact', ['id']);
+    const parsed = normalizeRequest(request, 'getArtifact');
     if (parsed.error) return parsed.error;
     const { normalized } = parsed;
-    if (typeof normalized.id !== 'string' || normalized.id.length === 0) {
+    if (
+      typeof normalized.id !== 'string'
+      || !new RegExp(ARTIFACT_REF_PATTERN).test(normalized.id)
+    ) {
       return queryError(
         'CORE_QUERY_INVALID',
         'query.get.id',
-        'getArtifact id must be an ArtifactRef or non-empty alias string.',
+        'getArtifact id must be an ArtifactRef string.',
         { id: normalized.id },
       );
     }
-    let artifact = artifactsById.get(normalized.id);
-    if (!artifact && !new RegExp(ARTIFACT_REF_PATTERN).test(normalized.id)) {
-      const matches = bundle.artifacts.filter((candidate) => (
-        candidate.aliases.includes(normalized.id)
-      ));
-      if (matches.length > 1) {
-        return queryError(
-          'CORE_QUERY_INVALID',
-          'query.get.alias.ambiguous',
-          `Alias ${JSON.stringify(normalized.id)} matched more than one artifact.`,
-          { alias: normalized.id, candidates: matches.map(({ id }) => id).sort(compareText) },
-        );
-      }
-      [artifact] = matches;
-    }
+    const artifact = artifactsById.get(normalized.id);
     if (
       !artifact
       || !appliesToPlatform(artifact, normalized.platform)

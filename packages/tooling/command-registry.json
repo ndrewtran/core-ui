@@ -86,7 +86,6 @@
       "name": "manifest",
       "summary": "Discover CLI grammar, schemas, capabilities, and catalog identity.",
       "operation": "getManifest",
-      "responseType": "catalog.manifest",
       "arguments": [],
       "options": ["detail", "json", "dense", "help"],
       "examples": ["core manifest --json", "core manifest --detail brief --dense"],
@@ -97,7 +96,6 @@
       "name": "list",
       "summary": "List catalog artifacts with common applicability selectors.",
       "operation": "listArtifacts",
-      "responseType": "artifact.list",
       "arguments": [
         { "name": "kind", "required": false, "type": "artifact-kind" }
       ],
@@ -110,7 +108,6 @@
       "name": "search",
       "summary": "Search the catalog with deterministic match reasons.",
       "operation": "searchArtifacts",
-      "responseType": "artifact.search",
       "arguments": [
         { "name": "query", "required": true, "type": "string" }
       ],
@@ -121,15 +118,14 @@
     },
     {
       "name": "get",
-      "summary": "Retrieve one artifact by immutable ID or deterministic human alias.",
+      "summary": "Retrieve one artifact by exact immutable ArtifactRef.",
       "operation": "getArtifact",
-      "responseType": "artifact.detail",
       "arguments": [
         { "name": "id-or-alias", "requestKey": "id", "required": true, "type": "string" }
       ],
       "options": ["platform", "detail", "section", "purpose", "json", "dense", "help"],
-      "examples": ["core get core:component:button --platform web.react --json", "core get button --detail compact --dense"],
-      "budgetFixture": { "id-or-alias": "button" },
+      "examples": ["core get core:component:button --platform web.react --json", "core get core:component:button --detail compact --dense"],
+      "budgetFixture": { "id-or-alias": "core:component:button" },
       "tokenBudgets": { "brief": 384, "compact": 1024, "full": 2048 }
     }
   ],

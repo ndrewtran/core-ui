@@ -5,6 +5,7 @@ import { test } from 'node:test';
 import { fileURLToPath } from 'node:url';
 import {
   getArtifact,
+  getManifest,
   listArtifacts,
   searchArtifacts,
 } from '@core-ui/catalog';
@@ -35,7 +36,7 @@ const commandCases = {
   manifest: (detail) => ({ args: ['manifest', '--detail', detail], request: { detail } }),
   list: (detail) => ({ args: ['list', '--detail', detail], request: { detail, limit: 20, platform: null, purpose: null, cursor: null, kind: null } }),
   search: (detail) => ({ args: ['search', 'button', '--detail', detail], request: { detail, limit: 20, platform: null, purpose: null, cursor: null, query: 'button' } }),
-  get: (detail) => ({ args: ['get', 'button', '--detail', detail], request: { detail, platform: null, purpose: null, section: null, 'id-or-alias': 'button' } }),
+  get: (detail) => ({ args: ['get', 'core:component:button', '--detail', detail], request: { detail, platform: null, purpose: null, section: null, 'id-or-alias': 'core:component:button' } }),
 };
 
 function jsonResult(args) {
@@ -45,10 +46,26 @@ function jsonResult(args) {
   return JSON.parse(result.stdout);
 }
 
+function processJsonResult(args) {
+  const result = spawnSync(process.execPath, [
+    fileURLToPath(new URL('../bin/core.mjs', import.meta.url)),
+    ...args,
+    '--json',
+  ], { encoding: 'utf8' });
+  assert.equal(result.status, 0);
+  assert.equal(result.stderr, '');
+  return JSON.parse(result.stdout);
+}
+
 test('E-G0.3-01 programmatic and CLI JSON surfaces return the same responses', () => {
+  const catalogManifest = getManifest({ detail: 'full' });
   assert.deepEqual(
     jsonResult(['manifest', '--detail', 'full']),
-    executeCommand('manifest', { detail: 'full' }),
+    catalogManifest,
+  );
+  assert.deepEqual(
+    processJsonResult(['manifest', '--detail', 'full']),
+    catalogManifest,
   );
   assert.deepEqual(
     jsonResult(['list', '--detail', 'compact']),
@@ -59,20 +76,22 @@ test('E-G0.3-01 programmatic and CLI JSON surfaces return the same responses', (
     searchArtifacts({ query: 'button', detail: 'brief', limit: 20, platform: null, purpose: null, cursor: null }),
   );
   assert.deepEqual(
-    jsonResult(['get', 'button', '--platform', 'web.react', '--detail', 'full']),
-    getArtifact({ id: 'button', platform: 'web.react', detail: 'full', purpose: null, section: null }),
+    jsonResult(['get', 'core:component:button', '--platform', 'web.react', '--detail', 'full']),
+    getArtifact({ id: 'core:component:button', platform: 'web.react', detail: 'full', purpose: null, section: null }),
   );
-  const displayNameIsNotAnAlias = runCli(['get', 'Button', '--json']);
-  assert.equal(displayNameIsNotAnAlias.exitCode, 4);
-  assert.equal(
-    JSON.parse(displayNameIsNotAnAlias.stdout).error.code,
-    'CORE_ARTIFACT_NOT_FOUND',
-  );
+  for (const undeclaredAlias of ['button', 'Button']) {
+    const result = runCli(['get', undeclaredAlias, '--json']);
+    assert.equal(result.exitCode, 2);
+    assert.equal(JSON.parse(result.stdout).error.code, 'CORE_QUERY_INVALID');
+  }
+  const manifestDrift = structuredClone(catalogManifest);
+  delete manifestDrift.data.cli;
+  assert.throws(() => assert.deepEqual(manifestDrift, catalogManifest));
 });
 
 test('E-G0.3-02 human, JSON, and dense projections preserve one response object', () => {
   const response = executeCommand('get', {
-    'id-or-alias': 'button',
+    'id-or-alias': 'core:component:button',
     platform: 'web.react',
     detail: 'compact',
     purpose: null,
@@ -138,6 +157,16 @@ test('E-G0.3-04 registry generates parser, help, completion, manifest, types, an
   }
   const types = await readFile(new URL('../generated/response-types.d.ts', import.meta.url), 'utf8');
   for (const command of commandRegistry.commands) assert.match(types, new RegExp(command.responseType));
+  const authoredRegistry = JSON.parse(await readFile(
+    new URL('../command-registry.json', import.meta.url),
+    'utf8',
+  ));
+  assert.ok(authoredRegistry.commands.every((command) => !Object.hasOwn(command, 'responseType')));
+  assert.deepEqual(
+    commandRegistry.commands.map(({ operation, responseType }) => ({ operation, responseType })),
+    getManifest({ detail: 'full' }).data.cli.commands
+      .map(({ operation, responseType }) => ({ operation, responseType })),
+  );
 
   const extra = structuredClone(commandRegistry);
   extra.commands.push({ ...extra.commands[0], name: 'doctor' });
@@ -154,6 +183,12 @@ test('E-G0.3-04 registry generates parser, help, completion, manifest, types, an
   const operationResponseDrift = structuredClone(commandRegistry);
   operationResponseDrift.commands[0].operation = 'listArtifacts';
   assert.throws(() => buildCommandProjections(operationResponseDrift), /CLI_OPERATION_RESPONSE_DRIFT/);
+  const requestKeyDrift = structuredClone(commandRegistry);
+  requestKeyDrift.commands.find(({ name }) => name === 'get').arguments[0].requestKey = 'alias';
+  assert.throws(() => buildCommandProjections(requestKeyDrift), /CLI_OPERATION_REQUEST_DRIFT/);
+  const optionDrift = structuredClone(commandRegistry);
+  optionDrift.commands.find(({ name }) => name === 'search').options.push('section');
+  assert.throws(() => buildCommandProjections(optionDrift), /CLI_OPERATION_REQUEST_DRIFT/);
   const unknownField = structuredClone(commandRegistry);
   unknownField.undocumented = true;
   assert.throws(() => buildCommandProjections(unknownField), /CLI_REGISTRY_UNKNOWN_FIELD/);
@@ -178,7 +213,7 @@ test('E-G0.3-05 structured errors have stable codes, safe actions, and meaningfu
     { args: ['unknown', '--json'], code: 'CORE_QUERY_INVALID', exitCode: 2 },
     { args: ['list', '--detail', 'verbose', '--json'], code: 'CORE_QUERY_INVALID', exitCode: 2 },
     { args: ['list', '--cursor', 'wrong', '--json'], code: 'CORE_CURSOR_INVALID', exitCode: 3 },
-    { args: ['get', 'missing', '--json'], code: 'CORE_ARTIFACT_NOT_FOUND', exitCode: 4 },
+    { args: ['get', 'core:component:missing', '--json'], code: 'CORE_ARTIFACT_NOT_FOUND', exitCode: 4 },
   ];
   for (const fixture of fixtures) {
     const result = runCli(fixture.args);
@@ -207,7 +242,7 @@ test('E-G0.3-05 structured errors have stable codes, safe actions, and meaningfu
       },
     },
   }), /CLI_UNSAFE_NEXT_COMMAND/);
-  const human = runCli(['get', 'missing']);
+  const human = runCli(['get', 'core:component:missing']);
   assert.equal(human.stdout, '');
   assert.match(human.stderr, /CORE_ARTIFACT_NOT_FOUND/);
 });
@@ -216,7 +251,7 @@ test('E-G0.3-05 process boundary keeps JSON singular and diagnostics off stderr'
   const result = spawnSync(process.execPath, [
     fileURLToPath(new URL('../bin/core.mjs', import.meta.url)),
     'get',
-    'missing',
+    'core:component:missing',
     '--json',
   ], { encoding: 'utf8' });
   assert.equal(result.status, 4);

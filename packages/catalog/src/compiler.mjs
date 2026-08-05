@@ -51,11 +51,13 @@ function validateSourceManifest(manifest) {
     || manifest.schema !== SOURCE_MANIFEST_SCHEMA
     || !Array.isArray(manifest.records)
     || manifest.records.length === 0
-    || Object.keys(manifest).some((key) => !['schema', 'records'].includes(key))
+    || Object.keys(manifest).some((key) => !['schema', 'commandRegistryPath', 'records'].includes(key))
+    || typeof manifest.commandRegistryPath !== 'string'
   ) {
     throw new Error('CORE_CATALOG_SOURCE_INVALID: invalid catalog source manifest');
   }
   const paths = new Set();
+  assertRelativePath(manifest.commandRegistryPath, 'commandRegistryPath');
   for (const [index, entry] of manifest.records.entries()) {
     if (
       entry === null
@@ -77,6 +79,7 @@ function validateSourceManifest(manifest) {
   }
   return {
     schema: manifest.schema,
+    commandRegistryPath: manifest.commandRegistryPath,
     records: [...manifest.records].sort((left, right) => compareText(left.path, right.path)),
   };
 }
@@ -85,13 +88,12 @@ function tokenize(value) {
   return String(value).toLowerCase().match(/[a-z0-9]+/g) ?? [];
 }
 
-function collectSearchFields(record, relations, aliases) {
+function collectSearchFields(record, relations) {
   const fields = [
     ['id', record.id],
     ['name', record.name],
     ['summary', record.summary],
   ];
-  for (const alias of aliases) fields.push(['alias', alias]);
   for (const keyword of record.keywords ?? []) fields.push(['keyword', keyword]);
   for (const value of record.intent?.useWhen ?? []) fields.push(['intent.useWhen', value]);
   for (const value of record.intent?.avoidWhen ?? []) fields.push(['intent.avoidWhen', value]);
@@ -143,6 +145,11 @@ export async function compileCatalog({
   }
   const manifestBytes = await readFile(resolve(repositoryRoot, sourceManifestPath), 'utf8');
   const manifest = validateSourceManifest(parseJsonStrict(manifestBytes));
+  const commandRegistryBytes = await readFile(
+    resolve(repositoryRoot, manifest.commandRegistryPath),
+    'utf8',
+  );
+  const commandRegistry = parseJsonStrict(commandRegistryBytes);
   const loaded = [];
 
   for (const entry of manifest.records) {
@@ -200,7 +207,6 @@ export async function compileCatalog({
       name: record.name,
       summary: record.summary,
       lifecycle: record.lifecycle,
-      aliases: [record.id.split(':').at(-1)],
       platforms: recordPlatforms(record),
       contentRevision: revision,
       bindingContentRevisions,
@@ -216,10 +222,9 @@ export async function compileCatalog({
     };
   }).sort((left, right) => compareText(left.id, right.id));
 
-  validateCompiledAliases(artifacts);
-
   const sourceRevision = canonicalDigest({
     manifest,
+    commandRegistryDigest: sha256Digest(commandRegistryBytes),
     inputs: loaded.map(({ entry, recordBytes, sourceBytes }) => ({
       path: entry.path,
       digest: sha256Digest(recordBytes),
@@ -229,9 +234,9 @@ export async function compileCatalog({
       }),
     })),
   });
-  const searchIndex = artifacts.map(({ id, record, aliases }) => ({
+  const searchIndex = artifacts.map(({ id, record }) => ({
     id,
-    terms: collectSearchFields(record, relations, aliases),
+    terms: collectSearchFields(record, relations),
   }));
   const preimage = {
     formatVersion: '1.0.0',
@@ -239,6 +244,7 @@ export async function compileCatalog({
     schemaVersion: SCHEMA_VERSION,
     catalogVersion: CATALOG_VERSION,
     sourceRevision,
+    commandRegistry,
     artifacts,
     relations,
     searchIndex,
@@ -246,20 +252,4 @@ export async function compileCatalog({
   const catalogDigest = canonicalDigest(preimage);
   const bundle = { ...preimage, catalogDigest };
   return { bundle, bytes: canonicalJson(bundle) };
-}
-
-export function validateCompiledAliases(artifacts) {
-  const owners = new Map();
-  for (const artifact of artifacts) {
-    for (const alias of artifact.aliases ?? []) {
-      const owner = owners.get(alias);
-      if (owner && owner !== artifact.id) {
-        throw new Error(
-          `CORE_CATALOG_ALIAS_INVALID: ${alias} is owned by both ${owner} and ${artifact.id}`,
-        );
-      }
-      owners.set(alias, artifact.id);
-    }
-  }
-  return owners;
 }

@@ -11,7 +11,7 @@ import {
   validateFamily,
 } from '@core-ui/schema';
 import { catalogJson } from '../generated/catalog.mjs';
-import { compileCatalog, validateCompiledAliases } from '../src/compiler.mjs';
+import { compileCatalog } from '../src/compiler.mjs';
 import {
   createCatalogApi,
   getArtifact,
@@ -84,12 +84,13 @@ test('E-G0.2-02: list, search, and get are deterministic with exact provenance',
     detail: 'full',
   }));
   assert.deepEqual(getArtifact({
-    id: 'button',
+    id: 'core:component:button',
     platform: 'web.react',
     detail: 'full',
   }), detail);
-  assert.equal(getArtifact({ id: 'button', detail: 'brief' }).data.artifact.id, 'core:component:button');
-  assert.equal(getArtifact({ id: 'Button', detail: 'brief' }).error.code, 'CORE_ARTIFACT_NOT_FOUND');
+  assert.equal(getArtifact({ id: 'button', detail: 'brief' }).error.code, 'CORE_QUERY_INVALID');
+  assert.equal(getArtifact({ id: 'Button', detail: 'brief' }).error.code, 'CORE_QUERY_INVALID');
+  assert.equal(getManifest({ limit: 1 }).error.code, 'CORE_QUERY_INVALID');
   assert.equal(list.type, 'artifact.list');
   assert.equal(search.type, 'artifact.search');
   assert.equal(detail.type, 'artifact.detail');
@@ -262,43 +263,11 @@ test('E-G0.2-04 negative: unsupported selectors and missing artifacts are typed'
   assert.equal(searchArtifacts({ query: ' '.repeat(257) }).error.code, 'CORE_QUERY_INVALID');
   assert.equal(searchArtifacts({ query: '---' }).error.code, 'CORE_QUERY_INVALID');
   assert.equal(getArtifact({ id: '' }).error.code, 'CORE_QUERY_INVALID');
-  assert.equal(getArtifact({ id: 'not-an-artifact-ref' }).error.code, 'CORE_ARTIFACT_NOT_FOUND');
+  assert.equal(getArtifact({ id: 'not-an-artifact-ref' }).error.code, 'CORE_QUERY_INVALID');
   const missing = getArtifact({ id: 'core:component:missing' });
   assert.equal(missing.error.code, 'CORE_ARTIFACT_NOT_FOUND');
   validateFamily('query-envelope', badSelector);
   validateFamily('query-envelope', missing);
-
-  const ambiguousBundle = structuredClone(baseBundle);
-  const duplicate = structuredClone(
-    ambiguousBundle.artifacts.find(({ id }) => id === 'core:component:button'),
-  );
-  duplicate.id = 'core:pattern:button';
-  duplicate.record.id = duplicate.id;
-  duplicate.aliases = ['button'];
-  ambiguousBundle.artifacts.push(duplicate);
-  ambiguousBundle.artifacts.sort((left, right) => left.id.localeCompare(right.id));
-  const duplicateIndex = structuredClone(
-    ambiguousBundle.searchIndex.find(({ id }) => id === 'core:component:button'),
-  );
-  duplicateIndex.id = duplicate.id;
-  ambiguousBundle.searchIndex.push(duplicateIndex);
-  ambiguousBundle.searchIndex.sort((left, right) => left.id.localeCompare(right.id));
-  const ambiguousPreimage = preimage(ambiguousBundle);
-  const ambiguousApi = createCatalogApi({
-    ...ambiguousPreimage,
-    catalogDigest: canonicalDigest(ambiguousPreimage),
-  });
-  const ambiguous = ambiguousApi.getArtifact({ id: 'button' });
-  assert.equal(ambiguous.error.code, 'CORE_QUERY_INVALID');
-  assert.equal(ambiguous.error.ruleId, 'query.get.alias.ambiguous');
-  assert.deepEqual(ambiguous.error.details.candidates, [
-    'core:component:button',
-    'core:pattern:button',
-  ]);
-  assert.throws(
-    () => validateCompiledAliases(ambiguousBundle.artifacts),
-    /CORE_CATALOG_ALIAS_INVALID/,
-  );
 
   const wrongPurpose = getArtifact({
     id: 'core:example:button-basic-react',

@@ -1,6 +1,6 @@
 import * as catalogApi from '@core-ui/catalog';
 import { canonicalJson, validateFamily } from '@core-ui/schema';
-import { cliManifest, commandRegistry } from '../generated/command-surface.mjs';
+import { commandRegistry } from '../generated/command-surface.mjs';
 import { parseCliArguments } from './parser.mjs';
 import { renderDense, renderHuman, renderJson } from './renderers.mjs';
 
@@ -12,38 +12,6 @@ const EXIT_CODES = {
 
 function requestWithout(request, keys) {
   return Object.fromEntries(Object.entries(request).filter(([key]) => !keys.includes(key)));
-}
-
-function cliManifestFor(detail) {
-  if (detail === 'brief') {
-    return {
-      name: cliManifest.cli.name,
-      version: cliManifest.cli.version,
-      commands: cliManifest.commands.map(({ name }) => name),
-    };
-  }
-  if (detail === 'compact') {
-    return {
-      cli: cliManifest.cli,
-      commands: cliManifest.commands.map(({ name, summary, responseType, tokenBudgets }) => ({
-        name,
-        summary,
-        responseType,
-        tokenBudgets,
-      })),
-      outputModes: cliManifest.outputModes,
-      unavailableCommands: cliManifest.unavailableCommands,
-    };
-  }
-  return cliManifest;
-}
-
-function manifestResponse(catalogResponse, request) {
-  const response = structuredClone(catalogResponse);
-  response.data.cli = cliManifestFor(request.detail);
-  response.meta.detail = request.detail;
-  validateFamily('query-envelope', response);
-  return response;
 }
 
 export function executeCommand(command, request) {
@@ -64,7 +32,7 @@ export function executeCommand(command, request) {
       `CLI_RESPONSE_TYPE_DRIFT: ${command} expected ${definition.responseType}, got ${response.type}`,
     );
   }
-  return response.type === 'catalog.manifest' ? manifestResponse(response, request) : response;
+  return response;
 }
 
 function diagnostics(response) {

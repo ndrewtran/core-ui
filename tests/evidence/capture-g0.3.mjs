@@ -54,6 +54,14 @@ function command(executable, args) {
   return execFileSync(executable, args, { cwd: repositoryRoot, encoding: 'utf8' }).trim();
 }
 
+function processCliJson(args) {
+  return JSON.parse(execFileSync(process.execPath, [
+    resolve(repositoryRoot, 'packages/tooling/bin/core.mjs'),
+    ...args,
+    '--json',
+  ], { cwd: repositoryRoot, encoding: 'utf8' }));
+}
+
 function sha256(bytes) {
   return `sha256:${createHash('sha256').update(bytes).digest('hex')}`;
 }
@@ -330,18 +338,22 @@ function commandRequest(commandName, detail) {
       ? { detail, limit: 20, platform: null, purpose: null, cursor: null, kind: null }
       : commandName === 'search'
         ? { detail, limit: 20, platform: null, purpose: null, cursor: null, query: 'button' }
-        : { detail, platform: null, purpose: null, section: null, 'id-or-alias': 'button' };
+        : { detail, platform: null, purpose: null, section: null, 'id-or-alias': 'core:component:button' };
   return { ...common, ...definition.budgetFixture };
 }
 
 function parityObservations() {
   const pairs = [
-    ['manifest', executeCommand('manifest', { detail: 'full' }), JSON.parse(runCli(['manifest', '--detail', 'full', '--json']).stdout)],
+    ['manifest', processCliJson(['manifest', '--detail', 'full']), getManifest({ detail: 'full' })],
     ['list', executeCommand('list', commandRequest('list', 'compact')), listArtifacts(commandRequest('list', 'compact'))],
     ['search', executeCommand('search', commandRequest('search', 'brief')), searchArtifacts(commandRequest('search', 'brief'))],
-    ['get', executeCommand('get', commandRequest('get', 'full')), getArtifact({ id: 'button', detail: 'full', platform: null, purpose: null, section: null })],
+    ['get', executeCommand('get', commandRequest('get', 'full')), getArtifact({ id: 'core:component:button', detail: 'full', platform: null, purpose: null, section: null })],
   ];
-  const declaredAlias = executeCommand('get', commandRequest('get', 'brief'));
+  const exactArtifactRef = executeCommand('get', commandRequest('get', 'brief'));
+  const undeclaredShorthand = executeCommand('get', {
+    ...commandRequest('get', 'brief'),
+    'id-or-alias': 'button',
+  });
   const displayName = executeCommand('get', {
     ...commandRequest('get', 'brief'),
     'id-or-alias': 'Button',
@@ -354,8 +366,9 @@ function parityObservations() {
       equal: canonicalJson(api) === canonicalJson(cli),
     })),
     aliasResolution: {
-      declaredSlug: 'button',
-      declaredSlugResolvedId: declaredAlias.data.artifact.id,
+      aliasesAvailable: false,
+      exactArtifactRefResolvedId: exactArtifactRef.data.artifact.id,
+      undeclaredShorthandRejected: undeclaredShorthand.error.code,
       displayNameHeuristicRejected: displayName.error.code,
     },
   };
@@ -363,7 +376,7 @@ function parityObservations() {
 
 function rendererObservations() {
   const response = executeCommand('get', {
-    'id-or-alias': 'button',
+    'id-or-alias': 'core:component:button',
     detail: 'compact',
     platform: 'web.react',
     purpose: null,
@@ -419,6 +432,8 @@ function registryObservations() {
     ['selector-drift', (value) => value.selectors.find(({ name }) => name === 'detail').choices.push('verbose')],
     ['operation-drift', (value) => { value.commands[0].operation = 'planComposition'; }],
     ['operation-response-drift', (value) => { value.commands[0].operation = 'listArtifacts'; }],
+    ['request-key-drift', (value) => { value.commands.find(({ name }) => name === 'get').arguments[0].requestKey = 'alias'; }],
+    ['option-drift', (value) => value.commands.find(({ name }) => name === 'search').options.push('section')],
     ['unknown-field', (value) => { value.undocumented = true; }],
     ['nested-unknown-field', (value) => value.commands[0].arguments.push({ name: 'extra', required: false, type: 'string', undocumented: true })],
     ['tokenizer-drift', (value) => { value.tokenizer.id = 'approximate'; }],
@@ -441,7 +456,7 @@ function errorObservations() {
     ['unknown', ['unknown', '--json']],
     ['invalid-detail', ['list', '--detail', 'verbose', '--json']],
     ['invalid-cursor', ['list', '--cursor', 'wrong', '--json']],
-    ['not-found', ['get', 'missing', '--json']],
+    ['not-found', ['get', 'core:component:missing', '--json']],
   ];
   const results = fixtures.map(([name, args]) => {
     const result = runCli(args);

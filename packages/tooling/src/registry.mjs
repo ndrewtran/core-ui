@@ -10,8 +10,9 @@ const BASELINE_GLOBAL_OPTIONS = ['dense', 'help', 'json'];
 const BASELINE_SELECTORS = ['cursor', 'detail', 'limit', 'platform', 'purpose', 'section'];
 const UNAVAILABLE_COMMANDS = ['doctor', 'init', 'migrate', 'plan', 'validate'];
 const DETAILS = ['brief', 'compact', 'full'];
-const CATALOG_OPERATIONS = getManifest().data.operations;
-const CLI_AVAILABLE = getManifest().data.capabilities
+const CATALOG_MANIFEST = getManifest({ detail: 'full' });
+const CATALOG_OPERATIONS = CATALOG_MANIFEST.data.operations;
+const CLI_AVAILABLE = CATALOG_MANIFEST.data.capabilities
   .find(({ id }) => id === 'core:capability:query-baseline')
   .availableOn.includes('cli');
 
@@ -163,11 +164,13 @@ export function validateCommandRegistry(registry) {
       'CLI_COMMAND_SURFACE_DRIFT',
       `${command.name} must declare a summary and examples`,
     );
+    const operationResponseType = CATALOG_OPERATIONS[command.operation].responseType;
     assert(
-      CATALOG_OPERATIONS[command.operation].responseType === command.responseType,
+      command.responseType === undefined || command.responseType === operationResponseType,
       'CLI_OPERATION_RESPONSE_DRIFT',
-      `${command.name} response type must match ${command.operation}`,
+      `${command.name} response type must derive from ${command.operation}`,
     );
+    command.responseType = operationResponseType;
     assert(
       QUERY_RESPONSE_TYPES.includes(command.responseType),
       'CLI_RESPONSE_TYPE_DRIFT',
@@ -205,6 +208,16 @@ export function validateCommandRegistry(registry) {
       )),
       'CLI_ARGUMENT_INVALID',
       `${command.name} argument request keys must be non-empty strings`,
+    );
+    const operationRequestKeys = [
+      ...command.arguments.map(({ name, requestKey }) => requestKey ?? name),
+      ...command.options.filter((name) => !BASELINE_GLOBAL_OPTIONS.includes(name)),
+    ].sort(compareText);
+    assert(
+      canonicalJson(operationRequestKeys)
+        === canonicalJson(CATALOG_OPERATIONS[command.operation].requestKeys),
+      'CLI_OPERATION_REQUEST_DRIFT',
+      `${command.name} request keys must derive from ${command.operation}`,
     );
     assert(
       canonicalJson(Object.keys(command.tokenBudgets).sort(compareText)) === canonicalJson(DETAILS),
@@ -408,18 +421,7 @@ export function buildCommandProjections(input) {
     globalOptions: registry.globalOptions,
     commands,
   };
-  const cliManifest = {
-    schemaVersion: registry.schemaVersion,
-    cli: registry.cli,
-    tokenizer: registry.tokenizer,
-    commands,
-    unavailableCommands: registry.unavailableCommands.map((command) => ({
-      ...command,
-      capability: { available: false },
-    })),
-    outputModes: registry.outputModes,
-    surfacePolicy: registry.surfacePolicy,
-  };
+  const cliManifest = getManifest({ detail: 'full' }).data.cli;
   const mcpInputSchemas = registry.commands.map((command) => ({
     name: command.name,
     available: false,
