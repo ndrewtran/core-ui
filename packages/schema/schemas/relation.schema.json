@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://core-ui.dev/schema/relation.schema.json",
+  "title": "G0.1 minimal relation registry",
+  "schemaVersion": "1.0.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "relations"],
+  "properties": {
+    "schemaVersion": { "const": "1.0.0" },
+    "relations": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["type", "source", "target", "owner", "minimum", "maximum", "guidanceImpact", "consumer"],
+        "properties": {
+          "type": { "enum": ["implemented-by", "example-of", "uses", "available-on"] },
+          "source": { "enum": ["component", "example", "binding", "capability"] },
+          "target": { "enum": ["binding", "token", "surface-or-platform"] },
+          "owner": { "enum": ["component.binding", "binding-example-relation", "binding.tokenSources", "capability.availableOn"] },
+          "minimum": { "type": "integer", "minimum": 0 },
+          "maximum": { "anyOf": [{ "type": "integer", "minimum": 1 }, { "const": "many" }] },
+          "guidanceImpact": { "const": "normative" },
+          "consumer": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 }, "uniqueItems": true }
+        }
+      }
+    }
+  },
+  "x-core-ui-registry": [
+    { "type": "implemented-by", "source": "component", "target": "binding", "owner": "component.binding", "minimum": 1, "maximum": "many", "guidanceImpact": "normative", "consumer": ["schema-validation", "spec-revision"] },
+    { "type": "example-of", "source": "example", "target": "binding", "owner": "binding-example-relation", "minimum": 1, "maximum": 1, "guidanceImpact": "normative", "consumer": ["example-selection", "spec-revision"] },
+    { "type": "uses", "source": "binding", "target": "token", "owner": "binding.tokenSources", "minimum": 0, "maximum": "many", "guidanceImpact": "normative", "consumer": ["schema-validation", "spec-revision"] },
+    { "type": "available-on", "source": "capability", "target": "surface-or-platform", "owner": "capability.availableOn", "minimum": 1, "maximum": "many", "guidanceImpact": "normative", "consumer": ["capability-validation"] }
+  ]
+}

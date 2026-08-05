@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://core-ui.dev/schema/query-envelope.schema.json",
+  "title": "Core UI query envelope",
+  "oneOf": [
+    {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["apiVersion", "type", "data", "meta", "warnings"],
+      "properties": {
+        "apiVersion": { "const": "1.0.0" },
+        "type": { "type": "string", "pattern": "^[a-z][a-z0-9-]*(?:\\.[a-z][a-z0-9-]*)+$" },
+        "data": { "type": "object", "additionalProperties": true },
+        "meta": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": ["schemaVersion", "authority", "revisions"],
+          "properties": {
+            "schemaVersion": { "const": "1.0.0" },
+            "authority": { "enum": ["installed-local", "advisory"] },
+            "revisions": {
+              "type": "object",
+              "additionalProperties": true,
+              "properties": {
+                "conceptContent": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+                "bindingSpec": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" }
+              }
+            }
+          }
+        },
+        "warnings": { "type": "array", "items": { "$ref": "diagnostic.schema.json" } }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["apiVersion", "type", "error"],
+      "properties": {
+        "apiVersion": { "const": "1.0.0" },
+        "type": { "const": "error" },
+        "error": { "$ref": "diagnostic.schema.json" }
+      }
+    }
+  ]
+}

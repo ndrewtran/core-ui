@@ -25,7 +25,18 @@ export async function loadPolicy(repositoryRoot) {
     repositoryRoot,
     'tooling/audits/repository-policy/repository-policy.json',
   );
-  return JSON.parse(await readFile(path, 'utf8'));
+  const policy = JSON.parse(await readFile(path, 'utf8'));
+  const artifactRefPath = join(
+    repositoryRoot,
+    'packages/schema/schemas/artifact-ref.schema.json',
+  );
+  const artifactRef = await readFile(artifactRefPath, 'utf8')
+    .then((bytes) => JSON.parse(bytes))
+    .catch(() => null);
+  if (artifactRef?.pattern) {
+    policy.artifactIdPattern = artifactRef.pattern;
+  }
+  return policy;
 }
 
 export function classifyPath(repositoryPath, policy) {
@@ -182,6 +193,12 @@ export async function auditAliases(repositoryRoot, policy, files = null) {
   const artifactFiles = allFiles.filter(
     (path) => path.startsWith('catalog/') && path.endsWith('/artifact.json'),
   );
+  if (!policy.artifactIdPattern) {
+    throw new PolicyError(
+      'ARTIFACT_REF_CONTRACT_MISSING',
+      'packages/schema/schemas/artifact-ref.schema.json must own ArtifactRef syntax',
+    );
+  }
   const idPattern = new RegExp(policy.artifactIdPattern);
   const slugPattern = new RegExp(policy.slugPattern);
   const claimed = new Map();
@@ -192,7 +209,7 @@ export async function auditAliases(repositoryRoot, policy, files = null) {
     if (!match) {
       throw new PolicyError('ARTIFACT_ID_INVALID', `${path} has invalid ArtifactRef`);
     }
-    const slug = match[1];
+    const slug = record.id.split(':')[2];
     if (dirname(path).split('/').at(-1) !== slug) {
       throw new PolicyError('ARTIFACT_PATH_DRIFT', `${path} must use the ArtifactRef slug ${slug}`);
     }

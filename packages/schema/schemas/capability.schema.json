@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://core-ui.dev/schema/capability.schema.json",
+  "title": "Core UI capability",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "id", "kind", "name", "summary", "lifecycle", "availability", "policy", "availableOn"],
+  "properties": {
+    "schemaVersion": { "const": "1.0.0" },
+    "id": { "type": "string", "pattern": "^core:capability:[a-z0-9]+(?:-[a-z0-9]+)*$" },
+    "kind": { "const": "capability" },
+    "name": { "type": "string", "minLength": 1 },
+    "summary": { "type": "string", "minLength": 1 },
+    "lifecycle": { "enum": ["experimental", "stable", "deprecated", "removed"] },
+    "availability": { "enum": ["available", "unavailable"] },
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["effect", "requiresConfirmation"],
+      "properties": {
+        "effect": { "enum": ["read-only", "project-write", "dependency-install"] },
+        "requiresConfirmation": { "type": "boolean" }
+      }
+    },
+    "availableOn": { "type": "array", "minItems": 1, "items": { "enum": ["api", "cli", "mcp-local", "mcp-hosted", "site", "web.html", "web.react", "native.react-native"] }, "uniqueItems": true },
+    "extensions": { "type": "object", "propertyNames": { "pattern": "^core\\.experimental\\.[a-z0-9]+(?:-[a-z0-9]+)*$" }, "additionalProperties": true }
+  }
+}

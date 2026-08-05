@@ -1,0 +1,1035 @@
+{
+  "classes": [
+    "authored",
+    "derived",
+    "proved"
+  ],
+  "fields": [
+    {
+      "class": "authored",
+      "name": "strategy",
+      "owner": "binding-contract",
+      "schema": "binding.schema.json",
+      "schemaPointer": "#/$defs/runtimeProfile/allOf/0/oneOf/0/properties/strategy"
+    },
+    {
+      "class": "authored",
+      "name": "strategy",
+      "owner": "binding-contract",
+      "schema": "binding.schema.json",
+      "schemaPointer": "#/$defs/runtimeProfile/allOf/0/oneOf/1/properties/strategy"
+    },
+    {
+      "class": "authored",
+      "name": "alternative",
+      "owner": "binding-contract",
+      "schema": "binding.schema.json",
+      "schemaPointer": "#/$defs/runtimeProfile/properties/alternative"
+    },
+    {
+      "class": "authored",
+      "name": "lifecycle",
+      "owner": "binding-contract",
+      "schema": "binding.schema.json",
+      "schemaPointer": "#/$defs/runtimeProfile/properties/lifecycle"
+    },
+    {
+      "class": "authored",
+      "name": "reason",
+      "owner": "binding-contract",
+      "schema": "binding.schema.json",
+      "schemaPointer": "#/$defs/runtimeProfile/properties/reason"
+    },
+    {
+      "class": "authored",
+      "name": "strategy",
+      "owner": "binding-contract",
+      "schema": "binding.schema.json",
+      "schemaPointer": "#/$defs/runtimeProfile/properties/strategy"
+    },
+    {
+      "class": "authored",
+      "name": "validationProfile",
+      "owner": "binding-contract",
+      "schema": "binding.schema.json",
+      "schemaPointer": "#/$defs/runtimeProfile/properties/validationProfile"
+    },
+    {
+      "class": "authored",
+      "name": "strategy",
+      "owner": "binding-contract",
+      "schema": "binding.schema.json",
+      "schemaPointer": "#/allOf/0/oneOf/0/properties/strategy"
+    },
+    {
+      "class": "authored",
+      "name": "strategy",
+      "owner": "binding-contract",
+      "schema": "binding.schema.json",
+      "schemaPointer": "#/allOf/0/oneOf/1/properties/strategy"
+    },
+    {
+      "class": "authored",
+      "name": "accessibility",
+      "owner": "binding-contract",
+      "schema": "binding.schema.json",
+      "schemaPointer": "#/properties/accessibility"
+    },
+    {
+      "class": "authored",
+      "name": "alternative",
+      "owner": "binding-contract",
+      "schema": "binding.schema.json",
+      "schemaPointer": "#/properties/alternative"
+    },
+    {
+      "class": "authored",
+      "name": "api",
+      "owner": "binding-contract",
+      "schema": "binding.schema.json",
+      "schemaPointer": "#/properties/api"
+    },
+    {
+      "class": "authored",
+      "name": "defaults",
+      "owner": "binding-contract",
+      "schema": "binding.schema.json",
+      "schemaPointer": "#/properties/api/properties/defaults"
+    },
+    {
+      "class": "authored",
+      "name": "events",
+      "owner": "binding-contract",
+      "schema": "binding.schema.json",
+      "schemaPointer": "#/properties/api/properties/events"
+    },
+    {
+      "class": "authored",
+      "name": "parts",
+      "owner": "binding-contract",
+      "schema": "binding.schema.json",
+      "schemaPointer": "#/properties/api/properties/parts"
+    },
+    {
+      "class": "authored",
+      "name": "props",
+      "owner": "binding-contract",
+      "schema": "binding.schema.json",
+      "schemaPointer": "#/properties/api/properties/props"
+    },
+    {
+      "class": "authored",
+      "name": "behavior",
+      "owner": "binding-contract",
+      "schema": "binding.schema.json",
+      "schemaPointer": "#/properties/behavior"
+    },
+    {
+      "class": "authored",
+      "name": "editorialNotes",
+      "owner": "binding-contract",
+      "schema": "binding.schema.json",
+      "schemaPointer": "#/properties/editorialNotes"
+    },
+    {
+      "class": "authored",
+      "name": "extensions",
+      "owner": "binding-contract",
+      "schema": "binding.schema.json",
+      "schemaPointer": "#/properties/extensions"
+    },
+    {
+      "class": "authored",
+      "name": "lifecycle",
+      "owner": "binding-contract",
+      "schema": "binding.schema.json",
+      "schemaPointer": "#/properties/lifecycle"
+    },
+    {
+      "class": "authored",
+      "name": "reason",
+      "owner": "binding-contract",
+      "schema": "binding.schema.json",
+      "schemaPointer": "#/properties/reason"
+    },
+    {
+      "class": "authored",
+      "name": "runtimeProfiles",
+      "owner": "binding-contract",
+      "schema": "binding.schema.json",
+      "schemaPointer": "#/properties/runtimeProfiles"
+    },
+    {
+      "class": "authored",
+      "name": "android",
+      "owner": "binding-contract",
+      "schema": "binding.schema.json",
+      "schemaPointer": "#/properties/runtimeProfiles/properties/android"
+    },
+    {
+      "class": "authored",
+      "name": "validationProfile",
+      "owner": "binding-contract",
+      "schema": "binding.schema.json",
+      "schemaPointer": "#/properties/runtimeProfiles/properties/android/allOf/1/properties/validationProfile"
+    },
+    {
+      "class": "authored",
+      "name": "ios",
+      "owner": "binding-contract",
+      "schema": "binding.schema.json",
+      "schemaPointer": "#/properties/runtimeProfiles/properties/ios"
+    },
+    {
+      "class": "authored",
+      "name": "validationProfile",
+      "owner": "binding-contract",
+      "schema": "binding.schema.json",
+      "schemaPointer": "#/properties/runtimeProfiles/properties/ios/allOf/1/properties/validationProfile"
+    },
+    {
+      "class": "authored",
+      "name": "native.react-native-web",
+      "owner": "binding-contract",
+      "schema": "binding.schema.json",
+      "schemaPointer": "#/properties/runtimeProfiles/properties/native.react-native-web"
+    },
+    {
+      "class": "authored",
+      "name": "validationProfile",
+      "owner": "binding-contract",
+      "schema": "binding.schema.json",
+      "schemaPointer": "#/properties/runtimeProfiles/properties/native.react-native-web/allOf/1/properties/validationProfile"
+    },
+    {
+      "class": "authored",
+      "name": "schemaVersion",
+      "owner": "binding-contract",
+      "schema": "binding.schema.json",
+      "schemaPointer": "#/properties/schemaVersion"
+    },
+    {
+      "class": "authored",
+      "name": "strategy",
+      "owner": "binding-contract",
+      "schema": "binding.schema.json",
+      "schemaPointer": "#/properties/strategy"
+    },
+    {
+      "class": "authored",
+      "name": "tokenSources",
+      "owner": "binding-contract",
+      "schema": "binding.schema.json",
+      "schemaPointer": "#/properties/tokenSources"
+    },
+    {
+      "class": "authored",
+      "name": "availability",
+      "owner": "capability-contract",
+      "schema": "capability.schema.json",
+      "schemaPointer": "#/properties/availability"
+    },
+    {
+      "class": "authored",
+      "name": "availableOn",
+      "owner": "capability-contract",
+      "schema": "capability.schema.json",
+      "schemaPointer": "#/properties/availableOn"
+    },
+    {
+      "class": "authored",
+      "name": "extensions",
+      "owner": "capability-contract",
+      "schema": "capability.schema.json",
+      "schemaPointer": "#/properties/extensions"
+    },
+    {
+      "class": "authored",
+      "name": "id",
+      "owner": "capability-contract",
+      "schema": "capability.schema.json",
+      "schemaPointer": "#/properties/id"
+    },
+    {
+      "class": "authored",
+      "name": "kind",
+      "owner": "capability-contract",
+      "schema": "capability.schema.json",
+      "schemaPointer": "#/properties/kind"
+    },
+    {
+      "class": "authored",
+      "name": "lifecycle",
+      "owner": "capability-contract",
+      "schema": "capability.schema.json",
+      "schemaPointer": "#/properties/lifecycle"
+    },
+    {
+      "class": "authored",
+      "name": "name",
+      "owner": "capability-contract",
+      "schema": "capability.schema.json",
+      "schemaPointer": "#/properties/name"
+    },
+    {
+      "class": "authored",
+      "name": "policy",
+      "owner": "capability-contract",
+      "schema": "capability.schema.json",
+      "schemaPointer": "#/properties/policy"
+    },
+    {
+      "class": "authored",
+      "name": "effect",
+      "owner": "capability-contract",
+      "schema": "capability.schema.json",
+      "schemaPointer": "#/properties/policy/properties/effect"
+    },
+    {
+      "class": "authored",
+      "name": "requiresConfirmation",
+      "owner": "capability-contract",
+      "schema": "capability.schema.json",
+      "schemaPointer": "#/properties/policy/properties/requiresConfirmation"
+    },
+    {
+      "class": "authored",
+      "name": "schemaVersion",
+      "owner": "capability-contract",
+      "schema": "capability.schema.json",
+      "schemaPointer": "#/properties/schemaVersion"
+    },
+    {
+      "class": "authored",
+      "name": "summary",
+      "owner": "capability-contract",
+      "schema": "capability.schema.json",
+      "schemaPointer": "#/properties/summary"
+    },
+    {
+      "class": "authored",
+      "name": "accessibility",
+      "owner": "component-contract",
+      "schema": "component.schema.json",
+      "schemaPointer": "#/properties/accessibility"
+    },
+    {
+      "class": "authored",
+      "name": "nameRequired",
+      "owner": "component-contract",
+      "schema": "component.schema.json",
+      "schemaPointer": "#/properties/accessibility/properties/nameRequired"
+    },
+    {
+      "class": "authored",
+      "name": "obligations",
+      "owner": "component-contract",
+      "schema": "component.schema.json",
+      "schemaPointer": "#/properties/accessibility/properties/obligations"
+    },
+    {
+      "class": "authored",
+      "name": "anatomy",
+      "owner": "component-contract",
+      "schema": "component.schema.json",
+      "schemaPointer": "#/properties/anatomy"
+    },
+    {
+      "class": "authored",
+      "name": "bindings",
+      "owner": "component-contract",
+      "schema": "component.schema.json",
+      "schemaPointer": "#/properties/bindings"
+    },
+    {
+      "class": "authored",
+      "name": "native.react-native",
+      "owner": "component-contract",
+      "schema": "component.schema.json",
+      "schemaPointer": "#/properties/bindings/properties/native.react-native"
+    },
+    {
+      "class": "authored",
+      "name": "web.html",
+      "owner": "component-contract",
+      "schema": "component.schema.json",
+      "schemaPointer": "#/properties/bindings/properties/web.html"
+    },
+    {
+      "class": "authored",
+      "name": "web.react",
+      "owner": "component-contract",
+      "schema": "component.schema.json",
+      "schemaPointer": "#/properties/bindings/properties/web.react"
+    },
+    {
+      "class": "authored",
+      "name": "extensions",
+      "owner": "component-contract",
+      "schema": "component.schema.json",
+      "schemaPointer": "#/properties/extensions"
+    },
+    {
+      "class": "authored",
+      "name": "id",
+      "owner": "component-contract",
+      "schema": "component.schema.json",
+      "schemaPointer": "#/properties/id"
+    },
+    {
+      "class": "authored",
+      "name": "intent",
+      "owner": "component-contract",
+      "schema": "component.schema.json",
+      "schemaPointer": "#/properties/intent"
+    },
+    {
+      "class": "authored",
+      "name": "avoidWhen",
+      "owner": "component-contract",
+      "schema": "component.schema.json",
+      "schemaPointer": "#/properties/intent/properties/avoidWhen"
+    },
+    {
+      "class": "authored",
+      "name": "useWhen",
+      "owner": "component-contract",
+      "schema": "component.schema.json",
+      "schemaPointer": "#/properties/intent/properties/useWhen"
+    },
+    {
+      "class": "authored",
+      "name": "kind",
+      "owner": "component-contract",
+      "schema": "component.schema.json",
+      "schemaPointer": "#/properties/kind"
+    },
+    {
+      "class": "authored",
+      "name": "lifecycle",
+      "owner": "component-contract",
+      "schema": "component.schema.json",
+      "schemaPointer": "#/properties/lifecycle"
+    },
+    {
+      "class": "authored",
+      "name": "name",
+      "owner": "component-contract",
+      "schema": "component.schema.json",
+      "schemaPointer": "#/properties/name"
+    },
+    {
+      "class": "authored",
+      "name": "schemaVersion",
+      "owner": "component-contract",
+      "schema": "component.schema.json",
+      "schemaPointer": "#/properties/schemaVersion"
+    },
+    {
+      "class": "authored",
+      "name": "states",
+      "owner": "component-contract",
+      "schema": "component.schema.json",
+      "schemaPointer": "#/properties/states"
+    },
+    {
+      "class": "authored",
+      "name": "summary",
+      "owner": "component-contract",
+      "schema": "component.schema.json",
+      "schemaPointer": "#/properties/summary"
+    },
+    {
+      "class": "derived",
+      "name": "code",
+      "owner": "diagnostic-contract",
+      "schema": "diagnostic.schema.json",
+      "schemaPointer": "#/properties/code"
+    },
+    {
+      "class": "derived",
+      "name": "details",
+      "owner": "diagnostic-contract",
+      "schema": "diagnostic.schema.json",
+      "schemaPointer": "#/properties/details"
+    },
+    {
+      "class": "derived",
+      "name": "message",
+      "owner": "diagnostic-contract",
+      "schema": "diagnostic.schema.json",
+      "schemaPointer": "#/properties/message"
+    },
+    {
+      "class": "derived",
+      "name": "nextCommand",
+      "owner": "diagnostic-contract",
+      "schema": "diagnostic.schema.json",
+      "schemaPointer": "#/properties/nextCommand"
+    },
+    {
+      "class": "derived",
+      "name": "command",
+      "owner": "diagnostic-contract",
+      "schema": "diagnostic.schema.json",
+      "schemaPointer": "#/properties/nextCommand/properties/command"
+    },
+    {
+      "class": "derived",
+      "name": "effect",
+      "owner": "diagnostic-contract",
+      "schema": "diagnostic.schema.json",
+      "schemaPointer": "#/properties/nextCommand/properties/effect"
+    },
+    {
+      "class": "derived",
+      "name": "requiresConfirmation",
+      "owner": "diagnostic-contract",
+      "schema": "diagnostic.schema.json",
+      "schemaPointer": "#/properties/nextCommand/properties/requiresConfirmation"
+    },
+    {
+      "class": "derived",
+      "name": "retryable",
+      "owner": "diagnostic-contract",
+      "schema": "diagnostic.schema.json",
+      "schemaPointer": "#/properties/retryable"
+    },
+    {
+      "class": "derived",
+      "name": "ruleId",
+      "owner": "diagnostic-contract",
+      "schema": "diagnostic.schema.json",
+      "schemaPointer": "#/properties/ruleId"
+    },
+    {
+      "class": "authored",
+      "name": "binding",
+      "owner": "example-contract",
+      "schema": "example.schema.json",
+      "schemaPointer": "#/properties/binding"
+    },
+    {
+      "class": "authored",
+      "name": "guidanceImpact",
+      "owner": "example-contract",
+      "schema": "example.schema.json",
+      "schemaPointer": "#/properties/binding/properties/guidanceImpact"
+    },
+    {
+      "class": "authored",
+      "name": "preference",
+      "owner": "example-contract",
+      "schema": "example.schema.json",
+      "schemaPointer": "#/properties/binding/properties/preference"
+    },
+    {
+      "class": "authored",
+      "name": "purposes",
+      "owner": "example-contract",
+      "schema": "example.schema.json",
+      "schemaPointer": "#/properties/binding/properties/purposes"
+    },
+    {
+      "class": "authored",
+      "name": "ref",
+      "owner": "example-contract",
+      "schema": "example.schema.json",
+      "schemaPointer": "#/properties/binding/properties/ref"
+    },
+    {
+      "class": "authored",
+      "name": "runtimeProfiles",
+      "owner": "example-contract",
+      "schema": "example.schema.json",
+      "schemaPointer": "#/properties/binding/properties/runtimeProfiles"
+    },
+    {
+      "class": "authored",
+      "name": "complexity",
+      "owner": "example-contract",
+      "schema": "example.schema.json",
+      "schemaPointer": "#/properties/complexity"
+    },
+    {
+      "class": "authored",
+      "name": "extensions",
+      "owner": "example-contract",
+      "schema": "example.schema.json",
+      "schemaPointer": "#/properties/extensions"
+    },
+    {
+      "class": "authored",
+      "name": "id",
+      "owner": "example-contract",
+      "schema": "example.schema.json",
+      "schemaPointer": "#/properties/id"
+    },
+    {
+      "class": "authored",
+      "name": "kind",
+      "owner": "example-contract",
+      "schema": "example.schema.json",
+      "schemaPointer": "#/properties/kind"
+    },
+    {
+      "class": "authored",
+      "name": "lifecycle",
+      "owner": "example-contract",
+      "schema": "example.schema.json",
+      "schemaPointer": "#/properties/lifecycle"
+    },
+    {
+      "class": "authored",
+      "name": "name",
+      "owner": "example-contract",
+      "schema": "example.schema.json",
+      "schemaPointer": "#/properties/name"
+    },
+    {
+      "class": "authored",
+      "name": "prerequisites",
+      "owner": "example-contract",
+      "schema": "example.schema.json",
+      "schemaPointer": "#/properties/prerequisites"
+    },
+    {
+      "class": "authored",
+      "name": "schemaVersion",
+      "owner": "example-contract",
+      "schema": "example.schema.json",
+      "schemaPointer": "#/properties/schemaVersion"
+    },
+    {
+      "class": "authored",
+      "name": "source",
+      "owner": "example-contract",
+      "schema": "example.schema.json",
+      "schemaPointer": "#/properties/source"
+    },
+    {
+      "class": "authored",
+      "name": "summary",
+      "owner": "example-contract",
+      "schema": "example.schema.json",
+      "schemaPointer": "#/properties/summary"
+    },
+    {
+      "class": "authored",
+      "name": "extensions",
+      "owner": "guide-contract",
+      "schema": "guide.schema.json",
+      "schemaPointer": "#/properties/extensions"
+    },
+    {
+      "class": "authored",
+      "name": "id",
+      "owner": "guide-contract",
+      "schema": "guide.schema.json",
+      "schemaPointer": "#/properties/id"
+    },
+    {
+      "class": "authored",
+      "name": "keywords",
+      "owner": "guide-contract",
+      "schema": "guide.schema.json",
+      "schemaPointer": "#/properties/keywords"
+    },
+    {
+      "class": "authored",
+      "name": "kind",
+      "owner": "guide-contract",
+      "schema": "guide.schema.json",
+      "schemaPointer": "#/properties/kind"
+    },
+    {
+      "class": "authored",
+      "name": "lifecycle",
+      "owner": "guide-contract",
+      "schema": "guide.schema.json",
+      "schemaPointer": "#/properties/lifecycle"
+    },
+    {
+      "class": "authored",
+      "name": "name",
+      "owner": "guide-contract",
+      "schema": "guide.schema.json",
+      "schemaPointer": "#/properties/name"
+    },
+    {
+      "class": "authored",
+      "name": "platforms",
+      "owner": "guide-contract",
+      "schema": "guide.schema.json",
+      "schemaPointer": "#/properties/platforms"
+    },
+    {
+      "class": "authored",
+      "name": "schemaVersion",
+      "owner": "guide-contract",
+      "schema": "guide.schema.json",
+      "schemaPointer": "#/properties/schemaVersion"
+    },
+    {
+      "class": "authored",
+      "name": "source",
+      "owner": "guide-contract",
+      "schema": "guide.schema.json",
+      "schemaPointer": "#/properties/source"
+    },
+    {
+      "class": "authored",
+      "name": "summary",
+      "owner": "guide-contract",
+      "schema": "guide.schema.json",
+      "schemaPointer": "#/properties/summary"
+    },
+    {
+      "class": "derived",
+      "name": "apiVersion",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/oneOf/0/properties/apiVersion"
+    },
+    {
+      "class": "derived",
+      "name": "data",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/oneOf/0/properties/data"
+    },
+    {
+      "class": "derived",
+      "name": "meta",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/oneOf/0/properties/meta"
+    },
+    {
+      "class": "derived",
+      "name": "authority",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/oneOf/0/properties/meta/properties/authority"
+    },
+    {
+      "class": "derived",
+      "name": "revisions",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/oneOf/0/properties/meta/properties/revisions"
+    },
+    {
+      "class": "derived",
+      "name": "bindingSpec",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/oneOf/0/properties/meta/properties/revisions/properties/bindingSpec"
+    },
+    {
+      "class": "derived",
+      "name": "conceptContent",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/oneOf/0/properties/meta/properties/revisions/properties/conceptContent"
+    },
+    {
+      "class": "derived",
+      "name": "schemaVersion",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/oneOf/0/properties/meta/properties/schemaVersion"
+    },
+    {
+      "class": "derived",
+      "name": "type",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/oneOf/0/properties/type"
+    },
+    {
+      "class": "derived",
+      "name": "warnings",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/oneOf/0/properties/warnings"
+    },
+    {
+      "class": "derived",
+      "name": "apiVersion",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/oneOf/1/properties/apiVersion"
+    },
+    {
+      "class": "derived",
+      "name": "error",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/oneOf/1/properties/error"
+    },
+    {
+      "class": "derived",
+      "name": "type",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/oneOf/1/properties/type"
+    },
+    {
+      "class": "authored",
+      "name": "relations",
+      "owner": "relation-registry",
+      "schema": "relation.schema.json",
+      "schemaPointer": "#/properties/relations"
+    },
+    {
+      "class": "authored",
+      "name": "consumer",
+      "owner": "relation-registry",
+      "schema": "relation.schema.json",
+      "schemaPointer": "#/properties/relations/items/properties/consumer"
+    },
+    {
+      "class": "authored",
+      "name": "guidanceImpact",
+      "owner": "relation-registry",
+      "schema": "relation.schema.json",
+      "schemaPointer": "#/properties/relations/items/properties/guidanceImpact"
+    },
+    {
+      "class": "authored",
+      "name": "maximum",
+      "owner": "relation-registry",
+      "schema": "relation.schema.json",
+      "schemaPointer": "#/properties/relations/items/properties/maximum"
+    },
+    {
+      "class": "authored",
+      "name": "minimum",
+      "owner": "relation-registry",
+      "schema": "relation.schema.json",
+      "schemaPointer": "#/properties/relations/items/properties/minimum"
+    },
+    {
+      "class": "authored",
+      "name": "owner",
+      "owner": "relation-registry",
+      "schema": "relation.schema.json",
+      "schemaPointer": "#/properties/relations/items/properties/owner"
+    },
+    {
+      "class": "authored",
+      "name": "source",
+      "owner": "relation-registry",
+      "schema": "relation.schema.json",
+      "schemaPointer": "#/properties/relations/items/properties/source"
+    },
+    {
+      "class": "authored",
+      "name": "target",
+      "owner": "relation-registry",
+      "schema": "relation.schema.json",
+      "schemaPointer": "#/properties/relations/items/properties/target"
+    },
+    {
+      "class": "authored",
+      "name": "type",
+      "owner": "relation-registry",
+      "schema": "relation.schema.json",
+      "schemaPointer": "#/properties/relations/items/properties/type"
+    },
+    {
+      "class": "authored",
+      "name": "schemaVersion",
+      "owner": "relation-registry",
+      "schema": "relation.schema.json",
+      "schemaPointer": "#/properties/schemaVersion"
+    },
+    {
+      "class": "authored",
+      "name": "extensions",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "schemaPointer": "#/properties/extensions"
+    },
+    {
+      "class": "authored",
+      "name": "id",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "schemaPointer": "#/properties/id"
+    },
+    {
+      "class": "authored",
+      "name": "kind",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "schemaPointer": "#/properties/kind"
+    },
+    {
+      "class": "authored",
+      "name": "lifecycle",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "schemaPointer": "#/properties/lifecycle"
+    },
+    {
+      "class": "authored",
+      "name": "name",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "schemaPointer": "#/properties/name"
+    },
+    {
+      "class": "authored",
+      "name": "schemaVersion",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "schemaPointer": "#/properties/schemaVersion"
+    },
+    {
+      "class": "authored",
+      "name": "summary",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "schemaPointer": "#/properties/summary"
+    },
+    {
+      "class": "authored",
+      "name": "tokenContractVersion",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "schemaPointer": "#/properties/tokenContractVersion"
+    },
+    {
+      "class": "authored",
+      "name": "tokens",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "schemaPointer": "#/properties/tokens"
+    },
+    {
+      "class": "authored",
+      "name": "alias",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "schemaPointer": "#/properties/tokens/additionalProperties/properties/alias"
+    },
+    {
+      "class": "authored",
+      "name": "type",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "schemaPointer": "#/properties/tokens/additionalProperties/properties/type"
+    },
+    {
+      "class": "authored",
+      "name": "value",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "schemaPointer": "#/properties/tokens/additionalProperties/properties/value"
+    }
+  ],
+  "governedSchemas": [
+    {
+      "class": "authored",
+      "file": "artifact-ref.schema.json",
+      "owner": "artifact-reference-contract"
+    },
+    {
+      "class": "authored",
+      "file": "binding.schema.json",
+      "owner": "binding-contract"
+    },
+    {
+      "class": "authored",
+      "file": "capability.schema.json",
+      "owner": "capability-contract"
+    },
+    {
+      "class": "authored",
+      "file": "component.schema.json",
+      "owner": "component-contract"
+    },
+    {
+      "class": "derived",
+      "file": "diagnostic.schema.json",
+      "owner": "diagnostic-contract"
+    },
+    {
+      "class": "derived",
+      "file": "error-code.schema.json",
+      "owner": "diagnostic-code-contract"
+    },
+    {
+      "class": "authored",
+      "file": "example.schema.json",
+      "owner": "example-contract"
+    },
+    {
+      "class": "authored",
+      "file": "guide.schema.json",
+      "owner": "guide-contract"
+    },
+    {
+      "class": "derived",
+      "file": "query-envelope.schema.json",
+      "owner": "query-envelope-contract"
+    },
+    {
+      "class": "authored",
+      "file": "relation.schema.json",
+      "owner": "relation-registry"
+    },
+    {
+      "class": "authored",
+      "file": "token-source.schema.json",
+      "owner": "token-source-contract"
+    }
+  ],
+  "reservedFields": [
+    {
+      "class": "derived",
+      "forbiddenInAuthoredSource": true,
+      "name": "contentRevision",
+      "owner": "artifact-revision-compiler"
+    },
+    {
+      "class": "derived",
+      "forbiddenInAuthoredSource": true,
+      "name": "exportPath",
+      "owner": "package-export-graph"
+    },
+    {
+      "class": "proved",
+      "forbiddenInAuthoredSource": true,
+      "name": "evidenceResults",
+      "owner": "proof-system"
+    },
+    {
+      "class": "proved",
+      "forbiddenInAuthoredSource": true,
+      "name": "evidenceStatus",
+      "owner": "proof-system"
+    },
+    {
+      "class": "derived",
+      "forbiddenInAuthoredSource": true,
+      "name": "packageVersion",
+      "owner": "package-graph"
+    },
+    {
+      "class": "derived",
+      "forbiddenInAuthoredSource": true,
+      "name": "sourceLocation",
+      "owner": "repository-convention"
+    },
+    {
+      "class": "derived",
+      "forbiddenInAuthoredSource": true,
+      "name": "specRevision",
+      "owner": "binding-revision-compiler"
+    }
+  ],
+  "schemaVersion": "1.0.0"
+}

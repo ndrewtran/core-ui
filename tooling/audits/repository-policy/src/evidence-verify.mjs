@@ -1,4 +1,4 @@
-import { readFile, readdir } from 'node:fs/promises';
+import { readFile, readdir, stat } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { canonicalJson } from './canonical-json.mjs';
 import { sha256 } from './policy.mjs';
@@ -36,6 +36,49 @@ async function assertDigest(root, reference) {
   return value;
 }
 
+async function manifestEntries(repositoryRoot, declaredPaths) {
+  const entries = [];
+
+  async function visit(relativePath) {
+    const absolutePath = join(repositoryRoot, relativePath);
+    const metadata = await stat(absolutePath);
+    if (metadata.isDirectory()) {
+      const children = await readdir(absolutePath);
+      children.sort((left, right) => left.localeCompare(right));
+      for (const child of children) await visit(join(relativePath, child));
+      return;
+    }
+    if (!metadata.isFile()) {
+      throw new EvidenceIntegrityError(
+        'EVIDENCE_MANIFEST_ENTRY_INVALID',
+        `${relativePath} is not a regular file`,
+      );
+    }
+    const bytes = await readFile(absolutePath);
+    entries.push({ path: relativePath, sha256: `sha256:${sha256(bytes)}` });
+  }
+
+  for (const relativePath of declaredPaths) await visit(relativePath);
+  return entries.sort((left, right) => left.path.localeCompare(right.path));
+}
+
+async function assertApplicabilityManifest(repositoryRoot, manifest) {
+  if (manifest.profile !== 'core-ui-path-manifest-v1') {
+    throw new EvidenceIntegrityError(
+      'EVIDENCE_MANIFEST_PROFILE_INVALID',
+      `unsupported applicability manifest profile ${manifest.profile}`,
+    );
+  }
+  const entries = await manifestEntries(repositoryRoot, manifest.paths);
+  const actual = `sha256:${sha256(canonicalJson(entries))}`;
+  if (actual !== manifest.sha256) {
+    throw new EvidenceIntegrityError(
+      'EVIDENCE_APPLICABILITY_MISMATCH',
+      `applicable source paths have ${actual}; expected ${manifest.sha256}`,
+    );
+  }
+}
+
 export async function verifyEvidence(repositoryRoot) {
   const evidenceRoot = join(repositoryRoot, 'tests/evidence');
   const milestones = await readdir(evidenceRoot, { withFileTypes: true }).catch(() => []);
@@ -46,6 +89,9 @@ export async function verifyEvidence(repositoryRoot) {
   for (const entry of milestones.filter((item) => item.isDirectory())) {
     const indexPath = join(evidenceRoot, entry.name, 'index.json');
     const { value: index } = await readCanonicalJson(indexPath);
+    if (index.applicabilityManifest) {
+      await assertApplicabilityManifest(repositoryRoot, index.applicabilityManifest);
+    }
     indexCount += 1;
     for (const reference of index.records) {
       const record = await assertDigest(repositoryRoot, reference);
@@ -60,6 +106,15 @@ export async function verifyEvidence(repositoryRoot) {
         throw new EvidenceIntegrityError(
           'EVIDENCE_SOURCE_MISMATCH',
           `${reference.path} does not match index source revision`,
+        );
+      }
+      if (
+        index.applicabilityManifest
+        && canonicalJson(record.applicabilityManifest) !== canonicalJson(index.applicabilityManifest)
+      ) {
+        throw new EvidenceIntegrityError(
+          'EVIDENCE_APPLICABILITY_MISMATCH',
+          `${reference.path} does not match the index applicability manifest`,
         );
       }
       await assertDigest(repositoryRoot, record.artifact);

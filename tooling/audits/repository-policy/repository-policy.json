@@ -24,7 +24,6 @@
     "generated"
   ],
   "slugPattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
-  "artifactIdPattern": "^core:(?:component|pattern|token|foundation|guide|example|pitfall|migration|capability):([a-z0-9]+(?:-[a-z0-9]+)*)$",
   "generatedMarkers": {
     "source": "@generated-from:",
     "digest": "@generated-content-sha256:"

@@ -93,6 +93,19 @@ test('E-G0.0-03 negative: duplicate aliases fail deterministically', async () =>
   });
 });
 
+test('E-G0.1-04: ArtifactRef grammar is derived from the schema owner', async () => {
+  const configuredPolicy = JSON.parse(await readFile(
+    join(repositoryRoot, 'tooling/audits/repository-policy/repository-policy.json'),
+    'utf8',
+  ));
+  const artifactRefSchema = JSON.parse(await readFile(
+    join(repositoryRoot, 'packages/schema/schemas/artifact-ref.schema.json'),
+    'utf8',
+  ));
+  assert.equal(Object.hasOwn(configuredPolicy, 'artifactIdPattern'), false);
+  assert.equal(policy.artifactIdPattern, artifactRefSchema.pattern);
+});
+
 test('E-G0.0-04 negative: an untracked non-projection output fails clean generation', () => {
   assert.throws(
     () => verifyGenerationState({

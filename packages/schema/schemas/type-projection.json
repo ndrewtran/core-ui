@@ -1,0 +1,14 @@
+{
+  "schemaVersion": "1.0.0",
+  "output": "packages/schema/generated/types.d.ts",
+  "projections": [
+    { "name": "ArtifactKind", "source": "artifact-ref.schema.json#/x-core-ui-kinds" },
+    { "name": "EnabledRecordKind", "source": "artifact-ref.schema.json#/x-core-ui-enabled-record-kinds" },
+    { "name": "RelationType", "source": "relation.schema.json#/properties/relations/items/properties/type/enum" },
+    { "name": "Lifecycle", "source": "binding.schema.json#/properties/lifecycle/enum" },
+    { "name": "Strategy", "source": "binding.schema.json#/properties/strategy/enum" },
+    { "name": "BindingId", "source": "component.schema.json#/properties/bindings/properties" },
+    { "name": "RuntimeProfileId", "source": "binding.schema.json#/properties/runtimeProfiles/properties" },
+    { "name": "ErrorCode", "source": "error-code.schema.json#/enum" }
+  ]
+}
