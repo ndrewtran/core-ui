@@ -341,12 +341,24 @@ function parityObservations() {
     ['search', executeCommand('search', commandRequest('search', 'brief')), searchArtifacts(commandRequest('search', 'brief'))],
     ['get', executeCommand('get', commandRequest('get', 'full')), getArtifact({ id: 'button', detail: 'full', platform: null, purpose: null, section: null })],
   ];
-  return pairs.map(([commandName, cli, api]) => ({
-    command: commandName,
-    apiDigest: canonicalDigest(api),
-    cliDigest: canonicalDigest(cli),
-    equal: canonicalJson(api) === canonicalJson(cli),
-  }));
+  const declaredAlias = executeCommand('get', commandRequest('get', 'brief'));
+  const displayName = executeCommand('get', {
+    ...commandRequest('get', 'brief'),
+    'id-or-alias': 'Button',
+  });
+  return {
+    pairs: pairs.map(([commandName, cli, api]) => ({
+      command: commandName,
+      apiDigest: canonicalDigest(api),
+      cliDigest: canonicalDigest(cli),
+      equal: canonicalJson(api) === canonicalJson(cli),
+    })),
+    aliasResolution: {
+      declaredSlug: 'button',
+      declaredSlugResolvedId: declaredAlias.data.artifact.id,
+      displayNameHeuristicRejected: displayName.error.code,
+    },
+  };
 }
 
 function rendererObservations() {
