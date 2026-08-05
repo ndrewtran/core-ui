@@ -3,12 +3,12 @@
   "id": "core:capability:query-baseline",
   "kind": "capability",
   "name": "Query baseline",
-  "summary": "Pure programmatic manifest, list, search, and get operations.",
+  "summary": "Pure API and CLI manifest, list, search, and get operations.",
   "lifecycle": "experimental",
   "availability": "available",
   "policy": {
     "effect": "read-only",
     "requiresConfirmation": false
   },
-  "availableOn": ["api"]
+  "availableOn": ["api", "cli"]
 }

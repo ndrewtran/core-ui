@@ -1,0 +1,26 @@
+{
+  "name": "@core-ui/tooling",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24.19.0 <25"
+  },
+  "bin": {
+    "core": "./bin/core.mjs"
+  },
+  "exports": {
+    ".": "./src/index.mjs",
+    "./registry": "./generated/command-surface.mjs",
+    "./types": "./generated/response-types.d.ts"
+  },
+  "scripts": {
+    "check": "node src/generate.mjs --check && node --test test/*.test.mjs",
+    "generate": "node src/generate.mjs",
+    "generate:check": "node src/generate.mjs --check"
+  },
+  "dependencies": {
+    "@core-ui/catalog": "workspace:*",
+    "@core-ui/schema": "workspace:*"
+  }
+}
