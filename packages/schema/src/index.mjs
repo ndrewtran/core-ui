@@ -13,6 +13,7 @@ export const ERROR_CODES = Object.freeze([...errorCodeSchema.enum]);
 export const QUERY_RESPONSE_TYPES = Object.freeze([
   ...queryEnvelopeSchema['x-core-ui-response-types'],
 ]);
+export const QUERY_ENVELOPE_SCHEMA_ID = queryEnvelopeSchema.$id;
 export const QUERY_SELECTORS = Object.freeze(
   Object.fromEntries(
     Object.entries(queryEnvelopeSchema['x-core-ui-selectors'])

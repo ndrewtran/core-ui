@@ -11,7 +11,12 @@ import {
   listArtifacts,
   searchArtifacts,
 } from '../../packages/catalog/src/index.mjs';
-import { canonicalDigest, canonicalJson } from '../../packages/schema/src/index.mjs';
+import {
+  QUERY_ENVELOPE_SCHEMA_ID,
+  canonicalDigest,
+  canonicalJson,
+  validateFamily,
+} from '../../packages/schema/src/index.mjs';
 import {
   cliManifest,
   commandRegistry,
@@ -49,6 +54,10 @@ const commandSuite = [
 ].join(' && ');
 const validation = commandSuite.split(' && ').map((entry) => ({ command: entry, exitState: 0 }));
 const bundle = JSON.parse(catalogJson);
+const authoredCommandRegistry = JSON.parse(await readFile(
+  resolve(repositoryRoot, 'packages/tooling/command-registry.json'),
+  'utf8',
+));
 
 function command(executable, args) {
   return execFileSync(executable, args, { cwd: repositoryRoot, encoding: 'utf8' }).trim();
@@ -428,18 +437,20 @@ function registryObservations() {
   const failures = [];
   for (const [name, mutate] of [
     ['undeclared-command', (value) => value.commands.push({ ...value.commands[0], name: 'doctor' })],
-    ['response-type-drift', (value) => { value.commands[0].responseType = 'cli.unknown'; }],
+    ['duplicate-response-type-owner', (value) => { value.commands[0].responseType = 'catalog.manifest'; }],
+    ['duplicate-response-schema-owner', (value) => { value.commands[0].responseSchema = 'https://core-ui.dev/schema/query-envelope.schema.json'; }],
     ['selector-drift', (value) => value.selectors.find(({ name }) => name === 'detail').choices.push('verbose')],
     ['operation-drift', (value) => { value.commands[0].operation = 'planComposition'; }],
-    ['operation-response-drift', (value) => { value.commands[0].operation = 'listArtifacts'; }],
+    ['operation-request-drift', (value) => { value.commands[0].operation = 'listArtifacts'; }],
     ['request-key-drift', (value) => { value.commands.find(({ name }) => name === 'get').arguments[0].requestKey = 'alias'; }],
     ['option-drift', (value) => value.commands.find(({ name }) => name === 'search').options.push('section')],
     ['unknown-field', (value) => { value.undocumented = true; }],
     ['nested-unknown-field', (value) => value.commands[0].arguments.push({ name: 'extra', required: false, type: 'string', undocumented: true })],
     ['tokenizer-drift', (value) => { value.tokenizer.id = 'approximate'; }],
-    ['capability-drift', (value) => { value.surfacePolicy.cli.available = false; }],
+    ['duplicate-cli-availability-owner', (value) => { value.surfacePolicy.cli.available = true; }],
+    ['duplicate-unavailable-capability-owner', (value) => { value.unavailableCommands[0].capability = { available: false }; }],
   ]) {
-    const value = structuredClone(commandRegistry);
+    const value = structuredClone(authoredCommandRegistry);
     try {
       mutate(value);
       buildCommandProjections(value);
@@ -448,7 +459,36 @@ function registryObservations() {
       failures.push({ name, rejected: true, code: error.message.split(':')[0] });
     }
   }
-  return { generated, negativeFixtures: failures };
+  const manifest = getManifest({ detail: 'full' });
+  const malformedManifestFailures = [];
+  for (const [name, mutate] of [
+    ['missing-cli', (value) => { delete value.data.cli; }],
+    ['malformed-cli', (value) => { value.data.cli = 'not-an-object'; }],
+    ['missing-operation-response-type', (value) => { delete value.data.operations.getManifest.responseType; }],
+    ['unknown-operation-field', (value) => { value.data.operations.getManifest.undocumented = true; }],
+    ['missing-command-response-schema', (value) => { delete value.data.cli.commands[0].responseSchema; }],
+  ]) {
+    const value = structuredClone(manifest);
+    try {
+      mutate(value);
+      validateFamily('query-envelope', value);
+      malformedManifestFailures.push({ name, rejected: false, code: null });
+    } catch (error) {
+      malformedManifestFailures.push({ name, rejected: true, code: error.message.split(':')[0] });
+    }
+  }
+  return {
+    generated,
+    negativeFixtures: failures,
+    manifestGrammar: {
+      responseSchema: QUERY_ENVELOPE_SCHEMA_ID,
+      commandResponseSchemas: manifest.data.cli.commands.map((command) => ({
+        name: command.name,
+        responseSchema: command.responseSchema,
+      })),
+      negativeFixtures: malformedManifestFailures,
+    },
+  };
 }
 
 function errorObservations() {

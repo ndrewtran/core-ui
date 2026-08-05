@@ -10,6 +10,10 @@ import {
   searchArtifacts,
 } from '@core-ui/catalog';
 import {
+  QUERY_ENVELOPE_SCHEMA_ID,
+  validateFamily,
+} from '@core-ui/schema';
+import {
   cliManifest,
   commandRegistry,
   completionScript,
@@ -156,7 +160,18 @@ test('E-G0.3-04 registry generates parser, help, completion, manifest, types, an
     assert.match(completionScript, new RegExp(`\\b${name}\\b`));
   }
   const types = await readFile(new URL('../generated/response-types.d.ts', import.meta.url), 'utf8');
-  for (const command of commandRegistry.commands) assert.match(types, new RegExp(command.responseType));
+  for (const command of commandRegistry.commands) {
+    assert.match(types, new RegExp(command.responseType));
+    assert.equal(command.responseSchema, QUERY_ENVELOPE_SCHEMA_ID);
+    assert.equal(
+      parserMetadata.commands.find(({ name }) => name === command.name).responseSchema,
+      QUERY_ENVELOPE_SCHEMA_ID,
+    );
+    assert.equal(
+      cliManifest.commands.find(({ name }) => name === command.name).responseSchema,
+      QUERY_ENVELOPE_SCHEMA_ID,
+    );
+  }
   const authoredRegistry = JSON.parse(await readFile(
     new URL('../command-registry.json', import.meta.url),
     'utf8',
@@ -167,32 +182,45 @@ test('E-G0.3-04 registry generates parser, help, completion, manifest, types, an
     getManifest({ detail: 'full' }).data.cli.commands
       .map(({ operation, responseType }) => ({ operation, responseType })),
   );
+  const manifest = getManifest({ detail: 'full' });
+  validateFamily('query-envelope', manifest);
+  for (const mutate of [
+    (value) => { delete value.data.cli; },
+    (value) => { value.data.cli = 'not-an-object'; },
+    (value) => { delete value.data.operations.getManifest.responseType; },
+    (value) => { value.data.operations.getManifest.undocumented = true; },
+    (value) => { delete value.data.cli.commands[0].responseSchema; },
+  ]) {
+    const malformed = structuredClone(manifest);
+    mutate(malformed);
+    assert.throws(() => validateFamily('query-envelope', malformed), /CORE_SCHEMA_INVALID/);
+  }
 
-  const extra = structuredClone(commandRegistry);
+  const extra = structuredClone(authoredRegistry);
   extra.commands.push({ ...extra.commands[0], name: 'doctor' });
   assert.throws(() => buildCommandProjections(extra), /CLI_COMMAND_SURFACE_DRIFT/);
-  const responseDrift = structuredClone(commandRegistry);
-  responseDrift.commands[0].responseType = 'cli.unknown';
-  assert.throws(() => buildCommandProjections(responseDrift), /CLI_OPERATION_RESPONSE_DRIFT/);
-  const selectorDrift = structuredClone(commandRegistry);
+  const duplicateResponseOwner = structuredClone(authoredRegistry);
+  duplicateResponseOwner.commands[0].responseType = 'catalog.manifest';
+  assert.throws(() => buildCommandProjections(duplicateResponseOwner), /CLI_REGISTRY_UNKNOWN_FIELD/);
+  const duplicateSchemaOwner = structuredClone(authoredRegistry);
+  duplicateSchemaOwner.commands[0].responseSchema = QUERY_ENVELOPE_SCHEMA_ID;
+  assert.throws(() => buildCommandProjections(duplicateSchemaOwner), /CLI_REGISTRY_UNKNOWN_FIELD/);
+  const selectorDrift = structuredClone(authoredRegistry);
   selectorDrift.selectors.find(({ name }) => name === 'detail').choices.push('verbose');
   assert.throws(() => buildCommandProjections(selectorDrift), /CLI_SELECTOR_SCHEMA_DRIFT/);
-  const operationDrift = structuredClone(commandRegistry);
+  const operationDrift = structuredClone(authoredRegistry);
   operationDrift.commands[0].operation = 'planComposition';
   assert.throws(() => buildCommandProjections(operationDrift), /CLI_OPERATION_REFERENCE_INVALID/);
-  const operationResponseDrift = structuredClone(commandRegistry);
-  operationResponseDrift.commands[0].operation = 'listArtifacts';
-  assert.throws(() => buildCommandProjections(operationResponseDrift), /CLI_OPERATION_RESPONSE_DRIFT/);
-  const requestKeyDrift = structuredClone(commandRegistry);
+  const requestKeyDrift = structuredClone(authoredRegistry);
   requestKeyDrift.commands.find(({ name }) => name === 'get').arguments[0].requestKey = 'alias';
   assert.throws(() => buildCommandProjections(requestKeyDrift), /CLI_OPERATION_REQUEST_DRIFT/);
-  const optionDrift = structuredClone(commandRegistry);
+  const optionDrift = structuredClone(authoredRegistry);
   optionDrift.commands.find(({ name }) => name === 'search').options.push('section');
   assert.throws(() => buildCommandProjections(optionDrift), /CLI_OPERATION_REQUEST_DRIFT/);
-  const unknownField = structuredClone(commandRegistry);
+  const unknownField = structuredClone(authoredRegistry);
   unknownField.undocumented = true;
   assert.throws(() => buildCommandProjections(unknownField), /CLI_REGISTRY_UNKNOWN_FIELD/);
-  const nestedUnknownField = structuredClone(commandRegistry);
+  const nestedUnknownField = structuredClone(authoredRegistry);
   nestedUnknownField.commands[0].arguments.push({
     name: 'extra',
     required: false,
@@ -200,12 +228,15 @@ test('E-G0.3-04 registry generates parser, help, completion, manifest, types, an
     undocumented: true,
   });
   assert.throws(() => buildCommandProjections(nestedUnknownField), /CLI_REGISTRY_UNKNOWN_FIELD/);
-  const tokenizerDrift = structuredClone(commandRegistry);
+  const tokenizerDrift = structuredClone(authoredRegistry);
   tokenizerDrift.tokenizer.id = 'approximate';
   assert.throws(() => buildCommandProjections(tokenizerDrift), /CLI_TOKENIZER_INVALID/);
-  const capabilityDrift = structuredClone(commandRegistry);
-  capabilityDrift.surfacePolicy.cli.available = false;
-  assert.throws(() => buildCommandProjections(capabilityDrift), /CLI_CAPABILITY_POLICY_INVALID/);
+  const duplicateAvailabilityOwner = structuredClone(authoredRegistry);
+  duplicateAvailabilityOwner.surfacePolicy.cli.available = true;
+  assert.throws(() => buildCommandProjections(duplicateAvailabilityOwner), /CLI_REGISTRY_UNKNOWN_FIELD/);
+  const duplicateUnavailableOwner = structuredClone(authoredRegistry);
+  duplicateUnavailableOwner.unavailableCommands[0].capability = { available: false };
+  assert.throws(() => buildCommandProjections(duplicateUnavailableOwner), /CLI_REGISTRY_UNKNOWN_FIELD/);
 });
 
 test('E-G0.3-05 structured errors have stable codes, safe actions, and meaningful exits', () => {

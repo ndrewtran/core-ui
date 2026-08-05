@@ -2,6 +2,7 @@ import {
   API_VERSION,
   ARTIFACT_KINDS,
   ARTIFACT_REF_PATTERN,
+  QUERY_ENVELOPE_SCHEMA_ID,
   QUERY_RESPONSE_TYPES,
   QUERY_SELECTORS,
   SCHEMA_VERSION,
@@ -16,7 +17,11 @@ const MAX_LIMIT = 100;
 const MAX_QUERY_LENGTH = 256;
 const MAX_QUERY_TERMS = 16;
 const OPERATIONS = {
-  getManifest: { available: true, requestKeys: ['detail'], responseType: 'catalog.manifest' },
+  getManifest: {
+    available: true,
+    requestKeys: ['detail'],
+    responseType: 'catalog.manifest',
+  },
   listArtifacts: {
     available: true,
     requestKeys: ['cursor', 'detail', 'kind', 'limit', 'platform', 'purpose'],
@@ -32,7 +37,11 @@ const OPERATIONS = {
     requestKeys: ['detail', 'id', 'platform', 'purpose', 'section'],
     responseType: 'artifact.detail',
   },
-  planComposition: { available: false, requestKeys: [], responseType: null },
+  planComposition: {
+    available: false,
+    requestKeys: [],
+    responseType: null,
+  },
 };
 
 function compareText(left, right) {
@@ -316,6 +325,7 @@ function resolvedCliRegistry(bundle) {
   registry.commands = registry.commands.map((command) => ({
     ...command,
     responseType: OPERATIONS[command.operation]?.responseType ?? null,
+    responseSchema: QUERY_ENVELOPE_SCHEMA_ID,
     capability,
   }));
   registry.unavailableCommands = registry.unavailableCommands.map((command) => ({
@@ -337,10 +347,13 @@ function cliRegistryForDetail(bundle, detail) {
   if (detail === 'compact') {
     return {
       cli: registry.cli,
-      commands: registry.commands.map(({ name, summary, responseType, tokenBudgets }) => ({
+      commands: registry.commands.map(({
+        name, summary, responseType, responseSchema, tokenBudgets,
+      }) => ({
         name,
         summary,
         responseType,
+        responseSchema,
         tokenBudgets,
       })),
       outputModes: registry.outputModes,

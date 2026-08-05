@@ -1,5 +1,6 @@
 import {
   QUERY_RESPONSE_TYPES,
+  QUERY_ENVELOPE_SCHEMA_ID,
   QUERY_SELECTORS,
   canonicalJson,
 } from '@core-ui/schema';
@@ -147,7 +148,7 @@ export function validateCommandRegistry(registry) {
 
   for (const command of registry.commands) {
     assertKeys(command, [
-      'name', 'summary', 'operation', 'responseType', 'arguments', 'options',
+      'name', 'summary', 'operation', 'arguments', 'options',
       'examples', 'budgetFixture', 'tokenBudgets',
     ], `registry.commands.${command.name ?? 'unknown'}`);
     assert(
@@ -164,13 +165,8 @@ export function validateCommandRegistry(registry) {
       'CLI_COMMAND_SURFACE_DRIFT',
       `${command.name} must declare a summary and examples`,
     );
-    const operationResponseType = CATALOG_OPERATIONS[command.operation].responseType;
-    assert(
-      command.responseType === undefined || command.responseType === operationResponseType,
-      'CLI_OPERATION_RESPONSE_DRIFT',
-      `${command.name} response type must derive from ${command.operation}`,
-    );
-    command.responseType = operationResponseType;
+    command.responseType = CATALOG_OPERATIONS[command.operation].responseType;
+    command.responseSchema = QUERY_ENVELOPE_SCHEMA_ID;
     assert(
       QUERY_RESPONSE_TYPES.includes(command.responseType),
       'CLI_RESPONSE_TYPE_DRIFT',
@@ -254,21 +250,9 @@ export function validateCommandRegistry(registry) {
   for (const unavailable of registry.unavailableCommands) {
     assertKeys(
       unavailable,
-      ['name', 'earliestMilestone', 'capability'],
+      ['name', 'earliestMilestone'],
       `registry.unavailableCommands.${unavailable.name ?? 'unknown'}`,
     );
-    if (unavailable.capability !== undefined) {
-      assertKeys(
-        unavailable.capability,
-        ['available'],
-        `registry.unavailableCommands.${unavailable.name}.capability`,
-      );
-      assert(
-        unavailable.capability.available === false,
-        'CLI_CAPABILITY_POLICY_INVALID',
-        `${unavailable.name} generated capability must remain unavailable`,
-      );
-    }
     assert(
       typeof unavailable.earliestMilestone === 'string'
         && /^G\d+\.\d+$/u.test(unavailable.earliestMilestone),
@@ -287,7 +271,7 @@ export function validateCommandRegistry(registry) {
   assertKeys(registry.surfacePolicy, ['cli', 'mcp'], 'registry.surfacePolicy');
   assertKeys(
     registry.surfacePolicy.cli,
-    ['available', 'effect', 'requiresConfirmation'],
+    ['effect', 'requiresConfirmation'],
     'registry.surfacePolicy.cli',
   );
   assertKeys(
@@ -302,9 +286,7 @@ export function validateCommandRegistry(registry) {
     'bare JSON recovery command must be available',
   );
   assert(
-    (registry.surfacePolicy.cli.available === undefined
-      || registry.surfacePolicy.cli.available === CLI_AVAILABLE)
-      && CLI_AVAILABLE === true
+    CLI_AVAILABLE === true
       && registry.surfacePolicy.cli.effect === 'read-only'
       && registry.surfacePolicy.cli.requiresConfirmation === false,
     'CLI_CAPABILITY_POLICY_INVALID',
@@ -322,6 +304,10 @@ export function validateCommandRegistry(registry) {
     'future MCP inputs must remain read-only and unavailable',
   );
   registry.surfacePolicy.cli.available = CLI_AVAILABLE;
+  registry.unavailableCommands = registry.unavailableCommands.map((command) => ({
+    ...command,
+    capability: { available: false },
+  }));
   return registry;
 }
 
@@ -395,7 +381,7 @@ function manifestCommand(command, optionsByName, capability) {
     arguments: command.arguments,
     options: command.options.map((name) => optionsByName.get(name)),
     responseType: command.responseType,
-    responseSchema: '@core-ui/schema/schemas/query-envelope.schema.json',
+    responseSchema: command.responseSchema,
     outputModes: ['human', 'json', 'dense'],
     tokenBudgets: command.tokenBudgets,
     budgetFixture: command.budgetFixture,

@@ -153,6 +153,200 @@
         }
       ]
     },
+    "operationDescriptor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["available", "requestKeys", "responseType"],
+      "properties": {
+        "available": { "type": "boolean" },
+        "requestKeys": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+        "responseType": { "anyOf": [{ "type": "string" }, { "type": "null" }] }
+      }
+    },
+    "operationManifest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["getManifest", "listArtifacts", "searchArtifacts", "getArtifact", "planComposition"],
+      "properties": {
+        "getManifest": { "$ref": "#/$defs/operationDescriptor" },
+        "listArtifacts": { "$ref": "#/$defs/operationDescriptor" },
+        "searchArtifacts": { "$ref": "#/$defs/operationDescriptor" },
+        "getArtifact": { "$ref": "#/$defs/operationDescriptor" },
+        "planComposition": { "$ref": "#/$defs/operationDescriptor" }
+      }
+    },
+    "cliIdentity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "version", "description"],
+      "properties": {
+        "name": { "const": "core" },
+        "version": { "type": "string", "minLength": 1 },
+        "description": { "type": "string", "minLength": 1 }
+      }
+    },
+    "cliCapability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["available", "effect", "requiresConfirmation"],
+      "properties": {
+        "available": { "type": "boolean" },
+        "effect": { "enum": ["read-only", "project-write", "external-write"] },
+        "requiresConfirmation": { "type": "boolean" }
+      }
+    },
+    "cliUnavailableCapability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["available"],
+      "properties": {
+        "available": { "const": false }
+      }
+    },
+    "cliArgument": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "required", "type"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "requestKey": { "type": "string", "minLength": 1 },
+        "required": { "type": "boolean" },
+        "type": { "enum": ["artifact-kind", "string"] }
+      }
+    },
+    "cliOption": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "flag", "type", "default"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "flag": { "type": "string", "pattern": "^--[a-z][a-z-]*$" },
+        "type": { "enum": ["boolean", "integer", "string"] },
+        "default": {},
+        "choices": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+        "minimum": { "type": "integer" },
+        "maximum": { "type": "integer" },
+        "conflicts": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+        "description": { "type": "string", "minLength": 1 }
+      }
+    },
+    "cliTokenBudgets": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["brief", "compact", "full"],
+      "properties": {
+        "brief": { "type": "integer", "minimum": 1 },
+        "compact": { "type": "integer", "minimum": 1 },
+        "full": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "cliUnavailableCommand": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "earliestMilestone", "capability"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "earliestMilestone": { "type": "string", "pattern": "^G[0-9]+\\.[0-9]+$" },
+        "capability": { "$ref": "#/$defs/cliUnavailableCapability" }
+      }
+    },
+    "cliCompactCommand": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "summary", "responseType", "responseSchema", "tokenBudgets"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "summary": { "type": "string", "minLength": 1 },
+        "responseType": { "type": "string", "minLength": 1 },
+        "responseSchema": { "type": "string", "minLength": 1 },
+        "tokenBudgets": { "$ref": "#/$defs/cliTokenBudgets" }
+      }
+    },
+    "cliFullCommand": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name", "summary", "operation", "arguments", "options", "examples",
+        "budgetFixture", "tokenBudgets", "responseType", "responseSchema", "capability"
+      ],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "summary": { "type": "string", "minLength": 1 },
+        "operation": { "type": "string", "minLength": 1 },
+        "arguments": { "type": "array", "items": { "$ref": "#/$defs/cliArgument" } },
+        "options": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+        "examples": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
+        "budgetFixture": { "type": "object" },
+        "tokenBudgets": { "$ref": "#/$defs/cliTokenBudgets" },
+        "responseType": { "type": "string", "minLength": 1 },
+        "responseSchema": { "type": "string", "minLength": 1 },
+        "capability": { "$ref": "#/$defs/cliCapability" }
+      }
+    },
+    "cliBriefManifest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "version", "commands"],
+      "properties": {
+        "name": { "const": "core" },
+        "version": { "type": "string", "minLength": 1 },
+        "commands": { "type": "array", "minItems": 1, "items": { "type": "string" }, "uniqueItems": true }
+      }
+    },
+    "cliCompactManifest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["cli", "commands", "outputModes", "unavailableCommands"],
+      "properties": {
+        "cli": { "$ref": "#/$defs/cliIdentity" },
+        "commands": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/cliCompactCommand" } },
+        "outputModes": { "type": "array", "items": { "enum": ["human", "json", "dense"] }, "uniqueItems": true },
+        "unavailableCommands": { "type": "array", "items": { "$ref": "#/$defs/cliUnavailableCommand" } }
+      }
+    },
+    "cliFullManifest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion", "cli", "tokenizer", "selectors", "globalOptions",
+        "bareJsonRecoveryCommand", "commands", "unavailableCommands", "outputModes", "surfacePolicy"
+      ],
+      "properties": {
+        "schemaVersion": { "const": "1.0.0" },
+        "cli": { "$ref": "#/$defs/cliIdentity" },
+        "tokenizer": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "description"],
+          "properties": {
+            "id": { "type": "string", "minLength": 1 },
+            "description": { "type": "string", "minLength": 1 }
+          }
+        },
+        "selectors": { "type": "array", "items": { "$ref": "#/$defs/cliOption" } },
+        "globalOptions": { "type": "array", "items": { "$ref": "#/$defs/cliOption" } },
+        "bareJsonRecoveryCommand": { "type": "string", "minLength": 1 },
+        "commands": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/cliFullCommand" } },
+        "unavailableCommands": { "type": "array", "items": { "$ref": "#/$defs/cliUnavailableCommand" } },
+        "outputModes": { "type": "array", "items": { "enum": ["human", "json", "dense"] }, "uniqueItems": true },
+        "surfacePolicy": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["cli", "mcp"],
+          "properties": {
+            "cli": { "$ref": "#/$defs/cliCapability" },
+            "mcp": { "$ref": "#/$defs/cliCapability" }
+          }
+        }
+      }
+    },
+    "cliManifest": {
+      "oneOf": [
+        { "$ref": "#/$defs/cliBriefManifest" },
+        { "$ref": "#/$defs/cliCompactManifest" },
+        { "$ref": "#/$defs/cliFullManifest" }
+      ]
+    },
     "manifestData": {
       "type": "object",
       "additionalProperties": true,
@@ -166,19 +360,21 @@
         "selectors",
         "artifactKinds",
         "platforms",
-        "capabilities"
+        "capabilities",
+        "cli"
       ],
       "properties": {
         "formatVersion": { "const": "1.0.0" },
         "catalogVersion": { "type": "string" },
         "catalogDigest": { "$ref": "#/$defs/digest" },
         "sourceRevision": { "$ref": "#/$defs/digest" },
-        "operations": { "type": "object", "minProperties": 1 },
+        "operations": { "$ref": "#/$defs/operationManifest" },
         "responseTypes": { "type": "array", "minItems": 1, "items": { "type": "string" }, "uniqueItems": true },
         "selectors": { "type": "object", "minProperties": 1 },
         "artifactKinds": { "type": "array", "minItems": 1, "items": { "type": "string" }, "uniqueItems": true },
         "platforms": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
-        "capabilities": { "type": "array", "items": { "type": "object" } }
+        "capabilities": { "type": "array", "items": { "type": "object" } },
+        "cli": { "$ref": "#/$defs/cliManifest" }
       }
     },
     "listData": {
