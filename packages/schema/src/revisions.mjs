@@ -12,6 +12,11 @@ export function contentRevision(family, record, { sourceBytes } = {}) {
   return canonicalDigest(record);
 }
 
+export function bindingContentRevision(binding) {
+  validateFamily('binding', binding);
+  return canonicalDigest(binding);
+}
+
 export function bindingSpecRevision({
   component,
   bindingId,

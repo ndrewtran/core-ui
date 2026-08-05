@@ -23,5 +23,7 @@ commits therefore do not invalidate their own proof, while a relevant source or
 tooling change fails verification until the evidence is recaptured.
 
 Run `pnpm check` to verify canonical bytes and every content-addressed link.
-The SHA-256 of `index.json` is retained in milestone issue #3 and its pull
-request; those mutable surfaces are locators, not evidence authorities.
+The original G0.1 proof remains immutable in issue #3's merged Git history.
+The current files recertify that contract after G0.2 extended the shared query
+envelope; issue #4 and its pull request are mutable locators, not evidence
+authorities.

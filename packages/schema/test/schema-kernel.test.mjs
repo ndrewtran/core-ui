@@ -7,6 +7,7 @@ import {
   ERROR_CODES,
   SchemaValidationError,
   assertAppendOnlyErrorCodes,
+  bindingContentRevision,
   bindingSpecRevision,
   canonicalDigest,
   canonicalJson,
@@ -154,11 +155,47 @@ test('E-G0.1-01: minimum records, envelopes, diagnostics, ownership, and relatio
     /record behavior is unavailable in G0\.1/,
   );
 
+  const bindingContent = bindingContentRevision(component().bindings['web.react']);
+  assert.match(bindingContent, /^sha256:[a-f0-9]{64}$/);
   validateFamily('query-envelope', {
     apiVersion: '1.0.0',
     type: 'artifact.detail',
-    data: {},
-    meta: { schemaVersion: '1.0.0', authority: 'advisory', revisions: {} },
+    data: {
+      artifact: {
+        id: 'core:component:button',
+        kind: 'component',
+        source: { record: 'catalog/components/button/artifact.json' },
+      },
+    },
+    meta: {
+      schemaVersion: '1.0.0',
+      authority: 'advisory',
+      revisions: {
+        conceptContent: `sha256:${'1'.repeat(64)}`,
+        bindingContent,
+        bindingSpec: `sha256:${'2'.repeat(64)}`,
+      },
+      coreVersion: '0.0.0',
+      catalogVersion: '0.0.0',
+      catalogDigest: `sha256:${'3'.repeat(64)}`,
+      sourceRevision: `sha256:${'4'.repeat(64)}`,
+      resolution: {
+        authority: 'advisory',
+        compatibility: 'unresolved',
+        catalogSource: 'package',
+        sourceRevision: `sha256:${'4'.repeat(64)}`,
+        revisions: {
+          conceptContent: `sha256:${'1'.repeat(64)}`,
+          bindingContent,
+          bindingSpec: `sha256:${'2'.repeat(64)}`,
+        },
+        targetPackages: {},
+      },
+      platform: 'web.react',
+      detail: 'full',
+      truncated: false,
+      nextCursor: null,
+    },
     warnings: [],
     futureOptionalMember: true,
   });

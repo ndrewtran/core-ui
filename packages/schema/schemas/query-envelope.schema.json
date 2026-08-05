@@ -2,36 +2,275 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://core-ui.dev/schema/query-envelope.schema.json",
   "title": "Core UI query envelope",
-  "oneOf": [
-    {
+  "x-core-ui-response-types": [
+    "catalog.manifest",
+    "artifact.list",
+    "artifact.search",
+    "artifact.detail",
+    "error"
+  ],
+  "x-core-ui-selectors": {
+    "platform": ["web.html", "web.react", "native.react-native", "native.react-native-web"],
+    "detail": ["brief", "compact", "full"],
+    "section": ["api", "examples", "guidance", "decision-context", "accessibility", "styling", "source"],
+    "purpose": ["generation", "explanation", "validation", "migration"]
+  },
+  "$defs": {
+    "digest": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+    "revisionSet": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "conceptContent": { "$ref": "#/$defs/digest" },
+        "bindingContent": { "anyOf": [{ "$ref": "#/$defs/digest" }, { "type": "null" }] },
+        "bindingSpec": { "anyOf": [{ "$ref": "#/$defs/digest" }, { "type": "null" }] }
+      }
+    },
+    "detailRevisionSet": {
+      "allOf": [
+        { "$ref": "#/$defs/revisionSet" },
+        { "type": "object", "required": ["conceptContent", "bindingContent", "bindingSpec"] }
+      ]
+    },
+    "detailResolution": {
+      "allOf": [
+        { "$ref": "#/$defs/resolution" },
+        {
+          "type": "object",
+          "properties": {
+            "revisions": { "$ref": "#/$defs/detailRevisionSet" }
+          }
+        }
+      ]
+    },
+    "resolution": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["authority", "compatibility", "catalogSource", "sourceRevision", "revisions", "targetPackages"],
+      "properties": {
+        "authority": { "enum": ["installed-local", "advisory"] },
+        "compatibility": { "enum": ["exact", "unresolved"] },
+        "catalogSource": { "enum": ["package", "project", "cache", "hosted"] },
+        "sourceRevision": { "$ref": "#/$defs/digest" },
+        "revisions": { "$ref": "#/$defs/revisionSet" },
+        "targetPackages": {
+          "type": "object",
+          "additionalProperties": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "responseMeta": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "schemaVersion",
+        "authority",
+        "revisions",
+        "coreVersion",
+        "catalogVersion",
+        "catalogDigest",
+        "sourceRevision",
+        "resolution",
+        "platform",
+        "detail",
+        "truncated",
+        "nextCursor"
+      ],
+      "properties": {
+        "schemaVersion": { "const": "1.0.0" },
+        "authority": { "enum": ["installed-local", "advisory"] },
+        "revisions": { "$ref": "#/$defs/revisionSet" },
+        "coreVersion": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(?:-[0-9A-Za-z.-]+)?$" },
+        "catalogVersion": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(?:-[0-9A-Za-z.-]+)?$" },
+        "catalogDigest": { "$ref": "#/$defs/digest" },
+        "sourceRevision": { "$ref": "#/$defs/digest" },
+        "resolution": { "$ref": "#/$defs/resolution" },
+        "platform": { "enum": [null, "web.html", "web.react", "native.react-native", "native.react-native-web"] },
+        "detail": { "enum": ["brief", "compact", "full"] },
+        "truncated": { "type": "boolean" },
+        "nextCursor": { "type": ["string", "null"] }
+      }
+    },
+    "detailMeta": {
+      "allOf": [
+        { "$ref": "#/$defs/responseMeta" },
+        {
+          "type": "object",
+          "properties": {
+            "revisions": { "$ref": "#/$defs/detailRevisionSet" },
+            "resolution": { "$ref": "#/$defs/detailResolution" }
+          }
+        }
+      ]
+    },
+    "sourcePointer": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["record"],
+      "properties": {
+        "record": { "type": "string", "minLength": 1 },
+        "content": { "type": "string", "minLength": 1 },
+        "contentDigest": { "$ref": "#/$defs/digest" }
+      }
+    },
+    "artifactSummary": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["id", "kind", "name", "summary", "lifecycle", "platforms", "source"],
+      "properties": {
+        "id": { "$ref": "artifact-ref.schema.json" },
+        "kind": { "type": "string" },
+        "name": { "type": "string", "minLength": 1 },
+        "summary": { "type": "string", "minLength": 1 },
+        "lifecycle": { "enum": ["experimental", "stable", "deprecated", "removed"] },
+        "platforms": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+        "source": { "$ref": "#/$defs/sourcePointer" },
+        "contentRevision": { "$ref": "#/$defs/digest" }
+      }
+    },
+    "matchReason": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["queryTerm", "field", "value", "match", "points"],
+      "properties": {
+        "queryTerm": { "type": "string", "minLength": 1 },
+        "field": { "type": "string", "minLength": 1 },
+        "value": { "type": "string", "minLength": 1 },
+        "match": { "enum": ["exact", "prefix"] },
+        "points": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "searchResult": {
+      "allOf": [
+        { "$ref": "#/$defs/artifactSummary" },
+        {
+          "type": "object",
+          "required": ["score", "matchReasons"],
+          "properties": {
+            "score": { "type": "integer", "minimum": 1 },
+            "matchReasons": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/matchReason" } }
+          }
+        }
+      ]
+    },
+    "manifestData": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "formatVersion",
+        "catalogVersion",
+        "catalogDigest",
+        "sourceRevision",
+        "operations",
+        "responseTypes",
+        "selectors",
+        "artifactKinds",
+        "platforms",
+        "capabilities"
+      ],
+      "properties": {
+        "formatVersion": { "const": "1.0.0" },
+        "catalogVersion": { "type": "string" },
+        "catalogDigest": { "$ref": "#/$defs/digest" },
+        "sourceRevision": { "$ref": "#/$defs/digest" },
+        "operations": { "type": "object", "minProperties": 1 },
+        "responseTypes": { "type": "array", "minItems": 1, "items": { "type": "string" }, "uniqueItems": true },
+        "selectors": { "type": "object", "minProperties": 1 },
+        "artifactKinds": { "type": "array", "minItems": 1, "items": { "type": "string" }, "uniqueItems": true },
+        "platforms": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+        "capabilities": { "type": "array", "items": { "type": "object" } }
+      }
+    },
+    "listData": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["items"],
+      "properties": {
+        "items": { "type": "array", "items": { "$ref": "#/$defs/artifactSummary" } }
+      }
+    },
+    "searchData": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["query", "items"],
+      "properties": {
+        "query": { "type": "string", "minLength": 1 },
+        "items": { "type": "array", "items": { "$ref": "#/$defs/searchResult" } }
+      }
+    },
+    "relation": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["type", "source", "target"],
+      "properties": {
+        "type": { "type": "string", "minLength": 1 },
+        "source": { "type": "string", "minLength": 1 },
+        "target": { "type": "string", "minLength": 1 }
+      }
+    },
+    "detailData": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["artifact"],
+      "properties": {
+        "artifact": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": ["id", "kind", "source"],
+          "properties": {
+            "id": { "$ref": "artifact-ref.schema.json" },
+            "kind": { "type": "string" },
+            "source": { "$ref": "#/$defs/sourcePointer" }
+          }
+        },
+        "relations": { "type": "array", "items": { "$ref": "#/$defs/relation" } },
+        "section": { "type": "string" },
+        "value": true
+      }
+    },
+    "successBase": {
       "type": "object",
       "additionalProperties": true,
       "required": ["apiVersion", "type", "data", "meta", "warnings"],
       "properties": {
         "apiVersion": { "const": "1.0.0" },
-        "type": { "type": "string", "pattern": "^[a-z][a-z0-9-]*(?:\\.[a-z][a-z0-9-]*)+$" },
-        "data": { "type": "object", "additionalProperties": true },
-        "meta": {
-          "type": "object",
-          "additionalProperties": true,
-          "required": ["schemaVersion", "authority", "revisions"],
-          "properties": {
-            "schemaVersion": { "const": "1.0.0" },
-            "authority": { "enum": ["installed-local", "advisory"] },
-            "revisions": {
-              "type": "object",
-              "additionalProperties": true,
-              "properties": {
-                "conceptContent": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
-                "bindingSpec": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" }
-              }
-            }
-          }
-        },
+        "type": { "enum": ["catalog.manifest", "artifact.list", "artifact.search", "artifact.detail"] },
+        "data": { "type": "object" },
+        "meta": { "$ref": "#/$defs/responseMeta" },
         "warnings": { "type": "array", "items": { "$ref": "diagnostic.schema.json" } }
       }
     },
-    {
+    "manifestResponse": {
+      "allOf": [
+        { "$ref": "#/$defs/successBase" },
+        { "properties": { "type": { "const": "catalog.manifest" }, "data": { "$ref": "#/$defs/manifestData" } } }
+      ]
+    },
+    "listResponse": {
+      "allOf": [
+        { "$ref": "#/$defs/successBase" },
+        { "properties": { "type": { "const": "artifact.list" }, "data": { "$ref": "#/$defs/listData" } } }
+      ]
+    },
+    "searchResponse": {
+      "allOf": [
+        { "$ref": "#/$defs/successBase" },
+        { "properties": { "type": { "const": "artifact.search" }, "data": { "$ref": "#/$defs/searchData" } } }
+      ]
+    },
+    "detailResponse": {
+      "allOf": [
+        { "$ref": "#/$defs/successBase" },
+        {
+          "properties": {
+            "type": { "const": "artifact.detail" },
+            "data": { "$ref": "#/$defs/detailData" },
+            "meta": { "$ref": "#/$defs/detailMeta" }
+          }
+        }
+      ]
+    },
+    "errorResponse": {
       "type": "object",
       "additionalProperties": true,
       "required": ["apiVersion", "type", "error"],
@@ -41,5 +280,12 @@
         "error": { "$ref": "diagnostic.schema.json" }
       }
     }
+  },
+  "oneOf": [
+    { "$ref": "#/$defs/manifestResponse" },
+    { "$ref": "#/$defs/listResponse" },
+    { "$ref": "#/$defs/searchResponse" },
+    { "$ref": "#/$defs/detailResponse" },
+    { "$ref": "#/$defs/errorResponse" }
   ]
 }

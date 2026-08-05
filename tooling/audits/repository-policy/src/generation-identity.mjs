@@ -63,6 +63,11 @@ const cleanRoot = join(temporaryRoot, 'checkout');
 
 try {
   run('git', ['worktree', 'add', '--quiet', '--detach', cleanRoot, sourceRevision], repositoryRoot);
+  run(
+    'pnpm',
+    ['install', '--offline', '--frozen-lockfile', '--ignore-scripts'],
+    cleanRoot,
+  );
   const beforeDigest = await snapshot(cleanRoot);
   generate(cleanRoot);
   const firstDigest = await snapshot(cleanRoot);

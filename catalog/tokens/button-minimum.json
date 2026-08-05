@@ -1,0 +1,15 @@
+{
+  "schemaVersion": "1.0.0",
+  "id": "core:token:button-minimum",
+  "kind": "token",
+  "name": "Button minimum tokens",
+  "summary": "The minimum token source used by the Gate 0 proof artifact.",
+  "lifecycle": "experimental",
+  "tokenContractVersion": "1.0.0",
+  "tokens": {
+    "semantic.action.background": {
+      "type": "color",
+      "value": "#000000"
+    }
+  }
+}

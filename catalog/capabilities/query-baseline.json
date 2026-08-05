@@ -1,0 +1,14 @@
+{
+  "schemaVersion": "1.0.0",
+  "id": "core:capability:query-baseline",
+  "kind": "capability",
+  "name": "Query baseline",
+  "summary": "Pure programmatic manifest, list, search, and get operations.",
+  "lifecycle": "experimental",
+  "availability": "available",
+  "policy": {
+    "effect": "read-only",
+    "requiresConfirmation": false
+  },
+  "availableOn": ["api"]
+}

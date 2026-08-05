@@ -8,6 +8,12 @@ importers:
 
   .: {}
 
+  packages/catalog:
+    dependencies:
+      '@core-ui/schema':
+        specifier: workspace:*
+        version: link:../schema
+
   packages/schema: {}
 
   tooling/audits/repository-policy: {}
