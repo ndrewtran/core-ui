@@ -293,11 +293,11 @@ export function createCatalogApi(inputBundle) {
       catalogDigest: bundle.catalogDigest,
       sourceRevision: bundle.sourceRevision,
       operations: {
-        getManifest: { available: true },
-        listArtifacts: { available: true },
-        searchArtifacts: { available: true },
-        getArtifact: { available: true },
-        planComposition: { available: false },
+        getManifest: { available: true, responseType: 'catalog.manifest' },
+        listArtifacts: { available: true, responseType: 'artifact.list' },
+        searchArtifacts: { available: true, responseType: 'artifact.search' },
+        getArtifact: { available: true, responseType: 'artifact.detail' },
+        planComposition: { available: false, responseType: null },
       },
       responseTypes: QUERY_RESPONSE_TYPES,
       selectors: QUERY_SELECTORS,
@@ -411,18 +411,29 @@ export function createCatalogApi(inputBundle) {
     const parsed = normalizeRequest(request, 'getArtifact', ['id']);
     if (parsed.error) return parsed.error;
     const { normalized } = parsed;
-    if (
-      typeof normalized.id !== 'string'
-      || !new RegExp(ARTIFACT_REF_PATTERN).test(normalized.id)
-    ) {
+    if (typeof normalized.id !== 'string' || normalized.id.length === 0) {
       return queryError(
         'CORE_QUERY_INVALID',
         'query.get.id',
-        'getArtifact id must be an ArtifactRef string.',
+        'getArtifact id must be an ArtifactRef or non-empty alias string.',
         { id: normalized.id },
       );
     }
-    const artifact = artifactsById.get(normalized.id);
+    let artifact = artifactsById.get(normalized.id);
+    if (!artifact && !new RegExp(ARTIFACT_REF_PATTERN).test(normalized.id)) {
+      const matches = bundle.artifacts.filter((candidate) => (
+        candidate.aliases.includes(normalized.id)
+      ));
+      if (matches.length > 1) {
+        return queryError(
+          'CORE_QUERY_INVALID',
+          'query.get.alias.ambiguous',
+          `Alias ${JSON.stringify(normalized.id)} matched more than one artifact.`,
+          { alias: normalized.id, candidates: matches.map(({ id }) => id).sort(compareText) },
+        );
+      }
+      [artifact] = matches;
+    }
     if (
       !artifact
       || !appliesToPlatform(artifact, normalized.platform)

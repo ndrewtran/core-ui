@@ -1,7 +1,6 @@
 export {
   assertSafeDiagnostics,
   executeCommand,
-  normalizeSurfaceResponse,
   registryIdentity,
   runCli,
 } from './cli.mjs';

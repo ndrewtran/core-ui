@@ -3,9 +3,31 @@ import {
   QUERY_SELECTORS,
   canonicalJson,
 } from '@core-ui/schema';
+import { getManifest } from '@core-ui/catalog';
 
 const BASELINE_COMMANDS = ['get', 'list', 'manifest', 'search'];
+const BASELINE_GLOBAL_OPTIONS = ['dense', 'help', 'json'];
+const BASELINE_SELECTORS = ['cursor', 'detail', 'limit', 'platform', 'purpose', 'section'];
+const UNAVAILABLE_COMMANDS = ['doctor', 'init', 'migrate', 'plan', 'validate'];
 const DETAILS = ['brief', 'compact', 'full'];
+const CATALOG_OPERATIONS = getManifest().data.operations;
+const CLI_AVAILABLE = getManifest().data.capabilities
+  .find(({ id }) => id === 'core:capability:query-baseline')
+  .availableOn.includes('cli');
+
+function assertKeys(value, allowed, context) {
+  assert(
+    value && typeof value === 'object' && !Array.isArray(value),
+    'CLI_REGISTRY_INVALID',
+    `${context} must be an object`,
+  );
+  const unknown = Object.keys(value).filter((key) => !allowed.includes(key)).sort(compareText);
+  assert(
+    unknown.length === 0,
+    'CLI_REGISTRY_UNKNOWN_FIELD',
+    `${context} has unknown fields: ${unknown.join(', ')}`,
+  );
+}
 
 function compareText(left, right) {
   return left < right ? -1 : left > right ? 1 : 0;
@@ -32,7 +54,27 @@ export function validateCommandRegistry(registry) {
     'registry must be an object',
   );
   assert(registry.schemaVersion === '1.0.0', 'CLI_REGISTRY_INVALID', 'schemaVersion must be 1.0.0');
+  assertKeys(registry, [
+    'schemaVersion', 'cli', 'tokenizer', 'outputModes', 'bareJsonRecoveryCommand',
+    'globalOptions', 'selectors', 'commands', 'unavailableCommands', 'surfacePolicy',
+  ], 'registry');
+  assertKeys(registry.cli, ['name', 'version', 'description'], 'registry.cli');
+  assertKeys(registry.tokenizer, ['id', 'description'], 'registry.tokenizer');
   assert(registry.cli?.name === 'core', 'CLI_REGISTRY_INVALID', 'CLI name must be core');
+  assert(
+    typeof registry.cli.version === 'string'
+      && typeof registry.cli.description === 'string'
+      && registry.cli.description.length > 0,
+    'CLI_REGISTRY_INVALID',
+    'CLI version and description must be non-empty strings',
+  );
+  assert(
+    registry.tokenizer.id === 'core-ui-lexeme-v1'
+      && typeof registry.tokenizer.description === 'string'
+      && registry.tokenizer.description.length > 0,
+    'CLI_TOKENIZER_INVALID',
+    'tokenizer must declare the locked core-ui-lexeme-v1 contract',
+  );
   assert(
     canonicalJson(registry.outputModes) === canonicalJson(['human', 'json', 'dense']),
     'CLI_REGISTRY_INVALID',
@@ -43,8 +85,43 @@ export function validateCommandRegistry(registry) {
   assert(unique(options.map(({ name }) => name)), 'CLI_REGISTRY_INVALID', 'option names must be unique');
   assert(unique(options.map(({ flag }) => flag)), 'CLI_REGISTRY_INVALID', 'option flags must be unique');
   const optionsByName = optionMap(registry);
+  assert(
+    canonicalJson(registry.globalOptions.map(({ name }) => name).sort(compareText))
+      === canonicalJson(BASELINE_GLOBAL_OPTIONS),
+    'CLI_OPTION_SURFACE_DRIFT',
+    'global options must be exactly dense, help, and json',
+  );
+  assert(
+    canonicalJson(registry.selectors.map(({ name }) => name).sort(compareText))
+      === canonicalJson(BASELINE_SELECTORS),
+    'CLI_OPTION_SURFACE_DRIFT',
+    'selectors must be exactly cursor, detail, limit, platform, purpose, and section',
+  );
+
+  for (const option of registry.globalOptions) {
+    assertKeys(
+      option,
+      ['name', 'flag', 'type', 'default', 'conflicts', 'description'],
+      `registry.globalOptions.${option.name ?? 'unknown'}`,
+    );
+    assert(
+      option.type === 'boolean'
+        && typeof option.default === 'boolean'
+        && Array.isArray(option.conflicts)
+        && option.conflicts.every((name) => BASELINE_GLOBAL_OPTIONS.includes(name))
+        && typeof option.description === 'string'
+        && option.description.length > 0,
+      'CLI_OPTION_REFERENCE_INVALID',
+      `${option.name} must be a closed boolean output option`,
+    );
+  }
 
   for (const selector of registry.selectors) {
+    assertKeys(
+      selector,
+      ['name', 'flag', 'type', 'choices', 'default', 'minimum', 'maximum'],
+      `registry.selectors.${selector.name ?? 'unknown'}`,
+    );
     if (QUERY_SELECTORS[selector.name]) {
       assert(
         canonicalJson(selector.choices) === canonicalJson(QUERY_SELECTORS[selector.name]),
@@ -52,6 +129,11 @@ export function validateCommandRegistry(registry) {
         `${selector.name} choices must come from @core-ui/schema`,
       );
     }
+    assert(
+      ['integer', 'string'].includes(selector.type),
+      'CLI_OPTION_REFERENCE_INVALID',
+      `${selector.name} must use a supported selector type`,
+    );
   }
 
   const commands = registry.commands.map(({ name }) => name);
@@ -63,6 +145,29 @@ export function validateCommandRegistry(registry) {
   );
 
   for (const command of registry.commands) {
+    assertKeys(command, [
+      'name', 'summary', 'operation', 'responseType', 'arguments', 'options',
+      'examples', 'budgetFixture', 'tokenBudgets',
+    ], `registry.commands.${command.name ?? 'unknown'}`);
+    assert(
+      CATALOG_OPERATIONS[command.operation]?.available === true,
+      'CLI_OPERATION_REFERENCE_INVALID',
+      `${command.name} references unavailable catalog operation ${command.operation}`,
+    );
+    assert(
+      typeof command.summary === 'string'
+        && command.summary.length > 0
+        && Array.isArray(command.examples)
+        && command.examples.length > 0
+        && command.examples.every((example) => typeof example === 'string' && example.length > 0),
+      'CLI_COMMAND_SURFACE_DRIFT',
+      `${command.name} must declare a summary and examples`,
+    );
+    assert(
+      CATALOG_OPERATIONS[command.operation].responseType === command.responseType,
+      'CLI_OPERATION_RESPONSE_DRIFT',
+      `${command.name} response type must match ${command.operation}`,
+    );
     assert(
       QUERY_RESPONSE_TYPES.includes(command.responseType),
       'CLI_RESPONSE_TYPE_DRIFT',
@@ -77,6 +182,29 @@ export function validateCommandRegistry(registry) {
       unique(command.arguments.map(({ name }) => name)),
       'CLI_ARGUMENT_INVALID',
       `${command.name} argument names must be unique`,
+    );
+    for (const argument of command.arguments) {
+      assertKeys(
+        argument,
+        ['name', 'requestKey', 'required', 'type'],
+        `registry.commands.${command.name}.arguments.${argument.name ?? 'unknown'}`,
+      );
+      assert(
+        typeof argument.name === 'string'
+          && argument.name.length > 0
+          && typeof argument.required === 'boolean'
+          && ['artifact-kind', 'string'].includes(argument.type),
+        'CLI_ARGUMENT_INVALID',
+        `${command.name} arguments must declare name, required, and supported type`,
+      );
+    }
+    assert(
+      command.arguments.every((argument) => (
+        argument.requestKey === undefined
+        || (typeof argument.requestKey === 'string' && argument.requestKey.length > 0)
+      )),
+      'CLI_ARGUMENT_INVALID',
+      `${command.name} argument request keys must be non-empty strings`,
     );
     assert(
       canonicalJson(Object.keys(command.tokenBudgets).sort(compareText)) === canonicalJson(DETAILS),
@@ -96,7 +224,64 @@ export function validateCommandRegistry(registry) {
         `${command.name}.${detail} must be a positive integer`,
       );
     }
+    const requestKeys = new Set([
+      ...command.arguments.map(({ name }) => name),
+      ...command.options.filter((name) => !['dense', 'help', 'json'].includes(name)),
+    ]);
+    assert(
+      Object.keys(command.budgetFixture).every((key) => requestKeys.has(key)),
+      'CLI_TOKEN_BUDGET_INVALID',
+      `${command.name} budget fixture contains an undeclared request field`,
+    );
   }
+
+  assert(unique(registry.commands.map(({ operation }) => operation)),
+    'CLI_OPERATION_REFERENCE_INVALID', 'catalog operations must be mapped once');
+
+  for (const unavailable of registry.unavailableCommands) {
+    assertKeys(
+      unavailable,
+      ['name', 'earliestMilestone', 'capability'],
+      `registry.unavailableCommands.${unavailable.name ?? 'unknown'}`,
+    );
+    if (unavailable.capability !== undefined) {
+      assertKeys(
+        unavailable.capability,
+        ['available'],
+        `registry.unavailableCommands.${unavailable.name}.capability`,
+      );
+      assert(
+        unavailable.capability.available === false,
+        'CLI_CAPABILITY_POLICY_INVALID',
+        `${unavailable.name} generated capability must remain unavailable`,
+      );
+    }
+    assert(
+      typeof unavailable.earliestMilestone === 'string'
+        && /^G\d+\.\d+$/u.test(unavailable.earliestMilestone),
+      'CLI_COMMAND_SURFACE_DRIFT',
+      `${unavailable.name} must declare an earliest milestone`,
+    );
+  }
+  assert(
+    unique(registry.unavailableCommands.map(({ name }) => name))
+      && canonicalJson(registry.unavailableCommands.map(({ name }) => name).sort(compareText))
+        === canonicalJson(UNAVAILABLE_COMMANDS),
+    'CLI_COMMAND_SURFACE_DRIFT',
+    'unavailable command names must match the locked command namespace',
+  );
+
+  assertKeys(registry.surfacePolicy, ['cli', 'mcp'], 'registry.surfacePolicy');
+  assertKeys(
+    registry.surfacePolicy.cli,
+    ['available', 'effect', 'requiresConfirmation'],
+    'registry.surfacePolicy.cli',
+  );
+  assertKeys(
+    registry.surfacePolicy.mcp,
+    ['available', 'effect', 'requiresConfirmation'],
+    'registry.surfacePolicy.mcp',
+  );
 
   assert(
     registry.commands.some(({ name }) => name === registry.bareJsonRecoveryCommand),
@@ -104,7 +289,9 @@ export function validateCommandRegistry(registry) {
     'bare JSON recovery command must be available',
   );
   assert(
-    registry.surfacePolicy.cli.available === true
+    (registry.surfacePolicy.cli.available === undefined
+      || registry.surfacePolicy.cli.available === CLI_AVAILABLE)
+      && CLI_AVAILABLE === true
       && registry.surfacePolicy.cli.effect === 'read-only'
       && registry.surfacePolicy.cli.requiresConfirmation === false,
     'CLI_CAPABILITY_POLICY_INVALID',
@@ -115,6 +302,13 @@ export function validateCommandRegistry(registry) {
     'CLI_CAPABILITY_POLICY_INVALID',
     'public MCP must remain unavailable in G0.3',
   );
+  assert(
+    registry.surfacePolicy.mcp.effect === 'read-only'
+      && registry.surfacePolicy.mcp.requiresConfirmation === false,
+    'CLI_CAPABILITY_POLICY_INVALID',
+    'future MCP inputs must remain read-only and unavailable',
+  );
+  registry.surfacePolicy.cli.available = CLI_AVAILABLE;
   return registry;
 }
 
@@ -180,7 +374,7 @@ function inputSchema(command, optionsByName) {
   };
 }
 
-function manifestCommand(command, optionsByName) {
+function manifestCommand(command, optionsByName, capability) {
   return {
     name: command.name,
     summary: command.summary,
@@ -193,14 +387,18 @@ function manifestCommand(command, optionsByName) {
     tokenBudgets: command.tokenBudgets,
     budgetFixture: command.budgetFixture,
     examples: command.examples,
-    capability: { available: true, effect: 'read-only', requiresConfirmation: false },
+    capability,
   };
 }
 
 export function buildCommandProjections(input) {
   const registry = validateCommandRegistry(structuredClone(input));
   const optionsByName = optionMap(registry);
-  const commands = registry.commands.map((command) => manifestCommand(command, optionsByName));
+  const commands = registry.commands.map((command) => manifestCommand(
+    command,
+    optionsByName,
+    registry.surfacePolicy.cli,
+  ));
   const helpByCommand = Object.fromEntries(
     registry.commands.map((command) => [command.name, commandHelp(registry, command, optionsByName)]),
   );

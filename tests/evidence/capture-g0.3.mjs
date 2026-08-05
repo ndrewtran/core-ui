@@ -24,7 +24,6 @@ import {
   assertSafeDiagnostics,
   countTokens,
   executeCommand,
-  normalizeSurfaceResponse,
   parseDense,
   parseHuman,
   renderDense,
@@ -331,16 +330,16 @@ function commandRequest(commandName, detail) {
       ? { detail, limit: 20, platform: null, purpose: null, cursor: null, kind: null }
       : commandName === 'search'
         ? { detail, limit: 20, platform: null, purpose: null, cursor: null, query: 'button' }
-        : { detail, platform: null, purpose: null, section: null, 'id-or-alias': 'Button' };
+        : { detail, platform: null, purpose: null, section: null, 'id-or-alias': 'button' };
   return { ...common, ...definition.budgetFixture };
 }
 
 function parityObservations() {
   const pairs = [
-    ['manifest', normalizeSurfaceResponse(executeCommand('manifest', { detail: 'full' })), getManifest()],
+    ['manifest', executeCommand('manifest', { detail: 'full' }), JSON.parse(runCli(['manifest', '--detail', 'full', '--json']).stdout)],
     ['list', executeCommand('list', commandRequest('list', 'compact')), listArtifacts(commandRequest('list', 'compact'))],
     ['search', executeCommand('search', commandRequest('search', 'brief')), searchArtifacts(commandRequest('search', 'brief'))],
-    ['get', executeCommand('get', commandRequest('get', 'full')), getArtifact({ id: 'core:component:button', detail: 'full', platform: null, purpose: null, section: null })],
+    ['get', executeCommand('get', commandRequest('get', 'full')), getArtifact({ id: 'button', detail: 'full', platform: null, purpose: null, section: null })],
   ];
   return pairs.map(([commandName, cli, api]) => ({
     command: commandName,
@@ -352,7 +351,7 @@ function parityObservations() {
 
 function rendererObservations() {
   const response = executeCommand('get', {
-    'id-or-alias': 'Button',
+    'id-or-alias': 'button',
     detail: 'compact',
     platform: 'web.react',
     purpose: null,
@@ -406,6 +405,12 @@ function registryObservations() {
     ['undeclared-command', (value) => value.commands.push({ ...value.commands[0], name: 'doctor' })],
     ['response-type-drift', (value) => { value.commands[0].responseType = 'cli.unknown'; }],
     ['selector-drift', (value) => value.selectors.find(({ name }) => name === 'detail').choices.push('verbose')],
+    ['operation-drift', (value) => { value.commands[0].operation = 'planComposition'; }],
+    ['operation-response-drift', (value) => { value.commands[0].operation = 'listArtifacts'; }],
+    ['unknown-field', (value) => { value.undocumented = true; }],
+    ['nested-unknown-field', (value) => value.commands[0].arguments.push({ name: 'extra', required: false, type: 'string', undocumented: true })],
+    ['tokenizer-drift', (value) => { value.tokenizer.id = 'approximate'; }],
+    ['capability-drift', (value) => { value.surfacePolicy.cli.available = false; }],
   ]) {
     const value = structuredClone(commandRegistry);
     try {

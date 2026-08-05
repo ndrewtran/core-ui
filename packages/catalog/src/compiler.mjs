@@ -85,12 +85,13 @@ function tokenize(value) {
   return String(value).toLowerCase().match(/[a-z0-9]+/g) ?? [];
 }
 
-function collectSearchFields(record, relations) {
+function collectSearchFields(record, relations, aliases) {
   const fields = [
     ['id', record.id],
     ['name', record.name],
     ['summary', record.summary],
   ];
+  for (const alias of aliases) fields.push(['alias', alias]);
   for (const keyword of record.keywords ?? []) fields.push(['keyword', keyword]);
   for (const value of record.intent?.useWhen ?? []) fields.push(['intent.useWhen', value]);
   for (const value of record.intent?.avoidWhen ?? []) fields.push(['intent.avoidWhen', value]);
@@ -199,6 +200,7 @@ export async function compileCatalog({
       name: record.name,
       summary: record.summary,
       lifecycle: record.lifecycle,
+      aliases: [record.id.split(':').at(-1)],
       platforms: recordPlatforms(record),
       contentRevision: revision,
       bindingContentRevisions,
@@ -214,6 +216,8 @@ export async function compileCatalog({
     };
   }).sort((left, right) => compareText(left.id, right.id));
 
+  validateCompiledAliases(artifacts);
+
   const sourceRevision = canonicalDigest({
     manifest,
     inputs: loaded.map(({ entry, recordBytes, sourceBytes }) => ({
@@ -225,9 +229,9 @@ export async function compileCatalog({
       }),
     })),
   });
-  const searchIndex = artifacts.map(({ id, record }) => ({
+  const searchIndex = artifacts.map(({ id, record, aliases }) => ({
     id,
-    terms: collectSearchFields(record, relations),
+    terms: collectSearchFields(record, relations, aliases),
   }));
   const preimage = {
     formatVersion: '1.0.0',
@@ -242,4 +246,20 @@ export async function compileCatalog({
   const catalogDigest = canonicalDigest(preimage);
   const bundle = { ...preimage, catalogDigest };
   return { bundle, bytes: canonicalJson(bundle) };
+}
+
+export function validateCompiledAliases(artifacts) {
+  const owners = new Map();
+  for (const artifact of artifacts) {
+    for (const alias of artifact.aliases ?? []) {
+      const owner = owners.get(alias);
+      if (owner && owner !== artifact.id) {
+        throw new Error(
+          `CORE_CATALOG_ALIAS_INVALID: ${alias} is owned by both ${owner} and ${artifact.id}`,
+        );
+      }
+      owners.set(alias, artifact.id);
+    }
+  }
+  return owners;
 }

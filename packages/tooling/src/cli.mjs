@@ -1,10 +1,5 @@
-import {
-  getArtifact,
-  getManifest,
-  listArtifacts,
-  searchArtifacts,
-} from '@core-ui/catalog';
-import { ARTIFACT_REF_PATTERN, canonicalJson, validateFamily } from '@core-ui/schema';
+import * as catalogApi from '@core-ui/catalog';
+import { canonicalJson, validateFamily } from '@core-ui/schema';
 import { cliManifest, commandRegistry } from '../generated/command-surface.mjs';
 import { parseCliArguments } from './parser.mjs';
 import { renderDense, renderHuman, renderJson } from './renderers.mjs';
@@ -15,66 +10,8 @@ const EXIT_CODES = {
   CORE_ARTIFACT_NOT_FOUND: 4,
 };
 
-function canonicalAlias(value) {
-  return value.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-}
-
-function errorResponse(code, ruleId, message, details, nextCommand) {
-  const response = {
-    apiVersion: '1.0.0',
-    type: 'error',
-    error: {
-      code,
-      ruleId,
-      message,
-      retryable: true,
-      details,
-      nextCommand: {
-        command: nextCommand,
-        effect: 'read-only',
-        requiresConfirmation: false,
-      },
-    },
-  };
-  validateFamily('query-envelope', response);
-  return response;
-}
-
 function requestWithout(request, keys) {
   return Object.fromEntries(Object.entries(request).filter(([key]) => !keys.includes(key)));
-}
-
-function resolveAlias(value, request) {
-  if (new RegExp(ARTIFACT_REF_PATTERN).test(value)) return { id: value };
-  const query = searchArtifacts({
-    ...requestWithout(request, ['id-or-alias', 'section']),
-    query: value,
-    detail: 'brief',
-    limit: 100,
-    cursor: null,
-  });
-  if (query.type === 'error') return { error: query };
-  const alias = canonicalAlias(value);
-  const matches = query.data.items.filter((item) => (
-    canonicalAlias(item.name) === alias || item.id.endsWith(`:${alias}`)
-  ));
-  if (matches.length === 1) return { id: matches[0].id };
-  if (matches.length > 1) {
-    return { error: errorResponse(
-      'CORE_QUERY_INVALID',
-      'cli.alias.ambiguous',
-      `Alias ${JSON.stringify(value)} matched more than one artifact.`,
-      { alias: value, candidates: matches.map(({ id }) => id).sort() },
-      `core search ${JSON.stringify(value)} --json`,
-    ) };
-  }
-  return { error: errorResponse(
-    'CORE_ARTIFACT_NOT_FOUND',
-    'artifact.resolve.exists',
-    `No artifact matched ${JSON.stringify(value)}.`,
-    { alias: value },
-    `core search ${JSON.stringify(value)} --json`,
-  ) };
 }
 
 function cliManifestFor(detail) {
@@ -101,8 +38,8 @@ function cliManifestFor(detail) {
   return cliManifest;
 }
 
-function manifestResponse(request) {
-  const response = structuredClone(getManifest());
+function manifestResponse(catalogResponse, request) {
+  const response = structuredClone(catalogResponse);
   response.data.cli = cliManifestFor(request.detail);
   response.meta.detail = request.detail;
   validateFamily('query-envelope', response);
@@ -110,24 +47,24 @@ function manifestResponse(request) {
 }
 
 export function executeCommand(command, request) {
-  if (command === 'manifest') return manifestResponse(request);
-  if (command === 'list') {
-    const { kind = null, ...selectors } = request;
-    return listArtifacts({ ...selectors, kind });
+  const definition = commandRegistry.commands.find(({ name }) => name === command);
+  if (!definition) throw new Error(`CLI_COMMAND_UNDECLARED: ${command}`);
+  const operation = catalogApi[definition.operation];
+  if (typeof operation !== 'function') {
+    throw new Error(`CLI_OPERATION_UNAVAILABLE: ${definition.operation}`);
   }
-  if (command === 'search') {
-    const { query, ...selectors } = request;
-    return searchArtifacts({ ...selectors, query });
+  const argumentNames = definition.arguments.map(({ name }) => name);
+  const operationRequest = requestWithout(request, argumentNames);
+  for (const argument of definition.arguments) {
+    operationRequest[argument.requestKey ?? argument.name] = request[argument.name];
   }
-  if (command === 'get') {
-    const resolved = resolveAlias(request['id-or-alias'], request);
-    if (resolved.error) return resolved.error;
-    return getArtifact({
-      ...requestWithout(request, ['id-or-alias']),
-      id: resolved.id,
-    });
+  const response = operation(operationRequest);
+  if (response.type !== 'error' && response.type !== definition.responseType) {
+    throw new Error(
+      `CLI_RESPONSE_TYPE_DRIFT: ${command} expected ${definition.responseType}, got ${response.type}`,
+    );
   }
-  throw new Error(`CLI_COMMAND_UNDECLARED: ${command}`);
+  return response.type === 'catalog.manifest' ? manifestResponse(response, request) : response;
 }
 
 function diagnostics(response) {
@@ -165,16 +102,6 @@ function render(response, mode) {
   if (mode === 'json') return renderJson(response);
   if (mode === 'dense') return renderDense(response);
   return renderHuman(response);
-}
-
-export function normalizeSurfaceResponse(response) {
-  const normalized = structuredClone(response);
-  if (normalized.type === 'catalog.manifest') {
-    delete normalized.data.cli;
-    normalized.meta.detail = 'full';
-  }
-  if (normalized.type === 'error') delete normalized.error.nextCommand;
-  return normalized;
 }
 
 export function runCli(args) {

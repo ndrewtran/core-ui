@@ -125,11 +125,11 @@
       "operation": "getArtifact",
       "responseType": "artifact.detail",
       "arguments": [
-        { "name": "id-or-alias", "required": true, "type": "string" }
+        { "name": "id-or-alias", "requestKey": "id", "required": true, "type": "string" }
       ],
       "options": ["platform", "detail", "section", "purpose", "json", "dense", "help"],
-      "examples": ["core get core:component:button --platform web.react --json", "core get Button --detail compact --dense"],
-      "budgetFixture": { "id-or-alias": "Button" },
+      "examples": ["core get core:component:button --platform web.react --json", "core get button --detail compact --dense"],
+      "budgetFixture": { "id-or-alias": "button" },
       "tokenBudgets": { "brief": 384, "compact": 1024, "full": 2048 }
     }
   ],
@@ -141,7 +141,7 @@
     { "name": "migrate", "earliestMilestone": "G3.2" }
   ],
   "surfacePolicy": {
-    "cli": { "available": true, "effect": "read-only", "requiresConfirmation": false },
+    "cli": { "effect": "read-only", "requiresConfirmation": false },
     "mcp": { "available": false, "effect": "read-only", "requiresConfirmation": false }
   }
 }

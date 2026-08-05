@@ -5,7 +5,6 @@ import { test } from 'node:test';
 import { fileURLToPath } from 'node:url';
 import {
   getArtifact,
-  getManifest,
   listArtifacts,
   searchArtifacts,
 } from '@core-ui/catalog';
@@ -21,7 +20,6 @@ import {
   assertSafeDiagnostics,
   countTokens,
   executeCommand,
-  normalizeSurfaceResponse,
   parseDense,
   parseHuman,
   renderDense,
@@ -37,7 +35,7 @@ const commandCases = {
   manifest: (detail) => ({ args: ['manifest', '--detail', detail], request: { detail } }),
   list: (detail) => ({ args: ['list', '--detail', detail], request: { detail, limit: 20, platform: null, purpose: null, cursor: null, kind: null } }),
   search: (detail) => ({ args: ['search', 'button', '--detail', detail], request: { detail, limit: 20, platform: null, purpose: null, cursor: null, query: 'button' } }),
-  get: (detail) => ({ args: ['get', 'Button', '--detail', detail], request: { detail, platform: null, purpose: null, section: null, 'id-or-alias': 'Button' } }),
+  get: (detail) => ({ args: ['get', 'button', '--detail', detail], request: { detail, platform: null, purpose: null, section: null, 'id-or-alias': 'button' } }),
 };
 
 function jsonResult(args) {
@@ -47,10 +45,10 @@ function jsonResult(args) {
   return JSON.parse(result.stdout);
 }
 
-test('E-G0.3-01 API and CLI JSON normalize to the same query responses', () => {
+test('E-G0.3-01 programmatic and CLI JSON surfaces return the same responses', () => {
   assert.deepEqual(
-    normalizeSurfaceResponse(jsonResult(['manifest', '--detail', 'full'])),
-    getManifest(),
+    jsonResult(['manifest', '--detail', 'full']),
+    executeCommand('manifest', { detail: 'full' }),
   );
   assert.deepEqual(
     jsonResult(['list', '--detail', 'compact']),
@@ -61,14 +59,20 @@ test('E-G0.3-01 API and CLI JSON normalize to the same query responses', () => {
     searchArtifacts({ query: 'button', detail: 'brief', limit: 20, platform: null, purpose: null, cursor: null }),
   );
   assert.deepEqual(
-    jsonResult(['get', 'Button', '--platform', 'web.react', '--detail', 'full']),
-    getArtifact({ id: 'core:component:button', platform: 'web.react', detail: 'full', purpose: null, section: null }),
+    jsonResult(['get', 'button', '--platform', 'web.react', '--detail', 'full']),
+    getArtifact({ id: 'button', platform: 'web.react', detail: 'full', purpose: null, section: null }),
+  );
+  const displayNameIsNotAnAlias = runCli(['get', 'Button', '--json']);
+  assert.equal(displayNameIsNotAnAlias.exitCode, 4);
+  assert.equal(
+    JSON.parse(displayNameIsNotAnAlias.stdout).error.code,
+    'CORE_ARTIFACT_NOT_FOUND',
   );
 });
 
 test('E-G0.3-02 human, JSON, and dense projections preserve one response object', () => {
   const response = executeCommand('get', {
-    'id-or-alias': 'Button',
+    'id-or-alias': 'button',
     platform: 'web.react',
     detail: 'compact',
     purpose: null,
@@ -123,6 +127,11 @@ test('E-G0.3-04 registry generates parser, help, completion, manifest, types, an
   assert.deepEqual(cliManifest.commands.map(({ name }) => name), names);
   assert.deepEqual(mcpInputSchemas.map(({ name }) => name), names);
   assert.ok(mcpInputSchemas.every(({ available }) => available === false));
+  const catalogCliAvailable = jsonResult(['manifest', '--detail', 'full'])
+    .data.capabilities
+    .find(({ id }) => id === 'core:capability:query-baseline')
+    .availableOn.includes('cli');
+  assert.equal(commandRegistry.surfacePolicy.cli.available, catalogCliAvailable);
   for (const name of names) {
     assert.match(helpText, new RegExp(`\\b${name}\\b`));
     assert.match(completionScript, new RegExp(`\\b${name}\\b`));
@@ -135,10 +144,33 @@ test('E-G0.3-04 registry generates parser, help, completion, manifest, types, an
   assert.throws(() => buildCommandProjections(extra), /CLI_COMMAND_SURFACE_DRIFT/);
   const responseDrift = structuredClone(commandRegistry);
   responseDrift.commands[0].responseType = 'cli.unknown';
-  assert.throws(() => buildCommandProjections(responseDrift), /CLI_RESPONSE_TYPE_DRIFT/);
+  assert.throws(() => buildCommandProjections(responseDrift), /CLI_OPERATION_RESPONSE_DRIFT/);
   const selectorDrift = structuredClone(commandRegistry);
   selectorDrift.selectors.find(({ name }) => name === 'detail').choices.push('verbose');
   assert.throws(() => buildCommandProjections(selectorDrift), /CLI_SELECTOR_SCHEMA_DRIFT/);
+  const operationDrift = structuredClone(commandRegistry);
+  operationDrift.commands[0].operation = 'planComposition';
+  assert.throws(() => buildCommandProjections(operationDrift), /CLI_OPERATION_REFERENCE_INVALID/);
+  const operationResponseDrift = structuredClone(commandRegistry);
+  operationResponseDrift.commands[0].operation = 'listArtifacts';
+  assert.throws(() => buildCommandProjections(operationResponseDrift), /CLI_OPERATION_RESPONSE_DRIFT/);
+  const unknownField = structuredClone(commandRegistry);
+  unknownField.undocumented = true;
+  assert.throws(() => buildCommandProjections(unknownField), /CLI_REGISTRY_UNKNOWN_FIELD/);
+  const nestedUnknownField = structuredClone(commandRegistry);
+  nestedUnknownField.commands[0].arguments.push({
+    name: 'extra',
+    required: false,
+    type: 'string',
+    undocumented: true,
+  });
+  assert.throws(() => buildCommandProjections(nestedUnknownField), /CLI_REGISTRY_UNKNOWN_FIELD/);
+  const tokenizerDrift = structuredClone(commandRegistry);
+  tokenizerDrift.tokenizer.id = 'approximate';
+  assert.throws(() => buildCommandProjections(tokenizerDrift), /CLI_TOKENIZER_INVALID/);
+  const capabilityDrift = structuredClone(commandRegistry);
+  capabilityDrift.surfacePolicy.cli.available = false;
+  assert.throws(() => buildCommandProjections(capabilityDrift), /CLI_CAPABILITY_POLICY_INVALID/);
 });
 
 test('E-G0.3-05 structured errors have stable codes, safe actions, and meaningful exits', () => {
