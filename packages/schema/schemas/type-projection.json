@@ -9,6 +9,7 @@
     { "name": "Strategy", "source": "binding.schema.json#/properties/strategy/enum" },
     { "name": "BindingId", "source": "component.schema.json#/properties/bindings/properties" },
     { "name": "RuntimeProfileId", "source": "binding.schema.json#/properties/runtimeProfiles/properties" },
-    { "name": "ErrorCode", "source": "error-code.schema.json#/enum" }
+    { "name": "ErrorCode", "source": "error-code.schema.json#/enum" },
+    { "name": "QueryResponseType", "source": "query-envelope.schema.json#/x-core-ui-response-types" }
   ]
 }

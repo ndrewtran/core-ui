@@ -1,0 +1,11 @@
+{
+  "schemaVersion": "1.0.0",
+  "id": "core:guide:button-usage",
+  "kind": "guide",
+  "name": "Button usage",
+  "summary": "Portable usage guidance for Button.",
+  "lifecycle": "experimental",
+  "keywords": ["action", "button"],
+  "platforms": ["web.html", "web.react", "native.react-native"],
+  "source": "catalog/guides/button-usage.md"
+}

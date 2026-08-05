@@ -1,14 +1,17 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://core-ui.dev/schema/error-code.schema.json",
-  "title": "G0.1 append-only error codes",
+  "title": "Core UI append-only error codes",
   "type": "string",
   "enum": [
     "CORE_SCHEMA_INVALID",
     "CORE_ARTIFACT_ID_INVALID",
     "CORE_RELATION_INVALID",
     "CORE_FIELD_OWNERSHIP_INVALID",
-    "CORE_SCHEMA_VERSION_UNSUPPORTED"
+    "CORE_SCHEMA_VERSION_UNSUPPORTED",
+    "CORE_QUERY_INVALID",
+    "CORE_CURSOR_INVALID",
+    "CORE_ARTIFACT_NOT_FOUND"
   ],
   "x-core-ui-policy": "append-only-within-major"
 }

@@ -2,6 +2,7 @@ import { loadJsonDocument } from './contracts.mjs';
 
 const artifactRefSchema = loadJsonDocument('artifact-ref.schema.json');
 const errorCodeSchema = loadJsonDocument('error-code.schema.json');
+const queryEnvelopeSchema = loadJsonDocument('query-envelope.schema.json');
 
 export const ARTIFACT_KINDS = Object.freeze([...artifactRefSchema['x-core-ui-kinds']]);
 export const ENABLED_RECORD_KINDS = Object.freeze([
@@ -9,6 +10,15 @@ export const ENABLED_RECORD_KINDS = Object.freeze([
 ]);
 export const ARTIFACT_REF_PATTERN = artifactRefSchema.pattern;
 export const ERROR_CODES = Object.freeze([...errorCodeSchema.enum]);
+export const QUERY_RESPONSE_TYPES = Object.freeze([
+  ...queryEnvelopeSchema['x-core-ui-response-types'],
+]);
+export const QUERY_SELECTORS = Object.freeze(
+  Object.fromEntries(
+    Object.entries(queryEnvelopeSchema['x-core-ui-selectors'])
+      .map(([key, values]) => [key, Object.freeze([...values])]),
+  ),
+);
 export const SCHEMA_VERSION = '1.0.0';
 export const API_VERSION = '1.0.0';
 
@@ -34,7 +44,11 @@ export {
   negotiateSchemaVersion,
   parseSchemaVersion,
 } from './evolution.mjs';
-export { bindingSpecRevision, contentRevision } from './revisions.mjs';
+export {
+  bindingContentRevision,
+  bindingSpecRevision,
+  contentRevision,
+} from './revisions.mjs';
 export {
   SchemaValidationError,
   assertAppendOnlyErrorCodes,

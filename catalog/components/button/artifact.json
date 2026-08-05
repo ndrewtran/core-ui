@@ -1,0 +1,80 @@
+{
+  "schemaVersion": "1.0.0",
+  "id": "core:component:button",
+  "kind": "component",
+  "name": "Button",
+  "summary": "Triggers an immediate action.",
+  "lifecycle": "experimental",
+  "intent": {
+    "useWhen": ["Triggering an immediate action"],
+    "avoidWhen": ["Navigating to another location"]
+  },
+  "anatomy": ["root", "label"],
+  "states": ["idle", "disabled"],
+  "accessibility": {
+    "nameRequired": true,
+    "obligations": ["Expose disabled state"]
+  },
+  "bindings": {
+    "web.html": {
+      "schemaVersion": "1.0.0",
+      "lifecycle": "experimental",
+      "strategy": "direct",
+      "api": {
+        "props": ["disabled"],
+        "events": ["activate"],
+        "parts": ["root", "label"],
+        "defaults": { "disabled": false }
+      },
+      "behavior": ["Activation requests one immediate action"],
+      "accessibility": ["Expose accessible name and disabled state"],
+      "tokenSources": ["core:token:button-minimum"],
+      "runtimeProfiles": {}
+    },
+    "web.react": {
+      "schemaVersion": "1.0.0",
+      "lifecycle": "experimental",
+      "strategy": "direct",
+      "api": {
+        "props": ["disabled"],
+        "events": ["activate"],
+        "parts": ["root", "label"],
+        "defaults": { "disabled": false }
+      },
+      "behavior": ["Activation requests one immediate action"],
+      "accessibility": ["Expose accessible name and disabled state"],
+      "tokenSources": ["core:token:button-minimum"],
+      "runtimeProfiles": {}
+    },
+    "native.react-native": {
+      "schemaVersion": "1.0.0",
+      "lifecycle": "experimental",
+      "strategy": "adapted",
+      "api": {
+        "props": ["disabled"],
+        "events": ["activate"],
+        "parts": ["root", "label"],
+        "defaults": { "disabled": false }
+      },
+      "behavior": ["Activation requests one immediate action"],
+      "accessibility": ["Expose accessible name and disabled state"],
+      "tokenSources": ["core:token:button-minimum"],
+      "runtimeProfiles": {
+        "ios": {
+          "strategy": "adapted",
+          "lifecycle": "experimental",
+          "validationProfile": "native.ios"
+        },
+        "android": {
+          "strategy": "adapted",
+          "lifecycle": "experimental",
+          "validationProfile": "native.android"
+        },
+        "native.react-native-web": {
+          "strategy": "unsupported",
+          "reason": "No responsible implementation in the first proof artifact."
+        }
+      }
+    }
+  }
+}

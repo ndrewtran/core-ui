@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "1.0.0",
+  "id": "core:example:button-basic-react",
+  "kind": "example",
+  "name": "Basic React Button",
+  "summary": "The minimum React Button example.",
+  "lifecycle": "experimental",
+  "binding": {
+    "ref": "core:component:button#web.react",
+    "guidanceImpact": "normative",
+    "purposes": ["generation", "explanation", "validation"],
+    "preference": 0
+  },
+  "complexity": "minimal",
+  "prerequisites": [],
+  "source": "catalog/components/button/examples/react/basic.tsx"
+}

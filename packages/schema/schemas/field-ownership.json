@@ -686,94 +686,577 @@
     },
     {
       "class": "derived",
-      "name": "apiVersion",
+      "name": "conceptContent",
       "owner": "query-envelope-contract",
       "schema": "query-envelope.schema.json",
-      "schemaPointer": "#/oneOf/0/properties/apiVersion"
+      "schemaPointer": "#/$defs/revisionSet/properties/conceptContent"
     },
     {
       "class": "derived",
-      "name": "data",
+      "name": "bindingContent",
       "owner": "query-envelope-contract",
       "schema": "query-envelope.schema.json",
-      "schemaPointer": "#/oneOf/0/properties/data"
-    },
-    {
-      "class": "derived",
-      "name": "meta",
-      "owner": "query-envelope-contract",
-      "schema": "query-envelope.schema.json",
-      "schemaPointer": "#/oneOf/0/properties/meta"
-    },
-    {
-      "class": "derived",
-      "name": "authority",
-      "owner": "query-envelope-contract",
-      "schema": "query-envelope.schema.json",
-      "schemaPointer": "#/oneOf/0/properties/meta/properties/authority"
-    },
-    {
-      "class": "derived",
-      "name": "revisions",
-      "owner": "query-envelope-contract",
-      "schema": "query-envelope.schema.json",
-      "schemaPointer": "#/oneOf/0/properties/meta/properties/revisions"
+      "schemaPointer": "#/$defs/revisionSet/properties/bindingContent"
     },
     {
       "class": "derived",
       "name": "bindingSpec",
       "owner": "query-envelope-contract",
       "schema": "query-envelope.schema.json",
-      "schemaPointer": "#/oneOf/0/properties/meta/properties/revisions/properties/bindingSpec"
+      "schemaPointer": "#/$defs/revisionSet/properties/bindingSpec"
     },
     {
       "class": "derived",
-      "name": "conceptContent",
+      "name": "revisions",
       "owner": "query-envelope-contract",
       "schema": "query-envelope.schema.json",
-      "schemaPointer": "#/oneOf/0/properties/meta/properties/revisions/properties/conceptContent"
+      "schemaPointer": "#/$defs/detailResolution/allOf/1/properties/revisions"
+    },
+    {
+      "class": "derived",
+      "name": "authority",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/resolution/properties/authority"
+    },
+    {
+      "class": "derived",
+      "name": "compatibility",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/resolution/properties/compatibility"
+    },
+    {
+      "class": "derived",
+      "name": "catalogSource",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/resolution/properties/catalogSource"
+    },
+    {
+      "class": "derived",
+      "name": "sourceRevision",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/resolution/properties/sourceRevision"
+    },
+    {
+      "class": "derived",
+      "name": "revisions",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/resolution/properties/revisions"
+    },
+    {
+      "class": "derived",
+      "name": "targetPackages",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/resolution/properties/targetPackages"
     },
     {
       "class": "derived",
       "name": "schemaVersion",
       "owner": "query-envelope-contract",
       "schema": "query-envelope.schema.json",
-      "schemaPointer": "#/oneOf/0/properties/meta/properties/schemaVersion"
+      "schemaPointer": "#/$defs/responseMeta/properties/schemaVersion"
+    },
+    {
+      "class": "derived",
+      "name": "authority",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/responseMeta/properties/authority"
+    },
+    {
+      "class": "derived",
+      "name": "revisions",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/responseMeta/properties/revisions"
+    },
+    {
+      "class": "derived",
+      "name": "coreVersion",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/responseMeta/properties/coreVersion"
+    },
+    {
+      "class": "derived",
+      "name": "catalogVersion",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/responseMeta/properties/catalogVersion"
+    },
+    {
+      "class": "derived",
+      "name": "catalogDigest",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/responseMeta/properties/catalogDigest"
+    },
+    {
+      "class": "derived",
+      "name": "sourceRevision",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/responseMeta/properties/sourceRevision"
+    },
+    {
+      "class": "derived",
+      "name": "resolution",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/responseMeta/properties/resolution"
+    },
+    {
+      "class": "derived",
+      "name": "platform",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/responseMeta/properties/platform"
+    },
+    {
+      "class": "derived",
+      "name": "detail",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/responseMeta/properties/detail"
+    },
+    {
+      "class": "derived",
+      "name": "truncated",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/responseMeta/properties/truncated"
+    },
+    {
+      "class": "derived",
+      "name": "nextCursor",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/responseMeta/properties/nextCursor"
+    },
+    {
+      "class": "derived",
+      "name": "revisions",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/detailMeta/allOf/1/properties/revisions"
+    },
+    {
+      "class": "derived",
+      "name": "resolution",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/detailMeta/allOf/1/properties/resolution"
+    },
+    {
+      "class": "derived",
+      "name": "record",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/sourcePointer/properties/record"
+    },
+    {
+      "class": "derived",
+      "name": "content",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/sourcePointer/properties/content"
+    },
+    {
+      "class": "derived",
+      "name": "contentDigest",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/sourcePointer/properties/contentDigest"
+    },
+    {
+      "class": "derived",
+      "name": "id",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/artifactSummary/properties/id"
+    },
+    {
+      "class": "derived",
+      "name": "kind",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/artifactSummary/properties/kind"
+    },
+    {
+      "class": "derived",
+      "name": "name",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/artifactSummary/properties/name"
+    },
+    {
+      "class": "derived",
+      "name": "summary",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/artifactSummary/properties/summary"
+    },
+    {
+      "class": "derived",
+      "name": "lifecycle",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/artifactSummary/properties/lifecycle"
+    },
+    {
+      "class": "derived",
+      "name": "platforms",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/artifactSummary/properties/platforms"
+    },
+    {
+      "class": "derived",
+      "name": "source",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/artifactSummary/properties/source"
+    },
+    {
+      "class": "derived",
+      "name": "contentRevision",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/artifactSummary/properties/contentRevision"
+    },
+    {
+      "class": "derived",
+      "name": "queryTerm",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/matchReason/properties/queryTerm"
+    },
+    {
+      "class": "derived",
+      "name": "field",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/matchReason/properties/field"
+    },
+    {
+      "class": "derived",
+      "name": "value",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/matchReason/properties/value"
+    },
+    {
+      "class": "derived",
+      "name": "match",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/matchReason/properties/match"
+    },
+    {
+      "class": "derived",
+      "name": "points",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/matchReason/properties/points"
+    },
+    {
+      "class": "derived",
+      "name": "score",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/searchResult/allOf/1/properties/score"
+    },
+    {
+      "class": "derived",
+      "name": "matchReasons",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/searchResult/allOf/1/properties/matchReasons"
+    },
+    {
+      "class": "derived",
+      "name": "formatVersion",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/manifestData/properties/formatVersion"
+    },
+    {
+      "class": "derived",
+      "name": "catalogVersion",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/manifestData/properties/catalogVersion"
+    },
+    {
+      "class": "derived",
+      "name": "catalogDigest",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/manifestData/properties/catalogDigest"
+    },
+    {
+      "class": "derived",
+      "name": "sourceRevision",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/manifestData/properties/sourceRevision"
+    },
+    {
+      "class": "derived",
+      "name": "operations",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/manifestData/properties/operations"
+    },
+    {
+      "class": "derived",
+      "name": "responseTypes",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/manifestData/properties/responseTypes"
+    },
+    {
+      "class": "derived",
+      "name": "selectors",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/manifestData/properties/selectors"
+    },
+    {
+      "class": "derived",
+      "name": "artifactKinds",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/manifestData/properties/artifactKinds"
+    },
+    {
+      "class": "derived",
+      "name": "platforms",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/manifestData/properties/platforms"
+    },
+    {
+      "class": "derived",
+      "name": "capabilities",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/manifestData/properties/capabilities"
+    },
+    {
+      "class": "derived",
+      "name": "items",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/listData/properties/items"
+    },
+    {
+      "class": "derived",
+      "name": "query",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/searchData/properties/query"
+    },
+    {
+      "class": "derived",
+      "name": "items",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/searchData/properties/items"
     },
     {
       "class": "derived",
       "name": "type",
       "owner": "query-envelope-contract",
       "schema": "query-envelope.schema.json",
-      "schemaPointer": "#/oneOf/0/properties/type"
+      "schemaPointer": "#/$defs/relation/properties/type"
     },
     {
       "class": "derived",
-      "name": "warnings",
+      "name": "source",
       "owner": "query-envelope-contract",
       "schema": "query-envelope.schema.json",
-      "schemaPointer": "#/oneOf/0/properties/warnings"
+      "schemaPointer": "#/$defs/relation/properties/source"
+    },
+    {
+      "class": "derived",
+      "name": "target",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/relation/properties/target"
+    },
+    {
+      "class": "derived",
+      "name": "artifact",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/detailData/properties/artifact"
+    },
+    {
+      "class": "derived",
+      "name": "id",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/detailData/properties/artifact/properties/id"
+    },
+    {
+      "class": "derived",
+      "name": "kind",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/detailData/properties/artifact/properties/kind"
+    },
+    {
+      "class": "derived",
+      "name": "source",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/detailData/properties/artifact/properties/source"
+    },
+    {
+      "class": "derived",
+      "name": "relations",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/detailData/properties/relations"
+    },
+    {
+      "class": "derived",
+      "name": "section",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/detailData/properties/section"
+    },
+    {
+      "class": "derived",
+      "name": "value",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/detailData/properties/value"
     },
     {
       "class": "derived",
       "name": "apiVersion",
       "owner": "query-envelope-contract",
       "schema": "query-envelope.schema.json",
-      "schemaPointer": "#/oneOf/1/properties/apiVersion"
-    },
-    {
-      "class": "derived",
-      "name": "error",
-      "owner": "query-envelope-contract",
-      "schema": "query-envelope.schema.json",
-      "schemaPointer": "#/oneOf/1/properties/error"
+      "schemaPointer": "#/$defs/successBase/properties/apiVersion"
     },
     {
       "class": "derived",
       "name": "type",
       "owner": "query-envelope-contract",
       "schema": "query-envelope.schema.json",
-      "schemaPointer": "#/oneOf/1/properties/type"
+      "schemaPointer": "#/$defs/successBase/properties/type"
+    },
+    {
+      "class": "derived",
+      "name": "data",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/successBase/properties/data"
+    },
+    {
+      "class": "derived",
+      "name": "meta",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/successBase/properties/meta"
+    },
+    {
+      "class": "derived",
+      "name": "warnings",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/successBase/properties/warnings"
+    },
+    {
+      "class": "derived",
+      "name": "type",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/manifestResponse/allOf/1/properties/type"
+    },
+    {
+      "class": "derived",
+      "name": "data",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/manifestResponse/allOf/1/properties/data"
+    },
+    {
+      "class": "derived",
+      "name": "type",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/listResponse/allOf/1/properties/type"
+    },
+    {
+      "class": "derived",
+      "name": "data",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/listResponse/allOf/1/properties/data"
+    },
+    {
+      "class": "derived",
+      "name": "type",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/searchResponse/allOf/1/properties/type"
+    },
+    {
+      "class": "derived",
+      "name": "data",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/searchResponse/allOf/1/properties/data"
+    },
+    {
+      "class": "derived",
+      "name": "type",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/detailResponse/allOf/1/properties/type"
+    },
+    {
+      "class": "derived",
+      "name": "data",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/detailResponse/allOf/1/properties/data"
+    },
+    {
+      "class": "derived",
+      "name": "meta",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/detailResponse/allOf/1/properties/meta"
+    },
+    {
+      "class": "derived",
+      "name": "apiVersion",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/errorResponse/properties/apiVersion"
+    },
+    {
+      "class": "derived",
+      "name": "type",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/errorResponse/properties/type"
+    },
+    {
+      "class": "derived",
+      "name": "error",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/errorResponse/properties/error"
     },
     {
       "class": "authored",

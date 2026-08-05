@@ -1,0 +1,32 @@
+{
+  "schema": "core-ui-catalog-source-manifest-v1",
+  "records": [
+    {
+      "family": "capability",
+      "path": "catalog/capabilities/query-baseline.json"
+    },
+    {
+      "family": "component",
+      "path": "catalog/components/button/artifact.json"
+    },
+    {
+      "family": "example",
+      "path": "catalog/components/button/examples/html/basic.example.json",
+      "sourcePath": "catalog/components/button/examples/html/basic.html"
+    },
+    {
+      "family": "example",
+      "path": "catalog/components/button/examples/react/basic.example.json",
+      "sourcePath": "catalog/components/button/examples/react/basic.tsx"
+    },
+    {
+      "family": "guide",
+      "path": "catalog/guides/button-usage.json",
+      "sourcePath": "catalog/guides/button-usage.md"
+    },
+    {
+      "family": "token-source",
+      "path": "catalog/tokens/button-minimum.json"
+    }
+  ]
+}
