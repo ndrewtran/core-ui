@@ -509,14 +509,32 @@ export function resolveCatalogGraph(input) {
     );
   }
 
-  if (!explicitCache) {
-    const lockVersions = uniqueSorted(locks.map(({ version }) => version));
-    const installedVersions = uniqueSorted(installedCatalogs.map(({ version }) => version));
-    const lockIntegrity = uniqueSorted(locks.map(({ integrity }) => integrity).filter(Boolean));
-    const installedIntegrity = uniqueSorted(
-      installedCatalogs.map(({ integrity }) => integrity).filter(Boolean),
-    );
-    if (
+  const lockVersions = uniqueSorted(locks.map(({ version }) => version));
+  const installedVersions = uniqueSorted(installedCatalogs.map(({ version }) => version));
+  const lockIntegrity = uniqueSorted(locks.map(({ integrity }) => integrity).filter(Boolean));
+  const installedIntegrity = uniqueSorted(
+    installedCatalogs.map(({ integrity }) => integrity).filter(Boolean),
+  );
+  const directStateDrifts = explicitCache
+    ? (
+      locks.length !== 1
+      || locks[0].version !== explicitCache.version
+      || !rangeAllows(declaredRange, explicitCache.version)
+      || (
+        installedCatalogs.length > 0
+        && (
+          installedCatalogs.length !== 1
+          || installedCatalogs[0].version !== explicitCache.version
+          || !rangeAllows(declaredRange, installedCatalogs[0].version)
+          || (
+            typeof locks[0].integrity === 'string'
+            && typeof installedCatalogs[0].integrity === 'string'
+            && locks[0].integrity !== installedCatalogs[0].integrity
+          )
+        )
+      )
+    )
+    : (
       lockVersions.length === 0
       || installedVersions.some((version) => !rangeAllows(declaredRange, version))
       || lockVersions.some((version) => !rangeAllows(declaredRange, version))
@@ -526,12 +544,14 @@ export function resolveCatalogGraph(input) {
         && installedIntegrity.length > 0
         && JSON.stringify(lockIntegrity) !== JSON.stringify(installedIntegrity)
       )
-    ) {
-      failures.push({
-        code: 'CORE_CATALOG_DECLARATION_DRIFT',
-        reason: 'declared, locked, and installed versions differ',
-      });
-    }
+    );
+  if (directStateDrifts) {
+    failures.push({
+      code: 'CORE_CATALOG_DECLARATION_DRIFT',
+      reason: explicitCache
+        ? 'explicit cache, declaration, lockfile, and present installed catalog differ'
+        : 'declared, locked, and installed versions differ',
+    });
   }
 
   const evaluated = candidates.map((candidate) => {

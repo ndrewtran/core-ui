@@ -42,15 +42,7 @@ const catalogPackage = parseJsonStrict(await readFile(
   join(repositoryRoot, 'packages/catalog/generated/catalog-package.json'),
   'utf8',
 ));
-const commandSuite = [
-  'pnpm --filter @core-ui/schema check',
-  'pnpm --filter @core-ui/catalog check',
-  'pnpm --filter @core-ui/tooling check',
-  'pnpm check',
-  'pnpm check:all',
-  'pnpm generate:check',
-  'pnpm release:prepare',
-].join(' && ');
+const captureProcedure = 'node tests/evidence/capture-g0.4.mjs';
 const environment = {
   architecture: process.arch,
   git: command('git', ['--version']).replace(/^git version /u, ''),
@@ -111,6 +103,63 @@ const results = corpus.graphs.map((graph) => ({
   expected: graph.expected,
   result: resolveGraph(graph),
 }));
+const cacheAuthorityBase = corpus.graphs.find(({ id }) => id === 'explicit-cache-compatible');
+const cacheAuthorityCases = [
+  ['cache-out-of-range', (graph) => {
+    graph.workspaces.find(({ path }) => path === graph.selectedWorkspace).catalogRange = '^2.0.0';
+  }],
+  ['cache-lock-mismatch', (graph) => {
+    graph.lockfile.find(({ name }) => name === '@core-ui/catalog').version = '1.1.0';
+  }],
+  ['cache-installed-mismatch', (graph) => {
+    graph.installed.push({
+      workspace: graph.selectedWorkspace,
+      name: '@core-ui/catalog',
+      version: '1.1.0',
+      kind: 'catalog',
+      fixture: 'catalog-newer',
+      relativePath: `${graph.selectedWorkspace}/node_modules/@core-ui/catalog`,
+      observedDigest: 'sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+    });
+  }],
+  ['cache-duplicate-lock', (graph) => {
+    graph.lockfile.push(structuredClone(
+      graph.lockfile.find(({ name }) => name === '@core-ui/catalog'),
+    ));
+  }],
+  ['cache-duplicate-installed', (graph) => {
+    for (const suffix of ['a', 'b']) graph.installed.push({
+      workspace: graph.selectedWorkspace,
+      name: '@core-ui/catalog',
+      version: '1.0.0',
+      kind: 'catalog',
+      fixture: 'catalog-compatible',
+      relativePath: `${graph.selectedWorkspace}/node_modules-${suffix}/@core-ui/catalog`,
+      observedDigest: 'sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+    });
+  }],
+  ['cache-installed-integrity-mismatch', (graph) => {
+    graph.lockfile.find(({ name }) => name === '@core-ui/catalog').integrity = 'sha512:locked';
+    graph.installed.push({
+      workspace: graph.selectedWorkspace,
+      name: '@core-ui/catalog',
+      version: '1.0.0',
+      kind: 'catalog',
+      fixture: 'catalog-compatible',
+      relativePath: `${graph.selectedWorkspace}/node_modules/@core-ui/catalog`,
+      observedDigest: 'sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+      integrity: 'sha512:installed',
+    });
+  }],
+].map(([caseId, mutate]) => {
+  const graph = structuredClone(cacheAuthorityBase);
+  mutate(graph);
+  const result = resolveGraph(graph);
+  if (result.type !== 'error' || result.error.code !== 'CORE_CATALOG_DECLARATION_DRIFT') {
+    throw new Error(`EVIDENCE_CACHE_AUTHORITY_MISMATCH: ${caseId}`);
+  }
+  return { caseId, result };
+});
 for (const { graphId, expected, result } of results) {
   if (expected.type === 'success') {
     if (
@@ -170,6 +219,7 @@ const missingCache = parseJsonStrict(runCli([
 const privacyPattern = /(?:\/Users\/|\/home\/|[A-Za-z]:\\|credential|password|token=|https?:\/\/[^\s"]+\?)/iu;
 const privacyInputs = [
   ...results.map(({ result }) => result),
+  ...cacheAuthorityCases.map(({ result }) => result),
   ...responseCases.map(([, response]) => response),
   ...cliCases.map(([, response]) => response),
   missingProject,
@@ -266,6 +316,11 @@ const definitions = [
       networkFallbackAttempted: false,
       hostedFallbackAttempted: false,
       adapterFailures: [missingProject.error.code, missingCache.error.code],
+      cacheAuthorityFailures: cacheAuthorityCases.map(({ caseId, result }) => ({
+        caseId,
+        code: result.error.code,
+        secondaryFailures: result.error.details.secondaryFailures,
+      })),
     },
   ],
   [
@@ -300,70 +355,119 @@ const definitions = [
 const root = join(repositoryRoot, 'tests/evidence/g0.4');
 await mkdir(join(root, 'artifacts'), { recursive: true });
 await mkdir(join(root, 'records'), { recursive: true });
-const records = [];
-for (const [assertionId, evidenceKind, observations] of definitions) {
-  const artifactPath = join(root, `artifacts/${assertionId}.json`);
-  await writeCanonical(artifactPath, {
-    applicability,
-    assertionId,
-    captureTimestamp,
-    command: commandSuite,
-    environment,
-    evidenceKind,
-    executedRevision: sourceRevision,
-    executedTree: sourceTree,
-    exitState: 0,
-    observations,
-    outcome: 'pass',
-    schema: 'core-ui-evidence-artifact-v1',
-    sourceRevision,
-    sourceTree,
-  });
-  const recordPath = join(root, `records/${assertionId}.json`);
-  await writeCanonical(recordPath, {
-    activeExceptionRefs: [],
-    advisoryRefs: [],
-    applicability,
+async function writeEvidence(validation = null) {
+  const records = [];
+  for (const [assertionId, evidenceKind, observations] of definitions) {
+    const artifactPath = join(root, `artifacts/${assertionId}.json`);
+    await writeCanonical(artifactPath, {
+      applicability,
+      assertionId,
+      captureTimestamp,
+      command: captureProcedure,
+      environment,
+      evidenceKind,
+      executedRevision: sourceRevision,
+      executedTree: sourceTree,
+      exitState: 0,
+      observations,
+      outcome: 'pass',
+      schema: 'core-ui-evidence-artifact-v1',
+      sourceRevision,
+      sourceTree,
+    });
+    const recordPath = join(root, `records/${assertionId}.json`);
+    await writeCanonical(recordPath, {
+      activeExceptionRefs: [],
+      advisoryRefs: [],
+      applicability,
+      applicabilityManifest: manifest,
+      artifact: {
+        path: `tests/evidence/g0.4/artifacts/${assertionId}.json`,
+        sha256: sha256(await readFile(artifactPath)),
+      },
+      assertionId,
+      captureTimestamp,
+      command: captureProcedure,
+      disclosureClass: 'public-sanitized',
+      environment,
+      evidenceKind,
+      executedRevision: sourceRevision,
+      executedTree: sourceTree,
+      expiry: 'Any enforced applicability-manifest mismatch or change to package identity, resolver inputs, precedence, compatibility checks, query metadata, privacy policy, runtime tuple, or retained result bytes',
+      milestone: 'G0.4',
+      outcome: 'pass',
+      owner: 'ndrewtran',
+      retentionPolicy: 'Content-addressed Git object retained by the milestone pull request and default-branch history after merge; issue #6 and its Evidence issue are mutable locators',
+      schema: 'core-ui-evidence-record-v1',
+      sourceRevision,
+      sourceTree,
+      ...(validation === null ? {} : { validation }),
+    });
+    records.push({
+      assertionId,
+      path: `tests/evidence/g0.4/records/${assertionId}.json`,
+      sha256: sha256(await readFile(recordPath)),
+    });
+  }
+  await writeCanonical(join(root, 'index.json'), {
     applicabilityManifest: manifest,
-    artifact: {
-      path: `tests/evidence/g0.4/artifacts/${assertionId}.json`,
-      sha256: sha256(await readFile(artifactPath)),
-    },
-    assertionId,
     captureTimestamp,
-    command: commandSuite,
     disclosureClass: 'public-sanitized',
-    environment,
-    evidenceKind,
-    executedRevision: sourceRevision,
-    executedTree: sourceTree,
-    expiry: 'Any enforced applicability-manifest mismatch or change to package identity, resolver inputs, precedence, compatibility checks, query metadata, privacy policy, runtime tuple, or retained result bytes',
     milestone: 'G0.4',
-    outcome: 'pass',
     owner: 'ndrewtran',
-    retentionPolicy: 'Content-addressed Git object retained by the milestone pull request and default-branch history after merge; issue #6 and its Evidence issue are mutable locators',
-    schema: 'core-ui-evidence-record-v1',
+    records,
+    retentionPolicy: 'Content-addressed Git records retained by the milestone pull request and default-branch history after merge; issue #6 and its Evidence issue are mutable locators',
+    schema: 'core-ui-evidence-index-v1',
     sourceRevision,
     sourceTree,
-  });
-  records.push({
-    assertionId,
-    path: `tests/evidence/g0.4/records/${assertionId}.json`,
-    sha256: sha256(await readFile(recordPath)),
+    ...(validation === null ? {} : { validation }),
   });
 }
 
-await writeCanonical(join(root, 'index.json'), {
-  applicabilityManifest: manifest,
-  captureTimestamp,
-  disclosureClass: 'public-sanitized',
-  milestone: 'G0.4',
-  owner: 'ndrewtran',
-  records,
-  retentionPolicy: 'Content-addressed Git records retained by the milestone pull request and default-branch history after merge; issue #6 and its Evidence issue are mutable locators',
-  schema: 'core-ui-evidence-index-v1',
+await writeEvidence();
+
+function validationResult(commandName, args, assertions) {
+  const output = execFileSync('pnpm', args, {
+    cwd: repositoryRoot,
+    encoding: 'utf8',
+    stdio: ['ignore', 'pipe', 'pipe'],
+  });
+  const observedAssertions = assertions.map(({ id, pattern }) => {
+    const match = output.match(pattern);
+    if (!match) throw new Error(`EVIDENCE_VALIDATION_ASSERTION_MISSING: ${id}`);
+    return { id, value: match[1] ?? true };
+  });
+  return { command: commandName, exitState: 0, observedAssertions };
+}
+
+const validationResults = [
+  validationResult('pnpm check', ['check'], [
+    { id: 'evidence-index-count', pattern: /\[evidence\] verified (5 immutable index, 25 records, and 25 artifacts)/u },
+  ]),
+  validationResult('pnpm check:all', ['check:all'], [
+    { id: 'evidence-index-count', pattern: /\[evidence\] verified (5 immutable index, 25 records, and 25 artifacts)/u },
+  ]),
+  validationResult('pnpm generate:check', ['generate:check'], [
+    { id: 'generation-identity', pattern: /remained clean after two generation runs \((sha256:[a-f0-9]{64})\)/u },
+  ]),
+  validationResult('pnpm release:prepare', ['release:prepare'], [
+    { id: 'release-boundary', pattern: /(Foundation checks passed; no publishable package or public release candidate exists\.)/u },
+    { id: 'generation-identity', pattern: /remained clean after two generation runs \((sha256:[a-f0-9]{64})\)/u },
+  ]),
+];
+const verificationPath = join(root, 'verification.json');
+await writeCanonical(verificationPath, {
+  captureProcedure,
+  environment,
+  results: validationResults,
+  schema: 'core-ui-evidence-validation-v1',
   sourceRevision,
   sourceTree,
 });
+const validation = {
+  path: 'tests/evidence/g0.4/verification.json',
+  sha256: sha256(await readFile(verificationPath)),
+};
+await writeEvidence(validation);
 
 console.log(`[evidence] captured G0.4 and refreshed upstream applicability at ${sourceRevision}`);

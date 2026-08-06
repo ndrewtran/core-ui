@@ -94,6 +94,66 @@ test('E-G0.4 resolver verifies provenance material instead of trusting fixture f
   assert.equal(rejected.error.code, 'CORE_CATALOG_INTEGRITY_MISMATCH');
 });
 
+test('E-G0.4 explicit cache remains subordinate to manifest and lock authority', async () => {
+  const value = await corpus();
+  const baseline = value.graphs.find(({ id }) => id === 'explicit-cache-compatible');
+  const cases = [
+    ['out-of-range', (graph) => {
+      graph.workspaces.find(({ path }) => path === graph.selectedWorkspace).catalogRange = '^2.0.0';
+    }],
+    ['lock-mismatch', (graph) => {
+      graph.lockfile.find(({ name }) => name === '@core-ui/catalog').version = '1.1.0';
+    }],
+    ['installed-mismatch', (graph) => {
+      graph.installed.push({
+        workspace: graph.selectedWorkspace,
+        name: '@core-ui/catalog',
+        version: '1.1.0',
+        kind: 'catalog',
+        fixture: 'catalog-newer',
+        relativePath: `${graph.selectedWorkspace}/node_modules/@core-ui/catalog`,
+        observedDigest: 'sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+      });
+    }],
+    ['duplicate-lock', (graph) => {
+      graph.lockfile.push(structuredClone(
+        graph.lockfile.find(({ name }) => name === '@core-ui/catalog'),
+      ));
+    }],
+    ['duplicate-installed', (graph) => {
+      for (const suffix of ['a', 'b']) graph.installed.push({
+        workspace: graph.selectedWorkspace,
+        name: '@core-ui/catalog',
+        version: '1.0.0',
+        kind: 'catalog',
+        fixture: 'catalog-compatible',
+        relativePath: `${graph.selectedWorkspace}/node_modules-${suffix}/@core-ui/catalog`,
+        observedDigest: 'sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+      });
+    }],
+    ['installed-integrity-mismatch', (graph) => {
+      graph.lockfile.find(({ name }) => name === '@core-ui/catalog').integrity = 'sha512:locked';
+      graph.installed.push({
+        workspace: graph.selectedWorkspace,
+        name: '@core-ui/catalog',
+        version: '1.0.0',
+        kind: 'catalog',
+        fixture: 'catalog-compatible',
+        relativePath: `${graph.selectedWorkspace}/node_modules/@core-ui/catalog`,
+        observedDigest: 'sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+        integrity: 'sha512:installed',
+      });
+    }],
+  ];
+  for (const [name, mutate] of cases) {
+    const graph = structuredClone(baseline);
+    mutate(graph);
+    const result = resolve(value, graph);
+    assert.equal(result.type, 'error', name);
+    assert.equal(result.error.code, 'CORE_CATALOG_DECLARATION_DRIFT', name);
+  }
+});
+
 test('G0.4 production resolver input rejects duplicate or undeclared normalized identities', async () => {
   const value = await corpus();
   const duplicate = structuredClone(value);

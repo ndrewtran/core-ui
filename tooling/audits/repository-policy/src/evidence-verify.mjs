@@ -92,6 +92,9 @@ export async function verifyEvidence(repositoryRoot) {
     if (index.applicabilityManifest) {
       await assertApplicabilityManifest(repositoryRoot, index.applicabilityManifest);
     }
+    const indexValidation = index.validation
+      ? await assertDigest(repositoryRoot, index.validation)
+      : null;
     indexCount += 1;
     for (const reference of index.records) {
       const record = await assertDigest(repositoryRoot, reference);
@@ -115,6 +118,30 @@ export async function verifyEvidence(repositoryRoot) {
         throw new EvidenceIntegrityError(
           'EVIDENCE_APPLICABILITY_MISMATCH',
           `${reference.path} does not match the index applicability manifest`,
+        );
+      }
+      if (
+        Boolean(record.validation) !== Boolean(index.validation)
+        || (
+          index.validation
+          && canonicalJson(record.validation) !== canonicalJson(index.validation)
+        )
+      ) {
+        throw new EvidenceIntegrityError(
+          'EVIDENCE_VALIDATION_MISMATCH',
+          `${reference.path} does not match the index validation reference`,
+        );
+      }
+      if (
+        indexValidation
+        && (
+          indexValidation.sourceRevision !== record.sourceRevision
+          || indexValidation.sourceTree !== record.sourceTree
+        )
+      ) {
+        throw new EvidenceIntegrityError(
+          'EVIDENCE_VALIDATION_SOURCE_MISMATCH',
+          `${reference.path} validation does not match its source identity`,
         );
       }
       await assertDigest(repositoryRoot, record.artifact);
