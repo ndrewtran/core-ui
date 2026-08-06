@@ -4,6 +4,10 @@ import { dirname, join, relative, resolve, sep } from 'node:path';
 
 const IGNORED_DIRECTORIES = new Set(['.git', 'node_modules', '.pnpm-store']);
 
+export function isIgnoredRepositoryEntry(name) {
+  return name === '.DS_Store' || IGNORED_DIRECTORIES.has(name);
+}
+
 export class PolicyError extends Error {
   constructor(code, message) {
     super(`${code}: ${message}`);
@@ -153,10 +157,9 @@ export async function walkFiles(root, current = root) {
   const entries = await readdir(current, { withFileTypes: true });
   const files = [];
   for (const entry of entries.sort((a, b) => a.name.localeCompare(b.name))) {
-    if (entry.name === '.DS_Store') continue;
+    if (isIgnoredRepositoryEntry(entry.name)) continue;
     const path = join(current, entry.name);
     if (entry.isDirectory()) {
-      if (IGNORED_DIRECTORIES.has(entry.name)) continue;
       files.push(...await walkFiles(root, path));
     } else if (entry.isFile()) {
       files.push(normalizePath(relative(root, path)));

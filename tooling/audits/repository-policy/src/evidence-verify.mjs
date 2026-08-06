@@ -1,7 +1,7 @@
 import { readFile, readdir, stat } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { canonicalJson } from './canonical-json.mjs';
-import { sha256 } from './policy.mjs';
+import { isIgnoredRepositoryEntry, sha256 } from './policy.mjs';
 
 export class EvidenceIntegrityError extends Error {
   constructor(code, message) {
@@ -45,7 +45,10 @@ async function manifestEntries(repositoryRoot, declaredPaths) {
     if (metadata.isDirectory()) {
       const children = await readdir(absolutePath);
       children.sort((left, right) => left.localeCompare(right));
-      for (const child of children) await visit(join(relativePath, child));
+      for (const child of children) {
+        if (isIgnoredRepositoryEntry(child)) continue;
+        await visit(join(relativePath, child));
+      }
       return;
     }
     if (!metadata.isFile()) {

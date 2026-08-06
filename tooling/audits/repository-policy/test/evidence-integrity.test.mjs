@@ -7,7 +7,11 @@ import { canonicalJson } from '../src/canonical-json.mjs';
 import { EvidenceIntegrityError, verifyEvidence } from '../src/evidence-verify.mjs';
 import { sha256 } from '../src/policy.mjs';
 
-async function fixture({ validation = false, recordOnlyValidation = false } = {}) {
+async function fixture({
+  applicability = false,
+  validation = false,
+  recordOnlyValidation = false,
+} = {}) {
   const root = await mkdtemp(join(tmpdir(), 'core-ui-evidence-'));
   await mkdir(join(root, 'tests/evidence/g0.0/artifacts'), { recursive: true });
   await mkdir(join(root, 'tests/evidence/g0.0/records'), { recursive: true });
@@ -21,6 +25,25 @@ async function fixture({ validation = false, recordOnlyValidation = false } = {}
     sourceTree: 'fixture-tree',
   };
   const hasValidation = validation || recordOnlyValidation;
+  let applicabilityManifest;
+  if (applicability) {
+    const ownedPath = 'packages/source/owned.txt';
+    const ownedBytes = 'repository-owned\n';
+    await mkdir(join(root, 'packages/source/node_modules/dependency'), { recursive: true });
+    await writeFile(join(root, ownedPath), ownedBytes);
+    await writeFile(
+      join(root, 'packages/source/node_modules/dependency/install.txt'),
+      'platform-specific install\n',
+    );
+    applicabilityManifest = {
+      paths: ['packages/source'],
+      profile: 'core-ui-path-manifest-v1',
+      sha256: `sha256:${sha256(canonicalJson([{
+        path: ownedPath,
+        sha256: `sha256:${sha256(ownedBytes)}`,
+      }]))}`,
+    };
+  }
   const validationReference = hasValidation ? {
     path: validationPath,
     sha256: `sha256:${sha256(canonicalJson(validationValue))}`,
@@ -31,6 +54,7 @@ async function fixture({ validation = false, recordOnlyValidation = false } = {}
     assertionId: 'E-G0.0-01',
     sourceRevision: 'fixture-source',
     sourceTree: 'fixture-tree',
+    ...(applicability ? { applicabilityManifest } : {}),
     ...(hasValidation ? { validation: validationReference } : {}),
   });
   await writeFile(join(root, recordPath), recordBytes);
@@ -43,6 +67,7 @@ async function fixture({ validation = false, recordOnlyValidation = false } = {}
         sha256: `sha256:${sha256(recordBytes)}`,
       }],
       sourceRevision: 'fixture-source',
+      ...(applicability ? { applicabilityManifest } : {}),
       ...(validation ? { validation: validationReference } : {}),
     }),
   );
@@ -60,6 +85,15 @@ test('content-addressed evidence index verifies canonical records and artifacts'
 
 test('content-addressed evidence verifies one shared validation result', async () => {
   const { root } = await fixture({ validation: true });
+  assert.deepEqual(await verifyEvidence(root), {
+    indexCount: 1,
+    recordCount: 1,
+    artifactCount: 1,
+  });
+});
+
+test('applicability manifests ignore platform-specific install directories', async () => {
+  const { root } = await fixture({ applicability: true });
   assert.deepEqual(await verifyEvidence(root), {
     indexCount: 1,
     recordCount: 1,

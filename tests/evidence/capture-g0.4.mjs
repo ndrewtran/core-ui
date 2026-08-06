@@ -14,6 +14,7 @@ import {
 } from '../../packages/tooling/src/local-resolver.mjs';
 import { runCli } from '../../packages/tooling/src/cli.mjs';
 import { resolvePnpmProjectCatalog } from '../../packages/tooling/src/pnpm-adapter.mjs';
+import { isIgnoredRepositoryEntry } from '../../tooling/audits/repository-policy/src/policy.mjs';
 
 const repositoryRoot = resolve(import.meta.dirname, '../..');
 const captureTimestamp = new Date().toISOString().replace(/\.\d{3}Z$/u, 'Z');
@@ -69,7 +70,10 @@ async function manifestEntries(paths) {
     if (metadata.isDirectory()) {
       const children = await readdir(absolutePath);
       children.sort((left, right) => left.localeCompare(right));
-      for (const child of children) await visit(join(relativePath, child));
+      for (const child of children) {
+        if (isIgnoredRepositoryEntry(child)) continue;
+        await visit(join(relativePath, child));
+      }
     } else if (metadata.isFile()) {
       entries.push({ path: relativePath, sha256: sha256(await readFile(absolutePath)) });
     }
