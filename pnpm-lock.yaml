@@ -16,4 +16,13 @@ importers:
 
   packages/schema: {}
 
+  packages/tooling:
+    dependencies:
+      '@core-ui/catalog':
+        specifier: workspace:*
+        version: link:../catalog
+      '@core-ui/schema':
+        specifier: workspace:*
+        version: link:../schema
+
   tooling/audits/repository-policy: {}

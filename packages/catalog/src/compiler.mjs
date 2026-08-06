@@ -51,11 +51,13 @@ function validateSourceManifest(manifest) {
     || manifest.schema !== SOURCE_MANIFEST_SCHEMA
     || !Array.isArray(manifest.records)
     || manifest.records.length === 0
-    || Object.keys(manifest).some((key) => !['schema', 'records'].includes(key))
+    || Object.keys(manifest).some((key) => !['schema', 'commandRegistryPath', 'records'].includes(key))
+    || typeof manifest.commandRegistryPath !== 'string'
   ) {
     throw new Error('CORE_CATALOG_SOURCE_INVALID: invalid catalog source manifest');
   }
   const paths = new Set();
+  assertRelativePath(manifest.commandRegistryPath, 'commandRegistryPath');
   for (const [index, entry] of manifest.records.entries()) {
     if (
       entry === null
@@ -77,6 +79,7 @@ function validateSourceManifest(manifest) {
   }
   return {
     schema: manifest.schema,
+    commandRegistryPath: manifest.commandRegistryPath,
     records: [...manifest.records].sort((left, right) => compareText(left.path, right.path)),
   };
 }
@@ -142,6 +145,11 @@ export async function compileCatalog({
   }
   const manifestBytes = await readFile(resolve(repositoryRoot, sourceManifestPath), 'utf8');
   const manifest = validateSourceManifest(parseJsonStrict(manifestBytes));
+  const commandRegistryBytes = await readFile(
+    resolve(repositoryRoot, manifest.commandRegistryPath),
+    'utf8',
+  );
+  const commandRegistry = parseJsonStrict(commandRegistryBytes);
   const loaded = [];
 
   for (const entry of manifest.records) {
@@ -216,6 +224,7 @@ export async function compileCatalog({
 
   const sourceRevision = canonicalDigest({
     manifest,
+    commandRegistryDigest: sha256Digest(commandRegistryBytes),
     inputs: loaded.map(({ entry, recordBytes, sourceBytes }) => ({
       path: entry.path,
       digest: sha256Digest(recordBytes),
@@ -235,6 +244,7 @@ export async function compileCatalog({
     schemaVersion: SCHEMA_VERSION,
     catalogVersion: CATALOG_VERSION,
     sourceRevision,
+    commandRegistry,
     artifacts,
     relations,
     searchIndex,

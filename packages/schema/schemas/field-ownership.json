@@ -1411,6 +1411,510 @@
       "owner": "token-source-contract",
       "schema": "token-source.schema.json",
       "schemaPointer": "#/properties/tokens/additionalProperties/properties/value"
+    },
+    {
+      "class": "derived",
+      "name": "available",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/operationDescriptor/properties/available"
+    },
+    {
+      "class": "derived",
+      "name": "requestKeys",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/operationDescriptor/properties/requestKeys"
+    },
+    {
+      "class": "derived",
+      "name": "responseType",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/operationDescriptor/properties/responseType"
+    },
+    {
+      "class": "derived",
+      "name": "getManifest",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/operationManifest/properties/getManifest"
+    },
+    {
+      "class": "derived",
+      "name": "listArtifacts",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/operationManifest/properties/listArtifacts"
+    },
+    {
+      "class": "derived",
+      "name": "searchArtifacts",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/operationManifest/properties/searchArtifacts"
+    },
+    {
+      "class": "derived",
+      "name": "getArtifact",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/operationManifest/properties/getArtifact"
+    },
+    {
+      "class": "derived",
+      "name": "planComposition",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/operationManifest/properties/planComposition"
+    },
+    {
+      "class": "derived",
+      "name": "name",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/cliIdentity/properties/name"
+    },
+    {
+      "class": "derived",
+      "name": "version",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/cliIdentity/properties/version"
+    },
+    {
+      "class": "derived",
+      "name": "description",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/cliIdentity/properties/description"
+    },
+    {
+      "class": "derived",
+      "name": "available",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/cliCapability/properties/available"
+    },
+    {
+      "class": "derived",
+      "name": "effect",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/cliCapability/properties/effect"
+    },
+    {
+      "class": "derived",
+      "name": "requiresConfirmation",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/cliCapability/properties/requiresConfirmation"
+    },
+    {
+      "class": "derived",
+      "name": "name",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/cliArgument/properties/name"
+    },
+    {
+      "class": "derived",
+      "name": "requestKey",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/cliArgument/properties/requestKey"
+    },
+    {
+      "class": "derived",
+      "name": "required",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/cliArgument/properties/required"
+    },
+    {
+      "class": "derived",
+      "name": "type",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/cliArgument/properties/type"
+    },
+    {
+      "class": "derived",
+      "name": "name",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/cliOption/properties/name"
+    },
+    {
+      "class": "derived",
+      "name": "flag",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/cliOption/properties/flag"
+    },
+    {
+      "class": "derived",
+      "name": "type",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/cliOption/properties/type"
+    },
+    {
+      "class": "derived",
+      "name": "default",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/cliOption/properties/default"
+    },
+    {
+      "class": "derived",
+      "name": "choices",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/cliOption/properties/choices"
+    },
+    {
+      "class": "derived",
+      "name": "minimum",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/cliOption/properties/minimum"
+    },
+    {
+      "class": "derived",
+      "name": "maximum",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/cliOption/properties/maximum"
+    },
+    {
+      "class": "derived",
+      "name": "conflicts",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/cliOption/properties/conflicts"
+    },
+    {
+      "class": "derived",
+      "name": "description",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/cliOption/properties/description"
+    },
+    {
+      "class": "derived",
+      "name": "brief",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/cliTokenBudgets/properties/brief"
+    },
+    {
+      "class": "derived",
+      "name": "compact",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/cliTokenBudgets/properties/compact"
+    },
+    {
+      "class": "derived",
+      "name": "full",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/cliTokenBudgets/properties/full"
+    },
+    {
+      "class": "derived",
+      "name": "name",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/cliUnavailableCommand/properties/name"
+    },
+    {
+      "class": "derived",
+      "name": "earliestMilestone",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/cliUnavailableCommand/properties/earliestMilestone"
+    },
+    {
+      "class": "derived",
+      "name": "capability",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/cliUnavailableCommand/properties/capability"
+    },
+    {
+      "class": "derived",
+      "name": "name",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/cliCompactCommand/properties/name"
+    },
+    {
+      "class": "derived",
+      "name": "summary",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/cliCompactCommand/properties/summary"
+    },
+    {
+      "class": "derived",
+      "name": "responseType",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/cliCompactCommand/properties/responseType"
+    },
+    {
+      "class": "derived",
+      "name": "responseSchema",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/cliCompactCommand/properties/responseSchema"
+    },
+    {
+      "class": "derived",
+      "name": "tokenBudgets",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/cliCompactCommand/properties/tokenBudgets"
+    },
+    {
+      "class": "derived",
+      "name": "name",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/cliFullCommand/properties/name"
+    },
+    {
+      "class": "derived",
+      "name": "summary",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/cliFullCommand/properties/summary"
+    },
+    {
+      "class": "derived",
+      "name": "operation",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/cliFullCommand/properties/operation"
+    },
+    {
+      "class": "derived",
+      "name": "arguments",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/cliFullCommand/properties/arguments"
+    },
+    {
+      "class": "derived",
+      "name": "options",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/cliFullCommand/properties/options"
+    },
+    {
+      "class": "derived",
+      "name": "examples",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/cliFullCommand/properties/examples"
+    },
+    {
+      "class": "derived",
+      "name": "budgetFixture",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/cliFullCommand/properties/budgetFixture"
+    },
+    {
+      "class": "derived",
+      "name": "tokenBudgets",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/cliFullCommand/properties/tokenBudgets"
+    },
+    {
+      "class": "derived",
+      "name": "responseType",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/cliFullCommand/properties/responseType"
+    },
+    {
+      "class": "derived",
+      "name": "responseSchema",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/cliFullCommand/properties/responseSchema"
+    },
+    {
+      "class": "derived",
+      "name": "capability",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/cliFullCommand/properties/capability"
+    },
+    {
+      "class": "derived",
+      "name": "name",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/cliBriefManifest/properties/name"
+    },
+    {
+      "class": "derived",
+      "name": "version",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/cliBriefManifest/properties/version"
+    },
+    {
+      "class": "derived",
+      "name": "commands",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/cliBriefManifest/properties/commands"
+    },
+    {
+      "class": "derived",
+      "name": "cli",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/cliCompactManifest/properties/cli"
+    },
+    {
+      "class": "derived",
+      "name": "commands",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/cliCompactManifest/properties/commands"
+    },
+    {
+      "class": "derived",
+      "name": "outputModes",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/cliCompactManifest/properties/outputModes"
+    },
+    {
+      "class": "derived",
+      "name": "unavailableCommands",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/cliCompactManifest/properties/unavailableCommands"
+    },
+    {
+      "class": "derived",
+      "name": "schemaVersion",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/cliFullManifest/properties/schemaVersion"
+    },
+    {
+      "class": "derived",
+      "name": "cli",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/cliFullManifest/properties/cli"
+    },
+    {
+      "class": "derived",
+      "name": "tokenizer",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/cliFullManifest/properties/tokenizer"
+    },
+    {
+      "class": "derived",
+      "name": "id",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/cliFullManifest/properties/tokenizer/properties/id"
+    },
+    {
+      "class": "derived",
+      "name": "description",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/cliFullManifest/properties/tokenizer/properties/description"
+    },
+    {
+      "class": "derived",
+      "name": "selectors",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/cliFullManifest/properties/selectors"
+    },
+    {
+      "class": "derived",
+      "name": "globalOptions",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/cliFullManifest/properties/globalOptions"
+    },
+    {
+      "class": "derived",
+      "name": "bareJsonRecoveryCommand",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/cliFullManifest/properties/bareJsonRecoveryCommand"
+    },
+    {
+      "class": "derived",
+      "name": "commands",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/cliFullManifest/properties/commands"
+    },
+    {
+      "class": "derived",
+      "name": "unavailableCommands",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/cliFullManifest/properties/unavailableCommands"
+    },
+    {
+      "class": "derived",
+      "name": "outputModes",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/cliFullManifest/properties/outputModes"
+    },
+    {
+      "class": "derived",
+      "name": "surfacePolicy",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/cliFullManifest/properties/surfacePolicy"
+    },
+    {
+      "class": "derived",
+      "name": "cli",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/cliFullManifest/properties/surfacePolicy/properties/cli"
+    },
+    {
+      "class": "derived",
+      "name": "mcp",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/cliFullManifest/properties/surfacePolicy/properties/mcp"
+    },
+    {
+      "class": "derived",
+      "name": "cli",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/manifestData/properties/cli"
+    },
+    {
+      "class": "derived",
+      "name": "available",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/cliUnavailableCapability/properties/available"
     }
   ],
   "governedSchemas": [

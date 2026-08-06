@@ -83,6 +83,14 @@ test('E-G0.2-02: list, search, and get are deterministic with exact provenance',
     platform: 'web.react',
     detail: 'full',
   }));
+  assert.deepEqual(getArtifact({
+    id: 'core:component:button',
+    platform: 'web.react',
+    detail: 'full',
+  }), detail);
+  assert.equal(getArtifact({ id: 'button', detail: 'brief' }).error.code, 'CORE_QUERY_INVALID');
+  assert.equal(getArtifact({ id: 'Button', detail: 'brief' }).error.code, 'CORE_QUERY_INVALID');
+  assert.equal(getManifest({ limit: 1 }).error.code, 'CORE_QUERY_INVALID');
   assert.equal(list.type, 'artifact.list');
   assert.equal(search.type, 'artifact.search');
   assert.equal(detail.type, 'artifact.detail');
@@ -254,6 +262,7 @@ test('E-G0.2-04 negative: unsupported selectors and missing artifacts are typed'
   assert.equal(listArtifacts({ kind: 'not-a-kind' }).error.code, 'CORE_QUERY_INVALID');
   assert.equal(searchArtifacts({ query: ' '.repeat(257) }).error.code, 'CORE_QUERY_INVALID');
   assert.equal(searchArtifacts({ query: '---' }).error.code, 'CORE_QUERY_INVALID');
+  assert.equal(getArtifact({ id: '' }).error.code, 'CORE_QUERY_INVALID');
   assert.equal(getArtifact({ id: 'not-an-artifact-ref' }).error.code, 'CORE_QUERY_INVALID');
   const missing = getArtifact({ id: 'core:component:missing' });
   assert.equal(missing.error.code, 'CORE_ARTIFACT_NOT_FOUND');

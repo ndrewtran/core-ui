@@ -1,0 +1,143 @@
+{
+  "schemaVersion": "1.0.0",
+  "cli": {
+    "name": "core",
+    "version": "0.0.0",
+    "description": "Deterministic Core UI documentation over the local catalog query API."
+  },
+  "tokenizer": {
+    "id": "core-ui-lexeme-v1",
+    "description": "Unicode letter, number, and underscore runs counted as retrieval lexemes."
+  },
+  "outputModes": ["human", "json", "dense"],
+  "bareJsonRecoveryCommand": "manifest",
+  "globalOptions": [
+    {
+      "name": "json",
+      "flag": "--json",
+      "type": "boolean",
+      "default": false,
+      "conflicts": ["dense"],
+      "description": "Write exactly one JSON response value to stdout."
+    },
+    {
+      "name": "dense",
+      "flag": "--dense",
+      "type": "boolean",
+      "default": false,
+      "conflicts": ["json"],
+      "description": "Write the deterministic token-efficient response projection."
+    },
+    {
+      "name": "help",
+      "flag": "--help",
+      "type": "boolean",
+      "default": false,
+      "conflicts": [],
+      "description": "Show generated help for the selected command."
+    }
+  ],
+  "selectors": [
+    {
+      "name": "platform",
+      "flag": "--platform",
+      "type": "string",
+      "choices": ["web.html", "web.react", "native.react-native", "native.react-native-web"],
+      "default": null
+    },
+    {
+      "name": "detail",
+      "flag": "--detail",
+      "type": "string",
+      "choices": ["brief", "compact", "full"],
+      "default": "compact"
+    },
+    {
+      "name": "section",
+      "flag": "--section",
+      "type": "string",
+      "choices": ["api", "examples", "guidance", "decision-context", "accessibility", "styling", "source"],
+      "default": null
+    },
+    {
+      "name": "purpose",
+      "flag": "--purpose",
+      "type": "string",
+      "choices": ["generation", "explanation", "validation", "migration"],
+      "default": null
+    },
+    {
+      "name": "limit",
+      "flag": "--limit",
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 100,
+      "default": 20
+    },
+    {
+      "name": "cursor",
+      "flag": "--cursor",
+      "type": "string",
+      "default": null
+    }
+  ],
+  "commands": [
+    {
+      "name": "manifest",
+      "summary": "Discover CLI grammar, schemas, capabilities, and catalog identity.",
+      "operation": "getManifest",
+      "arguments": [],
+      "options": ["detail", "json", "dense", "help"],
+      "examples": ["core manifest --json", "core manifest --detail brief --dense"],
+      "budgetFixture": {},
+      "tokenBudgets": { "brief": 256, "compact": 512, "full": 1024 }
+    },
+    {
+      "name": "list",
+      "summary": "List catalog artifacts with common applicability selectors.",
+      "operation": "listArtifacts",
+      "arguments": [
+        { "name": "kind", "required": false, "type": "artifact-kind" }
+      ],
+      "options": ["platform", "detail", "purpose", "limit", "cursor", "json", "dense", "help"],
+      "examples": ["core list component --platform web.react --json", "core list --detail brief --dense"],
+      "budgetFixture": { "limit": 1 },
+      "tokenBudgets": { "brief": 256, "compact": 512, "full": 1024 }
+    },
+    {
+      "name": "search",
+      "summary": "Search the catalog with deterministic match reasons.",
+      "operation": "searchArtifacts",
+      "arguments": [
+        { "name": "query", "required": true, "type": "string" }
+      ],
+      "options": ["platform", "detail", "purpose", "limit", "cursor", "json", "dense", "help"],
+      "examples": ["core search button --platform web.react --json", "core search action --detail brief --dense"],
+      "budgetFixture": { "query": "button", "limit": 1 },
+      "tokenBudgets": { "brief": 384, "compact": 768, "full": 1536 }
+    },
+    {
+      "name": "get",
+      "summary": "Retrieve one artifact by exact immutable ArtifactRef.",
+      "operation": "getArtifact",
+      "arguments": [
+        { "name": "id-or-alias", "requestKey": "id", "required": true, "type": "string" }
+      ],
+      "options": ["platform", "detail", "section", "purpose", "json", "dense", "help"],
+      "examples": ["core get core:component:button --platform web.react --json", "core get core:component:button --detail compact --dense"],
+      "budgetFixture": { "id-or-alias": "core:component:button" },
+      "tokenBudgets": { "brief": 384, "compact": 1024, "full": 2048 }
+    }
+  ],
+  "unavailableCommands": [
+    { "name": "validate", "earliestMilestone": "G2.2" },
+    { "name": "plan", "earliestMilestone": "G2.4" },
+    { "name": "doctor", "earliestMilestone": "G2.5" },
+    { "name": "init", "earliestMilestone": "G2.5" },
+    { "name": "migrate", "earliestMilestone": "G3.2" }
+  ],
+  "surfacePolicy": {
+    "cli": { "effect": "read-only", "requiresConfirmation": false },
+    "mcp": { "available": false, "effect": "read-only", "requiresConfirmation": false }
+  }
+}
