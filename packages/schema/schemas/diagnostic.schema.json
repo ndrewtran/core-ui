@@ -4,6 +4,71 @@
   "title": "Core UI diagnostic",
   "type": "object",
   "additionalProperties": true,
+  "$defs": {
+    "digest": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+    "secondaryFailure": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "ruleId", "reason"],
+      "properties": {
+        "code": {
+          "enum": [
+            "CORE_CATALOG_NOT_DECLARED",
+            "CORE_CATALOG_NOT_INSTALLED",
+            "CORE_CATALOG_DECLARATION_DRIFT",
+            "CORE_CATALOG_INTEGRITY_MISMATCH",
+            "CORE_CATALOG_RESOLUTION_AMBIGUOUS",
+            "CORE_CATALOG_INCOMPATIBLE"
+          ]
+        },
+        "ruleId": { "type": "string", "pattern": "^[a-z][a-z0-9-]*(?:\\.[a-z][a-z0-9-]*)+$" },
+        "reason": { "type": "string", "minLength": 1 }
+      }
+    },
+    "candidate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["relativePath", "version", "catalogDigest", "rejectionReasons"],
+      "properties": {
+        "relativePath": { "type": "string", "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$)).+$" },
+        "version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(?:-[0-9A-Za-z.-]+)?$" },
+        "catalogDigest": { "anyOf": [{ "$ref": "#/$defs/digest" }, { "type": "null" }] },
+        "rejectionReasons": { "type": "array", "items": { "type": "string", "minLength": 1 }, "uniqueItems": true }
+      }
+    },
+    "compatibilityFailure": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["dimension", "required", "actual"],
+      "properties": {
+        "dimension": {
+          "enum": ["schema", "tooling-api", "binding-spec", "renderer-package", "export", "token", "release-manifest"]
+        },
+        "required": { "type": "string", "minLength": 1 },
+        "actual": { "type": "string", "minLength": 1 }
+      }
+    },
+    "resolverDetails": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["workspacePath", "packageManager", "secondaryFailures"],
+      "properties": {
+        "workspacePackage": { "type": ["string", "null"] },
+        "workspacePath": { "type": "string", "pattern": "^(?:\\.|(?!/)(?!.*(?:^|/)\\.\\.(?:/|$)).+)$" },
+        "packageManager": { "type": "string", "pattern": "^[a-z0-9-]+@[0-9]+\\.[0-9]+\\.[0-9]+$" },
+        "declaredRange": { "type": ["string", "null"] },
+        "lockfileVersions": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+        "installedVersions": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+        "catalogVersion": { "type": ["string", "null"] },
+        "catalogDigest": { "anyOf": [{ "$ref": "#/$defs/digest" }, { "type": "null" }] },
+        "expectedDigest": { "anyOf": [{ "$ref": "#/$defs/digest" }, { "type": "null" }] },
+        "actualDigest": { "anyOf": [{ "$ref": "#/$defs/digest" }, { "type": "null" }] },
+        "candidates": { "type": "array", "items": { "$ref": "#/$defs/candidate" } },
+        "compatibilityFailures": { "type": "array", "items": { "$ref": "#/$defs/compatibilityFailure" } },
+        "secondaryFailures": { "type": "array", "items": { "$ref": "#/$defs/secondaryFailure" }, "uniqueItems": true }
+      }
+    }
+  },
   "required": ["code", "ruleId", "message", "retryable", "details"],
   "properties": {
     "code": { "$ref": "error-code.schema.json" },
@@ -21,5 +86,65 @@
         "requiresConfirmation": { "type": "boolean" }
       }
     }
-  }
+  },
+  "oneOf": [
+    {
+      "properties": {
+        "code": {
+          "enum": [
+            "CORE_SCHEMA_INVALID",
+            "CORE_ARTIFACT_ID_INVALID",
+            "CORE_RELATION_INVALID",
+            "CORE_FIELD_OWNERSHIP_INVALID",
+            "CORE_SCHEMA_VERSION_UNSUPPORTED",
+            "CORE_QUERY_INVALID",
+            "CORE_CURSOR_INVALID",
+            "CORE_ARTIFACT_NOT_FOUND"
+          ]
+        }
+      }
+    },
+    {
+      "properties": {
+        "code": { "const": "CORE_PROJECT_NOT_FOUND" },
+        "details": { "$ref": "#/$defs/resolverDetails" }
+      }
+    },
+    {
+      "properties": {
+        "code": { "const": "CORE_CATALOG_NOT_DECLARED" },
+        "details": { "$ref": "#/$defs/resolverDetails" }
+      }
+    },
+    {
+      "properties": {
+        "code": { "const": "CORE_CATALOG_NOT_INSTALLED" },
+        "details": { "$ref": "#/$defs/resolverDetails" }
+      }
+    },
+    {
+      "properties": {
+        "code": { "const": "CORE_CATALOG_DECLARATION_DRIFT" },
+        "details": { "$ref": "#/$defs/resolverDetails" }
+      }
+    },
+    {
+      "properties": {
+        "code": { "const": "CORE_CATALOG_INTEGRITY_MISMATCH" },
+        "details": { "$ref": "#/$defs/resolverDetails" }
+      }
+    },
+    {
+      "properties": {
+        "code": { "const": "CORE_CATALOG_RESOLUTION_AMBIGUOUS" },
+        "details": { "$ref": "#/$defs/resolverDetails" }
+      }
+    },
+    {
+      "properties": {
+        "code": { "const": "CORE_CATALOG_INCOMPATIBLE" },
+        "details": { "$ref": "#/$defs/resolverDetails" }
+      }
+    }
+  ]
 }

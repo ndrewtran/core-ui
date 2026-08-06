@@ -1,4 +1,5 @@
 import { canonicalJson } from '@core-ui/schema';
+import { valid } from 'semver';
 import {
   helpByCommand,
   helpText,
@@ -132,6 +133,44 @@ export function parseCliArguments(args) {
 
   const mode = outputMode(values);
   if (values.help) return { kind: 'help', mode: 'human', text: helpByCommand[commandName] };
+  if (Boolean(values['catalog-version']) !== Boolean(values['catalog-digest'])) {
+    return { mode, error: usageError(
+      'cli.resolution.cache-tuple',
+      '--catalog-version and --catalog-digest must be provided together.',
+      { command: commandName, fields: ['catalog-digest', 'catalog-version'] },
+      `core ${commandName} --help`,
+    ) };
+  }
+  if (
+    values.project !== null
+    && (
+      values.project.startsWith('/')
+      || /^[A-Za-z]:[\\/]/u.test(values.project)
+      || values.project.split('/').includes('..')
+      || !/^[A-Za-z0-9._/-]+$/u.test(values.project)
+    )
+  ) {
+    return { mode, error: usageError(
+      'cli.resolution.project-path',
+      '--project must be a shell-safe relative path without parent traversal.',
+      { command: commandName, fields: ['project'] },
+      `core ${commandName} --help`,
+    ) };
+  }
+  if (
+    values['catalog-version'] !== null
+    && (
+      valid(values['catalog-version']) === null
+      || !/^sha256:[a-f0-9]{64}$/u.test(values['catalog-digest'])
+    )
+  ) {
+    return { mode, error: usageError(
+      'cli.resolution.cache-identity',
+      'Cached catalog selection requires one exact SemVer and SHA-256 digest.',
+      { command: commandName, fields: ['catalog-digest', 'catalog-version'] },
+      `core ${commandName} --help`,
+    ) };
+  }
   const requiredCount = command.arguments.filter(({ required }) => required).length;
   if (positionals.length < requiredCount || positionals.length > command.arguments.length) {
     return { mode, error: usageError(
@@ -147,8 +186,22 @@ export function parseCliArguments(args) {
     if (positionals[index] !== undefined) request[argument.name] = positionals[index];
   });
   for (const option of command.options) {
-    if (['dense', 'help', 'json'].includes(option.name)) continue;
+    if (['catalog-digest', 'catalog-version', 'dense', 'help', 'json', 'project'].includes(option.name)) {
+      continue;
+    }
     request[option.name] = values[option.name];
   }
-  return { kind: 'command', command: commandName, mode, request };
+  return {
+    kind: 'command',
+    command: commandName,
+    mode,
+    request,
+    resolution: {
+      project: values.project,
+      cache: values['catalog-version'] === null ? null : {
+        version: values['catalog-version'],
+        digest: values['catalog-digest'],
+      },
+    },
+  };
 }

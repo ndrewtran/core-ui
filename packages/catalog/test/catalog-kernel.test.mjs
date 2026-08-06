@@ -97,6 +97,8 @@ test('E-G0.2-02: list, search, and get are deterministic with exact provenance',
   assert.equal(detail.meta.authority, 'advisory');
   assert.equal(detail.meta.resolution.authority, 'advisory');
   assert.equal(detail.meta.resolution.compatibility, 'unresolved');
+  assert.equal(detail.meta.resolution.catalogSource, 'package');
+  assert.deepEqual(detail.meta.resolution.targetPackages, {});
   assert.equal(detail.meta.catalogDigest, baseBundle.catalogDigest);
   assert.equal(detail.meta.sourceRevision, baseBundle.sourceRevision);
   assert.equal(detail.meta.resolution.sourceRevision, baseBundle.sourceRevision);

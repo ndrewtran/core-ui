@@ -1,0 +1,763 @@
+{
+  "schema": "core-ui-resolver-fixture-corpus-v1",
+  "packageManager": {
+    "name": "pnpm",
+    "version": "10.33.0",
+    "lockfileVersion": "9.0"
+  },
+  "errorPrecedence": [
+    "CORE_PROJECT_NOT_FOUND",
+    "CORE_CATALOG_NOT_DECLARED",
+    "CORE_CATALOG_NOT_INSTALLED",
+    "CORE_CATALOG_DECLARATION_DRIFT",
+    "CORE_CATALOG_INTEGRITY_MISMATCH",
+    "CORE_CATALOG_RESOLUTION_AMBIGUOUS",
+    "CORE_CATALOG_INCOMPATIBLE"
+  ],
+  "catalogs": [
+    {
+      "id": "catalog-compatible",
+      "name": "@core-ui/catalog",
+      "version": "1.0.0",
+      "catalogVersion": "1.0.0",
+      "catalogDigest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "queryApiVersion": "1.0.0",
+      "schemaRange": "^1.0.0",
+      "sourceRevision": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+      "provenance": {
+        "kind": "source-revision",
+        "value": "sha256:1111111111111111111111111111111111111111111111111111111111111111"
+      },
+      "releaseManifest": "release-compatible"
+    },
+    {
+      "id": "catalog-newer",
+      "name": "@core-ui/catalog",
+      "version": "1.1.0",
+      "catalogVersion": "1.1.0",
+      "catalogDigest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "queryApiVersion": "1.0.0",
+      "schemaRange": "^1.0.0",
+      "sourceRevision": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+      "provenance": {
+        "kind": "source-revision",
+        "value": "sha256:2222222222222222222222222222222222222222222222222222222222222222"
+      },
+      "releaseManifest": "release-newer"
+    }
+  ],
+  "rendererDescriptors": [
+    {
+      "id": "renderer-native-compatible",
+      "descriptorVersion": "1.0.0",
+      "package": "@core-ui/react-native",
+      "version": "1.0.0",
+      "bindingSchemaRange": "^1.0.0",
+      "tokenContractRange": "^1.0.0",
+      "releaseProvenance": "release-compatible",
+      "bindings": {
+        "core:component:button#native.react-native": {
+          "specRevision": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+          "export": "@core-ui/react-native/button",
+          "lifecycle": "experimental",
+          "strategy": "direct",
+          "tokenRequirementsDigest": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+        }
+      }
+    },
+    {
+      "id": "renderer-react-compatible",
+      "descriptorVersion": "1.0.0",
+      "package": "@core-ui/react",
+      "version": "1.0.0",
+      "bindingSchemaRange": "^1.0.0",
+      "tokenContractRange": "^1.0.0",
+      "releaseProvenance": "release-compatible",
+      "bindings": {
+        "core:component:button#web.react": {
+          "specRevision": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "export": "@core-ui/react/button",
+          "lifecycle": "experimental",
+          "strategy": "direct",
+          "tokenRequirementsDigest": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+        }
+      }
+    },
+    {
+      "id": "renderer-react-incompatible",
+      "descriptorVersion": "1.0.0",
+      "package": "@core-ui/react",
+      "version": "1.1.0",
+      "bindingSchemaRange": "^2.0.0",
+      "tokenContractRange": "^2.0.0",
+      "releaseProvenance": "release-newer",
+      "bindings": {
+        "core:component:button#web.react": {
+          "specRevision": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+          "export": "@core-ui/react/button",
+          "lifecycle": "experimental",
+          "strategy": "direct",
+          "tokenRequirementsDigest": "sha256:8888888888888888888888888888888888888888888888888888888888888888"
+        }
+      }
+    }
+  ],
+  "releaseManifests": [
+    {
+      "id": "release-compatible",
+      "releaseVersion": "1.0.0",
+      "schemaVersion": "1.0.0",
+      "queryApiVersion": "1.0.0",
+      "tokenContractVersion": "1.0.0",
+      "sourceRevision": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+      "catalog": {
+        "id": "catalog-compatible",
+        "version": "1.0.0",
+        "digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "bindings": [
+        {
+          "descriptor": "renderer-native-compatible",
+          "binding": "core:component:button#native.react-native",
+          "package": "@core-ui/react-native",
+          "version": "1.0.0",
+          "export": "@core-ui/react-native/button",
+          "specRevision": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+          "tokenRequirementsDigest": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+        },
+        {
+          "descriptor": "renderer-react-compatible",
+          "binding": "core:component:button#web.react",
+          "package": "@core-ui/react",
+          "version": "1.0.0",
+          "export": "@core-ui/react/button",
+          "specRevision": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "tokenRequirementsDigest": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+        }
+      ]
+    },
+    {
+      "id": "release-newer",
+      "releaseVersion": "1.1.0",
+      "schemaVersion": "2.0.0",
+      "queryApiVersion": "1.0.0",
+      "tokenContractVersion": "2.0.0",
+      "sourceRevision": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+      "catalog": {
+        "id": "catalog-newer",
+        "version": "1.1.0",
+        "digest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+      },
+      "bindings": [
+        {
+          "descriptor": "renderer-react-incompatible",
+          "binding": "core:component:button#web.react",
+          "package": "@core-ui/react",
+          "version": "1.1.0",
+          "export": "@core-ui/react/button",
+          "specRevision": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+          "tokenRequirementsDigest": "sha256:8888888888888888888888888888888888888888888888888888888888888888"
+        }
+      ]
+    }
+  ],
+  "graphs": [
+    {
+      "id": "catalog-declaration-drift",
+      "selectedWorkspace": "apps/consumer",
+      "workspaceRoot": ".",
+      "workspaces": [
+        {
+          "path": ".",
+          "name": "fixture-root",
+          "packageManager": "pnpm@10.33.0",
+          "catalogRange": null
+        },
+        {
+          "path": "apps/consumer",
+          "name": "consumer",
+          "packageManager": null,
+          "catalogRange": "1.0.0"
+        }
+      ],
+      "lockfile": [
+        {
+          "workspace": "apps/consumer",
+          "name": "@core-ui/catalog",
+          "version": "1.0.0",
+          "integrity": "sha512:catalog-compatible"
+        }
+      ],
+      "installed": [
+        {
+          "workspace": "apps/consumer",
+          "name": "@core-ui/catalog",
+          "version": "1.1.0",
+          "kind": "catalog",
+          "fixture": "catalog-newer",
+          "relativePath": "apps/consumer/node_modules/@core-ui/catalog",
+          "observedDigest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+        }
+      ],
+      "caches": [],
+      "request": {
+        "bindings": ["core:component:button#web.react"],
+        "cache": null
+      },
+      "expected": {
+        "type": "error",
+        "code": "CORE_CATALOG_DECLARATION_DRIFT",
+        "secondaryCodes": ["CORE_CATALOG_INCOMPATIBLE"],
+        "nextCommand": {
+          "command": "pnpm --dir apps/consumer why @core-ui/catalog",
+          "effect": "read-only",
+          "requiresConfirmation": false
+        }
+      }
+    },
+    {
+      "id": "catalog-incompatible",
+      "selectedWorkspace": "apps/consumer",
+      "workspaceRoot": ".",
+      "workspaces": [
+        {
+          "path": ".",
+          "name": "fixture-root",
+          "packageManager": "pnpm@10.33.0",
+          "catalogRange": null
+        },
+        {
+          "path": "apps/consumer",
+          "name": "consumer",
+          "packageManager": null,
+          "catalogRange": "1.0.0"
+        }
+      ],
+      "lockfile": [
+        {
+          "workspace": "apps/consumer",
+          "name": "@core-ui/catalog",
+          "version": "1.0.0",
+          "integrity": "sha512:catalog-compatible"
+        },
+        {
+          "workspace": "apps/consumer",
+          "name": "@core-ui/react",
+          "version": "1.1.0",
+          "integrity": "sha512:renderer-react-incompatible"
+        }
+      ],
+      "installed": [
+        {
+          "workspace": "apps/consumer",
+          "name": "@core-ui/catalog",
+          "version": "1.0.0",
+          "kind": "catalog",
+          "fixture": "catalog-compatible",
+          "relativePath": "apps/consumer/node_modules/@core-ui/catalog",
+          "observedDigest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        {
+          "workspace": "apps/consumer",
+          "name": "@core-ui/react",
+          "version": "1.1.0",
+          "kind": "renderer",
+          "fixture": "renderer-react-incompatible",
+          "relativePath": "apps/consumer/node_modules/@core-ui/react",
+          "observedDigest": null
+        }
+      ],
+      "caches": [],
+      "request": {
+        "bindings": ["core:component:button#web.react"],
+        "cache": null
+      },
+      "expected": {
+        "type": "error",
+        "code": "CORE_CATALOG_INCOMPATIBLE",
+        "secondaryCodes": [],
+        "nextCommand": {
+          "command": "pnpm --dir apps/consumer why @core-ui/react",
+          "effect": "read-only",
+          "requiresConfirmation": false
+        }
+      }
+    },
+    {
+      "id": "catalog-integrity-mismatch",
+      "selectedWorkspace": "apps/consumer",
+      "workspaceRoot": ".",
+      "workspaces": [
+        {
+          "path": ".",
+          "name": "fixture-root",
+          "packageManager": "pnpm@10.33.0",
+          "catalogRange": null
+        },
+        {
+          "path": "apps/consumer",
+          "name": "consumer",
+          "packageManager": null,
+          "catalogRange": "1.0.0"
+        }
+      ],
+      "lockfile": [
+        {
+          "workspace": "apps/consumer",
+          "name": "@core-ui/catalog",
+          "version": "1.0.0",
+          "integrity": "sha512:catalog-compatible"
+        }
+      ],
+      "installed": [
+        {
+          "workspace": "apps/consumer",
+          "name": "@core-ui/catalog",
+          "version": "1.0.0",
+          "kind": "catalog",
+          "fixture": "catalog-compatible",
+          "relativePath": "apps/consumer/node_modules/@core-ui/catalog",
+          "observedDigest": "sha256:7777777777777777777777777777777777777777777777777777777777777777"
+        }
+      ],
+      "caches": [],
+      "request": {
+        "bindings": ["core:component:button#web.react"],
+        "cache": null
+      },
+      "expected": {
+        "type": "error",
+        "code": "CORE_CATALOG_INTEGRITY_MISMATCH",
+        "secondaryCodes": [],
+        "nextCommand": {
+          "command": "pnpm --dir apps/consumer why @core-ui/catalog",
+          "effect": "read-only",
+          "requiresConfirmation": false
+        }
+      }
+    },
+    {
+      "id": "catalog-not-declared",
+      "selectedWorkspace": "apps/consumer",
+      "workspaceRoot": ".",
+      "workspaces": [
+        {
+          "path": ".",
+          "name": "fixture-root",
+          "packageManager": "pnpm@10.33.0",
+          "catalogRange": null
+        },
+        {
+          "path": "apps/consumer",
+          "name": "consumer",
+          "packageManager": null,
+          "catalogRange": null
+        },
+        {
+          "path": "apps/sibling",
+          "name": "sibling",
+          "packageManager": null,
+          "catalogRange": "1.1.0"
+        }
+      ],
+      "lockfile": [
+        {
+          "workspace": "apps/sibling",
+          "name": "@core-ui/catalog",
+          "version": "1.1.0",
+          "integrity": "sha512:catalog-newer"
+        }
+      ],
+      "installed": [
+        {
+          "workspace": "apps/sibling",
+          "name": "@core-ui/catalog",
+          "version": "1.1.0",
+          "kind": "catalog",
+          "fixture": "catalog-newer",
+          "relativePath": "apps/sibling/node_modules/@core-ui/catalog",
+          "observedDigest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+        }
+      ],
+      "caches": [],
+      "request": {
+        "bindings": ["core:component:button#web.react"],
+        "cache": null
+      },
+      "expected": {
+        "type": "error",
+        "code": "CORE_CATALOG_NOT_DECLARED",
+        "secondaryCodes": [],
+        "nextCommand": {
+          "command": "pnpm --dir apps/consumer why @core-ui/catalog",
+          "effect": "read-only",
+          "requiresConfirmation": false
+        }
+      }
+    },
+    {
+      "id": "catalog-not-installed",
+      "selectedWorkspace": "apps/consumer",
+      "workspaceRoot": ".",
+      "workspaces": [
+        {
+          "path": ".",
+          "name": "fixture-root",
+          "packageManager": "pnpm@10.33.0",
+          "catalogRange": null
+        },
+        {
+          "path": "apps/consumer",
+          "name": "consumer",
+          "packageManager": null,
+          "catalogRange": "1.0.0"
+        }
+      ],
+      "lockfile": [
+        {
+          "workspace": "apps/consumer",
+          "name": "@core-ui/catalog",
+          "version": "1.0.0",
+          "integrity": "sha512:catalog-compatible"
+        },
+        {
+          "workspace": "apps/consumer",
+          "name": "@core-ui/react",
+          "version": "1.0.0",
+          "integrity": "sha512:renderer-react-compatible"
+        }
+      ],
+      "installed": [
+        {
+          "workspace": "apps/consumer",
+          "name": "@core-ui/react",
+          "version": "1.0.0",
+          "kind": "renderer",
+          "fixture": "renderer-react-compatible",
+          "relativePath": "apps/consumer/node_modules/@core-ui/react",
+          "observedDigest": null
+        }
+      ],
+      "caches": [
+        {
+          "catalog": "catalog-newer",
+          "version": "1.1.0",
+          "digest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "relativePath": ".cache/core-ui/catalog-newer",
+          "provenanceVerified": true
+        }
+      ],
+      "request": {
+        "bindings": ["core:component:button#web.react"],
+        "cache": null
+      },
+      "expected": {
+        "type": "error",
+        "code": "CORE_CATALOG_NOT_INSTALLED",
+        "secondaryCodes": [],
+        "nextCommand": {
+          "command": "pnpm --dir apps/consumer why @core-ui/catalog",
+          "effect": "read-only",
+          "requiresConfirmation": false
+        }
+      }
+    },
+    {
+      "id": "catalog-resolution-ambiguous",
+      "selectedWorkspace": "apps/consumer",
+      "workspaceRoot": ".",
+      "workspaces": [
+        {
+          "path": ".",
+          "name": "fixture-root",
+          "packageManager": "pnpm@10.33.0",
+          "catalogRange": null
+        },
+        {
+          "path": "apps/consumer",
+          "name": "consumer",
+          "packageManager": null,
+          "catalogRange": "^1.0.0"
+        }
+      ],
+      "lockfile": [
+        {
+          "workspace": "apps/consumer",
+          "name": "@core-ui/catalog",
+          "version": "1.0.0",
+          "integrity": "sha512:catalog-compatible"
+        },
+        {
+          "workspace": "apps/consumer",
+          "name": "@core-ui/catalog",
+          "version": "1.1.0",
+          "integrity": "sha512:catalog-newer"
+        }
+      ],
+      "installed": [
+        {
+          "workspace": "apps/consumer",
+          "name": "@core-ui/catalog",
+          "version": "1.0.0",
+          "kind": "catalog",
+          "fixture": "catalog-compatible",
+          "relativePath": "apps/consumer/node_modules/.pnpm/catalog-compatible/node_modules/@core-ui/catalog",
+          "observedDigest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        {
+          "workspace": "apps/consumer",
+          "name": "@core-ui/catalog",
+          "version": "1.1.0",
+          "kind": "catalog",
+          "fixture": "catalog-newer",
+          "relativePath": "apps/consumer/node_modules/.pnpm/catalog-newer/node_modules/@core-ui/catalog",
+          "observedDigest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+        }
+      ],
+      "caches": [],
+      "request": {
+        "bindings": ["core:component:button#web.react"],
+        "cache": null
+      },
+      "expected": {
+        "type": "error",
+        "code": "CORE_CATALOG_RESOLUTION_AMBIGUOUS",
+        "secondaryCodes": [],
+        "nextCommand": {
+          "command": "pnpm --dir apps/consumer why @core-ui/catalog",
+          "effect": "read-only",
+          "requiresConfirmation": false
+        }
+      }
+    },
+    {
+      "id": "explicit-cache-compatible",
+      "selectedWorkspace": "apps/consumer",
+      "workspaceRoot": ".",
+      "workspaces": [
+        {
+          "path": ".",
+          "name": "fixture-root",
+          "packageManager": "pnpm@10.33.0",
+          "catalogRange": null
+        },
+        {
+          "path": "apps/consumer",
+          "name": "consumer",
+          "packageManager": null,
+          "catalogRange": "1.0.0"
+        }
+      ],
+      "lockfile": [
+        {
+          "workspace": "apps/consumer",
+          "name": "@core-ui/catalog",
+          "version": "1.0.0",
+          "integrity": "sha512:catalog-compatible"
+        },
+        {
+          "workspace": "apps/consumer",
+          "name": "@core-ui/react",
+          "version": "1.0.0",
+          "integrity": "sha512:renderer-react-compatible"
+        }
+      ],
+      "installed": [
+        {
+          "workspace": "apps/consumer",
+          "name": "@core-ui/react",
+          "version": "1.0.0",
+          "kind": "renderer",
+          "fixture": "renderer-react-compatible",
+          "relativePath": "apps/consumer/node_modules/@core-ui/react",
+          "observedDigest": null
+        }
+      ],
+      "caches": [
+        {
+          "catalog": "catalog-compatible",
+          "version": "1.0.0",
+          "digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "relativePath": ".cache/core-ui/catalog-compatible",
+          "provenanceVerified": true
+        },
+        {
+          "catalog": "catalog-newer",
+          "version": "1.1.0",
+          "digest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "relativePath": ".cache/core-ui/catalog-newer",
+          "provenanceVerified": true
+        }
+      ],
+      "request": {
+        "bindings": ["core:component:button#web.react"],
+        "cache": {
+          "version": "1.0.0",
+          "digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        }
+      },
+      "expected": {
+        "type": "success",
+        "authority": "installed-local",
+        "catalog": "catalog-compatible",
+        "releaseManifest": "release-compatible"
+      }
+    },
+    {
+      "id": "project-not-found",
+      "selectedWorkspace": "apps/missing",
+      "workspaceRoot": ".",
+      "workspaces": [
+        {
+          "path": ".",
+          "name": "fixture-root",
+          "packageManager": "pnpm@10.33.0",
+          "catalogRange": null
+        }
+      ],
+      "lockfile": [],
+      "installed": [],
+      "caches": [],
+      "request": {
+        "bindings": ["core:component:button#web.react"],
+        "cache": null
+      },
+      "expected": {
+        "type": "error",
+        "code": "CORE_PROJECT_NOT_FOUND",
+        "secondaryCodes": [],
+        "nextCommand": {
+          "command": "pnpm --dir . list --depth 0",
+          "effect": "read-only",
+          "requiresConfirmation": false
+        }
+      }
+    },
+    {
+      "id": "selected-direct-compatible",
+      "selectedWorkspace": "apps/consumer",
+      "workspaceRoot": ".",
+      "workspaces": [
+        {
+          "path": ".",
+          "name": "fixture-root",
+          "packageManager": "pnpm@10.33.0",
+          "catalogRange": "1.1.0"
+        },
+        {
+          "path": "apps/consumer",
+          "name": "consumer",
+          "packageManager": null,
+          "catalogRange": "1.0.0"
+        },
+        {
+          "path": "apps/sibling",
+          "name": "sibling",
+          "packageManager": null,
+          "catalogRange": "1.1.0"
+        }
+      ],
+      "lockfile": [
+        {
+          "workspace": ".",
+          "name": "@core-ui/catalog",
+          "version": "1.1.0",
+          "integrity": "sha512:catalog-newer"
+        },
+        {
+          "workspace": "apps/consumer",
+          "name": "@core-ui/catalog",
+          "version": "1.0.0",
+          "integrity": "sha512:catalog-compatible"
+        },
+        {
+          "workspace": "apps/consumer",
+          "name": "@core-ui/react",
+          "version": "1.0.0",
+          "integrity": "sha512:renderer-react-compatible"
+        },
+        {
+          "workspace": "apps/consumer",
+          "name": "@core-ui/react-native",
+          "version": "1.0.0",
+          "integrity": "sha512:renderer-native-compatible"
+        },
+        {
+          "workspace": "apps/sibling",
+          "name": "@core-ui/catalog",
+          "version": "1.1.0",
+          "integrity": "sha512:catalog-newer"
+        }
+      ],
+      "installed": [
+        {
+          "workspace": ".",
+          "name": "@core-ui/catalog",
+          "version": "1.1.0",
+          "kind": "catalog",
+          "fixture": "catalog-newer",
+          "relativePath": "node_modules/@core-ui/catalog",
+          "observedDigest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+        },
+        {
+          "workspace": "apps/consumer",
+          "name": "@core-ui/catalog",
+          "version": "1.0.0",
+          "kind": "catalog",
+          "fixture": "catalog-compatible",
+          "relativePath": "apps/consumer/node_modules/@core-ui/catalog",
+          "observedDigest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        {
+          "workspace": "apps/consumer",
+          "name": "@core-ui/react",
+          "version": "1.0.0",
+          "kind": "renderer",
+          "fixture": "renderer-react-compatible",
+          "relativePath": "apps/consumer/node_modules/@core-ui/react",
+          "observedDigest": null
+        },
+        {
+          "workspace": "apps/consumer",
+          "name": "@core-ui/react-native",
+          "version": "1.0.0",
+          "kind": "renderer",
+          "fixture": "renderer-native-compatible",
+          "relativePath": "apps/consumer/node_modules/@core-ui/react-native",
+          "observedDigest": null
+        },
+        {
+          "workspace": "apps/sibling",
+          "name": "@core-ui/catalog",
+          "version": "1.1.0",
+          "kind": "catalog",
+          "fixture": "catalog-newer",
+          "relativePath": "apps/sibling/node_modules/@core-ui/catalog",
+          "observedDigest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+        }
+      ],
+      "caches": [
+        {
+          "catalog": "catalog-newer",
+          "version": "1.1.0",
+          "digest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "relativePath": ".cache/core-ui/catalog-newer",
+          "provenanceVerified": true
+        }
+      ],
+      "request": {
+        "bindings": [
+          "core:component:button#native.react-native",
+          "core:component:button#web.react"
+        ],
+        "cache": null
+      },
+      "expected": {
+        "type": "success",
+        "authority": "installed-local",
+        "catalog": "catalog-compatible",
+        "releaseManifest": "release-compatible"
+      }
+    }
+  ]
+}

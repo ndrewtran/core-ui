@@ -1,12 +1,24 @@
 import { createHash } from 'node:crypto';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
-import { dirname, resolve } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
+import { canonicalJson, parseJsonStrict } from '@core-ui/schema';
+import { generatedText } from '../../../tooling/audits/repository-policy/src/policy.mjs';
 import { compileCatalog } from './compiler.mjs';
 
 const repositoryRoot = resolve(import.meta.dirname, '../../..');
 const source = 'packages/catalog/catalog-sources.json';
-const output = resolve(repositoryRoot, 'packages/catalog/generated/catalog.mjs');
-const { bytes } = await compileCatalog({ repositoryRoot, sourceManifestPath: source });
+const packageRoot = resolve(repositoryRoot, 'packages/catalog');
+const packageManifest = parseJsonStrict(await readFile(join(packageRoot, 'package.json'), 'utf8'));
+const repositoryPolicy = parseJsonStrict(await readFile(
+  join(repositoryRoot, 'tooling/audits/repository-policy/repository-policy.json'),
+  'utf8',
+));
+const { bundle, bytes } = await compileCatalog({ repositoryRoot, sourceManifestPath: source });
+if (packageManifest.version !== bundle.catalogVersion) {
+  throw new Error(
+    'CATALOG_PACKAGE_VERSION_DRIFT: package version must equal compiled catalogVersion',
+  );
+}
 const body = [
   `export const catalogJson = ${JSON.stringify(bytes)};`,
   '',
@@ -18,19 +30,82 @@ const expected = [
   body,
 ].join('\n');
 
-if (process.argv.includes('--check')) {
-  const actual = await readFile(output, 'utf8').catch(() => null);
-  if (actual !== expected) {
-    console.error(
-      'CATALOG_GENERATED_BUNDLE_DRIFT: packages/catalog/generated/catalog.mjs '
-      + `must be regenerated from ${source}`,
-    );
-    process.exitCode = 1;
+const catalogPackageId = `${packageManifest.name}@${packageManifest.version}:${bundle.catalogDigest}`;
+const releaseManifest = {
+  id: `core-ui-release:${packageManifest.version}:${bundle.sourceRevision}`,
+  releaseVersion: packageManifest.version,
+  schemaVersion: bundle.schemaVersion,
+  queryApiVersion: bundle.apiVersion,
+  tokenContractVersion: bundle.schemaVersion,
+  sourceRevision: bundle.sourceRevision,
+  catalog: {
+    id: catalogPackageId,
+    version: packageManifest.version,
+    digest: bundle.catalogDigest,
+  },
+  bindings: [],
+};
+const packageData = {
+  schema: 'core-ui-catalog-package-v1',
+  name: packageManifest.name,
+  version: packageManifest.version,
+  catalogVersion: bundle.catalogVersion,
+  catalogDigest: bundle.catalogDigest,
+  queryApiVersion: bundle.apiVersion,
+  schemaRange: '^1.0.0',
+  sourceRevision: bundle.sourceRevision,
+  provenance: {
+    kind: 'source-revision',
+    value: bundle.sourceRevision,
+  },
+  releaseManifest,
+  bundle: './catalog.json',
+};
+function strictJsonOutputs(path, sourcePath, value) {
+  const expectedBytes = `${typeof value === 'string' ? value : canonicalJson(value)}\n`;
+  const label = `packages/catalog/generated/${path}`;
+  const provenanceLabel = `${label}.provenance`;
+  const provenanceBody = `${canonicalJson({
+    path: label,
+    sha256: `sha256:${createHash('sha256').update(expectedBytes).digest('hex')}`,
+  })}\n`;
+  return [
+    {
+      path: resolve(packageRoot, `generated/${path}`),
+      expected: expectedBytes,
+      label,
+    },
+    {
+      path: resolve(packageRoot, `generated/${path}.provenance`),
+      expected: generatedText({ source: sourcePath, body: provenanceBody, policy: repositoryPolicy }),
+      label: provenanceLabel,
+    },
+  ];
+}
+const outputs = [
+  {
+    path: resolve(packageRoot, 'generated/catalog.mjs'),
+    expected,
+    label: 'packages/catalog/generated/catalog.mjs',
+  },
+  ...strictJsonOutputs('catalog.json', source, bytes),
+  ...strictJsonOutputs('catalog-package.json', 'packages/catalog/package.json', packageData),
+];
+
+for (const output of outputs) {
+  if (process.argv.includes('--check')) {
+    const actual = await readFile(output.path, 'utf8').catch(() => null);
+    if (actual !== output.expected) {
+      console.error(
+        `CATALOG_GENERATED_BUNDLE_DRIFT: ${output.label} must be regenerated from ${source}`,
+      );
+      process.exitCode = 1;
+    } else {
+      console.log(`[catalog] generated bundle matches ${source}: ${output.label}`);
+    }
   } else {
-    console.log(`[catalog] generated bundle matches ${source}`);
+    await mkdir(dirname(output.path), { recursive: true });
+    await writeFile(output.path, output.expected);
+    console.log(`[catalog] generated ${output.label}`);
   }
-} else {
-  await mkdir(dirname(output), { recursive: true });
-  await writeFile(output, expected);
-  console.log('[catalog] generated packages/catalog/generated/catalog.mjs');
 }

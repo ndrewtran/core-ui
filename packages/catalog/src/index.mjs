@@ -67,14 +67,32 @@ function assertBundle(bundle) {
   return deepFreeze(structuredClone(bundle));
 }
 
-function queryError(code, ruleId, message, details, retryable = false) {
+export function createCatalogDiagnostic({
+  code,
+  ruleId,
+  message,
+  details,
+  retryable = false,
+  nextCommand,
+}) {
   const response = {
     apiVersion: API_VERSION,
     type: 'error',
-    error: { code, ruleId, message, retryable, details },
+    error: {
+      code,
+      ruleId,
+      message,
+      retryable,
+      details,
+      ...(nextCommand === undefined ? {} : { nextCommand }),
+    },
   };
   validateFamily('query-envelope', response);
   return deepFreeze(response);
+}
+
+function queryError(code, ruleId, message, details, retryable = false) {
+  return createCatalogDiagnostic({ code, ruleId, message, details, retryable });
 }
 
 function success(type, data, meta) {
@@ -287,22 +305,62 @@ function selectedSection(bundle, artifact, request) {
   return null;
 }
 
-function baseMeta(bundle, request = {}, revisions = {}) {
-  return {
-    schemaVersion: SCHEMA_VERSION,
-    authority: 'advisory',
-    revisions,
-    coreVersion: '0.0.0',
-    catalogVersion: bundle.catalogVersion,
-    catalogDigest: bundle.catalogDigest,
-    sourceRevision: bundle.sourceRevision,
-    resolution: {
+function assertResolutionContext(bundle, input) {
+  if (input === undefined) {
+    return deepFreeze({
       authority: 'advisory',
       compatibility: 'unresolved',
       catalogSource: 'package',
       sourceRevision: bundle.sourceRevision,
-      revisions,
       targetPackages: {},
+      coreVersion: '0.0.0',
+    });
+  }
+  const allowed = [
+    'authority', 'compatibility', 'catalogSource', 'sourceRevision',
+    'targetPackages', 'coreVersion',
+  ];
+  if (
+    input === null
+    || typeof input !== 'object'
+    || Array.isArray(input)
+    || Object.keys(input).some((key) => !allowed.includes(key))
+    || input.authority !== 'installed-local'
+    || input.compatibility !== 'exact'
+    || !['project', 'cache'].includes(input.catalogSource)
+    || input.sourceRevision !== bundle.sourceRevision
+    || input.targetPackages === null
+    || typeof input.targetPackages !== 'object'
+    || Array.isArray(input.targetPackages)
+    || Object.values(input.targetPackages).some((version) => (
+      typeof version !== 'string' || version.length === 0
+    ))
+    || input.targetPackages['@core-ui/catalog'] !== bundle.catalogVersion
+    || typeof input.coreVersion !== 'string'
+  ) {
+    throw new Error(
+      'CORE_CATALOG_RESOLUTION_CONTEXT_INVALID: expected one verified installed-local context',
+    );
+  }
+  return deepFreeze(structuredClone(input));
+}
+
+function baseMeta(bundle, resolutionContext, request = {}, revisions = {}) {
+  return {
+    schemaVersion: SCHEMA_VERSION,
+    authority: resolutionContext.authority,
+    revisions,
+    coreVersion: resolutionContext.coreVersion,
+    catalogVersion: bundle.catalogVersion,
+    catalogDigest: bundle.catalogDigest,
+    sourceRevision: bundle.sourceRevision,
+    resolution: {
+      authority: resolutionContext.authority,
+      compatibility: resolutionContext.compatibility,
+      catalogSource: resolutionContext.catalogSource,
+      sourceRevision: resolutionContext.sourceRevision,
+      revisions,
+      targetPackages: resolutionContext.targetPackages,
     },
     platform: request.platform ?? null,
     detail: request.detail ?? 'full',
@@ -363,10 +421,42 @@ function cliRegistryForDetail(bundle, detail) {
   return registry;
 }
 
-export function createCatalogApi(inputBundle) {
+export function createCatalogApi(inputBundle, options = {}) {
   const bundle = assertBundle(inputBundle);
+  if (
+    options === null
+    || typeof options !== 'object'
+    || Array.isArray(options)
+    || Object.keys(options).some((key) => !['availableBindings', 'resolution'].includes(key))
+  ) {
+    throw new Error('CORE_CATALOG_API_OPTIONS_INVALID: options must be a closed object');
+  }
+  const resolutionContext = assertResolutionContext(bundle, options.resolution);
+  if (
+    options.availableBindings !== undefined
+    && (
+      !Array.isArray(options.availableBindings)
+      || options.availableBindings.some((binding) => typeof binding !== 'string')
+      || new Set(options.availableBindings).size !== options.availableBindings.length
+    )
+  ) {
+    throw new Error('CORE_CATALOG_AVAILABLE_BINDINGS_INVALID: bindings must be unique strings');
+  }
+  const availableBindings = options.availableBindings === undefined
+    ? null
+    : new Set(options.availableBindings);
   const artifactsById = new Map(bundle.artifacts.map((artifact) => [artifact.id, artifact]));
   const indexById = new Map(bundle.searchIndex.map((entry) => [entry.id, entry]));
+
+  function implementationAvailable(artifact, platform) {
+    if (availableBindings === null || platform === null) return true;
+    if (artifact.kind === 'component') {
+      const selected = bindingForPlatform(artifact.record, platform);
+      return selected === null || availableBindings.has(`${artifact.id}#${selected.bindingId}`);
+    }
+    if (artifact.kind === 'example') return availableBindings.has(artifact.record.binding.ref);
+    return true;
+  }
 
   function getManifest(request) {
     const parsed = normalizeRequest(request, 'getManifest');
@@ -386,7 +476,7 @@ export function createCatalogApi(inputBundle) {
         .filter(({ kind }) => kind === 'capability')
         .map(({ record }) => record),
       cli: cliRegistryForDetail(bundle, normalized.detail),
-    }, baseMeta(bundle, normalized));
+    }, baseMeta(bundle, resolutionContext, normalized));
   }
 
   function listArtifacts(request) {
@@ -405,13 +495,14 @@ export function createCatalogApi(inputBundle) {
       .filter((artifact) => (
         (normalized.kind === null || artifact.kind === normalized.kind)
         && appliesToPlatform(artifact, normalized.platform)
+        && implementationAvailable(artifact, normalized.platform)
         && appliesToPurpose(artifact, normalized.purpose)
       ))
       .map((artifact) => summary(artifact, normalized.detail));
     const page = paginate(values, 'listArtifacts', normalized, bundle.catalogDigest);
     if (page.error) return page.error;
     return success('artifact.list', { items: page.items }, {
-      ...baseMeta(bundle, normalized),
+      ...baseMeta(bundle, resolutionContext, normalized),
       truncated: page.truncated,
       nextCursor: page.nextCursor,
     });
@@ -446,7 +537,11 @@ export function createCatalogApi(inputBundle) {
     }
     const matches = [];
     for (const artifact of bundle.artifacts) {
-      if (!appliesToPlatform(artifact, normalized.platform) || !appliesToPurpose(artifact, normalized.purpose)) {
+      if (
+        !appliesToPlatform(artifact, normalized.platform)
+        || !implementationAvailable(artifact, normalized.platform)
+        || !appliesToPurpose(artifact, normalized.purpose)
+      ) {
         continue;
       }
       const reasons = [];
@@ -481,7 +576,7 @@ export function createCatalogApi(inputBundle) {
     const page = paginate(matches, 'searchArtifacts', normalized, bundle.catalogDigest);
     if (page.error) return page.error;
     return success('artifact.search', { query: normalized.query, items: page.items }, {
-      ...baseMeta(bundle, normalized),
+      ...baseMeta(bundle, resolutionContext, normalized),
       truncated: page.truncated,
       nextCursor: page.nextCursor,
     });
@@ -506,6 +601,7 @@ export function createCatalogApi(inputBundle) {
     if (
       !artifact
       || !appliesToPlatform(artifact, normalized.platform)
+      || !implementationAvailable(artifact, normalized.platform)
       || !appliesToPurpose(artifact, normalized.purpose)
     ) {
       return queryError(
@@ -549,7 +645,11 @@ export function createCatalogApi(inputBundle) {
         ? (artifact.bindingSpecRevisions[selectedBinding.bindingId] ?? null)
         : null,
     };
-    return success('artifact.detail', data, baseMeta(bundle, normalized, revisions));
+    return success(
+      'artifact.detail',
+      data,
+      baseMeta(bundle, resolutionContext, normalized, revisions),
+    );
   }
 
   return deepFreeze({ getManifest, listArtifacts, searchArtifacts, getArtifact });

@@ -7,7 +7,11 @@ import {
 import { getManifest } from '@core-ui/catalog';
 
 const BASELINE_COMMANDS = ['get', 'list', 'manifest', 'search'];
-const BASELINE_GLOBAL_OPTIONS = ['dense', 'help', 'json'];
+const BASELINE_GLOBAL_OPTIONS = [
+  'catalog-digest', 'catalog-version', 'dense', 'help', 'json', 'project',
+];
+const OUTPUT_OPTIONS = ['dense', 'help', 'json'];
+const RESOLUTION_OPTIONS = ['catalog-digest', 'catalog-version', 'project'];
 const BASELINE_SELECTORS = ['cursor', 'detail', 'limit', 'platform', 'purpose', 'section'];
 const UNAVAILABLE_COMMANDS = ['doctor', 'init', 'migrate', 'plan', 'validate'];
 const DETAILS = ['brief', 'compact', 'full'];
@@ -91,7 +95,7 @@ export function validateCommandRegistry(registry) {
     canonicalJson(registry.globalOptions.map(({ name }) => name).sort(compareText))
       === canonicalJson(BASELINE_GLOBAL_OPTIONS),
     'CLI_OPTION_SURFACE_DRIFT',
-    'global options must be exactly dense, help, and json',
+    'global options must be the locked output and local-resolution options',
   );
   assert(
     canonicalJson(registry.selectors.map(({ name }) => name).sort(compareText))
@@ -106,15 +110,17 @@ export function validateCommandRegistry(registry) {
       ['name', 'flag', 'type', 'default', 'conflicts', 'description'],
       `registry.globalOptions.${option.name ?? 'unknown'}`,
     );
+    const outputOption = OUTPUT_OPTIONS.includes(option.name);
+    const resolutionOption = RESOLUTION_OPTIONS.includes(option.name);
     assert(
-      option.type === 'boolean'
-        && typeof option.default === 'boolean'
+      ((outputOption && option.type === 'boolean' && typeof option.default === 'boolean')
+        || (resolutionOption && option.type === 'string' && option.default === null))
         && Array.isArray(option.conflicts)
-        && option.conflicts.every((name) => BASELINE_GLOBAL_OPTIONS.includes(name))
+        && option.conflicts.every((name) => OUTPUT_OPTIONS.includes(name))
         && typeof option.description === 'string'
         && option.description.length > 0,
       'CLI_OPTION_REFERENCE_INVALID',
-      `${option.name} must be a closed boolean output option`,
+      `${option.name} must be a closed output or local-resolution option`,
     );
   }
 
@@ -235,7 +241,7 @@ export function validateCommandRegistry(registry) {
     }
     const requestKeys = new Set([
       ...command.arguments.map(({ name }) => name),
-      ...command.options.filter((name) => !['dense', 'help', 'json'].includes(name)),
+      ...command.options.filter((name) => !BASELINE_GLOBAL_OPTIONS.includes(name)),
     ]);
     assert(
       Object.keys(command.budgetFixture).every((key) => requestKeys.has(key)),
@@ -359,7 +365,7 @@ function inputSchema(command, optionsByName) {
     if (argument.required) required.push(argument.name);
   }
   for (const name of command.options) {
-    if (['dense', 'help', 'json'].includes(name)) continue;
+    if (BASELINE_GLOBAL_OPTIONS.includes(name)) continue;
     const option = optionsByName.get(name);
     properties[name] = option.type === 'integer'
       ? { type: 'integer', minimum: option.minimum, maximum: option.maximum }

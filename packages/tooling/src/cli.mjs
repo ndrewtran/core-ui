@@ -2,22 +2,30 @@ import * as catalogApi from '@core-ui/catalog';
 import { canonicalJson, validateFamily } from '@core-ui/schema';
 import { commandRegistry } from '../generated/command-surface.mjs';
 import { parseCliArguments } from './parser.mjs';
+import { resolvePnpmProjectCatalog } from './pnpm-adapter.mjs';
 import { renderDense, renderHuman, renderJson } from './renderers.mjs';
 
 const EXIT_CODES = {
   CORE_QUERY_INVALID: 2,
   CORE_CURSOR_INVALID: 3,
   CORE_ARTIFACT_NOT_FOUND: 4,
+  CORE_PROJECT_NOT_FOUND: 10,
+  CORE_CATALOG_NOT_DECLARED: 11,
+  CORE_CATALOG_NOT_INSTALLED: 12,
+  CORE_CATALOG_DECLARATION_DRIFT: 13,
+  CORE_CATALOG_INTEGRITY_MISMATCH: 14,
+  CORE_CATALOG_RESOLUTION_AMBIGUOUS: 15,
+  CORE_CATALOG_INCOMPATIBLE: 16,
 };
 
 function requestWithout(request, keys) {
   return Object.fromEntries(Object.entries(request).filter(([key]) => !keys.includes(key)));
 }
 
-export function executeCommand(command, request) {
+export function executeCommand(command, request, api = catalogApi) {
   const definition = commandRegistry.commands.find(({ name }) => name === command);
   if (!definition) throw new Error(`CLI_COMMAND_UNDECLARED: ${command}`);
-  const operation = catalogApi[definition.operation];
+  const operation = api[definition.operation];
   if (typeof operation !== 'function') {
     throw new Error(`CLI_OPERATION_UNAVAILABLE: ${definition.operation}`);
   }
@@ -75,8 +83,20 @@ function render(response, mode) {
 export function runCli(args) {
   const parsed = parseCliArguments(args);
   if (parsed.kind === 'help') return { stdout: parsed.text, stderr: '', exitCode: 0 };
+  const projectResolution = parsed.error ? null : resolvePnpmProjectCatalog({
+    ...parsed.resolution,
+    artifact: parsed.command === 'get' ? parsed.request['id-or-alias'] : null,
+    platform: parsed.request.platform ?? null,
+    filterBindings: ['list', 'search'].includes(parsed.command),
+  });
   const response = assertSafeDiagnostics(
-    parsed.error ?? enrichDiagnostic(executeCommand(parsed.command, parsed.request), parsed.command),
+    parsed.error
+      ?? (projectResolution.type === 'error'
+        ? projectResolution
+        : enrichDiagnostic(
+          executeCommand(parsed.command, parsed.request, projectResolution.api),
+          parsed.command,
+        )),
   );
   const text = render(response, parsed.mode);
   const exitCode = response.type === 'error' ? (EXIT_CODES[response.error.code] ?? 1) : 0;
