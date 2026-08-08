@@ -1,0 +1,45 @@
+/* @generated-from: packages/catalog/catalog-sources.json
+ * @generated-content-sha256: sha256:2762e65160355dada6ccda0cf40788c33193a7285f555d90a297c8de3e885c93
+ */
+@layer core.tokens, core.components, core.utilities;
+
+@layer core.components {
+  .core-button {
+    --core-component-button-background: #1f2937;
+    --core-component-button-foreground: #ffffff;
+    align-items: center;
+    background: var(--core-component-button-background);
+    border: 2px solid #1f2937;
+    border-radius: 6px;
+    color: var(--core-component-button-foreground);
+    display: inline-flex;
+    font: inherit;
+    gap: 0.5em;
+    min-block-size: 40px;
+    padding-inline: 12px;
+    text-align: start;
+  }
+  .core-button [data-core-fixture-direction-marker] { margin-inline: 2px 10px; }
+  .core-button[data-core-state-disabled] { cursor: not-allowed; opacity: 0.55; }
+  .core-button:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
+}
+
+@media (prefers-contrast: more) {
+  @layer core.components {
+    .core-button { border-width: 3px; }
+    .core-button:focus-visible { outline-width: 3px; outline-offset: 3px; }
+  }
+}
+
+@media (forced-colors: active) {
+  @layer core.components {
+    .core-button {
+      background: ButtonFace;
+      border-color: ButtonText;
+      color: ButtonText;
+      forced-color-adjust: auto;
+    }
+    .core-button[data-core-state-disabled] { border-style: dashed; color: GrayText; opacity: 1; }
+    .core-button:focus-visible { outline-color: Highlight; }
+  }
+}

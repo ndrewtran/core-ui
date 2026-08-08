@@ -1,0 +1,27 @@
+{
+  "name": "@core-ui/web",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=24.19.0 <25" },
+  "exports": {
+    ".": { "types": "./src/index.d.ts", "default": "./src/index.mjs" },
+    "./runtime": { "types": "./src/runtime.d.ts", "default": "./src/runtime.mjs" },
+    "./button.css": "./generated/button.css",
+    "./compatibility": "./generated/compatibility.mjs",
+    "./testing": "./src/testing.mjs"
+  },
+  "scripts": {
+    "check": "node src/generate.mjs --check && node --test test/*.test.mjs",
+    "generate": "node src/generate.mjs",
+    "generate:check": "node src/generate.mjs --check"
+  },
+  "devDependencies": {
+    "@core-ui/catalog": "workspace:*",
+    "@core-ui/schema": "workspace:*",
+    "@core-ui/tokens": "workspace:*",
+    "axe-core": "4.13.0",
+    "jsdom": "30.0.1",
+    "playwright-core": "1.62.1"
+  }
+}

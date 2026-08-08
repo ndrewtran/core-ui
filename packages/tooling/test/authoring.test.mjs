@@ -421,7 +421,7 @@ test('E-G0.5-03: autofix is preview-only and denies every product-meaning catego
   }
 });
 
-test('E-G0.5-04: affected closure is graph-derived, declared, and bounded to Gate 0', async () => {
+test('E-G0.5-04: affected closure is graph-derived and extends through declared Gate 1 dependents', async () => {
   const { context, component } = await setup();
   const closure = affectedClosure({
     context,
@@ -435,10 +435,14 @@ test('E-G0.5-04: affected closure is graph-derived, declared, and bounded to Gat
   assert.ok(closure.projections.includes('packages/catalog/generated/catalog.json'));
   assert.deepEqual(closure.packages.map(({ name }) => name), [
     '@core-ui/catalog',
+    '@core-ui/react',
     '@core-ui/tooling',
+    '@core-ui/web',
   ]);
   assert.ok(closure.requiredChecks.includes('pnpm --filter @core-ui/catalog check'));
+  assert.ok(closure.requiredChecks.includes('pnpm --filter @core-ui/react check'));
   assert.ok(closure.requiredChecks.includes('pnpm --filter @core-ui/tooling check'));
+  assert.ok(closure.requiredChecks.includes('pnpm --filter @core-ui/web check'));
   assert.deepEqual(closure.deferred, [{
     capability: 'renderer-proof-evaluation-closure',
     readiness: 'unavailable',
@@ -452,9 +456,11 @@ test('E-G0.5-04: affected closure is graph-derived, declared, and bounded to Gat
   assert.ok(schemaClosure.projections.includes('packages/schema/generated/types.d.ts'));
   assert.deepEqual(schemaClosure.packages.map(({ name }) => name), [
     '@core-ui/catalog',
+    '@core-ui/react',
     '@core-ui/schema',
     '@core-ui/tokens',
     '@core-ui/tooling',
+    '@core-ui/web',
   ]);
   assert.throws(
     () => affectedClosure({ context, sourcePaths: ['catalog/components/inferred.json'] }),
