@@ -138,6 +138,7 @@ function validateManifest(manifest) {
     !isObject(manifest)
     || manifest.schema !== SOURCE_MANIFEST_SCHEMA
     || typeof manifest.commandRegistryPath !== 'string'
+    || typeof manifest.platformSafetyContractPath !== 'string'
     || !Array.isArray(manifest.records)
   ) {
     throw new AuthoringPolicyError(
@@ -146,6 +147,7 @@ function validateManifest(manifest) {
     );
   }
   assertRelativePath(manifest.commandRegistryPath, 'commandRegistryPath');
+  assertRelativePath(manifest.platformSafetyContractPath, 'platformSafetyContractPath');
   for (const [index, entry] of manifest.records.entries()) {
     if (!isObject(entry) || typeof entry.family !== 'string') {
       throw new AuthoringPolicyError(
@@ -337,6 +339,8 @@ export function explainRevisions({
   examples = [],
   exampleSources = {},
   tokenSources = [],
+  tokenRequirementSets = {},
+  platformSafetyRequirementSets = {},
   authoring = {},
 } = {}) {
   const axes = [revisionAxis(
@@ -360,6 +364,16 @@ export function explainRevisions({
       examples,
       exampleSources,
       tokenSources,
+      tokenRequirementSets: Array.isArray(tokenRequirementSets)
+        ? tokenRequirementSets
+        : Object.entries(tokenRequirementSets)
+          .filter(([key]) => key.startsWith(`${bindingId}:`))
+          .map(([, value]) => value),
+      platformSafetyRequirementSets: Array.isArray(platformSafetyRequirementSets)
+        ? platformSafetyRequirementSets
+        : Object.entries(platformSafetyRequirementSets)
+          .filter(([key]) => key.startsWith(`${bindingId}:`))
+          .map(([, value]) => value),
       ...authoring,
     })));
   }
@@ -448,6 +462,14 @@ function componentRevisionDelta(record, context, authoring) {
           examples: context.examples ?? [],
           exampleSources: context.exampleSources ?? {},
           tokenSources: context.tokenSources ?? [],
+          tokenRequirementSets: Object.entries(context.tokenRequirementSets ?? {})
+            .filter(([key]) => key.startsWith(`${bindingId}:`))
+            .map(([, value]) => value),
+          platformSafetyRequirementSets: Object.entries(
+            context.platformSafetyRequirementSets ?? {},
+          )
+            .filter(([key]) => key.startsWith(`${bindingId}:`))
+            .map(([, value]) => value),
           ...authoring,
         }),
       }),
@@ -606,6 +628,7 @@ function schemaSources(authoring = {}) {
 
 function isCatalogSource(context, path) {
   return context.sourceManifest.commandRegistryPath === path
+    || context.sourceManifest.platformSafetyContractPath === path
     || context.sourceManifest.records.some((entry) => (
       entry.path === path || entry.sourcePath === path
     ));

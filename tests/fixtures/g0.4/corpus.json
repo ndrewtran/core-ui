@@ -21,14 +21,25 @@
       "version": "1.0.0",
       "catalogVersion": "1.0.0",
       "catalogDigest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-      "queryApiVersion": "1.0.0",
-      "schemaRange": "^1.0.0",
+      "queryApiVersion": "1.1.0",
+      "schemaRange": "^2.0.0",
       "sourceRevision": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
       "provenance": {
         "kind": "source-revision",
         "value": "sha256:1111111111111111111111111111111111111111111111111111111111111111"
       },
-      "releaseManifest": "release-compatible"
+      "releaseManifest": "release-compatible",
+      "tokenRequirementSets": {
+        "core:component:button#native.react-native:native.android": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+        "core:component:button#native.react-native:native.ios": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+        "core:component:button#web.react:web.react": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+      },
+      "platformSafetyRequirementSets": {
+        "core:component:button#native.react-native:android": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+        "core:component:button#native.react-native:ios": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+        "core:component:button#native.react-native:native.react-native-web": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+        "core:component:button#web.react:web.react": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+      }
     },
     {
       "id": "catalog-newer",
@@ -36,14 +47,20 @@
       "version": "1.1.0",
       "catalogVersion": "1.1.0",
       "catalogDigest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
-      "queryApiVersion": "1.0.0",
-      "schemaRange": "^1.0.0",
+      "queryApiVersion": "2.0.0",
+      "schemaRange": "^3.0.0",
       "sourceRevision": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
       "provenance": {
         "kind": "source-revision",
         "value": "sha256:2222222222222222222222222222222222222222222222222222222222222222"
       },
-      "releaseManifest": "release-newer"
+      "releaseManifest": "release-newer",
+      "tokenRequirementSets": {
+        "core:component:button#web.react:web.react": "sha256:8888888888888888888888888888888888888888888888888888888888888888"
+      },
+      "platformSafetyRequirementSets": {
+        "core:component:button#web.react:web.react": "sha256:8888888888888888888888888888888888888888888888888888888888888888"
+      }
     }
   ],
   "rendererDescriptors": [
@@ -52,8 +69,8 @@
       "descriptorVersion": "1.0.0",
       "package": "@core-ui/react-native",
       "version": "1.0.0",
-      "bindingSchemaRange": "^1.0.0",
-      "tokenContractRange": "^1.0.0",
+      "bindingSchemaRange": "^2.0.0",
+      "tokenContractRange": "^1.1.0",
       "releaseProvenance": "release-compatible",
       "bindings": {
         "core:component:button#native.react-native": {
@@ -61,7 +78,15 @@
           "export": "@core-ui/react-native/button",
           "lifecycle": "experimental",
           "strategy": "direct",
-          "tokenRequirementsDigest": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+          "tokenRequirementSetDigests": {
+            "native.ios": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            "native.android": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+          },
+          "platformSafetyRequirementSetDigests": {
+            "ios": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            "android": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            "native.react-native-web": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+          }
         }
       }
     },
@@ -70,8 +95,8 @@
       "descriptorVersion": "1.0.0",
       "package": "@core-ui/react",
       "version": "1.0.0",
-      "bindingSchemaRange": "^1.0.0",
-      "tokenContractRange": "^1.0.0",
+      "bindingSchemaRange": "^2.0.0",
+      "tokenContractRange": "^1.1.0",
       "releaseProvenance": "release-compatible",
       "bindings": {
         "core:component:button#web.react": {
@@ -79,7 +104,12 @@
           "export": "@core-ui/react/button",
           "lifecycle": "experimental",
           "strategy": "direct",
-          "tokenRequirementsDigest": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+          "tokenRequirementSetDigests": {
+            "web.react": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+          },
+          "platformSafetyRequirementSetDigests": {
+            "web.react": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+          }
         }
       }
     },
@@ -88,7 +118,7 @@
       "descriptorVersion": "1.0.0",
       "package": "@core-ui/react",
       "version": "1.1.0",
-      "bindingSchemaRange": "^2.0.0",
+      "bindingSchemaRange": "^3.0.0",
       "tokenContractRange": "^2.0.0",
       "releaseProvenance": "release-newer",
       "bindings": {
@@ -97,7 +127,12 @@
           "export": "@core-ui/react/button",
           "lifecycle": "experimental",
           "strategy": "direct",
-          "tokenRequirementsDigest": "sha256:8888888888888888888888888888888888888888888888888888888888888888"
+          "tokenRequirementSetDigests": {
+            "web.react": "sha256:8888888888888888888888888888888888888888888888888888888888888888"
+          },
+          "platformSafetyRequirementSetDigests": {
+            "web.react": "sha256:8888888888888888888888888888888888888888888888888888888888888888"
+          }
         }
       }
     }
@@ -106,9 +141,9 @@
     {
       "id": "release-compatible",
       "releaseVersion": "1.0.0",
-      "schemaVersion": "1.0.0",
-      "queryApiVersion": "1.0.0",
-      "tokenContractVersion": "1.0.0",
+      "schemaVersion": "2.0.0",
+      "queryApiVersion": "1.1.0",
+      "tokenContractVersion": "1.1.0",
       "sourceRevision": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
       "catalog": {
         "id": "catalog-compatible",
@@ -123,7 +158,15 @@
           "version": "1.0.0",
           "export": "@core-ui/react-native/button",
           "specRevision": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
-          "tokenRequirementsDigest": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+          "tokenRequirementSetDigests": {
+            "native.ios": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            "native.android": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+          },
+          "platformSafetyRequirementSetDigests": {
+            "ios": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            "android": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            "native.react-native-web": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+          }
         },
         {
           "descriptor": "renderer-react-compatible",
@@ -132,15 +175,20 @@
           "version": "1.0.0",
           "export": "@core-ui/react/button",
           "specRevision": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
-          "tokenRequirementsDigest": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+          "tokenRequirementSetDigests": {
+            "web.react": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+          },
+          "platformSafetyRequirementSetDigests": {
+            "web.react": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+          }
         }
       ]
     },
     {
       "id": "release-newer",
       "releaseVersion": "1.1.0",
-      "schemaVersion": "2.0.0",
-      "queryApiVersion": "1.0.0",
+      "schemaVersion": "3.0.0",
+      "queryApiVersion": "2.0.0",
       "tokenContractVersion": "2.0.0",
       "sourceRevision": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
       "catalog": {
@@ -156,7 +204,12 @@
           "version": "1.1.0",
           "export": "@core-ui/react/button",
           "specRevision": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
-          "tokenRequirementsDigest": "sha256:8888888888888888888888888888888888888888888888888888888888888888"
+          "tokenRequirementSetDigests": {
+            "web.react": "sha256:8888888888888888888888888888888888888888888888888888888888888888"
+          },
+          "platformSafetyRequirementSetDigests": {
+            "web.react": "sha256:8888888888888888888888888888888888888888888888888888888888888888"
+          }
         }
       ]
     }
@@ -201,13 +254,17 @@
       ],
       "caches": [],
       "request": {
-        "bindings": ["core:component:button#web.react"],
+        "bindings": [
+          "core:component:button#web.react"
+        ],
         "cache": null
       },
       "expected": {
         "type": "error",
         "code": "CORE_CATALOG_DECLARATION_DRIFT",
-        "secondaryCodes": ["CORE_CATALOG_INCOMPATIBLE"],
+        "secondaryCodes": [
+          "CORE_CATALOG_INCOMPATIBLE"
+        ],
         "nextCommand": {
           "command": "pnpm --dir apps/consumer why @core-ui/catalog",
           "effect": "read-only",
@@ -269,7 +326,9 @@
       ],
       "caches": [],
       "request": {
-        "bindings": ["core:component:button#web.react"],
+        "bindings": [
+          "core:component:button#web.react"
+        ],
         "cache": null
       },
       "expected": {
@@ -322,7 +381,9 @@
       ],
       "caches": [],
       "request": {
-        "bindings": ["core:component:button#web.react"],
+        "bindings": [
+          "core:component:button#web.react"
+        ],
         "cache": null
       },
       "expected": {
@@ -381,7 +442,9 @@
       ],
       "caches": [],
       "request": {
-        "bindings": ["core:component:button#web.react"],
+        "bindings": [
+          "core:component:button#web.react"
+        ],
         "cache": null
       },
       "expected": {
@@ -448,7 +511,9 @@
         }
       ],
       "request": {
-        "bindings": ["core:component:button#web.react"],
+        "bindings": [
+          "core:component:button#web.react"
+        ],
         "cache": null
       },
       "expected": {
@@ -516,7 +581,9 @@
       ],
       "caches": [],
       "request": {
-        "bindings": ["core:component:button#web.react"],
+        "bindings": [
+          "core:component:button#web.react"
+        ],
         "cache": null
       },
       "expected": {
@@ -590,7 +657,9 @@
         }
       ],
       "request": {
-        "bindings": ["core:component:button#web.react"],
+        "bindings": [
+          "core:component:button#web.react"
+        ],
         "cache": {
           "version": "1.0.0",
           "digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
@@ -619,7 +688,9 @@
       "installed": [],
       "caches": [],
       "request": {
-        "bindings": ["core:component:button#web.react"],
+        "bindings": [
+          "core:component:button#web.react"
+        ],
         "cache": null
       },
       "expected": {

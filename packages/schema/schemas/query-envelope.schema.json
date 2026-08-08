@@ -77,7 +77,7 @@
         "nextCursor"
       ],
       "properties": {
-        "schemaVersion": { "const": "1.0.0" },
+        "schemaVersion": { "const": "1.1.0" },
         "authority": { "enum": ["installed-local", "advisory"] },
         "revisions": { "$ref": "#/$defs/revisionSet" },
         "coreVersion": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(?:-[0-9A-Za-z.-]+)?$" },
@@ -404,10 +404,145 @@
         "target": { "type": "string", "minLength": 1 }
       }
     },
+    "tokenRequirement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["token", "requirement", "type", "unit", "modes", "overridePolicy"],
+      "properties": {
+        "token": { "type": "string", "pattern": "^(semantic|component)\\." },
+        "requirement": { "enum": ["required", "optional", "deprecated"] },
+        "type": { "enum": ["color", "dimension", "duration", "number", "string"] },
+        "unit": { "enum": ["hex", "px", "ms", "unitless", "string"] },
+        "modes": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+        "overridePolicy": { "enum": ["fixed", "theme", "instance"] },
+        "fallback": {
+          "oneOf": [
+            { "$ref": "binding.schema.json#/$defs/fallbackToken" },
+            { "$ref": "binding.schema.json#/$defs/fallbackValue" }
+          ]
+        }
+      }
+    },
+    "tokenClosureEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["token", "layer", "type", "unit", "meaning", "overridePolicy", "resolved", "dependencies"],
+      "properties": {
+        "token": { "type": "string", "pattern": "^(reference|semantic|component)\\." },
+        "layer": { "enum": ["reference", "semantic", "component"] },
+        "type": { "enum": ["color", "dimension", "duration", "number", "string"] },
+        "unit": { "enum": ["hex", "px", "ms", "unitless", "string"] },
+        "meaning": { "type": "string", "minLength": 1 },
+        "overridePolicy": { "enum": ["fixed", "theme", "instance"] },
+        "resolved": { "type": ["string", "number"] },
+        "dependencies": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^(reference|semantic|component)\\." },
+          "uniqueItems": true
+        }
+      }
+    },
+    "tokenRequirementSet": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schemaVersion", "bindingId", "profile", "source", "sourceRevision", "tokenContractVersion", "requirements", "closure", "digest"],
+      "properties": {
+        "schemaVersion": { "const": "1.0.0" },
+        "bindingId": { "type": "string", "minLength": 1 },
+        "profile": { "enum": ["web.html", "web.react", "native.ios", "native.android", "native.react-native-web"] },
+        "source": { "type": "string", "pattern": "^core:token:" },
+        "sourceRevision": { "$ref": "#/$defs/digest" },
+        "tokenContractVersion": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+        "requirements": { "type": "array", "items": { "$ref": "#/$defs/tokenRequirement" } },
+        "closure": { "type": "array", "items": { "$ref": "#/$defs/tokenClosureEntry" } },
+        "digest": { "$ref": "#/$defs/digest" }
+      }
+    },
+    "platformSafetyDisposition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "disposition"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z][a-z0-9-]*(?:\\.[a-z][a-z0-9-]*)+$" },
+        "disposition": { "enum": ["required", "not-applicable"] },
+        "reason": { "type": "string", "minLength": 1 }
+      }
+    },
+    "platformSafetyRequirementSet": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schemaVersion", "contractVersion", "contractDigest", "bindingId", "profile", "declarationRevision", "dispositions", "digest"],
+      "properties": {
+        "schemaVersion": { "const": "1.0.0" },
+        "contractVersion": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+        "contractDigest": { "$ref": "#/$defs/digest" },
+        "bindingId": { "type": "string", "minLength": 1 },
+        "profile": { "enum": ["web.html", "web.react", "ios", "android", "native.react-native-web"] },
+        "validationProfile": { "enum": ["native.ios", "native.android", "native.react-native-web"] },
+        "declarationRevision": { "$ref": "#/$defs/digest" },
+        "dispositions": { "type": "array", "items": { "$ref": "#/$defs/platformSafetyDisposition" } },
+        "digest": { "$ref": "#/$defs/digest" }
+      }
+    },
+    "stylingValue": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["recipe", "requirementSets", "platformSafetyRequirementSets"],
+          "properties": {
+            "recipe": { "type": "object" },
+            "requirementSets": {
+              "type": "object",
+              "additionalProperties": { "$ref": "#/$defs/tokenRequirementSet" }
+            },
+            "platformSafetyRequirementSets": {
+              "type": "object",
+              "additionalProperties": { "$ref": "#/$defs/platformSafetyRequirementSet" }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["recipes", "requirementSets", "platformSafetyRequirementSets"],
+          "properties": {
+            "recipes": { "type": "object" },
+            "requirementSets": {
+              "type": "object",
+              "additionalProperties": { "$ref": "#/$defs/tokenRequirementSet" }
+            },
+            "platformSafetyRequirementSets": {
+              "type": "object",
+              "additionalProperties": { "$ref": "#/$defs/platformSafetyRequirementSet" }
+            }
+          }
+        }
+      ]
+    },
     "detailData": {
       "type": "object",
       "additionalProperties": true,
       "required": ["artifact"],
+      "allOf": [{
+        "oneOf": [
+          {
+            "required": ["section", "value"],
+            "properties": {
+              "section": { "const": "styling" },
+              "value": { "$ref": "#/$defs/stylingValue" }
+            }
+          },
+          {
+            "required": ["section", "value"],
+            "properties": {
+              "section": { "enum": ["api", "examples", "guidance", "decision-context", "accessibility", "source"] },
+              "value": true
+            }
+          },
+          { "not": { "required": ["section"] } }
+        ]
+      }],
       "properties": {
         "artifact": {
           "type": "object",
@@ -416,7 +551,15 @@
           "properties": {
             "id": { "$ref": "artifact-ref.schema.json" },
             "kind": { "type": "string" },
-            "source": { "$ref": "#/$defs/sourcePointer" }
+            "source": { "$ref": "#/$defs/sourcePointer" },
+            "tokenRequirementSets": {
+              "type": "object",
+              "additionalProperties": { "$ref": "#/$defs/tokenRequirementSet" }
+            },
+            "platformSafetyRequirementSets": {
+              "type": "object",
+              "additionalProperties": { "$ref": "#/$defs/platformSafetyRequirementSet" }
+            }
           }
         },
         "relations": { "type": "array", "items": { "$ref": "#/$defs/relation" } },
@@ -429,7 +572,7 @@
       "additionalProperties": true,
       "required": ["apiVersion", "type", "data", "meta", "warnings"],
       "properties": {
-        "apiVersion": { "const": "1.0.0" },
+        "apiVersion": { "const": "1.1.0" },
         "type": { "enum": ["catalog.manifest", "artifact.list", "artifact.search", "artifact.detail"] },
         "data": { "type": "object" },
         "meta": { "$ref": "#/$defs/responseMeta" },
@@ -471,7 +614,7 @@
       "additionalProperties": true,
       "required": ["apiVersion", "type", "error"],
       "properties": {
-        "apiVersion": { "const": "1.0.0" },
+        "apiVersion": { "const": "1.1.0" },
         "type": { "const": "error" },
         "error": { "$ref": "diagnostic.schema.json" }
       }

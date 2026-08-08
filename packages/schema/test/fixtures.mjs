@@ -1,21 +1,107 @@
 export function tokenSource() {
   return {
-    schemaVersion: '1.0.0',
+    schemaVersion: '2.0.0',
     id: 'core:token:button-minimum',
     kind: 'token',
     name: 'Button minimum tokens',
     summary: 'The minimum token source used by the G0.1 proof artifact.',
     lifecycle: 'experimental',
-    tokenContractVersion: '1.0.0',
+    tokenContractVersion: '1.1.0',
+    theme: {
+      name: 'default',
+      modeAxes: {
+        colorScheme: ['light', 'dark'],
+        contrast: ['standard', 'more'],
+        motion: ['full', 'reduced'],
+        density: ['comfortable', 'compact'],
+        direction: ['ltr', 'rtl'],
+      },
+      defaultModes: {
+        colorScheme: 'light',
+        contrast: 'standard',
+        motion: 'full',
+        density: 'comfortable',
+        direction: 'ltr',
+      },
+      runtimeSwitching: 'unavailable',
+    },
     tokens: {
-      'semantic.action.background': { type: 'color', value: '#000000' },
+      'reference.color.black': {
+        layer: 'reference',
+        type: 'color',
+        unit: 'hex',
+        meaning: 'Black reference value.',
+        overridePolicy: 'fixed',
+        value: '#000000',
+      },
+      'semantic.action.background': {
+        layer: 'semantic',
+        type: 'color',
+        unit: 'hex',
+        meaning: 'Immediate action background.',
+        overridePolicy: 'theme',
+        alias: 'reference.color.black',
+      },
     },
   };
 }
 
-function webBinding() {
+function required(id) {
+  return { id, disposition: 'required' };
+}
+
+function notApplicable(id, reason) {
+  return { id, disposition: 'not-applicable', reason };
+}
+
+export function webPlatformSafety(profile) {
+  return [{
+    profile,
+    requirements: [
+      required('system.forced-colors'),
+      required('system.high-contrast'),
+      notApplicable('native.dynamic-color', 'Native dynamic colors do not apply to web.'),
+      notApplicable('native.font-metrics', 'Native font metrics do not apply to web.'),
+      required('layout.direction'),
+      required('platform.accessibility-mapping'),
+    ],
+  }];
+}
+
+export function nativePlatformSafety() {
+  const supported = (profile, validationProfile) => ({
+    profile,
+    validationProfile,
+    requirements: [
+      notApplicable('system.forced-colors', 'Web forced colors do not apply to native.'),
+      notApplicable('system.high-contrast', 'Web high contrast does not apply to native.'),
+      required('native.dynamic-color'),
+      required('native.font-metrics'),
+      required('layout.direction'),
+      required('platform.accessibility-mapping'),
+    ],
+  });
+  return [
+    supported('ios', 'native.ios'),
+    supported('android', 'native.android'),
+    {
+      profile: 'native.react-native-web',
+      validationProfile: 'native.react-native-web',
+      requirements: [
+        'system.forced-colors',
+        'system.high-contrast',
+        'native.dynamic-color',
+        'native.font-metrics',
+        'layout.direction',
+        'platform.accessibility-mapping',
+      ].map((id) => notApplicable(id, 'The runtime profile is unsupported in G1.0.')),
+    },
+  ];
+}
+
+function webBinding(profile = 'web.react') {
   return {
-    schemaVersion: '1.0.0',
+    schemaVersion: '2.0.0',
     lifecycle: 'experimental',
     strategy: 'direct',
     api: {
@@ -26,7 +112,11 @@ function webBinding() {
     },
     behavior: ['Activation requests one immediate action'],
     accessibility: ['Expose accessible name and disabled state'],
-    tokenSources: ['core:token:button-minimum'],
+    tokenRecipe: {
+      source: 'core:token:button-minimum',
+      requirements: [{ token: 'semantic.action.background', requirement: 'required' }],
+    },
+    platformSafety: webPlatformSafety(profile),
     runtimeProfiles: {},
   };
 }
@@ -50,11 +140,12 @@ export function component() {
       obligations: ['Expose disabled state'],
     },
     bindings: {
-      'web.html': webBinding(),
-      'web.react': webBinding(),
+      'web.html': webBinding('web.html'),
+      'web.react': webBinding('web.react'),
       'native.react-native': {
         ...webBinding(),
         strategy: 'adapted',
+        platformSafety: nativePlatformSafety(),
         runtimeProfiles: {
           ios: {
             strategy: 'adapted',

@@ -115,6 +115,65 @@ async function addRecertification(root, mutate = (value) => value) {
     sourceRevision: 'current-source',
     sourceTree: 'current-tree',
   }));
+  return { recertification, recertificationBytes, recertificationPath };
+}
+
+async function addRecertificationContinuation(
+  root,
+  previous,
+  { name = 'G0.0', mutate = (value) => value } = {},
+) {
+  const historicalPath = 'tests/evidence/g0.0/index.json';
+  const historicalBytes = await readFile(join(root, historicalPath), 'utf8');
+  const historicalIndex = JSON.parse(historicalBytes);
+  const ownedPath = 'packages/source/owned.txt';
+  const currentBytes = `repository-owned-${name}-current\n`;
+  await writeFile(join(root, ownedPath), currentBytes);
+  const currentApplicabilityManifest = {
+    paths: historicalIndex.applicabilityManifest.paths,
+    profile: 'core-ui-path-manifest-v1',
+    sha256: `sha256:${sha256(canonicalJson([{
+      path: ownedPath,
+      sha256: `sha256:${sha256(currentBytes)}`,
+    }]))}`,
+  };
+  const recertificationPath = `tests/evidence/g0.2/recertifications/${name}.json`;
+  const recertification = mutate({
+    currentApplicabilityManifest,
+    historicalApplicabilityManifest: previous.recertification.currentApplicabilityManifest,
+    historicalIndex: {
+      path: historicalPath,
+      sha256: `sha256:${sha256(historicalBytes)}`,
+    },
+    outcome: 'pass',
+    previousRecertification: {
+      path: previous.recertificationPath,
+      sha256: `sha256:${sha256(previous.recertificationBytes)}`,
+    },
+    schema: 'core-ui-evidence-recertification-v2',
+    sourceRevision: 'next-source',
+    sourceTree: 'next-tree',
+  });
+  const recertificationBytes = canonicalJson(recertification);
+  await mkdir(join(root, 'tests/evidence/g0.2/recertifications'), { recursive: true });
+  await writeFile(join(root, recertificationPath), recertificationBytes);
+  const indexPath = join(root, 'tests/evidence/g0.2/index.json');
+  let index = {
+    records: [],
+    recertifications: [],
+    sourceRevision: 'next-source',
+    sourceTree: 'next-tree',
+  };
+  try {
+    index = JSON.parse(await readFile(indexPath, 'utf8'));
+  } catch {}
+  index.recertifications.push({
+    milestone: 'G0.0',
+    path: recertificationPath,
+    sha256: `sha256:${sha256(recertificationBytes)}`,
+  });
+  await writeFile(indexPath, canonicalJson(index));
+  return { recertification, recertificationBytes, recertificationPath };
 }
 
 test('content-addressed evidence index verifies canonical records and artifacts', async () => {
@@ -177,6 +236,61 @@ test('append-only recertification preserves a stale historical index', async () 
     recordCount: 1,
     artifactCount: 1,
     recertificationCount: 1,
+  });
+});
+
+test('append-only recertification extends through one digest-linked leaf', async () => {
+  const { root } = await fixture({ applicability: true });
+  const previous = await addRecertification(root);
+  await addRecertificationContinuation(root, previous);
+  assert.deepEqual(await verifyEvidence(root), {
+    indexCount: 3,
+    recordCount: 1,
+    artifactCount: 1,
+    recertificationCount: 2,
+  });
+});
+
+test('recertification rejects a fork from one predecessor', async () => {
+  const { root } = await fixture({ applicability: true });
+  const previous = await addRecertification(root);
+  await addRecertificationContinuation(root, previous, { name: 'first' });
+  await addRecertificationContinuation(root, previous, { name: 'second' });
+  await assert.rejects(verifyEvidence(root), (error) => {
+    assert.ok(error instanceof EvidenceIntegrityError);
+    assert.equal(error.code, 'EVIDENCE_RECERTIFICATION_FORK');
+    return true;
+  });
+});
+
+test('recertification rejects a predecessor cycle', async () => {
+  const { root } = await fixture({ applicability: true });
+  const previous = await addRecertification(root);
+  await addRecertificationContinuation(root, previous, {
+    mutate: (value) => ({
+      ...value,
+      previousRecertification: {
+        path: 'tests/evidence/g0.2/recertifications/G0.0.json',
+        sha256: `sha256:${'0'.repeat(64)}`,
+      },
+    }),
+  });
+  await assert.rejects(verifyEvidence(root), (error) => {
+    assert.ok(error instanceof EvidenceIntegrityError);
+    assert.equal(error.code, 'EVIDENCE_RECERTIFICATION_CYCLE');
+    return true;
+  });
+});
+
+test('recertification rejects a stale terminal certificate', async () => {
+  const { root } = await fixture({ applicability: true });
+  const previous = await addRecertification(root);
+  await addRecertificationContinuation(root, previous);
+  await writeFile(join(root, 'packages/source/owned.txt'), 'changed-after-leaf\n');
+  await assert.rejects(verifyEvidence(root), (error) => {
+    assert.ok(error instanceof EvidenceIntegrityError);
+    assert.equal(error.code, 'EVIDENCE_APPLICABILITY_MISMATCH');
+    return true;
   });
 });
 

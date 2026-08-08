@@ -3,6 +3,10 @@ import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 import { canonicalDigest, parseJsonStrict, validateFamily } from '@core-ui/schema';
 import { createCatalogApi } from '../src/index.mjs';
+import {
+  assertPackedCompatibilityFixture,
+  createPackedCompatibilityFixture,
+} from '../../../tests/fixtures/g1.0/packed-compatibility.mjs';
 
 async function readJson(relativePath) {
   return parseJsonStrict(await readFile(new URL(relativePath, import.meta.url), 'utf8'));
@@ -22,14 +26,34 @@ test('E-G0.4 package layout binds package, catalog, API, schema, digest, and sou
   assert.equal(identity.catalogDigest, canonicalDigest(preimage));
   assert.equal(identity.catalogDigest, bundle.catalogDigest);
   assert.equal(identity.queryApiVersion, bundle.apiVersion);
-  assert.equal(identity.schemaRange, '^1.0.0');
+  assert.equal(identity.schemaRange, '^2.0.0');
   assert.equal(identity.sourceRevision, bundle.sourceRevision);
   assert.equal(identity.provenance.kind, 'source-revision');
   assert.equal(identity.provenance.value, bundle.sourceRevision);
   assert.equal(identity.releaseManifest.catalog.id.startsWith('@core-ui/catalog@'), true);
   assert.equal(identity.releaseManifest.catalog.digest, bundle.catalogDigest);
   assert.equal(identity.releaseManifest.sourceRevision, bundle.sourceRevision);
+  assert.equal(identity.releaseManifest.tokenContractVersion, '1.1.0');
   assert.deepEqual(identity.releaseManifest.bindings, []);
+  const component = bundle.artifacts.find(({ id }) => id === 'core:component:button');
+  for (const [key, set] of Object.entries(component.tokenRequirementSets)) {
+    const [bindingId, profile] = key.split(':');
+    assert.equal(
+      identity.tokenRequirementSets[`core:component:button#${bindingId}:${profile}`],
+      set.digest,
+    );
+  }
+  assert.equal(identity.platformSafetyContract.version, '1.0.0');
+  assert.equal(
+    identity.platformSafetyContract.digest,
+    bundle.platformSafetyContractDigest,
+  );
+  for (const [key, set] of Object.entries(component.platformSafetyRequirementSets)) {
+    assert.equal(
+      identity.platformSafetyRequirementSets[`core:component:button#${key}`],
+      set.digest,
+    );
+  }
   assert.equal(identity.bundle, './catalog.json');
 });
 
@@ -71,4 +95,122 @@ test('E-G0.4 installed-local resolution context is catalog-owned response metada
   assert.throws(() => createCatalogApi(bundle, {
     resolution: { ...resolution, targetPackages: {} },
   }), /CORE_CATALOG_RESOLUTION_CONTEXT_INVALID/);
+});
+
+test('E-G1.0-04 catalog exposes resolved requirement sets matching packed descriptors', async () => {
+  const bundle = await readJson('../generated/catalog.json');
+  const identity = await readJson('../generated/catalog-package.json');
+  const api = createCatalogApi(bundle);
+  const response = api.getArtifact({
+    id: 'core:component:button',
+    platform: 'web.react',
+    section: 'styling',
+    detail: 'full',
+  });
+  validateFamily('query-envelope', response);
+  const set = response.data.value.requirementSets['web.react:web.react'];
+  assert.equal(set.requirements.every(({ token }) => token.startsWith('component.button.')), true);
+  assert.equal(
+    set.digest,
+    identity.tokenRequirementSets['core:component:button#web.react:web.react'],
+  );
+  assert.equal(
+    set.digest,
+    bundle.artifacts.find(({ id }) => id === 'core:component:button')
+      .tokenRequirementSets['web.react:web.react'].digest,
+  );
+});
+
+test('E-G1.0-04 test pack projection binds catalog, descriptors, and release maps', async () => {
+  const bundle = await readJson('../generated/catalog.json');
+  const identity = await readJson('../generated/catalog-package.json');
+  const source = await readJson('../../../tests/fixtures/g1.0/packed-compatibility-source.json');
+  const fixture = createPackedCompatibilityFixture({
+    source,
+    catalogPackage: identity,
+    catalogBundle: bundle,
+  });
+  assert.doesNotThrow(() => assertPackedCompatibilityFixture(fixture));
+  assert.equal(fixture.descriptors.length, 3);
+  assert.equal(fixture.release.bindings.length, 3);
+
+  for (const field of [
+    'tokenRequirementSetDigests',
+    'platformSafetyRequirementSetDigests',
+  ]) {
+    const stale = structuredClone(fixture);
+    const releaseBinding = stale.release.bindings.find(
+      ({ binding }) => binding === 'core:component:button#web.react',
+    );
+    const profile = Object.keys(releaseBinding[field])[0];
+    const digest = `sha256:${'0'.repeat(64)}`;
+    releaseBinding[field][profile] = digest;
+    stale.descriptors.find(({ id }) => id === releaseBinding.descriptor)
+      .bindings[releaseBinding.binding][field][profile] = digest;
+    assert.throws(
+      () => assertPackedCompatibilityFixture(stale),
+      /does not match the catalog package/,
+    );
+  }
+});
+
+test('E-G1.0-04 query validation rejects open fallback and dependency closure facts', async () => {
+  const bundle = await readJson('../generated/catalog.json');
+  const response = createCatalogApi(bundle).getArtifact({
+    id: 'core:component:button',
+    platform: 'web.react',
+    detail: 'full',
+  });
+  const arbitraryFallback = structuredClone(response);
+  arbitraryFallback.data.artifact.tokenRequirementSets['web.react:web.react']
+    .requirements[0].fallback = { arbitrary: true };
+  assert.throws(() => validateFamily('query-envelope', arbitraryFallback), /CORE_SCHEMA_INVALID/);
+
+  const arbitraryClosure = structuredClone(response);
+  arbitraryClosure.data.artifact.tokenRequirementSets['web.react:web.react'].closure[0] = {
+    modelSelectedCanonicalFact: true,
+  };
+  assert.throws(() => validateFamily('query-envelope', arbitraryClosure), /CORE_SCHEMA_INVALID/);
+
+  const contradictoryValue = structuredClone(response);
+  const valueEntry = contradictoryValue.data.artifact
+    .tokenRequirementSets['web.react:web.react'].closure[0];
+  valueEntry.type = 'dimension';
+  valueEntry.unit = 'px';
+  valueEntry.resolved = 'not-a-dimension';
+  assert.throws(() => validateFamily('query-envelope', contradictoryValue), /CORE_SCHEMA_INVALID/);
+
+  const contradictoryLayer = structuredClone(response);
+  contradictoryLayer.data.artifact.tokenRequirementSets['web.react:web.react']
+    .closure.find(({ token }) => token.startsWith('reference.')).layer = 'component';
+  assert.throws(() => validateFamily('query-envelope', contradictoryLayer), /CORE_SCHEMA_INVALID/);
+});
+
+test('E-G1.0-07 catalog and package expose exact platform-safety set digests', async () => {
+  const bundle = await readJson('../generated/catalog.json');
+  const identity = await readJson('../generated/catalog-package.json');
+  const api = createCatalogApi(bundle);
+  const response = api.getArtifact({
+    id: 'core:component:button',
+    platform: 'web.react',
+    section: 'styling',
+    detail: 'full',
+  });
+  validateFamily('query-envelope', response);
+  const set = response.data.value.platformSafetyRequirementSets['web.react:web.react'];
+  assert.equal(set.contractDigest, identity.platformSafetyContract.digest);
+  assert.equal(
+    set.digest,
+    identity.platformSafetyRequirementSets['core:component:button#web.react:web.react'],
+  );
+  assert.equal(Object.hasOwn(set, 'support'), false);
+  assert.equal(Object.hasOwn(set, 'evidence'), false);
+
+  const unknownRequirement = structuredClone(response);
+  unknownRequirement.data.value.platformSafetyRequirementSets['web.react:web.react']
+    .dispositions[0].id = 'system.unknown';
+  assert.throws(
+    () => validateFamily('query-envelope', unknownRequirement),
+    /CORE_SCHEMA_INVALID/,
+  );
 });

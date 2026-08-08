@@ -22,6 +22,7 @@
     "generate:check": "node src/generate.mjs --check"
   },
   "dependencies": {
-    "@core-ui/schema": "workspace:*"
+    "@core-ui/schema": "workspace:*",
+    "@core-ui/tokens": "workspace:*"
   }
 }

@@ -14,6 +14,8 @@ const repositoryPolicy = parseJsonStrict(await readFile(
   'utf8',
 ));
 const { bundle, bytes } = await compileCatalog({ repositoryRoot, sourceManifestPath: source });
+const tokenArtifact = bundle.artifacts.find(({ kind }) => kind === 'token');
+if (!tokenArtifact) throw new Error('CATALOG_TOKEN_CONTRACT_MISSING: expected one canonical token source');
 if (packageManifest.version !== bundle.catalogVersion) {
   throw new Error(
     'CATALOG_PACKAGE_VERSION_DRIFT: package version must equal compiled catalogVersion',
@@ -31,12 +33,34 @@ const expected = [
 ].join('\n');
 
 const catalogPackageId = `${packageManifest.name}@${packageManifest.version}:${bundle.catalogDigest}`;
+const bindingDescriptors = bundle.artifacts
+  .filter(({ kind }) => kind === 'component')
+  .flatMap((artifact) => Object.entries(artifact.tokenRequirementSets).map(([key, requirementSet]) => {
+    const separator = key.indexOf(':');
+    const bindingId = key.slice(0, separator);
+    const profile = key.slice(separator + 1);
+    return {
+      ref: `${artifact.id}#${bindingId}`,
+      profile,
+      specRevision: artifact.bindingSpecRevisions[bindingId],
+      tokenRequirementSetDigest: requirementSet.digest,
+    };
+  }))
+  .sort((left, right) => `${left.ref}:${left.profile}`.localeCompare(`${right.ref}:${right.profile}`));
+const platformSafetyDescriptors = bundle.artifacts
+  .filter(({ kind }) => kind === 'component')
+  .flatMap((artifact) => Object.entries(artifact.platformSafetyRequirementSets)
+    .map(([key, requirementSet]) => ({
+      key: `${artifact.id}#${key}`,
+      digest: requirementSet.digest,
+    })))
+  .sort((left, right) => left.key.localeCompare(right.key));
 const releaseManifest = {
   id: `core-ui-release:${packageManifest.version}:${bundle.sourceRevision}`,
   releaseVersion: packageManifest.version,
   schemaVersion: bundle.schemaVersion,
   queryApiVersion: bundle.apiVersion,
-  tokenContractVersion: bundle.schemaVersion,
+  tokenContractVersion: tokenArtifact.record.tokenContractVersion,
   sourceRevision: bundle.sourceRevision,
   catalog: {
     id: catalogPackageId,
@@ -52,8 +76,20 @@ const packageData = {
   catalogVersion: bundle.catalogVersion,
   catalogDigest: bundle.catalogDigest,
   queryApiVersion: bundle.apiVersion,
-  schemaRange: '^1.0.0',
+  schemaRange: '^2.0.0',
   sourceRevision: bundle.sourceRevision,
+  tokenRequirementSets: Object.fromEntries(bindingDescriptors.map((descriptor) => [
+    `${descriptor.ref}:${descriptor.profile}`,
+    descriptor.tokenRequirementSetDigest,
+  ])),
+  platformSafetyContract: {
+    version: bundle.platformSafetyContract.contractVersion,
+    digest: bundle.platformSafetyContractDigest,
+  },
+  platformSafetyRequirementSets: Object.fromEntries(platformSafetyDescriptors.map(({ key, digest }) => [
+    key,
+    digest,
+  ])),
   provenance: {
     kind: 'source-revision',
     value: bundle.sourceRevision,

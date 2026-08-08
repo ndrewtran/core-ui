@@ -52,7 +52,13 @@ async function setup() {
     compiled,
     context,
     component,
-    revisionContext: { examples, tokenSources, exampleSources },
+    revisionContext: {
+      examples,
+      tokenSources,
+      exampleSources,
+      tokenRequirementSets: component.tokenRequirementSets,
+      platformSafetyRequirementSets: component.platformSafetyRequirementSets,
+    },
   };
 }
 
@@ -62,6 +68,7 @@ async function temporaryCatalogRepository() {
     mkdir(resolve(temporaryRoot, 'packages/tooling'), { recursive: true }),
     mkdir(resolve(temporaryRoot, 'tooling/audits/repository-policy'), { recursive: true }),
     mkdir(resolve(temporaryRoot, 'packages/schema/schemas'), { recursive: true }),
+    mkdir(resolve(temporaryRoot, 'strategy'), { recursive: true }),
   ]);
   await Promise.all([
     cp(resolve(repositoryRoot, 'catalog'), resolve(temporaryRoot, 'catalog'), { recursive: true }),
@@ -84,6 +91,10 @@ async function temporaryCatalogRepository() {
       resolve(repositoryRoot, 'packages/schema/schemas/type-projection.json'),
       resolve(temporaryRoot, 'packages/schema/schemas/type-projection.json'),
       { recursive: true },
+    ),
+    cp(
+      resolve(repositoryRoot, 'strategy/platform-safety-contract.json'),
+      resolve(temporaryRoot, 'strategy/platform-safety-contract.json'),
     ),
   ]);
   return temporaryRoot;
@@ -442,6 +453,7 @@ test('E-G0.5-04: affected closure is graph-derived, declared, and bounded to Gat
   assert.deepEqual(schemaClosure.packages.map(({ name }) => name), [
     '@core-ui/catalog',
     '@core-ui/schema',
+    '@core-ui/tokens',
     '@core-ui/tooling',
   ]);
   assert.throws(

@@ -168,7 +168,7 @@ test('E-G0.1-01: minimum records, envelopes, diagnostics, ownership, and relatio
   const bindingContent = bindingContentRevision(component().bindings['web.react']);
   assert.match(bindingContent, /^sha256:[a-f0-9]{64}$/);
   validateFamily('query-envelope', {
-    apiVersion: '1.0.0',
+    apiVersion: '1.1.0',
     type: 'artifact.detail',
     data: {
       artifact: {
@@ -178,7 +178,7 @@ test('E-G0.1-01: minimum records, envelopes, diagnostics, ownership, and relatio
       },
     },
     meta: {
-      schemaVersion: '1.0.0',
+      schemaVersion: '1.1.0',
       authority: 'advisory',
       revisions: {
         conceptContent: `sha256:${'1'.repeat(64)}`,
@@ -291,9 +291,17 @@ test('E-G0.1-01 negative: unknown, duplicate, invalid-relation, and unowned fiel
   );
 
   const unsupportedBinding = {
-    schemaVersion: '1.0.0',
+    schemaVersion: '2.0.0',
     strategy: 'unsupported',
     reason: 'No responsible implementation exists.',
+    platformSafety: component().bindings['web.react'].platformSafety.map((declaration) => ({
+      ...declaration,
+      requirements: declaration.requirements.map(({ id }) => ({
+        id,
+        disposition: 'not-applicable',
+        reason: 'The binding is unsupported in G1.0.',
+      })),
+    })),
   };
   assert.deepEqual(validateFamily('binding', unsupportedBinding), unsupportedBinding);
   const componentWithUnsupportedBinding = component();
@@ -312,14 +320,14 @@ test('E-G0.1-01 negative: unknown, duplicate, invalid-relation, and unowned fiel
   );
   assert.throws(
     () => validateFamily('binding', {
-      schemaVersion: '1.0.0',
+      schemaVersion: '2.0.0',
       strategy: 'unsupported',
       alternative: 'core:component:button',
     }),
     expectCode('CORE_SCHEMA_INVALID'),
   );
   assert.throws(
-    () => validateFamily('binding', { schemaVersion: '1.0.0', strategy: 'unsupported' }),
+    () => validateFamily('binding', { schemaVersion: '2.0.0', strategy: 'unsupported' }),
     expectCode('CORE_SCHEMA_INVALID'),
   );
   assert.throws(
@@ -362,7 +370,7 @@ test('E-G0.1-01 negative: unknown, duplicate, invalid-relation, and unowned fiel
     api: { props: [], events: [], parts: [], defaults: {} },
     behavior: [],
     accessibility: [],
-    tokenSources: [],
+    tokenRecipe: { source: 'core:token:button-minimum', requirements: [] },
     runtimeProfiles: {
       ios: {
         strategy: 'adapted',
@@ -387,9 +395,7 @@ test('E-G0.1-01 negative: unknown, duplicate, invalid-relation, and unowned fiel
 
   const danglingAlternative = component();
   danglingAlternative.bindings['web.react'] = {
-    schemaVersion: '1.0.0',
-    strategy: 'unsupported',
-    reason: 'No responsible implementation exists.',
+    ...unsupportedBinding,
     alternative: 'core:component:missing',
   };
   assert.throws(
@@ -415,11 +421,12 @@ test('E-G0.5-01: discriminated binding branches retain exact required-field diag
     '$/api',
     '$/behavior',
     '$/accessibility',
-    '$/tokenSources',
+    '$/tokenRecipe',
+    '$/platformSafety',
     '$/runtimeProfiles',
   ];
   for (const strategy of ['direct', 'adapted', 'native-alternative']) {
-    const issues = validationIssues('binding', { schemaVersion: '1.0.0', strategy });
+    const issues = validationIssues('binding', { schemaVersion: '2.0.0', strategy });
     for (const path of supportedRequiredPaths) {
       assert.ok(issues.some((issue) => issue.path === path), `${strategy}: ${path}`);
     }
@@ -432,10 +439,11 @@ test('E-G0.5-01: discriminated binding branches retain exact required-field diag
   }
 
   const unsupportedIssues = validationIssues('binding', {
-    schemaVersion: '1.0.0',
+    schemaVersion: '2.0.0',
     strategy: 'unsupported',
   });
   assert.ok(unsupportedIssues.some((issue) => issue.path === '$/reason'));
+  assert.ok(unsupportedIssues.some((issue) => issue.path === '$/platformSafety'));
   assert.equal(unsupportedIssues.some((issue) => issue.path === '$/api'), false);
 
   for (const strategy of ['direct', 'adapted', 'native-alternative']) {
@@ -606,7 +614,7 @@ test('E-G0.1-03: editorial content and normative binding closure affect the corr
 
   const editorialToken = structuredClone(token);
   editorialToken.summary = 'Editorially clarified token guidance.';
-  editorialToken.tokens['semantic.action.background'].value = '#ffffff';
+  editorialToken.tokens['reference.color.black'].value = '#ffffff';
   assert.equal(bindingSpecRevision({
     ...revisionInput({
       concept,
@@ -617,10 +625,7 @@ test('E-G0.1-03: editorial content and normative binding closure affect the corr
   }), baseSpec);
 
   const normativeTokenContract = structuredClone(token);
-  normativeTokenContract.tokens['semantic.action.foreground'] = {
-    type: 'color',
-    value: '#ffffff',
-  };
+  normativeTokenContract.tokenContractVersion = '1.2.0';
   assert.notEqual(bindingSpecRevision({
     ...revisionInput({
       concept,
@@ -631,7 +636,7 @@ test('E-G0.1-03: editorial content and normative binding closure affect the corr
   }), baseSpec);
 
   const unsafeTokenNumber = structuredClone(token);
-  unsafeTokenNumber.tokens['semantic.action.background'].value = Number.MAX_SAFE_INTEGER + 1;
+  unsafeTokenNumber.tokens['reference.color.black'].value = Number.MAX_SAFE_INTEGER + 1;
   assert.throws(
     () => contentRevision('token-source', unsafeTokenNumber),
     /CANONICAL_NUMBER_INVALID/,

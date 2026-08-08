@@ -17,8 +17,19 @@ importers:
       '@core-ui/schema':
         specifier: workspace:*
         version: link:../schema
+      '@core-ui/tokens':
+        specifier: workspace:*
+        version: link:../tokens
+
+  packages/foundation: {}
 
   packages/schema: {}
+
+  packages/tokens:
+    dependencies:
+      '@core-ui/schema':
+        specifier: workspace:*
+        version: link:../schema
 
   packages/tooling:
     dependencies:

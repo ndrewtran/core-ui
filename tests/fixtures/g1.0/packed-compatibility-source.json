@@ -1,0 +1,61 @@
+{
+  "schema": "core-ui-g1.0-packed-compatibility-source-v1",
+  "classification": "test-only-synthetic-pack-input",
+  "release": {
+    "idPrefix": "core-ui-test-release:0.0.0",
+    "releaseVersion": "0.0.0",
+    "schemaVersion": "2.0.0",
+    "queryApiVersion": "1.1.0",
+    "tokenContractVersion": "1.1.0"
+  },
+  "descriptors": [
+    {
+      "id": "g1.0-packed-native",
+      "package": "@core-ui/react-native",
+      "version": "0.0.0",
+      "bindingSchemaRange": "^2.0.0",
+      "tokenContractRange": "^1.1.0",
+      "bindings": [
+        {
+          "artifact": "core:component:button",
+          "binding": "native.react-native",
+          "export": "@core-ui/react-native/button",
+          "tokenProfiles": ["native.android", "native.ios"],
+          "platformSafetyProfiles": ["android", "ios", "native.react-native-web"]
+        }
+      ]
+    },
+    {
+      "id": "g1.0-packed-react",
+      "package": "@core-ui/react",
+      "version": "0.0.0",
+      "bindingSchemaRange": "^2.0.0",
+      "tokenContractRange": "^1.1.0",
+      "bindings": [
+        {
+          "artifact": "core:component:button",
+          "binding": "web.react",
+          "export": "@core-ui/react/button",
+          "tokenProfiles": ["web.react"],
+          "platformSafetyProfiles": ["web.react"]
+        }
+      ]
+    },
+    {
+      "id": "g1.0-packed-web",
+      "package": "@core-ui/html",
+      "version": "0.0.0",
+      "bindingSchemaRange": "^2.0.0",
+      "tokenContractRange": "^1.1.0",
+      "bindings": [
+        {
+          "artifact": "core:component:button",
+          "binding": "web.html",
+          "export": "@core-ui/html/button",
+          "tokenProfiles": ["web.html"],
+          "platformSafetyProfiles": ["web.html"]
+        }
+      ]
+    }
+  ]
+}

@@ -113,20 +113,23 @@ export async function verifyEvidence(repositoryRoot) {
     });
   }
 
-  const recertifications = new Map();
+  const recertificationNodes = new Map();
   for (const owner of indexes) {
     for (const reference of owner.index.recertifications ?? []) {
       const recertification = await assertDigest(repositoryRoot, reference);
       const target = recertification.historicalIndex?.path;
       if (
-        recertification.schema !== 'core-ui-evidence-recertification-v1'
+        ![
+          'core-ui-evidence-recertification-v1',
+          'core-ui-evidence-recertification-v2',
+        ].includes(recertification.schema)
         || recertification.outcome !== 'pass'
         || typeof target !== 'string'
-        || recertifications.has(target)
+        || recertificationNodes.has(reference.path)
       ) {
         throw new EvidenceIntegrityError(
           'EVIDENCE_RECERTIFICATION_INVALID',
-          `${reference.path} must be one unique passing recertification`,
+          `${reference.path} must be one uniquely addressed passing recertification`,
         );
       }
       const historical = indexes.find(({ relativePath }) => relativePath === target);
@@ -139,8 +142,6 @@ export async function verifyEvidence(repositoryRoot) {
       const historicalDigest = `sha256:${sha256(historical.indexBytes)}`;
       if (
         recertification.historicalIndex.sha256 !== historicalDigest
-        || canonicalJson(recertification.historicalApplicabilityManifest)
-          !== canonicalJson(historical.index.applicabilityManifest)
         || canonicalJson(recertification.currentApplicabilityManifest.paths)
           !== canonicalJson(historical.index.applicabilityManifest.paths)
         || recertification.sourceRevision !== owner.index.sourceRevision
@@ -156,13 +157,115 @@ export async function verifyEvidence(repositoryRoot) {
           `${reference.path} does not bind the historical and current evidence identities`,
         );
       }
-      await assertApplicabilityManifest(
-        repositoryRoot,
-        recertification.currentApplicabilityManifest,
-      );
-      recertifications.set(target, recertification);
+      if (
+        recertification.schema === 'core-ui-evidence-recertification-v1'
+        && recertification.previousRecertification !== undefined
+      ) {
+        throw new EvidenceIntegrityError(
+          'EVIDENCE_RECERTIFICATION_INVALID',
+          `${reference.path} uses a v1 schema with a chain predecessor`,
+        );
+      }
+      recertificationNodes.set(reference.path, {
+        owner,
+        recertification,
+        reference,
+        target,
+      });
       recertificationCount += 1;
     }
+  }
+
+  const recertificationLeaves = new Map();
+  const nodesByTarget = Map.groupBy(
+    recertificationNodes.values(),
+    ({ target }) => target,
+  );
+  for (const [target, nodes] of nodesByTarget) {
+    const historical = indexes.find(({ relativePath }) => relativePath === target);
+    const children = new Map();
+    const roots = [];
+    for (const node of nodes) {
+      const previous = node.recertification.previousRecertification;
+      if (previous === undefined) {
+        roots.push(node);
+        if (
+          canonicalJson(node.recertification.historicalApplicabilityManifest)
+          !== canonicalJson(historical.index.applicabilityManifest)
+        ) {
+          throw new EvidenceIntegrityError(
+            'EVIDENCE_RECERTIFICATION_INVALID',
+            `${node.reference.path} root does not bind the historical applicability manifest`,
+          );
+        }
+        continue;
+      }
+      if (node.recertification.schema !== 'core-ui-evidence-recertification-v2') {
+        throw new EvidenceIntegrityError(
+          'EVIDENCE_RECERTIFICATION_INVALID',
+          `${node.reference.path} must use v2 to extend a recertification chain`,
+        );
+      }
+      if (previous.path === node.reference.path) {
+        throw new EvidenceIntegrityError(
+          'EVIDENCE_RECERTIFICATION_CYCLE',
+          `${node.reference.path} cannot name itself as its predecessor`,
+        );
+      }
+      const predecessor = recertificationNodes.get(previous.path);
+      if (
+        !predecessor
+        || predecessor.target !== target
+        || previous.sha256 !== predecessor.reference.sha256
+        || canonicalJson(node.recertification.historicalApplicabilityManifest)
+          !== canonicalJson(predecessor.recertification.currentApplicabilityManifest)
+      ) {
+        throw new EvidenceIntegrityError(
+          'EVIDENCE_RECERTIFICATION_INVALID',
+          `${node.reference.path} does not bind its exact predecessor`,
+        );
+      }
+      const successorPaths = children.get(previous.path) ?? [];
+      successorPaths.push(node.reference.path);
+      children.set(previous.path, successorPaths);
+    }
+    if (roots.length !== 1 || [...children.values()].some((paths) => paths.length !== 1)) {
+      throw new EvidenceIntegrityError(
+        'EVIDENCE_RECERTIFICATION_FORK',
+        `${target} must have one root and at most one successor per certificate`,
+      );
+    }
+    const leaves = nodes.filter(({ reference }) => !children.has(reference.path));
+    if (leaves.length !== 1) {
+      throw new EvidenceIntegrityError(
+        'EVIDENCE_RECERTIFICATION_FORK',
+        `${target} must have exactly one terminal certificate`,
+      );
+    }
+    const visited = new Set();
+    let cursor = leaves[0];
+    while (cursor) {
+      if (visited.has(cursor.reference.path)) {
+        throw new EvidenceIntegrityError(
+          'EVIDENCE_RECERTIFICATION_CYCLE',
+          `${target} contains a recertification cycle`,
+        );
+      }
+      visited.add(cursor.reference.path);
+      const previousPath = cursor.recertification.previousRecertification?.path;
+      cursor = previousPath === undefined ? null : recertificationNodes.get(previousPath);
+    }
+    if (visited.size !== nodes.length || !visited.has(roots[0].reference.path)) {
+      throw new EvidenceIntegrityError(
+        'EVIDENCE_RECERTIFICATION_INVALID',
+        `${target} contains a disconnected or cyclic recertification chain`,
+      );
+    }
+    await assertApplicabilityManifest(
+      repositoryRoot,
+      leaves[0].recertification.currentApplicabilityManifest,
+    );
+    recertificationLeaves.set(target, leaves[0].recertification);
   }
 
   for (const { index, relativePath } of indexes) {
@@ -173,7 +276,7 @@ export async function verifyEvidence(repositoryRoot) {
         if (
           !(error instanceof EvidenceIntegrityError)
           || error.code !== 'EVIDENCE_APPLICABILITY_MISMATCH'
-          || !recertifications.has(relativePath)
+          || !recertificationLeaves.has(relativePath)
         ) throw error;
       }
     }

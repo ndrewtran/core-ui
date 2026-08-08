@@ -1,4 +1,5 @@
 import { createCatalogDiagnostic } from '@core-ui/catalog';
+import { canonicalJson } from '@core-ui/schema';
 import { satisfies, valid, validRange } from 'semver';
 
 export const RESOLVER_ERROR_PRECEDENCE = Object.freeze([
@@ -11,8 +12,8 @@ export const RESOLVER_ERROR_PRECEDENCE = Object.freeze([
   'CORE_CATALOG_INCOMPATIBLE',
 ]);
 
-const TOOLING_API_VERSION = '1.0.0';
-const TOOLING_SCHEMA_VERSION = '1.0.0';
+const TOOLING_API_VERSION = '1.1.0';
+const TOOLING_SCHEMA_VERSION = '2.0.0';
 const TOOLING_VERSION = '0.0.0';
 
 function compareText(left, right) {
@@ -82,6 +83,37 @@ function assertUnique(values, key, context) {
   }
 }
 
+function assertClosedDigestMap(value, context) {
+  if (value === null || typeof value !== 'object' || Array.isArray(value)) {
+    inputError(`${context} must be an object`);
+  }
+  if (Object.keys(value).length === 0) inputError(`${context} must not be empty`);
+  for (const [profile, digest] of Object.entries(value)) {
+    if (profile.length === 0 || !/^sha256:[a-f0-9]{64}$/u.test(digest)) {
+      inputError(`${context} has invalid profile digest ${profile}`);
+    }
+  }
+}
+
+function assertCatalogDigestMap(value, context) {
+  if (value === null || typeof value !== 'object' || Array.isArray(value)) {
+    inputError(`${context} must be an object`);
+  }
+  for (const [identity, digest] of Object.entries(value)) {
+    if (identity.length === 0 || !/^sha256:[a-f0-9]{64}$/u.test(digest)) {
+      inputError(`${context} has invalid requirement-set digest ${identity}`);
+    }
+  }
+}
+
+function bindingDigestMap(requirementSets, binding) {
+  const prefix = `${binding}:`;
+  return Object.fromEntries(Object.entries(requirementSets)
+    .filter(([identity]) => identity.startsWith(prefix))
+    .map(([identity, digest]) => [identity.slice(prefix.length), digest])
+    .sort(([left], [right]) => compareText(left, right)));
+}
+
 function validateNormalizedInput(input) {
   assertClosed(
     input,
@@ -97,8 +129,14 @@ function validateNormalizedInput(input) {
     assertClosed(catalog, [
       'id', 'name', 'version', 'catalogVersion', 'catalogDigest', 'queryApiVersion',
       'schemaRange', 'sourceRevision', 'provenance', 'releaseManifest',
+      'tokenRequirementSets', 'platformSafetyRequirementSets',
     ], `catalog ${catalog.id ?? '<unknown>'}`);
     assertClosed(catalog.provenance, ['kind', 'value'], `${catalog.id}.provenance`);
+    assertCatalogDigestMap(catalog.tokenRequirementSets, `${catalog.id}.tokenRequirementSets`);
+    assertCatalogDigestMap(
+      catalog.platformSafetyRequirementSets,
+      `${catalog.id}.platformSafetyRequirementSets`,
+    );
   }
   for (const descriptor of input.rendererDescriptors) {
     assertClosed(descriptor, [
@@ -112,8 +150,11 @@ function validateNormalizedInput(input) {
     ) inputError(`${descriptor.id}.bindings must be an object`);
     for (const [binding, definition] of Object.entries(descriptor.bindings)) {
       assertClosed(definition, [
-        'specRevision', 'export', 'lifecycle', 'strategy', 'tokenRequirementsDigest',
+        'specRevision', 'export', 'lifecycle', 'strategy', 'tokenRequirementSetDigests',
+        'platformSafetyRequirementSetDigests',
       ], `${descriptor.id}.${binding}`);
+      assertClosedDigestMap(definition.tokenRequirementSetDigests, `${descriptor.id}.${binding}.tokenRequirementSetDigests`);
+      assertClosedDigestMap(definition.platformSafetyRequirementSetDigests, `${descriptor.id}.${binding}.platformSafetyRequirementSetDigests`);
     }
   }
   for (const release of input.releaseManifests) {
@@ -127,8 +168,10 @@ function validateNormalizedInput(input) {
     for (const binding of release.bindings) {
       assertClosed(binding, [
         'descriptor', 'binding', 'package', 'version', 'export', 'specRevision',
-        'tokenRequirementsDigest',
+        'tokenRequirementSetDigests', 'platformSafetyRequirementSetDigests',
       ], `${release.id}.binding`);
+      assertClosedDigestMap(binding.tokenRequirementSetDigests, `${release.id}.binding.tokenRequirementSetDigests`);
+      assertClosedDigestMap(binding.platformSafetyRequirementSetDigests, `${release.id}.binding.platformSafetyRequirementSetDigests`);
     }
   }
   const { graph } = input;
@@ -331,11 +374,46 @@ function compatibilityFor({
         actual: descriptor.tokenContractRange,
       });
     }
-    if (described.tokenRequirementsDigest !== expected.tokenRequirementsDigest) {
+    const catalogTokenDigests = bindingDigestMap(catalog.tokenRequirementSets, binding);
+    const catalogPlatformSafetyDigests = bindingDigestMap(
+      catalog.platformSafetyRequirementSets,
+      binding,
+    );
+    if (
+      canonicalJson(expected.tokenRequirementSetDigests)
+      !== canonicalJson(catalogTokenDigests)
+    ) {
       failures.push({
         dimension: 'token',
-        required: expected.tokenRequirementsDigest,
-        actual: described.tokenRequirementsDigest,
+        required: canonicalJson(catalogTokenDigests),
+        actual: canonicalJson(expected.tokenRequirementSetDigests),
+      });
+    }
+    if (
+      canonicalJson(expected.platformSafetyRequirementSetDigests)
+      !== canonicalJson(catalogPlatformSafetyDigests)
+    ) {
+      failures.push({
+        dimension: 'platform-safety',
+        required: canonicalJson(catalogPlatformSafetyDigests),
+        actual: canonicalJson(expected.platformSafetyRequirementSetDigests),
+      });
+    }
+    if (canonicalJson(described.tokenRequirementSetDigests) !== canonicalJson(expected.tokenRequirementSetDigests)) {
+      failures.push({
+        dimension: 'token',
+        required: canonicalJson(expected.tokenRequirementSetDigests),
+        actual: canonicalJson(described.tokenRequirementSetDigests),
+      });
+    }
+    if (
+      canonicalJson(described.platformSafetyRequirementSetDigests)
+      !== canonicalJson(expected.platformSafetyRequirementSetDigests)
+    ) {
+      failures.push({
+        dimension: 'platform-safety',
+        required: canonicalJson(expected.platformSafetyRequirementSetDigests),
+        actual: canonicalJson(described.platformSafetyRequirementSetDigests),
       });
     }
   }

@@ -94,6 +94,65 @@ test('E-G0.4 resolver verifies provenance material instead of trusting fixture f
   assert.equal(rejected.error.code, 'CORE_CATALOG_INTEGRITY_MISMATCH');
 });
 
+test('E-G1.0-07 resolver rejects a weakened platform-safety requirement digest', async () => {
+  const value = await corpus();
+  const descriptor = value.rendererDescriptors.find(
+    ({ id }) => id === 'renderer-react-compatible',
+  );
+  descriptor.bindings['core:component:button#web.react']
+    .platformSafetyRequirementSetDigests['web.react'] = `sha256:${'0'.repeat(64)}`;
+  const graph = value.graphs.find(({ id }) => id === 'selected-direct-compatible');
+  const result = resolve(value, graph);
+  assert.equal(result.error.code, 'CORE_CATALOG_INCOMPATIBLE');
+  assert.equal(
+    result.error.details.compatibilityFailures.some(
+      ({ dimension }) => dimension === 'platform-safety',
+    ),
+    true,
+  );
+});
+
+test('E-G1.0-04 compatibility rejects one changed native profile digest', async () => {
+  for (const [field, profile, dimension] of [
+    ['tokenRequirementSetDigests', 'native.ios', 'token'],
+    ['platformSafetyRequirementSetDigests', 'android', 'platform-safety'],
+  ]) {
+    const value = await corpus();
+    value.rendererDescriptors.find(({ id }) => id === 'renderer-native-compatible')
+      .bindings['core:component:button#native.react-native'][field][profile]
+      = `sha256:${'0'.repeat(64)}`;
+    const graph = value.graphs.find(({ id }) => id === 'selected-direct-compatible');
+    const result = resolve(value, graph);
+    assert.equal(result.error.code, 'CORE_CATALOG_INCOMPATIBLE');
+    assert.equal(
+      result.error.details.compatibilityFailures.some((failure) => failure.dimension === dimension),
+      true,
+    );
+  }
+});
+
+test('E-G1.0-04 compatibility rejects jointly stale descriptor and release maps', async () => {
+  for (const [field, profile, dimension] of [
+    ['tokenRequirementSetDigests', 'web.react', 'token'],
+    ['platformSafetyRequirementSetDigests', 'web.react', 'platform-safety'],
+  ]) {
+    const value = await corpus();
+    const staleDigest = `sha256:${'0'.repeat(64)}`;
+    value.rendererDescriptors.find(({ id }) => id === 'renderer-react-compatible')
+      .bindings['core:component:button#web.react'][field][profile] = staleDigest;
+    value.releaseManifests.find(({ id }) => id === 'release-compatible')
+      .bindings.find(({ binding }) => binding === 'core:component:button#web.react')
+      [field][profile] = staleDigest;
+    const graph = value.graphs.find(({ id }) => id === 'selected-direct-compatible');
+    const result = resolve(value, graph);
+    assert.equal(result.error.code, 'CORE_CATALOG_INCOMPATIBLE');
+    assert.equal(
+      result.error.details.compatibilityFailures.some((failure) => failure.dimension === dimension),
+      true,
+    );
+  }
+});
+
 test('E-G0.4 explicit cache remains subordinate to manifest and lock authority', async () => {
   const value = await corpus();
   const baseline = value.graphs.find(({ id }) => id === 'explicit-cache-compatible');
@@ -394,8 +453,8 @@ test('E-G0.4 pnpm adapter normalizes renderer packages into the single resolver'
       descriptorVersion: '1.0.0',
       package: '@core-ui/react',
       version: '1.0.0',
-      bindingSchemaRange: '^1.0.0',
-      tokenContractRange: '^1.0.0',
+      bindingSchemaRange: '^2.0.0',
+      tokenContractRange: '^1.1.0',
       releaseProvenance: `core-ui-release:0.0.0:${bundle.sourceRevision}`,
       bindings: {
         [binding]: {
@@ -404,7 +463,12 @@ test('E-G0.4 pnpm adapter normalizes renderer packages into the single resolver'
           export: '@core-ui/react/button',
           lifecycle: 'experimental',
           strategy: 'direct',
-          tokenRequirementsDigest: 'sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
+          tokenRequirementSetDigests: {
+            'web.react': 'sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
+          },
+          platformSafetyRequirementSetDigests: {
+            'web.react': 'sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd',
+          },
         },
       },
     };
@@ -415,15 +479,27 @@ test('E-G0.4 pnpm adapter normalizes renderer packages into the single resolver'
       catalogVersion: '0.0.0',
       catalogDigest: bundle.catalogDigest,
       queryApiVersion: bundle.apiVersion,
-      schemaRange: '^1.0.0',
+      schemaRange: '^2.0.0',
       sourceRevision: bundle.sourceRevision,
       provenance: { kind: 'source-revision', value: bundle.sourceRevision },
+      tokenRequirementSets: {
+        [`${binding}:web.react`]: descriptor.bindings[binding]
+          .tokenRequirementSetDigests['web.react'],
+      },
+      platformSafetyContract: {
+        version: bundle.platformSafetyContract.contractVersion,
+        digest: bundle.platformSafetyContractDigest,
+      },
+      platformSafetyRequirementSets: {
+        [`${binding}:web.react`]: descriptor.bindings[binding]
+          .platformSafetyRequirementSetDigests['web.react'],
+      },
       releaseManifest: {
         id: descriptor.releaseProvenance,
         releaseVersion: '0.0.0',
-        schemaVersion: '1.0.0',
-        queryApiVersion: '1.0.0',
-        tokenContractVersion: '1.0.0',
+        schemaVersion: '2.0.0',
+        queryApiVersion: '1.1.0',
+        tokenContractVersion: '1.1.0',
         sourceRevision: bundle.sourceRevision,
         catalog: {
           id: `@core-ui/catalog@0.0.0:${bundle.catalogDigest}`,
@@ -437,7 +513,9 @@ test('E-G0.4 pnpm adapter normalizes renderer packages into the single resolver'
           version: '1.0.0',
           export: descriptor.bindings[binding].export,
           specRevision: descriptor.bindings[binding].specRevision,
-          tokenRequirementsDigest: descriptor.bindings[binding].tokenRequirementsDigest,
+          tokenRequirementSetDigests: descriptor.bindings[binding].tokenRequirementSetDigests,
+          platformSafetyRequirementSetDigests:
+            descriptor.bindings[binding].platformSafetyRequirementSetDigests,
         }],
       },
       bundle: './catalog.json',

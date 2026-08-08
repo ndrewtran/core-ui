@@ -217,13 +217,6 @@
     },
     {
       "class": "authored",
-      "name": "tokenSources",
-      "owner": "binding-contract",
-      "schema": "binding.schema.json",
-      "schemaPointer": "#/properties/tokenSources"
-    },
-    {
-      "class": "authored",
       "name": "availability",
       "owner": "capability-contract",
       "schema": "capability.schema.json",
@@ -1658,27 +1651,6 @@
       "schemaPointer": "#/properties/tokens"
     },
     {
-      "class": "authored",
-      "name": "alias",
-      "owner": "token-source-contract",
-      "schema": "token-source.schema.json",
-      "schemaPointer": "#/properties/tokens/additionalProperties/properties/alias"
-    },
-    {
-      "class": "authored",
-      "name": "type",
-      "owner": "token-source-contract",
-      "schema": "token-source.schema.json",
-      "schemaPointer": "#/properties/tokens/additionalProperties/properties/type"
-    },
-    {
-      "class": "authored",
-      "name": "value",
-      "owner": "token-source-contract",
-      "schema": "token-source.schema.json",
-      "schemaPointer": "#/properties/tokens/additionalProperties/properties/value"
-    },
-    {
       "class": "derived",
       "name": "available",
       "owner": "query-envelope-contract",
@@ -2181,6 +2153,699 @@
       "owner": "query-envelope-contract",
       "schema": "query-envelope.schema.json",
       "schemaPointer": "#/$defs/cliUnavailableCapability/properties/available"
+    },
+    {
+      "class": "authored",
+      "name": "evidenceIds",
+      "owner": "binding-contract",
+      "schema": "binding.schema.json",
+      "schemaPointer": "#/$defs/fallbackToken/properties/evidenceIds"
+    },
+    {
+      "class": "authored",
+      "name": "kind",
+      "owner": "binding-contract",
+      "schema": "binding.schema.json",
+      "schemaPointer": "#/$defs/fallbackToken/properties/kind"
+    },
+    {
+      "class": "authored",
+      "name": "profiles",
+      "owner": "binding-contract",
+      "schema": "binding.schema.json",
+      "schemaPointer": "#/$defs/fallbackToken/properties/profiles"
+    },
+    {
+      "class": "authored",
+      "name": "token",
+      "owner": "binding-contract",
+      "schema": "binding.schema.json",
+      "schemaPointer": "#/$defs/fallbackToken/properties/token"
+    },
+    {
+      "class": "authored",
+      "name": "evidenceIds",
+      "owner": "binding-contract",
+      "schema": "binding.schema.json",
+      "schemaPointer": "#/$defs/fallbackValue/properties/evidenceIds"
+    },
+    {
+      "class": "authored",
+      "name": "kind",
+      "owner": "binding-contract",
+      "schema": "binding.schema.json",
+      "schemaPointer": "#/$defs/fallbackValue/properties/kind"
+    },
+    {
+      "class": "authored",
+      "name": "profiles",
+      "owner": "binding-contract",
+      "schema": "binding.schema.json",
+      "schemaPointer": "#/$defs/fallbackValue/properties/profiles"
+    },
+    {
+      "class": "authored",
+      "name": "type",
+      "owner": "binding-contract",
+      "schema": "binding.schema.json",
+      "schemaPointer": "#/$defs/fallbackValue/properties/type"
+    },
+    {
+      "class": "authored",
+      "name": "unit",
+      "owner": "binding-contract",
+      "schema": "binding.schema.json",
+      "schemaPointer": "#/$defs/fallbackValue/properties/unit"
+    },
+    {
+      "class": "authored",
+      "name": "value",
+      "owner": "binding-contract",
+      "schema": "binding.schema.json",
+      "schemaPointer": "#/$defs/fallbackValue/properties/value"
+    },
+    {
+      "class": "authored",
+      "name": "fallback",
+      "owner": "binding-contract",
+      "schema": "binding.schema.json",
+      "schemaPointer": "#/$defs/tokenRequirement/properties/fallback"
+    },
+    {
+      "class": "authored",
+      "name": "profiles",
+      "owner": "binding-contract",
+      "schema": "binding.schema.json",
+      "schemaPointer": "#/$defs/tokenRequirement/properties/profiles"
+    },
+    {
+      "class": "authored",
+      "name": "requirement",
+      "owner": "binding-contract",
+      "schema": "binding.schema.json",
+      "schemaPointer": "#/$defs/tokenRequirement/properties/requirement"
+    },
+    {
+      "class": "authored",
+      "name": "token",
+      "owner": "binding-contract",
+      "schema": "binding.schema.json",
+      "schemaPointer": "#/$defs/tokenRequirement/properties/token"
+    },
+    {
+      "class": "authored",
+      "name": "tokenRecipe",
+      "owner": "binding-contract",
+      "schema": "binding.schema.json",
+      "schemaPointer": "#/properties/tokenRecipe"
+    },
+    {
+      "class": "authored",
+      "name": "requirements",
+      "owner": "binding-contract",
+      "schema": "binding.schema.json",
+      "schemaPointer": "#/properties/tokenRecipe/properties/requirements"
+    },
+    {
+      "class": "authored",
+      "name": "source",
+      "owner": "binding-contract",
+      "schema": "binding.schema.json",
+      "schemaPointer": "#/properties/tokenRecipe/properties/source"
+    },
+    {
+      "class": "derived",
+      "name": "tokenRequirementSets",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/detailData/properties/artifact/properties/tokenRequirementSets"
+    },
+    {
+      "class": "derived",
+      "name": "fallback",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/tokenRequirement/properties/fallback"
+    },
+    {
+      "class": "derived",
+      "name": "modes",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/tokenRequirement/properties/modes"
+    },
+    {
+      "class": "derived",
+      "name": "overridePolicy",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/tokenRequirement/properties/overridePolicy"
+    },
+    {
+      "class": "derived",
+      "name": "requirement",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/tokenRequirement/properties/requirement"
+    },
+    {
+      "class": "derived",
+      "name": "token",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/tokenRequirement/properties/token"
+    },
+    {
+      "class": "derived",
+      "name": "type",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/tokenRequirement/properties/type"
+    },
+    {
+      "class": "derived",
+      "name": "unit",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/tokenRequirement/properties/unit"
+    },
+    {
+      "class": "derived",
+      "name": "bindingId",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/tokenRequirementSet/properties/bindingId"
+    },
+    {
+      "class": "derived",
+      "name": "closure",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/tokenRequirementSet/properties/closure"
+    },
+    {
+      "class": "derived",
+      "name": "digest",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/tokenRequirementSet/properties/digest"
+    },
+    {
+      "class": "derived",
+      "name": "profile",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/tokenRequirementSet/properties/profile"
+    },
+    {
+      "class": "derived",
+      "name": "requirements",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/tokenRequirementSet/properties/requirements"
+    },
+    {
+      "class": "derived",
+      "name": "schemaVersion",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/tokenRequirementSet/properties/schemaVersion"
+    },
+    {
+      "class": "derived",
+      "name": "source",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/tokenRequirementSet/properties/source"
+    },
+    {
+      "class": "derived",
+      "name": "sourceRevision",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/tokenRequirementSet/properties/sourceRevision"
+    },
+    {
+      "class": "derived",
+      "name": "tokenContractVersion",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/tokenRequirementSet/properties/tokenContractVersion"
+    },
+    {
+      "class": "authored",
+      "name": "alias",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "schemaPointer": "#/$defs/token/properties/alias"
+    },
+    {
+      "class": "authored",
+      "name": "equivalence",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "schemaPointer": "#/$defs/token/properties/equivalence"
+    },
+    {
+      "class": "authored",
+      "name": "layer",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "schemaPointer": "#/$defs/token/properties/layer"
+    },
+    {
+      "class": "authored",
+      "name": "meaning",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "schemaPointer": "#/$defs/token/properties/meaning"
+    },
+    {
+      "class": "authored",
+      "name": "modes",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "schemaPointer": "#/$defs/token/properties/modes"
+    },
+    {
+      "class": "authored",
+      "name": "overridePolicy",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "schemaPointer": "#/$defs/token/properties/overridePolicy"
+    },
+    {
+      "class": "authored",
+      "name": "platformRestrictions",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "schemaPointer": "#/$defs/token/properties/platformRestrictions"
+    },
+    {
+      "class": "authored",
+      "name": "type",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "schemaPointer": "#/$defs/token/properties/type"
+    },
+    {
+      "class": "authored",
+      "name": "unit",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "schemaPointer": "#/$defs/token/properties/unit"
+    },
+    {
+      "class": "authored",
+      "name": "value",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "schemaPointer": "#/$defs/token/properties/value"
+    },
+    {
+      "class": "authored",
+      "name": "value",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "schemaPointer": "#/$defs/valueOrAlias/oneOf/0/properties/value"
+    },
+    {
+      "class": "authored",
+      "name": "alias",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "schemaPointer": "#/$defs/valueOrAlias/oneOf/1/properties/alias"
+    },
+    {
+      "class": "authored",
+      "name": "theme",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "schemaPointer": "#/properties/theme"
+    },
+    {
+      "class": "authored",
+      "name": "defaultModes",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "schemaPointer": "#/properties/theme/properties/defaultModes"
+    },
+    {
+      "class": "authored",
+      "name": "colorScheme",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "schemaPointer": "#/properties/theme/properties/defaultModes/properties/colorScheme"
+    },
+    {
+      "class": "authored",
+      "name": "contrast",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "schemaPointer": "#/properties/theme/properties/defaultModes/properties/contrast"
+    },
+    {
+      "class": "authored",
+      "name": "density",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "schemaPointer": "#/properties/theme/properties/defaultModes/properties/density"
+    },
+    {
+      "class": "authored",
+      "name": "direction",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "schemaPointer": "#/properties/theme/properties/defaultModes/properties/direction"
+    },
+    {
+      "class": "authored",
+      "name": "motion",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "schemaPointer": "#/properties/theme/properties/defaultModes/properties/motion"
+    },
+    {
+      "class": "authored",
+      "name": "modeAxes",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "schemaPointer": "#/properties/theme/properties/modeAxes"
+    },
+    {
+      "class": "authored",
+      "name": "colorScheme",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "schemaPointer": "#/properties/theme/properties/modeAxes/properties/colorScheme"
+    },
+    {
+      "class": "authored",
+      "name": "contrast",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "schemaPointer": "#/properties/theme/properties/modeAxes/properties/contrast"
+    },
+    {
+      "class": "authored",
+      "name": "density",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "schemaPointer": "#/properties/theme/properties/modeAxes/properties/density"
+    },
+    {
+      "class": "authored",
+      "name": "direction",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "schemaPointer": "#/properties/theme/properties/modeAxes/properties/direction"
+    },
+    {
+      "class": "authored",
+      "name": "motion",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "schemaPointer": "#/properties/theme/properties/modeAxes/properties/motion"
+    },
+    {
+      "class": "authored",
+      "name": "name",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "schemaPointer": "#/properties/theme/properties/name"
+    },
+    {
+      "class": "authored",
+      "name": "runtimeSwitching",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "schemaPointer": "#/properties/theme/properties/runtimeSwitching"
+    },
+    {
+      "class": "authored",
+      "name": "platformSafety",
+      "owner": "binding-contract",
+      "schema": "binding.schema.json",
+      "schemaPointer": "#/properties/platformSafety"
+    },
+    {
+      "class": "authored",
+      "name": "profile",
+      "owner": "binding-contract",
+      "schema": "binding.schema.json",
+      "schemaPointer": "#/$defs/platformSafetyDeclaration/properties/profile"
+    },
+    {
+      "class": "authored",
+      "name": "validationProfile",
+      "owner": "binding-contract",
+      "schema": "binding.schema.json",
+      "schemaPointer": "#/$defs/platformSafetyDeclaration/properties/validationProfile"
+    },
+    {
+      "class": "authored",
+      "name": "requirements",
+      "owner": "binding-contract",
+      "schema": "binding.schema.json",
+      "schemaPointer": "#/$defs/platformSafetyDeclaration/properties/requirements"
+    },
+    {
+      "class": "authored",
+      "name": "id",
+      "owner": "binding-contract",
+      "schema": "binding.schema.json",
+      "schemaPointer": "#/$defs/platformSafetyDisposition/properties/id"
+    },
+    {
+      "class": "authored",
+      "name": "disposition",
+      "owner": "binding-contract",
+      "schema": "binding.schema.json",
+      "schemaPointer": "#/$defs/platformSafetyDisposition/properties/disposition"
+    },
+    {
+      "class": "authored",
+      "name": "reason",
+      "owner": "binding-contract",
+      "schema": "binding.schema.json",
+      "schemaPointer": "#/$defs/platformSafetyDisposition/properties/reason"
+    },
+    {
+      "class": "derived",
+      "name": "id",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/platformSafetyDisposition/properties/id"
+    },
+    {
+      "class": "derived",
+      "name": "disposition",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/platformSafetyDisposition/properties/disposition"
+    },
+    {
+      "class": "derived",
+      "name": "reason",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/platformSafetyDisposition/properties/reason"
+    },
+    {
+      "class": "derived",
+      "name": "schemaVersion",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/platformSafetyRequirementSet/properties/schemaVersion"
+    },
+    {
+      "class": "derived",
+      "name": "contractVersion",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/platformSafetyRequirementSet/properties/contractVersion"
+    },
+    {
+      "class": "derived",
+      "name": "contractDigest",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/platformSafetyRequirementSet/properties/contractDigest"
+    },
+    {
+      "class": "derived",
+      "name": "bindingId",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/platformSafetyRequirementSet/properties/bindingId"
+    },
+    {
+      "class": "derived",
+      "name": "profile",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/platformSafetyRequirementSet/properties/profile"
+    },
+    {
+      "class": "derived",
+      "name": "validationProfile",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/platformSafetyRequirementSet/properties/validationProfile"
+    },
+    {
+      "class": "derived",
+      "name": "declarationRevision",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/platformSafetyRequirementSet/properties/declarationRevision"
+    },
+    {
+      "class": "derived",
+      "name": "dispositions",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/platformSafetyRequirementSet/properties/dispositions"
+    },
+    {
+      "class": "derived",
+      "name": "digest",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/platformSafetyRequirementSet/properties/digest"
+    },
+    {
+      "class": "derived",
+      "name": "platformSafetyRequirementSets",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/detailData/properties/artifact/properties/platformSafetyRequirementSets"
+    },
+    {
+      "class": "derived",
+      "name": "token",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/tokenClosureEntry/properties/token"
+    },
+    {
+      "class": "derived",
+      "name": "layer",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/tokenClosureEntry/properties/layer"
+    },
+    {
+      "class": "derived",
+      "name": "type",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/tokenClosureEntry/properties/type"
+    },
+    {
+      "class": "derived",
+      "name": "unit",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/tokenClosureEntry/properties/unit"
+    },
+    {
+      "class": "derived",
+      "name": "meaning",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/tokenClosureEntry/properties/meaning"
+    },
+    {
+      "class": "derived",
+      "name": "overridePolicy",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/tokenClosureEntry/properties/overridePolicy"
+    },
+    {
+      "class": "derived",
+      "name": "resolved",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/tokenClosureEntry/properties/resolved"
+    },
+    {
+      "class": "derived",
+      "name": "dependencies",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/tokenClosureEntry/properties/dependencies"
+    },
+    {
+      "class": "derived",
+      "name": "recipe",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/stylingValue/oneOf/0/properties/recipe"
+    },
+    {
+      "class": "derived",
+      "name": "requirementSets",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/stylingValue/oneOf/0/properties/requirementSets"
+    },
+    {
+      "class": "derived",
+      "name": "platformSafetyRequirementSets",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/stylingValue/oneOf/0/properties/platformSafetyRequirementSets"
+    },
+    {
+      "class": "derived",
+      "name": "recipes",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/stylingValue/oneOf/1/properties/recipes"
+    },
+    {
+      "class": "derived",
+      "name": "requirementSets",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/stylingValue/oneOf/1/properties/requirementSets"
+    },
+    {
+      "class": "derived",
+      "name": "platformSafetyRequirementSets",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/stylingValue/oneOf/1/properties/platformSafetyRequirementSets"
+    },
+    {
+      "class": "derived",
+      "name": "section",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/detailData/allOf/0/oneOf/0/properties/section"
+    },
+    {
+      "class": "derived",
+      "name": "value",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/detailData/allOf/0/oneOf/0/properties/value"
+    },
+    {
+      "class": "derived",
+      "name": "section",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/detailData/allOf/0/oneOf/1/properties/section"
+    },
+    {
+      "class": "derived",
+      "name": "value",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/detailData/allOf/0/oneOf/1/properties/value"
     }
   ],
   "governedSchemas": [

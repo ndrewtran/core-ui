@@ -1,4 +1,5 @@
 import { canonicalJson } from './canonical.mjs';
+import { platformSafetyRequirementIds } from '../generated/platform-safety-contract.mjs';
 import {
   loadFamilySchema,
   loadJsonDocument,
@@ -287,6 +288,82 @@ function semanticIssues(family, value, ownership) {
         }
       }
     }
+    const platformSafetyIds = new Set(platformSafetyRequirementIds);
+    for (const { object, path } of bindingContexts) {
+      for (const [declarationIndex, declaration] of (object.platformSafety ?? []).entries()) {
+        for (const [requirementIndex, requirement] of (declaration.requirements ?? []).entries()) {
+          if (!platformSafetyIds.has(requirement.id)) {
+            issues.push({
+              path: `${path}/platformSafety/${declarationIndex}/requirements/${requirementIndex}/id`,
+              message: 'must be owned by the architecture platform-safety registry',
+            });
+          }
+        }
+      }
+    }
+  }
+  if (family === 'query-envelope') {
+    const platformSafetyIds = new Set(platformSafetyRequirementIds);
+    const unitsByType = {
+      color: 'hex',
+      dimension: 'px',
+      duration: 'ms',
+      number: 'unitless',
+      string: 'string',
+    };
+    walkObjects(value, (object, path) => {
+      if (Array.isArray(object.dispositions) && Object.hasOwn(object, 'contractDigest')) {
+        for (const [index, disposition] of object.dispositions.entries()) {
+          if (!platformSafetyIds.has(disposition.id)) {
+            issues.push({
+              path: `${path}/dispositions/${index}/id`,
+              message: 'must be owned by the architecture platform-safety registry',
+            });
+          }
+        }
+      }
+      if (
+        typeof object.token === 'string'
+        && typeof object.layer === 'string'
+        && typeof object.type === 'string'
+        && typeof object.unit === 'string'
+        && Object.hasOwn(object, 'resolved')
+        && Array.isArray(object.dependencies)
+      ) {
+        const tokenLayer = object.token.split('.')[0];
+        if (object.layer !== tokenLayer) {
+          issues.push({
+            path: `${path}/layer`,
+            message: `must equal the ${tokenLayer} token namespace`,
+          });
+        }
+        const expectedUnit = unitsByType[object.type];
+        if (expectedUnit !== undefined && object.unit !== expectedUnit) {
+          issues.push({
+            path: `${path}/unit`,
+            message: `must equal ${expectedUnit} for ${object.type}`,
+          });
+        }
+        const expectsNumber = ['dimension', 'duration', 'number'].includes(object.type);
+        if (
+          (expectsNumber && (typeof object.resolved !== 'number' || !Number.isFinite(object.resolved)))
+          || (!expectsNumber && typeof object.resolved !== 'string')
+        ) {
+          issues.push({
+            path: `${path}/resolved`,
+            message: `must be a ${expectsNumber ? 'finite number' : 'string'} for ${object.type}`,
+          });
+        } else if (
+          object.type === 'color'
+          && !/^#[a-fA-F0-9]{6}(?:[a-fA-F0-9]{2})?$/u.test(object.resolved)
+        ) {
+          issues.push({
+            path: `${path}/resolved`,
+            message: 'must be a six- or eight-digit hex color',
+          });
+        }
+      }
+    });
   }
   if (family === 'example') {
     const implementationPurposes = new Set(['generation', 'validation', 'migration']);
@@ -318,6 +395,32 @@ function semanticIssues(family, value, ownership) {
               message: `is missing required disposition ${profileId}`,
             });
           }
+        }
+      }
+    }
+  }
+  if (family === 'token-source') {
+    for (const [tokenId, definition] of Object.entries(value.tokens ?? {})) {
+      const declaredLayer = tokenId.split('.')[0];
+      if (definition.layer !== declaredLayer) {
+        issues.push({
+          path: `$/tokens/${tokenId}/layer`,
+          message: `must explicitly equal the ${declaredLayer} token namespace`,
+        });
+      }
+      if (definition.layer === 'reference' && definition.overridePolicy !== 'fixed') {
+        issues.push({
+          path: `$/tokens/${tokenId}/overridePolicy`,
+          message: 'reference tokens are fixed canonical inputs',
+        });
+      }
+      for (const modeKey of Object.keys(definition.modes ?? {})) {
+        const [axis, mode] = modeKey.split('.');
+        if (!value.theme?.modeAxes?.[axis]?.includes(mode)) {
+          issues.push({
+            path: `$/tokens/${tokenId}/modes/${modeKey}`,
+            message: 'must reference a declared mode axis value',
+          });
         }
       }
     }
@@ -513,8 +616,8 @@ export function relationEdges(records) {
       for (const [bindingId, binding] of Object.entries(record.bindings)) {
         const bindingRef = `${record.id}#${bindingId}`;
         edges.push({ type: 'implemented-by', source: record.id, target: bindingRef });
-        for (const token of binding.tokenSources ?? []) {
-          edges.push({ type: 'uses', source: bindingRef, target: token });
+        if (binding.tokenRecipe?.source) {
+          edges.push({ type: 'uses', source: bindingRef, target: binding.tokenRecipe.source });
         }
       }
     } else if (record.kind === 'example') {
@@ -615,7 +718,7 @@ export function validateCatalogRecords(records, { schemas, ownership } = {}) {
         }
       }
     } else if (edge.type === 'uses' && !ids.has(edge.target)) {
-      issues.push({ path: '$/tokenSources', message: `${edge.target} does not exist` });
+      issues.push({ path: '$/tokenRecipe/source', message: `${edge.target} does not exist` });
     }
   }
   if (issues.length > 0) throw new SchemaValidationError('CORE_RELATION_INVALID', issues);
