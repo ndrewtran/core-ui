@@ -113,7 +113,16 @@ function normalizeOverrides(source, overrides = {}) {
   return normalized;
 }
 
-export function compileTokenGraph(source, { modes, overrides } = {}) {
+export function compileTokenGraph(source, options = {}) {
+  if (
+    !isObject(options)
+    || Object.keys(options).some((key) => !['modes', 'overrides'].includes(key))
+  ) {
+    fail('CORE_TOKEN_OPTIONS_INVALID', 'token compilation options must be closed', {
+      fields: isObject(options) ? Object.keys(options).sort(compareText) : [],
+    });
+  }
+  const { modes, overrides } = options;
   validateFamily('token-source', source);
   assertThemeContract(source);
   const selectedModes = assertModes(source, modes);

@@ -72,6 +72,14 @@ test('E-G1.0-02 web and native transforms retain canonical provenance without cr
   consumeButtonStaticWebTransform(react, { target: 'web.react' });
   consumeButtonStaticNativeTransform(ios, { profile: 'native.ios' });
   consumeButtonStaticNativeTransform(android, { profile: 'native.android' });
+  for (const profile of ['native.ios', 'native.android']) {
+    for (const field of ['css', 'cssSource']) {
+      expectCode('CORE_TOKEN_OPTIONS_INVALID', () => compileNativeTheme(source, {
+        profile,
+        [field]: ':root {}',
+      }));
+    }
+  }
 });
 
 test('E-G1.0-03 missing required tokens fail per profile and exact proved fallbacks diagnose use', () => {

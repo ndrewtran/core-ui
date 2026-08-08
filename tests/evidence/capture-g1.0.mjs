@@ -151,6 +151,17 @@ const web = compileWebTheme(tokenSource);
 const react = compileWebTheme(tokenSource);
 const ios = compileNativeTheme(tokenSource, { profile: 'native.ios' });
 const android = compileNativeTheme(tokenSource, { profile: 'native.android' });
+const nativeCssInputDenials = Object.fromEntries(
+  ['native.ios', 'native.android'].flatMap((profile) => (
+    ['css', 'cssSource'].map((field) => [
+      `${profile}:${field}`,
+      observedCode(() => compileNativeTheme(tokenSource, {
+        profile,
+        [field]: ':root {}',
+      })),
+    ])
+  )),
+);
 if (
   web.css !== react.css
   || web.css.includes('--core-reference-')
@@ -369,6 +380,9 @@ const paths = [
   'pnpm-workspace.yaml',
   'catalog',
   'strategy/platform-safety-contract.json',
+  'strategy/monorepo-architecture.md',
+  'strategy/milestone-roadmap.md',
+  'strategy/product-scope.md',
   'packages/schema',
   'packages/catalog',
   'packages/tooling',
@@ -448,6 +462,7 @@ const definitions = [
   ['E-G1.0-02', 'cross-target-transform-provenance-audit', {
     canonicalSourceDigest: web.provenance.digest,
     nativeContainsCss: false,
+    nativeCssInputDenials,
     publicReferenceTokenCount: 0,
     transforms: [web, ios, android].map(({ kind, sourceId, sourceRevision: revision }) => ({
       kind,
@@ -603,7 +618,7 @@ async function writeEvidence(validation = null) {
       evidenceKind,
       executedRevision: sourceRevision,
       executedTree: sourceTree,
-      expiry: 'Any enforced applicability-manifest mismatch or change to token identity, platform-safety registry or declaration, layer, type, unit, meaning, modes, override policy, binding recipe, fallback evidence, requirement closure, transform policy, foundation boundary, runtime-switching state, or retained result bytes',
+      expiry: 'Any enforced applicability-manifest mismatch or change to governing architecture, roadmap assertion, committed Product Scope, token identity, platform-safety registry or declaration, layer, type, unit, meaning, modes, override policy, binding recipe, fallback evidence, requirement closure, transform policy, foundation boundary, runtime-switching state, or retained result bytes',
       milestone: 'G1.0',
       outcome: 'pass',
       owner: 'ndrewtran',

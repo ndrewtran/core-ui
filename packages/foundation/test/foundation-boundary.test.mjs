@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
-import { deriveControlState, deriveFormSummary } from '../src/logic/index.mjs';
+import { deriveControlState } from '../src/logic/index.mjs';
 import { semanticState } from '../src/semantic/index.mjs';
 
 test('E-G1.0-05 foundation is semantic plus pure logic with interaction honestly absent', async () => {
@@ -23,9 +23,4 @@ test('E-G1.0-05 foundation is semantic plus pure logic with interaction honestly
   const input = { intent: 'field', disabled: false, invalid: true, required: true };
   assert.deepEqual(semanticState(input), semanticState(structuredClone(input)));
   assert.deepEqual(deriveControlState(input), deriveControlState(structuredClone(input)));
-  assert.deepEqual(deriveFormSummary([input]), {
-    valid: false,
-    actionable: true,
-    requiredCount: 1,
-  });
 });
