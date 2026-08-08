@@ -1,0 +1,22 @@
+
+> @core-ui/web@0.0.0 check <repository-root>/packages/web
+> node src/generate.mjs --check && node --test test/*.test.mjs
+
+[web] generated surface and CSS identity match canonical bindings
+✔ E-G1.1-01 progressive fixture keeps native semantics with JavaScript disabled (499.891334ms)
+✔ E-G1.1-06 binds two exact safety sets and proves web-owned browser adaptation (492.046375ms)
+✔ E-G1.1-03 vanilla reconnect is idempotent and mixed ownership is rejected (36.037416ms)
+✔ E-G1.1-03 concurrent roots share listeners and global leases then clean up (9.325625ms)
+✔ E-G1.1-03 failed setup rolls every resource and root claim back (4.420666ms)
+✔ E-G1.1-03 resource releases are idempotent before final teardown (3.920583ms)
+✔ E-G1.1-03 duplicate package module identities share the realm coordinator (4.258417ms)
+✔ E-G1.1-02 machine-enumerates only binding and token-policy derived hooks (0.624583ms)
+✔ E-G1.1-02 refuses nonexistent exports and non-component identities (0.268042ms)
+ℹ tests 9
+ℹ suites 0
+ℹ pass 9
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1164.791417
