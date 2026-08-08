@@ -1,0 +1,157 @@
+{
+  "schema": "core-ui-g1.0-entry-inventory-v1",
+  "classification": "non-normative-entry-evidence",
+  "milestone": "G1.0",
+  "authority": {
+    "architecture": [
+      "Multi-platform renderer architecture",
+      "@core-ui/foundation internal boundaries",
+      "Theme and token policy"
+    ],
+    "roadmap": "G1.0 Tokens, themes, and foundation boundaries",
+    "scope": [
+      "SCOPE-SYSTEM-TOKENS",
+      "SCOPE-THEME-PLATFORM-SAFETY"
+    ]
+  },
+  "ownershipBoundary": {
+    "inventoryOwns": [
+      "observed fixed-slice needs",
+      "required owner class",
+      "affected target families",
+      "consumer fixture linkage"
+    ],
+    "inventoryMustNotOwn": [
+      "token identity, type, unit, value, alias, layer, mode, or override policy",
+      "binding recipe, requirement level, or fallback declaration",
+      "public renderer API or runtime-profile strategy",
+      "portable interaction availability"
+    ]
+  },
+  "slices": [
+    {
+      "slice": "Button",
+      "roadmapMilestone": "G1.3",
+      "firstRendererSlice": true,
+      "tokenNeeds": [
+        { "need": "action surface and foreground", "ownerClass": "canonical-token-source", "targetFamilies": ["web", "native"] },
+        { "need": "disabled and pending visual distinction", "ownerClass": "binding-recipe-plus-canonical-token-source", "targetFamilies": ["web", "native"] },
+        { "need": "focus indication", "ownerClass": "binding-platform-safety", "targetFamilies": ["web", "native"] },
+        { "need": "control spacing, shape, typography, and applicable motion", "ownerClass": "canonical-token-source", "targetFamilies": ["web", "native"] }
+      ],
+      "semanticNeeds": ["immediate action", "disabled", "pending"],
+      "logicNeeds": ["none before renderer behavior proves a reusable pure algorithm"],
+      "interactionNeed": "unproved-absent",
+      "consumerFixtures": ["button-web", "button-react", "button-ios", "button-android", "button-react-native-web-disposition"]
+    },
+    {
+      "slice": "TextField",
+      "roadmapMilestone": "G1.4",
+      "firstRendererSlice": false,
+      "tokenNeeds": [
+        { "need": "field surface, text, placeholder, border, focus, error, and disabled distinction", "ownerClass": "binding-recipe-plus-canonical-token-source", "targetFamilies": ["web", "native"] },
+        { "need": "field spacing, shape, and text metrics", "ownerClass": "canonical-token-source", "targetFamilies": ["web", "native"] }
+      ],
+      "semanticNeeds": ["value ownership", "required", "invalid", "disabled", "description and error relationships"],
+      "logicNeeds": ["pure value and validity normalization only if both web and native slices require the same algorithm"],
+      "interactionNeed": "unproved-absent",
+      "consumerFixtures": []
+    },
+    {
+      "slice": "Switch",
+      "roadmapMilestone": "G1.5",
+      "firstRendererSlice": false,
+      "tokenNeeds": [
+        { "need": "on and off track, thumb, focus, and disabled distinction", "ownerClass": "binding-recipe-plus-canonical-token-source", "targetFamilies": ["web", "native"] },
+        { "need": "control size and applicable transition timing", "ownerClass": "canonical-token-source", "targetFamilies": ["web", "native"] }
+      ],
+      "semanticNeeds": ["boolean on and off state", "disabled", "group relationship"],
+      "logicNeeds": ["pure boolean normalization only if renderer slices prove identical inputs and outputs"],
+      "interactionNeed": "unproved-absent",
+      "consumerFixtures": []
+    },
+    {
+      "slice": "Dialog",
+      "roadmapMilestone": "G1.6",
+      "firstRendererSlice": false,
+      "tokenNeeds": [
+        { "need": "overlay and dialog surface, foreground, focus, spacing, shape, and applicable motion", "ownerClass": "binding-recipe-plus-canonical-token-source", "targetFamilies": ["web", "native"] },
+        { "need": "platform elevation or layering adaptation", "ownerClass": "binding-platform-safety", "targetFamilies": ["web", "native"] }
+      ],
+      "semanticNeeds": ["open and closed state", "label and description relationships", "dismissal intent"],
+      "logicNeeds": ["none until overlay owners prove a platform-neutral pure algorithm"],
+      "interactionNeed": "unproved-absent",
+      "consumerFixtures": []
+    },
+    {
+      "slice": "Select",
+      "roadmapMilestone": "G1.7",
+      "firstRendererSlice": false,
+      "tokenNeeds": [
+        { "need": "field, popup or native-alternative, option, highlight, selected, focus, and disabled distinction", "ownerClass": "binding-recipe-plus-canonical-token-source", "targetFamilies": ["web", "native"] },
+        { "need": "logical spacing and direction-safe layout", "ownerClass": "binding-platform-safety", "targetFamilies": ["web", "native"] }
+      ],
+      "semanticNeeds": ["single selection", "empty selection", "disabled option", "label and value relationships"],
+      "logicNeeds": ["pure single-selection normalization only if binding inputs remain compatible"],
+      "interactionNeed": "unproved-absent",
+      "consumerFixtures": []
+    },
+    {
+      "slice": "Form",
+      "roadmapMilestone": "G1.8",
+      "firstRendererSlice": false,
+      "tokenNeeds": [
+        { "need": "field grouping, label, description, error, action, and layout spacing", "ownerClass": "binding-recipe-plus-canonical-token-source", "targetFamilies": ["web", "native"] },
+        { "need": "density and direction-safe composition", "ownerClass": "binding-platform-safety", "targetFamilies": ["web", "native"] }
+      ],
+      "semanticNeeds": ["field membership", "validity", "submission intent", "pending submission"],
+      "logicNeeds": ["pure aggregate validity and submission-state normalization only when fixed component inputs are known"],
+      "interactionNeed": "unproved-absent",
+      "consumerFixtures": []
+    }
+  ],
+  "targetConsumers": [
+    {
+      "id": "button-web",
+      "target": "web.html",
+      "fixture": "tests/fixtures/g1.0/consumers/button-web.consumer.mjs",
+      "consumes": "complete-static-web-css",
+      "runtimeSwitching": "unavailable"
+    },
+    {
+      "id": "button-react",
+      "target": "web.react",
+      "fixture": "tests/fixtures/g1.0/consumers/button-web.consumer.mjs",
+      "consumes": "the-same-complete-static-web-css",
+      "runtimeSwitching": "unavailable"
+    },
+    {
+      "id": "button-ios",
+      "target": "native.ios",
+      "fixture": "tests/fixtures/g1.0/consumers/button-native.consumer.mjs",
+      "consumes": "typed-native-theme-object",
+      "runtimeSwitching": "unavailable"
+    },
+    {
+      "id": "button-android",
+      "target": "native.android",
+      "fixture": "tests/fixtures/g1.0/consumers/button-native.consumer.mjs",
+      "consumes": "typed-native-theme-object",
+      "runtimeSwitching": "unavailable"
+    },
+    {
+      "id": "button-react-native-web-disposition",
+      "target": "native.react-native-web",
+      "fixture": "tests/fixtures/g1.0/consumers/button-react-native-web.disposition.json",
+      "consumes": "no-transform-until-binding-owns-a-strategy",
+      "runtimeSwitching": "unavailable"
+    }
+  ],
+  "platformSafetyNeeds": [
+    { "target": "web.html", "need": "forced-colors and high-contrast adaptation cannot be disabled by consumer values", "futureOwner": "web binding" },
+    { "target": "web.react", "need": "uses the web binding safety behavior without a second style owner", "futureOwner": "web binding consumed by React" },
+    { "target": "native.ios", "need": "dynamic color, font metrics, direction, and applicable accessibility adaptation", "futureOwner": "React Native iOS profile" },
+    { "target": "native.android", "need": "dynamic color, font metrics, direction, and applicable accessibility adaptation", "futureOwner": "React Native Android profile" },
+    { "target": "native.react-native-web", "need": "explicit binding-owned strategy and profile evidence if implemented", "futureOwner": "React Native Web profile" }
+  ]
+}

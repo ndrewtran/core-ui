@@ -1,0 +1,9 @@
+{
+  "schema": "core-ui-g1.0-entry-profile-disposition-v1",
+  "classification": "non-normative-entry-evidence",
+  "slice": "Button",
+  "profile": "native.react-native-web",
+  "state": "binding-owner-decision-required",
+  "reason": "G1.0 entry evidence may not infer React Native Web parity from web React, iOS, or Android.",
+  "implementationClaim": "none"
+}
