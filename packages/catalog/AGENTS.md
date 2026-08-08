@@ -5,4 +5,5 @@ transport-independent query kernel. Canonical product facts remain under
 `catalog/`; response grammar remains owned by `@core-ui/schema`.
 
 Run `pnpm --filter @core-ui/catalog check`, then the root `pnpm check` and
-`pnpm generate:check`. Never patch `generated/catalog.mjs` directly.
+`pnpm generate:check`. Never patch any bundle or strict JSON projection under
+`generated/` directly.

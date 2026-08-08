@@ -4,6 +4,10 @@ import { dirname, join, relative, resolve, sep } from 'node:path';
 
 const IGNORED_DIRECTORIES = new Set(['.git', 'node_modules', '.pnpm-store']);
 
+export function isIgnoredRepositoryEntry(name) {
+  return name === '.DS_Store' || IGNORED_DIRECTORIES.has(name);
+}
+
 export class PolicyError extends Error {
   constructor(code, message) {
     super(`${code}: ${message}`);
@@ -73,6 +77,32 @@ function markerValue(lines, marker) {
 export async function validateGeneratedFile(repositoryRoot, repositoryPath, policy) {
   const normalized = normalizePath(repositoryPath);
   const content = await readFile(join(repositoryRoot, normalized), 'utf8');
+  const strictJson = policy.strictJsonProjections?.find(({ path }) => path === normalized);
+  if (strictJson) {
+    JSON.parse(content);
+    const provenance = normalizePath(strictJson.provenance);
+    await validateGeneratedFile(repositoryRoot, provenance, policy);
+    const provenanceContent = await readFile(join(repositoryRoot, provenance), 'utf8');
+    const provenanceLines = provenanceContent.split('\n');
+    const sourceMarker = markerValue(
+      provenanceLines.slice(0, 8),
+      policy.generatedMarkers.source,
+    );
+    const digestMarker = markerValue(
+      provenanceLines.slice(0, 8),
+      policy.generatedMarkers.digest,
+    );
+    const bodyStart = Math.max(sourceMarker.index, digestMarker.index) + 1;
+    const declaration = JSON.parse(provenanceLines.slice(bodyStart).join('\n'));
+    const actual = `sha256:${sha256(content)}`;
+    if (declaration.path !== normalized || declaration.sha256 !== actual) {
+      throw new PolicyError(
+        'PROJECTION_DIGEST_MISMATCH',
+        `${normalized} was edited outside generation; repair ${sourceMarker.value} and regenerate`,
+      );
+    }
+    return { path: normalized, source: sourceMarker.value, digest: actual };
+  }
   const lines = content.split('\n');
   const sourceMarker = markerValue(lines.slice(0, 8), policy.generatedMarkers.source);
   const digestMarker = markerValue(lines.slice(0, 8), policy.generatedMarkers.digest);
@@ -127,10 +157,9 @@ export async function walkFiles(root, current = root) {
   const entries = await readdir(current, { withFileTypes: true });
   const files = [];
   for (const entry of entries.sort((a, b) => a.name.localeCompare(b.name))) {
-    if (entry.name === '.DS_Store') continue;
+    if (isIgnoredRepositoryEntry(entry.name)) continue;
     const path = join(current, entry.name);
     if (entry.isDirectory()) {
-      if (IGNORED_DIRECTORIES.has(entry.name)) continue;
       files.push(...await walkFiles(root, path));
     } else if (entry.isFile()) {
       files.push(normalizePath(relative(root, path)));

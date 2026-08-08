@@ -15,7 +15,6 @@ import {
   validateFamily,
 } from '@core-ui/schema';
 
-const CATALOG_VERSION = '0.0.0';
 const SOURCE_MANIFEST_SCHEMA = 'core-ui-catalog-source-manifest-v1';
 
 function compareText(left, right) {
@@ -143,6 +142,11 @@ export async function compileCatalog({
   if (!repositoryRoot) {
     throw new Error('CORE_CATALOG_SOURCE_INVALID: repositoryRoot is required');
   }
+  const packageManifest = parseJsonStrict(await readFile(
+    resolve(repositoryRoot, 'packages/catalog/package.json'),
+    'utf8',
+  ));
+  const catalogVersion = packageManifest.version;
   const manifestBytes = await readFile(resolve(repositoryRoot, sourceManifestPath), 'utf8');
   const manifest = validateSourceManifest(parseJsonStrict(manifestBytes));
   const commandRegistryBytes = await readFile(
@@ -242,7 +246,7 @@ export async function compileCatalog({
     formatVersion: '1.0.0',
     apiVersion: API_VERSION,
     schemaVersion: SCHEMA_VERSION,
-    catalogVersion: CATALOG_VERSION,
+    catalogVersion,
     sourceRevision,
     commandRegistry,
     artifacts,

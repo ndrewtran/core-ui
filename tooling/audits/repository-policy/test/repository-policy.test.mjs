@@ -9,6 +9,7 @@ import {
   auditRepository,
   generatedText,
   loadPolicy,
+  sha256,
   validateGeneratedFile,
 } from '../src/policy.mjs';
 import { GenerationProofError, verifyGenerationState } from '../src/generation-proof.mjs';
@@ -68,6 +69,32 @@ test('E-G0.0-03 negative: a direct projection edit is rejected with its owner', 
       assert.match(error.message, /repair catalog\/source\.txt and regenerate/);
       return true;
     },
+  );
+});
+
+test('G0.4 strict JSON projections use governed digest sidecars', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'core-ui-policy-json-'));
+  await mkdir(join(root, 'catalog'), { recursive: true });
+  await mkdir(join(root, 'tooling/generated'), { recursive: true });
+  await writeFile(join(root, 'catalog/source.json'), '{"version":1}\n');
+  const path = 'tooling/generated/data.json';
+  const provenance = `${path}.provenance`;
+  const bytes = '{"value":42}\n';
+  const strictPolicy = {
+    ...policy,
+    strictJsonProjections: [{ path, provenance }],
+  };
+  await writeFile(join(root, path), bytes);
+  await writeFile(join(root, provenance), generatedText({
+    source: 'catalog/source.json',
+    body: `${JSON.stringify({ path, sha256: `sha256:${sha256(bytes)}` })}\n`,
+    policy: strictPolicy,
+  }));
+  await validateGeneratedFile(root, path, strictPolicy);
+  await writeFile(join(root, path), '{"value":43}\n');
+  await assert.rejects(
+    validateGeneratedFile(root, path, strictPolicy),
+    (error) => error instanceof PolicyError && error.code === 'PROJECTION_DIGEST_MISMATCH',
   );
 });
 

@@ -9,7 +9,12 @@
   "exports": {
     ".": "./src/index.mjs",
     "./compiler": "./src/compiler.mjs",
-    "./bundle": "./generated/catalog.mjs"
+    "./bundle": "./generated/catalog.mjs",
+    "./catalog.json": "./generated/catalog.json",
+    "./catalog-package.json": "./generated/catalog-package.json"
+  },
+  "coreUi": {
+    "catalogPackage": "./generated/catalog-package.json"
   },
   "scripts": {
     "check": "node src/generate.mjs --check && node --test test/*.test.mjs",

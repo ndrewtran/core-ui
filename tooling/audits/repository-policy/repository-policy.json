@@ -28,6 +28,16 @@
     "source": "@generated-from:",
     "digest": "@generated-content-sha256:"
   },
+  "strictJsonProjections": [
+    {
+      "path": "packages/catalog/generated/catalog.json",
+      "provenance": "packages/catalog/generated/catalog.json.provenance"
+    },
+    {
+      "path": "packages/catalog/generated/catalog-package.json",
+      "provenance": "packages/catalog/generated/catalog-package.json.provenance"
+    }
+  ],
   "globalTaskInputs": [
     ".github/",
     "decisions/",

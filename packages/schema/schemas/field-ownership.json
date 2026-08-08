@@ -503,6 +503,272 @@
       "schemaPointer": "#/properties/ruleId"
     },
     {
+      "class": "derived",
+      "name": "code",
+      "owner": "diagnostic-contract",
+      "schema": "diagnostic.schema.json",
+      "schemaPointer": "#/$defs/secondaryFailure/properties/code"
+    },
+    {
+      "class": "derived",
+      "name": "ruleId",
+      "owner": "diagnostic-contract",
+      "schema": "diagnostic.schema.json",
+      "schemaPointer": "#/$defs/secondaryFailure/properties/ruleId"
+    },
+    {
+      "class": "derived",
+      "name": "reason",
+      "owner": "diagnostic-contract",
+      "schema": "diagnostic.schema.json",
+      "schemaPointer": "#/$defs/secondaryFailure/properties/reason"
+    },
+    {
+      "class": "derived",
+      "name": "relativePath",
+      "owner": "diagnostic-contract",
+      "schema": "diagnostic.schema.json",
+      "schemaPointer": "#/$defs/candidate/properties/relativePath"
+    },
+    {
+      "class": "derived",
+      "name": "version",
+      "owner": "diagnostic-contract",
+      "schema": "diagnostic.schema.json",
+      "schemaPointer": "#/$defs/candidate/properties/version"
+    },
+    {
+      "class": "derived",
+      "name": "catalogDigest",
+      "owner": "diagnostic-contract",
+      "schema": "diagnostic.schema.json",
+      "schemaPointer": "#/$defs/candidate/properties/catalogDigest"
+    },
+    {
+      "class": "derived",
+      "name": "rejectionReasons",
+      "owner": "diagnostic-contract",
+      "schema": "diagnostic.schema.json",
+      "schemaPointer": "#/$defs/candidate/properties/rejectionReasons"
+    },
+    {
+      "class": "derived",
+      "name": "dimension",
+      "owner": "diagnostic-contract",
+      "schema": "diagnostic.schema.json",
+      "schemaPointer": "#/$defs/compatibilityFailure/properties/dimension"
+    },
+    {
+      "class": "derived",
+      "name": "required",
+      "owner": "diagnostic-contract",
+      "schema": "diagnostic.schema.json",
+      "schemaPointer": "#/$defs/compatibilityFailure/properties/required"
+    },
+    {
+      "class": "derived",
+      "name": "actual",
+      "owner": "diagnostic-contract",
+      "schema": "diagnostic.schema.json",
+      "schemaPointer": "#/$defs/compatibilityFailure/properties/actual"
+    },
+    {
+      "class": "derived",
+      "name": "workspacePackage",
+      "owner": "diagnostic-contract",
+      "schema": "diagnostic.schema.json",
+      "schemaPointer": "#/$defs/resolverDetails/properties/workspacePackage"
+    },
+    {
+      "class": "derived",
+      "name": "workspacePath",
+      "owner": "diagnostic-contract",
+      "schema": "diagnostic.schema.json",
+      "schemaPointer": "#/$defs/resolverDetails/properties/workspacePath"
+    },
+    {
+      "class": "derived",
+      "name": "packageManager",
+      "owner": "diagnostic-contract",
+      "schema": "diagnostic.schema.json",
+      "schemaPointer": "#/$defs/resolverDetails/properties/packageManager"
+    },
+    {
+      "class": "derived",
+      "name": "declaredRange",
+      "owner": "diagnostic-contract",
+      "schema": "diagnostic.schema.json",
+      "schemaPointer": "#/$defs/resolverDetails/properties/declaredRange"
+    },
+    {
+      "class": "derived",
+      "name": "lockfileVersions",
+      "owner": "diagnostic-contract",
+      "schema": "diagnostic.schema.json",
+      "schemaPointer": "#/$defs/resolverDetails/properties/lockfileVersions"
+    },
+    {
+      "class": "derived",
+      "name": "installedVersions",
+      "owner": "diagnostic-contract",
+      "schema": "diagnostic.schema.json",
+      "schemaPointer": "#/$defs/resolverDetails/properties/installedVersions"
+    },
+    {
+      "class": "derived",
+      "name": "catalogVersion",
+      "owner": "diagnostic-contract",
+      "schema": "diagnostic.schema.json",
+      "schemaPointer": "#/$defs/resolverDetails/properties/catalogVersion"
+    },
+    {
+      "class": "derived",
+      "name": "catalogDigest",
+      "owner": "diagnostic-contract",
+      "schema": "diagnostic.schema.json",
+      "schemaPointer": "#/$defs/resolverDetails/properties/catalogDigest"
+    },
+    {
+      "class": "derived",
+      "name": "expectedDigest",
+      "owner": "diagnostic-contract",
+      "schema": "diagnostic.schema.json",
+      "schemaPointer": "#/$defs/resolverDetails/properties/expectedDigest"
+    },
+    {
+      "class": "derived",
+      "name": "actualDigest",
+      "owner": "diagnostic-contract",
+      "schema": "diagnostic.schema.json",
+      "schemaPointer": "#/$defs/resolverDetails/properties/actualDigest"
+    },
+    {
+      "class": "derived",
+      "name": "candidates",
+      "owner": "diagnostic-contract",
+      "schema": "diagnostic.schema.json",
+      "schemaPointer": "#/$defs/resolverDetails/properties/candidates"
+    },
+    {
+      "class": "derived",
+      "name": "compatibilityFailures",
+      "owner": "diagnostic-contract",
+      "schema": "diagnostic.schema.json",
+      "schemaPointer": "#/$defs/resolverDetails/properties/compatibilityFailures"
+    },
+    {
+      "class": "derived",
+      "name": "secondaryFailures",
+      "owner": "diagnostic-contract",
+      "schema": "diagnostic.schema.json",
+      "schemaPointer": "#/$defs/resolverDetails/properties/secondaryFailures"
+    },
+    {
+      "class": "derived",
+      "name": "code",
+      "owner": "diagnostic-contract",
+      "schema": "diagnostic.schema.json",
+      "schemaPointer": "#/oneOf/0/properties/code"
+    },
+    {
+      "class": "derived",
+      "name": "code",
+      "owner": "diagnostic-contract",
+      "schema": "diagnostic.schema.json",
+      "schemaPointer": "#/oneOf/1/properties/code"
+    },
+    {
+      "class": "derived",
+      "name": "details",
+      "owner": "diagnostic-contract",
+      "schema": "diagnostic.schema.json",
+      "schemaPointer": "#/oneOf/1/properties/details"
+    },
+    {
+      "class": "derived",
+      "name": "code",
+      "owner": "diagnostic-contract",
+      "schema": "diagnostic.schema.json",
+      "schemaPointer": "#/oneOf/2/properties/code"
+    },
+    {
+      "class": "derived",
+      "name": "details",
+      "owner": "diagnostic-contract",
+      "schema": "diagnostic.schema.json",
+      "schemaPointer": "#/oneOf/2/properties/details"
+    },
+    {
+      "class": "derived",
+      "name": "code",
+      "owner": "diagnostic-contract",
+      "schema": "diagnostic.schema.json",
+      "schemaPointer": "#/oneOf/3/properties/code"
+    },
+    {
+      "class": "derived",
+      "name": "details",
+      "owner": "diagnostic-contract",
+      "schema": "diagnostic.schema.json",
+      "schemaPointer": "#/oneOf/3/properties/details"
+    },
+    {
+      "class": "derived",
+      "name": "code",
+      "owner": "diagnostic-contract",
+      "schema": "diagnostic.schema.json",
+      "schemaPointer": "#/oneOf/4/properties/code"
+    },
+    {
+      "class": "derived",
+      "name": "details",
+      "owner": "diagnostic-contract",
+      "schema": "diagnostic.schema.json",
+      "schemaPointer": "#/oneOf/4/properties/details"
+    },
+    {
+      "class": "derived",
+      "name": "code",
+      "owner": "diagnostic-contract",
+      "schema": "diagnostic.schema.json",
+      "schemaPointer": "#/oneOf/5/properties/code"
+    },
+    {
+      "class": "derived",
+      "name": "details",
+      "owner": "diagnostic-contract",
+      "schema": "diagnostic.schema.json",
+      "schemaPointer": "#/oneOf/5/properties/details"
+    },
+    {
+      "class": "derived",
+      "name": "code",
+      "owner": "diagnostic-contract",
+      "schema": "diagnostic.schema.json",
+      "schemaPointer": "#/oneOf/6/properties/code"
+    },
+    {
+      "class": "derived",
+      "name": "details",
+      "owner": "diagnostic-contract",
+      "schema": "diagnostic.schema.json",
+      "schemaPointer": "#/oneOf/6/properties/details"
+    },
+    {
+      "class": "derived",
+      "name": "code",
+      "owner": "diagnostic-contract",
+      "schema": "diagnostic.schema.json",
+      "schemaPointer": "#/oneOf/7/properties/code"
+    },
+    {
+      "class": "derived",
+      "name": "details",
+      "owner": "diagnostic-contract",
+      "schema": "diagnostic.schema.json",
+      "schemaPointer": "#/oneOf/7/properties/details"
+    },
+    {
       "class": "authored",
       "name": "binding",
       "owner": "example-contract",

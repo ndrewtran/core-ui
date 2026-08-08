@@ -35,6 +35,30 @@
       "default": false,
       "conflicts": [],
       "description": "Show generated help for the selected command."
+    },
+    {
+      "name": "project",
+      "flag": "--project",
+      "type": "string",
+      "default": null,
+      "conflicts": [],
+      "description": "Select one project or workspace without scanning siblings or ancestors."
+    },
+    {
+      "name": "catalog-version",
+      "flag": "--catalog-version",
+      "type": "string",
+      "default": null,
+      "conflicts": [],
+      "description": "Select an explicit cached catalog version; requires --catalog-digest."
+    },
+    {
+      "name": "catalog-digest",
+      "flag": "--catalog-digest",
+      "type": "string",
+      "default": null,
+      "conflicts": [],
+      "description": "Select an explicit cached catalog digest; requires --catalog-version."
     }
   ],
   "selectors": [
@@ -87,7 +111,7 @@
       "summary": "Discover CLI grammar, schemas, capabilities, and catalog identity.",
       "operation": "getManifest",
       "arguments": [],
-      "options": ["detail", "json", "dense", "help"],
+      "options": ["detail", "json", "dense", "help", "project", "catalog-version", "catalog-digest"],
       "examples": ["core manifest --json", "core manifest --detail brief --dense"],
       "budgetFixture": {},
       "tokenBudgets": { "brief": 256, "compact": 512, "full": 1024 }
@@ -99,7 +123,7 @@
       "arguments": [
         { "name": "kind", "required": false, "type": "artifact-kind" }
       ],
-      "options": ["platform", "detail", "purpose", "limit", "cursor", "json", "dense", "help"],
+      "options": ["platform", "detail", "purpose", "limit", "cursor", "json", "dense", "help", "project", "catalog-version", "catalog-digest"],
       "examples": ["core list component --platform web.react --json", "core list --detail brief --dense"],
       "budgetFixture": { "limit": 1 },
       "tokenBudgets": { "brief": 256, "compact": 512, "full": 1024 }
@@ -111,7 +135,7 @@
       "arguments": [
         { "name": "query", "required": true, "type": "string" }
       ],
-      "options": ["platform", "detail", "purpose", "limit", "cursor", "json", "dense", "help"],
+      "options": ["platform", "detail", "purpose", "limit", "cursor", "json", "dense", "help", "project", "catalog-version", "catalog-digest"],
       "examples": ["core search button --platform web.react --json", "core search action --detail brief --dense"],
       "budgetFixture": { "query": "button", "limit": 1 },
       "tokenBudgets": { "brief": 384, "compact": 768, "full": 1536 }
@@ -123,7 +147,7 @@
       "arguments": [
         { "name": "id-or-alias", "requestKey": "id", "required": true, "type": "string" }
       ],
-      "options": ["platform", "detail", "section", "purpose", "json", "dense", "help"],
+      "options": ["platform", "detail", "section", "purpose", "json", "dense", "help", "project", "catalog-version", "catalog-digest"],
       "examples": ["core get core:component:button --platform web.react --json", "core get core:component:button --detail compact --dense"],
       "budgetFixture": { "id-or-alias": "core:component:button" },
       "tokenBudgets": { "brief": 384, "compact": 1024, "full": 2048 }

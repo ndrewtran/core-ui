@@ -1,7 +1,7 @@
 import { readFile, readdir, stat } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { canonicalJson } from './canonical-json.mjs';
-import { sha256 } from './policy.mjs';
+import { isIgnoredRepositoryEntry, sha256 } from './policy.mjs';
 
 export class EvidenceIntegrityError extends Error {
   constructor(code, message) {
@@ -45,7 +45,10 @@ async function manifestEntries(repositoryRoot, declaredPaths) {
     if (metadata.isDirectory()) {
       const children = await readdir(absolutePath);
       children.sort((left, right) => left.localeCompare(right));
-      for (const child of children) await visit(join(relativePath, child));
+      for (const child of children) {
+        if (isIgnoredRepositoryEntry(child)) continue;
+        await visit(join(relativePath, child));
+      }
       return;
     }
     if (!metadata.isFile()) {
@@ -92,6 +95,9 @@ export async function verifyEvidence(repositoryRoot) {
     if (index.applicabilityManifest) {
       await assertApplicabilityManifest(repositoryRoot, index.applicabilityManifest);
     }
+    const indexValidation = index.validation
+      ? await assertDigest(repositoryRoot, index.validation)
+      : null;
     indexCount += 1;
     for (const reference of index.records) {
       const record = await assertDigest(repositoryRoot, reference);
@@ -115,6 +121,30 @@ export async function verifyEvidence(repositoryRoot) {
         throw new EvidenceIntegrityError(
           'EVIDENCE_APPLICABILITY_MISMATCH',
           `${reference.path} does not match the index applicability manifest`,
+        );
+      }
+      if (
+        Boolean(record.validation) !== Boolean(index.validation)
+        || (
+          index.validation
+          && canonicalJson(record.validation) !== canonicalJson(index.validation)
+        )
+      ) {
+        throw new EvidenceIntegrityError(
+          'EVIDENCE_VALIDATION_MISMATCH',
+          `${reference.path} does not match the index validation reference`,
+        );
+      }
+      if (
+        indexValidation
+        && (
+          indexValidation.sourceRevision !== record.sourceRevision
+          || indexValidation.sourceTree !== record.sourceTree
+        )
+      ) {
+        throw new EvidenceIntegrityError(
+          'EVIDENCE_VALIDATION_SOURCE_MISMATCH',
+          `${reference.path} validation does not match its source identity`,
         );
       }
       await assertDigest(repositoryRoot, record.artifact);

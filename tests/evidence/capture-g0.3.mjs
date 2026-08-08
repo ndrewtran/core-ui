@@ -38,6 +38,7 @@ import {
   tokenBudgetFor,
 } from '../../packages/tooling/src/index.mjs';
 import { buildCommandProjections } from '../../packages/tooling/src/registry.mjs';
+import { isIgnoredRepositoryEntry } from '../../tooling/audits/repository-policy/src/policy.mjs';
 
 const repositoryRoot = resolve(import.meta.dirname, '../..');
 const sourceRevision = command('git', ['rev-parse', 'HEAD']);
@@ -105,7 +106,10 @@ async function manifestEntries(paths) {
     if (metadata.isDirectory()) {
       const children = await readdir(absolutePath);
       children.sort((left, right) => left.localeCompare(right));
-      for (const child of children) await visit(join(relativePath, child));
+      for (const child of children) {
+        if (isIgnoredRepositoryEntry(child)) continue;
+        await visit(join(relativePath, child));
+      }
     } else if (metadata.isFile()) {
       entries.push({ path: relativePath, sha256: sha256(await readFile(absolutePath)) });
     }

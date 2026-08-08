@@ -6,7 +6,11 @@ settings:
 
 importers:
 
-  .: {}
+  .:
+    devDependencies:
+      '@core-ui/catalog':
+        specifier: workspace:*
+        version: link:packages/catalog
 
   packages/catalog:
     dependencies:
@@ -24,5 +28,19 @@ importers:
       '@core-ui/schema':
         specifier: workspace:*
         version: link:../schema
+      semver:
+        specifier: 7.8.5
+        version: 7.8.5
 
   tooling/audits/repository-policy: {}
+
+packages:
+
+  semver@7.8.5:
+    resolution: {integrity: sha512-Y7/KDsb8LjooZpwaqGyulO6DQlksgCncchHGk+sZIY4SBvUocMBEFH5Ur1fI4dV+Jvl0w6cjvucaIi40puRioA==}
+    engines: {node: '>=10'}
+    hasBin: true
+
+snapshots:
+
+  semver@7.8.5: {}

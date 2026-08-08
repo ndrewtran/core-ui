@@ -26,6 +26,7 @@ import {
   countTokens,
   executeCommand,
   parseDense,
+  parseCliArguments,
   parseHuman,
   renderDense,
   renderHuman,
@@ -34,6 +35,7 @@ import {
   tokenBudgetFor,
 } from '../src/index.mjs';
 import { buildCommandProjections } from '../src/registry.mjs';
+import { resolvePnpmProjectCatalog } from '../src/pnpm-adapter.mjs';
 
 const details = ['brief', 'compact', 'full'];
 const commandCases = {
@@ -62,7 +64,9 @@ function processJsonResult(args) {
 }
 
 test('E-G0.3-01 programmatic and CLI JSON surfaces return the same responses', () => {
-  const catalogManifest = getManifest({ detail: 'full' });
+  const resolution = resolvePnpmProjectCatalog();
+  assert.equal(resolution.type, 'success');
+  const catalogManifest = resolution.api.getManifest({ detail: 'full' });
   assert.deepEqual(
     jsonResult(['manifest', '--detail', 'full']),
     catalogManifest,
@@ -73,15 +77,15 @@ test('E-G0.3-01 programmatic and CLI JSON surfaces return the same responses', (
   );
   assert.deepEqual(
     jsonResult(['list', '--detail', 'compact']),
-    listArtifacts({ detail: 'compact', limit: 20, platform: null, purpose: null, cursor: null, kind: null }),
+    resolution.api.listArtifacts({ detail: 'compact', limit: 20, platform: null, purpose: null, cursor: null, kind: null }),
   );
   assert.deepEqual(
     jsonResult(['search', 'button', '--detail', 'brief']),
-    searchArtifacts({ query: 'button', detail: 'brief', limit: 20, platform: null, purpose: null, cursor: null }),
+    resolution.api.searchArtifacts({ query: 'button', detail: 'brief', limit: 20, platform: null, purpose: null, cursor: null }),
   );
   assert.deepEqual(
-    jsonResult(['get', 'core:component:button', '--platform', 'web.react', '--detail', 'full']),
-    getArtifact({ id: 'core:component:button', platform: 'web.react', detail: 'full', purpose: null, section: null }),
+    jsonResult(['get', 'core:component:button', '--detail', 'full']),
+    resolution.api.getArtifact({ id: 'core:component:button', platform: null, detail: 'full', purpose: null, section: null }),
   );
   for (const undeclaredAlias of ['button', 'Button']) {
     const result = runCli(['get', undeclaredAlias, '--json']);
@@ -150,6 +154,11 @@ test('E-G0.3-04 registry generates parser, help, completion, manifest, types, an
   assert.deepEqual(cliManifest.commands.map(({ name }) => name), names);
   assert.deepEqual(mcpInputSchemas.map(({ name }) => name), names);
   assert.ok(mcpInputSchemas.every(({ available }) => available === false));
+  assert.ok(mcpInputSchemas.every(({ inputSchema }) => (
+    !Object.hasOwn(inputSchema.properties, 'project')
+    && !Object.hasOwn(inputSchema.properties, 'catalog-version')
+    && !Object.hasOwn(inputSchema.properties, 'catalog-digest')
+  )));
   const catalogCliAvailable = jsonResult(['manifest', '--detail', 'full'])
     .data.capabilities
     .find(({ id }) => id === 'core:capability:query-baseline')
@@ -239,6 +248,26 @@ test('E-G0.3-04 registry generates parser, help, completion, manifest, types, an
   assert.throws(() => buildCommandProjections(duplicateUnavailableOwner), /CLI_REGISTRY_UNKNOWN_FIELD/);
 });
 
+test('G0.4 project and cache inputs stay outside query selectors and require an exact pair', () => {
+  const parsed = parseCliArguments([
+    'manifest', '--project', 'apps/consumer', '--catalog-version', '1.0.0',
+    '--catalog-digest', 'sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+    '--json',
+  ]);
+  assert.equal(parsed.kind, 'command');
+  assert.deepEqual(parsed.request, { detail: 'compact' });
+  assert.deepEqual(parsed.resolution, {
+    project: 'apps/consumer',
+    cache: {
+      version: '1.0.0',
+      digest: 'sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+    },
+  });
+  const unpaired = parseCliArguments(['manifest', '--catalog-version', '1.0.0', '--json']);
+  assert.equal(unpaired.error.error.code, 'CORE_QUERY_INVALID');
+  assert.equal(unpaired.error.error.ruleId, 'cli.resolution.cache-tuple');
+});
+
 test('E-G0.3-05 structured errors have stable codes, safe actions, and meaningful exits', () => {
   const fixtures = [
     { args: ['unknown', '--json'], code: 'CORE_QUERY_INVALID', exitCode: 2 },
@@ -307,5 +336,5 @@ test('E-G0.3-06 bare JSON cold start discovers manifest and retrieves without re
   const id = search.data.items.find(({ name }) => name === 'Button').id;
   const detail = jsonResult(['get', id, '--detail', 'compact']);
   assert.equal(detail.data.artifact.id, 'core:component:button');
-  assert.equal(detail.meta.resolution.catalogSource, 'package');
+  assert.equal(detail.meta.resolution.catalogSource, 'project');
 });
