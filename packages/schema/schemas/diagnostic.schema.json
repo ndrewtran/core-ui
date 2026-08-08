@@ -42,7 +42,7 @@
       "required": ["dimension", "required", "actual"],
       "properties": {
         "dimension": {
-          "enum": ["schema", "tooling-api", "binding-spec", "renderer-package", "export", "token", "release-manifest"]
+          "enum": ["schema", "tooling-api", "binding-spec", "renderer-package", "export", "token", "platform-safety", "release-manifest"]
         },
         "required": { "type": "string", "minLength": 1 },
         "actual": { "type": "string", "minLength": 1 }

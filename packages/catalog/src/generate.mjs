@@ -47,6 +47,14 @@ const bindingDescriptors = bundle.artifacts
     };
   }))
   .sort((left, right) => `${left.ref}:${left.profile}`.localeCompare(`${right.ref}:${right.profile}`));
+const platformSafetyDescriptors = bundle.artifacts
+  .filter(({ kind }) => kind === 'component')
+  .flatMap((artifact) => Object.entries(artifact.platformSafetyRequirementSets)
+    .map(([key, requirementSet]) => ({
+      key: `${artifact.id}#${key}`,
+      digest: requirementSet.digest,
+    })))
+  .sort((left, right) => left.key.localeCompare(right.key));
 const releaseManifest = {
   id: `core-ui-release:${packageManifest.version}:${bundle.sourceRevision}`,
   releaseVersion: packageManifest.version,
@@ -73,6 +81,14 @@ const packageData = {
   tokenRequirementSets: Object.fromEntries(bindingDescriptors.map((descriptor) => [
     `${descriptor.ref}:${descriptor.profile}`,
     descriptor.tokenRequirementSetDigest,
+  ])),
+  platformSafetyContract: {
+    version: bundle.platformSafetyContract.contractVersion,
+    digest: bundle.platformSafetyContractDigest,
+  },
+  platformSafetyRequirementSets: Object.fromEntries(platformSafetyDescriptors.map(({ key, digest }) => [
+    key,
+    digest,
   ])),
   provenance: {
     kind: 'source-revision',

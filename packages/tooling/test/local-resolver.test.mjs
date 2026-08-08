@@ -94,6 +94,24 @@ test('E-G0.4 resolver verifies provenance material instead of trusting fixture f
   assert.equal(rejected.error.code, 'CORE_CATALOG_INTEGRITY_MISMATCH');
 });
 
+test('E-G1.0-07 resolver rejects a weakened platform-safety requirement digest', async () => {
+  const value = await corpus();
+  const descriptor = value.rendererDescriptors.find(
+    ({ id }) => id === 'renderer-react-compatible',
+  );
+  descriptor.bindings['core:component:button#web.react']
+    .platformSafetyRequirementsDigest = `sha256:${'0'.repeat(64)}`;
+  const graph = value.graphs.find(({ id }) => id === 'selected-direct-compatible');
+  const result = resolve(value, graph);
+  assert.equal(result.error.code, 'CORE_CATALOG_INCOMPATIBLE');
+  assert.equal(
+    result.error.details.compatibilityFailures.some(
+      ({ dimension }) => dimension === 'platform-safety',
+    ),
+    true,
+  );
+});
+
 test('E-G0.4 explicit cache remains subordinate to manifest and lock authority', async () => {
   const value = await corpus();
   const baseline = value.graphs.find(({ id }) => id === 'explicit-cache-compatible');
@@ -405,6 +423,7 @@ test('E-G0.4 pnpm adapter normalizes renderer packages into the single resolver'
           lifecycle: 'experimental',
           strategy: 'direct',
           tokenRequirementsDigest: 'sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
+          platformSafetyRequirementsDigest: 'sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd',
         },
       },
     };
@@ -419,6 +438,11 @@ test('E-G0.4 pnpm adapter normalizes renderer packages into the single resolver'
       sourceRevision: bundle.sourceRevision,
       provenance: { kind: 'source-revision', value: bundle.sourceRevision },
       tokenRequirementSets: {},
+      platformSafetyContract: {
+        version: bundle.platformSafetyContract.contractVersion,
+        digest: bundle.platformSafetyContractDigest,
+      },
+      platformSafetyRequirementSets: {},
       releaseManifest: {
         id: descriptor.releaseProvenance,
         releaseVersion: '0.0.0',
@@ -439,6 +463,8 @@ test('E-G0.4 pnpm adapter normalizes renderer packages into the single resolver'
           export: descriptor.bindings[binding].export,
           specRevision: descriptor.bindings[binding].specRevision,
           tokenRequirementsDigest: descriptor.bindings[binding].tokenRequirementsDigest,
+          platformSafetyRequirementsDigest:
+            descriptor.bindings[binding].platformSafetyRequirementsDigest,
         }],
       },
       bundle: './catalog.json',

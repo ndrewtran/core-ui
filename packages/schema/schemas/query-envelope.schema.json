@@ -434,6 +434,32 @@
         "digest": { "$ref": "#/$defs/digest" }
       }
     },
+    "platformSafetyDisposition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "disposition"],
+      "properties": {
+        "id": { "enum": ["system.forced-colors", "system.high-contrast", "native.dynamic-color", "native.font-metrics", "layout.direction", "platform.accessibility-mapping"] },
+        "disposition": { "enum": ["required", "not-applicable"] },
+        "reason": { "type": "string", "minLength": 1 }
+      }
+    },
+    "platformSafetyRequirementSet": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schemaVersion", "contractVersion", "contractDigest", "bindingId", "profile", "declarationRevision", "dispositions", "digest"],
+      "properties": {
+        "schemaVersion": { "const": "1.0.0" },
+        "contractVersion": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+        "contractDigest": { "$ref": "#/$defs/digest" },
+        "bindingId": { "type": "string", "minLength": 1 },
+        "profile": { "enum": ["web.html", "web.react", "ios", "android", "native.react-native-web"] },
+        "validationProfile": { "enum": ["native.ios", "native.android", "native.react-native-web"] },
+        "declarationRevision": { "$ref": "#/$defs/digest" },
+        "dispositions": { "type": "array", "items": { "$ref": "#/$defs/platformSafetyDisposition" } },
+        "digest": { "$ref": "#/$defs/digest" }
+      }
+    },
     "detailData": {
       "type": "object",
       "additionalProperties": true,
@@ -450,6 +476,10 @@
             "tokenRequirementSets": {
               "type": "object",
               "additionalProperties": { "$ref": "#/$defs/tokenRequirementSet" }
+            },
+            "platformSafetyRequirementSets": {
+              "type": "object",
+              "additionalProperties": { "$ref": "#/$defs/platformSafetyRequirementSet" }
             }
           }
         },

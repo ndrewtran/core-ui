@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -7,21 +8,25 @@ import { loadJsonDocument, resolveJsonPointer } from './contracts.mjs';
 const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../../..');
 const recipe = loadJsonDocument('type-projection.json');
 
-function projectionValues(source) {
+function projectionValues(source, valueField) {
   const [fileName, pointer] = source.split('#');
+  const document = fileName.startsWith('strategy/')
+    ? JSON.parse(readFileSync(join(repositoryRoot, fileName), 'utf8'))
+    : loadJsonDocument(fileName);
   const value = resolveJsonPointer(
-    loadJsonDocument(fileName),
+    document,
     pointer ? `#${pointer}` : '#',
   );
-  return Array.isArray(value) ? value : Object.keys(value);
+  const values = Array.isArray(value) ? value : Object.keys(value);
+  return valueField === undefined ? values : values.map((entry) => entry[valueField]);
 }
 
 function union(values) {
   return values.map((value) => JSON.stringify(value)).join(' | ');
 }
 
-const declarations = recipe.projections.map(({ name, source }) => (
-  `export type ${name} = ${union(projectionValues(source))};`
+const declarations = recipe.projections.map(({ name, source, valueField }) => (
+  `export type ${name} = ${union(projectionValues(source, valueField))};`
 ));
 const body = [
   'export type ArtifactRef = `core:${ArtifactKind}:${string}`;',

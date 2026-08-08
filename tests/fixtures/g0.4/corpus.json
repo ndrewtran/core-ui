@@ -61,7 +61,8 @@
           "export": "@core-ui/react-native/button",
           "lifecycle": "experimental",
           "strategy": "direct",
-          "tokenRequirementsDigest": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+          "tokenRequirementsDigest": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+          "platformSafetyRequirementsDigest": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
         }
       }
     },
@@ -79,7 +80,8 @@
           "export": "@core-ui/react/button",
           "lifecycle": "experimental",
           "strategy": "direct",
-          "tokenRequirementsDigest": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+          "tokenRequirementsDigest": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+          "platformSafetyRequirementsDigest": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
         }
       }
     },
@@ -97,7 +99,8 @@
           "export": "@core-ui/react/button",
           "lifecycle": "experimental",
           "strategy": "direct",
-          "tokenRequirementsDigest": "sha256:8888888888888888888888888888888888888888888888888888888888888888"
+          "tokenRequirementsDigest": "sha256:8888888888888888888888888888888888888888888888888888888888888888",
+          "platformSafetyRequirementsDigest": "sha256:8888888888888888888888888888888888888888888888888888888888888888"
         }
       }
     }
@@ -123,7 +126,8 @@
           "version": "1.0.0",
           "export": "@core-ui/react-native/button",
           "specRevision": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
-          "tokenRequirementsDigest": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+          "tokenRequirementsDigest": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+          "platformSafetyRequirementsDigest": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
         },
         {
           "descriptor": "renderer-react-compatible",
@@ -132,7 +136,8 @@
           "version": "1.0.0",
           "export": "@core-ui/react/button",
           "specRevision": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
-          "tokenRequirementsDigest": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+          "tokenRequirementsDigest": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+          "platformSafetyRequirementsDigest": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
         }
       ]
     },
@@ -156,7 +161,8 @@
           "version": "1.1.0",
           "export": "@core-ui/react/button",
           "specRevision": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
-          "tokenRequirementsDigest": "sha256:8888888888888888888888888888888888888888888888888888888888888888"
+          "tokenRequirementsDigest": "sha256:8888888888888888888888888888888888888888888888888888888888888888",
+          "platformSafetyRequirementsDigest": "sha256:8888888888888888888888888888888888888888888888888888888888888888"
         }
       ]
     }
@@ -201,13 +207,17 @@
       ],
       "caches": [],
       "request": {
-        "bindings": ["core:component:button#web.react"],
+        "bindings": [
+          "core:component:button#web.react"
+        ],
         "cache": null
       },
       "expected": {
         "type": "error",
         "code": "CORE_CATALOG_DECLARATION_DRIFT",
-        "secondaryCodes": ["CORE_CATALOG_INCOMPATIBLE"],
+        "secondaryCodes": [
+          "CORE_CATALOG_INCOMPATIBLE"
+        ],
         "nextCommand": {
           "command": "pnpm --dir apps/consumer why @core-ui/catalog",
           "effect": "read-only",
@@ -269,7 +279,9 @@
       ],
       "caches": [],
       "request": {
-        "bindings": ["core:component:button#web.react"],
+        "bindings": [
+          "core:component:button#web.react"
+        ],
         "cache": null
       },
       "expected": {
@@ -322,7 +334,9 @@
       ],
       "caches": [],
       "request": {
-        "bindings": ["core:component:button#web.react"],
+        "bindings": [
+          "core:component:button#web.react"
+        ],
         "cache": null
       },
       "expected": {
@@ -381,7 +395,9 @@
       ],
       "caches": [],
       "request": {
-        "bindings": ["core:component:button#web.react"],
+        "bindings": [
+          "core:component:button#web.react"
+        ],
         "cache": null
       },
       "expected": {
@@ -448,7 +464,9 @@
         }
       ],
       "request": {
-        "bindings": ["core:component:button#web.react"],
+        "bindings": [
+          "core:component:button#web.react"
+        ],
         "cache": null
       },
       "expected": {
@@ -516,7 +534,9 @@
       ],
       "caches": [],
       "request": {
-        "bindings": ["core:component:button#web.react"],
+        "bindings": [
+          "core:component:button#web.react"
+        ],
         "cache": null
       },
       "expected": {
@@ -590,7 +610,9 @@
         }
       ],
       "request": {
-        "bindings": ["core:component:button#web.react"],
+        "bindings": [
+          "core:component:button#web.react"
+        ],
         "cache": {
           "version": "1.0.0",
           "digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
@@ -619,7 +641,9 @@
       "installed": [],
       "caches": [],
       "request": {
-        "bindings": ["core:component:button#web.react"],
+        "bindings": [
+          "core:component:button#web.react"
+        ],
         "cache": null
       },
       "expected": {

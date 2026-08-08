@@ -110,10 +110,15 @@ function validateDescriptor(descriptor) {
     }
     const bindingFields = [
       'specRevision', 'export', 'lifecycle', 'strategy', 'tokenRequirementsDigest',
+      'platformSafetyRequirementsDigest',
     ];
     closed(binding, bindingFields, `${descriptor.id}.${bindingId}`);
     required(binding, bindingFields, `${descriptor.id}.${bindingId}`);
-    if (!DIGEST.test(binding.specRevision) || !DIGEST.test(binding.tokenRequirementsDigest)) {
+    if (
+      !DIGEST.test(binding.specRevision)
+      || !DIGEST.test(binding.tokenRequirementsDigest)
+      || !DIGEST.test(binding.platformSafetyRequirementsDigest)
+    ) {
       fail(`${descriptor.id}.${bindingId} has an invalid revision`);
     }
     if (!binding.export.startsWith(`${descriptor.package}/`)) {
@@ -149,6 +154,7 @@ function validateRelease(release, catalogs, descriptors) {
     const bindingFields = [
       'descriptor', 'binding', 'package', 'version', 'export', 'specRevision',
       'tokenRequirementsDigest',
+      'platformSafetyRequirementsDigest',
     ];
     closed(binding, bindingFields, `${release.id}.binding`);
     required(binding, bindingFields, `${release.id}.binding`);
@@ -162,6 +168,7 @@ function validateRelease(release, catalogs, descriptors) {
       || described?.export !== binding.export
       || described?.specRevision !== binding.specRevision
       || described?.tokenRequirementsDigest !== binding.tokenRequirementsDigest
+      || described?.platformSafetyRequirementsDigest !== binding.platformSafetyRequirementsDigest
     ) {
       fail(`${release.id} binding tuple does not match ${binding.descriptor}`);
     }

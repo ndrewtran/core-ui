@@ -156,7 +156,8 @@ function loadCatalogCandidate(packageRoot) {
     const identityFields = [
       'bundle', 'catalogDigest', 'catalogVersion', 'name', 'provenance',
       'queryApiVersion', 'releaseManifest', 'schema', 'schemaRange',
-      'sourceRevision', 'tokenRequirementSets', 'version',
+      'sourceRevision', 'tokenRequirementSets', 'platformSafetyContract',
+      'platformSafetyRequirementSets', 'version',
     ];
     identityValid = (
       identity.schema !== 'core-ui-catalog-package-v1'
@@ -166,6 +167,10 @@ function loadCatalogCandidate(packageRoot) {
         && identity.tokenRequirementSets !== null
         && typeof identity.tokenRequirementSets === 'object'
         && !Array.isArray(identity.tokenRequirementSets)
+        && hasExactFields(identity.platformSafetyContract, ['digest', 'version'])
+        && identity.platformSafetyRequirementSets !== null
+        && typeof identity.platformSafetyRequirementSets === 'object'
+        && !Array.isArray(identity.platformSafetyRequirementSets)
         && [
           identity.bundle,
           identity.catalogDigest,
@@ -230,7 +235,7 @@ function loadCatalogCandidate(packageRoot) {
     ];
     const bindingFields = [
       'binding', 'descriptor', 'export', 'package', 'specRevision',
-      'tokenRequirementsDigest', 'version',
+      'tokenRequirementsDigest', 'platformSafetyRequirementsDigest', 'version',
     ];
     const releaseValid = hasExactFields(release, releaseFields)
       && hasExactFields(release.catalog, ['digest', 'id', 'version'])

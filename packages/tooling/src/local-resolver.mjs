@@ -113,6 +113,7 @@ function validateNormalizedInput(input) {
     for (const [binding, definition] of Object.entries(descriptor.bindings)) {
       assertClosed(definition, [
         'specRevision', 'export', 'lifecycle', 'strategy', 'tokenRequirementsDigest',
+        'platformSafetyRequirementsDigest',
       ], `${descriptor.id}.${binding}`);
     }
   }
@@ -127,7 +128,7 @@ function validateNormalizedInput(input) {
     for (const binding of release.bindings) {
       assertClosed(binding, [
         'descriptor', 'binding', 'package', 'version', 'export', 'specRevision',
-        'tokenRequirementsDigest',
+        'tokenRequirementsDigest', 'platformSafetyRequirementsDigest',
       ], `${release.id}.binding`);
     }
   }
@@ -336,6 +337,16 @@ function compatibilityFor({
         dimension: 'token',
         required: expected.tokenRequirementsDigest,
         actual: described.tokenRequirementsDigest,
+      });
+    }
+    if (
+      described.platformSafetyRequirementsDigest
+      !== expected.platformSafetyRequirementsDigest
+    ) {
+      failures.push({
+        dimension: 'platform-safety',
+        required: expected.platformSafetyRequirementsDigest,
+        actual: described.platformSafetyRequirementsDigest,
       });
     }
   }

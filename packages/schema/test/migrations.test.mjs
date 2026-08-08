@@ -6,6 +6,7 @@ import {
   migrateBindingV1ToV2,
   migrateTokenSourceV1ToV2,
 } from '../src/index.mjs';
+import { webPlatformSafety } from './fixtures.mjs';
 
 const theme = {
   name: 'default',
@@ -77,10 +78,12 @@ test('G1.0 binding v1-to-v2 migration requires the binding-owned token recipe', 
     source: 'core:token:button-minimum',
     requirements: [{ token: 'semantic.action.background', requirement: 'required' }],
   };
-  const migrated = migrateBindingV1ToV2(previous, { tokenRecipe });
+  const platformSafety = webPlatformSafety('web.react');
+  const migrated = migrateBindingV1ToV2(previous, { tokenRecipe, platformSafety });
   assert.equal(migrated.schemaVersion, '2.0.0');
   assert.equal(Object.hasOwn(migrated, 'tokenSources'), false);
   assert.deepEqual(migrated.tokenRecipe, tokenRecipe);
+  assert.deepEqual(migrated.platformSafety, platformSafety);
   assert.equal(canonicalJson(migrateBindingV1ToV2(migrated)), canonicalJson(migrated));
   assert.throws(
     () => migrateBindingV1ToV2(previous),

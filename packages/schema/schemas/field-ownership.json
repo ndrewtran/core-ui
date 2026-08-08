@@ -2580,6 +2580,146 @@
       "owner": "token-source-contract",
       "schema": "token-source.schema.json",
       "schemaPointer": "#/properties/theme/properties/runtimeSwitching"
+    },
+    {
+      "class": "authored",
+      "name": "platformSafety",
+      "owner": "binding-contract",
+      "schema": "binding.schema.json",
+      "schemaPointer": "#/properties/platformSafety"
+    },
+    {
+      "class": "authored",
+      "name": "profile",
+      "owner": "binding-contract",
+      "schema": "binding.schema.json",
+      "schemaPointer": "#/$defs/platformSafetyDeclaration/properties/profile"
+    },
+    {
+      "class": "authored",
+      "name": "validationProfile",
+      "owner": "binding-contract",
+      "schema": "binding.schema.json",
+      "schemaPointer": "#/$defs/platformSafetyDeclaration/properties/validationProfile"
+    },
+    {
+      "class": "authored",
+      "name": "requirements",
+      "owner": "binding-contract",
+      "schema": "binding.schema.json",
+      "schemaPointer": "#/$defs/platformSafetyDeclaration/properties/requirements"
+    },
+    {
+      "class": "authored",
+      "name": "id",
+      "owner": "binding-contract",
+      "schema": "binding.schema.json",
+      "schemaPointer": "#/$defs/platformSafetyDisposition/properties/id"
+    },
+    {
+      "class": "authored",
+      "name": "disposition",
+      "owner": "binding-contract",
+      "schema": "binding.schema.json",
+      "schemaPointer": "#/$defs/platformSafetyDisposition/properties/disposition"
+    },
+    {
+      "class": "authored",
+      "name": "reason",
+      "owner": "binding-contract",
+      "schema": "binding.schema.json",
+      "schemaPointer": "#/$defs/platformSafetyDisposition/properties/reason"
+    },
+    {
+      "class": "derived",
+      "name": "id",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/platformSafetyDisposition/properties/id"
+    },
+    {
+      "class": "derived",
+      "name": "disposition",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/platformSafetyDisposition/properties/disposition"
+    },
+    {
+      "class": "derived",
+      "name": "reason",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/platformSafetyDisposition/properties/reason"
+    },
+    {
+      "class": "derived",
+      "name": "schemaVersion",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/platformSafetyRequirementSet/properties/schemaVersion"
+    },
+    {
+      "class": "derived",
+      "name": "contractVersion",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/platformSafetyRequirementSet/properties/contractVersion"
+    },
+    {
+      "class": "derived",
+      "name": "contractDigest",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/platformSafetyRequirementSet/properties/contractDigest"
+    },
+    {
+      "class": "derived",
+      "name": "bindingId",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/platformSafetyRequirementSet/properties/bindingId"
+    },
+    {
+      "class": "derived",
+      "name": "profile",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/platformSafetyRequirementSet/properties/profile"
+    },
+    {
+      "class": "derived",
+      "name": "validationProfile",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/platformSafetyRequirementSet/properties/validationProfile"
+    },
+    {
+      "class": "derived",
+      "name": "declarationRevision",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/platformSafetyRequirementSet/properties/declarationRevision"
+    },
+    {
+      "class": "derived",
+      "name": "dispositions",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/platformSafetyRequirementSet/properties/dispositions"
+    },
+    {
+      "class": "derived",
+      "name": "digest",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/platformSafetyRequirementSet/properties/digest"
+    },
+    {
+      "class": "derived",
+      "name": "platformSafetyRequirementSets",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/detailData/properties/artifact/properties/platformSafetyRequirementSets"
     }
   ],
   "governedSchemas": [

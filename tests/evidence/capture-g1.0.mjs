@@ -3,7 +3,14 @@ import { execFileSync, spawnSync } from 'node:child_process';
 import { mkdir, readFile, readdir, stat, writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { compileCatalog } from '../../packages/catalog/src/compiler.mjs';
-import { canonicalDigest, canonicalJson, parseJsonStrict } from '../../packages/schema/src/index.mjs';
+import {
+  PlatformSafetyContractError,
+  assertPlatformSafetyRequirementSet,
+  canonicalDigest,
+  canonicalJson,
+  compilePlatformSafetyRequirementSets,
+  parseJsonStrict,
+} from '../../packages/schema/src/index.mjs';
 import {
   TokenContractError,
   compileNativeTheme,
@@ -68,6 +75,16 @@ function observedCode(operation) {
     throw error;
   }
   throw new Error('EVIDENCE_EXPECTED_TOKEN_DENIAL_MISSING');
+}
+
+function observedPlatformSafetyCode(operation) {
+  try {
+    operation();
+  } catch (error) {
+    if (error instanceof PlatformSafetyContractError) return error.code;
+    throw error;
+  }
+  throw new Error('EVIDENCE_EXPECTED_PLATFORM_SAFETY_DENIAL_MISSING');
 }
 
 const sourceRevision = command('git', ['rev-parse', 'HEAD']);
@@ -231,6 +248,83 @@ if (
   || packedMatches.some(({ matched }) => !matched)
 ) throw new Error('EVIDENCE_REQUIREMENT_SET_CLOSURE_FAILED');
 
+const platformSafetyContract = compiled.bundle.platformSafetyContract;
+const webSafetyBinding = component.bindings['web.react'];
+const webSafetySet = componentArtifact
+  .platformSafetyRequirementSets['web.react:web.react'];
+const platformSafetyPackedMatches = Object.entries(
+  componentArtifact.platformSafetyRequirementSets,
+).map(([key, set]) => ({
+  key,
+  digest: set.digest,
+  packedDigest: packedDescriptor.platformSafetyRequirementSets[`${component.id}#${key}`],
+  matched: set.digest
+    === packedDescriptor.platformSafetyRequirementSets[`${component.id}#${key}`],
+}));
+const platformSafetyDenialCodes = {};
+const unknownSafety = structuredClone(webSafetyBinding);
+unknownSafety.platformSafety[0].requirements[0].id = 'system.unknown';
+platformSafetyDenialCodes.unknown = observedPlatformSafetyCode(
+  () => compilePlatformSafetyRequirementSets({
+    contract: platformSafetyContract,
+    bindingId: 'web.react',
+    binding: unknownSafety,
+  }),
+);
+const missingSafety = structuredClone(webSafetyBinding);
+missingSafety.platformSafety[0].requirements.pop();
+platformSafetyDenialCodes.missing = observedPlatformSafetyCode(
+  () => compilePlatformSafetyRequirementSets({
+    contract: platformSafetyContract,
+    bindingId: 'web.react',
+    binding: missingSafety,
+  }),
+);
+const duplicateSafety = structuredClone(webSafetyBinding);
+duplicateSafety.platformSafety[0].requirements.push(
+  structuredClone(duplicateSafety.platformSafety[0].requirements[0]),
+);
+platformSafetyDenialCodes.duplicate = observedPlatformSafetyCode(
+  () => compilePlatformSafetyRequirementSets({
+    contract: platformSafetyContract,
+    bindingId: 'web.react',
+    binding: duplicateSafety,
+  }),
+);
+const wrongProfileSafety = structuredClone(webSafetyBinding);
+wrongProfileSafety.platformSafety[0].profile = 'web.html';
+platformSafetyDenialCodes.wrongProfile = observedPlatformSafetyCode(
+  () => compilePlatformSafetyRequirementSets({
+    contract: platformSafetyContract,
+    bindingId: 'web.react',
+    binding: wrongProfileSafety,
+  }),
+);
+const weakenedSafety = structuredClone(webSafetySet);
+weakenedSafety.dispositions.find(({ disposition }) => disposition === 'required')
+  .disposition = 'not-applicable';
+platformSafetyDenialCodes.consumerWeakened = observedPlatformSafetyCode(
+  () => assertPlatformSafetyRequirementSet({
+    contract: platformSafetyContract,
+    bindingId: 'web.react',
+    binding: webSafetyBinding,
+    profile: 'web.react',
+    requirementSet: weakenedSafety,
+  }),
+);
+const prematureSafety = structuredClone(webSafetyBinding);
+prematureSafety.platformSafety[0].requirements[0].fulfilled = true;
+platformSafetyDenialCodes.prematurelyFulfilled = observedPlatformSafetyCode(
+  () => compilePlatformSafetyRequirementSets({
+    contract: platformSafetyContract,
+    bindingId: 'web.react',
+    binding: prematureSafety,
+  }),
+);
+if (platformSafetyPackedMatches.some(({ matched }) => !matched)) {
+  throw new Error('EVIDENCE_PLATFORM_SAFETY_PROJECTION_FAILED');
+}
+
 const foundationManifest = parseJsonStrict(await readFile(
   join(repositoryRoot, 'packages/foundation/package.json'),
   'utf8',
@@ -274,6 +368,7 @@ const paths = [
   'pnpm-lock.yaml',
   'pnpm-workspace.yaml',
   'catalog',
+  'strategy/platform-safety-contract.json',
   'packages/schema',
   'packages/catalog',
   'packages/tooling',
@@ -325,6 +420,13 @@ const applicableIdentities = {
   },
   tokenRequirementSets: Object.fromEntries(Object.entries(
     componentArtifact.tokenRequirementSets,
+  ).map(([key, set]) => [key, set.digest])),
+  platformSafetyContract: {
+    version: platformSafetyContract.contractVersion,
+    digest: compiled.bundle.platformSafetyContractDigest,
+  },
+  platformSafetyRequirementSets: Object.fromEntries(Object.entries(
+    componentArtifact.platformSafetyRequirementSets,
   ).map(([key, set]) => [key, set.digest])),
 };
 const rollbackOrDisable = {
@@ -384,6 +486,15 @@ const definitions = [
       runtimeSwitching,
       sourceRevision: revision,
     })),
+  }],
+  ['E-G1.0-07', 'platform-safety-contract-closure-and-negative-corpus', {
+    behaviorClaim: 'none',
+    contractDigest: compiled.bundle.platformSafetyContractDigest,
+    contractVersion: platformSafetyContract.contractVersion,
+    denialCodes: platformSafetyDenialCodes,
+    packedMatches: platformSafetyPackedMatches,
+    requirementSetCount: platformSafetyPackedMatches.length,
+    supportClaim: 'none',
   }],
 ];
 
@@ -492,7 +603,7 @@ async function writeEvidence(validation = null) {
       evidenceKind,
       executedRevision: sourceRevision,
       executedTree: sourceTree,
-      expiry: 'Any enforced applicability-manifest mismatch or change to token identity, layer, type, unit, meaning, modes, override policy, binding recipe, fallback evidence, requirement closure, transform policy, foundation boundary, runtime-switching state, or retained result bytes',
+      expiry: 'Any enforced applicability-manifest mismatch or change to token identity, platform-safety registry or declaration, layer, type, unit, meaning, modes, override policy, binding recipe, fallback evidence, requirement closure, transform policy, foundation boundary, runtime-switching state, or retained result bytes',
       milestone: 'G1.0',
       outcome: 'pass',
       owner: 'ndrewtran',
@@ -561,7 +672,7 @@ async function validationResult(commandName, args, assertions) {
   };
 }
 
-const evidenceCount = /(8 immutable index, 36 records, 36 artifacts, and 10 recertifications)/u;
+const evidenceCount = /(8 immutable index, 37 records, 37 artifacts, and 10 recertifications)/u;
 const validationResults = [
   await validationResult('pnpm check', ['check'], [
     { id: 'evidence-index-count', pattern: evidenceCount },

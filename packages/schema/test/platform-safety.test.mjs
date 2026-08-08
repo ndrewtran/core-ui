@@ -1,0 +1,120 @@
+import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
+import test from 'node:test';
+import {
+  PlatformSafetyContractError,
+  assertPlatformSafetyRequirementSet,
+  canonicalDigest,
+  compilePlatformSafetyRequirementSets,
+  parseJsonStrict,
+  validatePlatformSafetyContract,
+} from '../src/index.mjs';
+import { component } from './fixtures.mjs';
+
+const contract = parseJsonStrict(await readFile(
+  new URL('../../../strategy/platform-safety-contract.json', import.meta.url),
+  'utf8',
+));
+
+function expectCode(code, callback) {
+  assert.throws(callback, (error) => (
+    error instanceof PlatformSafetyContractError && error.code === code
+  ));
+}
+
+function webBinding() {
+  return structuredClone(component().bindings['web.react']);
+}
+
+test('E-G1.0-07 compiles closed binding-owned requirement sets without behavior claims', () => {
+  const identity = validatePlatformSafetyContract(contract);
+  assert.equal(identity.digest, canonicalDigest(contract));
+  const sets = compilePlatformSafetyRequirementSets({
+    contract,
+    bindingId: 'web.react',
+    binding: webBinding(),
+  });
+  assert.deepEqual(Object.keys(sets), ['web.react']);
+  assert.equal(sets['web.react'].contractVersion, contract.contractVersion);
+  assert.equal(sets['web.react'].contractDigest, identity.digest);
+  assert.equal(sets['web.react'].requirements, undefined);
+  assert.equal(sets['web.react'].dispositions.length, contract.requirements.length);
+  assert.doesNotThrow(() => assertPlatformSafetyRequirementSet({
+    contract,
+    bindingId: 'web.react',
+    binding: webBinding(),
+    profile: 'web.react',
+    requirementSet: sets['web.react'],
+  }));
+});
+
+test('E-G1.0-07 rejects unknown, missing, duplicate, and wrong-profile declarations', () => {
+  const unknown = webBinding();
+  unknown.platformSafety[0].requirements[0].id = 'system.unknown';
+  expectCode('CORE_PLATFORM_SAFETY_REQUIREMENT_UNKNOWN', () => compilePlatformSafetyRequirementSets({
+    contract, bindingId: 'web.react', binding: unknown,
+  }));
+
+  const missingRequirement = webBinding();
+  missingRequirement.platformSafety[0].requirements.pop();
+  expectCode('CORE_PLATFORM_SAFETY_REQUIREMENT_MISSING', () => compilePlatformSafetyRequirementSets({
+    contract, bindingId: 'web.react', binding: missingRequirement,
+  }));
+
+  const duplicateRequirement = webBinding();
+  duplicateRequirement.platformSafety[0].requirements.push(
+    structuredClone(duplicateRequirement.platformSafety[0].requirements[0]),
+  );
+  expectCode('CORE_PLATFORM_SAFETY_REQUIREMENT_DUPLICATE', () => compilePlatformSafetyRequirementSets({
+    contract, bindingId: 'web.react', binding: duplicateRequirement,
+  }));
+
+  const wrongProfile = webBinding();
+  wrongProfile.platformSafety[0].profile = 'web.html';
+  expectCode('CORE_PLATFORM_SAFETY_PROFILE_INVALID', () => compilePlatformSafetyRequirementSets({
+    contract, bindingId: 'web.react', binding: wrongProfile,
+  }));
+
+  const duplicateProfile = webBinding();
+  duplicateProfile.platformSafety.push(structuredClone(duplicateProfile.platformSafety[0]));
+  expectCode('CORE_PLATFORM_SAFETY_DECLARATION_DUPLICATE', () => compilePlatformSafetyRequirementSets({
+    contract, bindingId: 'web.react', binding: duplicateProfile,
+  }));
+
+  const missingProfile = webBinding();
+  missingProfile.platformSafety = [];
+  expectCode('CORE_PLATFORM_SAFETY_DECLARATION_MISSING', () => compilePlatformSafetyRequirementSets({
+    contract, bindingId: 'web.react', binding: missingProfile,
+  }));
+});
+
+test('E-G1.0-07 rejects consumer weakening and premature fulfillment', () => {
+  const binding = webBinding();
+  const set = compilePlatformSafetyRequirementSets({
+    contract, bindingId: 'web.react', binding,
+  })['web.react'];
+  const weakened = structuredClone(set);
+  weakened.dispositions.find(({ disposition }) => disposition === 'required').disposition = 'not-applicable';
+  expectCode('CORE_PLATFORM_SAFETY_CONSUMER_WEAKENED', () => assertPlatformSafetyRequirementSet({
+    contract,
+    bindingId: 'web.react',
+    binding,
+    profile: 'web.react',
+    requirementSet: weakened,
+  }));
+
+  const premature = webBinding();
+  premature.platformSafety[0].requirements[0].fulfilled = true;
+  expectCode('CORE_PLATFORM_SAFETY_PREMATURE_FULFILLMENT', () => compilePlatformSafetyRequirementSets({
+    contract, bindingId: 'web.react', binding: premature,
+  }));
+
+  const native = structuredClone(component().bindings['native.react-native']);
+  const unsupportedRequirement = native.platformSafety
+    .find(({ profile }) => profile === 'native.react-native-web').requirements[0];
+  unsupportedRequirement.disposition = 'required';
+  delete unsupportedRequirement.reason;
+  expectCode('CORE_PLATFORM_SAFETY_PREMATURE_FULFILLMENT', () => compilePlatformSafetyRequirementSets({
+    contract, bindingId: 'native.react-native', binding: native,
+  }));
+});

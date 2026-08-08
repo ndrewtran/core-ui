@@ -32,6 +32,7 @@ export function bindingSpecRevisionPreimage({
   exampleSources = {},
   tokenSources = [],
   tokenRequirementSets = [],
+  platformSafetyRequirementSets = [],
   schemas,
   ownership,
 }) {
@@ -69,6 +70,15 @@ export function bindingSpecRevisionPreimage({
       .map(({ profile, digest }) => ({ profile, digest }))
       .sort((left, right) => left.profile.localeCompare(right.profile)),
   };
+  const platformSafetyRequirements = [...platformSafetyRequirementSets]
+    .map(({ profile, validationProfile, digest, contractVersion, contractDigest }) => ({
+      profile,
+      ...(validationProfile === undefined ? {} : { validationProfile }),
+      digest,
+      contractVersion,
+      contractDigest,
+    }))
+    .sort((left, right) => left.profile.localeCompare(right.profile));
   return {
     component: {
       id: component.id,
@@ -86,9 +96,11 @@ export function bindingSpecRevisionPreimage({
       accessibility: binding.accessibility,
       runtimeProfiles: binding.runtimeProfiles,
       tokenRecipe: binding.tokenRecipe,
+      platformSafety: binding.platformSafety,
     },
     normativeExamples,
     tokenRequirements,
+    platformSafetyRequirements,
   };
 }
 

@@ -67,7 +67,7 @@ export function migrateTokenSourceV1ToV2(source, {
   return migrated;
 }
 
-export function migrateBindingV1ToV2(binding, { tokenRecipe } = {}) {
+export function migrateBindingV1ToV2(binding, { tokenRecipe, platformSafety } = {}) {
   assertPlainObject(binding, '$');
   if (binding.schemaVersion === '2.0.0') {
     validateFamily('binding', binding);
@@ -81,19 +81,26 @@ export function migrateBindingV1ToV2(binding, { tokenRecipe } = {}) {
   delete migrated.tokenSources;
   if (migrated.strategy !== 'unsupported') {
     assertPlainObject(tokenRecipe, '$migration/tokenRecipe');
+    if (!Array.isArray(platformSafety) || platformSafety.length === 0) {
+      migrationError('$migration/platformSafety', 'must provide binding-owned declarations');
+    }
     migrated.tokenRecipe = structuredClone(tokenRecipe);
+    migrated.platformSafety = structuredClone(platformSafety);
   }
   validateFamily('binding', migrated);
   return migrated;
 }
 
-export function migrateComponentBindingsV1ToV2(component, { recipes = {} } = {}) {
+export function migrateComponentBindingsV1ToV2(component, { recipes = {}, platformSafety = {} } = {}) {
   assertPlainObject(component, '$');
   const migrated = structuredClone(component);
   migrated.bindings = Object.fromEntries(Object.entries(component.bindings ?? {}).map(
     ([bindingId, binding]) => [
       bindingId,
-      migrateBindingV1ToV2(binding, { tokenRecipe: recipes[bindingId] }),
+      migrateBindingV1ToV2(binding, {
+        tokenRecipe: recipes[bindingId],
+        platformSafety: platformSafety[bindingId],
+      }),
     ],
   ));
   validateFamily('component', migrated);

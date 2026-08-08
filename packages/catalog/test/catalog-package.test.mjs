@@ -39,6 +39,17 @@ test('E-G0.4 package layout binds package, catalog, API, schema, digest, and sou
       set.digest,
     );
   }
+  assert.equal(identity.platformSafetyContract.version, '1.0.0');
+  assert.equal(
+    identity.platformSafetyContract.digest,
+    bundle.platformSafetyContractDigest,
+  );
+  for (const [key, set] of Object.entries(component.platformSafetyRequirementSets)) {
+    assert.equal(
+      identity.platformSafetyRequirementSets[`core:component:button#${key}`],
+      set.digest,
+    );
+  }
   assert.equal(identity.bundle, './catalog.json');
 });
 
@@ -104,4 +115,25 @@ test('E-G1.0-04 catalog exposes resolved requirement sets matching packed descri
     bundle.artifacts.find(({ id }) => id === 'core:component:button')
       .tokenRequirementSets['web.react:web.react'].digest,
   );
+});
+
+test('E-G1.0-07 catalog and package expose exact platform-safety set digests', async () => {
+  const bundle = await readJson('../generated/catalog.json');
+  const identity = await readJson('../generated/catalog-package.json');
+  const api = createCatalogApi(bundle);
+  const response = api.getArtifact({
+    id: 'core:component:button',
+    platform: 'web.react',
+    section: 'styling',
+    detail: 'full',
+  });
+  validateFamily('query-envelope', response);
+  const set = response.data.value.platformSafetyRequirementSets['web.react:web.react'];
+  assert.equal(set.contractDigest, identity.platformSafetyContract.digest);
+  assert.equal(
+    set.digest,
+    identity.platformSafetyRequirementSets['core:component:button#web.react:web.react'],
+  );
+  assert.equal(Object.hasOwn(set, 'support'), false);
+  assert.equal(Object.hasOwn(set, 'evidence'), false);
 });

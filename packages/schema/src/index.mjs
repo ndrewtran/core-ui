@@ -74,3 +74,9 @@ export {
   validateFieldOwnershipRegistry,
   validateRelationRegistry,
 } from './validation.mjs';
+export {
+  PlatformSafetyContractError,
+  assertPlatformSafetyRequirementSet,
+  compilePlatformSafetyRequirementSets,
+  validatePlatformSafetyContract,
+} from './platform-safety.mjs';

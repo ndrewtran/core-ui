@@ -7,6 +7,7 @@ import {
   bindingSpecRevision,
   canonicalDigest,
   canonicalJson,
+  compilePlatformSafetyRequirementSets,
   contentRevision,
   parseJsonStrict,
   relationEdges,
@@ -51,13 +52,15 @@ function validateSourceManifest(manifest) {
     || manifest.schema !== SOURCE_MANIFEST_SCHEMA
     || !Array.isArray(manifest.records)
     || manifest.records.length === 0
-    || Object.keys(manifest).some((key) => !['schema', 'commandRegistryPath', 'records'].includes(key))
+    || Object.keys(manifest).some((key) => !['schema', 'commandRegistryPath', 'platformSafetyContractPath', 'records'].includes(key))
     || typeof manifest.commandRegistryPath !== 'string'
+    || typeof manifest.platformSafetyContractPath !== 'string'
   ) {
     throw new Error('CORE_CATALOG_SOURCE_INVALID: invalid catalog source manifest');
   }
   const paths = new Set();
   assertRelativePath(manifest.commandRegistryPath, 'commandRegistryPath');
+  assertRelativePath(manifest.platformSafetyContractPath, 'platformSafetyContractPath');
   for (const [index, entry] of manifest.records.entries()) {
     if (
       entry === null
@@ -80,6 +83,7 @@ function validateSourceManifest(manifest) {
   return {
     schema: manifest.schema,
     commandRegistryPath: manifest.commandRegistryPath,
+    platformSafetyContractPath: manifest.platformSafetyContractPath,
     records: [...manifest.records].sort((left, right) => compareText(left.path, right.path)),
   };
 }
@@ -163,6 +167,11 @@ export async function compileCatalog({
     'utf8',
   );
   const commandRegistry = parseJsonStrict(commandRegistryBytes);
+  const platformSafetyContractBytes = await readFile(
+    resolve(repositoryRoot, manifest.platformSafetyContractPath),
+    'utf8',
+  );
+  const platformSafetyContract = parseJsonStrict(platformSafetyContractBytes);
   const loaded = [];
 
   for (const entry of manifest.records) {
@@ -211,6 +220,19 @@ export async function compileCatalog({
           });
         }).sort(([left], [right]) => compareText(left, right)))
       : {};
+    const platformSafetyRequirementSets = record.kind === 'component'
+      ? Object.fromEntries(Object.entries(record.bindings)
+        .filter(([, binding]) => binding.strategy !== 'unsupported')
+        .flatMap(([bindingId, binding]) => Object.entries(compilePlatformSafetyRequirementSets({
+          contract: platformSafetyContract,
+          bindingId,
+          binding,
+        })).map(([profile, requirementSet]) => [
+          `${bindingId}:${profile}`,
+          requirementSet,
+        ]))
+        .sort(([left], [right]) => compareText(left, right)))
+      : {};
     const bindingSpecRevisions = record.kind === 'component'
       ? Object.fromEntries(
         Object.entries(record.bindings)
@@ -222,6 +244,9 @@ export async function compileCatalog({
             exampleSources,
             tokenSources: tokens,
             tokenRequirementSets: Object.entries(tokenRequirementSets)
+              .filter(([key]) => key.startsWith(`${bindingId}:`))
+              .map(([, value]) => value),
+            platformSafetyRequirementSets: Object.entries(platformSafetyRequirementSets)
               .filter(([key]) => key.startsWith(`${bindingId}:`))
               .map(([, value]) => value),
           })]),
@@ -245,6 +270,7 @@ export async function compileCatalog({
       bindingContentRevisions,
       bindingSpecRevisions,
       tokenRequirementSets,
+      platformSafetyRequirementSets,
       source: {
         record: entry.path,
         ...(entry.sourcePath === undefined ? {} : {
@@ -259,6 +285,7 @@ export async function compileCatalog({
   const sourceRevision = canonicalDigest({
     manifest,
     commandRegistryDigest: sha256Digest(commandRegistryBytes),
+    platformSafetyContractDigest: canonicalDigest(platformSafetyContract),
     inputs: loaded.map(({ entry, recordBytes, sourceBytes }) => ({
       path: entry.path,
       digest: sha256Digest(recordBytes),
@@ -279,6 +306,8 @@ export async function compileCatalog({
     catalogVersion,
     sourceRevision,
     commandRegistry,
+    platformSafetyContract,
+    platformSafetyContractDigest: canonicalDigest(platformSafetyContract),
     artifacts,
     relations,
     searchIndex,

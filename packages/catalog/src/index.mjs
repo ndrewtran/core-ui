@@ -280,12 +280,17 @@ function selectedSection(bundle, artifact, request) {
           recipe: selectedBinding.binding.tokenRecipe,
           requirementSets: Object.fromEntries(Object.entries(artifact.tokenRequirementSets)
             .filter(([key]) => key.startsWith(`${selectedBinding.bindingId}:`))),
+          platformSafetyRequirementSets: Object.fromEntries(
+            Object.entries(artifact.platformSafetyRequirementSets)
+              .filter(([key]) => key.startsWith(`${selectedBinding.bindingId}:`)),
+          ),
         }
         : {
           recipes: Object.fromEntries(Object.entries(record.bindings)
             .filter(([, binding]) => binding.strategy !== 'unsupported')
             .map(([id, binding]) => [id, binding.tokenRecipe])),
           requirementSets: artifact.tokenRequirementSets,
+          platformSafetyRequirementSets: artifact.platformSafetyRequirementSets,
         })
       : null;
   }
@@ -639,6 +644,10 @@ export function createCatalogApi(inputBundle, options = {}) {
         ? undefined
         : Object.fromEntries(Object.entries(artifact.tokenRequirementSets)
           .filter(([key]) => key.startsWith(`${selectedBinding.bindingId}:`)));
+      const selectedPlatformSafetyRequirementSets = selectedBinding === null
+        ? undefined
+        : Object.fromEntries(Object.entries(artifact.platformSafetyRequirementSets)
+          .filter(([key]) => key.startsWith(`${selectedBinding.bindingId}:`)));
       data = {
         artifact: {
           ...artifact.record,
@@ -647,6 +656,13 @@ export function createCatalogApi(inputBundle, options = {}) {
           tokenRequirementSetDigests: Object.fromEntries(Object.entries(artifact.tokenRequirementSets)
             .map(([key, value]) => [key, value.digest])),
           ...(selectedRequirementSets === undefined ? {} : { tokenRequirementSets: selectedRequirementSets }),
+          platformSafetyRequirementSetDigests: Object.fromEntries(
+            Object.entries(artifact.platformSafetyRequirementSets)
+              .map(([key, value]) => [key, value.digest]),
+          ),
+          ...(selectedPlatformSafetyRequirementSets === undefined ? {} : {
+            platformSafetyRequirementSets: selectedPlatformSafetyRequirementSets,
+          }),
           source: artifact.source,
         },
         relations,

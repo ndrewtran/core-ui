@@ -57,6 +57,7 @@ async function setup() {
       tokenSources,
       exampleSources,
       tokenRequirementSets: component.tokenRequirementSets,
+      platformSafetyRequirementSets: component.platformSafetyRequirementSets,
     },
   };
 }
@@ -67,6 +68,7 @@ async function temporaryCatalogRepository() {
     mkdir(resolve(temporaryRoot, 'packages/tooling'), { recursive: true }),
     mkdir(resolve(temporaryRoot, 'tooling/audits/repository-policy'), { recursive: true }),
     mkdir(resolve(temporaryRoot, 'packages/schema/schemas'), { recursive: true }),
+    mkdir(resolve(temporaryRoot, 'strategy'), { recursive: true }),
   ]);
   await Promise.all([
     cp(resolve(repositoryRoot, 'catalog'), resolve(temporaryRoot, 'catalog'), { recursive: true }),
@@ -89,6 +91,10 @@ async function temporaryCatalogRepository() {
       resolve(repositoryRoot, 'packages/schema/schemas/type-projection.json'),
       resolve(temporaryRoot, 'packages/schema/schemas/type-projection.json'),
       { recursive: true },
+    ),
+    cp(
+      resolve(repositoryRoot, 'strategy/platform-safety-contract.json'),
+      resolve(temporaryRoot, 'strategy/platform-safety-contract.json'),
     ),
   ]);
   return temporaryRoot;

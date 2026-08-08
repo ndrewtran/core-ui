@@ -1,6 +1,7 @@
 {
   "schema": "core-ui-catalog-source-manifest-v1",
   "commandRegistryPath": "packages/tooling/command-registry.json",
+  "platformSafetyContractPath": "strategy/platform-safety-contract.json",
   "records": [
     {
       "family": "capability",
