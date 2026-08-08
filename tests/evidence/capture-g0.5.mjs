@@ -614,7 +614,6 @@ const packageIdentities = await Promise.all([
     version: packageManifest.version,
   };
 }));
-const binding = componentArtifact.record.bindings['web.react'];
 const fixturePath = 'tests/fixtures/g0.5/corpus.json';
 const applicableIdentities = {
   artifact: {
@@ -627,12 +626,24 @@ const applicableIdentities = {
     package: '@core-ui/tooling',
     version: packageIdentities.find(({ name }) => name === '@core-ui/tooling').version,
   },
-  binding: {
-    bindingContentRevision: componentArtifact.bindingContentRevisions['web.react'],
-    bindingSpecRevision: componentArtifact.bindingSpecRevisions['web.react'],
-    id: `${componentArtifact.id}#web.react`,
-    platform: 'web.react',
-  },
+  bindings: Object.entries(componentArtifact.record.bindings)
+    .sort(([left], [right]) => left.localeCompare(right))
+    .map(([platform, bindingRecord]) => ({
+      bindingContentRevision: componentArtifact.bindingContentRevisions[platform],
+      bindingSpecRevision: componentArtifact.bindingSpecRevisions[platform],
+      id: `${componentArtifact.id}#${platform}`,
+      platform,
+      runtimeProfiles: Object.entries(bindingRecord.runtimeProfiles ?? {})
+        .sort(([left], [right]) => left.localeCompare(right))
+        .map(([id, profile]) => ({
+          id,
+          strategy: profile.strategy,
+          ...(profile.lifecycle === undefined ? {} : { lifecycle: profile.lifecycle }),
+          ...(profile.validationProfile === undefined
+            ? {}
+            : { validationProfile: profile.validationProfile }),
+        })),
+    })),
   catalog: {
     catalogDigest: compiled.bundle.catalogDigest,
     catalogVersion: compiled.bundle.catalogVersion,
@@ -650,9 +661,6 @@ const applicableIdentities = {
     sha256: sha256(await readFile(join(repositoryRoot, fixturePath))),
   }],
   packages: packageIdentities,
-  runtimeProfiles: Object.entries(
-    componentArtifact.record.bindings['native.react-native'].runtimeProfiles,
-  ).map(([id, profile]) => ({ id, strategy: profile.strategy })),
   tokenSources: compiled.bundle.artifacts
     .filter(({ kind }) => kind === 'token')
     .map((artifact) => ({ contentRevision: artifact.contentRevision, id: artifact.id })),
