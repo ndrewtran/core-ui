@@ -1,0 +1,70 @@
+
+> @core-ui/workspace@0.0.0 generate:check <repository-root>
+> node tooling/audits/repository-policy/src/generation-identity.mjs
+
+Scope: all 5 workspace projects
+Lockfile is up to date, resolution step is skipped
+Progress: resolved 1, reused 0, downloaded 0, added 0
+Packages: +1
++
+Progress: resolved 1, reused 1, downloaded 0, added 1, done
+
+devDependencies:
++ @core-ui/catalog 0.0.0 <- packages/catalog
+
+Done in 161ms using pnpm v10.33.0
+[workspace-task] generate: full graph
+Scope: 4 of 5 workspace projects
+
+> @core-ui/schema@0.0.0 generate <temporary-path>
+> node src/generate.mjs
+
+[schema] generated packages/schema/generated/types.d.ts
+
+> @core-ui/repository-policy@0.0.0 generate <temporary-path>
+> node src/generate.mjs
+
+Repository-policy package owns no projections; generation is a deterministic no-op.
+
+> @core-ui/catalog@0.0.0 generate <temporary-path>
+> node src/generate.mjs
+
+[catalog] generated packages/catalog/generated/catalog.mjs
+[catalog] generated packages/catalog/generated/catalog.json
+[catalog] generated packages/catalog/generated/catalog.json.provenance
+[catalog] generated packages/catalog/generated/catalog-package.json
+[catalog] generated packages/catalog/generated/catalog-package.json.provenance
+
+> @core-ui/tooling@0.0.0 generate <temporary-path>
+> node src/generate.mjs
+
+[tooling] generated packages/tooling/generated/command-surface.mjs
+[tooling] generated packages/tooling/generated/response-types.d.ts
+[workspace-task] generate: full graph
+Scope: 4 of 5 workspace projects
+
+> @core-ui/schema@0.0.0 generate <temporary-path>
+> node src/generate.mjs
+
+[schema] generated packages/schema/generated/types.d.ts
+
+> @core-ui/repository-policy@0.0.0 generate <temporary-path>
+> node src/generate.mjs
+
+Repository-policy package owns no projections; generation is a deterministic no-op.
+
+> @core-ui/catalog@0.0.0 generate <temporary-path>
+> node src/generate.mjs
+
+[catalog] generated packages/catalog/generated/catalog.mjs
+[catalog] generated packages/catalog/generated/catalog.json
+[catalog] generated packages/catalog/generated/catalog.json.provenance
+[catalog] generated packages/catalog/generated/catalog-package.json
+[catalog] generated packages/catalog/generated/catalog-package.json.provenance
+
+> @core-ui/tooling@0.0.0 generate <temporary-path>
+> node src/generate.mjs
+
+[tooling] generated packages/tooling/generated/command-surface.mjs
+[tooling] generated packages/tooling/generated/response-types.d.ts
+[E-G0.0-04] isolated clean checkout 9489713d6594e6f6ac5c930804ba55cc689cf0f5 remained clean after two generation runs (sha256:8d969bf0a33e1f3dc0572ee6a844c4dc4432af564bb2c7a0a7ba8f7eb456812c)

@@ -6,46 +6,129 @@
   "additionalProperties": false,
   "required": ["schemaVersion", "id", "kind", "name", "summary", "lifecycle", "intent", "anatomy", "states", "accessibility", "bindings"],
   "properties": {
-    "schemaVersion": { "const": "1.0.0" },
-    "id": { "type": "string", "pattern": "^core:component:[a-z0-9]+(?:-[a-z0-9]+)*$" },
-    "kind": { "const": "component" },
-    "name": { "type": "string", "minLength": 1 },
-    "summary": { "type": "string", "minLength": 1 },
-    "lifecycle": { "enum": ["experimental", "stable", "deprecated", "removed"] },
+    "schemaVersion": {
+      "const": "1.0.0",
+      "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["content"] }
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^core:component:[a-z0-9]+(?:-[a-z0-9]+)*$",
+      "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["content"] }
+    },
+    "kind": {
+      "const": "component",
+      "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["content"] }
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "x-core-ui-authoring": { "effect": "editorial", "revisionAxes": ["content"], "autofixes": ["trim-outer-whitespace"] }
+    },
+    "summary": {
+      "type": "string",
+      "minLength": 1,
+      "x-core-ui-authoring": { "effect": "editorial", "revisionAxes": ["content"], "autofixes": ["trim-outer-whitespace"] }
+    },
+    "lifecycle": {
+      "enum": ["experimental", "stable", "deprecated", "removed"],
+      "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["content", "binding-spec"] }
+    },
     "intent": {
       "type": "object",
       "additionalProperties": false,
       "required": ["useWhen", "avoidWhen"],
+      "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["content", "binding-spec"] },
       "properties": {
-        "useWhen": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
-        "avoidWhen": { "type": "array", "items": { "type": "string", "minLength": 1 } }
+        "useWhen": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 },
+          "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["content", "binding-spec"] }
+        },
+        "avoidWhen": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["content", "binding-spec"] }
+        }
       }
     },
-    "anatomy": { "type": "array", "minItems": 1, "items": { "type": "string", "pattern": "^[a-z][a-zA-Z0-9-]*$" }, "uniqueItems": true },
-    "states": { "type": "array", "items": { "type": "string", "pattern": "^[a-z][a-zA-Z0-9-]*$" }, "uniqueItems": true },
+    "anatomy": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "pattern": "^[a-z][a-zA-Z0-9-]*$" },
+      "uniqueItems": true,
+      "x-core-ui-authoring": {
+        "effects": { "add": "compatible", "remove": "incompatible", "replace": "incompatible" },
+        "revisionAxes": ["content", "binding-spec"]
+      }
+    },
+    "states": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^[a-z][a-zA-Z0-9-]*$" },
+      "uniqueItems": true,
+      "x-core-ui-authoring": {
+        "effects": { "add": "compatible", "remove": "incompatible", "replace": "incompatible" },
+        "revisionAxes": ["content", "binding-spec"]
+      }
+    },
     "accessibility": {
       "type": "object",
       "additionalProperties": false,
       "required": ["nameRequired", "obligations"],
+      "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["content", "binding-spec"] },
       "properties": {
-        "nameRequired": { "type": "boolean" },
-        "obligations": { "type": "array", "items": { "type": "string", "minLength": 1 }, "uniqueItems": true }
+        "nameRequired": {
+          "type": "boolean",
+          "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["content", "binding-spec"] }
+        },
+        "obligations": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true,
+          "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["content", "binding-spec"] }
+        }
       }
     },
     "bindings": {
       "type": "object",
       "minProperties": 1,
       "additionalProperties": false,
+      "x-core-ui-authoring": {
+        "effects": { "add": "compatible", "remove": "incompatible", "replace": "incompatible" },
+        "revisionAxes": ["content", "binding-spec"]
+      },
       "properties": {
-        "web.html": { "$ref": "binding.schema.json" },
-        "web.react": { "$ref": "binding.schema.json" },
-        "native.react-native": { "$ref": "binding.schema.json" }
+        "web.html": {
+          "$ref": "binding.schema.json",
+          "x-core-ui-authoring": {
+            "effects": { "add": "compatible", "remove": "incompatible", "replace": "incompatible" },
+            "revisionAxes": ["content", "binding-spec"]
+          }
+        },
+        "web.react": {
+          "$ref": "binding.schema.json",
+          "x-core-ui-authoring": {
+            "effects": { "add": "compatible", "remove": "incompatible", "replace": "incompatible" },
+            "revisionAxes": ["content", "binding-spec"]
+          }
+        },
+        "native.react-native": {
+          "$ref": "binding.schema.json",
+          "x-core-ui-authoring": {
+            "effects": { "add": "compatible", "remove": "incompatible", "replace": "incompatible" },
+            "revisionAxes": ["content", "binding-spec"]
+          }
+        }
       }
     },
     "extensions": {
       "type": "object",
       "propertyNames": { "pattern": "^core\\.experimental\\.[a-z0-9]+(?:-[a-z0-9]+)*$" },
-      "additionalProperties": true
+      "additionalProperties": true,
+      "x-core-ui-authoring": {
+        "effects": { "add": "compatible", "remove": "incompatible", "replace": "incompatible" },
+        "revisionAxes": ["content"]
+      }
     }
   }
 }

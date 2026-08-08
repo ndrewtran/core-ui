@@ -1,0 +1,42 @@
+{
+  "schema": "core-ui-g0.5-authoring-corpus-v1",
+  "semanticCases": [
+    {
+      "id": "editorial-summary",
+      "path": "$/summary",
+      "operation": "replace",
+      "value": "Clarifies that Button triggers an immediate action.",
+      "effect": "editorial",
+      "versionEffect": "patch",
+      "bindingSpecChanged": false
+    },
+    {
+      "id": "compatible-state-addition",
+      "path": "$/states/2",
+      "operation": "add",
+      "value": "busy",
+      "effect": "compatible",
+      "versionEffect": "minor",
+      "bindingSpecChanged": true
+    },
+    {
+      "id": "incompatible-default-change",
+      "path": "$/bindings/web.react/api/defaults/disabled",
+      "operation": "replace",
+      "value": true,
+      "effect": "incompatible",
+      "versionEffect": "major",
+      "bindingSpecChanged": true
+    }
+  ],
+  "autofixDenied": [
+    { "category": "intent", "path": "$/intent/useWhen/0" },
+    { "category": "lifecycle", "path": "$/lifecycle" },
+    { "category": "accessibility", "path": "$/accessibility/nameRequired" },
+    { "category": "public-api", "path": "$/bindings/web.react/api/defaults/disabled" },
+    { "category": "token-meaning", "path": "$/bindings/web.react/tokenSources/0" },
+    { "category": "migration", "path": "$/migration" },
+    { "category": "rationale", "path": "$/rationale" },
+    { "category": "exception", "path": "$/exception" }
+  ]
+}

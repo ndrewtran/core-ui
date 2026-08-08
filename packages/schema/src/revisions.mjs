@@ -1,30 +1,40 @@
 import { canonicalDigest, sha256Digest } from './canonical.mjs';
 import { validateCatalogRecords, validateFamily } from './validation.mjs';
 
-export function contentRevision(family, record, { sourceBytes } = {}) {
-  validateFamily(family, record);
+export function contentRevisionPreimage(family, record, { sourceBytes, schemas, ownership } = {}) {
+  validateFamily(family, record, { schemas, ownership });
   if (family === 'example') {
     if (typeof sourceBytes !== 'string' && !Buffer.isBuffer(sourceBytes)) {
       throw new Error(`CORE_RELATION_INVALID: missing executable source bytes for ${record.id}`);
     }
-    return canonicalDigest({ record, sourceDigest: sha256Digest(sourceBytes) });
+    return { record, sourceDigest: sha256Digest(sourceBytes) };
   }
-  return canonicalDigest(record);
+  return record;
 }
 
-export function bindingContentRevision(binding) {
-  validateFamily('binding', binding);
-  return canonicalDigest(binding);
+export function contentRevision(family, record, options = {}) {
+  return canonicalDigest(contentRevisionPreimage(family, record, options));
 }
 
-export function bindingSpecRevision({
+export function bindingContentRevisionPreimage(binding, { schemas, ownership } = {}) {
+  validateFamily('binding', binding, { schemas, ownership });
+  return binding;
+}
+
+export function bindingContentRevision(binding, options = {}) {
+  return canonicalDigest(bindingContentRevisionPreimage(binding, options));
+}
+
+export function bindingSpecRevisionPreimage({
   component,
   bindingId,
   examples = [],
   exampleSources = {},
   tokenSources = [],
+  schemas,
+  ownership,
 }) {
-  validateCatalogRecords([component, ...examples, ...tokenSources]);
+  validateCatalogRecords([component, ...examples, ...tokenSources], { schemas, ownership });
   const binding = Object.hasOwn(component.bindings, bindingId)
     ? component.bindings[bindingId]
     : undefined;
@@ -42,6 +52,8 @@ export function bindingSpecRevision({
       id: example.id,
       revision: contentRevision('example', example, {
         sourceBytes: exampleSources[example.id],
+        schemas,
+        ownership,
       }),
       relation: example.binding,
     }))
@@ -61,7 +73,7 @@ export function bindingSpecRevision({
         .sort((left, right) => left.token.localeCompare(right.token)),
     };
   });
-  const closure = {
+  return {
     component: {
       id: component.id,
       lifecycle: component.lifecycle,
@@ -82,5 +94,8 @@ export function bindingSpecRevision({
     normativeExamples,
     tokenRequirements,
   };
-  return canonicalDigest(closure);
+}
+
+export function bindingSpecRevision(input) {
+  return canonicalDigest(bindingSpecRevisionPreimage(input));
 }

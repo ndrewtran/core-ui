@@ -57,10 +57,13 @@ export function loadJsonDocument(fileName) {
   return documentCache.get(fileName);
 }
 
-export function loadFamilySchema(family) {
+export function loadFamilySchema(family, documents) {
   const fileName = Object.hasOwn(familyFiles, family) ? familyFiles[family] : undefined;
   if (!fileName) throw new Error(`SCHEMA_FAMILY_UNKNOWN: ${family}`);
-  return { fileName, schema: loadJsonDocument(fileName) };
+  return {
+    fileName,
+    schema: documents?.[fileName] ?? loadJsonDocument(fileName),
+  };
 }
 
 export function resolveJsonPointer(value, pointer) {
@@ -76,10 +79,10 @@ export function resolveJsonPointer(value, pointer) {
   }, value);
 }
 
-export function resolveSchemaReference(reference, currentFile) {
+export function resolveSchemaReference(reference, currentFile, documents) {
   const [filePart, fragment = ''] = reference.split('#');
   const fileName = filePart || currentFile;
-  const document = loadJsonDocument(fileName);
+  const document = documents?.[fileName] ?? loadJsonDocument(fileName);
   return {
     fileName,
     schema: resolveJsonPointer(document, fragment ? `#${fragment}` : '#'),
