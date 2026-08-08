@@ -48,6 +48,18 @@ test('rejects an authority change without a label or change record', () => {
   assert.match(errors[1], /change record/);
 });
 
+test('protects the executable platform-safety registry as architecture authority', () => {
+  const errors = validatePlanningPullRequest({
+    files: ['strategy/platform-safety-contract.json'],
+    labels: [],
+    body: '',
+  });
+
+  assert.equal(errors.length, 2);
+  assert.match(errors[0], /label/);
+  assert.match(errors[1], /change record/);
+});
+
 test('rejects a planning-control-only change without governance metadata', () => {
   const errors = validatePlanningPullRequest({
     files: ['.github/workflows/repository-planning-policy.yml'],

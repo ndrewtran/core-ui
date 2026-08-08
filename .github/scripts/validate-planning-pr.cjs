@@ -3,6 +3,7 @@
 const AUTHORITY_FILES = new Set([
   'strategy/monorepo-architecture.md',
   'strategy/milestone-roadmap.md',
+  'strategy/platform-safety-contract.json',
   'strategy/product-scope.md',
 ]);
 

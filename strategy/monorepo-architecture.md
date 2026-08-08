@@ -58,12 +58,14 @@ consistently:
 | Decision context | Bounded rationale attached to an existing concept, pattern, or guide: the problem, constraints, preferred approach, alternatives, and trade-offs. It explains owned facts but is not a second source of product behavior. |
 | Guidance impact | `normative` content enters a binding-spec compatibility closure; `editorial` content may explain an already-owned fact but cannot define implementation behavior. |
 | Content revision | Digest of the complete canonical record, including editorial fields and inert extensions. It proves source identity, not renderer compatibility. |
-| Binding-spec revision | Digest of the normalized implementation-facing closure: relevant concept semantics, binding API/behavior, examples, token requirements, and accessibility obligations. |
+| Binding-spec revision | Digest of the normalized implementation-facing closure: relevant concept semantics, binding API/behavior, examples, token requirements, platform-safety declarations, and accessibility obligations. |
 | Schema | Versioned validation grammar for canonical sources or machine responses; it does not own product meaning. |
 | Schema version | SemVer interpretation of one schema family; it governs readable data shape, not product/package availability. |
 | Query envelope | Versioned CLI/API/MCP response shape, including data, diagnostics, provenance, authority, and compatibility metadata. |
-| Compatibility descriptor | Generated package metadata identifying the exact binding-spec and token requirements implemented by an installed renderer package. |
+| Compatibility descriptor | Generated package metadata identifying the exact binding spec plus its declared token and platform-safety requirement closures. Fulfillment/support remains tied to separate current evidence. |
 | Token requirement set | The binding-specific semantic/component token IDs, requirement levels, fallbacks, types, modes, and recipe revision needed for rendering. |
+| Platform safety contract | The closed architecture-defined safety-requirement registry plus each binding/profile's complete required/not-applicable declaration. It is separate from token identity and owns no renderer behavior result. |
+| Platform safety requirement set | A derived per-binding/profile projection of the platform safety contract, bound to the registry and declaration revisions and consumed by renderer evidence and compatibility descriptors. |
 | Token contract version | SemVer for public token identity, type, layer, and semantic meaning. |
 | Evidence record | Produced proof metadata and references for one artifact, binding, revision, environment, and result. |
 | Catalog release | One immutable `@core-ui/catalog` package version and digest containing a compatible compiled knowledge/query projection. |
@@ -1791,6 +1793,41 @@ generated package descriptor stores the requirement-set digest, while the
 catalog exposes the resolved list. Theme and package validation compare both
 the semantic dependency closure and its digest, so a broad SemVer range cannot
 hide a missing token or changed role.
+
+Platform safety is a separate binding fact, never a token requirement or a
+fourth token namespace. The single authored executable registry and normative
+ID meanings live in
+[`platform-safety-contract.json`](./platform-safety-contract.json), a protected
+child of this architecture. Its initial contract version is `1.0.0`. The
+registry digest is `sha256:` plus SHA-256 of the entire registry document
+serialized as UTF-8 Core UI canonical JSON: object keys sorted recursively,
+declared array order preserved, LF text, and no insignificant whitespace.
+Schema enums, generated types, compiler validation, and catalog/query/package
+projections derive from that source; none re-author its IDs or meanings.
+
+`@core-ui/schema` owns only the closed declaration/projection grammar. A
+binding with no nested runtime profiles declares all six registry IDs against
+its binding ID, which is also its profile identity. A binding with nested
+runtime profiles declares all six IDs only for each concrete nested profile;
+it has no second abstract binding-profile declaration. Each entry is
+`required` or `not-applicable`; the latter includes a reason. An unsupported
+profile declares all six as `not-applicable` and carries no behavior or
+evidence claim.
+
+The full binding-authored declaration enters the binding-spec revision. A
+compiler derives a separate `PlatformSafetyRequirementSet` for each binding/
+profile containing the registry version and digest, binding ID, profile
+identity, applicable validation-profile ID, declaration revision, complete
+dispositions, and its own digest. For a nested runtime profile, `profile` is
+the runtime-profile key (for example `ios`) and `validationProfile` is its
+separate validation identity (for example `native.ios`); they are never
+interchanged. A binding without nested profiles uses its binding ID as
+`profile` and omits `validationProfile`. Unknown, missing, duplicate, or
+wrong-profile declarations fail closed. Compatibility
+descriptors and catalog/query projections carry that derived digest alongside,
+not inside, the `TokenRequirementSet` digest. Renderer evidence binds the exact
+per-profile safety-requirement-set digest; the release manifest correlates
+those identities without re-authoring the declaration or behavior result.
 
 Fallback is never an implicit fourth requirement level. A binding spec may
 authorize one only for an optional target capability, a defined safe degraded

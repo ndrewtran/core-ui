@@ -1,5 +1,5 @@
 ---
-scopeVersion: 1.0.0
+scopeVersion: 1.0.1
 status: execution-baseline
 product: Core UI
 architecture: ./monorepo-architecture.md
@@ -406,7 +406,7 @@ section-selectable, token-budgeted, and round-trippable to the response object.
 | `SCOPE-TOKEN-REQUIREMENTS` | `committed` | Binding-specific required/optional/deprecated token requirement sets and digests | `0.1` |
 | `SCOPE-TOKEN-FALLBACKS` | `committed` | Explicit typed fallback value/token policy with profile proof and structured diagnostics | `0.1` |
 | `SCOPE-TOKEN-OVERRIDES` | `committed` | `fixed`, `theme`, and `instance` override policies with consumer-theme validation | `0.1` |
-| `SCOPE-THEME-ACCESSIBILITY` | `committed` | Forced-colors/high-contrast web policy and native dynamic-color/accessibility mappings that consumers cannot disable | `0.1` |
+| `SCOPE-THEME-ACCESSIBILITY` | `committed` | Observable forced-colors/high-contrast web behavior and native dynamic-color/accessibility mappings, fulfilled and evidenced by the owning bindings against `SCOPE-THEME-PLATFORM-SAFETY`; this item does not own requirement identity or the non-disable rule | `0.1` |
 | `SCOPE-THEME-RUNTIME` | `admitted` | Runtime theme switching per explicitly supported/proved profile; complete static output remains mandatory | Productization or capability release |
 | `SCOPE-THEME-ADDITIONAL` | `deferred` | Additional first-party or consumer themes | Capability release after stable token contract |
 | `SCOPE-DESIGN-TOOL` | `admitted` | One named design-tool interchange profile and proposal-only round-trip | Capability release through G3.5 |
@@ -477,7 +477,7 @@ roadmap evidence ownership before the affected milestone becomes `ready`.
 | `SCOPE-QUALITY-PERFORMANCE` | `committed` | Versioned performance policy, representative renderer/query/package baselines, predeclared regression budgets, and scheduled retained evidence. | Baseline by `0.1`; stable policy before stable productization |
 | `SCOPE-TRUST-CACHE-PROVENANCE` | `committed` | Explicitly downloaded catalogs are content-addressed, signature or provenance verified, digest-isolated, and rejected when verification fails. | Foundation synthetic proof; real packed proof at productization |
 | `SCOPE-TRUST-EVIDENCE-PRIVACY` | `committed` | Consumer code, prompts, screens, and traces are not collected by default; capture requires explicit scope, consent, redaction, disclosure class, and retention policy. | Before any evidence or evaluation capture involving consumer context |
-| `SCOPE-THEME-PLATFORM-SAFETY` | `committed` | Default-theme forced-colors, high-contrast, dynamic native color, font metrics, direction, and applicable accessibility adaptations are binding-owned and cannot be disabled by consumer values. | `0.1` per supported profile |
+| `SCOPE-THEME-PLATFORM-SAFETY` | `committed` | The architecture-owned closed registry owns requirement identity and meaning; binding-authored declarations own exact profile applicability and the consumer non-disable disposition for forced-colors, system high-contrast, dynamic native color, font metrics, direction, and applicable accessibility adaptations. Token sources own only token facts; renderer bindings own realization and evidence through `SCOPE-THEME-ACCESSIBILITY`. | `0.1` per supported profile |
 
 ### Evidence and release trust
 
@@ -562,7 +562,8 @@ rules:
 | Performance policy (`SCOPE-QUALITY-PERFORMANCE`) | G1.9 captures representative baselines; G2.7 owns stable policy; G3.1 guards breadth regressions. |
 | Cached-catalog provenance (`SCOPE-TRUST-CACHE-PROVENANCE`) | G0.4 proves synthetic verification and rejection; G2.1/G2.2 prove real packed/cached catalogs. |
 | Evidence-capture privacy (`SCOPE-TRUST-EVIDENCE-PRIVACY`) | G1.9 evidence policy and every evaluation/integration capture milestone enforce default-off collection and consent/redaction. |
-| Platform theme safety (`SCOPE-THEME-PLATFORM-SAFETY`) | G1.0 and affected Gate 1 slices prove default-theme platform safety; G3.5 extends the same rule to additional themes. |
+| Platform theme-safety contract (`SCOPE-THEME-PLATFORM-SAFETY`) | G1.0 defines and enforces the closed requirement identities, per-binding/profile applicability, revision closure, and consumer non-disable rule without claiming renderer behavior; G1.9 verifies the complete Gate 1 contract/evidence correlation. G3.5 extends the same rule to additional themes. |
+| Platform theme-accessibility behavior (`SCOPE-THEME-ACCESSIBILITY`) | G1.1 proves forced-colors/system-high-contrast web behavior, G1.2 proves native dynamic-color and applicable accessibility mappings plus the contract's font-metric/direction obligations, each implemented React Native Web slice carries its own profile evidence, and G1.9 verifies the complete Gate 1 profile view. |
 
 No tracker issue can substitute for this roadmap reconciliation because the
 roadmap, not the tracker, owns milestone proof.
