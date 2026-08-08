@@ -12,7 +12,7 @@ Progress: resolved 1, reused 1, downloaded 0, added 1, done
 devDependencies:
 + @core-ui/catalog 0.0.0 <- packages/catalog
 
-Done in 178ms using pnpm v10.33.0
+Done in 161ms using pnpm v10.33.0
 [workspace-task] generate: full graph
 Scope: 4 of 5 workspace projects
 
@@ -67,4 +67,4 @@ Repository-policy package owns no projections; generation is a deterministic no-
 
 [tooling] generated packages/tooling/generated/command-surface.mjs
 [tooling] generated packages/tooling/generated/response-types.d.ts
-[E-G0.0-04] isolated clean checkout 198e2c9194b9207889e8a30d0093cacb2ca4e4a8 remained clean after two generation runs (sha256:bb945fadf04592aaaf76cbdfb1f65f39ae14c552719b220bcdac8d88bcbd4d0a)
+[E-G0.0-04] isolated clean checkout 9489713d6594e6f6ac5c930804ba55cc689cf0f5 remained clean after two generation runs (sha256:8d969bf0a33e1f3dc0572ee6a844c4dc4432af564bb2c7a0a7ba8f7eb456812c)
