@@ -12,7 +12,7 @@ Progress: resolved 1, reused 1, downloaded 0, added 1, done
 devDependencies:
 + @core-ui/catalog 0.0.0 <- packages/catalog
 
-Done in 160ms using pnpm v10.33.0
+Done in 162ms using pnpm v10.33.0
 [workspace-task] generate: full graph
 Scope: 6 of 7 workspace projects
 
@@ -25,6 +25,7 @@ Scope: 6 of 7 workspace projects
 > node src/generate.mjs
 
 [schema] generated packages/schema/generated/types.d.ts
+[schema] generated packages/schema/generated/platform-safety-contract.mjs
 
 > @core-ui/repository-policy@0.0.0 generate <temporary-path>
 > node src/generate.mjs
@@ -62,6 +63,7 @@ Scope: 6 of 7 workspace projects
 > node src/generate.mjs
 
 [schema] generated packages/schema/generated/types.d.ts
+[schema] generated packages/schema/generated/platform-safety-contract.mjs
 
 > @core-ui/repository-policy@0.0.0 generate <temporary-path>
 > node src/generate.mjs
@@ -87,4 +89,4 @@ Repository-policy package owns no projections; generation is a deterministic no-
 
 [tooling] generated packages/tooling/generated/command-surface.mjs
 [tooling] generated packages/tooling/generated/response-types.d.ts
-[E-G0.0-04] isolated clean checkout 74a0ec14c7203b2e72613f756719970eb4de47a1 remained clean after two generation runs (sha256:0103d6e6665fea11fcd05fbcb7d1d5f7addd3810334a55d4f1dbeed0cced6c3a)
+[E-G0.0-04] isolated clean checkout a91afa8f0d51b4461ba9f02f99205ea6ce677eee remained clean after two generation runs (sha256:8bb11cfae63c58f02b5e21e5aca29d4043d8321c56da427bf6282ac8201cd4f0)
