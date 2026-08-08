@@ -55,12 +55,22 @@ function evaluate(schema, value, path, currentFile, issues, documents) {
     if (!matches) issues.push({ path, message: 'matches no allowed schema' });
   }
   if (schema.oneOf) {
-    const matches = schema.oneOf.filter((item) => {
+    const candidates = schema.oneOf.map((item) => {
       const candidateIssues = [];
       evaluate(item, value, path, currentFile, candidateIssues, documents);
-      return candidateIssues.length === 0;
-    }).length;
-    if (matches !== 1) issues.push({ path, message: `must match exactly one schema; matched ${matches}` });
+      return candidateIssues;
+    });
+    const matches = candidates.filter((candidateIssues) => candidateIssues.length === 0).length;
+    if (matches === 0) {
+      const closestSize = Math.min(...candidates.map((candidateIssues) => candidateIssues.length));
+      const closest = candidates.filter(
+        (candidateIssues) => candidateIssues.length === closestSize,
+      );
+      if (closest.length === 1) issues.push(...closest[0]);
+      else issues.push({ path, message: 'must match exactly one schema; matched 0' });
+    } else if (matches !== 1) {
+      issues.push({ path, message: `must match exactly one schema; matched ${matches}` });
+    }
   }
   if (schema.not) {
     const candidateIssues = [];

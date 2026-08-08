@@ -169,6 +169,23 @@ const brokenDiagnosis = diagnoseCanonicalSource({
   record: brokenRecord,
   recordPath: sourcePath,
 });
+const missingBindingApi = structuredClone(scaffold.record);
+delete missingBindingApi.bindings['web.react'].api;
+const bindingDiagnosis = diagnoseCanonicalSource({
+  context,
+  family: 'component',
+  record: missingBindingApi,
+  recordPath: sourcePath,
+});
+const missingRuntimeReason = structuredClone(scaffold.record);
+delete missingRuntimeReason.bindings['native.react-native']
+  .runtimeProfiles['native.react-native-web'].reason;
+const runtimeDiagnosis = diagnoseCanonicalSource({
+  context,
+  family: 'component',
+  record: missingRuntimeReason,
+  recordPath: sourcePath,
+});
 const repairedDiagnosis = diagnoseCanonicalSource({
   context,
   family: 'component',
@@ -231,6 +248,12 @@ if (
   || bundleDriftRule !== 'authoring.source.bundle-drift'
   || brokenDiagnosis.diagnostics[0].details.source.path !== '$/summary'
   || brokenDiagnosis.diagnostics[0].details.owner.schemaPointer !== '#/properties/summary'
+  || bindingDiagnosis.diagnostics[0].details.source.path !== '$/bindings/web.react/api'
+  || bindingDiagnosis.diagnostics[0].details.owner.schemaPointer !== '#/properties/api'
+  || runtimeDiagnosis.diagnostics[0].details.source.path
+    !== '$/bindings/native.react-native/runtimeProfiles/native.react-native-web/reason'
+  || runtimeDiagnosis.diagnostics[0].details.owner.schemaPointer
+    !== '#/$defs/runtimeProfile/properties/reason'
   || await readFile(join(repositoryRoot, sourcePath), 'utf8') !== sourceBytesBefore
 ) {
   throw new Error('EVIDENCE_AUTHORING_ROUND_TRIP_FAILED');
@@ -710,6 +733,18 @@ const definitions = [
           ruleId: brokenDiagnosis.diagnostics[0].ruleId,
           source: brokenDiagnosis.diagnostics[0].details.source,
           owner: brokenDiagnosis.diagnostics[0].details.owner,
+        },
+        {
+          action: 'diagnose-missing-binding-field',
+          ruleId: bindingDiagnosis.diagnostics[0].ruleId,
+          source: bindingDiagnosis.diagnostics[0].details.source,
+          owner: bindingDiagnosis.diagnostics[0].details.owner,
+        },
+        {
+          action: 'diagnose-missing-runtime-profile-field',
+          ruleId: runtimeDiagnosis.diagnostics[0].ruleId,
+          source: runtimeDiagnosis.diagnostics[0].details.source,
+          owner: runtimeDiagnosis.diagnostics[0].details.owner,
         },
         { action: 'repair', valid: repairedDiagnosis.valid },
       ],
