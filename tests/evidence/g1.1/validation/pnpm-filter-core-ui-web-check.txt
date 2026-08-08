@@ -3,20 +3,21 @@
 > node src/generate.mjs --check && node --test test/*.test.mjs
 
 [web] generated surface and CSS identity match canonical bindings
-✔ E-G1.1-01 progressive fixture keeps native semantics with JavaScript disabled (499.891334ms)
-✔ E-G1.1-06 binds two exact safety sets and proves web-owned browser adaptation (492.046375ms)
-✔ E-G1.1-03 vanilla reconnect is idempotent and mixed ownership is rejected (36.037416ms)
-✔ E-G1.1-03 concurrent roots share listeners and global leases then clean up (9.325625ms)
-✔ E-G1.1-03 failed setup rolls every resource and root claim back (4.420666ms)
-✔ E-G1.1-03 resource releases are idempotent before final teardown (3.920583ms)
-✔ E-G1.1-03 duplicate package module identities share the realm coordinator (4.258417ms)
-✔ E-G1.1-02 machine-enumerates only binding and token-policy derived hooks (0.624583ms)
-✔ E-G1.1-02 refuses nonexistent exports and non-component identities (0.268042ms)
-ℹ tests 9
+✔ E-G1.1-02 canonical examples consume no undocumented topology (3.480291ms)
+✔ E-G1.1-01 progressive fixture keeps native semantics with JavaScript disabled (487.545042ms)
+✔ E-G1.1-06 binds two exact safety sets and proves web-owned browser adaptation (509.357458ms)
+✔ E-G1.1-03 vanilla reconnect is idempotent and mixed ownership is rejected (35.269291ms)
+✔ E-G1.1-03 concurrent roots share listeners and global leases then clean up (9.451208ms)
+✔ E-G1.1-03 failed setup rolls every resource and root claim back (4.394459ms)
+✔ E-G1.1-03 resource releases are idempotent before final teardown (3.822042ms)
+✔ E-G1.1-03 duplicate package module identities share the realm coordinator (4.3175ms)
+✔ E-G1.1-02 machine-enumerates only binding and token-policy derived hooks (0.577208ms)
+✔ E-G1.1-02 refuses nonexistent exports and non-component identities (0.396ms)
+ℹ tests 10
 ℹ suites 0
-ℹ pass 9
+ℹ pass 10
 ℹ fail 0
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 1164.791417
+ℹ duration_ms 1169.827708

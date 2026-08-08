@@ -12,7 +12,7 @@ Progress: resolved 54, reused 54, downloaded 0, added 54, done
 devDependencies:
 + @core-ui/catalog 0.0.0 <- packages/catalog
 
-Done in 400ms using pnpm v10.33.0
+Done in 395ms using pnpm v10.33.0
 [workspace-task] generate: full graph
 Scope: 8 of 9 workspace projects
 
@@ -109,4 +109,4 @@ Repository-policy package owns no projections; generation is a deterministic no-
 > node src/generate.mjs
 
 [react] generated compatibility identity matches the web binding
-[E-G0.0-04] isolated clean checkout a6c7d3c41d31227a616f01b5c2b3dfa2e327f8fc remained clean after two generation runs (sha256:6911b674117124d151ba8f4cdc5fc13a3c753c02c12fc4f4c97947e891917942)
+[E-G0.0-04] isolated clean checkout 1022e37be71e8b415b6c15ea0a6959e3bd31498b remained clean after two generation runs (sha256:4973a37948df3cc71326998fa0db52bfc727aa7dd4e0b3d9c75425e2934d2d3a)

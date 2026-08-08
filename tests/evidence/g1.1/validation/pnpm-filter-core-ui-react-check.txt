@@ -3,11 +3,11 @@
 > node src/generate.mjs --check && node --test test/*.test.mjs && tsc --noEmit -p test/tsconfig.json
 
 [react] generated compatibility identity matches the web binding
-✔ E-G1.1-04 imports and server renders without browser globals (2.963542ms)
-✔ E-G1.1-04 hydration claims after commit without changing public markup (43.871458ms)
-✔ E-G1.1-03 StrictMode replay and concurrent roots share effects and fully clean up (12.498417ms)
-✔ E-G1.1-03 React cannot claim a vanilla-owned root (7.090708ms)
-✔ E-G1.1-05 React preserves the web surface and exact web stylesheet identity (0.114667ms)
+✔ E-G1.1-04 imports and server renders without browser globals (2.657ms)
+✔ E-G1.1-04 hydration claims after commit without changing public markup (41.796416ms)
+✔ E-G1.1-03 StrictMode replay and concurrent roots share effects and fully clean up (12.042083ms)
+✔ E-G1.1-03 React cannot claim a vanilla-owned root (6.35825ms)
+✔ E-G1.1-05 React preserves the web surface and exact web stylesheet identity (0.116667ms)
 ℹ tests 5
 ℹ suites 0
 ℹ pass 5
@@ -15,4 +15,4 @@
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 325.437708
+ℹ duration_ms 295.515209

@@ -143,9 +143,33 @@ for (const [key, value] of Object.entries(expectedHooks)) {
   }
 }
 
+const canonicalExamples = await Promise.all([
+  {
+    descriptor: 'catalog/components/button/examples/html/basic.example.json',
+    source: 'catalog/components/button/examples/html/basic.html',
+  },
+  {
+    descriptor: 'catalog/components/button/examples/react/basic.example.json',
+    source: 'catalog/components/button/examples/react/basic.tsx',
+  },
+].map(async ({ descriptor, source }) => {
+  const descriptorBytes = await readFile(join(repositoryRoot, descriptor), 'utf8');
+  const record = parseJsonStrict(descriptorBytes);
+  const sourceBytes = await readFile(join(repositoryRoot, source), 'utf8');
+  return {
+    id: record.id,
+    bindingRef: record.binding.ref,
+    descriptor,
+    descriptorDigest: sha256(descriptorBytes),
+    source,
+    sourceDigest: sha256(sourceBytes),
+  };
+}));
+
 const safetyProfiles = Object.fromEntries(Object.entries(platformSafetyFixture.profiles)
   .map(([profile, fixture]) => [profile, {
     bindingRef: fixture.bindingRef,
+    contractDigest: fixture.requirementSet.contractDigest,
     fixtureId: fixture.id,
     requirementIds: fixture.requirementSet.dispositions.map(({ id }) => id),
     requirementSetDigest: fixture.requirementSet.digest,
@@ -155,6 +179,9 @@ for (const value of Object.values(safetyProfiles)) {
   if (value.requirementIds.length !== 6 || !/^sha256:[a-f0-9]{64}$/u.test(value.requirementSetDigest)) {
     throw new Error('EVIDENCE_PLATFORM_SAFETY_SET_INVALID');
   }
+}
+if (new Set(Object.values(safetyProfiles).map(({ contractDigest }) => contractDigest)).size !== 1) {
+  throw new Error('EVIDENCE_PLATFORM_SAFETY_REGISTRY_DIVERGED');
 }
 if (
   platformSafetyFixture.stylesheet !== reactPlatformSafetyFixture.stylesheet
@@ -176,6 +203,7 @@ const applicableIdentities = {
     webReactSpecRevision: reactCompatibility.bindings['web.react'].specRevision,
   },
   stylesheetDigest: platformSafetyFixture.stylesheetDigest,
+  platformSafetyContractDigest: safetyProfiles['web.html'].contractDigest,
   platformSafetyRequirementSets: Object.fromEntries(Object.entries(safetyProfiles)
     .map(([profile, value]) => [profile, value.requirementSetDigest])),
 };
@@ -202,6 +230,7 @@ const definitions = [
     observed: ['native role and accessible name', 'keyboard focus', 'enabled base state'],
   }],
   ['E-G1.1-02', 'binding-derived-css-dom-surface-conformance', {
+    canonicalExamples,
     compilerExported: false,
     hooks: expectedHooks,
     internalTopologyAdvertised: false,
@@ -224,7 +253,8 @@ const definitions = [
     strictModeReplay: 'pass',
   }],
   ['E-G1.1-05', 'typed-react-web-cross-binding-conformance', {
-    hostRefinement: 'HTMLButtonElement with typed core:activate callback fixture',
+    generatedBindingType: '@core-ui/web/bindings ButtonWebReactBinding',
+    hostRefinement: '@core-ui/react CoreButtonReactHostProps over HTMLButtonElement and binding-owned core:activate type',
     reactCompatibility: applicableIdentities.reactCompatibility,
     surfaceParity: true,
     webStyleSourceCopied: false,
@@ -412,8 +442,8 @@ async function validationResult(commandName, args, assertions) {
 const evidenceCount = /(9 immutable index, 43 records, 43 artifacts, and 17 recertifications)/u;
 const validationResults = [
   await validationResult('pnpm --filter @core-ui/web check', ['--filter', '@core-ui/web', 'check'], [
-    { id: 'web-test-count', pattern: /tests (9)/u },
-    { id: 'web-pass-count', pattern: /pass (9)/u },
+    { id: 'web-test-count', pattern: /tests (10)/u },
+    { id: 'web-pass-count', pattern: /pass (10)/u },
   ]),
   await validationResult('pnpm --filter @core-ui/react check', ['--filter', '@core-ui/react', 'check'], [
     { id: 'react-test-count', pattern: /tests (5)/u },
