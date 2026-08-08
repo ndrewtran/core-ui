@@ -122,7 +122,10 @@ function evaluate(schema, value, path, currentFile, issues, documents) {
     }
     for (const required of schema.required ?? []) {
       if (!Object.hasOwn(value, required)) {
-        issues.push({ path, message: `is missing required field ${required}` });
+        issues.push({
+          path: `${path}/${escapeJsonPointer(required)}`,
+          message: `is missing required field ${required}`,
+        });
       }
     }
     for (const key of keys) {

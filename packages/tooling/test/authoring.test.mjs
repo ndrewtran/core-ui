@@ -153,7 +153,12 @@ test('E-G0.5-01: scaffold, validation, compilation, retrieval, diagnosis, and re
   assert.equal(diagnosed.valid, false);
   assert.equal(diagnosed.diagnostics[0].ruleId, 'authoring.source.schema-invalid');
   assert.equal(diagnosed.diagnostics[0].details.source.record, sourcePath);
+  assert.equal(diagnosed.diagnostics[0].details.source.path, '$/summary');
   assert.equal(diagnosed.diagnostics[0].details.owner.name, 'component-contract');
+  assert.equal(
+    diagnosed.diagnostics[0].details.owner.schemaPointer,
+    '#/properties/summary',
+  );
   assert.equal(diagnoseCanonicalSource({
     context,
     family: 'component',

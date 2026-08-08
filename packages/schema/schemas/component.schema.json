@@ -13,7 +13,7 @@
     "id": {
       "type": "string",
       "pattern": "^core:component:[a-z0-9]+(?:-[a-z0-9]+)*$",
-      "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["content"] }
+      "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["content", "binding-spec"] }
     },
     "kind": {
       "const": "component",

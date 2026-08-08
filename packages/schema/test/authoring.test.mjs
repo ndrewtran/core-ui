@@ -49,6 +49,13 @@ test('E-G0.5-04: schema-owned metadata drives completion, effects, revisions, an
   assert.equal(defaultValue.owner, 'binding-contract');
   assert.deepEqual(defaultValue.revisionAxes, ['binding-content', 'binding-spec']);
 });
+
+test('E-G0.5-04: authoring resolves family files only through the canonical schema contract', async () => {
+  const source = await readFile(resolve(import.meta.dirname, '../src/authoring.mjs'), 'utf8');
+  assert.doesNotMatch(source, /(?:binding|component)\.schema\.json/u);
+  assert.ok(authoringMetadata('binding').every(({ family }) => family === 'binding'));
+  assert.ok(authoringMetadata('component').every(({ family }) => family === 'component'));
+});
 test('E-G0.5-02: revision preimages are the exact inputs hashed by existing digest functions', () => {
   const concept = component();
   const binding = concept.bindings['web.react'];
@@ -74,6 +81,110 @@ test('E-G0.5-02: revision preimages are the exact inputs hashed by existing dige
     bindingSpecRevision(specInput),
     canonicalDigest(bindingSpecRevisionPreimage(specInput)),
   );
+});
+
+function firstProperty(pointer) {
+  const match = /^#\/properties\/([^/]+)/u.exec(pointer);
+  return match?.[1].replaceAll('~1', '/').replaceAll('~0', '~') ?? null;
+}
+
+function finalProperty(pointer) {
+  const match = /\/properties\/([^/]+)$/u.exec(pointer);
+  return match?.[1].replaceAll('~1', '/').replaceAll('~0', '~') ?? null;
+}
+
+test('E-G0.5-02: every declared revision axis matches its digest preimage membership', () => {
+  const concept = component();
+  const preimage = bindingSpecRevisionPreimage({
+    component: concept,
+    bindingId: 'web.react',
+    tokenSources: [tokenSource()],
+  });
+  const componentSpecFields = new Set(Object.keys(preimage.component));
+  const bindingSpecFields = new Set(Object.keys(preimage.binding));
+  const declarations = validateAuthoringMetadata();
+
+  for (const declaration of declarations) {
+    let expected;
+    if (declaration.schema === 'component.schema.json') {
+      const field = firstProperty(declaration.schemaPointer);
+      expected = [
+        'content',
+        ...(componentSpecFields.has(field) || field === 'bindings' ? ['binding-spec'] : []),
+      ];
+    } else {
+      assert.equal(declaration.schema, 'binding.schema.json');
+      const rootField = firstProperty(declaration.schemaPointer);
+      const definitionField = declaration.schemaPointer.startsWith('#/$defs/runtimeProfile/')
+        ? finalProperty(declaration.schemaPointer)
+        : null;
+      const inBindingSpec = bindingSpecFields.has(rootField)
+        || definitionField !== null
+        || bindingSpecFields.has(finalProperty(declaration.schemaPointer));
+      expected = ['binding-content', ...(inBindingSpec ? ['binding-spec'] : [])];
+    }
+    assert.deepEqual(
+      declaration.revisionAxes,
+      expected,
+      `${declaration.schema}${declaration.schemaPointer}`,
+    );
+  }
+});
+
+test('E-G0.5-02: corrected identity and runtime-profile fields change observed spec digests', () => {
+  const baseline = component();
+  const tokenSources = [tokenSource()];
+  const digest = (record, bindingId) => bindingSpecRevision({
+    component: record,
+    bindingId,
+    tokenSources,
+  });
+
+  const renamed = structuredClone(baseline);
+  renamed.id = 'core:component:button-renamed';
+  assert.notEqual(digest(baseline, 'web.react'), digest(renamed, 'web.react'));
+  assert.deepEqual(
+    resolveAuthoringField('component', '$/id').revisionAxes,
+    ['content', 'binding-spec'],
+  );
+
+  const revisedReason = structuredClone(baseline);
+  revisedReason.bindings['native.react-native']
+    .runtimeProfiles['native.react-native-web'].reason += ' Reassessed.';
+  assert.notEqual(
+    digest(baseline, 'native.react-native'),
+    digest(revisedReason, 'native.react-native'),
+  );
+  assert.deepEqual(
+    resolveAuthoringField(
+      'component',
+      '$/bindings/native.react-native/runtimeProfiles/native.react-native-web/reason',
+    ).revisionAxes,
+    ['binding-content', 'binding-spec'],
+  );
+
+  const addedAlternative = structuredClone(baseline);
+  addedAlternative.bindings['native.react-native']
+    .runtimeProfiles['native.react-native-web'].alternative = baseline.id;
+  assert.notEqual(
+    digest(baseline, 'native.react-native'),
+    digest(addedAlternative, 'native.react-native'),
+  );
+  assert.deepEqual(
+    resolveAuthoringField(
+      'component',
+      '$/bindings/native.react-native/runtimeProfiles/native.react-native-web/alternative',
+    ).revisionAxes,
+    ['binding-content', 'binding-spec'],
+  );
+
+  const editorial = structuredClone(baseline);
+  editorial.bindings['web.react'].editorialNotes = ['Clarified implementation note.'];
+  assert.notEqual(
+    bindingContentRevision(baseline.bindings['web.react']),
+    bindingContentRevision(editorial.bindings['web.react']),
+  );
+  assert.equal(digest(baseline, 'web.react'), digest(editorial, 'web.react'));
 });
 
 test('E-G0.5-04 negative: a new stable field cannot bypass authoring and ownership coupling', async () => {

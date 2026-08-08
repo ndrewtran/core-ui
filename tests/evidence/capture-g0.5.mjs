@@ -7,11 +7,18 @@ import { createCatalogApi } from '../../packages/catalog/src/index.mjs';
 import { compileCatalog } from '../../packages/catalog/src/compiler.mjs';
 import {
   authoringMetadataDigest,
+  bindingContentRevision,
+  bindingSpecRevision,
+  bindingSpecRevisionPreimage,
   canonicalDigest,
   canonicalJson,
   parseJsonStrict,
+  resolveAuthoringField,
   validateAuthoringMetadata,
 } from '../../packages/schema/src/index.mjs';
+import {
+  loadFamilySchema,
+} from '../../packages/schema/src/contracts.mjs';
 import {
   AuthoringPolicyError,
   affectedClosure,
@@ -222,6 +229,8 @@ if (
   || undeclaredDiagnosis.valid
   || staleRevisionRule !== 'authoring.source.revision-stale'
   || bundleDriftRule !== 'authoring.source.bundle-drift'
+  || brokenDiagnosis.diagnostics[0].details.source.path !== '$/summary'
+  || brokenDiagnosis.diagnostics[0].details.owner.schemaPointer !== '#/properties/summary'
   || await readFile(join(repositoryRoot, sourcePath), 'utf8') !== sourceBytesBefore
 ) {
   throw new Error('EVIDENCE_AUTHORING_ROUND_TRIP_FAILED');
@@ -241,6 +250,115 @@ for (const artifact of compiled.bundle.artifacts.filter(({ kind }) => kind === '
   );
 }
 const revisionContext = { examples, tokenSources, exampleSources };
+
+function firstProperty(pointer) {
+  const match = /^#\/properties\/([^/]+)/u.exec(pointer);
+  return match?.[1].replaceAll('~1', '/').replaceAll('~0', '~') ?? null;
+}
+
+function finalProperty(pointer) {
+  const match = /\/properties\/([^/]+)$/u.exec(pointer);
+  return match?.[1].replaceAll('~1', '/').replaceAll('~0', '~') ?? null;
+}
+
+const referencePreimage = bindingSpecRevisionPreimage({
+  component: componentArtifact.record,
+  bindingId: 'web.react',
+  tokenSources,
+});
+const componentSpecFields = new Set(Object.keys(referencePreimage.component));
+const bindingSpecFields = new Set(Object.keys(referencePreimage.binding));
+const revisionAxisDeclarations = validateAuthoringMetadata().map((declaration) => {
+  let expected;
+  if (declaration.schema === 'component.schema.json') {
+    const field = firstProperty(declaration.schemaPointer);
+    expected = [
+      'content',
+      ...(componentSpecFields.has(field) || field === 'bindings' ? ['binding-spec'] : []),
+    ];
+  } else {
+    const rootField = firstProperty(declaration.schemaPointer);
+    const definitionField = declaration.schemaPointer.startsWith('#/$defs/runtimeProfile/')
+      ? finalProperty(declaration.schemaPointer)
+      : null;
+    const inBindingSpec = bindingSpecFields.has(rootField)
+      || definitionField !== null
+      || bindingSpecFields.has(finalProperty(declaration.schemaPointer));
+    expected = ['binding-content', ...(inBindingSpec ? ['binding-spec'] : [])];
+  }
+  const matched = canonicalJson(declaration.revisionAxes) === canonicalJson(expected);
+  return {
+    declared: declaration.revisionAxes,
+    expected,
+    matched,
+    schema: declaration.schema,
+    schemaPointer: declaration.schemaPointer,
+  };
+});
+if (revisionAxisDeclarations.some(({ matched }) => !matched)) {
+  throw new Error('EVIDENCE_REVISION_AXIS_DECLARATION_MISMATCH');
+}
+
+const observedRevisionCases = [];
+const digest = (record, bindingId) => bindingSpecRevision({
+  component: record,
+  bindingId,
+  tokenSources,
+});
+const renamedComponent = structuredClone(componentArtifact.record);
+renamedComponent.id = 'core:component:button-renamed';
+observedRevisionCases.push({
+  id: 'component-id-binding-spec',
+  axes: resolveAuthoringField('component', '$/id').revisionAxes,
+  changed: digest(componentArtifact.record, 'web.react')
+    !== digest(renamedComponent, 'web.react'),
+});
+const revisedRuntimeReason = structuredClone(componentArtifact.record);
+revisedRuntimeReason.bindings['native.react-native']
+  .runtimeProfiles['native.react-native-web'].reason += ' Reassessed.';
+observedRevisionCases.push({
+  id: 'runtime-profile-reason-binding-spec',
+  axes: resolveAuthoringField(
+    'component',
+    '$/bindings/native.react-native/runtimeProfiles/native.react-native-web/reason',
+  ).revisionAxes,
+  changed: digest(componentArtifact.record, 'native.react-native')
+    !== digest(revisedRuntimeReason, 'native.react-native'),
+});
+const addedRuntimeAlternative = structuredClone(componentArtifact.record);
+addedRuntimeAlternative.bindings['native.react-native']
+  .runtimeProfiles['native.react-native-web'].alternative = componentArtifact.id;
+observedRevisionCases.push({
+  id: 'runtime-profile-alternative-binding-spec',
+  axes: resolveAuthoringField(
+    'component',
+    '$/bindings/native.react-native/runtimeProfiles/native.react-native-web/alternative',
+  ).revisionAxes,
+  changed: digest(componentArtifact.record, 'native.react-native')
+    !== digest(addedRuntimeAlternative, 'native.react-native'),
+});
+const editorialBinding = structuredClone(componentArtifact.record.bindings['web.react']);
+editorialBinding.editorialNotes = ['Clarified implementation note.'];
+const editorialComponent = structuredClone(componentArtifact.record);
+editorialComponent.bindings['web.react'] = editorialBinding;
+observedRevisionCases.push({
+  id: 'binding-editorial-content-only',
+  axes: resolveAuthoringField(
+    'component',
+    '$/bindings/web.react/editorialNotes',
+  ).revisionAxes,
+  bindingContentChanged: bindingContentRevision(
+    componentArtifact.record.bindings['web.react'],
+  ) !== bindingContentRevision(editorialBinding),
+  bindingSpecChanged: digest(componentArtifact.record, 'web.react')
+    !== digest(editorialComponent, 'web.react'),
+});
+if (
+  observedRevisionCases.slice(0, 3).some(({ changed }) => !changed)
+  || !observedRevisionCases[3].bindingContentChanged
+  || observedRevisionCases[3].bindingSpecChanged
+) throw new Error('EVIDENCE_REVISION_AXIS_OBSERVATION_FAILED');
+
 const semanticResults = corpus.semanticCases.map((change) => {
   const result = semanticDiff({
     before: componentArtifact.record,
@@ -600,6 +718,12 @@ const definitions = [
     {
       semanticResults,
       emptyContainerResults,
+      revisionAxisCoverage: {
+        declarationCount: revisionAxisDeclarations.length,
+        declarationDigest: canonicalDigest(revisionAxisDeclarations),
+        everyDeclarationMatched: true,
+        observedCases: observedRevisionCases,
+      },
       revisionAxes: revisionExplanation.axes.map(({ name, digest, normalizedInputs }) => ({
         name,
         digest,
@@ -631,6 +755,10 @@ const definitions = [
       injectedClosure,
       schemaClosure,
       undeclaredClosureRule,
+      canonicalFamilyFiles: ['binding', 'component'].map((family) => ({
+        family,
+        fileName: loadFamilySchema(family).fileName,
+      })),
       secondRegistryIntroduced: false,
     },
   ],
