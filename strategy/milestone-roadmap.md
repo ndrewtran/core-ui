@@ -612,7 +612,11 @@ and pure logic required by the fixed slices.
 
 **Primary ownership**
 
-- `@core-ui/tokens`
+- `@core-ui/schema` for the closed platform-safety contract grammar
+- Canonical binding specs for per-binding/runtime-profile safety declarations
+- `@core-ui/tokens` for canonical token/theme data, transforms, and validated
+  token-requirement-set compilation
+- `@core-ui/catalog` for derived contract/query projection
 - `@core-ui/foundation/semantic`
 - `@core-ui/foundation/logic`
 - Optional `@core-ui/foundation/interaction` only where proved portable
@@ -631,6 +635,19 @@ and pure logic required by the fixed slices.
   digests.
 - Explicit required/optional/deprecated requirements and typed fallback value
   or fallback token semantics.
+- The architecture-defined, closed, versioned `PlatformSafetyContract` derived
+  from `strategy/platform-safety-contract.json`. A binding without nested
+  runtime profiles declares against its binding ID/profile identity; a binding
+  with nested profiles declares only per concrete nested profile. All six IDs
+  receive a `required` or reasoned `not-applicable` disposition; unsupported
+  profiles declare the latter without a behavior or evidence claim.
+- A separate `PlatformSafetyRequirementSet` projection for each binding/profile
+  containing the registry version/digest, binding/profile identity,
+  declaration revision, complete dispositions, and projection digest. Unknown,
+  missing, duplicate, wrong-profile, consumer-weakened, or prematurely
+  fulfilled declarations fail closed. Token sources and `TokenRequirementSet`
+  continue to own only token facts; target renderers own realization and
+  observable behavior.
 - Enforced foundation import boundaries for `semantic`, `logic`, and optional
   `interaction`.
 - Profile-scoped proof metadata for every portable interaction machine.
@@ -645,6 +662,7 @@ and pure logic required by the fixed slices.
 | `E-G1.0-04` | Requirement-set digests change exactly when semantic dependencies change and match packed renderer descriptors. | Digest-closure fixture. |
 | `E-G1.0-05` | Foundation dependency direction is enforced and a portable machine is available only on profiles with materially distinct retained proof. | Import-boundary and portability matrix. |
 | `E-G1.0-06` | Static theme output works without runtime switching; any runtime switch is separately declared and proved. | Web/native theme smoke fixtures. |
+| `E-G1.0-07` | Closed platform-safety declarations enter binding-spec revisions and compile into separate per-binding/profile `PlatformSafetyRequirementSet` digests plus query/package projections; unknown, missing, duplicate, wrong-profile, consumer-weakened, or prematurely fulfilled requirements fail deterministically. This assertion produces no CSS/native adaptation, support, accessibility, or availability result. | Safety-contract closure and negative corpus. |
 
 **Scope controls**
 
@@ -657,7 +675,10 @@ and pure logic required by the fixed slices.
 
 **Exit condition:** The fixed slices have the smallest sufficient semantic,
 logic, token, and optional portable-interaction substrate with cross-target
-provenance and fallback denial.
+provenance and fallback denial. The platform-safety requirement contract is
+closed, digest-bound, and consumer-non-removable, while web and native behavior
+remain explicitly unproved and unavailable until G1.1 and G1.2 supply their
+binding-owned evidence.
 
 ### G1.1 Framework-free web and React substrate
 
@@ -690,6 +711,10 @@ canonical inventory or duplicating styles and runtime ownership.
 - Public events and observable DOM hooks derived from binding specs.
 - Host TypeScript refinements validated against generated Core-owned binding
   types without exporting an upstream primitive library as public API.
+- `@core-ui/web`-owned forced-colors and system-high-contrast behavior that
+  consumers cannot disable through theme or instance values. `web.html` proves
+  the behavior directly; `web.react` proves it consumes the same web source and
+  cannot bypass it with a copied React safety implementation.
 
 **Acceptance evidence**
 
@@ -700,6 +725,7 @@ canonical inventory or duplicating styles and runtime ownership.
 | `E-G1.1-03` | React and vanilla never own the same root or duplicate global effects; mount/unmount and concurrent instances clean up completely. | Ownership, leak, and duplicate-listener tests. |
 | `E-G1.1-04` | SSR and hydration do not access browser globals early, change public semantics, or produce ownership duplication. | SSR/hydration fixture. |
 | `E-G1.1-05` | React preserves applicable web semantics and hooks while allowed React ergonomics remain binding-owned and typed. | Cross-binding conformance report. |
+| `E-G1.1-06` | Test-only conformance fixtures `fixture:platform-safety-web#web.html` and `fixture:platform-safety-web#web.react` each bind their own `PlatformSafetyRequirementSet`. They prove the applicable `system.forced-colors`, `system.high-contrast`, and `layout.direction` substrate policy; React proves source/parity consumption without bypass. Results bind registry/set digests, environment, and evidence identity, make no component-support claim, and leave per-slice fulfillment to G1.3–G1.7. | Forced-colors/high-contrast substrate browser matrix. |
 
 **Scope controls**
 
@@ -710,7 +736,9 @@ canonical inventory or duplicating styles and runtime ownership.
 - No document-wide controller scan or import-time global lifecycle.
 
 **Exit condition:** Framework-free web and React have explicit, non-competing
-runtime ownership and a machine-enumerated compatible public surface.
+runtime ownership, a machine-enumerated compatible public surface, and retained
+shared-substrate proof of binding-owned forced-colors/high-contrast safety.
+Component support remains unclaimed until the owning slice evidence passes.
 
 ### G1.2 React Native substrate and runtime profiles
 
@@ -737,6 +765,12 @@ tokens without importing web implementation accidents.
   lifecycle when supported, validation profile, and evidence.
 - Native deviations and `native-alternative` references in binding specs.
 - Host applications for Expo/native exploration outside the runtime package.
+- Binding-owned iOS and Android dynamic-color, font-metric, direction, and
+  applicable accessibility mappings that consumer values cannot disable.
+  The shared React Native Web substrate declares its own profile-specific
+  disposition without inheriting web, iOS, or Android behavior; an unsupported
+  disposition carries no behavior claim. Each component slice owns its later
+  binding/profile declaration and fulfillment proof.
 
 **Acceptance evidence**
 
@@ -746,6 +780,7 @@ tokens without importing web implementation accidents.
 | `E-G1.2-02` | iOS and Android behavior/accessibility are proved against explicit validation profiles rather than assumed from shared props. | Native profile smoke matrix. |
 | `E-G1.2-03` | React Native Web is never treated as `web.react` parity; unsupported or adapted behavior is surfaced honestly. | Runtime-profile query and evidence fixture. |
 | `E-G1.2-04` | Native token values trace to canonical recipes and target transforms without CSS-derived authority. | Token provenance report. |
+| `E-G1.2-05` | Test-only component fixture `fixture:platform-safety-native` uses binding `native.react-native` and distinct tuples `(profile: ios, validationProfile: native.ios)`, `(profile: android, validationProfile: native.android)`, and `(profile: native.react-native-web, validationProfile: native.react-native-web)`, each with its own `PlatformSafetyRequirementSet`. iOS/Android prove applicable `native.dynamic-color`, `native.font-metrics`, `layout.direction`, and `platform.accessibility-mapping` substrate policy; React Native Web records an explicit substrate disposition. Results bind registry/set digests, environment, and evidence identity, make no component-support claim, and leave per-slice fulfillment to G1.3–G1.7. | Native platform-safety substrate matrix. |
 
 **Scope controls**
 
@@ -756,8 +791,11 @@ tokens without importing web implementation accidents.
 - Do not split React Native Web into another binding without sustained API or
   ownership divergence and ontology admission.
 
-**Exit condition:** React Native has independent native implementation and
-proof, explicit profile dispositions, and no web runtime dependency.
+**Exit condition:** React Native has independent shared-substrate
+implementation and proof, explicit iOS/Android/React Native Web fixture
+dispositions, no web runtime dependency, and retained substrate
+platform-theme-safety proof. Component support remains unclaimed until the
+owning slice evidence passes.
 
 ### Shared slice deliverable contract
 
@@ -768,6 +806,9 @@ Each G1.3–G1.7 component milestone must deliver:
 - exact `web.html`, `web.react`, and `native.react-native` binding specs plus a
   React Native Web profile disposition;
 - canonical token recipe and compiled requirement-set digest;
+- one complete platform-safety declaration against the architecture-owned
+  `PlatformSafetyContract` plus a derived `PlatformSafetyRequirementSet`
+  digest for every implemented binding/profile;
 - structured pitfall records for known misuse, typed repair guidance, and
   affected bindings;
 - one normative executable example for every implemented target and an
@@ -776,6 +817,10 @@ Each G1.3–G1.7 component milestone must deliver:
   target disposition;
 - package exports and generated packed compatibility descriptors;
 - risk-proportionate behavior, accessibility, visual, and package evidence;
+- per-binding/profile fulfillment of every applicable platform-safety
+  declaration through the slice's named behavior/accessibility evidence, bound
+  to its exact safety-requirement-set digest; unsupported and reasoned
+  `not-applicable` dispositions remain behavior-evidence-free;
 - API/CLI human/JSON/dense retrieval parity; and
 - a semantic diff and change-intent preview for one representative public
   change to the slice.
@@ -1069,7 +1114,7 @@ the Gate 1 cross-cutting architecture fixtures.
 
 | ID | Required assertion | Retained evidence |
 | --- | --- | --- |
-| `E-G1.9-01` | Every required Gate 1 matrix cell is implemented/proved or has only the explicitly permitted disposition. | Signed target-matrix report. |
+| `E-G1.9-01` | Every required Gate 1 matrix cell is implemented/proved or has only the explicitly permitted disposition. The same release manifest correlates the architecture registry digest, current G1.1/G1.2 substrate evidence, each slice's exact `PlatformSafetyRequirementSet`, and its named behavior/accessibility evidence for every applicable binding/profile, including explicit unsupported/not-applicable dispositions. | Signed target-matrix and platform-safety correlation report. |
 | `E-G1.9-02` | Packed descriptor derivation rejects a source-only, missing, mismatched, or unexported binding. | Packed descriptor fixture. |
 | `E-G1.9-03` | Change-intent closure reports authoritative writes, affected projections, stale proof, version effects, checks, confirmation, and base-drift rejection for every representative source class. | Change-intent golden corpus. |
 | `E-G1.9-04` | Evidence withdrawal marks every affected support/query/release view unproved without exposing restricted payloads. | Advisory propagation fixture. |
@@ -1102,6 +1147,8 @@ Gate 1 completes when G1.0 through G1.9 pass and:
   platform accidents;
 - packed consumers prove published shape rather than source-tree assumptions;
 - mandatory accessibility evidence exists for each risk/profile claim;
+- web and native platform-theme safety has binding-owned retained evidence for
+  every supported Gate 1 profile;
 - change impact is explainable before any write capability exists; and
 - later productization or integration work remains unnecessary for renderer
   correctness.
@@ -2085,6 +2132,7 @@ valid outcomes and do not make the core product incomplete.
 | Change-intent closure | G1.9 | `E-G1.9-03` |
 | Packed descriptor derivation | G1.9, then real release at G2.1 | `E-G1.9-02`, `E-G2.1-02` |
 | Token fallback denial | G1.0 | `E-G1.0-03` |
+| Platform theme safety and accessibility | G1.0 contract; G1.1/G1.2 test-only substrate behavior; G1.3–G1.7 per-slice binding/profile fulfillment; G1.9 exact contract/evidence correlation | `E-G1.0-07`, `E-G1.1-06`, `E-G1.2-05`, `E-G1.3-01`, `E-G1.3-02`, `E-G1.4-02`, `E-G1.4-03`, `E-G1.5-01` through `E-G1.5-03`, `E-G1.6-01`, `E-G1.6-03`, `E-G1.6-04`, `E-G1.7-01` through `E-G1.7-03`, `E-G1.9-01` |
 | Evidence advisory propagation | G1.9 | `E-G1.9-04` |
 | Operational exception enforcement | G1.9 | `E-G1.9-05` |
 | Inert extension isolation | G3.7 or earlier extension enablement | `E-G3.7-01`, `E-G3.7-02` |
@@ -2114,7 +2162,7 @@ remove or weaken these assertions without changing the architecture.
 | Generation hygiene | G0.0 path policy, G0.2 deterministic compiler, every milestone’s no-projection-patch rule. |
 | Proof/evidence/disclosure/advisories | G1.9 evidence system, G2.1/G2.7 release manifests, G3.4 eval promotion. |
 | Lifecycle, SemVer, historical retrieval, trust | G0.1 schema rules, G2.1 version/release, G2.2 installed authority, G3.2 migrations. |
-| Token/theme/fallback/override policy | G1.0 default system, per-slice requirement sets, G3.5 additional themes/interchange. |
+| Token/theme/fallback/override policy | G1.0 default system and cross-platform safety contract, G1.1/G1.2 binding-owned platform proof, per-slice requirement sets, G1.9 integrated profile view, and G3.5 additional themes/interchange. |
 | V1 product boundaries | Global guardrails, Gate 1 fixed matrix, Gate 2 capability enablement, independent Gate 3 admission. |
 | Design-tool interoperability | G3.5 export/import-proposal and round-trip proof. |
 | Promptable semantics | G3.6 observed-task discovery and bounded activation only. |
