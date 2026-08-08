@@ -33,6 +33,25 @@ function matchesType(value, type) {
   return typeof value === type;
 }
 
+function discriminatedBranchIndex(branches, value) {
+  if (!isObject(value)) return null;
+  const keys = Object.keys(value).sort().filter((key) => branches.every((branch) => {
+    const property = branch.properties?.[key];
+    return isObject(property) && (property.const !== undefined || Array.isArray(property.enum));
+  }));
+  for (const key of keys) {
+    const matches = branches.flatMap((branch, index) => {
+      const property = branch.properties[key];
+      const matched = property.const !== undefined
+        ? sameValue(value[key], property.const)
+        : property.enum.some((item) => sameValue(value[key], item));
+      return matched ? [index] : [];
+    });
+    if (matches.length === 1) return matches[0];
+  }
+  return null;
+}
+
 function evaluate(schema, value, path, currentFile, issues, documents) {
   if (schema === true) return;
   if (schema === false) {
@@ -62,11 +81,8 @@ function evaluate(schema, value, path, currentFile, issues, documents) {
     });
     const matches = candidates.filter((candidateIssues) => candidateIssues.length === 0).length;
     if (matches === 0) {
-      const closestSize = Math.min(...candidates.map((candidateIssues) => candidateIssues.length));
-      const closest = candidates.filter(
-        (candidateIssues) => candidateIssues.length === closestSize,
-      );
-      if (closest.length === 1) issues.push(...closest[0]);
+      const branchIndex = discriminatedBranchIndex(schema.oneOf, value);
+      if (branchIndex !== null) issues.push(...candidates[branchIndex]);
       else issues.push({ path, message: 'must match exactly one schema; matched 0' });
     } else if (matches !== 1) {
       issues.push({ path, message: `must match exactly one schema; matched ${matches}` });
