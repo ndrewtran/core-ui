@@ -304,6 +304,13 @@ function semanticIssues(family, value, ownership) {
   }
   if (family === 'query-envelope') {
     const platformSafetyIds = new Set(platformSafetyRequirementIds);
+    const unitsByType = {
+      color: 'hex',
+      dimension: 'px',
+      duration: 'ms',
+      number: 'unitless',
+      string: 'string',
+    };
     walkObjects(value, (object, path) => {
       if (Array.isArray(object.dispositions) && Object.hasOwn(object, 'contractDigest')) {
         for (const [index, disposition] of object.dispositions.entries()) {
@@ -313,6 +320,47 @@ function semanticIssues(family, value, ownership) {
               message: 'must be owned by the architecture platform-safety registry',
             });
           }
+        }
+      }
+      if (
+        typeof object.token === 'string'
+        && typeof object.layer === 'string'
+        && typeof object.type === 'string'
+        && typeof object.unit === 'string'
+        && Object.hasOwn(object, 'resolved')
+        && Array.isArray(object.dependencies)
+      ) {
+        const tokenLayer = object.token.split('.')[0];
+        if (object.layer !== tokenLayer) {
+          issues.push({
+            path: `${path}/layer`,
+            message: `must equal the ${tokenLayer} token namespace`,
+          });
+        }
+        const expectedUnit = unitsByType[object.type];
+        if (expectedUnit !== undefined && object.unit !== expectedUnit) {
+          issues.push({
+            path: `${path}/unit`,
+            message: `must equal ${expectedUnit} for ${object.type}`,
+          });
+        }
+        const expectsNumber = ['dimension', 'duration', 'number'].includes(object.type);
+        if (
+          (expectsNumber && (typeof object.resolved !== 'number' || !Number.isFinite(object.resolved)))
+          || (!expectsNumber && typeof object.resolved !== 'string')
+        ) {
+          issues.push({
+            path: `${path}/resolved`,
+            message: `must be a ${expectsNumber ? 'finite number' : 'string'} for ${object.type}`,
+          });
+        } else if (
+          object.type === 'color'
+          && !/^#[a-fA-F0-9]{6}(?:[a-fA-F0-9]{2})?$/u.test(object.resolved)
+        ) {
+          issues.push({
+            path: `${path}/resolved`,
+            message: 'must be a six- or eight-digit hex color',
+          });
         }
       }
     });

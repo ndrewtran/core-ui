@@ -28,7 +28,18 @@
         "kind": "source-revision",
         "value": "sha256:1111111111111111111111111111111111111111111111111111111111111111"
       },
-      "releaseManifest": "release-compatible"
+      "releaseManifest": "release-compatible",
+      "tokenRequirementSets": {
+        "core:component:button#native.react-native:native.android": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+        "core:component:button#native.react-native:native.ios": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+        "core:component:button#web.react:web.react": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+      },
+      "platformSafetyRequirementSets": {
+        "core:component:button#native.react-native:android": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+        "core:component:button#native.react-native:ios": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+        "core:component:button#native.react-native:native.react-native-web": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+        "core:component:button#web.react:web.react": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+      }
     },
     {
       "id": "catalog-newer",
@@ -43,7 +54,13 @@
         "kind": "source-revision",
         "value": "sha256:2222222222222222222222222222222222222222222222222222222222222222"
       },
-      "releaseManifest": "release-newer"
+      "releaseManifest": "release-newer",
+      "tokenRequirementSets": {
+        "core:component:button#web.react:web.react": "sha256:8888888888888888888888888888888888888888888888888888888888888888"
+      },
+      "platformSafetyRequirementSets": {
+        "core:component:button#web.react:web.react": "sha256:8888888888888888888888888888888888888888888888888888888888888888"
+      }
     }
   ],
   "rendererDescriptors": [

@@ -95,6 +95,25 @@ function assertClosedDigestMap(value, context) {
   }
 }
 
+function assertCatalogDigestMap(value, context) {
+  if (value === null || typeof value !== 'object' || Array.isArray(value)) {
+    inputError(`${context} must be an object`);
+  }
+  for (const [identity, digest] of Object.entries(value)) {
+    if (identity.length === 0 || !/^sha256:[a-f0-9]{64}$/u.test(digest)) {
+      inputError(`${context} has invalid requirement-set digest ${identity}`);
+    }
+  }
+}
+
+function bindingDigestMap(requirementSets, binding) {
+  const prefix = `${binding}:`;
+  return Object.fromEntries(Object.entries(requirementSets)
+    .filter(([identity]) => identity.startsWith(prefix))
+    .map(([identity, digest]) => [identity.slice(prefix.length), digest])
+    .sort(([left], [right]) => compareText(left, right)));
+}
+
 function validateNormalizedInput(input) {
   assertClosed(
     input,
@@ -110,8 +129,14 @@ function validateNormalizedInput(input) {
     assertClosed(catalog, [
       'id', 'name', 'version', 'catalogVersion', 'catalogDigest', 'queryApiVersion',
       'schemaRange', 'sourceRevision', 'provenance', 'releaseManifest',
+      'tokenRequirementSets', 'platformSafetyRequirementSets',
     ], `catalog ${catalog.id ?? '<unknown>'}`);
     assertClosed(catalog.provenance, ['kind', 'value'], `${catalog.id}.provenance`);
+    assertCatalogDigestMap(catalog.tokenRequirementSets, `${catalog.id}.tokenRequirementSets`);
+    assertCatalogDigestMap(
+      catalog.platformSafetyRequirementSets,
+      `${catalog.id}.platformSafetyRequirementSets`,
+    );
   }
   for (const descriptor of input.rendererDescriptors) {
     assertClosed(descriptor, [
@@ -347,6 +372,31 @@ function compatibilityFor({
         dimension: 'token',
         required: release.tokenContractVersion,
         actual: descriptor.tokenContractRange,
+      });
+    }
+    const catalogTokenDigests = bindingDigestMap(catalog.tokenRequirementSets, binding);
+    const catalogPlatformSafetyDigests = bindingDigestMap(
+      catalog.platformSafetyRequirementSets,
+      binding,
+    );
+    if (
+      canonicalJson(expected.tokenRequirementSetDigests)
+      !== canonicalJson(catalogTokenDigests)
+    ) {
+      failures.push({
+        dimension: 'token',
+        required: canonicalJson(catalogTokenDigests),
+        actual: canonicalJson(expected.tokenRequirementSetDigests),
+      });
+    }
+    if (
+      canonicalJson(expected.platformSafetyRequirementSetDigests)
+      !== canonicalJson(catalogPlatformSafetyDigests)
+    ) {
+      failures.push({
+        dimension: 'platform-safety',
+        required: canonicalJson(catalogPlatformSafetyDigests),
+        actual: canonicalJson(expected.platformSafetyRequirementSetDigests),
       });
     }
     if (canonicalJson(described.tokenRequirementSetDigests) !== canonicalJson(expected.tokenRequirementSetDigests)) {

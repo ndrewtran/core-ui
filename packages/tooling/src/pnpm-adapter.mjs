@@ -463,6 +463,8 @@ export function resolvePnpmProjectCatalog({
     sourceRevision: identity.sourceRevision,
     provenance: identity.provenance,
     releaseManifest: release?.id ?? 'unresolved-release',
+    tokenRequirementSets: identity.tokenRequirementSets,
+    platformSafetyRequirementSets: identity.platformSafetyRequirementSets,
   }] : [];
   const releaseManifests = release ? [release] : [];
 

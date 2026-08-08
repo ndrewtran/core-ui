@@ -20,6 +20,10 @@ import {
   validateThemeForRequirementSet,
 } from '../../packages/tokens/src/index.mjs';
 import { isIgnoredRepositoryEntry } from '../../tooling/audits/repository-policy/src/policy.mjs';
+import {
+  assertPackedCompatibilityFixture,
+  createPackedCompatibilityFixture,
+} from '../fixtures/g1.0/packed-compatibility.mjs';
 
 const repositoryRoot = resolve(import.meta.dirname, '../..');
 
@@ -111,6 +115,19 @@ const packedDescriptor = parseJsonStrict(await readFile(
   join(repositoryRoot, 'packages/catalog/generated/catalog-package.json'),
   'utf8',
 ));
+const packedCompatibilitySource = parseJsonStrict(await readFile(
+  join(repositoryRoot, 'tests/fixtures/g1.0/packed-compatibility-source.json'),
+  'utf8',
+));
+const packedCompatibilityFixture = createPackedCompatibilityFixture({
+  source: packedCompatibilitySource,
+  catalogPackage: packedDescriptor,
+  catalogBundle: compiled.bundle,
+});
+const packedRendererBindings = Object.assign(
+  {},
+  ...packedCompatibilityFixture.descriptors.map(({ bindings }) => bindings),
+);
 
 const cycle = structuredClone(tokenSource);
 cycle.tokens['semantic.test.a'] = {
@@ -252,42 +269,43 @@ const packedMatches = Object.entries(componentArtifact.tokenRequirementSets).map
   packedDigest: packedDescriptor.tokenRequirementSets[`${component.id}#${key}`],
   matched: set.digest === packedDescriptor.tokenRequirementSets[`${component.id}#${key}`],
 }));
-const packedRendererDescriptor = {
-  descriptorVersion: '1.0.0-test-fixture',
-  classification: 'test-only-synthetic',
-  bindings: Object.fromEntries(Object.entries(component.bindings)
-    .filter(([, binding]) => binding.strategy !== 'unsupported')
-    .map(([bindingId]) => [bindingId, {
-      specRevision: componentArtifact.bindingSpecRevisions[bindingId],
-      tokenRequirementSetDigests: Object.fromEntries(Object.entries(
-        componentArtifact.tokenRequirementSets,
-      ).filter(([key]) => key.startsWith(`${bindingId}:`)).map(([key, set]) => [
-        key.slice(bindingId.length + 1),
-        set.digest,
-      ])),
-      platformSafetyRequirementSetDigests: Object.fromEntries(Object.entries(
-        componentArtifact.platformSafetyRequirementSets,
-      ).filter(([key]) => key.startsWith(`${bindingId}:`)).map(([key, set]) => [
-        key.slice(bindingId.length + 1),
-        set.digest,
-      ])),
-    }])),
-};
 const packedRendererMatches = Object.entries(componentArtifact.tokenRequirementSets)
   .map(([key, set]) => {
     const separator = key.indexOf(':');
     const bindingId = key.slice(0, separator);
     const profile = key.slice(separator + 1);
-    const packedDigest = packedRendererDescriptor.bindings[bindingId]
+    const packedDigest = packedRendererBindings[`${component.id}#${bindingId}`]
       .tokenRequirementSetDigests[profile];
     return { key, digest: set.digest, packedDigest, matched: set.digest === packedDigest };
   });
+const packedJointDriftDenials = {};
+for (const field of [
+  'tokenRequirementSetDigests',
+  'platformSafetyRequirementSetDigests',
+]) {
+  const stale = structuredClone(packedCompatibilityFixture);
+  const releaseBinding = stale.release.bindings.find(
+    ({ binding }) => binding === `${component.id}#web.react`,
+  );
+  const profile = Object.keys(releaseBinding[field])[0];
+  releaseBinding[field][profile] = `sha256:${'0'.repeat(64)}`;
+  stale.descriptors.find(({ id }) => id === releaseBinding.descriptor)
+    .bindings[releaseBinding.binding][field][profile] = `sha256:${'0'.repeat(64)}`;
+  try {
+    assertPackedCompatibilityFixture(stale);
+    packedJointDriftDenials[field] = false;
+  } catch (error) {
+    if (!/^G1_0_PACKED_COMPATIBILITY_INVALID:/u.test(error.message)) throw error;
+    packedJointDriftDenials[field] = true;
+  }
+}
 if (
   baseSet.digest !== unrelatedSet.digest
   || baseSet.sourceRevision === unrelatedSet.sourceRevision
   || baseSet.digest === dependencySet.digest
   || packedMatches.some(({ matched }) => !matched)
   || packedRendererMatches.some(({ matched }) => !matched)
+  || Object.values(packedJointDriftDenials).some((denied) => !denied)
 ) throw new Error('EVIDENCE_REQUIREMENT_SET_CLOSURE_FAILED');
 
 const platformSafetyContract = compiled.bundle.platformSafetyContract;
@@ -309,7 +327,7 @@ const platformSafetyRendererMatches = Object.entries(
   const separator = key.indexOf(':');
   const bindingId = key.slice(0, separator);
   const profile = key.slice(separator + 1);
-  const packedDigest = packedRendererDescriptor.bindings[bindingId]
+  const packedDigest = packedRendererBindings[`${component.id}#${bindingId}`]
     .platformSafetyRequirementSetDigests[profile];
   return { key, digest: set.digest, packedDigest, matched: set.digest === packedDigest };
 });
@@ -562,8 +580,11 @@ const definitions = [
     dependencyChangeDigest: dependencySet.digest,
     exactClosureDigest: baseSet.digest,
     packedMatches,
-    packedRendererDescriptorDigest: canonicalDigest(packedRendererDescriptor),
+    packedFixtureSourceDigest: canonicalDigest(packedCompatibilitySource),
+    packedRendererDescriptorDigest: canonicalDigest(packedCompatibilityFixture.descriptors),
     packedRendererMatches,
+    packedReleaseManifestDigest: canonicalDigest(packedCompatibilityFixture.release),
+    packedJointDriftDenials,
     unrelatedChangeDigest: unrelatedSet.digest,
     unrelatedSourceRevisionChanged: true,
   }],
@@ -593,8 +614,11 @@ const definitions = [
     contractVersion: platformSafetyContract.contractVersion,
     denialCodes: platformSafetyDenialCodes,
     packedMatches: platformSafetyPackedMatches,
-    packedRendererDescriptorDigest: canonicalDigest(packedRendererDescriptor),
+    packedFixtureSourceDigest: canonicalDigest(packedCompatibilitySource),
+    packedRendererDescriptorDigest: canonicalDigest(packedCompatibilityFixture.descriptors),
     packedRendererMatches: platformSafetyRendererMatches,
+    packedReleaseManifestDigest: canonicalDigest(packedCompatibilityFixture.release),
+    packedJointDriftDenials,
     requirementSetCount: platformSafetyPackedMatches.length,
     supportClaim: 'none',
     unsupportedTopLevelSetDigest: unsupportedTopLevelSet.digest,

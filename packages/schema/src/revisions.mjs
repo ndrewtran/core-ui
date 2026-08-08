@@ -41,9 +41,6 @@ export function bindingSpecRevisionPreimage({
     ? component.bindings[bindingId]
     : undefined;
   if (!binding) throw new Error(`CORE_RELATION_INVALID: missing ${component.id}#${bindingId}`);
-  if (binding.strategy === 'unsupported') {
-    throw new Error(`CORE_RELATION_INVALID: unsupported binding ${component.id}#${bindingId} has no specRevision`);
-  }
   const bindingRef = `${component.id}#${bindingId}`;
   const normativeExamples = examples
     .filter((example) => (
@@ -60,16 +57,19 @@ export function bindingSpecRevisionPreimage({
       relation: example.binding,
     }))
     .sort((left, right) => left.id.localeCompare(right.id));
-  const tokenSource = tokenSources.find((record) => record.id === binding.tokenRecipe.source);
-  if (!tokenSource) throw new Error(`CORE_RELATION_INVALID: missing ${binding.tokenRecipe.source}`);
-  const tokenRequirements = {
-    source: tokenSource.id,
-    tokenContractVersion: tokenSource.tokenContractVersion,
-    recipe: binding.tokenRecipe,
-    resolvedSets: [...tokenRequirementSets]
-      .map(({ profile, digest }) => ({ profile, digest }))
-      .sort((left, right) => left.profile.localeCompare(right.profile)),
-  };
+  let tokenRequirements;
+  if (binding.strategy !== 'unsupported') {
+    const tokenSource = tokenSources.find((record) => record.id === binding.tokenRecipe.source);
+    if (!tokenSource) throw new Error(`CORE_RELATION_INVALID: missing ${binding.tokenRecipe.source}`);
+    tokenRequirements = {
+      source: tokenSource.id,
+      tokenContractVersion: tokenSource.tokenContractVersion,
+      recipe: binding.tokenRecipe,
+      resolvedSets: [...tokenRequirementSets]
+        .map(({ profile, digest }) => ({ profile, digest }))
+        .sort((left, right) => left.profile.localeCompare(right.profile)),
+    };
+  }
   const platformSafetyRequirements = [...platformSafetyRequirementSets]
     .map(({ profile, validationProfile, digest, contractVersion, contractDigest }) => ({
       profile,
@@ -88,18 +88,25 @@ export function bindingSpecRevisionPreimage({
       states: component.states,
       accessibility: component.accessibility,
     },
-    binding: {
-      lifecycle: binding.lifecycle,
-      strategy: binding.strategy,
-      api: binding.api,
-      behavior: binding.behavior,
-      accessibility: binding.accessibility,
-      runtimeProfiles: binding.runtimeProfiles,
-      tokenRecipe: binding.tokenRecipe,
-      platformSafety: binding.platformSafety,
-    },
+    binding: binding.strategy === 'unsupported'
+      ? {
+        strategy: binding.strategy,
+        reason: binding.reason,
+        ...(binding.alternative === undefined ? {} : { alternative: binding.alternative }),
+        platformSafety: binding.platformSafety,
+      }
+      : {
+        lifecycle: binding.lifecycle,
+        strategy: binding.strategy,
+        api: binding.api,
+        behavior: binding.behavior,
+        accessibility: binding.accessibility,
+        runtimeProfiles: binding.runtimeProfiles,
+        tokenRecipe: binding.tokenRecipe,
+        platformSafety: binding.platformSafety,
+      },
     normativeExamples,
-    tokenRequirements,
+    ...(tokenRequirements === undefined ? {} : { tokenRequirements }),
     platformSafetyRequirements,
   };
 }

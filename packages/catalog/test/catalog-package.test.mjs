@@ -3,6 +3,10 @@ import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 import { canonicalDigest, parseJsonStrict, validateFamily } from '@core-ui/schema';
 import { createCatalogApi } from '../src/index.mjs';
+import {
+  assertPackedCompatibilityFixture,
+  createPackedCompatibilityFixture,
+} from '../../../tests/fixtures/g1.0/packed-compatibility.mjs';
 
 async function readJson(relativePath) {
   return parseJsonStrict(await readFile(new URL(relativePath, import.meta.url), 'utf8'));
@@ -117,6 +121,39 @@ test('E-G1.0-04 catalog exposes resolved requirement sets matching packed descri
   );
 });
 
+test('E-G1.0-04 test pack projection binds catalog, descriptors, and release maps', async () => {
+  const bundle = await readJson('../generated/catalog.json');
+  const identity = await readJson('../generated/catalog-package.json');
+  const source = await readJson('../../../tests/fixtures/g1.0/packed-compatibility-source.json');
+  const fixture = createPackedCompatibilityFixture({
+    source,
+    catalogPackage: identity,
+    catalogBundle: bundle,
+  });
+  assert.doesNotThrow(() => assertPackedCompatibilityFixture(fixture));
+  assert.equal(fixture.descriptors.length, 3);
+  assert.equal(fixture.release.bindings.length, 3);
+
+  for (const field of [
+    'tokenRequirementSetDigests',
+    'platformSafetyRequirementSetDigests',
+  ]) {
+    const stale = structuredClone(fixture);
+    const releaseBinding = stale.release.bindings.find(
+      ({ binding }) => binding === 'core:component:button#web.react',
+    );
+    const profile = Object.keys(releaseBinding[field])[0];
+    const digest = `sha256:${'0'.repeat(64)}`;
+    releaseBinding[field][profile] = digest;
+    stale.descriptors.find(({ id }) => id === releaseBinding.descriptor)
+      .bindings[releaseBinding.binding][field][profile] = digest;
+    assert.throws(
+      () => assertPackedCompatibilityFixture(stale),
+      /does not match the catalog package/,
+    );
+  }
+});
+
 test('E-G1.0-04 query validation rejects open fallback and dependency closure facts', async () => {
   const bundle = await readJson('../generated/catalog.json');
   const response = createCatalogApi(bundle).getArtifact({
@@ -134,6 +171,19 @@ test('E-G1.0-04 query validation rejects open fallback and dependency closure fa
     modelSelectedCanonicalFact: true,
   };
   assert.throws(() => validateFamily('query-envelope', arbitraryClosure), /CORE_SCHEMA_INVALID/);
+
+  const contradictoryValue = structuredClone(response);
+  const valueEntry = contradictoryValue.data.artifact
+    .tokenRequirementSets['web.react:web.react'].closure[0];
+  valueEntry.type = 'dimension';
+  valueEntry.unit = 'px';
+  valueEntry.resolved = 'not-a-dimension';
+  assert.throws(() => validateFamily('query-envelope', contradictoryValue), /CORE_SCHEMA_INVALID/);
+
+  const contradictoryLayer = structuredClone(response);
+  contradictoryLayer.data.artifact.tokenRequirementSets['web.react:web.react']
+    .closure.find(({ token }) => token.startsWith('reference.')).layer = 'component';
+  assert.throws(() => validateFamily('query-envelope', contradictoryLayer), /CORE_SCHEMA_INVALID/);
 });
 
 test('E-G1.0-07 catalog and package expose exact platform-safety set digests', async () => {

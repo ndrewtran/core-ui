@@ -131,6 +131,28 @@ test('E-G1.0-04 compatibility rejects one changed native profile digest', async 
   }
 });
 
+test('E-G1.0-04 compatibility rejects jointly stale descriptor and release maps', async () => {
+  for (const [field, profile, dimension] of [
+    ['tokenRequirementSetDigests', 'web.react', 'token'],
+    ['platformSafetyRequirementSetDigests', 'web.react', 'platform-safety'],
+  ]) {
+    const value = await corpus();
+    const staleDigest = `sha256:${'0'.repeat(64)}`;
+    value.rendererDescriptors.find(({ id }) => id === 'renderer-react-compatible')
+      .bindings['core:component:button#web.react'][field][profile] = staleDigest;
+    value.releaseManifests.find(({ id }) => id === 'release-compatible')
+      .bindings.find(({ binding }) => binding === 'core:component:button#web.react')
+      [field][profile] = staleDigest;
+    const graph = value.graphs.find(({ id }) => id === 'selected-direct-compatible');
+    const result = resolve(value, graph);
+    assert.equal(result.error.code, 'CORE_CATALOG_INCOMPATIBLE');
+    assert.equal(
+      result.error.details.compatibilityFailures.some((failure) => failure.dimension === dimension),
+      true,
+    );
+  }
+});
+
 test('E-G0.4 explicit cache remains subordinate to manifest and lock authority', async () => {
   const value = await corpus();
   const baseline = value.graphs.find(({ id }) => id === 'explicit-cache-compatible');
@@ -460,12 +482,18 @@ test('E-G0.4 pnpm adapter normalizes renderer packages into the single resolver'
       schemaRange: '^2.0.0',
       sourceRevision: bundle.sourceRevision,
       provenance: { kind: 'source-revision', value: bundle.sourceRevision },
-      tokenRequirementSets: {},
+      tokenRequirementSets: {
+        [`${binding}:web.react`]: descriptor.bindings[binding]
+          .tokenRequirementSetDigests['web.react'],
+      },
       platformSafetyContract: {
         version: bundle.platformSafetyContract.contractVersion,
         digest: bundle.platformSafetyContractDigest,
       },
-      platformSafetyRequirementSets: {},
+      platformSafetyRequirementSets: {
+        [`${binding}:web.react`]: descriptor.bindings[binding]
+          .platformSafetyRequirementSetDigests['web.react'],
+      },
       releaseManifest: {
         id: descriptor.releaseProvenance,
         releaseVersion: '0.0.0',

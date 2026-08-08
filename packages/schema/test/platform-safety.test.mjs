@@ -5,13 +5,14 @@ import { platformSafetyRequirementIds } from '../generated/platform-safety-contr
 import {
   PlatformSafetyContractError,
   assertPlatformSafetyRequirementSet,
+  bindingSpecRevision,
   canonicalDigest,
   compilePlatformSafetyRequirementSets,
   parseJsonStrict,
   validateFamily,
   validatePlatformSafetyContract,
 } from '../src/index.mjs';
-import { component } from './fixtures.mjs';
+import { component, tokenSource } from './fixtures.mjs';
 
 const contract = parseJsonStrict(await readFile(
   new URL('../../../strategy/platform-safety-contract.json', import.meta.url),
@@ -127,6 +128,28 @@ test('E-G1.0-07 unsupported top-level bindings retain a complete declaration and
   expectCode('CORE_PLATFORM_SAFETY_PREMATURE_FULFILLMENT', () => (
     compilePlatformSafetyRequirementSets({ contract, bindingId: 'web.react', binding: required })
   ));
+
+  const concept = component();
+  concept.bindings['web.react'] = binding;
+  const baseRevision = bindingSpecRevision({
+    component: concept,
+    bindingId: 'web.react',
+    tokenSources: [tokenSource()],
+    platformSafetyRequirementSets: [set],
+  });
+  const revised = structuredClone(concept);
+  revised.bindings['web.react'].platformSafety[0].requirements[0].reason += ' Reassessed.';
+  const revisedSet = compilePlatformSafetyRequirementSets({
+    contract,
+    bindingId: 'web.react',
+    binding: revised.bindings['web.react'],
+  })['web.react'];
+  assert.notEqual(bindingSpecRevision({
+    component: revised,
+    bindingId: 'web.react',
+    tokenSources: [tokenSource()],
+    platformSafetyRequirementSets: [revisedSet],
+  }), baseRevision);
 });
 
 test('E-G1.0-07 rejects consumer weakening and premature fulfillment', () => {

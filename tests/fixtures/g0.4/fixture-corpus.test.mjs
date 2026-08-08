@@ -72,6 +72,7 @@ function validateCatalog(catalog) {
   const fields = [
     'id', 'name', 'version', 'catalogVersion', 'catalogDigest', 'queryApiVersion',
     'schemaRange', 'sourceRevision', 'provenance', 'releaseManifest',
+    'tokenRequirementSets', 'platformSafetyRequirementSets',
   ];
   closed(catalog, fields, `catalog ${catalog.id ?? '<unknown>'}`);
   required(catalog, fields, `catalog ${catalog.id ?? '<unknown>'}`);
@@ -89,6 +90,12 @@ function validateCatalog(catalog) {
     || catalog.provenance.value !== catalog.sourceRevision
   ) {
     fail(`${catalog.id} provenance must bind its source revision`);
+  }
+  for (const field of ['tokenRequirementSets', 'platformSafetyRequirementSets']) {
+    object(catalog[field], `${catalog.id}.${field}`);
+    if (!Object.values(catalog[field]).every((digest) => DIGEST.test(digest))) {
+      fail(`${catalog.id}.${field} has an invalid digest`);
+    }
   }
 }
 

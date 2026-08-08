@@ -235,7 +235,6 @@ export async function compileCatalog({
     const bindingSpecRevisions = record.kind === 'component'
       ? Object.fromEntries(
         Object.entries(record.bindings)
-          .filter(([, binding]) => binding.strategy !== 'unsupported')
           .map(([bindingId]) => [bindingId, bindingSpecRevision({
             component: record,
             bindingId,
@@ -254,7 +253,6 @@ export async function compileCatalog({
     const bindingContentRevisions = record.kind === 'component'
       ? Object.fromEntries(
         Object.entries(record.bindings)
-          .filter(([, binding]) => binding.strategy !== 'unsupported')
           .map(([bindingId, binding]) => [bindingId, bindingContentRevision(binding)]),
       )
       : {};
