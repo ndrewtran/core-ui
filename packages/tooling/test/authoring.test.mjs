@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
-import { resolve } from 'node:path';
+import { cp, mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join, resolve } from 'node:path';
 import test from 'node:test';
 import { createCatalogApi } from '@core-ui/catalog';
 import { compileCatalog } from '@core-ui/catalog/compiler';
@@ -55,6 +56,39 @@ async function setup() {
   };
 }
 
+async function temporaryCatalogRepository() {
+  const temporaryRoot = await mkdtemp(join(tmpdir(), 'core-ui-g0-5-'));
+  await Promise.all([
+    mkdir(resolve(temporaryRoot, 'packages/tooling'), { recursive: true }),
+    mkdir(resolve(temporaryRoot, 'tooling/audits/repository-policy'), { recursive: true }),
+    mkdir(resolve(temporaryRoot, 'packages/schema/schemas'), { recursive: true }),
+  ]);
+  await Promise.all([
+    cp(resolve(repositoryRoot, 'catalog'), resolve(temporaryRoot, 'catalog'), { recursive: true }),
+    cp(
+      resolve(repositoryRoot, 'packages/catalog'),
+      resolve(temporaryRoot, 'packages/catalog'),
+      { recursive: true },
+    ),
+    cp(
+      resolve(repositoryRoot, 'packages/tooling/command-registry.json'),
+      resolve(temporaryRoot, 'packages/tooling/command-registry.json'),
+      { recursive: true },
+    ),
+    cp(
+      resolve(repositoryRoot, 'tooling/audits/repository-policy/repository-policy.json'),
+      resolve(temporaryRoot, 'tooling/audits/repository-policy/repository-policy.json'),
+      { recursive: true },
+    ),
+    cp(
+      resolve(repositoryRoot, 'packages/schema/schemas/type-projection.json'),
+      resolve(temporaryRoot, 'packages/schema/schemas/type-projection.json'),
+      { recursive: true },
+    ),
+  ]);
+  return temporaryRoot;
+}
+
 function applyCase(record, change) {
   const result = structuredClone(record);
   const segments = change.path.slice(2).split('/').map((segment) => (
@@ -71,7 +105,7 @@ function applyCase(record, change) {
 }
 
 test('E-G0.5-01: scaffold, validation, compilation, retrieval, diagnosis, and repair stay canonical', async () => {
-  const { compiled, context, component } = await setup();
+  const { context, component } = await setup();
   const sourcePath = component.source.record;
   const sourceBefore = await readFile(resolve(repositoryRoot, sourcePath), 'utf8');
   const { schemaVersion: _schemaVersion, id: _id, kind: _kind, ...decisions } =
@@ -91,12 +125,22 @@ test('E-G0.5-01: scaffold, validation, compilation, retrieval, diagnosis, and re
     recordPath: sourcePath,
   }).valid, true);
 
-  const retrieved = createCatalogApi(compiled.bundle).getArtifact({
-    id: preview.record.id,
-    detail: 'full',
-  });
-  assert.equal(retrieved.type, 'artifact.detail');
-  assert.equal(retrieved.data.artifact.source.record, sourcePath);
+  const temporaryRoot = await temporaryCatalogRepository();
+  try {
+    await writeFile(resolve(temporaryRoot, sourcePath), preview.writeSet[0].bytes);
+    const compiledFromScaffold = await compileCatalog({ repositoryRoot: temporaryRoot });
+    const retrieved = createCatalogApi(compiledFromScaffold.bundle).getArtifact({
+      id: preview.record.id,
+      detail: 'full',
+    });
+    assert.equal(retrieved.type, 'artifact.detail');
+    assert.equal(retrieved.data.artifact.source.record, sourcePath);
+    assert.equal(canonicalJson(Object.fromEntries(
+      Object.keys(preview.record).map((key) => [key, retrieved.data.artifact[key]]),
+    )), canonicalJson(preview.record));
+  } finally {
+    await rm(temporaryRoot, { recursive: true, force: true });
+  }
 
   const broken = structuredClone(preview.record);
   delete broken.summary;
@@ -142,6 +186,26 @@ test('E-G0.5-01 negative: diagnostics require an exact manifest source and sourc
   assert.equal(undeclared.valid, false);
   assert.equal(undeclared.diagnostics[0].ruleId, 'authoring.source.declared-owner');
   assert.equal(context.sourceRevision, compiled.bundle.sourceRevision);
+
+  const temporaryRoot = await temporaryCatalogRepository();
+  try {
+    const changed = structuredClone(component.record);
+    changed.summary = `${changed.summary} Drift`;
+    await writeFile(resolve(temporaryRoot, component.source.record), `${canonicalJson(changed)}\n`);
+    await assert.rejects(
+      loadRepositoryAuthoringContext({
+        repositoryRoot: temporaryRoot,
+        expectedSourceRevision: compiled.bundle.sourceRevision,
+      }),
+      (error) => {
+        assert.ok(error instanceof AuthoringPolicyError);
+        assert.equal(error.ruleId, 'authoring.source.bundle-drift');
+        return true;
+      },
+    );
+  } finally {
+    await rm(temporaryRoot, { recursive: true, force: true });
+  }
 });
 
 test('E-G0.5-02: semantic golden corpus reports owning fields and exact revision effects', async () => {
@@ -165,6 +229,28 @@ test('E-G0.5-02: semantic golden corpus reports owning fields and exact revision
       change.id,
     );
     assert.match(result.changes[0].owner.schemaPointer, /^#\//u, change.id);
+  }
+});
+
+test('E-G0.5-02: sequence diffs preserve one add or remove at every array position', async () => {
+  const { component, revisionContext } = await setup();
+  for (let index = 0; index <= component.record.states.length; index += 1) {
+    const after = structuredClone(component.record);
+    after.states.splice(index, 0, `inserted-${index}`);
+    const result = semanticDiff({ before: component.record, after, revisionContext });
+    assert.deepEqual(
+      result.changes.map(({ path, operation }) => ({ path, operation })),
+      [{ path: `$/states/${index}`, operation: 'add' }],
+    );
+  }
+  for (let index = 0; index < component.record.states.length; index += 1) {
+    const after = structuredClone(component.record);
+    after.states.splice(index, 1);
+    const result = semanticDiff({ before: component.record, after, revisionContext });
+    assert.deepEqual(
+      result.changes.map(({ path, operation }) => ({ path, operation })),
+      [{ path: `$/states/${index}`, operation: 'remove' }],
+    );
   }
 });
 
@@ -258,4 +344,87 @@ test('E-G0.5-04: affected closure is graph-derived, declared, and bounded to Gat
     (error) => error instanceof AuthoringPolicyError
       && error.ruleId === 'authoring.closure.source-undeclared',
   );
+});
+
+test('E-G0.5-04: an injected stable field must couple scaffold, diff, diagnostics, and closure', async () => {
+  const { context, component, revisionContext } = await setup();
+  const [componentSchema, bindingSchema, ownership] = await Promise.all([
+    readFile(resolve(repositoryRoot, 'packages/schema/schemas/component.schema.json'), 'utf8'),
+    readFile(resolve(repositoryRoot, 'packages/schema/schemas/binding.schema.json'), 'utf8'),
+    readFile(resolve(repositoryRoot, 'packages/schema/schemas/field-ownership.json'), 'utf8'),
+  ]).then((documents) => documents.map((document) => JSON.parse(document)));
+  componentSchema.required.push('newStableField');
+  componentSchema.properties.newStableField = {
+    type: 'string',
+    minLength: 1,
+    'x-core-ui-authoring': { effect: 'incompatible', revisionAxes: ['content'] },
+  };
+  ownership.fields.push({
+    class: 'authored',
+    name: 'newStableField',
+    owner: 'component-contract',
+    schema: 'component.schema.json',
+    schemaPointer: '#/properties/newStableField',
+  });
+  const authoring = {
+    schemas: {
+      'component.schema.json': componentSchema,
+      'binding.schema.json': bindingSchema,
+    },
+    ownership,
+  };
+  const decisions = structuredClone(component.record);
+  delete decisions.schemaVersion;
+  delete decisions.id;
+  delete decisions.kind;
+  decisions.newStableField = 'baseline';
+  const readiness = { scaffold: false, diff: false, diagnostics: false, closure: false };
+  assert.equal(Object.values(readiness).every(Boolean), false);
+
+  const preview = scaffoldComponent({
+    slug: 'button',
+    recordPath: component.source.record,
+    decisions,
+    authoring,
+  });
+  readiness.scaffold = preview.record.newStableField === 'baseline';
+  assert.equal(Object.values(readiness).every(Boolean), false);
+
+  const after = structuredClone(preview.record);
+  after.newStableField = 'changed';
+  const diff = semanticDiff({
+    before: preview.record,
+    after,
+    revisionContext,
+    authoring,
+  });
+  readiness.diff = diff.changes.some(({ path, owner }) => (
+    path === '$/newStableField' && owner.name === 'component-contract'
+  ));
+  assert.equal(Object.values(readiness).every(Boolean), false);
+
+  const invalid = structuredClone(preview.record);
+  invalid.newStableField = '';
+  const diagnosis = diagnoseCanonicalSource({
+    context,
+    family: 'component',
+    record: invalid,
+    recordPath: component.source.record,
+    authoring,
+  });
+  readiness.diagnostics = diagnosis.diagnostics.some(({ details }) => (
+    details.source.path === '$/newStableField'
+    && details.owner.name === 'component-contract'
+  ));
+  assert.equal(Object.values(readiness).every(Boolean), false);
+
+  const closure = affectedClosure({
+    context,
+    sourcePaths: ['packages/schema/schemas/component.schema.json'],
+    authoring,
+  });
+  readiness.closure = closure.artifacts.includes(component.id)
+    && closure.canonicalSources.includes(component.source.record)
+    && closure.projections.includes('packages/catalog/generated/catalog.json');
+  assert.equal(Object.values(readiness).every(Boolean), true);
 });

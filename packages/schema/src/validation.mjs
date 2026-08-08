@@ -33,23 +33,23 @@ function matchesType(value, type) {
   return typeof value === type;
 }
 
-function evaluate(schema, value, path, currentFile, issues) {
+function evaluate(schema, value, path, currentFile, issues, documents) {
   if (schema === true) return;
   if (schema === false) {
     issues.push({ path, message: 'is denied by the closed schema' });
     return;
   }
   if (schema.$ref) {
-    const resolved = resolveSchemaReference(schema.$ref, currentFile);
-    evaluate(resolved.schema, value, path, resolved.fileName, issues);
+    const resolved = resolveSchemaReference(schema.$ref, currentFile, documents);
+    evaluate(resolved.schema, value, path, resolved.fileName, issues, documents);
   }
   if (schema.allOf) {
-    for (const item of schema.allOf) evaluate(item, value, path, currentFile, issues);
+    for (const item of schema.allOf) evaluate(item, value, path, currentFile, issues, documents);
   }
   if (schema.anyOf) {
     const matches = schema.anyOf.some((item) => {
       const candidateIssues = [];
-      evaluate(item, value, path, currentFile, candidateIssues);
+      evaluate(item, value, path, currentFile, candidateIssues, documents);
       return candidateIssues.length === 0;
     });
     if (!matches) issues.push({ path, message: 'matches no allowed schema' });
@@ -57,14 +57,14 @@ function evaluate(schema, value, path, currentFile, issues) {
   if (schema.oneOf) {
     const matches = schema.oneOf.filter((item) => {
       const candidateIssues = [];
-      evaluate(item, value, path, currentFile, candidateIssues);
+      evaluate(item, value, path, currentFile, candidateIssues, documents);
       return candidateIssues.length === 0;
     }).length;
     if (matches !== 1) issues.push({ path, message: `must match exactly one schema; matched ${matches}` });
   }
   if (schema.not) {
     const candidateIssues = [];
-    evaluate(schema.not, value, path, currentFile, candidateIssues);
+    evaluate(schema.not, value, path, currentFile, candidateIssues, documents);
     if (candidateIssues.length === 0) issues.push({ path, message: 'matches a forbidden schema' });
   }
   if (schema.const !== undefined && !sameValue(value, schema.const)) {
@@ -111,6 +111,7 @@ function evaluate(schema, value, path, currentFile, issues) {
         `${path}/${index}`,
         currentFile,
         issues,
+        documents,
       ));
     }
   }
@@ -126,19 +127,19 @@ function evaluate(schema, value, path, currentFile, issues) {
     }
     for (const key of keys) {
       if (schema.propertyNames) {
-        evaluate(schema.propertyNames, key, `${path}/{propertyName}`, currentFile, issues);
+        evaluate(schema.propertyNames, key, `${path}/{propertyName}`, currentFile, issues, documents);
       }
       const propertySchema = Object.hasOwn(schema.properties ?? {}, key)
         ? schema.properties[key]
         : undefined;
       if (propertySchema !== undefined) {
-        evaluate(propertySchema, value[key], `${path}/${key}`, currentFile, issues);
+        evaluate(propertySchema, value[key], `${path}/${key}`, currentFile, issues, documents);
         continue;
       }
       const patternSchema = Object.entries(schema.patternProperties ?? {})
         .find(([pattern]) => new RegExp(pattern).test(key))?.[1];
       if (patternSchema) {
-        evaluate(patternSchema, value[key], `${path}/${key}`, currentFile, issues);
+        evaluate(patternSchema, value[key], `${path}/${key}`, currentFile, issues, documents);
       } else if (schema.additionalProperties === false) {
         issues.push({ path: `${path}/${key}`, message: 'is an unknown field' });
       } else if (isObject(schema.additionalProperties)) {
@@ -148,6 +149,7 @@ function evaluate(schema, value, path, currentFile, issues) {
           `${path}/${key}`,
           currentFile,
           issues,
+          documents,
         );
       }
     }
@@ -165,7 +167,7 @@ function walkObjects(value, visit, path = '$') {
   }
 }
 
-function semanticIssues(family, value) {
+function semanticIssues(family, value, ownership) {
   const issues = [];
   const prototypeKeys = new Set(['__proto__', 'constructor', 'prototype']);
   walkObjects(value, (object, path) => {
@@ -176,9 +178,9 @@ function semanticIssues(family, value) {
     }
   });
   if (['binding', 'capability', 'component', 'example', 'guide', 'token-source'].includes(family)) {
-    const ownership = loadJsonDocument('field-ownership.json');
+    const ownershipRegistry = ownership ?? loadJsonDocument('field-ownership.json');
     const forbidden = new Set(
-      [...ownership.fields, ...(ownership.reservedFields ?? [])]
+      [...ownershipRegistry.fields, ...(ownershipRegistry.reservedFields ?? [])]
         .filter((field) => field.forbiddenInAuthoredSource)
         .map((field) => field.name),
     );
@@ -294,11 +296,11 @@ function semanticIssues(family, value) {
   return issues;
 }
 
-export function validateFamily(family, value) {
-  const { fileName, schema } = loadFamilySchema(family);
+export function validateFamily(family, value, { schemas, ownership } = {}) {
+  const { fileName, schema } = loadFamilySchema(family, schemas);
   const issues = [];
-  evaluate(schema, value, '$', fileName, issues);
-  issues.push(...semanticIssues(family, value));
+  evaluate(schema, value, '$', fileName, issues, schemas);
+  issues.push(...semanticIssues(family, value, ownership));
   if (issues.length > 0) throw new SchemaValidationError('CORE_SCHEMA_INVALID', issues);
   return value;
 }
@@ -334,6 +336,7 @@ function collectSchemaFieldDeclarations(schema, pointer = '#', declarations = []
 
 export function validateFieldOwnershipRegistry(
   registry = loadJsonDocument('field-ownership.json'),
+  { schemas } = {},
 ) {
   if (!Array.isArray(registry.classes) || !Array.isArray(registry.fields)) {
     throw new SchemaValidationError('CORE_FIELD_OWNERSHIP_INVALID', [
@@ -377,7 +380,9 @@ export function validateFieldOwnershipRegistry(
   }
   const expected = new Map();
   for (const governed of contexts.values()) {
-    for (const declaration of collectSchemaFieldDeclarations(loadJsonDocument(governed.file))) {
+    for (const declaration of collectSchemaFieldDeclarations(
+      schemas?.[governed.file] ?? loadJsonDocument(governed.file),
+    )) {
       const key = `${governed.file}${declaration.schemaPointer}`;
       expected.set(key, { ...declaration, ...governed });
     }
@@ -494,8 +499,11 @@ export function relationEdges(records) {
   return edges;
 }
 
-export function validateCatalogRecords(records) {
-  validateFieldOwnershipRegistry();
+export function validateCatalogRecords(records, { schemas, ownership } = {}) {
+  validateFieldOwnershipRegistry(
+    ownership ?? loadJsonDocument('field-ownership.json'),
+    { schemas },
+  );
   validateRelationRegistry();
   const ids = new Map();
   for (const record of records) {
@@ -507,7 +515,7 @@ export function validateCatalogRecords(records) {
         { path: '$/kind', message: `${record.kind} record behavior is unavailable in G0.1` },
       ]);
     }
-    validateFamily(family, record);
+    validateFamily(family, record, { schemas, ownership });
     if (ids.has(record.id)) {
       throw new SchemaValidationError('CORE_ARTIFACT_ID_INVALID', [
         { path: '$/id', message: `${record.id} is duplicated` },

@@ -123,3 +123,71 @@ test('E-G0.5-04 negative: a new stable field cannot bypass authoring and ownersh
     ['content'],
   );
 });
+
+test('E-G0.5-04 negative: schema-bearing keywords and references cannot hide authorable fields', async () => {
+  const [baselineComponent, bindingSchema, ownership] = await Promise.all([
+    schemaDocument('component.schema.json'),
+    schemaDocument('binding.schema.json'),
+    schemaDocument('field-ownership.json'),
+  ]);
+  const payload = (field) => ({
+    type: 'object',
+    properties: { [field]: { type: 'string' } },
+  });
+  const mapKeywords = ['$defs', 'patternProperties', 'dependentSchemas'];
+  const arrayKeywords = ['allOf', 'anyOf', 'oneOf', 'prefixItems'];
+  const singleKeywords = [
+    'items', 'additionalProperties', 'propertyNames', 'contains',
+    'not', 'if', 'then', 'else', 'unevaluatedItems', 'unevaluatedProperties',
+  ];
+  for (const keyword of [...mapKeywords, ...arrayKeywords, ...singleKeywords]) {
+    const componentSchema = structuredClone(baselineComponent);
+    const field = `hidden${keyword.replaceAll(/[^a-z]/giu, '')}`;
+    if (mapKeywords.includes(keyword)) {
+      componentSchema.$defs = {
+        ...(componentSchema.$defs ?? {}),
+        [`probe-${keyword}`]: keyword === '$defs'
+          ? payload(field)
+          : { [keyword]: { probe: payload(field) } },
+      };
+    } else if (arrayKeywords.includes(keyword)) {
+      componentSchema.$defs = {
+        ...(componentSchema.$defs ?? {}),
+        [`probe-${keyword}`]: { [keyword]: [payload(field)] },
+      };
+    } else {
+      componentSchema.$defs = {
+        ...(componentSchema.$defs ?? {}),
+        [`probe-${keyword}`]: { [keyword]: payload(field) },
+      };
+    }
+    assert.throws(
+      () => validateAuthoringMetadata({
+        schemas: {
+          'binding.schema.json': bindingSchema,
+          'component.schema.json': componentSchema,
+        },
+        ownership,
+      }),
+      (error) => error instanceof SchemaValidationError
+        && error.code === 'CORE_SCHEMA_INVALID'
+        && error.message.includes('missing x-core-ui-authoring metadata'),
+      keyword,
+    );
+  }
+
+  const componentSchema = structuredClone(baselineComponent);
+  componentSchema.allOf = [{ $ref: 'hidden-authoring.schema.json' }];
+  assert.throws(
+    () => validateAuthoringMetadata({
+      schemas: {
+        'binding.schema.json': bindingSchema,
+        'component.schema.json': componentSchema,
+        'hidden-authoring.schema.json': payload('hiddenReference'),
+      },
+      ownership,
+    }),
+    (error) => error instanceof SchemaValidationError
+      && error.message.includes('missing x-core-ui-authoring metadata'),
+  );
+});

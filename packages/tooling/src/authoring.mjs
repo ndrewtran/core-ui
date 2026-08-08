@@ -19,6 +19,7 @@ import {
 import {
   discoverWorkspacePackages,
 } from '../../../tooling/audits/repository-policy/src/workspace-packages.mjs';
+import { compileCatalog } from '@core-ui/catalog/compiler';
 
 const SOURCE_MANIFEST_SCHEMA = 'core-ui-catalog-source-manifest-v1';
 const EFFECT_ORDER = Object.freeze({ editorial: 0, compatible: 1, incompatible: 2 });
@@ -76,7 +77,7 @@ function deepFreeze(value) {
   return value;
 }
 
-export function scaffoldComponent({ slug, recordPath, decisions } = {}) {
+export function scaffoldComponent({ slug, recordPath, decisions, authoring = {} } = {}) {
   if (typeof slug !== 'string' || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/u.test(slug)) {
     throw new AuthoringPolicyError(
       'authoring.scaffold.slug',
@@ -93,7 +94,7 @@ export function scaffoldComponent({ slug, recordPath, decisions } = {}) {
     );
   }
   assertExactKeys(decisions, new Set(
-    authoringMetadata('component')
+    authoringMetadata('component', authoring)
       .filter(({ schema, schemaPointer }) => (
         schema === 'component.schema.json'
         && schemaPointer.startsWith('#/properties/')
@@ -117,7 +118,7 @@ export function scaffoldComponent({ slug, recordPath, decisions } = {}) {
     kind: 'component',
     ...structuredClone(decisions),
   };
-  validateFamily('component', record);
+  validateFamily('component', record, authoring);
   const bytes = `${canonicalJson(record)}\n`;
   return deepFreeze({
     mode: 'preview-only',
@@ -189,6 +190,23 @@ export async function loadRepositoryAuthoringContext({
       discoverWorkspacePackages(repositoryRoot),
     ]);
   validateManifest(sourceManifest);
+  const compiled = await compileCatalog({ repositoryRoot, sourceManifestPath });
+  if (
+    compiled.bundle.sourceRevision !== catalogBundle.sourceRevision
+    || compiled.bundle.catalogDigest !== catalogBundle.catalogDigest
+    || compiled.bytes !== canonicalJson(catalogBundle)
+  ) {
+    throw new AuthoringPolicyError(
+      'authoring.source.bundle-drift',
+      'the live manifest and canonical inputs do not compile to the declared catalog bundle',
+      {
+        compiledSourceRevision: compiled.bundle.sourceRevision,
+        declaredSourceRevision: catalogBundle.sourceRevision ?? null,
+        compiledCatalogDigest: compiled.bundle.catalogDigest,
+        declaredCatalogDigest: catalogBundle.catalogDigest ?? null,
+      },
+    );
+  }
   if (
     typeof expectedSourceRevision !== 'string'
     || expectedSourceRevision !== catalogBundle.sourceRevision
@@ -241,7 +259,13 @@ function sourceDiagnostic(ruleId, message, { record, recordPath, path = '$', own
   };
 }
 
-export function diagnoseCanonicalSource({ context, family, record, recordPath } = {}) {
+export function diagnoseCanonicalSource({
+  context,
+  family,
+  record,
+  recordPath,
+  authoring = {},
+} = {}) {
   assertRelativePath(recordPath, 'recordPath');
   if (!sourceEntry(context, recordPath, family)) {
     return deepFreeze({
@@ -254,14 +278,14 @@ export function diagnoseCanonicalSource({ context, family, record, recordPath } 
     });
   }
   try {
-    validateFamily(family, record);
+    validateFamily(family, record, authoring);
     return deepFreeze({ valid: true, diagnostics: [] });
   } catch (error) {
     if (!(error instanceof SchemaValidationError)) throw error;
     const diagnostics = error.issues.map(({ path, message }) => {
       let owner = null;
       try {
-        const field = resolveAuthoringField(family, path);
+        const field = resolveAuthoringField(family, path, authoring);
         owner = {
           name: field.owner,
           schema: field.schema,
@@ -310,21 +334,22 @@ export function explainRevisions({
   examples = [],
   exampleSources = {},
   tokenSources = [],
+  authoring = {},
 } = {}) {
   const axes = [revisionAxis(
     'contentRevision',
-    contentRevisionPreimage(family, record, { sourceBytes }),
+    contentRevisionPreimage(family, record, { sourceBytes, ...authoring }),
   )];
   if (family === 'binding') {
     axes.push(revisionAxis(
       'bindingContentRevision',
-      bindingContentRevisionPreimage(record),
+      bindingContentRevisionPreimage(record, authoring),
     ));
   }
   if (family === 'component' && bindingId !== undefined) {
     axes.push(revisionAxis(
       'bindingContentRevision',
-      bindingContentRevisionPreimage(record.bindings[bindingId]),
+      bindingContentRevisionPreimage(record.bindings[bindingId], authoring),
     ));
     axes.push(revisionAxis('bindingSpecRevision', bindingSpecRevisionPreimage({
       component: record,
@@ -332,6 +357,7 @@ export function explainRevisions({
       examples,
       exampleSources,
       tokenSources,
+      ...authoring,
     })));
   }
   return deepFreeze({ family, artifactId: record.id ?? null, bindingId: bindingId ?? null, axes });
@@ -340,16 +366,38 @@ export function explainRevisions({
 function diffValues(before, after, path = '$', changes = []) {
   if (canonicalJson(before) === canonicalJson(after)) return changes;
   if (Array.isArray(before) && Array.isArray(after)) {
-    const length = Math.max(before.length, after.length);
-    for (let index = 0; index < length; index += 1) {
-      const hasBefore = index < before.length;
-      const hasAfter = index < after.length;
-      if (!hasBefore) {
-        changes.push({ path: `${path}/${index}`, operation: 'add', after: after[index] });
-      } else if (!hasAfter) {
-        changes.push({ path: `${path}/${index}`, operation: 'remove', before: before[index] });
+    const beforeKeys = before.map((value) => canonicalJson(value));
+    const afterKeys = after.map((value) => canonicalJson(value));
+    const lengths = Array.from(
+      { length: before.length + 1 },
+      () => Array(after.length + 1).fill(0),
+    );
+    for (let left = before.length - 1; left >= 0; left -= 1) {
+      for (let right = after.length - 1; right >= 0; right -= 1) {
+        lengths[left][right] = beforeKeys[left] === afterKeys[right]
+          ? lengths[left + 1][right + 1] + 1
+          : Math.max(lengths[left + 1][right], lengths[left][right + 1]);
+      }
+    }
+    let left = 0;
+    let right = 0;
+    while (left < before.length || right < after.length) {
+      if (
+        left < before.length
+        && right < after.length
+        && beforeKeys[left] === afterKeys[right]
+      ) {
+        left += 1;
+        right += 1;
+      } else if (
+        right < after.length
+        && (left === before.length || lengths[left][right + 1] >= lengths[left + 1][right])
+      ) {
+        changes.push({ path: `${path}/${right}`, operation: 'add', after: after[right] });
+        right += 1;
       } else {
-        diffValues(before[index], after[index], `${path}/${index}`, changes);
+        changes.push({ path: `${path}/${left}`, operation: 'remove', before: before[left] });
+        left += 1;
       }
     }
     return changes;
@@ -384,12 +432,12 @@ function versionEffectFor(effect, changes) {
   return classifySchemaChange(changeType).versionEffect;
 }
 
-function componentRevisionDelta(record, context) {
-  const content = contentRevision('component', record);
+function componentRevisionDelta(record, context, authoring) {
+  const content = contentRevision('component', record, authoring);
   const bindings = {};
   for (const [bindingId, binding] of Object.entries(record.bindings)) {
     bindings[bindingId] = {
-      content: bindingContentRevision(binding),
+      content: bindingContentRevision(binding, authoring),
       ...(binding.strategy === 'unsupported' ? {} : {
         spec: bindingSpecRevision({
           component: record,
@@ -397,6 +445,7 @@ function componentRevisionDelta(record, context) {
           examples: context.examples ?? [],
           exampleSources: context.exampleSources ?? {},
           tokenSources: context.tokenSources ?? [],
+          ...authoring,
         }),
       }),
     };
@@ -409,11 +458,12 @@ export function semanticDiff({
   before,
   after,
   revisionContext = {},
+  authoring = {},
 } = {}) {
-  validateFamily(family, before);
-  validateFamily(family, after);
+  validateFamily(family, before, authoring);
+  validateFamily(family, after, authoring);
   const changes = diffValues(before, after).map((change) => {
-    const field = resolveAuthoringField(family, change.path);
+    const field = resolveAuthoringField(family, change.path, authoring);
     return {
       ...change,
       effect: field.effects[change.operation],
@@ -433,8 +483,8 @@ export function semanticDiff({
   );
   let revisions;
   if (family === 'component') {
-    const beforeRevisions = componentRevisionDelta(before, revisionContext);
-    const afterRevisions = componentRevisionDelta(after, revisionContext);
+    const beforeRevisions = componentRevisionDelta(before, revisionContext, authoring);
+    const afterRevisions = componentRevisionDelta(after, revisionContext, authoring);
     revisions = {
       contentRevision: {
         before: beforeRevisions.content,
@@ -466,9 +516,10 @@ export function semanticDiff({
   } else {
     revisions = {
       contentRevision: {
-        before: contentRevision(family, before),
-        after: contentRevision(family, after),
-        changed: contentRevision(family, before) !== contentRevision(family, after),
+        before: contentRevision(family, before, authoring),
+        after: contentRevision(family, after, authoring),
+        changed: contentRevision(family, before, authoring)
+          !== contentRevision(family, after, authoring),
       },
     };
   }
@@ -505,10 +556,11 @@ export function previewAutofix({
   record,
   path,
   autofix = 'trim-outer-whitespace',
+  authoring = {},
 } = {}) {
   let field;
   try {
-    field = resolveAuthoringField(family, path);
+    field = resolveAuthoringField(family, path, authoring);
   } catch {
     throw new AuthoringPolicyError(
       'authoring.autofix.field-denied',
@@ -534,7 +586,7 @@ export function previewAutofix({
   const next = current.trim();
   const preview = structuredClone(record);
   setAt(preview, path, next);
-  validateFamily(family, preview);
+  validateFamily(family, preview, authoring);
   return deepFreeze({
     mode: 'preview-only',
     autofix,
@@ -543,9 +595,9 @@ export function previewAutofix({
   });
 }
 
-function schemaSources() {
-  return new Set(authoringMetadata('component')
-    .concat(authoringMetadata('binding'))
+function schemaSources(authoring = {}) {
+  return new Set(authoringMetadata('component', authoring)
+    .concat(authoringMetadata('binding', authoring))
     .map(({ schema }) => `packages/schema/schemas/${schema}`));
 }
 
@@ -617,14 +669,19 @@ function relatedArtifactIds(bundle, initialIds) {
   return affected;
 }
 
-export function affectedClosure({ context, sourcePaths = [], artifactIds = [] } = {}) {
+export function affectedClosure({
+  context,
+  sourcePaths = [],
+  artifactIds = [],
+  authoring = {},
+} = {}) {
   if (!Array.isArray(sourcePaths) || sourcePaths.length === 0) {
     throw new AuthoringPolicyError(
       'authoring.closure.source-required',
       'at least one exact canonical source path is required',
     );
   }
-  const declaredSchemaSources = schemaSources();
+  const declaredSchemaSources = schemaSources(authoring);
   for (const path of sourcePaths) {
     assertRelativePath(path, 'sourcePaths');
     if (!isCatalogSource(context, path) && !declaredSchemaSources.has(path)) {
@@ -638,7 +695,18 @@ export function affectedClosure({ context, sourcePaths = [], artifactIds = [] } 
   const sourceArtifacts = context.catalogBundle.artifacts.filter(({ source }) => (
     sourcePaths.includes(source.record) || sourcePaths.includes(source.content)
   ));
-  const initialIds = new Set([...artifactIds, ...sourceArtifacts.map(({ id }) => id)]);
+  const schemaFamilies = new Set(sourcePaths
+    .filter((path) => declaredSchemaSources.has(path))
+    .map((path) => posix.basename(path).replace('.schema.json', '')));
+  const schemaArtifacts = context.catalogBundle.artifacts.filter((artifact) => (
+    schemaFamilies.has(artifact.kind)
+    || (schemaFamilies.has('binding') && artifact.kind === 'component')
+  ));
+  const initialIds = new Set([
+    ...artifactIds,
+    ...sourceArtifacts.map(({ id }) => id),
+    ...schemaArtifacts.map(({ id }) => id),
+  ]);
   const knownIds = new Set(context.catalogBundle.artifacts.map(({ id }) => id));
   for (const id of initialIds) {
     if (!knownIds.has(id)) {

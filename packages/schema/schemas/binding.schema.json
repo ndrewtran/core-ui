@@ -8,7 +8,10 @@
     "oneOf": [
       {
       "required": ["schemaVersion", "lifecycle", "strategy", "api", "behavior", "accessibility", "tokenSources", "runtimeProfiles"],
-      "properties": { "strategy": { "enum": ["direct", "adapted", "native-alternative"] } },
+      "properties": { "strategy": {
+        "enum": ["direct", "adapted", "native-alternative"],
+        "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
+      } },
       "not": {
         "anyOf": [
           { "required": ["reason"] },
@@ -18,7 +21,10 @@
       },
       {
       "required": ["schemaVersion", "strategy", "reason"],
-      "properties": { "strategy": { "const": "unsupported" } },
+      "properties": { "strategy": {
+        "const": "unsupported",
+        "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
+      } },
       "not": {
         "anyOf": [
           { "required": ["lifecycle"] },
@@ -133,7 +139,10 @@
           },
           "allOf": [
             { "$ref": "#/$defs/runtimeProfile" },
-            { "type": "object", "properties": { "validationProfile": { "const": "native.ios" } } }
+            { "type": "object", "properties": { "validationProfile": {
+              "const": "native.ios",
+              "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
+            } } }
           ]
         },
         "android": {
@@ -143,7 +152,10 @@
           },
           "allOf": [
             { "$ref": "#/$defs/runtimeProfile" },
-            { "type": "object", "properties": { "validationProfile": { "const": "native.android" } } }
+            { "type": "object", "properties": { "validationProfile": {
+              "const": "native.android",
+              "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
+            } } }
           ]
         },
         "native.react-native-web": {
@@ -153,7 +165,10 @@
           },
           "allOf": [
             { "$ref": "#/$defs/runtimeProfile" },
-            { "type": "object", "properties": { "validationProfile": { "const": "native.react-native-web" } } }
+            { "type": "object", "properties": { "validationProfile": {
+              "const": "native.react-native-web",
+              "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
+            } } }
           ]
         }
       }
@@ -179,7 +194,10 @@
         "oneOf": [
           {
             "required": ["strategy", "lifecycle", "validationProfile"],
-            "properties": { "strategy": { "enum": ["direct", "adapted", "native-alternative"] } },
+            "properties": { "strategy": {
+              "enum": ["direct", "adapted", "native-alternative"],
+              "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
+            } },
             "not": {
               "anyOf": [
                 { "required": ["reason"] },
@@ -189,7 +207,10 @@
           },
           {
             "required": ["strategy", "reason"],
-            "properties": { "strategy": { "const": "unsupported" } },
+            "properties": { "strategy": {
+              "const": "unsupported",
+              "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
+            } },
             "not": {
               "anyOf": [
                 { "required": ["lifecycle"] },

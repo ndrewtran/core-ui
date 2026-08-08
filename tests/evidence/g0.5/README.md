@@ -7,9 +7,11 @@ coupling with graph-derived affected closure.
 
 Run `node tests/evidence/capture-g0.5.mjs` from the exact committed source
 revision. The capture writes a preliminary G0.5 index, refreshes still-applicable
-upstream Gate 0 packets, executes `pnpm check`, `pnpm check:all`,
+upstream Gate 0 assertions through separate append-only recertifications without
+changing any historical evidence bytes, executes `pnpm check`, `pnpm check:all`,
 `pnpm generate:check`, and `pnpm release:prepare`, then binds the validation
-summary into the final content-addressed G0.5 records.
+summary and sanitized full command outputs into the final content-addressed G0.5
+records.
 
 Rollback remains bounded to reverting the exact implementation and evidence
 commits, retaining failed evidence for diagnosis, keeping all packages private,

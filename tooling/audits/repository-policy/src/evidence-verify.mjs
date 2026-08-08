@@ -36,6 +36,18 @@ async function assertDigest(root, reference) {
   return value;
 }
 
+async function assertFileDigest(root, reference) {
+  const bytes = await readFile(join(root, reference.path));
+  const actual = `sha256:${sha256(bytes)}`;
+  if (actual !== reference.sha256) {
+    throw new EvidenceIntegrityError(
+      'EVIDENCE_DIGEST_MISMATCH',
+      `${reference.path} has ${actual}; expected ${reference.sha256}`,
+    );
+  }
+  return bytes;
+}
+
 async function manifestEntries(repositoryRoot, declaredPaths) {
   const entries = [];
 
@@ -85,19 +97,104 @@ async function assertApplicabilityManifest(repositoryRoot, manifest) {
 export async function verifyEvidence(repositoryRoot) {
   const evidenceRoot = join(repositoryRoot, 'tests/evidence');
   const milestones = await readdir(evidenceRoot, { withFileTypes: true }).catch(() => []);
+  const indexes = [];
   let indexCount = 0;
   let recordCount = 0;
   let artifactCount = 0;
+  let recertificationCount = 0;
 
   for (const entry of milestones.filter((item) => item.isDirectory())) {
     const indexPath = join(evidenceRoot, entry.name, 'index.json');
-    const { value: index } = await readCanonicalJson(indexPath);
+    const result = await readCanonicalJson(indexPath);
+    indexes.push({
+      index: result.value,
+      indexBytes: result.bytes,
+      relativePath: `tests/evidence/${entry.name}/index.json`,
+    });
+  }
+
+  const recertifications = new Map();
+  for (const owner of indexes) {
+    for (const reference of owner.index.recertifications ?? []) {
+      const recertification = await assertDigest(repositoryRoot, reference);
+      const target = recertification.historicalIndex?.path;
+      if (
+        recertification.schema !== 'core-ui-evidence-recertification-v1'
+        || recertification.outcome !== 'pass'
+        || typeof target !== 'string'
+        || recertifications.has(target)
+      ) {
+        throw new EvidenceIntegrityError(
+          'EVIDENCE_RECERTIFICATION_INVALID',
+          `${reference.path} must be one unique passing recertification`,
+        );
+      }
+      const historical = indexes.find(({ relativePath }) => relativePath === target);
+      if (!historical) {
+        throw new EvidenceIntegrityError(
+          'EVIDENCE_RECERTIFICATION_INVALID',
+          `${reference.path} targets an unknown historical index`,
+        );
+      }
+      const historicalDigest = `sha256:${sha256(historical.indexBytes)}`;
+      if (
+        recertification.historicalIndex.sha256 !== historicalDigest
+        || canonicalJson(recertification.historicalApplicabilityManifest)
+          !== canonicalJson(historical.index.applicabilityManifest)
+        || canonicalJson(recertification.currentApplicabilityManifest.paths)
+          !== canonicalJson(historical.index.applicabilityManifest.paths)
+        || recertification.sourceRevision !== owner.index.sourceRevision
+        || recertification.sourceTree !== owner.index.sourceTree
+        || Boolean(recertification.validation) !== Boolean(owner.index.validation)
+        || (
+          owner.index.validation
+          && canonicalJson(recertification.validation) !== canonicalJson(owner.index.validation)
+        )
+      ) {
+        throw new EvidenceIntegrityError(
+          'EVIDENCE_RECERTIFICATION_INVALID',
+          `${reference.path} does not bind the historical and current evidence identities`,
+        );
+      }
+      await assertApplicabilityManifest(
+        repositoryRoot,
+        recertification.currentApplicabilityManifest,
+      );
+      recertifications.set(target, recertification);
+      recertificationCount += 1;
+    }
+  }
+
+  for (const { index, relativePath } of indexes) {
     if (index.applicabilityManifest) {
-      await assertApplicabilityManifest(repositoryRoot, index.applicabilityManifest);
+      try {
+        await assertApplicabilityManifest(repositoryRoot, index.applicabilityManifest);
+      } catch (error) {
+        if (
+          !(error instanceof EvidenceIntegrityError)
+          || error.code !== 'EVIDENCE_APPLICABILITY_MISMATCH'
+          || !recertifications.has(relativePath)
+        ) throw error;
+      }
     }
     const indexValidation = index.validation
       ? await assertDigest(repositoryRoot, index.validation)
       : null;
+    for (const result of indexValidation?.results ?? []) {
+      if (!result.rawOutput) continue;
+      const rawOutput = await assertFileDigest(repositoryRoot, result.rawOutput);
+      const text = rawOutput.toString('utf8');
+      if (
+        text.includes(repositoryRoot)
+        || /\/(?:Users|private\/var)\//u.test(text)
+        || /(?:authorization|api[-_]?key|token)\s*[:=]\s*\S+/iu.test(text)
+      ) {
+        throw new EvidenceIntegrityError(
+          'EVIDENCE_RAW_OUTPUT_UNSANITIZED',
+          `${result.rawOutput.path} contains a private path or credential-shaped value`,
+        );
+      }
+    }
     indexCount += 1;
     for (const reference of index.records) {
       const record = await assertDigest(repositoryRoot, reference);
@@ -152,7 +249,7 @@ export async function verifyEvidence(repositoryRoot) {
     }
   }
 
-  return { indexCount, recordCount, artifactCount };
+  return { indexCount, recordCount, artifactCount, recertificationCount };
 }
 
 if (process.argv[1] === new URL(import.meta.url).pathname) {
@@ -161,7 +258,8 @@ if (process.argv[1] === new URL(import.meta.url).pathname) {
     const result = await verifyEvidence(repositoryRoot);
     console.log(
       `[evidence] verified ${result.indexCount} immutable index, `
-        + `${result.recordCount} records, and ${result.artifactCount} artifacts`,
+        + `${result.recordCount} records, ${result.artifactCount} artifacts, and `
+        + `${result.recertificationCount} recertifications`,
     );
   } catch (error) {
     console.error(error.message);

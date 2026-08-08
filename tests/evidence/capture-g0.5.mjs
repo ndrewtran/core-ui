@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
-import { execFileSync } from 'node:child_process';
-import { mkdir, readFile, readdir, stat, writeFile } from 'node:fs/promises';
+import { execFileSync, spawnSync } from 'node:child_process';
+import { cp, mkdir, mkdtemp, readFile, readdir, rm, stat, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { createCatalogApi } from '../../packages/catalog/src/index.mjs';
 import { compileCatalog } from '../../packages/catalog/src/compiler.mjs';
@@ -72,6 +73,36 @@ async function applicabilityManifest(paths) {
   };
 }
 
+async function temporaryCatalogRepository() {
+  const temporaryRoot = await mkdtemp(join(tmpdir(), 'core-ui-g0-5-'));
+  await Promise.all([
+    mkdir(join(temporaryRoot, 'packages/tooling'), { recursive: true }),
+    mkdir(join(temporaryRoot, 'packages/schema/schemas'), { recursive: true }),
+    mkdir(join(temporaryRoot, 'tooling/audits/repository-policy'), { recursive: true }),
+  ]);
+  await Promise.all([
+    cp(join(repositoryRoot, 'catalog'), join(temporaryRoot, 'catalog'), { recursive: true }),
+    cp(
+      join(repositoryRoot, 'packages/catalog'),
+      join(temporaryRoot, 'packages/catalog'),
+      { recursive: true },
+    ),
+    cp(
+      join(repositoryRoot, 'packages/tooling/command-registry.json'),
+      join(temporaryRoot, 'packages/tooling/command-registry.json'),
+    ),
+    cp(
+      join(repositoryRoot, 'packages/schema/schemas/type-projection.json'),
+      join(temporaryRoot, 'packages/schema/schemas/type-projection.json'),
+    ),
+    cp(
+      join(repositoryRoot, 'tooling/audits/repository-policy/repository-policy.json'),
+      join(temporaryRoot, 'tooling/audits/repository-policy/repository-policy.json'),
+    ),
+  ]);
+  return temporaryRoot;
+}
+
 function applyCase(record, change) {
   const result = structuredClone(record);
   const segments = change.path.slice(2).split('/').map((segment) => (
@@ -137,10 +168,32 @@ const repairedDiagnosis = diagnoseCanonicalSource({
   record: scaffold.record,
   recordPath: sourcePath,
 });
-const retrieved = createCatalogApi(compiled.bundle).getArtifact({
-  id: scaffold.record.id,
-  detail: 'full',
-});
+let compiledFromScaffold;
+let retrieved;
+let bundleDriftRule = null;
+const temporaryRoot = await temporaryCatalogRepository();
+try {
+  await writeFile(join(temporaryRoot, sourcePath), scaffold.writeSet[0].bytes);
+  compiledFromScaffold = await compileCatalog({ repositoryRoot: temporaryRoot });
+  retrieved = createCatalogApi(compiledFromScaffold.bundle).getArtifact({
+    id: scaffold.record.id,
+    detail: 'full',
+  });
+  const driftedRecord = structuredClone(scaffold.record);
+  driftedRecord.summary = `${driftedRecord.summary} Drift`;
+  await writeFile(join(temporaryRoot, sourcePath), `${canonicalJson(driftedRecord)}\n`);
+  try {
+    await loadRepositoryAuthoringContext({
+      repositoryRoot: temporaryRoot,
+      expectedSourceRevision: compiled.bundle.sourceRevision,
+    });
+  } catch (error) {
+    if (!(error instanceof AuthoringPolicyError)) throw error;
+    bundleDriftRule = error.ruleId;
+  }
+} finally {
+  await rm(temporaryRoot, { recursive: true, force: true });
+}
 const undeclaredDiagnosis = diagnoseCanonicalSource({
   context,
   family: 'component',
@@ -163,8 +216,12 @@ if (
   || !repairedDiagnosis.valid
   || retrieved.type !== 'artifact.detail'
   || retrieved.data.artifact.source.record !== sourcePath
+  || canonicalJson(Object.fromEntries(
+    Object.keys(scaffold.record).map((key) => [key, retrieved.data.artifact[key]]),
+  )) !== canonicalJson(scaffold.record)
   || undeclaredDiagnosis.valid
   || staleRevisionRule !== 'authoring.source.revision-stale'
+  || bundleDriftRule !== 'authoring.source.bundle-drift'
   || await readFile(join(repositoryRoot, sourcePath), 'utf8') !== sourceBytesBefore
 ) {
   throw new Error('EVIDENCE_AUTHORING_ROUND_TRIP_FAILED');
@@ -268,6 +325,70 @@ if (
   || !couplingFailure.message.includes('missing x-core-ui-authoring metadata')
 ) throw new Error('EVIDENCE_SCHEMA_AUTHORING_COUPLING_FAILED');
 
+componentSchema.properties.newStableField['x-core-ui-authoring'] = {
+  effect: 'incompatible',
+  revisionAxes: ['content'],
+};
+ownership.fields.push({
+  class: 'authored',
+  name: 'newStableField',
+  owner: 'component-contract',
+  schema: 'component.schema.json',
+  schemaPointer: '#/properties/newStableField',
+});
+const injectedAuthoring = {
+  schemas: {
+    'binding.schema.json': bindingSchema,
+    'component.schema.json': componentSchema,
+  },
+  ownership,
+};
+const injectedDecisions = structuredClone(decisions);
+injectedDecisions.newStableField = 'baseline';
+const injectedScaffold = scaffoldComponent({
+  slug: 'button',
+  recordPath: sourcePath,
+  decisions: injectedDecisions,
+  authoring: injectedAuthoring,
+});
+const injectedAfter = structuredClone(injectedScaffold.record);
+injectedAfter.newStableField = 'changed';
+const injectedDiff = semanticDiff({
+  before: injectedScaffold.record,
+  after: injectedAfter,
+  revisionContext,
+  authoring: injectedAuthoring,
+});
+const injectedInvalid = structuredClone(injectedScaffold.record);
+injectedInvalid.newStableField = '';
+const injectedDiagnosis = diagnoseCanonicalSource({
+  context,
+  family: 'component',
+  record: injectedInvalid,
+  recordPath: sourcePath,
+  authoring: injectedAuthoring,
+});
+const injectedClosure = affectedClosure({
+  context,
+  sourcePaths: ['packages/schema/schemas/component.schema.json'],
+  authoring: injectedAuthoring,
+});
+const couplingSurfaces = {
+  scaffold: injectedScaffold.record.newStableField === 'baseline',
+  semanticDiff: injectedDiff.changes.some(({ path, owner }) => (
+    path === '$/newStableField' && owner.name === 'component-contract'
+  )),
+  diagnostics: injectedDiagnosis.diagnostics.some(({ details }) => (
+    details.source.path === '$/newStableField'
+    && details.owner.name === 'component-contract'
+  )),
+  affectedClosure: injectedClosure.artifacts.includes(componentArtifact.id)
+    && injectedClosure.canonicalSources.includes(sourcePath),
+};
+if (!Object.values(couplingSurfaces).every(Boolean)) {
+  throw new Error('EVIDENCE_SCHEMA_AUTHORING_SURFACE_COUPLING_FAILED');
+}
+
 const closure = affectedClosure({ context, sourcePaths: [sourcePath] });
 const schemaClosure = affectedClosure({
   context,
@@ -285,6 +406,8 @@ if (
   || !closure.artifacts.includes('core:token:button-minimum')
   || !closure.projections.includes('packages/catalog/generated/catalog.json')
   || !schemaClosure.projections.includes('packages/schema/generated/types.d.ts')
+  || !schemaClosure.artifacts.includes(componentArtifact.id)
+  || !schemaClosure.canonicalSources.includes(sourcePath)
   || undeclaredClosureRule !== 'authoring.closure.source-undeclared'
 ) throw new Error('EVIDENCE_AFFECTED_CLOSURE_FAILED');
 
@@ -298,11 +421,75 @@ const paths = [
   'packages/tooling',
   'tooling/audits/repository-policy',
   'tests/fixtures/g0.5',
-  'tests/evidence/capture-g0.4.mjs',
   'tests/evidence/capture-g0.5.mjs',
   'tests/evidence/g0.5/README.md',
 ];
 const manifest = await applicabilityManifest(paths);
+const packageIdentities = await Promise.all([
+  'packages/schema/package.json',
+  'packages/catalog/package.json',
+  'packages/tooling/package.json',
+].map(async (path) => {
+  const packageManifest = parseJsonStrict(await readFile(join(repositoryRoot, path), 'utf8'));
+  return {
+    name: packageManifest.name,
+    path,
+    private: packageManifest.private,
+    version: packageManifest.version,
+  };
+}));
+const binding = componentArtifact.record.bindings['web.react'];
+const fixturePath = 'tests/fixtures/g0.5/corpus.json';
+const applicableIdentities = {
+  artifact: {
+    contentRevision: componentArtifact.contentRevision,
+    id: componentArtifact.id,
+    source: componentArtifact.source,
+  },
+  authoringTool: {
+    metadataDigest: authoringMetadataDigest(),
+    package: '@core-ui/tooling',
+    version: packageIdentities.find(({ name }) => name === '@core-ui/tooling').version,
+  },
+  binding: {
+    bindingContentRevision: componentArtifact.bindingContentRevisions['web.react'],
+    bindingSpecRevision: componentArtifact.bindingSpecRevisions['web.react'],
+    id: `${componentArtifact.id}#web.react`,
+    platform: 'web.react',
+  },
+  catalog: {
+    catalogDigest: compiled.bundle.catalogDigest,
+    catalogVersion: compiled.bundle.catalogVersion,
+    sourceRevision: compiled.bundle.sourceRevision,
+  },
+  examples: compiled.bundle.artifacts
+    .filter(({ kind }) => kind === 'example')
+    .map((artifact) => ({
+      contentRevision: artifact.contentRevision,
+      id: artifact.id,
+      source: artifact.source,
+    })),
+  fixtures: [{
+    path: fixturePath,
+    sha256: sha256(await readFile(join(repositoryRoot, fixturePath))),
+  }],
+  packages: packageIdentities,
+  runtimeProfiles: Object.entries(
+    componentArtifact.record.bindings['native.react-native'].runtimeProfiles,
+  ).map(([id, profile]) => ({ id, strategy: profile.strategy })),
+  tokenSources: compiled.bundle.artifacts
+    .filter(({ kind }) => kind === 'token')
+    .map((artifact) => ({ contentRevision: artifact.contentRevision, id: artifact.id })),
+};
+const rollbackOrDisable = {
+  actions: [
+    'Revert the exact G0.5 implementation and retained-evidence commits.',
+    'Remove the private authoring exports from @core-ui/schema and @core-ui/tooling.',
+    'Retain failed or superseded evidence as append-only diagnostic history.',
+  ],
+  packagePublication: 'prohibited',
+  projectStatus: 'not-ready',
+};
 const applicability = {
   applicabilityManifest: manifest,
   authoringMetadata: {
@@ -328,7 +515,11 @@ const definitions = [
       steps: [
         { action: 'scaffold-preview', mode: scaffold.mode, path: scaffold.recordPath },
         { action: 'validate', valid: validDiagnosis.valid },
-        { action: 'compile', catalogDigest: compiled.bundle.catalogDigest },
+        {
+          action: 'compile-scaffolded-bytes',
+          catalogDigest: compiledFromScaffold.bundle.catalogDigest,
+          sourceRevision: compiledFromScaffold.bundle.sourceRevision,
+        },
         { action: 'retrieve', type: retrieved.type, id: retrieved.data.artifact.id },
         {
           action: 'break-and-diagnose',
@@ -342,6 +533,7 @@ const definitions = [
       projectionEdits: [],
       undeclaredSourceRule: undeclaredDiagnosis.diagnostics[0].ruleId,
       staleRevisionRule,
+      bundleDriftRule,
     },
   ],
   [
@@ -375,7 +567,9 @@ const definitions = [
     'schema-authoring-coupling-and-affected-closure',
     {
       couplingFailure,
+      couplingSurfaces,
       closure,
+      injectedClosure,
       schemaClosure,
       undeclaredClosureRule,
       secondRegistryIntroduced: false,
@@ -386,13 +580,54 @@ const definitions = [
 const root = join(repositoryRoot, 'tests/evidence/g0.5');
 await mkdir(join(root, 'artifacts'), { recursive: true });
 await mkdir(join(root, 'records'), { recursive: true });
+await mkdir(join(root, 'recertifications'), { recursive: true });
+await mkdir(join(root, 'validation'), { recursive: true });
+
+async function writeRecertifications(validation = null) {
+  const references = [];
+  for (const milestone of ['G0.1', 'G0.2', 'G0.3', 'G0.4']) {
+    const historicalPath = `tests/evidence/${milestone.toLowerCase()}/index.json`;
+    const historicalBytes = await readFile(join(repositoryRoot, historicalPath), 'utf8');
+    const historicalIndex = parseJsonStrict(historicalBytes);
+    const recertificationPath = `tests/evidence/g0.5/recertifications/${milestone}.json`;
+    await writeCanonical(join(repositoryRoot, recertificationPath), {
+      captureTimestamp,
+      currentApplicabilityManifest: await applicabilityManifest(
+        historicalIndex.applicabilityManifest.paths,
+      ),
+      disclosureClass: 'public-sanitized',
+      historicalApplicabilityManifest: historicalIndex.applicabilityManifest,
+      historicalIndex: {
+        path: historicalPath,
+        sha256: sha256(historicalBytes),
+      },
+      milestone,
+      outcome: 'pass',
+      reason: 'Append-only recertification against the current worktree; historical evidence bytes remain unchanged.',
+      retentionPolicy: 'Retained with the G0.5 milestone pull request and default-branch history after merge.',
+      rollbackOrDisable,
+      schema: 'core-ui-evidence-recertification-v1',
+      sourceRevision,
+      sourceTree,
+      ...(validation === null ? {} : { validation }),
+    });
+    references.push({
+      milestone,
+      path: recertificationPath,
+      sha256: sha256(await readFile(join(repositoryRoot, recertificationPath))),
+    });
+  }
+  return references;
+}
 
 async function writeEvidence(validation = null) {
+  const recertifications = await writeRecertifications(validation);
   const records = [];
   for (const [assertionId, evidenceKind, observations] of definitions) {
     const artifactPath = join(root, `artifacts/${assertionId}.json`);
     await writeCanonical(artifactPath, {
       applicability,
+      applicableIdentities,
       assertionId,
       captureTimestamp,
       command: captureProcedure,
@@ -403,6 +638,7 @@ async function writeEvidence(validation = null) {
       exitState: 0,
       observations,
       outcome: 'pass',
+      rollbackOrDisable,
       schema: 'core-ui-evidence-artifact-v1',
       sourceRevision,
       sourceTree,
@@ -412,6 +648,7 @@ async function writeEvidence(validation = null) {
       activeExceptionRefs: [],
       advisoryRefs: [],
       applicability,
+      applicableIdentities,
       applicabilityManifest: manifest,
       artifact: {
         path: `tests/evidence/g0.5/artifacts/${assertionId}.json`,
@@ -430,6 +667,7 @@ async function writeEvidence(validation = null) {
       outcome: 'pass',
       owner: 'ndrewtran',
       retentionPolicy: 'Content-addressed Git object retained by the milestone pull request and default-branch history after merge; issue #7 and its Evidence issues are mutable locators',
+      rollbackOrDisable,
       schema: 'core-ui-evidence-record-v1',
       sourceRevision,
       sourceTree,
@@ -447,7 +685,9 @@ async function writeEvidence(validation = null) {
     disclosureClass: 'public-sanitized',
     milestone: 'G0.5',
     owner: 'ndrewtran',
+    recertifications,
     records,
+    rollbackOrDisable,
     retentionPolicy: 'Content-addressed Git records retained by the milestone pull request and default-branch history after merge; issue #7 and its Evidence issues are mutable locators',
     schema: 'core-ui-evidence-index-v1',
     sourceRevision,
@@ -457,33 +697,54 @@ async function writeEvidence(validation = null) {
 }
 
 await writeEvidence();
-command(process.execPath, ['tests/evidence/capture-g0.4.mjs']);
 
-function validationResult(commandName, args, assertions) {
-  const output = execFileSync('pnpm', args, {
+async function validationResult(commandName, args, assertions) {
+  const result = spawnSync('pnpm', args, {
     cwd: repositoryRoot,
     encoding: 'utf8',
     stdio: ['ignore', 'pipe', 'pipe'],
   });
+  const output = `${result.stdout ?? ''}${result.stderr ?? ''}`;
+  if (result.status !== 0) {
+    throw new Error(`EVIDENCE_VALIDATION_COMMAND_FAILED: ${commandName}\n${output}`);
+  }
   const observedAssertions = assertions.map(({ id, pattern }) => {
     const match = output.match(pattern);
     if (!match) throw new Error(`EVIDENCE_VALIDATION_ASSERTION_MISSING: ${id}`);
     return { id, value: match[1] ?? true };
   });
-  return { command: commandName, exitState: 0, observedAssertions };
+  const sanitizedOutput = output
+    .replaceAll(repositoryRoot, '<repository-root>')
+    .replace(/\/(?:private\/)?var\/folders\/[^\s)]+/gu, '<temporary-path>');
+  if (/\/(?:Users|private\/var)\//u.test(sanitizedOutput)) {
+    throw new Error(`EVIDENCE_VALIDATION_OUTPUT_UNSANITIZED: ${commandName}`);
+  }
+  const outputPath = `tests/evidence/g0.5/validation/${commandName
+    .replaceAll(/[^a-z0-9]+/giu, '-')
+    .replaceAll(/^-|-$/gu, '')}.txt`;
+  await writeFile(join(repositoryRoot, outputPath), sanitizedOutput);
+  return {
+    command: commandName,
+    exitState: 0,
+    observedAssertions,
+    rawOutput: {
+      path: outputPath,
+      sha256: sha256(sanitizedOutput),
+    },
+  };
 }
 
 const validationResults = [
-  validationResult('pnpm check', ['check'], [
-    { id: 'evidence-index-count', pattern: /\[evidence\] verified (6 immutable index, 29 records, and 29 artifacts)/u },
+  await validationResult('pnpm check', ['check'], [
+    { id: 'evidence-index-count', pattern: /\[evidence\] verified (6 immutable index, 29 records, 29 artifacts, and 4 recertifications)/u },
   ]),
-  validationResult('pnpm check:all', ['check:all'], [
-    { id: 'evidence-index-count', pattern: /\[evidence\] verified (6 immutable index, 29 records, and 29 artifacts)/u },
+  await validationResult('pnpm check:all', ['check:all'], [
+    { id: 'evidence-index-count', pattern: /\[evidence\] verified (6 immutable index, 29 records, 29 artifacts, and 4 recertifications)/u },
   ]),
-  validationResult('pnpm generate:check', ['generate:check'], [
+  await validationResult('pnpm generate:check', ['generate:check'], [
     { id: 'generation-identity', pattern: /remained clean after two generation runs \((sha256:[a-f0-9]{64})\)/u },
   ]),
-  validationResult('pnpm release:prepare', ['release:prepare'], [
+  await validationResult('pnpm release:prepare', ['release:prepare'], [
     { id: 'release-boundary', pattern: /(Foundation checks passed; no publishable package or public release candidate exists\.)/u },
     { id: 'generation-identity', pattern: /remained clean after two generation runs \((sha256:[a-f0-9]{64})\)/u },
   ]),
@@ -503,4 +764,4 @@ const validation = {
 };
 await writeEvidence(validation);
 
-console.log(`[evidence] captured G0.5 and refreshed upstream applicability at ${sourceRevision}`);
+console.log(`[evidence] captured G0.5 and append-only recertified G0.1-G0.4 at ${sourceRevision}`);

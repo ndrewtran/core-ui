@@ -107,8 +107,13 @@ function collectProperties({
   node,
   pointer = '#',
   declarations,
+  schemas,
+  visited = new Set(),
 }) {
   if (!isObject(node)) return;
+  const visitKey = `${fileName}${pointer}`;
+  if (visited.has(visitKey)) return;
+  visited.add(visitKey);
   if (isObject(node.properties)) {
     const required = new Set(node.required ?? []);
     for (const [field, propertySchema] of Object.entries(node.properties)) {
@@ -131,19 +136,64 @@ function collectProperties({
         node: propertySchema,
         pointer: schemaPointer,
         declarations,
+        schemas,
+        visited,
       });
     }
   }
-  if (isObject(node.$defs)) {
-    for (const [name, definition] of Object.entries(node.$defs)) {
+  for (const keyword of ['$defs', 'patternProperties', 'dependentSchemas']) {
+    if (!isObject(node[keyword])) continue;
+    for (const [name, definition] of Object.entries(node[keyword])) {
       collectProperties({
         family,
         fileName,
         node: definition,
-        pointer: `${pointer}/$defs/${escapePointer(name)}`,
+        pointer: `${pointer}/${keyword}/${escapePointer(name)}`,
         declarations,
+        schemas,
+        visited,
       });
     }
+  }
+  for (const keyword of ['allOf', 'anyOf', 'oneOf', 'prefixItems']) {
+    for (const [index, definition] of (node[keyword] ?? []).entries()) {
+      collectProperties({
+        family,
+        fileName,
+        node: definition,
+        pointer: `${pointer}/${keyword}/${index}`,
+        declarations,
+        schemas,
+        visited,
+      });
+    }
+  }
+  for (const keyword of [
+    'items', 'additionalProperties', 'propertyNames', 'contains',
+    'not', 'if', 'then', 'else', 'unevaluatedItems', 'unevaluatedProperties',
+  ]) {
+    if (!isObject(node[keyword])) continue;
+    collectProperties({
+      family,
+      fileName,
+      node: node[keyword],
+      pointer: `${pointer}/${keyword}`,
+      declarations,
+      schemas,
+      visited,
+    });
+  }
+  if (node.$ref) {
+    const target = referenceTarget(node.$ref, fileName, schemas);
+    collectProperties({
+      family,
+      fileName: target.fileName,
+      node: target.schema,
+      pointer: target.pointer,
+      declarations,
+      schemas,
+      visited,
+    });
   }
 }
 
@@ -158,6 +208,7 @@ function declarationsFor(family, schemas) {
     fileName,
     node: schemaAt(fileName, schemas),
     declarations,
+    schemas,
   });
   return declarations;
 }
@@ -182,23 +233,23 @@ export function validateAuthoringMetadata({ schemas, ownership } = {}) {
   return declarations.map((declaration) => Object.freeze(structuredClone(declaration)));
 }
 
-export function authoringMetadata(family) {
-  validateAuthoringMetadata();
-  return Object.freeze(declarationsFor(family).map((declaration) => (
+export function authoringMetadata(family, { schemas, ownership } = {}) {
+  validateAuthoringMetadata({ schemas, ownership });
+  return Object.freeze(declarationsFor(family, schemas).map((declaration) => (
     Object.freeze(structuredClone(declaration))
   )));
 }
 
-function referenceTarget(reference, currentFile) {
+function referenceTarget(reference, currentFile, schemas) {
   const [filePart, fragment = ''] = reference.split('#');
   return {
     fileName: filePart || currentFile,
     pointer: fragment ? `#${fragment}` : '#',
-    schema: resolveSchemaReference(reference, currentFile).schema,
+    schema: resolveSchemaReference(reference, currentFile, schemas).schema,
   };
 }
 
-function findProperty(node, fileName, pointer, segment, visited = new Set()) {
+function findProperty(node, fileName, pointer, segment, schemas, visited = new Set()) {
   if (!isObject(node)) return null;
   const visitKey = `${fileName}${pointer}:${segment}`;
   if (visited.has(visitKey)) return null;
@@ -211,12 +262,13 @@ function findProperty(node, fileName, pointer, segment, visited = new Set()) {
     };
   }
   if (node.$ref) {
-    const target = referenceTarget(node.$ref, fileName);
+    const target = referenceTarget(node.$ref, fileName, schemas);
     const found = findProperty(
       target.schema,
       target.fileName,
       target.pointer,
       segment,
+      schemas,
       visited,
     );
     if (found) return found;
@@ -228,6 +280,7 @@ function findProperty(node, fileName, pointer, segment, visited = new Set()) {
         fileName,
         `${pointer}/${keyword}/${index}`,
         segment,
+        schemas,
         visited,
       );
       if (found) return found;
@@ -236,8 +289,8 @@ function findProperty(node, fileName, pointer, segment, visited = new Set()) {
   return null;
 }
 
-function ownerFor(fileName, schemaPointer) {
-  const field = loadJsonDocument('field-ownership.json').fields.find((entry) => (
+function ownerFor(fileName, schemaPointer, ownership) {
+  const field = (ownership ?? loadJsonDocument('field-ownership.json')).fields.find((entry) => (
     entry.schema === fileName && entry.schemaPointer === schemaPointer
   ));
   if (!field) {
@@ -249,9 +302,9 @@ function ownerFor(fileName, schemaPointer) {
   return field.owner;
 }
 
-export function resolveAuthoringField(family, path) {
-  validateAuthoringMetadata();
-  const { fileName, schema } = loadFamilySchema(family);
+export function resolveAuthoringField(family, path, { schemas, ownership } = {}) {
+  validateAuthoringMetadata({ schemas, ownership });
+  const { fileName, schema } = loadFamilySchema(family, schemas);
   let current = { fileName, pointer: '#', schema };
   let resolved = null;
   for (const segment of pathSegments(path)) {
@@ -270,6 +323,7 @@ export function resolveAuthoringField(family, path) {
       current.fileName,
       current.pointer,
       segment,
+      schemas,
     );
     if (!property) break;
     const authoring = normalizeAnnotation(
@@ -281,7 +335,7 @@ export function resolveAuthoringField(family, path) {
       field: segment,
       schema: property.fileName,
       schemaPointer: property.pointer,
-      owner: ownerFor(property.fileName, property.pointer),
+      owner: ownerFor(property.fileName, property.pointer, ownership),
       completion: completionFor(property.schema, false),
       ...authoring,
     };
@@ -296,6 +350,6 @@ export function resolveAuthoringField(family, path) {
   return Object.freeze(structuredClone(resolved));
 }
 
-export function authoringMetadataDigest() {
-  return canonicalDigest(validateAuthoringMetadata());
+export function authoringMetadataDigest(options = {}) {
+  return canonicalDigest(validateAuthoringMetadata(options));
 }

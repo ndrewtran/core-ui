@@ -1,8 +1,8 @@
 import { canonicalDigest, sha256Digest } from './canonical.mjs';
 import { validateCatalogRecords, validateFamily } from './validation.mjs';
 
-export function contentRevisionPreimage(family, record, { sourceBytes } = {}) {
-  validateFamily(family, record);
+export function contentRevisionPreimage(family, record, { sourceBytes, schemas, ownership } = {}) {
+  validateFamily(family, record, { schemas, ownership });
   if (family === 'example') {
     if (typeof sourceBytes !== 'string' && !Buffer.isBuffer(sourceBytes)) {
       throw new Error(`CORE_RELATION_INVALID: missing executable source bytes for ${record.id}`);
@@ -16,13 +16,13 @@ export function contentRevision(family, record, options = {}) {
   return canonicalDigest(contentRevisionPreimage(family, record, options));
 }
 
-export function bindingContentRevisionPreimage(binding) {
-  validateFamily('binding', binding);
+export function bindingContentRevisionPreimage(binding, { schemas, ownership } = {}) {
+  validateFamily('binding', binding, { schemas, ownership });
   return binding;
 }
 
-export function bindingContentRevision(binding) {
-  return canonicalDigest(bindingContentRevisionPreimage(binding));
+export function bindingContentRevision(binding, options = {}) {
+  return canonicalDigest(bindingContentRevisionPreimage(binding, options));
 }
 
 export function bindingSpecRevisionPreimage({
@@ -31,8 +31,10 @@ export function bindingSpecRevisionPreimage({
   examples = [],
   exampleSources = {},
   tokenSources = [],
+  schemas,
+  ownership,
 }) {
-  validateCatalogRecords([component, ...examples, ...tokenSources]);
+  validateCatalogRecords([component, ...examples, ...tokenSources], { schemas, ownership });
   const binding = Object.hasOwn(component.bindings, bindingId)
     ? component.bindings[bindingId]
     : undefined;
@@ -50,6 +52,8 @@ export function bindingSpecRevisionPreimage({
       id: example.id,
       revision: contentRevision('example', example, {
         sourceBytes: exampleSources[example.id],
+        schemas,
+        ownership,
       }),
       relation: example.binding,
     }))
