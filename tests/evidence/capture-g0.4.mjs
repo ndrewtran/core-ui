@@ -446,10 +446,10 @@ function validationResult(commandName, args, assertions) {
 
 const validationResults = [
   validationResult('pnpm check', ['check'], [
-    { id: 'evidence-index-count', pattern: /\[evidence\] verified (5 immutable index, 25 records, and 25 artifacts)/u },
+    { id: 'evidence-index-count', pattern: /\[evidence\] verified (6 immutable index, 29 records, and 29 artifacts)/u },
   ]),
   validationResult('pnpm check:all', ['check:all'], [
-    { id: 'evidence-index-count', pattern: /\[evidence\] verified (5 immutable index, 25 records, and 25 artifacts)/u },
+    { id: 'evidence-index-count', pattern: /\[evidence\] verified (6 immutable index, 29 records, and 29 artifacts)/u },
   ]),
   validationResult('pnpm generate:check', ['generate:check'], [
     { id: 'generation-identity', pattern: /remained clean after two generation runs \((sha256:[a-f0-9]{64})\)/u },
