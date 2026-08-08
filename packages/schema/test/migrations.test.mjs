@@ -90,3 +90,25 @@ test('G1.0 binding v1-to-v2 migration requires the binding-owned token recipe', 
     (error) => error instanceof SchemaValidationError && error.code === 'CORE_SCHEMA_MIGRATION_REQUIRED',
   );
 });
+
+test('G1.0 unsupported binding migration requires its complete platform-safety declaration', () => {
+  const previous = {
+    schemaVersion: '1.0.0',
+    strategy: 'unsupported',
+    reason: 'No implementation is available.',
+  };
+  const platformSafety = webPlatformSafety('web.react').map((declaration) => ({
+    ...declaration,
+    requirements: declaration.requirements.map(({ id }) => ({
+      id,
+      disposition: 'not-applicable',
+      reason: 'The binding is unsupported in G1.0.',
+    })),
+  }));
+  const migrated = migrateBindingV1ToV2(previous, { platformSafety });
+  assert.deepEqual(migrated.platformSafety, platformSafety);
+  assert.throws(
+    () => migrateBindingV1ToV2(previous),
+    (error) => error instanceof SchemaValidationError && error.code === 'CORE_SCHEMA_MIGRATION_REQUIRED',
+  );
+});

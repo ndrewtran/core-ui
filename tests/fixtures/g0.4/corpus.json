@@ -61,8 +61,15 @@
           "export": "@core-ui/react-native/button",
           "lifecycle": "experimental",
           "strategy": "direct",
-          "tokenRequirementsDigest": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
-          "platformSafetyRequirementsDigest": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+          "tokenRequirementSetDigests": {
+            "native.ios": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            "native.android": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+          },
+          "platformSafetyRequirementSetDigests": {
+            "ios": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            "android": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            "native.react-native-web": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+          }
         }
       }
     },
@@ -80,8 +87,12 @@
           "export": "@core-ui/react/button",
           "lifecycle": "experimental",
           "strategy": "direct",
-          "tokenRequirementsDigest": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
-          "platformSafetyRequirementsDigest": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+          "tokenRequirementSetDigests": {
+            "web.react": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+          },
+          "platformSafetyRequirementSetDigests": {
+            "web.react": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+          }
         }
       }
     },
@@ -99,8 +110,12 @@
           "export": "@core-ui/react/button",
           "lifecycle": "experimental",
           "strategy": "direct",
-          "tokenRequirementsDigest": "sha256:8888888888888888888888888888888888888888888888888888888888888888",
-          "platformSafetyRequirementsDigest": "sha256:8888888888888888888888888888888888888888888888888888888888888888"
+          "tokenRequirementSetDigests": {
+            "web.react": "sha256:8888888888888888888888888888888888888888888888888888888888888888"
+          },
+          "platformSafetyRequirementSetDigests": {
+            "web.react": "sha256:8888888888888888888888888888888888888888888888888888888888888888"
+          }
         }
       }
     }
@@ -126,8 +141,15 @@
           "version": "1.0.0",
           "export": "@core-ui/react-native/button",
           "specRevision": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
-          "tokenRequirementsDigest": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
-          "platformSafetyRequirementsDigest": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+          "tokenRequirementSetDigests": {
+            "native.ios": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            "native.android": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+          },
+          "platformSafetyRequirementSetDigests": {
+            "ios": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            "android": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            "native.react-native-web": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+          }
         },
         {
           "descriptor": "renderer-react-compatible",
@@ -136,8 +158,12 @@
           "version": "1.0.0",
           "export": "@core-ui/react/button",
           "specRevision": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
-          "tokenRequirementsDigest": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
-          "platformSafetyRequirementsDigest": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+          "tokenRequirementSetDigests": {
+            "web.react": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+          },
+          "platformSafetyRequirementSetDigests": {
+            "web.react": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+          }
         }
       ]
     },
@@ -161,8 +187,12 @@
           "version": "1.1.0",
           "export": "@core-ui/react/button",
           "specRevision": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
-          "tokenRequirementsDigest": "sha256:8888888888888888888888888888888888888888888888888888888888888888",
-          "platformSafetyRequirementsDigest": "sha256:8888888888888888888888888888888888888888888888888888888888888888"
+          "tokenRequirementSetDigests": {
+            "web.react": "sha256:8888888888888888888888888888888888888888888888888888888888888888"
+          },
+          "platformSafetyRequirementSetDigests": {
+            "web.react": "sha256:8888888888888888888888888888888888888888888888888888888888888888"
+          }
         }
       ]
     }

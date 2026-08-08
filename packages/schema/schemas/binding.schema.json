@@ -20,7 +20,7 @@
       }
       },
       {
-      "required": ["schemaVersion", "strategy", "reason"],
+      "required": ["schemaVersion", "strategy", "reason", "platformSafety"],
       "properties": { "strategy": {
         "const": "unsupported",
         "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
@@ -32,7 +32,6 @@
           { "required": ["behavior"] },
           { "required": ["accessibility"] },
           { "required": ["tokenRecipe"] },
-          { "required": ["platformSafety"] },
           { "required": ["runtimeProfiles"] }
         ]
       }
@@ -243,7 +242,8 @@
       "required": ["id", "disposition"],
       "properties": {
         "id": {
-          "enum": ["system.forced-colors", "system.high-contrast", "native.dynamic-color", "native.font-metrics", "layout.direction", "platform.accessibility-mapping"],
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]*(?:\\.[a-z][a-z0-9-]*)+$",
           "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
         },
         "disposition": {

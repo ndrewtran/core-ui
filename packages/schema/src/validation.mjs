@@ -1,4 +1,5 @@
 import { canonicalJson } from './canonical.mjs';
+import { platformSafetyRequirementIds } from '../generated/platform-safety-contract.mjs';
 import {
   loadFamilySchema,
   loadJsonDocument,
@@ -287,6 +288,34 @@ function semanticIssues(family, value, ownership) {
         }
       }
     }
+    const platformSafetyIds = new Set(platformSafetyRequirementIds);
+    for (const { object, path } of bindingContexts) {
+      for (const [declarationIndex, declaration] of (object.platformSafety ?? []).entries()) {
+        for (const [requirementIndex, requirement] of (declaration.requirements ?? []).entries()) {
+          if (!platformSafetyIds.has(requirement.id)) {
+            issues.push({
+              path: `${path}/platformSafety/${declarationIndex}/requirements/${requirementIndex}/id`,
+              message: 'must be owned by the architecture platform-safety registry',
+            });
+          }
+        }
+      }
+    }
+  }
+  if (family === 'query-envelope') {
+    const platformSafetyIds = new Set(platformSafetyRequirementIds);
+    walkObjects(value, (object, path) => {
+      if (Array.isArray(object.dispositions) && Object.hasOwn(object, 'contractDigest')) {
+        for (const [index, disposition] of object.dispositions.entries()) {
+          if (!platformSafetyIds.has(disposition.id)) {
+            issues.push({
+              path: `${path}/dispositions/${index}/id`,
+              message: 'must be owned by the architecture platform-safety registry',
+            });
+          }
+        }
+      }
+    });
   }
   if (family === 'example') {
     const implementationPurposes = new Set(['generation', 'validation', 'migration']);

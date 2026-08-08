@@ -294,6 +294,14 @@ test('E-G0.1-01 negative: unknown, duplicate, invalid-relation, and unowned fiel
     schemaVersion: '2.0.0',
     strategy: 'unsupported',
     reason: 'No responsible implementation exists.',
+    platformSafety: component().bindings['web.react'].platformSafety.map((declaration) => ({
+      ...declaration,
+      requirements: declaration.requirements.map(({ id }) => ({
+        id,
+        disposition: 'not-applicable',
+        reason: 'The binding is unsupported in G1.0.',
+      })),
+    })),
   };
   assert.deepEqual(validateFamily('binding', unsupportedBinding), unsupportedBinding);
   const componentWithUnsupportedBinding = component();
@@ -387,9 +395,7 @@ test('E-G0.1-01 negative: unknown, duplicate, invalid-relation, and unowned fiel
 
   const danglingAlternative = component();
   danglingAlternative.bindings['web.react'] = {
-    schemaVersion: '2.0.0',
-    strategy: 'unsupported',
-    reason: 'No responsible implementation exists.',
+    ...unsupportedBinding,
     alternative: 'core:component:missing',
   };
   assert.throws(
@@ -416,6 +422,7 @@ test('E-G0.5-01: discriminated binding branches retain exact required-field diag
     '$/behavior',
     '$/accessibility',
     '$/tokenRecipe',
+    '$/platformSafety',
     '$/runtimeProfiles',
   ];
   for (const strategy of ['direct', 'adapted', 'native-alternative']) {
@@ -436,6 +443,7 @@ test('E-G0.5-01: discriminated binding branches retain exact required-field diag
     strategy: 'unsupported',
   });
   assert.ok(unsupportedIssues.some((issue) => issue.path === '$/reason'));
+  assert.ok(unsupportedIssues.some((issue) => issue.path === '$/platformSafety'));
   assert.equal(unsupportedIssues.some((issue) => issue.path === '$/api'), false);
 
   for (const strategy of ['direct', 'adapted', 'native-alternative']) {

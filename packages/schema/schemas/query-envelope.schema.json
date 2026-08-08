@@ -406,7 +406,7 @@
     },
     "tokenRequirement": {
       "type": "object",
-      "additionalProperties": true,
+      "additionalProperties": false,
       "required": ["token", "requirement", "type", "unit", "modes", "overridePolicy"],
       "properties": {
         "token": { "type": "string", "pattern": "^(semantic|component)\\." },
@@ -415,7 +415,31 @@
         "unit": { "enum": ["hex", "px", "ms", "unitless", "string"] },
         "modes": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
         "overridePolicy": { "enum": ["fixed", "theme", "instance"] },
-        "fallback": { "type": "object" }
+        "fallback": {
+          "oneOf": [
+            { "$ref": "binding.schema.json#/$defs/fallbackToken" },
+            { "$ref": "binding.schema.json#/$defs/fallbackValue" }
+          ]
+        }
+      }
+    },
+    "tokenClosureEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["token", "layer", "type", "unit", "meaning", "overridePolicy", "resolved", "dependencies"],
+      "properties": {
+        "token": { "type": "string", "pattern": "^(reference|semantic|component)\\." },
+        "layer": { "enum": ["reference", "semantic", "component"] },
+        "type": { "enum": ["color", "dimension", "duration", "number", "string"] },
+        "unit": { "enum": ["hex", "px", "ms", "unitless", "string"] },
+        "meaning": { "type": "string", "minLength": 1 },
+        "overridePolicy": { "enum": ["fixed", "theme", "instance"] },
+        "resolved": { "type": ["string", "number"] },
+        "dependencies": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^(reference|semantic|component)\\." },
+          "uniqueItems": true
+        }
       }
     },
     "tokenRequirementSet": {
@@ -430,7 +454,7 @@
         "sourceRevision": { "$ref": "#/$defs/digest" },
         "tokenContractVersion": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
         "requirements": { "type": "array", "items": { "$ref": "#/$defs/tokenRequirement" } },
-        "closure": { "type": "array", "items": { "type": "object" } },
+        "closure": { "type": "array", "items": { "$ref": "#/$defs/tokenClosureEntry" } },
         "digest": { "$ref": "#/$defs/digest" }
       }
     },
@@ -439,7 +463,7 @@
       "additionalProperties": false,
       "required": ["id", "disposition"],
       "properties": {
-        "id": { "enum": ["system.forced-colors", "system.high-contrast", "native.dynamic-color", "native.font-metrics", "layout.direction", "platform.accessibility-mapping"] },
+        "id": { "type": "string", "pattern": "^[a-z][a-z0-9-]*(?:\\.[a-z][a-z0-9-]*)+$" },
         "disposition": { "enum": ["required", "not-applicable"] },
         "reason": { "type": "string", "minLength": 1 }
       }
@@ -460,10 +484,65 @@
         "digest": { "$ref": "#/$defs/digest" }
       }
     },
+    "stylingValue": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["recipe", "requirementSets", "platformSafetyRequirementSets"],
+          "properties": {
+            "recipe": { "type": "object" },
+            "requirementSets": {
+              "type": "object",
+              "additionalProperties": { "$ref": "#/$defs/tokenRequirementSet" }
+            },
+            "platformSafetyRequirementSets": {
+              "type": "object",
+              "additionalProperties": { "$ref": "#/$defs/platformSafetyRequirementSet" }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["recipes", "requirementSets", "platformSafetyRequirementSets"],
+          "properties": {
+            "recipes": { "type": "object" },
+            "requirementSets": {
+              "type": "object",
+              "additionalProperties": { "$ref": "#/$defs/tokenRequirementSet" }
+            },
+            "platformSafetyRequirementSets": {
+              "type": "object",
+              "additionalProperties": { "$ref": "#/$defs/platformSafetyRequirementSet" }
+            }
+          }
+        }
+      ]
+    },
     "detailData": {
       "type": "object",
       "additionalProperties": true,
       "required": ["artifact"],
+      "allOf": [{
+        "oneOf": [
+          {
+            "required": ["section", "value"],
+            "properties": {
+              "section": { "const": "styling" },
+              "value": { "$ref": "#/$defs/stylingValue" }
+            }
+          },
+          {
+            "required": ["section", "value"],
+            "properties": {
+              "section": { "enum": ["api", "examples", "guidance", "decision-context", "accessibility", "source"] },
+              "value": true
+            }
+          },
+          { "not": { "required": ["section"] } }
+        ]
+      }],
       "properties": {
         "artifact": {
           "type": "object",

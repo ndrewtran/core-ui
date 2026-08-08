@@ -100,7 +100,7 @@ test('E-G1.0-07 resolver rejects a weakened platform-safety requirement digest',
     ({ id }) => id === 'renderer-react-compatible',
   );
   descriptor.bindings['core:component:button#web.react']
-    .platformSafetyRequirementsDigest = `sha256:${'0'.repeat(64)}`;
+    .platformSafetyRequirementSetDigests['web.react'] = `sha256:${'0'.repeat(64)}`;
   const graph = value.graphs.find(({ id }) => id === 'selected-direct-compatible');
   const result = resolve(value, graph);
   assert.equal(result.error.code, 'CORE_CATALOG_INCOMPATIBLE');
@@ -110,6 +110,25 @@ test('E-G1.0-07 resolver rejects a weakened platform-safety requirement digest',
     ),
     true,
   );
+});
+
+test('E-G1.0-04 compatibility rejects one changed native profile digest', async () => {
+  for (const [field, profile, dimension] of [
+    ['tokenRequirementSetDigests', 'native.ios', 'token'],
+    ['platformSafetyRequirementSetDigests', 'android', 'platform-safety'],
+  ]) {
+    const value = await corpus();
+    value.rendererDescriptors.find(({ id }) => id === 'renderer-native-compatible')
+      .bindings['core:component:button#native.react-native'][field][profile]
+      = `sha256:${'0'.repeat(64)}`;
+    const graph = value.graphs.find(({ id }) => id === 'selected-direct-compatible');
+    const result = resolve(value, graph);
+    assert.equal(result.error.code, 'CORE_CATALOG_INCOMPATIBLE');
+    assert.equal(
+      result.error.details.compatibilityFailures.some((failure) => failure.dimension === dimension),
+      true,
+    );
+  }
 });
 
 test('E-G0.4 explicit cache remains subordinate to manifest and lock authority', async () => {
@@ -422,8 +441,12 @@ test('E-G0.4 pnpm adapter normalizes renderer packages into the single resolver'
           export: '@core-ui/react/button',
           lifecycle: 'experimental',
           strategy: 'direct',
-          tokenRequirementsDigest: 'sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
-          platformSafetyRequirementsDigest: 'sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd',
+          tokenRequirementSetDigests: {
+            'web.react': 'sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
+          },
+          platformSafetyRequirementSetDigests: {
+            'web.react': 'sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd',
+          },
         },
       },
     };
@@ -462,9 +485,9 @@ test('E-G0.4 pnpm adapter normalizes renderer packages into the single resolver'
           version: '1.0.0',
           export: descriptor.bindings[binding].export,
           specRevision: descriptor.bindings[binding].specRevision,
-          tokenRequirementsDigest: descriptor.bindings[binding].tokenRequirementsDigest,
-          platformSafetyRequirementsDigest:
-            descriptor.bindings[binding].platformSafetyRequirementsDigest,
+          tokenRequirementSetDigests: descriptor.bindings[binding].tokenRequirementSetDigests,
+          platformSafetyRequirementSetDigests:
+            descriptor.bindings[binding].platformSafetyRequirementSetDigests,
         }],
       },
       bundle: './catalog.json',

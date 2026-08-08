@@ -79,13 +79,13 @@ export function migrateBindingV1ToV2(binding, { tokenRecipe, platformSafety } = 
   const migrated = structuredClone(binding);
   migrated.schemaVersion = '2.0.0';
   delete migrated.tokenSources;
+  if (!Array.isArray(platformSafety) || platformSafety.length === 0) {
+    migrationError('$migration/platformSafety', 'must provide binding-owned declarations');
+  }
+  migrated.platformSafety = structuredClone(platformSafety);
   if (migrated.strategy !== 'unsupported') {
     assertPlainObject(tokenRecipe, '$migration/tokenRecipe');
-    if (!Array.isArray(platformSafety) || platformSafety.length === 0) {
-      migrationError('$migration/platformSafety', 'must provide binding-owned declarations');
-    }
     migrated.tokenRecipe = structuredClone(tokenRecipe);
-    migrated.platformSafety = structuredClone(platformSafety);
   }
   validateFamily('binding', migrated);
   return migrated;

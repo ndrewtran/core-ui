@@ -139,6 +139,14 @@ function hasExactFields(value, fields) {
     && Object.keys(value).every((field) => fields.includes(field));
 }
 
+function hasDigestMap(value) {
+  return value !== null
+    && typeof value === 'object'
+    && !Array.isArray(value)
+    && Object.keys(value).length > 0
+    && Object.values(value).every((digest) => /^sha256:[a-f0-9]{64}$/u.test(digest));
+}
+
 function loadCatalogCandidate(packageRoot) {
   const failures = [];
   let packageManifest;
@@ -235,12 +243,19 @@ function loadCatalogCandidate(packageRoot) {
     ];
     const bindingFields = [
       'binding', 'descriptor', 'export', 'package', 'specRevision',
-      'tokenRequirementsDigest', 'platformSafetyRequirementsDigest', 'version',
+      'tokenRequirementSetDigests', 'platformSafetyRequirementSetDigests', 'version',
+    ];
+    const bindingScalarFields = [
+      'binding', 'descriptor', 'export', 'package', 'specRevision', 'version',
     ];
     const releaseValid = hasExactFields(release, releaseFields)
       && hasExactFields(release.catalog, ['digest', 'id', 'version'])
       && Array.isArray(release.bindings)
       && release.bindings.every((binding) => hasExactFields(binding, bindingFields))
+      && release.bindings.every((binding) => (
+        hasDigestMap(binding.tokenRequirementSetDigests)
+        && hasDigestMap(binding.platformSafetyRequirementSetDigests)
+      ))
       && [
         release.id,
         release.queryApiVersion,
@@ -251,7 +266,7 @@ function loadCatalogCandidate(packageRoot) {
         release.catalog.digest,
         release.catalog.id,
         release.catalog.version,
-        ...release.bindings.flatMap((binding) => bindingFields.map((field) => binding[field])),
+        ...release.bindings.flatMap((binding) => bindingScalarFields.map((field) => binding[field])),
       ].every((value) => typeof value === 'string')
       && new Set(release.bindings.map(({ binding }) => binding)).size === release.bindings.length;
     if (

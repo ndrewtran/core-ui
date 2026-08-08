@@ -117,6 +117,25 @@ test('E-G1.0-04 catalog exposes resolved requirement sets matching packed descri
   );
 });
 
+test('E-G1.0-04 query validation rejects open fallback and dependency closure facts', async () => {
+  const bundle = await readJson('../generated/catalog.json');
+  const response = createCatalogApi(bundle).getArtifact({
+    id: 'core:component:button',
+    platform: 'web.react',
+    detail: 'full',
+  });
+  const arbitraryFallback = structuredClone(response);
+  arbitraryFallback.data.artifact.tokenRequirementSets['web.react:web.react']
+    .requirements[0].fallback = { arbitrary: true };
+  assert.throws(() => validateFamily('query-envelope', arbitraryFallback), /CORE_SCHEMA_INVALID/);
+
+  const arbitraryClosure = structuredClone(response);
+  arbitraryClosure.data.artifact.tokenRequirementSets['web.react:web.react'].closure[0] = {
+    modelSelectedCanonicalFact: true,
+  };
+  assert.throws(() => validateFamily('query-envelope', arbitraryClosure), /CORE_SCHEMA_INVALID/);
+});
+
 test('E-G1.0-07 catalog and package expose exact platform-safety set digests', async () => {
   const bundle = await readJson('../generated/catalog.json');
   const identity = await readJson('../generated/catalog-package.json');
@@ -136,4 +155,12 @@ test('E-G1.0-07 catalog and package expose exact platform-safety set digests', a
   );
   assert.equal(Object.hasOwn(set, 'support'), false);
   assert.equal(Object.hasOwn(set, 'evidence'), false);
+
+  const unknownRequirement = structuredClone(response);
+  unknownRequirement.data.value.platformSafetyRequirementSets['web.react:web.react']
+    .dispositions[0].id = 'system.unknown';
+  assert.throws(
+    () => validateFamily('query-envelope', unknownRequirement),
+    /CORE_SCHEMA_INVALID/,
+  );
 });

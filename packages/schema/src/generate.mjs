@@ -7,6 +7,10 @@ import { loadJsonDocument, resolveJsonPointer } from './contracts.mjs';
 
 const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../../..');
 const recipe = loadJsonDocument('type-projection.json');
+const platformSafetyContract = JSON.parse(readFileSync(
+  join(repositoryRoot, 'strategy/platform-safety-contract.json'),
+  'utf8',
+));
 
 function projectionValues(source, valueField) {
   const [fileName, pointer] = source.split('#');
@@ -41,19 +45,46 @@ const policy = JSON.parse(await readFile(
 const source = 'packages/schema/schemas/type-projection.json';
 const outputPath = join(repositoryRoot, recipe.output);
 const expected = generatedText({ source, body, policy });
+const platformSafetySource = 'strategy/platform-safety-contract.json';
+const platformSafetyBody = [
+  `export const platformSafetyContract = Object.freeze(${JSON.stringify(platformSafetyContract)});`,
+  'export const platformSafetyRequirementIds = Object.freeze(',
+  '  platformSafetyContract.requirements.map(({ id }) => id),',
+  ');',
+  '',
+].join('\n');
+const platformSafetyOutputPath = join(
+  repositoryRoot,
+  'packages/schema/generated/platform-safety-contract.mjs',
+);
+const expectedPlatformSafety = generatedText({
+  source: platformSafetySource,
+  body: platformSafetyBody,
+  policy,
+});
 
 if (process.argv.includes('--check')) {
-  const actual = await readFile(outputPath, 'utf8').catch(() => null);
-  if (actual !== expected) {
+  const [actual, actualPlatformSafety] = await Promise.all([
+    readFile(outputPath, 'utf8').catch(() => null),
+    readFile(platformSafetyOutputPath, 'utf8').catch(() => null),
+  ]);
+  if (actual !== expected || actualPlatformSafety !== expectedPlatformSafety) {
     console.error(
       `SCHEMA_GENERATED_TYPES_DRIFT: ${normalizePath(recipe.output)} must be regenerated from ${source}`,
     );
     process.exitCode = 1;
   } else {
-    console.log(`[schema] generated types match ${source}`);
+    console.log(`[schema] generated types and platform-safety contract match canonical sources`);
   }
 } else {
-  await mkdir(dirname(outputPath), { recursive: true });
-  await writeFile(outputPath, expected);
+  await Promise.all([
+    mkdir(dirname(outputPath), { recursive: true }),
+    mkdir(dirname(platformSafetyOutputPath), { recursive: true }),
+  ]);
+  await Promise.all([
+    writeFile(outputPath, expected),
+    writeFile(platformSafetyOutputPath, expectedPlatformSafety),
+  ]);
   console.log(`[schema] generated ${normalizePath(recipe.output)}`);
+  console.log('[schema] generated packages/schema/generated/platform-safety-contract.mjs');
 }

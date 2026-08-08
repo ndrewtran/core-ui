@@ -222,7 +222,6 @@ export async function compileCatalog({
       : {};
     const platformSafetyRequirementSets = record.kind === 'component'
       ? Object.fromEntries(Object.entries(record.bindings)
-        .filter(([, binding]) => binding.strategy !== 'unsupported')
         .flatMap(([bindingId, binding]) => Object.entries(compilePlatformSafetyRequirementSets({
           contract: platformSafetyContract,
           bindingId,

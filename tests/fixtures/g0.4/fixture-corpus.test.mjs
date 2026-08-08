@@ -109,15 +109,15 @@ function validateDescriptor(descriptor) {
       fail(`${descriptor.id} has invalid binding ${bindingId}`);
     }
     const bindingFields = [
-      'specRevision', 'export', 'lifecycle', 'strategy', 'tokenRequirementsDigest',
-      'platformSafetyRequirementsDigest',
+      'specRevision', 'export', 'lifecycle', 'strategy', 'tokenRequirementSetDigests',
+      'platformSafetyRequirementSetDigests',
     ];
     closed(binding, bindingFields, `${descriptor.id}.${bindingId}`);
     required(binding, bindingFields, `${descriptor.id}.${bindingId}`);
     if (
       !DIGEST.test(binding.specRevision)
-      || !DIGEST.test(binding.tokenRequirementsDigest)
-      || !DIGEST.test(binding.platformSafetyRequirementsDigest)
+      || !Object.values(binding.tokenRequirementSetDigests).every((digest) => DIGEST.test(digest))
+      || !Object.values(binding.platformSafetyRequirementSetDigests).every((digest) => DIGEST.test(digest))
     ) {
       fail(`${descriptor.id}.${bindingId} has an invalid revision`);
     }
@@ -153,8 +153,8 @@ function validateRelease(release, catalogs, descriptors) {
   for (const binding of release.bindings) {
     const bindingFields = [
       'descriptor', 'binding', 'package', 'version', 'export', 'specRevision',
-      'tokenRequirementsDigest',
-      'platformSafetyRequirementsDigest',
+      'tokenRequirementSetDigests',
+      'platformSafetyRequirementSetDigests',
     ];
     closed(binding, bindingFields, `${release.id}.binding`);
     required(binding, bindingFields, `${release.id}.binding`);
@@ -167,8 +167,8 @@ function validateRelease(release, catalogs, descriptors) {
       || descriptor.version !== binding.version
       || described?.export !== binding.export
       || described?.specRevision !== binding.specRevision
-      || described?.tokenRequirementsDigest !== binding.tokenRequirementsDigest
-      || described?.platformSafetyRequirementsDigest !== binding.platformSafetyRequirementsDigest
+      || JSON.stringify(described?.tokenRequirementSetDigests) !== JSON.stringify(binding.tokenRequirementSetDigests)
+      || JSON.stringify(described?.platformSafetyRequirementSetDigests) !== JSON.stringify(binding.platformSafetyRequirementSetDigests)
     ) {
       fail(`${release.id} binding tuple does not match ${binding.descriptor}`);
     }

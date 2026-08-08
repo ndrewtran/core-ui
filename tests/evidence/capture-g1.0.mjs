@@ -252,11 +252,42 @@ const packedMatches = Object.entries(componentArtifact.tokenRequirementSets).map
   packedDigest: packedDescriptor.tokenRequirementSets[`${component.id}#${key}`],
   matched: set.digest === packedDescriptor.tokenRequirementSets[`${component.id}#${key}`],
 }));
+const packedRendererDescriptor = {
+  descriptorVersion: '1.0.0-test-fixture',
+  classification: 'test-only-synthetic',
+  bindings: Object.fromEntries(Object.entries(component.bindings)
+    .filter(([, binding]) => binding.strategy !== 'unsupported')
+    .map(([bindingId]) => [bindingId, {
+      specRevision: componentArtifact.bindingSpecRevisions[bindingId],
+      tokenRequirementSetDigests: Object.fromEntries(Object.entries(
+        componentArtifact.tokenRequirementSets,
+      ).filter(([key]) => key.startsWith(`${bindingId}:`)).map(([key, set]) => [
+        key.slice(bindingId.length + 1),
+        set.digest,
+      ])),
+      platformSafetyRequirementSetDigests: Object.fromEntries(Object.entries(
+        componentArtifact.platformSafetyRequirementSets,
+      ).filter(([key]) => key.startsWith(`${bindingId}:`)).map(([key, set]) => [
+        key.slice(bindingId.length + 1),
+        set.digest,
+      ])),
+    }])),
+};
+const packedRendererMatches = Object.entries(componentArtifact.tokenRequirementSets)
+  .map(([key, set]) => {
+    const separator = key.indexOf(':');
+    const bindingId = key.slice(0, separator);
+    const profile = key.slice(separator + 1);
+    const packedDigest = packedRendererDescriptor.bindings[bindingId]
+      .tokenRequirementSetDigests[profile];
+    return { key, digest: set.digest, packedDigest, matched: set.digest === packedDigest };
+  });
 if (
   baseSet.digest !== unrelatedSet.digest
   || baseSet.sourceRevision === unrelatedSet.sourceRevision
   || baseSet.digest === dependencySet.digest
   || packedMatches.some(({ matched }) => !matched)
+  || packedRendererMatches.some(({ matched }) => !matched)
 ) throw new Error('EVIDENCE_REQUIREMENT_SET_CLOSURE_FAILED');
 
 const platformSafetyContract = compiled.bundle.platformSafetyContract;
@@ -272,6 +303,16 @@ const platformSafetyPackedMatches = Object.entries(
   matched: set.digest
     === packedDescriptor.platformSafetyRequirementSets[`${component.id}#${key}`],
 }));
+const platformSafetyRendererMatches = Object.entries(
+  componentArtifact.platformSafetyRequirementSets,
+).map(([key, set]) => {
+  const separator = key.indexOf(':');
+  const bindingId = key.slice(0, separator);
+  const profile = key.slice(separator + 1);
+  const packedDigest = packedRendererDescriptor.bindings[bindingId]
+    .platformSafetyRequirementSetDigests[profile];
+  return { key, digest: set.digest, packedDigest, matched: set.digest === packedDigest };
+});
 const platformSafetyDenialCodes = {};
 const unknownSafety = structuredClone(webSafetyBinding);
 unknownSafety.platformSafety[0].requirements[0].id = 'system.unknown';
@@ -332,7 +373,49 @@ platformSafetyDenialCodes.prematurelyFulfilled = observedPlatformSafetyCode(
     binding: prematureSafety,
   }),
 );
-if (platformSafetyPackedMatches.some(({ matched }) => !matched)) {
+const unsupportedTopLevelBinding = {
+  schemaVersion: '2.0.0',
+  strategy: 'unsupported',
+  reason: 'No implementation is available in G1.0.',
+  platformSafety: [{
+    profile: 'web.react',
+    requirements: platformSafetyContract.requirements.map(({ id }) => ({
+      id,
+      disposition: 'not-applicable',
+      reason: 'The binding is unsupported in G1.0.',
+    })),
+  }],
+};
+const unsupportedTopLevelSet = compilePlatformSafetyRequirementSets({
+  contract: platformSafetyContract,
+  bindingId: 'web.react',
+  binding: unsupportedTopLevelBinding,
+})['web.react'];
+const unsupportedMissing = structuredClone(unsupportedTopLevelBinding);
+delete unsupportedMissing.platformSafety;
+platformSafetyDenialCodes.unsupportedDeclarationMissing = observedPlatformSafetyCode(
+  () => compilePlatformSafetyRequirementSets({
+    contract: platformSafetyContract,
+    bindingId: 'web.react',
+    binding: unsupportedMissing,
+  }),
+);
+const unsupportedRequired = structuredClone(unsupportedTopLevelBinding);
+unsupportedRequired.platformSafety[0].requirements[0] = {
+  id: unsupportedRequired.platformSafety[0].requirements[0].id,
+  disposition: 'required',
+};
+platformSafetyDenialCodes.unsupportedRequirementClaimed = observedPlatformSafetyCode(
+  () => compilePlatformSafetyRequirementSets({
+    contract: platformSafetyContract,
+    bindingId: 'web.react',
+    binding: unsupportedRequired,
+  }),
+);
+if (
+  platformSafetyPackedMatches.some(({ matched }) => !matched)
+  || platformSafetyRendererMatches.some(({ matched }) => !matched)
+) {
   throw new Error('EVIDENCE_PLATFORM_SAFETY_PROJECTION_FAILED');
 }
 
@@ -479,6 +562,8 @@ const definitions = [
     dependencyChangeDigest: dependencySet.digest,
     exactClosureDigest: baseSet.digest,
     packedMatches,
+    packedRendererDescriptorDigest: canonicalDigest(packedRendererDescriptor),
+    packedRendererMatches,
     unrelatedChangeDigest: unrelatedSet.digest,
     unrelatedSourceRevisionChanged: true,
   }],
@@ -508,8 +593,11 @@ const definitions = [
     contractVersion: platformSafetyContract.contractVersion,
     denialCodes: platformSafetyDenialCodes,
     packedMatches: platformSafetyPackedMatches,
+    packedRendererDescriptorDigest: canonicalDigest(packedRendererDescriptor),
+    packedRendererMatches: platformSafetyRendererMatches,
     requirementSetCount: platformSafetyPackedMatches.length,
     supportClaim: 'none',
+    unsupportedTopLevelSetDigest: unsupportedTopLevelSet.digest,
   }],
 ];
 
