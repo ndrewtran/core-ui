@@ -1,23 +1,31 @@
 import { canonicalDigest, sha256Digest } from './canonical.mjs';
 import { validateCatalogRecords, validateFamily } from './validation.mjs';
 
-export function contentRevision(family, record, { sourceBytes } = {}) {
+export function contentRevisionPreimage(family, record, { sourceBytes } = {}) {
   validateFamily(family, record);
   if (family === 'example') {
     if (typeof sourceBytes !== 'string' && !Buffer.isBuffer(sourceBytes)) {
       throw new Error(`CORE_RELATION_INVALID: missing executable source bytes for ${record.id}`);
     }
-    return canonicalDigest({ record, sourceDigest: sha256Digest(sourceBytes) });
+    return { record, sourceDigest: sha256Digest(sourceBytes) };
   }
-  return canonicalDigest(record);
+  return record;
+}
+
+export function contentRevision(family, record, options = {}) {
+  return canonicalDigest(contentRevisionPreimage(family, record, options));
+}
+
+export function bindingContentRevisionPreimage(binding) {
+  validateFamily('binding', binding);
+  return binding;
 }
 
 export function bindingContentRevision(binding) {
-  validateFamily('binding', binding);
-  return canonicalDigest(binding);
+  return canonicalDigest(bindingContentRevisionPreimage(binding));
 }
 
-export function bindingSpecRevision({
+export function bindingSpecRevisionPreimage({
   component,
   bindingId,
   examples = [],
@@ -61,7 +69,7 @@ export function bindingSpecRevision({
         .sort((left, right) => left.token.localeCompare(right.token)),
     };
   });
-  const closure = {
+  return {
     component: {
       id: component.id,
       lifecycle: component.lifecycle,
@@ -82,5 +90,8 @@ export function bindingSpecRevision({
     normativeExamples,
     tokenRequirements,
   };
-  return canonicalDigest(closure);
+}
+
+export function bindingSpecRevision(input) {
+  return canonicalDigest(bindingSpecRevisionPreimage(input));
 }

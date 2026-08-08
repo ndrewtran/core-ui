@@ -46,8 +46,17 @@ export {
   parseSchemaVersion,
 } from './evolution.mjs';
 export {
+  authoringMetadata,
+  authoringMetadataDigest,
+  resolveAuthoringField,
+  validateAuthoringMetadata,
+} from './authoring.mjs';
+export {
+  bindingContentRevisionPreimage,
   bindingContentRevision,
+  bindingSpecRevisionPreimage,
   bindingSpecRevision,
+  contentRevisionPreimage,
   contentRevision,
 } from './revisions.mjs';
 export {

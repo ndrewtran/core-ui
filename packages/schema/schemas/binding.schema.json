@@ -33,42 +33,124 @@
     ]
   }],
   "properties": {
-    "schemaVersion": { "const": "1.0.0" },
-    "lifecycle": { "enum": ["experimental", "stable", "deprecated", "removed"] },
-    "strategy": { "enum": ["direct", "adapted", "native-alternative", "unsupported"] },
-    "reason": { "type": "string", "minLength": 1 },
-    "alternative": { "$ref": "artifact-ref.schema.json" },
+    "schemaVersion": {
+      "const": "1.0.0",
+      "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content"] }
+    },
+    "lifecycle": {
+      "enum": ["experimental", "stable", "deprecated", "removed"],
+      "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
+    },
+    "strategy": {
+      "enum": ["direct", "adapted", "native-alternative", "unsupported"],
+      "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
+    },
+    "reason": {
+      "type": "string",
+      "minLength": 1,
+      "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content"] }
+    },
+    "alternative": {
+      "$ref": "artifact-ref.schema.json",
+      "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content"] }
+    },
     "api": {
       "type": "object",
       "additionalProperties": false,
       "required": ["props", "events", "parts", "defaults"],
+      "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] },
       "properties": {
-        "props": { "type": "array", "items": { "type": "string", "minLength": 1 }, "uniqueItems": true },
-        "events": { "type": "array", "items": { "type": "string", "minLength": 1 }, "uniqueItems": true },
-        "parts": { "type": "array", "items": { "type": "string", "minLength": 1 }, "uniqueItems": true },
-        "defaults": { "type": "object", "additionalProperties": true }
+        "props": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true,
+          "x-core-ui-authoring": {
+            "effects": { "add": "compatible", "remove": "incompatible", "replace": "incompatible" },
+            "revisionAxes": ["binding-content", "binding-spec"]
+          }
+        },
+        "events": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true,
+          "x-core-ui-authoring": {
+            "effects": { "add": "compatible", "remove": "incompatible", "replace": "incompatible" },
+            "revisionAxes": ["binding-content", "binding-spec"]
+          }
+        },
+        "parts": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true,
+          "x-core-ui-authoring": {
+            "effects": { "add": "compatible", "remove": "incompatible", "replace": "incompatible" },
+            "revisionAxes": ["binding-content", "binding-spec"]
+          }
+        },
+        "defaults": {
+          "type": "object",
+          "additionalProperties": true,
+          "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
+        }
       }
     },
-    "behavior": { "type": "array", "items": { "type": "string", "minLength": 1 }, "uniqueItems": true },
-    "accessibility": { "type": "array", "items": { "type": "string", "minLength": 1 }, "uniqueItems": true },
-    "tokenSources": { "type": "array", "items": { "type": "string", "pattern": "^core:token:[a-z0-9]+(?:-[a-z0-9]+)*$" }, "uniqueItems": true },
+    "behavior": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true,
+      "x-core-ui-authoring": {
+        "effects": { "add": "compatible", "remove": "incompatible", "replace": "incompatible" },
+        "revisionAxes": ["binding-content", "binding-spec"]
+      }
+    },
+    "accessibility": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true,
+      "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
+    },
+    "tokenSources": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^core:token:[a-z0-9]+(?:-[a-z0-9]+)*$" },
+      "uniqueItems": true,
+      "x-core-ui-authoring": {
+        "effects": { "add": "compatible", "remove": "incompatible", "replace": "incompatible" },
+        "revisionAxes": ["binding-content", "binding-spec"]
+      }
+    },
     "runtimeProfiles": {
       "type": "object",
       "additionalProperties": false,
+      "x-core-ui-authoring": {
+        "effects": { "add": "compatible", "remove": "incompatible", "replace": "incompatible" },
+        "revisionAxes": ["binding-content", "binding-spec"]
+      },
       "properties": {
         "ios": {
+          "x-core-ui-authoring": {
+            "effects": { "add": "compatible", "remove": "incompatible", "replace": "incompatible" },
+            "revisionAxes": ["binding-content", "binding-spec"]
+          },
           "allOf": [
             { "$ref": "#/$defs/runtimeProfile" },
             { "type": "object", "properties": { "validationProfile": { "const": "native.ios" } } }
           ]
         },
         "android": {
+          "x-core-ui-authoring": {
+            "effects": { "add": "compatible", "remove": "incompatible", "replace": "incompatible" },
+            "revisionAxes": ["binding-content", "binding-spec"]
+          },
           "allOf": [
             { "$ref": "#/$defs/runtimeProfile" },
             { "type": "object", "properties": { "validationProfile": { "const": "native.android" } } }
           ]
         },
         "native.react-native-web": {
+          "x-core-ui-authoring": {
+            "effects": { "add": "compatible", "remove": "incompatible", "replace": "incompatible" },
+            "revisionAxes": ["binding-content", "binding-spec"]
+          },
           "allOf": [
             { "$ref": "#/$defs/runtimeProfile" },
             { "type": "object", "properties": { "validationProfile": { "const": "native.react-native-web" } } }
@@ -76,8 +158,18 @@
         }
       }
     },
-    "editorialNotes": { "type": "array", "items": { "type": "string" } },
-    "extensions": { "$ref": "#/$defs/extensions" }
+    "editorialNotes": {
+      "type": "array",
+      "items": { "type": "string" },
+      "x-core-ui-authoring": { "effect": "editorial", "revisionAxes": ["binding-content"], "autofixes": ["trim-outer-whitespace"] }
+    },
+    "extensions": {
+      "$ref": "#/$defs/extensions",
+      "x-core-ui-authoring": {
+        "effects": { "add": "compatible", "remove": "incompatible", "replace": "incompatible" },
+        "revisionAxes": ["binding-content"]
+      }
+    }
   },
   "$defs": {
     "runtimeProfile": {
@@ -108,11 +200,27 @@
         ]
       }],
       "properties": {
-        "strategy": { "enum": ["direct", "adapted", "native-alternative", "unsupported"] },
-        "lifecycle": { "enum": ["experimental", "stable", "deprecated", "removed"] },
-        "validationProfile": { "enum": ["native.ios", "native.android", "native.react-native-web"] },
-        "reason": { "type": "string", "minLength": 1 },
-        "alternative": { "$ref": "artifact-ref.schema.json" }
+        "strategy": {
+          "enum": ["direct", "adapted", "native-alternative", "unsupported"],
+          "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
+        },
+        "lifecycle": {
+          "enum": ["experimental", "stable", "deprecated", "removed"],
+          "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
+        },
+        "validationProfile": {
+          "enum": ["native.ios", "native.android", "native.react-native-web"],
+          "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1,
+          "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content"] }
+        },
+        "alternative": {
+          "$ref": "artifact-ref.schema.json",
+          "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content"] }
+        }
       }
     },
     "extensions": {

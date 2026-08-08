@@ -1,0 +1,709 @@
+import { readFile } from 'node:fs/promises';
+import { dirname, posix, resolve } from 'node:path';
+import {
+  SchemaValidationError,
+  authoringMetadata,
+  bindingContentRevision,
+  bindingContentRevisionPreimage,
+  bindingSpecRevision,
+  bindingSpecRevisionPreimage,
+  canonicalDigest,
+  canonicalJson,
+  classifySchemaChange,
+  contentRevision,
+  contentRevisionPreimage,
+  parseJsonStrict,
+  resolveAuthoringField,
+  validateFamily,
+} from '@core-ui/schema';
+import {
+  discoverWorkspacePackages,
+} from '../../../tooling/audits/repository-policy/src/workspace-packages.mjs';
+
+const SOURCE_MANIFEST_SCHEMA = 'core-ui-catalog-source-manifest-v1';
+const EFFECT_ORDER = Object.freeze({ editorial: 0, compatible: 1, incompatible: 2 });
+const DERIVED_COMPONENT_FIELDS = new Set(['schemaVersion', 'id', 'kind']);
+
+export class AuthoringPolicyError extends Error {
+  constructor(ruleId, message, details = {}) {
+    super(`${ruleId}: ${message}`);
+    this.name = 'AuthoringPolicyError';
+    this.code = 'CORE_SCHEMA_INVALID';
+    this.ruleId = ruleId;
+    this.details = details;
+  }
+}
+function compareText(left, right) {
+  return left < right ? -1 : left > right ? 1 : 0;
+}
+
+function isObject(value) {
+  return value !== null && typeof value === 'object' && !Array.isArray(value);
+}
+
+function assertRelativePath(path, field) {
+  if (
+    typeof path !== 'string'
+    || path.length === 0
+    || path.startsWith('/')
+    || path.split('/').includes('..')
+    || path.includes('\\')
+  ) {
+    throw new AuthoringPolicyError(
+      'authoring.path.relative',
+      `${field} must be repository-relative`,
+      { field },
+    );
+  }
+  return path;
+}
+
+function assertExactKeys(value, allowed, ruleId) {
+  if (!isObject(value)) {
+    throw new AuthoringPolicyError(ruleId, 'input must be an object');
+  }
+  const unknown = Object.keys(value).filter((key) => !allowed.has(key)).sort(compareText);
+  if (unknown.length > 0) {
+    throw new AuthoringPolicyError(ruleId, 'input contains unknown fields', { fields: unknown });
+  }
+}
+
+function deepFreeze(value) {
+  if (value && typeof value === 'object' && !Object.isFrozen(value)) {
+    Object.freeze(value);
+    for (const item of Object.values(value)) deepFreeze(item);
+  }
+  return value;
+}
+
+export function scaffoldComponent({ slug, recordPath, decisions } = {}) {
+  if (typeof slug !== 'string' || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/u.test(slug)) {
+    throw new AuthoringPolicyError(
+      'authoring.scaffold.slug',
+      'slug must use the canonical lower-kebab convention',
+      { field: 'slug' },
+    );
+  }
+  assertRelativePath(recordPath, 'recordPath');
+  if (!recordPath.endsWith('.json')) {
+    throw new AuthoringPolicyError(
+      'authoring.scaffold.record-path',
+      'recordPath must identify a canonical JSON source',
+      { field: 'recordPath' },
+    );
+  }
+  assertExactKeys(decisions, new Set(
+    authoringMetadata('component')
+      .filter(({ schema, schemaPointer }) => (
+        schema === 'component.schema.json'
+        && schemaPointer.startsWith('#/properties/')
+        && schemaPointer.split('/').length === 3
+      ))
+      .map(({ field }) => field)
+      .filter((field) => !DERIVED_COMPONENT_FIELDS.has(field)),
+  ), 'authoring.scaffold.decisions');
+  for (const field of ['name', 'summary', 'lifecycle', 'intent', 'anatomy', 'states', 'accessibility', 'bindings']) {
+    if (!Object.hasOwn(decisions, field)) {
+      throw new AuthoringPolicyError(
+        'authoring.scaffold.decision-required',
+        `the caller must supply ${field}`,
+        { field },
+      );
+    }
+  }
+  const record = {
+    schemaVersion: '1.0.0',
+    id: `core:component:${slug}`,
+    kind: 'component',
+    ...structuredClone(decisions),
+  };
+  validateFamily('component', record);
+  const bytes = `${canonicalJson(record)}\n`;
+  return deepFreeze({
+    mode: 'preview-only',
+    family: 'component',
+    recordPath,
+    record,
+    writeSet: [{ path: recordPath, bytes }],
+  });
+}
+
+async function readJson(repositoryRoot, path) {
+  return parseJsonStrict(await readFile(resolve(repositoryRoot, path), 'utf8'));
+}
+
+function validateManifest(manifest) {
+  if (
+    !isObject(manifest)
+    || manifest.schema !== SOURCE_MANIFEST_SCHEMA
+    || typeof manifest.commandRegistryPath !== 'string'
+    || !Array.isArray(manifest.records)
+  ) {
+    throw new AuthoringPolicyError(
+      'authoring.source.manifest',
+      'the declared catalog source manifest is invalid',
+    );
+  }
+  assertRelativePath(manifest.commandRegistryPath, 'commandRegistryPath');
+  for (const [index, entry] of manifest.records.entries()) {
+    if (!isObject(entry) || typeof entry.family !== 'string') {
+      throw new AuthoringPolicyError(
+        'authoring.source.manifest-entry',
+        'a catalog source entry is invalid',
+        { index },
+      );
+    }
+    assertRelativePath(entry.path, `records/${index}/path`);
+    if (entry.sourcePath !== undefined) {
+      assertRelativePath(entry.sourcePath, `records/${index}/sourcePath`);
+    }
+  }
+}
+
+export async function loadRepositoryAuthoringContext({
+  repositoryRoot,
+  expectedSourceRevision,
+  sourceManifestPath = 'packages/catalog/catalog-sources.json',
+  catalogBundlePath = 'packages/catalog/generated/catalog.json',
+  repositoryPolicyPath = 'tooling/audits/repository-policy/repository-policy.json',
+  typeProjectionPath = 'packages/schema/schemas/type-projection.json',
+} = {}) {
+  if (!repositoryRoot) {
+    throw new AuthoringPolicyError(
+      'authoring.context.repository-root',
+      'repositoryRoot is required',
+    );
+  }
+  for (const [field, path] of Object.entries({
+    sourceManifestPath,
+    catalogBundlePath,
+    repositoryPolicyPath,
+    typeProjectionPath,
+  })) assertRelativePath(path, field);
+  const [sourceManifest, catalogBundle, repositoryPolicy, typeProjection, workspacePackages] =
+    await Promise.all([
+      readJson(repositoryRoot, sourceManifestPath),
+      readJson(repositoryRoot, catalogBundlePath),
+      readJson(repositoryRoot, repositoryPolicyPath),
+      readJson(repositoryRoot, typeProjectionPath),
+      discoverWorkspacePackages(repositoryRoot),
+    ]);
+  validateManifest(sourceManifest);
+  if (
+    typeof expectedSourceRevision !== 'string'
+    || expectedSourceRevision !== catalogBundle.sourceRevision
+  ) {
+    throw new AuthoringPolicyError(
+      'authoring.source.revision-stale',
+      'the requested source revision does not match the declared compiled catalog',
+      {
+        expectedSourceRevision: expectedSourceRevision ?? null,
+        actualSourceRevision: catalogBundle.sourceRevision ?? null,
+      },
+    );
+  }
+  return deepFreeze({
+    sourceRevision: catalogBundle.sourceRevision,
+    sourceManifestPath,
+    catalogBundlePath,
+    repositoryPolicyPath,
+    typeProjectionPath,
+    sourceManifest,
+    catalogBundle,
+    repositoryPolicy,
+    typeProjection,
+    workspacePackages,
+  });
+}
+
+function sourceEntry(context, recordPath, family) {
+  return context.sourceManifest.records.find((entry) => (
+    entry.path === recordPath && entry.family === family
+  ));
+}
+
+function sourceDiagnostic(ruleId, message, { record, recordPath, path = '$', owner = null }) {
+  return {
+    code: 'CORE_SCHEMA_INVALID',
+    ruleId,
+    message,
+    retryable: false,
+    details: {
+      artifactId: typeof record?.id === 'string' ? record.id : null,
+      source: { record: recordPath, path },
+      owner,
+    },
+    nextCommand: {
+      command: 'pnpm --filter @core-ui/schema check',
+      effect: 'read-only',
+      requiresConfirmation: false,
+    },
+  };
+}
+
+export function diagnoseCanonicalSource({ context, family, record, recordPath } = {}) {
+  assertRelativePath(recordPath, 'recordPath');
+  if (!sourceEntry(context, recordPath, family)) {
+    return deepFreeze({
+      valid: false,
+      diagnostics: [sourceDiagnostic(
+        'authoring.source.declared-owner',
+        'The source is not declared by the exact catalog source manifest.',
+        { record, recordPath },
+      )],
+    });
+  }
+  try {
+    validateFamily(family, record);
+    return deepFreeze({ valid: true, diagnostics: [] });
+  } catch (error) {
+    if (!(error instanceof SchemaValidationError)) throw error;
+    const diagnostics = error.issues.map(({ path, message }) => {
+      let owner = null;
+      try {
+        const field = resolveAuthoringField(family, path);
+        owner = {
+          name: field.owner,
+          schema: field.schema,
+          schemaPointer: field.schemaPointer,
+        };
+      } catch {
+        owner = { name: `${family}-contract`, schema: `${family}.schema.json`, schemaPointer: '#' };
+      }
+      return sourceDiagnostic(
+        'authoring.source.schema-invalid',
+        `The canonical source is invalid: ${message}`,
+        { record, recordPath, path, owner },
+      );
+    });
+    return deepFreeze({ valid: false, diagnostics });
+  }
+}
+
+function normalizedInputRows(value, path = '$', rows = []) {
+  if (Array.isArray(value)) {
+    value.forEach((item, index) => normalizedInputRows(item, `${path}/${index}`, rows));
+  } else if (isObject(value)) {
+    for (const key of Object.keys(value).sort(compareText)) {
+      normalizedInputRows(value[key], `${path}/${key.replaceAll('~', '~0').replaceAll('/', '~1')}`, rows);
+    }
+  } else {
+    rows.push({ path, value });
+  }
+  return rows;
+}
+
+function revisionAxis(name, preimage) {
+  const normalized = JSON.parse(canonicalJson(preimage));
+  return {
+    name,
+    digest: canonicalDigest(preimage),
+    normalizedInputs: normalizedInputRows(normalized),
+  };
+}
+
+export function explainRevisions({
+  family,
+  record,
+  sourceBytes,
+  bindingId,
+  examples = [],
+  exampleSources = {},
+  tokenSources = [],
+} = {}) {
+  const axes = [revisionAxis(
+    'contentRevision',
+    contentRevisionPreimage(family, record, { sourceBytes }),
+  )];
+  if (family === 'binding') {
+    axes.push(revisionAxis(
+      'bindingContentRevision',
+      bindingContentRevisionPreimage(record),
+    ));
+  }
+  if (family === 'component' && bindingId !== undefined) {
+    axes.push(revisionAxis(
+      'bindingContentRevision',
+      bindingContentRevisionPreimage(record.bindings[bindingId]),
+    ));
+    axes.push(revisionAxis('bindingSpecRevision', bindingSpecRevisionPreimage({
+      component: record,
+      bindingId,
+      examples,
+      exampleSources,
+      tokenSources,
+    })));
+  }
+  return deepFreeze({ family, artifactId: record.id ?? null, bindingId: bindingId ?? null, axes });
+}
+
+function diffValues(before, after, path = '$', changes = []) {
+  if (canonicalJson(before) === canonicalJson(after)) return changes;
+  if (Array.isArray(before) && Array.isArray(after)) {
+    const length = Math.max(before.length, after.length);
+    for (let index = 0; index < length; index += 1) {
+      const hasBefore = index < before.length;
+      const hasAfter = index < after.length;
+      if (!hasBefore) {
+        changes.push({ path: `${path}/${index}`, operation: 'add', after: after[index] });
+      } else if (!hasAfter) {
+        changes.push({ path: `${path}/${index}`, operation: 'remove', before: before[index] });
+      } else {
+        diffValues(before[index], after[index], `${path}/${index}`, changes);
+      }
+    }
+    return changes;
+  }
+  if (isObject(before) && isObject(after)) {
+    const keys = [...new Set([...Object.keys(before), ...Object.keys(after)])].sort(compareText);
+    for (const key of keys) {
+      const nextPath = `${path}/${key.replaceAll('~', '~0').replaceAll('/', '~1')}`;
+      if (!Object.hasOwn(before, key)) {
+        changes.push({ path: nextPath, operation: 'add', after: after[key] });
+      } else if (!Object.hasOwn(after, key)) {
+        changes.push({ path: nextPath, operation: 'remove', before: before[key] });
+      } else {
+        diffValues(before[key], after[key], nextPath, changes);
+      }
+    }
+    return changes;
+  }
+  changes.push({ path, operation: 'replace', before, after });
+  return changes;
+}
+
+function versionEffectFor(effect, changes) {
+  if (changes.length === 0) return 'none';
+  const changeType = effect === 'editorial'
+    ? 'description-or-annotation'
+    : effect === 'compatible'
+      ? 'optional-stable-field'
+      : changes.some(({ operation }) => operation === 'remove')
+        ? 'field-removal'
+        : 'required-field';
+  return classifySchemaChange(changeType).versionEffect;
+}
+
+function componentRevisionDelta(record, context) {
+  const content = contentRevision('component', record);
+  const bindings = {};
+  for (const [bindingId, binding] of Object.entries(record.bindings)) {
+    bindings[bindingId] = {
+      content: bindingContentRevision(binding),
+      ...(binding.strategy === 'unsupported' ? {} : {
+        spec: bindingSpecRevision({
+          component: record,
+          bindingId,
+          examples: context.examples ?? [],
+          exampleSources: context.exampleSources ?? {},
+          tokenSources: context.tokenSources ?? [],
+        }),
+      }),
+    };
+  }
+  return { content, bindings };
+}
+
+export function semanticDiff({
+  family = 'component',
+  before,
+  after,
+  revisionContext = {},
+} = {}) {
+  validateFamily(family, before);
+  validateFamily(family, after);
+  const changes = diffValues(before, after).map((change) => {
+    const field = resolveAuthoringField(family, change.path);
+    return {
+      ...change,
+      effect: field.effects[change.operation],
+      revisionAxes: field.revisionAxes,
+      owner: {
+        name: field.owner,
+        schema: field.schema,
+        schemaPointer: field.schemaPointer,
+      },
+    };
+  });
+  const effect = changes.reduce(
+    (current, change) => (
+      EFFECT_ORDER[change.effect] > EFFECT_ORDER[current] ? change.effect : current
+    ),
+    'editorial',
+  );
+  let revisions;
+  if (family === 'component') {
+    const beforeRevisions = componentRevisionDelta(before, revisionContext);
+    const afterRevisions = componentRevisionDelta(after, revisionContext);
+    revisions = {
+      contentRevision: {
+        before: beforeRevisions.content,
+        after: afterRevisions.content,
+        changed: beforeRevisions.content !== afterRevisions.content,
+      },
+      bindings: Object.fromEntries(
+        [...new Set([
+          ...Object.keys(beforeRevisions.bindings),
+          ...Object.keys(afterRevisions.bindings),
+        ])].sort(compareText).map((bindingId) => {
+          const left = beforeRevisions.bindings[bindingId] ?? null;
+          const right = afterRevisions.bindings[bindingId] ?? null;
+          return [bindingId, {
+            bindingContentRevision: {
+              before: left?.content ?? null,
+              after: right?.content ?? null,
+              changed: left?.content !== right?.content,
+            },
+            bindingSpecRevision: {
+              before: left?.spec ?? null,
+              after: right?.spec ?? null,
+              changed: left?.spec !== right?.spec,
+            },
+          }];
+        }),
+      ),
+    };
+  } else {
+    revisions = {
+      contentRevision: {
+        before: contentRevision(family, before),
+        after: contentRevision(family, after),
+        changed: contentRevision(family, before) !== contentRevision(family, after),
+      },
+    };
+  }
+  return deepFreeze({
+    family,
+    artifactId: before.id ?? after.id ?? null,
+    effect: changes.length === 0 ? 'editorial' : effect,
+    versionEffect: versionEffectFor(effect, changes),
+    changes,
+    revisions,
+  });
+}
+
+function pointerSegments(path) {
+  const value = path.startsWith('$/') ? path.slice(2) : path.replace(/^\//u, '');
+  return value.split('/').filter(Boolean).map((segment) => (
+    segment.replaceAll('~1', '/').replaceAll('~0', '~')
+  ));
+}
+
+function valueAt(root, path) {
+  return pointerSegments(path).reduce((value, segment) => value?.[segment], root);
+}
+
+function setAt(root, path, value) {
+  const segments = pointerSegments(path);
+  const field = segments.pop();
+  const parent = segments.reduce((current, segment) => current[segment], root);
+  parent[field] = value;
+}
+
+export function previewAutofix({
+  family = 'component',
+  record,
+  path,
+  autofix = 'trim-outer-whitespace',
+} = {}) {
+  let field;
+  try {
+    field = resolveAuthoringField(family, path);
+  } catch {
+    throw new AuthoringPolicyError(
+      'authoring.autofix.field-denied',
+      'autofix is denied because the path has no schema-owned mechanical policy',
+      { path, autofix },
+    );
+  }
+  if (!field.autofixes.includes(autofix)) {
+    throw new AuthoringPolicyError(
+      'authoring.autofix.semantic-denied',
+      'autofix is denied for product meaning and review-owned fields',
+      { path, autofix, owner: field.owner },
+    );
+  }
+  const current = valueAt(record, path);
+  if (typeof current !== 'string') {
+    throw new AuthoringPolicyError(
+      'authoring.autofix.value-denied',
+      'the selected mechanical autofix requires a string value',
+      { path, autofix },
+    );
+  }
+  const next = current.trim();
+  const preview = structuredClone(record);
+  setAt(preview, path, next);
+  validateFamily(family, preview);
+  return deepFreeze({
+    mode: 'preview-only',
+    autofix,
+    record: preview,
+    changedPaths: current === next ? [] : [path],
+  });
+}
+
+function schemaSources() {
+  return new Set(authoringMetadata('component')
+    .concat(authoringMetadata('binding'))
+    .map(({ schema }) => `packages/schema/schemas/${schema}`));
+}
+
+function isCatalogSource(context, path) {
+  return context.sourceManifest.commandRegistryPath === path
+    || context.sourceManifest.records.some((entry) => (
+      entry.path === path || entry.sourcePath === path
+    ));
+}
+
+function packageForPath(packages, path) {
+  return packages
+    .filter((item) => path === item.path || path.startsWith(`${item.path}/`))
+    .sort((left, right) => right.path.length - left.path.length)[0] ?? null;
+}
+
+function dependencyNames(manifest) {
+  return new Set(Object.keys({
+    ...(manifest.dependencies ?? {}),
+    ...(manifest.devDependencies ?? {}),
+    ...(manifest.peerDependencies ?? {}),
+    ...(manifest.optionalDependencies ?? {}),
+  }));
+}
+
+function dependentClosure(packages, seedNames) {
+  const selected = new Set(seedNames);
+  let changed = true;
+  while (changed) {
+    changed = false;
+    for (const item of packages) {
+      if (
+        !selected.has(item.name)
+        && [...dependencyNames(item.manifest)].some((name) => selected.has(name))
+      ) {
+        selected.add(item.name);
+        changed = true;
+      }
+    }
+  }
+  return packages.filter(({ name }) => selected.has(name));
+}
+
+function artifactIdFromEndpoint(endpoint, ids) {
+  if (ids.has(endpoint)) return endpoint;
+  const concept = endpoint.split('#')[0];
+  return ids.has(concept) ? concept : null;
+}
+
+function relatedArtifactIds(bundle, initialIds) {
+  const known = new Set(bundle.artifacts.map(({ id }) => id));
+  const affected = new Set(initialIds);
+  let changed = true;
+  while (changed) {
+    changed = false;
+    for (const edge of bundle.relations) {
+      const source = artifactIdFromEndpoint(edge.source, known);
+      const target = artifactIdFromEndpoint(edge.target, known);
+      if (source && target && (affected.has(source) || affected.has(target))) {
+        for (const id of [source, target]) {
+          if (!affected.has(id)) {
+            affected.add(id);
+            changed = true;
+          }
+        }
+      }
+    }
+  }
+  return affected;
+}
+
+export function affectedClosure({ context, sourcePaths = [], artifactIds = [] } = {}) {
+  if (!Array.isArray(sourcePaths) || sourcePaths.length === 0) {
+    throw new AuthoringPolicyError(
+      'authoring.closure.source-required',
+      'at least one exact canonical source path is required',
+    );
+  }
+  const declaredSchemaSources = schemaSources();
+  for (const path of sourcePaths) {
+    assertRelativePath(path, 'sourcePaths');
+    if (!isCatalogSource(context, path) && !declaredSchemaSources.has(path)) {
+      throw new AuthoringPolicyError(
+        'authoring.closure.source-undeclared',
+        'affected closure refuses undeclared or inferred sources',
+        { path },
+      );
+    }
+  }
+  const sourceArtifacts = context.catalogBundle.artifacts.filter(({ source }) => (
+    sourcePaths.includes(source.record) || sourcePaths.includes(source.content)
+  ));
+  const initialIds = new Set([...artifactIds, ...sourceArtifacts.map(({ id }) => id)]);
+  const knownIds = new Set(context.catalogBundle.artifacts.map(({ id }) => id));
+  for (const id of initialIds) {
+    if (!knownIds.has(id)) {
+      throw new AuthoringPolicyError(
+        'authoring.closure.artifact-undeclared',
+        'affected closure refuses an artifact absent from the exact catalog revision',
+        { id },
+      );
+    }
+  }
+  const relatedIds = relatedArtifactIds(context.catalogBundle, initialIds);
+  const relatedArtifacts = context.catalogBundle.artifacts.filter(({ id }) => relatedIds.has(id));
+  const canonicalSources = new Set(sourcePaths);
+  for (const artifact of relatedArtifacts) {
+    canonicalSources.add(artifact.source.record);
+    if (artifact.source.content) canonicalSources.add(artifact.source.content);
+  }
+
+  const seedPackages = new Set();
+  const catalogOwner = packageForPath(
+    context.workspacePackages,
+    dirname(context.sourceManifestPath),
+  );
+  for (const path of canonicalSources) {
+    const directOwner = packageForPath(context.workspacePackages, path);
+    if (directOwner) seedPackages.add(directOwner.name);
+    if (isCatalogSource(context, path) && catalogOwner) seedPackages.add(catalogOwner.name);
+  }
+  const packages = dependentClosure(context.workspacePackages, seedPackages);
+  const projections = new Set();
+  if ([...canonicalSources].some((path) => isCatalogSource(context, path))) {
+    for (const projection of context.repositoryPolicy.strictJsonProjections ?? []) {
+      projections.add(projection.path);
+      projections.add(projection.provenance);
+    }
+  }
+  for (const path of canonicalSources) {
+    if (!declaredSchemaSources.has(path)) continue;
+    const schemaFile = posix.basename(path);
+    if (context.typeProjection.projections.some(({ source }) => source.startsWith(`${schemaFile}#`))) {
+      projections.add(context.typeProjection.output);
+    }
+  }
+  const requiredChecks = [
+    ...packages
+      .filter(({ manifest }) => Object.hasOwn(manifest.scripts ?? {}, 'check'))
+      .map(({ name }) => `pnpm --filter ${name} check`),
+    'pnpm check',
+    'pnpm generate:check',
+  ];
+  return deepFreeze({
+    sourceRevision: context.sourceRevision,
+    canonicalSources: [...canonicalSources].sort(compareText),
+    artifacts: relatedArtifacts.map(({ id }) => id).sort(compareText),
+    relations: context.catalogBundle.relations.filter(({ source, target }) => (
+      relatedIds.has(artifactIdFromEndpoint(source, knownIds))
+      || relatedIds.has(artifactIdFromEndpoint(target, knownIds))
+    )),
+    projections: [...projections].sort(compareText),
+    packages: packages.map(({ name, path }) => ({ name, path })),
+    requiredChecks,
+    deferred: [{
+      capability: 'renderer-proof-evaluation-closure',
+      readiness: 'unavailable',
+      earliestBoundary: 'Gate 1',
+    }],
+  });
+}
