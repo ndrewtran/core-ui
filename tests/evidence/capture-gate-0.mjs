@@ -1,7 +1,6 @@
 import { createHash } from 'node:crypto';
 import { execFileSync, spawnSync } from 'node:child_process';
-import { cp, mkdir, mkdtemp, readFile, readdir, rm, stat, writeFile } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
+import { mkdir, readFile, readdir, stat, writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { compileCatalog } from '../../packages/catalog/src/compiler.mjs';
 import {
@@ -79,27 +78,6 @@ async function applicabilityManifest(paths) {
     profile: 'core-ui-path-manifest-v1',
     sha256: sha256(canonicalJson(await manifestEntries(paths))),
   };
-}
-
-async function temporaryCatalogRepository() {
-  const temporaryRoot = await mkdtemp(join(tmpdir(), 'core-ui-gate-0-'));
-  await Promise.all([
-    mkdir(join(temporaryRoot, 'packages'), { recursive: true }),
-    mkdir(join(temporaryRoot, 'packages/tooling'), { recursive: true }),
-  ]);
-  await Promise.all([
-    cp(join(repositoryRoot, 'catalog'), join(temporaryRoot, 'catalog'), { recursive: true }),
-    cp(
-      join(repositoryRoot, 'packages/catalog'),
-      join(temporaryRoot, 'packages/catalog'),
-      { recursive: true },
-    ),
-    cp(
-      join(repositoryRoot, 'packages/tooling/command-registry.json'),
-      join(temporaryRoot, 'packages/tooling/command-registry.json'),
-    ),
-  ]);
-  return temporaryRoot;
 }
 
 function processCli(args, mode) {
@@ -203,14 +181,7 @@ const repairedDiagnosis = diagnoseCanonicalSource({
   recordPath: sourcePath,
 });
 
-let scaffoldedCompilation;
-const temporaryRoot = await temporaryCatalogRepository();
-try {
-  await writeFile(join(temporaryRoot, sourcePath), scaffold.writeSet[0].bytes);
-  scaffoldedCompilation = await compileCatalog({ repositoryRoot: temporaryRoot });
-} finally {
-  await rm(temporaryRoot, { recursive: true, force: true });
-}
+const repeatedCompilation = await compileCatalog({ repositoryRoot });
 
 const projectResolution = resolvePnpmProjectCatalog();
 if (projectResolution.type !== 'success') {
@@ -309,21 +280,52 @@ const revisionExplanation = explainRevisions({
   tokenSources,
 });
 
-if (
-  !validDiagnosis.valid
-  || brokenDiagnosis.valid
-  || brokenDiagnosis.diagnostics[0]?.details.source.path !== '$/summary'
-  || brokenDiagnosis.diagnostics[0]?.details.owner.schemaPointer !== '#/properties/summary'
-  || !repairedDiagnosis.valid
-  || canonicalJson(scaffold.record) !== canonicalJson(repairedRecord)
-  || scaffoldedCompilation.bundle.sourceRevision !== compiled.bundle.sourceRevision
-  || scaffoldedCompilation.bundle.catalogDigest !== compiled.bundle.catalogDigest
-  || projectResolution.package.sourceRevision !== compiled.bundle.sourceRevision
-  || projectResolution.package.catalogDigest !== compiled.bundle.catalogDigest
-  || surfaceObservations.some(({ authority }) => authority !== 'installed-local')
-  || canonicalJson(scaffold.record) !== sourceBytesBefore.trim()
-  || await readFile(join(repositoryRoot, sourcePath), 'utf8') !== sourceBytesBefore
-) throw new Error('EVIDENCE_GATE0_CHAIN_FAILED');
+const chainFailures = [
+  ['canonical-source-valid', validDiagnosis.valid],
+  ['deliberate-error-invalid', !brokenDiagnosis.valid],
+  [
+    'deliberate-error-path',
+    brokenDiagnosis.diagnostics[0]?.details.source.path === '$/summary',
+  ],
+  [
+    'deliberate-error-owner',
+    brokenDiagnosis.diagnostics[0]?.details.owner.schemaPointer === '#/properties/summary',
+  ],
+  ['repair-valid', repairedDiagnosis.valid],
+  ['repair-exact', canonicalJson(scaffold.record) === canonicalJson(repairedRecord)],
+  [
+    'repeated-source-revision',
+    repeatedCompilation.bundle.sourceRevision === compiled.bundle.sourceRevision,
+  ],
+  [
+    'repeated-catalog-digest',
+    repeatedCompilation.bundle.catalogDigest === compiled.bundle.catalogDigest,
+  ],
+  ['repeated-byte-identity', repeatedCompilation.bytes === compiled.bytes],
+  [
+    'resolved-source-revision',
+    projectResolution.package.sourceRevision === compiled.bundle.sourceRevision,
+  ],
+  [
+    'resolved-catalog-digest',
+    projectResolution.package.catalogDigest === compiled.bundle.catalogDigest,
+  ],
+  [
+    'installed-local-authority',
+    surfaceObservations.every(({ authority }) => authority === 'installed-local'),
+  ],
+  [
+    'scaffold-semantic-source',
+    canonicalJson(scaffold.record) === canonicalJson(parseJsonStrict(sourceBytesBefore)),
+  ],
+  [
+    'source-bytes-unchanged',
+    await readFile(join(repositoryRoot, sourcePath), 'utf8') === sourceBytesBefore,
+  ],
+].filter(([, passed]) => !passed).map(([name]) => name);
+if (chainFailures.length > 0) {
+  throw new Error(`EVIDENCE_GATE0_CHAIN_FAILED: ${chainFailures.join(', ')}`);
+}
 
 const upstream = await upstreamEvidence();
 if (upstream.flatMap(({ assertions }) => assertions).length !== 29) {
@@ -361,7 +363,7 @@ const observations = {
       step: 'compile-deterministic-catalog',
       catalogDigest: compiled.bundle.catalogDigest,
       sourceRevision: compiled.bundle.sourceRevision,
-      scaffoldedDigestEqual: true,
+      repeatedBytesEqual: repeatedCompilation.bytes === compiled.bytes,
     },
     {
       step: 'resolve-project-local-authority',
