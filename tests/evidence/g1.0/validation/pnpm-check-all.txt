@@ -1,0 +1,185 @@
+
+> @core-ui/workspace@0.0.0 check:all <repository-root>
+> node tooling/audits/repository-policy/src/run-workspace-task.mjs check
+
+[workspace-task] check: full graph
+Scope: 6 of 7 workspace projects
+
+> @core-ui/foundation@0.0.0 check <repository-root>/packages/foundation
+> node --test test/*.test.mjs
+
+✔ E-G1.0-05 foundation is semantic plus pure logic with interaction honestly absent (2.656291ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 1
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 37.827
+
+> @core-ui/schema@0.0.0 check <repository-root>/packages/schema
+> node src/generate.mjs --check && node --test test/*.test.mjs
+
+[schema] generated types match packages/schema/schemas/type-projection.json
+✔ E-G0.5-04: schema-owned metadata drives completion, effects, revisions, and owners (9.217416ms)
+✔ E-G0.5-04: authoring resolves family files only through the canonical schema contract (3.935792ms)
+✔ E-G0.5-02: revision preimages are the exact inputs hashed by existing digest functions (6.402791ms)
+✔ E-G0.5-02: every declared revision axis matches its digest preimage membership (2.376625ms)
+✔ E-G0.5-02: corrected identity and runtime-profile fields change observed spec digests (10.806666ms)
+✔ E-G0.5-04 negative: a new stable field cannot bypass authoring and ownership coupling (3.525416ms)
+✔ E-G0.5-04 negative: schema-bearing keywords and references cannot hide authorable fields (9.218625ms)
+✔ G1.0 token-source v1-to-v2 migration is explicit, deterministic, and idempotent (2.144916ms)
+✔ G1.0 binding v1-to-v2 migration requires the binding-owned token recipe (1.068291ms)
+✔ E-G1.0-07 compiles closed binding-owned requirement sets without behavior claims (2.43725ms)
+✔ E-G1.0-07 rejects unknown, missing, duplicate, and wrong-profile declarations (0.650375ms)
+✔ E-G1.0-07 rejects consumer weakening and premature fulfillment (0.466916ms)
+✔ G0.4 resolver codes discriminate closed detail schemas (4.301125ms)
+✔ E-G0.1-01: minimum records, envelopes, diagnostics, ownership, and relations validate (32.84225ms)
+✔ E-G0.1-01 negative: unknown, duplicate, invalid-relation, and unowned fields fail closed (14.21625ms)
+✔ E-G0.5-01: discriminated binding branches retain exact required-field diagnostics (0.793042ms)
+✔ E-G0.1-02: canonical bytes ignore key order and whitespace but preserve meaning (4.740625ms)
+✔ E-G0.1-03: editorial content and normative binding closure affect the correct revision (10.26225ms)
+✔ E-G0.1-04: package/source locations remain derived and generated types retain owner linkage (2.415042ms)
+✔ E-G0.1-05: schema evolution and append-only response policy enforce declared effects (0.503333ms)
+ℹ tests 20
+ℹ suites 0
+ℹ pass 20
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 110.1495
+
+> @core-ui/repository-policy@0.0.0 check <repository-root>/tooling/audits/repository-policy
+> node src/cli.mjs && node src/evidence-verify.mjs && node --test test/*.test.mjs ../../../.github/scripts/validate-planning-pr.test.cjs
+
+[E-G0.0-01] navigation and path audit passed (7 major owners)
+[E-G0.0-03] repository policy passed (8 projections, 1 artifacts, 1 slugs/aliases)
+[evidence] verified 8 immutable index, 37 records, 37 artifacts, and 10 recertifications
+✔ ignores pull requests outside authority sources (0.995416ms)
+✔ accepts a complete Product Scope authority publication (0.51425ms)
+✔ rejects an authority change without a label or change record (0.284875ms)
+✔ protects the executable platform-safety registry as architecture authority (0.07925ms)
+✔ rejects a planning-control-only change without governance metadata (0.056875ms)
+✔ rejects incomplete Product Scope change metadata (0.256167ms)
+✔ content-addressed evidence index verifies canonical records and artifacts (5.460083ms)
+✔ content-addressed evidence verifies one shared validation result (2.184375ms)
+✔ applicability manifests ignore platform-specific install directories (8.132625ms)
+✔ content-addressed evidence rejects record-only validation ownership (1.558916ms)
+✔ content-addressed evidence rejects a changed retained artifact (1.907459ms)
+✔ append-only recertification preserves a stale historical index (3.918125ms)
+✔ append-only recertification extends through one digest-linked leaf (5.009584ms)
+✔ recertification rejects a fork from one predecessor (4.716959ms)
+✔ recertification rejects a predecessor cycle (2.766041ms)
+✔ recertification rejects a stale terminal certificate (4.173334ms)
+✔ changed applicability still fails without a recertification (1.620125ms)
+✔ recertification rejects a wrong historical digest (2.019125ms)
+✔ recertification rejects a stale current manifest (2.684166ms)
+✔ E-G0.0-01: a cold root navigation audit reaches every major owner (18.404666ms)
+✔ E-G0.0-03: generated output validates against its source and digest (1.006ms)
+✔ E-G0.0-03 negative: a direct projection edit is rejected with its owner (1.423167ms)
+✔ G0.4 strict JSON projections use governed digest sidecars (1.767208ms)
+✔ E-G0.0-03 negative: duplicate aliases fail deterministically (1.408583ms)
+✔ E-G0.1-04: ArtifactRef grammar is derived from the schema owner (0.366584ms)
+✔ E-G0.0-04 negative: an untracked non-projection output fails clean generation (0.171334ms)
+✔ E-G0.0-02: affected selection runs a changed package before every dependent (387.169916ms)
+ℹ tests 27
+ℹ suites 0
+ℹ pass 27
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 423.643333
+
+> @core-ui/tokens@0.0.0 check <repository-root>/packages/tokens
+> node --test test/*.test.mjs
+
+✔ E-G1.0-01 rejects cycles, reverse layers, incompatible units, and overrides (4.094667ms)
+✔ E-G1.0-02 web and native transforms retain canonical provenance without cross-target authority (2.476ms)
+✔ E-G1.0-03 missing required tokens fail per profile and exact proved fallbacks diagnose use (3.368334ms)
+✔ E-G1.0-04 requirement digests track exact semantic closure only (1.165208ms)
+✔ E-G1.0-06 static mode output works while runtime switching remains unavailable (1.095583ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 53.496625
+
+> @core-ui/catalog@0.0.0 check <repository-root>/packages/catalog
+> node src/generate.mjs --check && node --test test/*.test.mjs
+
+[catalog] generated bundle matches packages/catalog/catalog-sources.json: packages/catalog/generated/catalog.mjs
+[catalog] generated bundle matches packages/catalog/catalog-sources.json: packages/catalog/generated/catalog.json
+[catalog] generated bundle matches packages/catalog/catalog-sources.json: packages/catalog/generated/catalog.json.provenance
+[catalog] generated bundle matches packages/catalog/catalog-sources.json: packages/catalog/generated/catalog-package.json
+[catalog] generated bundle matches packages/catalog/catalog-sources.json: packages/catalog/generated/catalog-package.json.provenance
+✔ E-G0.2-01: declared sources compile to byte-identical ordered bundles (45.9855ms)
+✔ E-G0.2-01 negative: generated bundle matches its canonical source manifest (9.814125ms)
+✔ E-G0.2-02: list, search, and get are deterministic with exact provenance (6.413625ms)
+✔ E-G0.2-02: graph and revisions remain derived from schema-owned contracts (0.521459ms)
+✔ E-G0.2-03: pagination is digest- and request-bound (2.029458ms)
+✔ E-G0.2-04: search is bounded and retrieval traverses only direct relations (4.602542ms)
+✔ E-G0.2-04 negative: unsupported selectors and missing artifacts are typed (0.38525ms)
+✔ E-G0.2-05: query kernel is hermetic and ranking ignores environment state (1.817292ms)
+✔ E-G0.2-05 negative: compiler uses the declared manifest and rejects duplicates (1.291542ms)
+✔ E-G0.4 package layout binds package, catalog, API, schema, digest, and source identity (4.786375ms)
+✔ E-G0.4 installed-local resolution context is catalog-owned response metadata (9.46025ms)
+✔ E-G1.0-04 catalog exposes resolved requirement sets matching packed descriptors (2.693166ms)
+✔ E-G1.0-07 catalog and package expose exact platform-safety set digests (2.407ms)
+ℹ tests 13
+ℹ suites 0
+ℹ pass 13
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 118.4175
+
+> @core-ui/tooling@0.0.0 check <repository-root>/packages/tooling
+> node src/generate.mjs --check && node --test test/*.test.mjs
+
+[tooling] generated surface matches packages/tooling/command-registry.json: packages/tooling/generated/command-surface.mjs
+[tooling] generated surface matches packages/tooling/command-registry.json: packages/tooling/generated/response-types.d.ts
+✔ E-G0.5-01: scaffold, validation, compilation, retrieval, diagnosis, and repair stay canonical (82.575125ms)
+✔ E-G0.5-01 negative: diagnostics require an exact manifest source and source revision (68.922417ms)
+✔ E-G0.5-02: semantic golden corpus reports owning fields and exact revision effects (50.909333ms)
+✔ E-G0.5-02: sequence diffs preserve one add or remove at every array position (56.983666ms)
+✔ E-G0.5-02: revision explainer lists the normalized inputs behind each digest (23.575667ms)
+✔ E-G0.5-02: revision explanations distinguish absent and empty containers on every axis (25.744792ms)
+✔ E-G0.5-03: autofix is preview-only and denies every product-meaning category (31.762875ms)
+✔ E-G0.5-04: affected closure is graph-derived, declared, and bounded to Gate 0 (28.351291ms)
+✔ E-G0.5-04: an injected stable field must couple scaffold, diff, diagnostics, and closure (32.406709ms)
+✔ E-G0.3-01 programmatic and CLI JSON surfaces return the same responses (2257.046042ms)
+✔ E-G0.3-02 human, JSON, and dense projections preserve one response object (0.68425ms)
+✔ E-G0.3-03 dense outputs round-trip deterministically within every locked budget (4.077917ms)
+✔ E-G0.3-03 dense golden snapshots remain stable (2.942166ms)
+✔ E-G0.3-04 registry generates parser, help, completion, manifest, types, and future MCP inputs (278.701584ms)
+✔ G0.4 project and cache inputs stay outside query selectors and require an exact pair (0.230875ms)
+✔ E-G0.3-05 structured errors have stable codes, safe actions, and meaningful exits (809.001ms)
+✔ E-G0.3-05 process boundary keeps JSON singular and diagnostics off stderr (317.50025ms)
+✔ E-G0.3-06 bare JSON cold start discovers manifest and retrieves without repository crawling (832.646208ms)
+✔ E-G0.4 resolver matrix selects only direct or explicitly addressed catalog authority (11.374209ms)
+✔ E-G0.4 resolver verifies provenance material instead of trusting fixture flags (0.952792ms)
+✔ E-G1.0-07 resolver rejects a weakened platform-safety requirement digest (1.079667ms)
+✔ E-G0.4 explicit cache remains subordinate to manifest and lock authority (2.04525ms)
+✔ G0.4 production resolver input rejects duplicate or undeclared normalized identities (1.5005ms)
+✔ E-G0.4 resolver diagnostics are relative and privacy-safe (2.074083ms)
+✔ E-G0.4 pnpm adapter resolves the selected direct package and drives the CLI (820.834958ms)
+✔ E-G0.4 CLI requires exact bindings and filters project-wide discovery (543.646709ms)
+✔ E-G0.4 pnpm adapter fails closed for missing projects and cache tuples (272.13425ms)
+✔ E-G0.4 pnpm adapter translates malformed project JSON into one typed response (1.823084ms)
+✔ E-G0.4 pnpm adapter admits only an exact verified cache tuple (556.23075ms)
+✔ E-G0.4 pnpm adapter normalizes renderer packages into the single resolver (2841.821375ms)
+ℹ tests 30
+ℹ suites 0
+ℹ pass 30
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 5109.571959
