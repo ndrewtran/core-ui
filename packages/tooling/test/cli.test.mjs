@@ -287,7 +287,7 @@ test('E-G0.3-05 structured errors have stable codes, safe actions, and meaningfu
     assert.equal(response.error.nextCommand.requiresConfirmation, false);
   }
   assert.throws(() => assertSafeDiagnostics({
-    apiVersion: '1.0.0',
+    apiVersion: '1.1.0',
     type: 'error',
     error: {
       code: 'CORE_QUERY_INVALID',

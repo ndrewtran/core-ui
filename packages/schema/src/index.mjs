@@ -20,8 +20,9 @@ export const QUERY_SELECTORS = Object.freeze(
       .map(([key, values]) => [key, Object.freeze([...values])]),
   ),
 );
-export const SCHEMA_VERSION = '1.0.0';
-export const API_VERSION = '1.0.0';
+export const SCHEMA_VERSION = '2.0.0';
+export const API_VERSION = '1.1.0';
+export const QUERY_SCHEMA_VERSION = '1.1.0';
 
 export function parseArtifactRef(value, { requireEnabledRecordKind = false } = {}) {
   const match = new RegExp(ARTIFACT_REF_PATTERN).exec(value);
@@ -45,6 +46,11 @@ export {
   negotiateSchemaVersion,
   parseSchemaVersion,
 } from './evolution.mjs';
+export {
+  migrateBindingV1ToV2,
+  migrateComponentBindingsV1ToV2,
+  migrateTokenSourceV1ToV2,
+} from './migrations.mjs';
 export {
   authoringMetadata,
   authoringMetadataDigest,

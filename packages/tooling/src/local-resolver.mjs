@@ -11,8 +11,8 @@ export const RESOLVER_ERROR_PRECEDENCE = Object.freeze([
   'CORE_CATALOG_INCOMPATIBLE',
 ]);
 
-const TOOLING_API_VERSION = '1.0.0';
-const TOOLING_SCHEMA_VERSION = '1.0.0';
+const TOOLING_API_VERSION = '1.1.0';
+const TOOLING_SCHEMA_VERSION = '2.0.0';
 const TOOLING_VERSION = '0.0.0';
 
 function compareText(left, right) {

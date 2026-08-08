@@ -394,8 +394,8 @@ test('E-G0.4 pnpm adapter normalizes renderer packages into the single resolver'
       descriptorVersion: '1.0.0',
       package: '@core-ui/react',
       version: '1.0.0',
-      bindingSchemaRange: '^1.0.0',
-      tokenContractRange: '^1.0.0',
+      bindingSchemaRange: '^2.0.0',
+      tokenContractRange: '^1.1.0',
       releaseProvenance: `core-ui-release:0.0.0:${bundle.sourceRevision}`,
       bindings: {
         [binding]: {
@@ -415,15 +415,16 @@ test('E-G0.4 pnpm adapter normalizes renderer packages into the single resolver'
       catalogVersion: '0.0.0',
       catalogDigest: bundle.catalogDigest,
       queryApiVersion: bundle.apiVersion,
-      schemaRange: '^1.0.0',
+      schemaRange: '^2.0.0',
       sourceRevision: bundle.sourceRevision,
       provenance: { kind: 'source-revision', value: bundle.sourceRevision },
+      tokenRequirementSets: {},
       releaseManifest: {
         id: descriptor.releaseProvenance,
         releaseVersion: '0.0.0',
-        schemaVersion: '1.0.0',
-        queryApiVersion: '1.0.0',
-        tokenContractVersion: '1.0.0',
+        schemaVersion: '2.0.0',
+        queryApiVersion: '1.1.0',
+        tokenContractVersion: '1.1.0',
         sourceRevision: bundle.sourceRevision,
         catalog: {
           id: `@core-ui/catalog@0.0.0:${bundle.catalogDigest}`,

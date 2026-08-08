@@ -22,14 +22,23 @@ test('E-G0.4 package layout binds package, catalog, API, schema, digest, and sou
   assert.equal(identity.catalogDigest, canonicalDigest(preimage));
   assert.equal(identity.catalogDigest, bundle.catalogDigest);
   assert.equal(identity.queryApiVersion, bundle.apiVersion);
-  assert.equal(identity.schemaRange, '^1.0.0');
+  assert.equal(identity.schemaRange, '^2.0.0');
   assert.equal(identity.sourceRevision, bundle.sourceRevision);
   assert.equal(identity.provenance.kind, 'source-revision');
   assert.equal(identity.provenance.value, bundle.sourceRevision);
   assert.equal(identity.releaseManifest.catalog.id.startsWith('@core-ui/catalog@'), true);
   assert.equal(identity.releaseManifest.catalog.digest, bundle.catalogDigest);
   assert.equal(identity.releaseManifest.sourceRevision, bundle.sourceRevision);
+  assert.equal(identity.releaseManifest.tokenContractVersion, '1.1.0');
   assert.deepEqual(identity.releaseManifest.bindings, []);
+  const component = bundle.artifacts.find(({ id }) => id === 'core:component:button');
+  for (const [key, set] of Object.entries(component.tokenRequirementSets)) {
+    const [bindingId, profile] = key.split(':');
+    assert.equal(
+      identity.tokenRequirementSets[`core:component:button#${bindingId}:${profile}`],
+      set.digest,
+    );
+  }
   assert.equal(identity.bundle, './catalog.json');
 });
 
@@ -71,4 +80,28 @@ test('E-G0.4 installed-local resolution context is catalog-owned response metada
   assert.throws(() => createCatalogApi(bundle, {
     resolution: { ...resolution, targetPackages: {} },
   }), /CORE_CATALOG_RESOLUTION_CONTEXT_INVALID/);
+});
+
+test('E-G1.0-04 catalog exposes resolved requirement sets matching packed descriptors', async () => {
+  const bundle = await readJson('../generated/catalog.json');
+  const identity = await readJson('../generated/catalog-package.json');
+  const api = createCatalogApi(bundle);
+  const response = api.getArtifact({
+    id: 'core:component:button',
+    platform: 'web.react',
+    section: 'styling',
+    detail: 'full',
+  });
+  validateFamily('query-envelope', response);
+  const set = response.data.value.requirementSets['web.react:web.react'];
+  assert.equal(set.requirements.every(({ token }) => token.startsWith('component.button.')), true);
+  assert.equal(
+    set.digest,
+    identity.tokenRequirementSets['core:component:button#web.react:web.react'],
+  );
+  assert.equal(
+    set.digest,
+    bundle.artifacts.find(({ id }) => id === 'core:component:button')
+      .tokenRequirementSets['web.react:web.react'].digest,
+  );
 });

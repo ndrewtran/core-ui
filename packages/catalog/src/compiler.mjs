@@ -14,6 +14,7 @@ import {
   validateCatalogRecords,
   validateFamily,
 } from '@core-ui/schema';
+import { compileTokenRequirementSet } from '@core-ui/tokens';
 
 const SOURCE_MANIFEST_SCHEMA = 'core-ui-catalog-source-manifest-v1';
 
@@ -135,6 +136,14 @@ function recordPlatforms(record) {
   return [];
 }
 
+function bindingProfiles(bindingId, binding) {
+  if (bindingId !== 'native.react-native') return [bindingId];
+  return Object.values(binding.runtimeProfiles ?? {})
+    .filter(({ strategy }) => strategy !== 'unsupported')
+    .map(({ validationProfile }) => validationProfile)
+    .sort(compareText);
+}
+
 export async function compileCatalog({
   repositoryRoot,
   sourceManifestPath = 'packages/catalog/catalog-sources.json',
@@ -185,6 +194,23 @@ export async function compileCatalog({
 
   const artifacts = loaded.map(({ entry, record, sourceBytes }) => {
     const revision = contentRevision(entry.family, record, { sourceBytes });
+    const tokenRequirementSets = record.kind === 'component'
+      ? Object.fromEntries(Object.entries(record.bindings)
+        .filter(([, binding]) => binding.strategy !== 'unsupported')
+        .flatMap(([bindingId, binding]) => {
+          const source = tokens.find(({ id }) => id === binding.tokenRecipe.source);
+          if (!source) throw new Error(`CORE_RELATION_INVALID: missing ${binding.tokenRecipe.source}`);
+          return bindingProfiles(bindingId, binding).map((profile) => {
+            const requirementSet = compileTokenRequirementSet({
+              source,
+              recipe: binding.tokenRecipe,
+              bindingId,
+              profile,
+            });
+            return [`${bindingId}:${profile}`, requirementSet];
+          });
+        }).sort(([left], [right]) => compareText(left, right)))
+      : {};
     const bindingSpecRevisions = record.kind === 'component'
       ? Object.fromEntries(
         Object.entries(record.bindings)
@@ -195,6 +221,9 @@ export async function compileCatalog({
             examples,
             exampleSources,
             tokenSources: tokens,
+            tokenRequirementSets: Object.entries(tokenRequirementSets)
+              .filter(([key]) => key.startsWith(`${bindingId}:`))
+              .map(([, value]) => value),
           })]),
       )
       : {};
@@ -215,6 +244,7 @@ export async function compileCatalog({
       contentRevision: revision,
       bindingContentRevisions,
       bindingSpecRevisions,
+      tokenRequirementSets,
       source: {
         record: entry.path,
         ...(entry.sourcePath === undefined ? {} : {

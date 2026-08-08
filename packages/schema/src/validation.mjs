@@ -322,6 +322,32 @@ function semanticIssues(family, value, ownership) {
       }
     }
   }
+  if (family === 'token-source') {
+    for (const [tokenId, definition] of Object.entries(value.tokens ?? {})) {
+      const declaredLayer = tokenId.split('.')[0];
+      if (definition.layer !== declaredLayer) {
+        issues.push({
+          path: `$/tokens/${tokenId}/layer`,
+          message: `must explicitly equal the ${declaredLayer} token namespace`,
+        });
+      }
+      if (definition.layer === 'reference' && definition.overridePolicy !== 'fixed') {
+        issues.push({
+          path: `$/tokens/${tokenId}/overridePolicy`,
+          message: 'reference tokens are fixed canonical inputs',
+        });
+      }
+      for (const modeKey of Object.keys(definition.modes ?? {})) {
+        const [axis, mode] = modeKey.split('.');
+        if (!value.theme?.modeAxes?.[axis]?.includes(mode)) {
+          issues.push({
+            path: `$/tokens/${tokenId}/modes/${modeKey}`,
+            message: 'must reference a declared mode axis value',
+          });
+        }
+      }
+    }
+  }
   return issues;
 }
 
@@ -513,8 +539,8 @@ export function relationEdges(records) {
       for (const [bindingId, binding] of Object.entries(record.bindings)) {
         const bindingRef = `${record.id}#${bindingId}`;
         edges.push({ type: 'implemented-by', source: record.id, target: bindingRef });
-        for (const token of binding.tokenSources ?? []) {
-          edges.push({ type: 'uses', source: bindingRef, target: token });
+        if (binding.tokenRecipe?.source) {
+          edges.push({ type: 'uses', source: bindingRef, target: binding.tokenRecipe.source });
         }
       }
     } else if (record.kind === 'example') {
@@ -615,7 +641,7 @@ export function validateCatalogRecords(records, { schemas, ownership } = {}) {
         }
       }
     } else if (edge.type === 'uses' && !ids.has(edge.target)) {
-      issues.push({ path: '$/tokenSources', message: `${edge.target} does not exist` });
+      issues.push({ path: '$/tokenRecipe/source', message: `${edge.target} does not exist` });
     }
   }
   if (issues.length > 0) throw new SchemaValidationError('CORE_RELATION_INVALID', issues);

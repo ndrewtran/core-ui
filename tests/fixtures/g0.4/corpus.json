@@ -21,8 +21,8 @@
       "version": "1.0.0",
       "catalogVersion": "1.0.0",
       "catalogDigest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-      "queryApiVersion": "1.0.0",
-      "schemaRange": "^1.0.0",
+      "queryApiVersion": "1.1.0",
+      "schemaRange": "^2.0.0",
       "sourceRevision": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
       "provenance": {
         "kind": "source-revision",
@@ -36,8 +36,8 @@
       "version": "1.1.0",
       "catalogVersion": "1.1.0",
       "catalogDigest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
-      "queryApiVersion": "1.0.0",
-      "schemaRange": "^1.0.0",
+      "queryApiVersion": "2.0.0",
+      "schemaRange": "^3.0.0",
       "sourceRevision": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
       "provenance": {
         "kind": "source-revision",
@@ -52,8 +52,8 @@
       "descriptorVersion": "1.0.0",
       "package": "@core-ui/react-native",
       "version": "1.0.0",
-      "bindingSchemaRange": "^1.0.0",
-      "tokenContractRange": "^1.0.0",
+      "bindingSchemaRange": "^2.0.0",
+      "tokenContractRange": "^1.1.0",
       "releaseProvenance": "release-compatible",
       "bindings": {
         "core:component:button#native.react-native": {
@@ -70,8 +70,8 @@
       "descriptorVersion": "1.0.0",
       "package": "@core-ui/react",
       "version": "1.0.0",
-      "bindingSchemaRange": "^1.0.0",
-      "tokenContractRange": "^1.0.0",
+      "bindingSchemaRange": "^2.0.0",
+      "tokenContractRange": "^1.1.0",
       "releaseProvenance": "release-compatible",
       "bindings": {
         "core:component:button#web.react": {
@@ -88,7 +88,7 @@
       "descriptorVersion": "1.0.0",
       "package": "@core-ui/react",
       "version": "1.1.0",
-      "bindingSchemaRange": "^2.0.0",
+      "bindingSchemaRange": "^3.0.0",
       "tokenContractRange": "^2.0.0",
       "releaseProvenance": "release-newer",
       "bindings": {
@@ -106,9 +106,9 @@
     {
       "id": "release-compatible",
       "releaseVersion": "1.0.0",
-      "schemaVersion": "1.0.0",
-      "queryApiVersion": "1.0.0",
-      "tokenContractVersion": "1.0.0",
+      "schemaVersion": "2.0.0",
+      "queryApiVersion": "1.1.0",
+      "tokenContractVersion": "1.1.0",
       "sourceRevision": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
       "catalog": {
         "id": "catalog-compatible",
@@ -139,8 +139,8 @@
     {
       "id": "release-newer",
       "releaseVersion": "1.1.0",
-      "schemaVersion": "2.0.0",
-      "queryApiVersion": "1.0.0",
+      "schemaVersion": "3.0.0",
+      "queryApiVersion": "2.0.0",
       "tokenContractVersion": "2.0.0",
       "sourceRevision": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
       "catalog": {

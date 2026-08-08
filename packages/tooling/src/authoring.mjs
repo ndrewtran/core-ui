@@ -337,6 +337,7 @@ export function explainRevisions({
   examples = [],
   exampleSources = {},
   tokenSources = [],
+  tokenRequirementSets = {},
   authoring = {},
 } = {}) {
   const axes = [revisionAxis(
@@ -360,6 +361,11 @@ export function explainRevisions({
       examples,
       exampleSources,
       tokenSources,
+      tokenRequirementSets: Array.isArray(tokenRequirementSets)
+        ? tokenRequirementSets
+        : Object.entries(tokenRequirementSets)
+          .filter(([key]) => key.startsWith(`${bindingId}:`))
+          .map(([, value]) => value),
       ...authoring,
     })));
   }

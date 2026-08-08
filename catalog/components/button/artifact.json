@@ -17,7 +17,7 @@
   },
   "bindings": {
     "web.html": {
-      "schemaVersion": "1.0.0",
+      "schemaVersion": "2.0.0",
       "lifecycle": "experimental",
       "strategy": "direct",
       "api": {
@@ -28,11 +28,20 @@
       },
       "behavior": ["Activation requests one immediate action"],
       "accessibility": ["Expose accessible name and disabled state"],
-      "tokenSources": ["core:token:button-minimum"],
+      "tokenRecipe": {
+        "source": "core:token:button-minimum",
+        "requirements": [
+          { "token": "component.button.background", "requirement": "required" },
+          { "token": "component.button.foreground", "requirement": "required" },
+          { "token": "component.button.min-height", "requirement": "required" },
+          { "token": "component.button.padding-inline", "requirement": "required" },
+          { "token": "component.button.radius", "requirement": "required" }
+        ]
+      },
       "runtimeProfiles": {}
     },
     "web.react": {
-      "schemaVersion": "1.0.0",
+      "schemaVersion": "2.0.0",
       "lifecycle": "experimental",
       "strategy": "direct",
       "api": {
@@ -43,11 +52,20 @@
       },
       "behavior": ["Activation requests one immediate action"],
       "accessibility": ["Expose accessible name and disabled state"],
-      "tokenSources": ["core:token:button-minimum"],
+      "tokenRecipe": {
+        "source": "core:token:button-minimum",
+        "requirements": [
+          { "token": "component.button.background", "requirement": "required" },
+          { "token": "component.button.foreground", "requirement": "required" },
+          { "token": "component.button.min-height", "requirement": "required" },
+          { "token": "component.button.padding-inline", "requirement": "required" },
+          { "token": "component.button.radius", "requirement": "required" }
+        ]
+      },
       "runtimeProfiles": {}
     },
     "native.react-native": {
-      "schemaVersion": "1.0.0",
+      "schemaVersion": "2.0.0",
       "lifecycle": "experimental",
       "strategy": "adapted",
       "api": {
@@ -58,7 +76,16 @@
       },
       "behavior": ["Activation requests one immediate action"],
       "accessibility": ["Expose accessible name and disabled state"],
-      "tokenSources": ["core:token:button-minimum"],
+      "tokenRecipe": {
+        "source": "core:token:button-minimum",
+        "requirements": [
+          { "token": "component.button.background", "requirement": "required", "profiles": ["native.ios", "native.android"] },
+          { "token": "component.button.foreground", "requirement": "required", "profiles": ["native.ios", "native.android"] },
+          { "token": "component.button.min-height", "requirement": "required", "profiles": ["native.ios", "native.android"] },
+          { "token": "component.button.padding-inline", "requirement": "required", "profiles": ["native.ios", "native.android"] },
+          { "token": "component.button.radius", "requirement": "required", "profiles": ["native.ios", "native.android"] }
+        ]
+      },
       "runtimeProfiles": {
         "ios": {
           "strategy": "adapted",

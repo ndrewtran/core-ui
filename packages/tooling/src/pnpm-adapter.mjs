@@ -156,13 +156,16 @@ function loadCatalogCandidate(packageRoot) {
     const identityFields = [
       'bundle', 'catalogDigest', 'catalogVersion', 'name', 'provenance',
       'queryApiVersion', 'releaseManifest', 'schema', 'schemaRange',
-      'sourceRevision', 'version',
+      'sourceRevision', 'tokenRequirementSets', 'version',
     ];
     identityValid = (
       identity.schema !== 'core-ui-catalog-package-v1'
       ? false
       : hasExactFields(identity, identityFields)
         && hasExactFields(identity.provenance, ['kind', 'value'])
+        && identity.tokenRequirementSets !== null
+        && typeof identity.tokenRequirementSets === 'object'
+        && !Array.isArray(identity.tokenRequirementSets)
         && [
           identity.bundle,
           identity.catalogDigest,

@@ -4,8 +4,8 @@ import {
   ARTIFACT_REF_PATTERN,
   QUERY_ENVELOPE_SCHEMA_ID,
   QUERY_RESPONSE_TYPES,
+  QUERY_SCHEMA_VERSION,
   QUERY_SELECTORS,
-  SCHEMA_VERSION,
   canonicalDigest,
   parseJsonStrict,
   validateFamily,
@@ -275,9 +275,18 @@ function selectedSection(bundle, artifact, request) {
   }
   if (request.section === 'styling') {
     return record.kind === 'component'
-      ? (selectedBinding?.binding.tokenSources ?? Object.fromEntries(
-        Object.entries(record.bindings).map(([id, binding]) => [id, binding.tokenSources ?? []]),
-      ))
+      ? (selectedBinding
+        ? {
+          recipe: selectedBinding.binding.tokenRecipe,
+          requirementSets: Object.fromEntries(Object.entries(artifact.tokenRequirementSets)
+            .filter(([key]) => key.startsWith(`${selectedBinding.bindingId}:`))),
+        }
+        : {
+          recipes: Object.fromEntries(Object.entries(record.bindings)
+            .filter(([, binding]) => binding.strategy !== 'unsupported')
+            .map(([id, binding]) => [id, binding.tokenRecipe])),
+          requirementSets: artifact.tokenRequirementSets,
+        })
       : null;
   }
   if (request.section === 'guidance') {
@@ -347,7 +356,7 @@ function assertResolutionContext(bundle, input) {
 
 function baseMeta(bundle, resolutionContext, request = {}, revisions = {}) {
   return {
-    schemaVersion: SCHEMA_VERSION,
+    schemaVersion: QUERY_SCHEMA_VERSION,
     authority: resolutionContext.authority,
     revisions,
     coreVersion: resolutionContext.coreVersion,
@@ -613,6 +622,7 @@ export function createCatalogApi(inputBundle, options = {}) {
       );
     }
     const relations = related(bundle, artifact.id);
+    const selectedBinding = bindingForPlatform(artifact.record, normalized.platform);
     let data;
     if (normalized.section !== null) {
       data = {
@@ -625,17 +635,23 @@ export function createCatalogApi(inputBundle, options = {}) {
     } else if (normalized.detail === 'compact') {
       data = { artifact: summary(artifact), relations };
     } else {
+      const selectedRequirementSets = selectedBinding === null
+        ? undefined
+        : Object.fromEntries(Object.entries(artifact.tokenRequirementSets)
+          .filter(([key]) => key.startsWith(`${selectedBinding.bindingId}:`)));
       data = {
         artifact: {
           ...artifact.record,
           contentRevision: artifact.contentRevision,
           bindingSpecRevisions: artifact.bindingSpecRevisions,
+          tokenRequirementSetDigests: Object.fromEntries(Object.entries(artifact.tokenRequirementSets)
+            .map(([key, value]) => [key, value.digest])),
+          ...(selectedRequirementSets === undefined ? {} : { tokenRequirementSets: selectedRequirementSets }),
           source: artifact.source,
         },
         relations,
       };
     }
-    const selectedBinding = bindingForPlatform(artifact.record, normalized.platform);
     const revisions = {
       conceptContent: artifact.contentRevision,
       bindingContent: selectedBinding?.bindingId

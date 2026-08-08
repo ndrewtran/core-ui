@@ -8,7 +8,7 @@ import {
 
 function usageError(ruleId, message, details, nextCommand = 'core --json') {
   return {
-    apiVersion: '1.0.0',
+    apiVersion: '1.1.0',
     type: 'error',
     error: {
       code: 'CORE_QUERY_INVALID',

@@ -52,7 +52,12 @@ async function setup() {
     compiled,
     context,
     component,
-    revisionContext: { examples, tokenSources, exampleSources },
+    revisionContext: {
+      examples,
+      tokenSources,
+      exampleSources,
+      tokenRequirementSets: component.tokenRequirementSets,
+    },
   };
 }
 
@@ -442,6 +447,7 @@ test('E-G0.5-04: affected closure is graph-derived, declared, and bounded to Gat
   assert.deepEqual(schemaClosure.packages.map(({ name }) => name), [
     '@core-ui/catalog',
     '@core-ui/schema',
+    '@core-ui/tokens',
     '@core-ui/tooling',
   ]);
   assert.throws(

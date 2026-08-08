@@ -115,7 +115,7 @@ test('E-G0.5-02: every declared revision axis matches its digest preimage member
     } else {
       assert.equal(declaration.schema, 'binding.schema.json');
       const rootField = firstProperty(declaration.schemaPointer);
-      const definitionField = declaration.schemaPointer.startsWith('#/$defs/runtimeProfile/')
+      const definitionField = declaration.schemaPointer.startsWith('#/$defs/')
         ? finalProperty(declaration.schemaPointer)
         : null;
       const inBindingSpec = bindingSpecFields.has(rootField)

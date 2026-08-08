@@ -31,6 +31,7 @@ export function bindingSpecRevisionPreimage({
   examples = [],
   exampleSources = {},
   tokenSources = [],
+  tokenRequirementSets = [],
   schemas,
   ownership,
 }) {
@@ -58,21 +59,16 @@ export function bindingSpecRevisionPreimage({
       relation: example.binding,
     }))
     .sort((left, right) => left.id.localeCompare(right.id));
-  const tokenRequirements = binding.tokenSources.map((id) => {
-    const source = tokenSources.find((record) => record.id === id);
-    if (!source) throw new Error(`CORE_RELATION_INVALID: missing ${id}`);
-    return {
-      id,
-      tokenContractVersion: source.tokenContractVersion,
-      tokens: Object.entries(source.tokens)
-        .map(([token, definition]) => ({
-          token,
-          type: definition.type,
-          ...(definition.alias === undefined ? {} : { alias: definition.alias }),
-        }))
-        .sort((left, right) => left.token.localeCompare(right.token)),
-    };
-  });
+  const tokenSource = tokenSources.find((record) => record.id === binding.tokenRecipe.source);
+  if (!tokenSource) throw new Error(`CORE_RELATION_INVALID: missing ${binding.tokenRecipe.source}`);
+  const tokenRequirements = {
+    source: tokenSource.id,
+    tokenContractVersion: tokenSource.tokenContractVersion,
+    recipe: binding.tokenRecipe,
+    resolvedSets: [...tokenRequirementSets]
+      .map(({ profile, digest }) => ({ profile, digest }))
+      .sort((left, right) => left.profile.localeCompare(right.profile)),
+  };
   return {
     component: {
       id: component.id,
@@ -89,7 +85,7 @@ export function bindingSpecRevisionPreimage({
       behavior: binding.behavior,
       accessibility: binding.accessibility,
       runtimeProfiles: binding.runtimeProfiles,
-      tokenSources: binding.tokenSources,
+      tokenRecipe: binding.tokenRecipe,
     },
     normativeExamples,
     tokenRequirements,

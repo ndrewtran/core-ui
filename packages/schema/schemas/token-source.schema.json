@@ -1,33 +1,92 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://core-ui.dev/schema/token-source.schema.json",
-  "title": "Core UI minimum token source",
+  "title": "Core UI token source and default theme",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schemaVersion", "id", "kind", "name", "summary", "lifecycle", "tokenContractVersion", "tokens"],
+  "required": ["schemaVersion", "id", "kind", "name", "summary", "lifecycle", "tokenContractVersion", "theme", "tokens"],
   "properties": {
-    "schemaVersion": { "const": "1.0.0" },
+    "schemaVersion": { "const": "2.0.0" },
     "id": { "type": "string", "pattern": "^core:token:[a-z0-9]+(?:-[a-z0-9]+)*$" },
     "kind": { "const": "token" },
     "name": { "type": "string", "minLength": 1 },
     "summary": { "type": "string", "minLength": 1 },
     "lifecycle": { "enum": ["experimental", "stable", "deprecated", "removed"] },
     "tokenContractVersion": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+    "theme": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "modeAxes", "defaultModes", "runtimeSwitching"],
+      "properties": {
+        "name": { "const": "default" },
+        "modeAxes": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["colorScheme", "contrast", "motion", "density", "direction"],
+          "properties": {
+            "colorScheme": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "enum": ["light", "dark"] } },
+            "contrast": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "enum": ["standard", "more"] } },
+            "motion": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "enum": ["full", "reduced"] } },
+            "density": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "enum": ["comfortable", "compact"] } },
+            "direction": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "enum": ["ltr", "rtl"] } }
+          }
+        },
+        "defaultModes": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["colorScheme", "contrast", "motion", "density", "direction"],
+          "properties": {
+            "colorScheme": { "enum": ["light", "dark"] },
+            "contrast": { "enum": ["standard", "more"] },
+            "motion": { "enum": ["full", "reduced"] },
+            "density": { "enum": ["comfortable", "compact"] },
+            "direction": { "enum": ["ltr", "rtl"] }
+          }
+        },
+        "runtimeSwitching": { "const": "unavailable" }
+      }
+    },
     "tokens": {
       "type": "object",
       "minProperties": 1,
-      "propertyNames": { "pattern": "^[a-z][a-z0-9]*(?:\\.[a-z][a-z0-9-]*)+$" },
-      "additionalProperties": {
-        "type": "object",
-        "additionalProperties": false,
-        "required": ["type", "value"],
-        "properties": {
-          "type": { "enum": ["color", "dimension", "duration", "number", "string"] },
-          "value": { "anyOf": [{ "type": "string" }, { "type": "number" }] },
-          "alias": { "type": "string", "pattern": "^[a-z][a-z0-9]*(?:\\.[a-z][a-z0-9-]*)+$" }
-        }
-      }
+      "propertyNames": { "pattern": "^(reference|semantic|component)\\.[a-z][a-z0-9]*(?:\\.[a-z][a-z0-9-]*)+$" },
+      "additionalProperties": { "$ref": "#/$defs/token" }
     },
     "extensions": { "type": "object", "propertyNames": { "pattern": "^core\\.experimental\\.[a-z0-9]+(?:-[a-z0-9]+)*$" }, "additionalProperties": true }
+  },
+  "$defs": {
+    "valueOrAlias": {
+      "type": "object",
+      "oneOf": [
+        { "required": ["value"], "properties": { "value": { "anyOf": [{ "type": "string" }, { "type": "number" }] } } },
+        { "required": ["alias"], "properties": { "alias": { "type": "string", "pattern": "^(reference|semantic|component)\\.[a-z][a-z0-9]*(?:\\.[a-z][a-z0-9-]*)+$" } } }
+      ]
+    },
+    "token": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["layer", "type", "unit", "meaning", "overridePolicy"],
+      "allOf": [{ "$ref": "#/$defs/valueOrAlias" }],
+      "properties": {
+        "layer": { "enum": ["reference", "semantic", "component"] },
+        "type": { "enum": ["color", "dimension", "duration", "number", "string"] },
+        "unit": { "enum": ["hex", "px", "ms", "unitless", "string"] },
+        "meaning": { "type": "string", "minLength": 1 },
+        "overridePolicy": { "enum": ["fixed", "theme", "instance"] },
+        "value": { "anyOf": [{ "type": "string" }, { "type": "number" }] },
+        "alias": { "type": "string", "pattern": "^(reference|semantic|component)\\.[a-z][a-z0-9]*(?:\\.[a-z][a-z0-9-]*)+$" },
+        "equivalence": { "enum": ["semantic-equivalence", "deprecation-bridge"] },
+        "modes": {
+          "type": "object",
+          "propertyNames": { "pattern": "^(colorScheme|contrast|motion|density|direction)\\.[a-z0-9]+(?:-[a-z0-9]+)*$" },
+          "additionalProperties": { "$ref": "#/$defs/valueOrAlias" }
+        },
+        "platformRestrictions": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "enum": ["web.html", "web.react", "native.ios", "native.android", "native.react-native-web"] }
+        }
+      }
+    }
   }
 }

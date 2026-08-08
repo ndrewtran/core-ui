@@ -7,7 +7,7 @@
   "allOf": [{
     "oneOf": [
       {
-      "required": ["schemaVersion", "lifecycle", "strategy", "api", "behavior", "accessibility", "tokenSources", "runtimeProfiles"],
+      "required": ["schemaVersion", "lifecycle", "strategy", "api", "behavior", "accessibility", "tokenRecipe", "runtimeProfiles"],
       "properties": { "strategy": {
         "enum": ["direct", "adapted", "native-alternative"],
         "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
@@ -31,7 +31,7 @@
           { "required": ["api"] },
           { "required": ["behavior"] },
           { "required": ["accessibility"] },
-          { "required": ["tokenSources"] },
+          { "required": ["tokenRecipe"] },
           { "required": ["runtimeProfiles"] }
         ]
       }
@@ -40,7 +40,7 @@
   }],
   "properties": {
     "schemaVersion": {
-      "const": "1.0.0",
+      "const": "2.0.0",
       "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content"] }
     },
     "lifecycle": {
@@ -115,13 +115,29 @@
       "uniqueItems": true,
       "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
     },
-    "tokenSources": {
-      "type": "array",
-      "items": { "type": "string", "pattern": "^core:token:[a-z0-9]+(?:-[a-z0-9]+)*$" },
-      "uniqueItems": true,
+    "tokenRecipe": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source", "requirements"],
       "x-core-ui-authoring": {
-        "effects": { "add": "compatible", "remove": "incompatible", "replace": "incompatible" },
+        "effect": "incompatible",
         "revisionAxes": ["binding-content", "binding-spec"]
+      },
+      "properties": {
+        "source": {
+          "type": "string",
+          "pattern": "^core:token:[a-z0-9]+(?:-[a-z0-9]+)*$",
+          "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
+        },
+        "requirements": {
+          "type": "array",
+          "minItems": 1,
+          "x-core-ui-authoring": {
+            "effects": { "add": "compatible", "remove": "incompatible", "replace": "incompatible" },
+            "revisionAxes": ["binding-content", "binding-spec"]
+          },
+          "items": { "$ref": "#/$defs/tokenRequirement" }
+        }
       }
     },
     "runtimeProfiles": {
@@ -187,6 +203,94 @@
     }
   },
   "$defs": {
+    "tokenRequirement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["token", "requirement"],
+      "properties": {
+        "token": {
+          "type": "string",
+          "pattern": "^(semantic|component)\\.[a-z][a-z0-9]*(?:\\.[a-z][a-z0-9-]*)+$",
+          "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
+        },
+        "requirement": {
+          "enum": ["required", "optional", "deprecated"],
+          "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
+        },
+        "profiles": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "enum": ["web.html", "web.react", "native.ios", "native.android", "native.react-native-web"] },
+          "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
+        },
+        "fallback": {
+          "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] },
+          "oneOf": [
+            { "$ref": "#/$defs/fallbackToken" },
+            { "$ref": "#/$defs/fallbackValue" }
+          ]
+        }
+      }
+    },
+    "fallbackToken": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "profiles", "evidenceIds", "token"],
+      "properties": {
+        "kind": {
+          "const": "token",
+          "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
+        },
+        "profiles": {
+          "type": "array", "minItems": 1, "uniqueItems": true,
+          "items": { "enum": ["web.html", "web.react", "native.ios", "native.android", "native.react-native-web"] },
+          "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
+        },
+        "evidenceIds": {
+          "type": "array", "minItems": 1, "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^E-G[0-9]+\\.[0-9]+-[0-9]{2}$" },
+          "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
+        },
+        "token": {
+          "type": "string", "pattern": "^(semantic|component)\\.[a-z][a-z0-9]*(?:\\.[a-z][a-z0-9-]*)+$",
+          "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
+        }
+      }
+    },
+    "fallbackValue": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "profiles", "evidenceIds", "type", "unit", "value"],
+      "properties": {
+        "kind": {
+          "const": "value",
+          "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
+        },
+        "profiles": {
+          "type": "array", "minItems": 1, "uniqueItems": true,
+          "items": { "enum": ["web.html", "web.react", "native.ios", "native.android", "native.react-native-web"] },
+          "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
+        },
+        "evidenceIds": {
+          "type": "array", "minItems": 1, "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^E-G[0-9]+\\.[0-9]+-[0-9]{2}$" },
+          "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
+        },
+        "type": {
+          "enum": ["color", "dimension", "duration", "number", "string"],
+          "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
+        },
+        "unit": {
+          "enum": ["hex", "px", "ms", "unitless", "string"],
+          "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
+        },
+        "value": {
+          "anyOf": [{ "type": "string" }, { "type": "number" }],
+          "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
+        }
+      }
+    },
     "runtimeProfile": {
       "type": "object",
       "additionalProperties": false,

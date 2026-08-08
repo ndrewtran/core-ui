@@ -1,21 +1,54 @@
 export function tokenSource() {
   return {
-    schemaVersion: '1.0.0',
+    schemaVersion: '2.0.0',
     id: 'core:token:button-minimum',
     kind: 'token',
     name: 'Button minimum tokens',
     summary: 'The minimum token source used by the G0.1 proof artifact.',
     lifecycle: 'experimental',
-    tokenContractVersion: '1.0.0',
+    tokenContractVersion: '1.1.0',
+    theme: {
+      name: 'default',
+      modeAxes: {
+        colorScheme: ['light', 'dark'],
+        contrast: ['standard', 'more'],
+        motion: ['full', 'reduced'],
+        density: ['comfortable', 'compact'],
+        direction: ['ltr', 'rtl'],
+      },
+      defaultModes: {
+        colorScheme: 'light',
+        contrast: 'standard',
+        motion: 'full',
+        density: 'comfortable',
+        direction: 'ltr',
+      },
+      runtimeSwitching: 'unavailable',
+    },
     tokens: {
-      'semantic.action.background': { type: 'color', value: '#000000' },
+      'reference.color.black': {
+        layer: 'reference',
+        type: 'color',
+        unit: 'hex',
+        meaning: 'Black reference value.',
+        overridePolicy: 'fixed',
+        value: '#000000',
+      },
+      'semantic.action.background': {
+        layer: 'semantic',
+        type: 'color',
+        unit: 'hex',
+        meaning: 'Immediate action background.',
+        overridePolicy: 'theme',
+        alias: 'reference.color.black',
+      },
     },
   };
 }
 
 function webBinding() {
   return {
-    schemaVersion: '1.0.0',
+    schemaVersion: '2.0.0',
     lifecycle: 'experimental',
     strategy: 'direct',
     api: {
@@ -26,7 +59,10 @@ function webBinding() {
     },
     behavior: ['Activation requests one immediate action'],
     accessibility: ['Expose accessible name and disabled state'],
-    tokenSources: ['core:token:button-minimum'],
+    tokenRecipe: {
+      source: 'core:token:button-minimum',
+      requirements: [{ token: 'semantic.action.background', requirement: 'required' }],
+    },
     runtimeProfiles: {},
   };
 }
