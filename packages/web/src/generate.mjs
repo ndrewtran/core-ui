@@ -85,6 +85,32 @@ const compatibility = {
   }])),
 };
 const compatibilityBody = `function deepFreeze(value) {\n  if (value && typeof value === 'object' && !Object.isFrozen(value)) {\n    Object.freeze(value);\n    for (const item of Object.values(value)) deepFreeze(item);\n  }\n  return value;\n}\nexport const webCompatibility = deepFreeze(${canonicalJson(compatibility)});\nexport const webSurfaces = webCompatibility.bindings;\n`;
+function bindingTypeName(bindingId) {
+  return `Button${bindingId.split('.').map((part) => part[0].toUpperCase() + part.slice(1)).join('')}Binding`;
+}
+function valueType(value) {
+  if (typeof value === 'boolean') return 'boolean';
+  if (typeof value === 'number') return 'number';
+  if (typeof value === 'string') return 'string';
+  return 'unknown';
+}
+const bindingTypeBody = ['web.html', 'web.react'].map((bindingId) => {
+  const binding = button.record.bindings[bindingId];
+  const props = binding.api.props.map((prop) => (
+    `    readonly ${JSON.stringify(prop)}?: ${valueType(binding.api.defaults[prop])};`
+  )).join('\n');
+  const events = binding.api.events.map((event) => (
+    `    readonly ${JSON.stringify(event)}: CustomEvent<void>;`
+  )).join('\n');
+  return [
+    `export interface ${bindingTypeName(bindingId)} {`,
+    `  readonly bindingRef: ${JSON.stringify(`${button.id}#${bindingId}`)};`,
+    '  readonly props: {', props, '  };',
+    '  readonly events: {', events, '  };',
+    `  readonly slots: ${binding.api.parts.map((part) => JSON.stringify(part)).join(' | ')};`,
+    '}',
+  ].join('\n');
+}).join('\n\n') + '\n';
 function generated(sourcePath, body, comment = '//') {
   if (comment === '/*') {
     const cssDigestBody = ` */\n${body}`;
@@ -96,6 +122,7 @@ function generated(sourcePath, body, comment = '//') {
 }
 const outputs = [
   { path: resolve(packageRoot, 'generated/button.css'), expected: generated(source, cssBody, '/*') },
+  { path: resolve(packageRoot, 'generated/bindings.d.ts'), expected: generated(source, bindingTypeBody) },
   { path: resolve(packageRoot, 'generated/compatibility.mjs'), expected: generated(source, compatibilityBody) },
 ];
 for (const output of outputs) {

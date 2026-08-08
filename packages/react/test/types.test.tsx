@@ -1,11 +1,8 @@
-import { useRef, type ComponentPropsWithoutRef } from 'react';
-import { useCoreRootOwnership } from '@core-ui/react';
+import { useRef } from 'react';
+import { useCoreRootOwnership, type CoreButtonReactHostProps } from '@core-ui/react';
+import type { ButtonWebReactBinding } from '@core-ui/web/bindings';
 
-type CoreButtonHostProps = Omit<ComponentPropsWithoutRef<'button'>, 'onClick'> & {
-  onActivate?: (event: CustomEvent<void>) => void;
-};
-
-function TypeFixture(props: CoreButtonHostProps) {
+function TypeFixture(props: CoreButtonReactHostProps) {
   const ref = useRef<HTMLButtonElement>(null);
   useCoreRootOwnership(ref, (resources) => {
     resources.addDocumentListener('keydown', () => {});
@@ -15,6 +12,9 @@ function TypeFixture(props: CoreButtonHostProps) {
 
 const valid = <TypeFixture disabled aria-label="Synthetic" onActivate={() => {}} />;
 void valid;
+
+const bindingOwnedDisabled: ButtonWebReactBinding['props']['disabled'] = true;
+void bindingOwnedDisabled;
 
 // @ts-expect-error upstream/internal string is not part of the Core refinement
 const invalid = <TypeFixture onActivate="activate" />;

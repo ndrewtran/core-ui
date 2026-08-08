@@ -8,6 +8,7 @@
     ".": { "types": "./src/index.d.ts", "default": "./src/index.mjs" },
     "./runtime": { "types": "./src/runtime.d.ts", "default": "./src/runtime.mjs" },
     "./button.css": "./generated/button.css",
+    "./bindings": "./generated/bindings.d.ts",
     "./compatibility": "./generated/compatibility.mjs",
     "./testing": "./src/testing.mjs"
   },
