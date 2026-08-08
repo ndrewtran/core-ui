@@ -306,9 +306,12 @@ export function diagnoseCanonicalSource({
 
 function normalizedInputRows(value, path = '$', rows = []) {
   if (Array.isArray(value)) {
-    value.forEach((item, index) => normalizedInputRows(item, `${path}/${index}`, rows));
+    if (value.length === 0) rows.push({ path, value: [] });
+    else value.forEach((item, index) => normalizedInputRows(item, `${path}/${index}`, rows));
   } else if (isObject(value)) {
-    for (const key of Object.keys(value).sort(compareText)) {
+    const keys = Object.keys(value).sort(compareText);
+    if (keys.length === 0) rows.push({ path, value: {} });
+    for (const key of keys) {
       normalizedInputRows(value[key], `${path}/${key.replaceAll('~', '~0').replaceAll('/', '~1')}`, rows);
     }
   } else {

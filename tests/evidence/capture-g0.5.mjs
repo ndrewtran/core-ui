@@ -277,6 +277,64 @@ if (
     !== componentArtifact.bindingSpecRevisions['web.react']
 ) throw new Error('EVIDENCE_REVISION_EXPLANATION_FAILED');
 
+const emptyConcept = structuredClone(componentArtifact.record);
+emptyConcept.extensions = {};
+const emptyBinding = structuredClone(componentArtifact.record.bindings['web.react']);
+emptyBinding.editorialNotes = [];
+const emptySpec = structuredClone(componentArtifact.record);
+emptySpec.bindings['web.react'].api.defaults.emptyContract = {};
+const emptyContainerCases = [
+  {
+    axis: 'contentRevision',
+    path: '$/extensions',
+    before: explainRevisions({
+      family: 'component',
+      record: componentArtifact.record,
+    }).axes.find(({ name }) => name === 'contentRevision'),
+    after: explainRevisions({
+      family: 'component',
+      record: emptyConcept,
+    }).axes.find(({ name }) => name === 'contentRevision'),
+  },
+  {
+    axis: 'bindingContentRevision',
+    path: '$/editorialNotes',
+    before: explainRevisions({
+      family: 'binding',
+      record: componentArtifact.record.bindings['web.react'],
+    }).axes.find(({ name }) => name === 'bindingContentRevision'),
+    after: explainRevisions({
+      family: 'binding',
+      record: emptyBinding,
+    }).axes.find(({ name }) => name === 'bindingContentRevision'),
+  },
+  {
+    axis: 'bindingSpecRevision',
+    path: '$/binding/api/defaults/emptyContract',
+    before: revisionExplanation.axes.find(({ name }) => name === 'bindingSpecRevision'),
+    after: explainRevisions({
+      family: 'component',
+      record: emptySpec,
+      bindingId: 'web.react',
+      ...revisionContext,
+    }).axes.find(({ name }) => name === 'bindingSpecRevision'),
+  },
+];
+const emptyContainerResults = emptyContainerCases.map(({ axis, path, before, after }) => {
+  const beforeRow = before.normalizedInputs.find((row) => row.path === path);
+  const afterRow = after.normalizedInputs.find((row) => row.path === path);
+  if (before.digest === after.digest || beforeRow !== undefined || afterRow === undefined) {
+    throw new Error(`EVIDENCE_EMPTY_CONTAINER_EXPLANATION_FAILED: ${axis}`);
+  }
+  return {
+    afterDigest: after.digest,
+    afterValue: afterRow.value,
+    axis,
+    beforeDigest: before.digest,
+    path,
+  };
+});
+
 const whitespaceRecord = structuredClone(componentArtifact.record);
 whitespaceRecord.summary = '  Triggers an immediate action.  ';
 const allowedAutofix = previewAutofix({ record: whitespaceRecord, path: '$/summary' });
@@ -541,6 +599,7 @@ const definitions = [
     'semantic-change-and-revision-golden-corpus',
     {
       semanticResults,
+      emptyContainerResults,
       revisionAxes: revisionExplanation.axes.map(({ name, digest, normalizedInputs }) => ({
         name,
         digest,

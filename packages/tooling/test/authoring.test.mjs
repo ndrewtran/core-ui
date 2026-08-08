@@ -282,6 +282,72 @@ test('E-G0.5-02: revision explainer lists the normalized inputs behind each dige
   );
 });
 
+test('E-G0.5-02: revision explanations distinguish absent and empty containers on every axis', async () => {
+  const { component, revisionContext } = await setup();
+
+  const conceptAfter = structuredClone(component.record);
+  conceptAfter.extensions = {};
+  const conceptBeforeRows = explainRevisions({
+    family: 'component',
+    record: component.record,
+  }).axes.find(({ name }) => name === 'contentRevision').normalizedInputs;
+  const conceptAfterRows = explainRevisions({
+    family: 'component',
+    record: conceptAfter,
+  }).axes.find(({ name }) => name === 'contentRevision').normalizedInputs;
+  assert.equal(conceptBeforeRows.some(({ path }) => path === '$/extensions'), false);
+  assert.deepEqual(conceptAfterRows.find(({ path }) => path === '$/extensions').value, {});
+
+  const bindingBefore = component.record.bindings['web.react'];
+  const bindingAfter = structuredClone(bindingBefore);
+  bindingAfter.editorialNotes = [];
+  const bindingBeforeAxis = explainRevisions({
+    family: 'binding',
+    record: bindingBefore,
+  }).axes.find(({ name }) => name === 'bindingContentRevision');
+  const bindingAfterAxis = explainRevisions({
+    family: 'binding',
+    record: bindingAfter,
+  }).axes.find(({ name }) => name === 'bindingContentRevision');
+  assert.notEqual(bindingBeforeAxis.digest, bindingAfterAxis.digest);
+  assert.equal(
+    bindingBeforeAxis.normalizedInputs.some(({ path }) => path === '$/editorialNotes'),
+    false,
+  );
+  assert.deepEqual(
+    bindingAfterAxis.normalizedInputs.find(({ path }) => path === '$/editorialNotes').value,
+    [],
+  );
+
+  const specAfter = structuredClone(component.record);
+  specAfter.bindings['web.react'].api.defaults.emptyContract = {};
+  const specBeforeAxis = explainRevisions({
+    family: 'component',
+    record: component.record,
+    bindingId: 'web.react',
+    ...revisionContext,
+  }).axes.find(({ name }) => name === 'bindingSpecRevision');
+  const specAfterAxis = explainRevisions({
+    family: 'component',
+    record: specAfter,
+    bindingId: 'web.react',
+    ...revisionContext,
+  }).axes.find(({ name }) => name === 'bindingSpecRevision');
+  assert.notEqual(specBeforeAxis.digest, specAfterAxis.digest);
+  assert.equal(
+    specBeforeAxis.normalizedInputs.some(
+      ({ path }) => path === '$/binding/api/defaults/emptyContract',
+    ),
+    false,
+  );
+  assert.deepEqual(
+    specAfterAxis.normalizedInputs.find(
+      ({ path }) => path === '$/binding/api/defaults/emptyContract',
+    ).value,
+    {},
+  );
+});
+
 test('E-G0.5-03: autofix is preview-only and denies every product-meaning category', async () => {
   const value = await corpus();
   const { component } = await setup();
