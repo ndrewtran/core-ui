@@ -33,6 +33,25 @@ function matchesType(value, type) {
   return typeof value === type;
 }
 
+function discriminatedBranchIndex(branches, value) {
+  if (!isObject(value)) return null;
+  const keys = Object.keys(value).sort().filter((key) => branches.every((branch) => {
+    const property = branch.properties?.[key];
+    return isObject(property) && (property.const !== undefined || Array.isArray(property.enum));
+  }));
+  for (const key of keys) {
+    const matches = branches.flatMap((branch, index) => {
+      const property = branch.properties[key];
+      const matched = property.const !== undefined
+        ? sameValue(value[key], property.const)
+        : property.enum.some((item) => sameValue(value[key], item));
+      return matched ? [index] : [];
+    });
+    if (matches.length === 1) return matches[0];
+  }
+  return null;
+}
+
 function evaluate(schema, value, path, currentFile, issues, documents) {
   if (schema === true) return;
   if (schema === false) {
@@ -55,12 +74,19 @@ function evaluate(schema, value, path, currentFile, issues, documents) {
     if (!matches) issues.push({ path, message: 'matches no allowed schema' });
   }
   if (schema.oneOf) {
-    const matches = schema.oneOf.filter((item) => {
+    const candidates = schema.oneOf.map((item) => {
       const candidateIssues = [];
       evaluate(item, value, path, currentFile, candidateIssues, documents);
-      return candidateIssues.length === 0;
-    }).length;
-    if (matches !== 1) issues.push({ path, message: `must match exactly one schema; matched ${matches}` });
+      return candidateIssues;
+    });
+    const matches = candidates.filter((candidateIssues) => candidateIssues.length === 0).length;
+    if (matches === 0) {
+      const branchIndex = discriminatedBranchIndex(schema.oneOf, value);
+      if (branchIndex !== null) issues.push(...candidates[branchIndex]);
+      else issues.push({ path, message: 'must match exactly one schema; matched 0' });
+    } else if (matches !== 1) {
+      issues.push({ path, message: `must match exactly one schema; matched ${matches}` });
+    }
   }
   if (schema.not) {
     const candidateIssues = [];
@@ -122,7 +148,10 @@ function evaluate(schema, value, path, currentFile, issues, documents) {
     }
     for (const required of schema.required ?? []) {
       if (!Object.hasOwn(value, required)) {
-        issues.push({ path, message: `is missing required field ${required}` });
+        issues.push({
+          path: `${path}/${escapeJsonPointer(required)}`,
+          message: `is missing required field ${required}`,
+        });
       }
     }
     for (const key of keys) {

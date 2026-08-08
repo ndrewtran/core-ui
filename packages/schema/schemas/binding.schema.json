@@ -236,11 +236,11 @@
         "reason": {
           "type": "string",
           "minLength": 1,
-          "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content"] }
+          "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
         },
         "alternative": {
           "$ref": "artifact-ref.schema.json",
-          "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content"] }
+          "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
         }
       }
     },

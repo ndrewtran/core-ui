@@ -51,6 +51,16 @@ function expectCode(code) {
   };
 }
 
+function validationIssues(family, value) {
+  try {
+    validateFamily(family, value);
+  } catch (error) {
+    assert.ok(error instanceof SchemaValidationError);
+    return error.issues;
+  }
+  assert.fail(`${family} unexpectedly validated`);
+}
+
 test('E-G0.1-01: minimum records, envelopes, diagnostics, ownership, and relations validate', () => {
   const graph = validateCatalogRecords(allRecords());
   assert.equal(graph.records.length, 5);
@@ -397,6 +407,59 @@ test('E-G0.1-01 negative: unknown, duplicate, invalid-relation, and unowned fiel
     ]),
     expectCode('CORE_RELATION_INVALID'),
   );
+});
+
+test('E-G0.5-01: discriminated binding branches retain exact required-field diagnostics', () => {
+  const supportedRequiredPaths = [
+    '$/lifecycle',
+    '$/api',
+    '$/behavior',
+    '$/accessibility',
+    '$/tokenSources',
+    '$/runtimeProfiles',
+  ];
+  for (const strategy of ['direct', 'adapted', 'native-alternative']) {
+    const issues = validationIssues('binding', { schemaVersion: '1.0.0', strategy });
+    for (const path of supportedRequiredPaths) {
+      assert.ok(issues.some((issue) => issue.path === path), `${strategy}: ${path}`);
+    }
+    assert.equal(issues.some((issue) => issue.path === '$/reason'), false, strategy);
+    assert.equal(
+      issues.some((issue) => issue.message.includes('must equal "unsupported"')),
+      false,
+      strategy,
+    );
+  }
+
+  const unsupportedIssues = validationIssues('binding', {
+    schemaVersion: '1.0.0',
+    strategy: 'unsupported',
+  });
+  assert.ok(unsupportedIssues.some((issue) => issue.path === '$/reason'));
+  assert.equal(unsupportedIssues.some((issue) => issue.path === '$/api'), false);
+
+  for (const strategy of ['direct', 'adapted', 'native-alternative']) {
+    const record = component().bindings['native.react-native'];
+    record.runtimeProfiles.ios = { strategy };
+    const issues = validationIssues('binding', record);
+    assert.ok(issues.some((issue) => issue.path === '$/runtimeProfiles/ios/lifecycle'), strategy);
+    assert.ok(
+      issues.some((issue) => issue.path === '$/runtimeProfiles/ios/validationProfile'),
+      strategy,
+    );
+    assert.equal(
+      issues.some((issue) => issue.path === '$/runtimeProfiles/ios/reason'),
+      false,
+      strategy,
+    );
+  }
+
+  const runtimeUnsupported = component().bindings['native.react-native'];
+  runtimeUnsupported.runtimeProfiles['native.react-native-web'] = { strategy: 'unsupported' };
+  const runtimeIssues = validationIssues('binding', runtimeUnsupported);
+  assert.ok(runtimeIssues.some(
+    (issue) => issue.path === '$/runtimeProfiles/native.react-native-web/reason',
+  ));
 });
 
 test('E-G0.1-02: canonical bytes ignore key order and whitespace but preserve meaning', () => {

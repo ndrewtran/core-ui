@@ -6,10 +6,7 @@ import {
 } from './contracts.mjs';
 import { SchemaValidationError } from './validation.mjs';
 
-const AUTHORING_FILES = Object.freeze({
-  binding: 'binding.schema.json',
-  component: 'component.schema.json',
-});
+const AUTHORING_FAMILIES = Object.freeze(['binding', 'component']);
 const EFFECTS = new Set(['editorial', 'compatible', 'incompatible']);
 const OPERATIONS = Object.freeze(['add', 'remove', 'replace']);
 const REVISION_AXES = new Set(['content', 'binding-content', 'binding-spec']);
@@ -35,10 +32,6 @@ function pathSegments(path) {
       ? path.slice(1)
       : path;
   return normalized.split('/').filter(Boolean).map(unescapePointer);
-}
-
-function schemaAt(fileName, schemas) {
-  return schemas?.[fileName] ?? loadJsonDocument(fileName);
 }
 
 function completionFor(schema, required) {
@@ -198,15 +191,15 @@ function collectProperties({
 }
 
 function declarationsFor(family, schemas) {
-  const fileName = AUTHORING_FILES[family];
-  if (!fileName) {
+  if (!AUTHORING_FAMILIES.includes(family)) {
     throw new Error(`CORE_SCHEMA_INVALID: authoring metadata unavailable for ${family}`);
   }
+  const { fileName, schema } = loadFamilySchema(family, schemas);
   const declarations = [];
   collectProperties({
     family,
     fileName,
-    node: schemaAt(fileName, schemas),
+    node: schema,
     declarations,
     schemas,
   });
@@ -214,7 +207,7 @@ function declarationsFor(family, schemas) {
 }
 
 export function validateAuthoringMetadata({ schemas, ownership } = {}) {
-  const declarations = Object.keys(AUTHORING_FILES)
+  const declarations = AUTHORING_FAMILIES
     .flatMap((family) => declarationsFor(family, schemas));
   const registry = ownership ?? loadJsonDocument('field-ownership.json');
   const owners = new Map(registry.fields.map((field) => [

@@ -153,7 +153,46 @@ test('E-G0.5-01: scaffold, validation, compilation, retrieval, diagnosis, and re
   assert.equal(diagnosed.valid, false);
   assert.equal(diagnosed.diagnostics[0].ruleId, 'authoring.source.schema-invalid');
   assert.equal(diagnosed.diagnostics[0].details.source.record, sourcePath);
+  assert.equal(diagnosed.diagnostics[0].details.source.path, '$/summary');
   assert.equal(diagnosed.diagnostics[0].details.owner.name, 'component-contract');
+  assert.equal(
+    diagnosed.diagnostics[0].details.owner.schemaPointer,
+    '#/properties/summary',
+  );
+
+  const missingBindingApi = structuredClone(preview.record);
+  delete missingBindingApi.bindings['web.react'].api;
+  const bindingDiagnosis = diagnoseCanonicalSource({
+    context,
+    family: 'component',
+    record: missingBindingApi,
+    recordPath: sourcePath,
+  });
+  assert.equal(bindingDiagnosis.diagnostics[0].details.source.path, '$/bindings/web.react/api');
+  assert.deepEqual(bindingDiagnosis.diagnostics[0].details.owner, {
+    name: 'binding-contract',
+    schema: 'binding.schema.json',
+    schemaPointer: '#/properties/api',
+  });
+
+  const missingRuntimeReason = structuredClone(preview.record);
+  delete missingRuntimeReason.bindings['native.react-native']
+    .runtimeProfiles['native.react-native-web'].reason;
+  const runtimeDiagnosis = diagnoseCanonicalSource({
+    context,
+    family: 'component',
+    record: missingRuntimeReason,
+    recordPath: sourcePath,
+  });
+  assert.equal(
+    runtimeDiagnosis.diagnostics[0].details.source.path,
+    '$/bindings/native.react-native/runtimeProfiles/native.react-native-web/reason',
+  );
+  assert.deepEqual(runtimeDiagnosis.diagnostics[0].details.owner, {
+    name: 'binding-contract',
+    schema: 'binding.schema.json',
+    schemaPointer: '#/$defs/runtimeProfile/properties/reason',
+  });
   assert.equal(diagnoseCanonicalSource({
     context,
     family: 'component',
