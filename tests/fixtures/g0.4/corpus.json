@@ -22,8 +22,8 @@
       "version": "1.0.0",
       "catalogVersion": "1.0.0",
       "catalogDigest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-      "queryApiVersion": "1.2.0",
-      "supportedQueryApiVersions": ["1.1.0", "1.2.0"],
+      "queryApiVersion": "2.0.0",
+      "supportedQueryApiVersions": ["1.1.0", "1.2.0", "2.0.0"],
       "schemaRange": "^2.0.0",
       "sourceRevision": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
       "provenance": {
@@ -50,7 +50,7 @@
       "catalogVersion": "1.1.0",
       "catalogDigest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
       "queryApiVersion": "2.0.0",
-      "supportedQueryApiVersions": ["1.1.0", "1.2.0", "2.0.0"],
+      "supportedQueryApiVersions": ["2.0.0"],
       "schemaRange": "^3.0.0",
       "sourceRevision": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
       "provenance": {
@@ -144,8 +144,8 @@
     {
       "id": "release-compatible",
       "releaseVersion": "1.0.0",
-      "schemaVersion": "2.0.0",
-      "queryApiVersion": "1.2.0",
+      "schemaVersion": "2.1.0",
+      "queryApiVersion": "2.0.0",
       "tokenContractVersion": "1.1.0",
       "sourceRevision": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
       "catalog": {
@@ -266,7 +266,7 @@
         "type": "error",
         "code": "CORE_CATALOG_DECLARATION_DRIFT",
         "secondaryCodes": [
-          "CORE_QUERY_API_VERSION_UNSUPPORTED"
+          "CORE_CATALOG_INCOMPATIBLE"
         ],
         "nextCommand": {
           "command": "pnpm --dir apps/consumer why @core-ui/catalog",
@@ -722,33 +722,33 @@
           "path": "apps/consumer",
           "name": "consumer",
           "packageManager": null,
-          "catalogRange": "1.0.0"
+          "catalogRange": "1.1.0"
         }
       ],
       "lockfile": [
         {
           "workspace": "apps/consumer",
           "name": "@core-ui/catalog",
-          "version": "1.0.0",
-          "integrity": "sha512:catalog-compatible"
+          "version": "1.1.0",
+          "integrity": "sha512:catalog-newer"
         }
       ],
       "installed": [
         {
           "workspace": "apps/consumer",
           "name": "@core-ui/catalog",
-          "version": "1.0.0",
+          "version": "1.1.0",
           "kind": "catalog",
-          "fixture": "catalog-compatible",
+          "fixture": "catalog-newer",
           "relativePath": "apps/consumer/node_modules/@core-ui/catalog",
-          "observedDigest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          "observedDigest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
         }
       ],
       "caches": [],
       "request": {
         "bindings": [],
         "cache": null,
-        "queryApiVersion": "2.0.0"
+        "queryApiVersion": "1.1.0"
       },
       "expected": {
         "type": "error",

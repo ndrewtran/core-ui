@@ -15,7 +15,7 @@ import {
   validateCatalogRecords,
   validateFamily,
 } from '@core-ui/schema';
-import { compileTokenRequirementSet } from '@core-ui/tokens';
+import { compileTokenRequirementSet, validateSourceCrosswalk } from '@core-ui/tokens';
 
 const SOURCE_MANIFEST_SCHEMA = 'core-ui-catalog-source-manifest-v1';
 
@@ -86,11 +86,17 @@ function validateSourceManifest(manifest) {
       || typeof entry !== 'object'
       || Array.isArray(entry)
       || !['capability', 'component', 'example', 'guide', 'token-source'].includes(entry.family)
-      || Object.keys(entry).some((key) => !['family', 'path', 'sourcePath'].includes(key))
+      || Object.keys(entry).some((key) => !['baselineOccurrencesPath', 'family', 'path', 'sourcePath'].includes(key))
     ) {
       throw new Error(`CORE_CATALOG_SOURCE_INVALID: invalid records/${index}`);
     }
     assertRelativePath(entry.path, `records/${index}/path`);
+    if (entry.baselineOccurrencesPath !== undefined) {
+      assertRelativePath(entry.baselineOccurrencesPath, `records/${index}/baselineOccurrencesPath`);
+      if (entry.family !== 'token-source') {
+        throw new Error(`CORE_CATALOG_SOURCE_INVALID: records/${index}/baselineOccurrencesPath requires token-source`);
+      }
+    }
     if (entry.sourcePath !== undefined) {
       assertRelativePath(entry.sourcePath, `records/${index}/sourcePath`);
     }
@@ -115,16 +121,17 @@ function countLexemes(value) {
   return canonicalJson(value).match(/[\p{L}\p{N}_]+/gu)?.length ?? 0;
 }
 
-export function assertPhaseAQueryProfile({ manifest, pageBudgetProfile, authorityDecision }) {
+export function assertAcceptedQueryProfile({ manifest, pageBudgetProfile, authorityDecision }) {
   validateFamily('token-section-page-budget-profile', pageBudgetProfile);
   const acceptedPageProfile = authorityDecision.pageProfiles?.find(
     ({ queryApiVersion }) => queryApiVersion === manifest.queryApiVersion,
   );
+  const expectedPhase = manifest.queryApiVersion === '2.0.0' ? 'B' : 'A';
   const phase = authorityDecision.queryCompatibility?.phases?.find(
-    ({ phase: phaseId }) => phaseId === 'A',
+    ({ phase: phaseId }) => phaseId === expectedPhase,
   );
   if (!acceptedPageProfile || !phase) {
-    throw new Error('CORE_CATALOG_SOURCE_INVALID: accepted Phase A profile is missing');
+    throw new Error(`CORE_CATALOG_SOURCE_INVALID: accepted Phase ${expectedPhase} profile is missing`);
   }
   const { normalizedWorstCaseEnvelopePreimage, ...acceptedPageValues } = acceptedPageProfile;
   const expectedPageBudgetProfile = {
@@ -141,10 +148,12 @@ export function assertPhaseAQueryProfile({ manifest, pageBudgetProfile, authorit
     || canonicalJson(manifest.supportedQueryApiVersions)
       !== canonicalJson(phase.selectedCatalogSupportedQueryApiVersions)
   ) {
-    throw new Error('CORE_CATALOG_SOURCE_INVALID: Phase A profile differs from accepted authority');
+    throw new Error(`CORE_CATALOG_SOURCE_INVALID: Phase ${expectedPhase} profile differs from accepted authority`);
   }
   return pageBudgetProfile;
 }
+
+export const assertPhaseAQueryProfile = assertAcceptedQueryProfile;
 
 function tokenize(value) {
   return String(value).toLowerCase().match(/[a-z0-9]+/g) ?? [];
@@ -244,7 +253,7 @@ export async function compileCatalog({
     'utf8',
   );
   const pageBudgetProfile = parseJsonStrict(pageBudgetProfileBytes);
-  assertPhaseAQueryProfile({ manifest, pageBudgetProfile, authorityDecision });
+  assertAcceptedQueryProfile({ manifest, pageBudgetProfile, authorityDecision });
   const platformSafetyContractBytes = await readFile(
     resolve(repositoryRoot, manifest.platformSafetyContractPath),
     'utf8',
@@ -257,6 +266,7 @@ export async function compileCatalog({
     const record = parseJsonStrict(recordBytes);
     validateFamily(entry.family, record);
     let sourceBytes;
+    let baselineOccurrencesBytes;
     if (entry.sourcePath !== undefined) {
       sourceBytes = await readFile(resolve(repositoryRoot, entry.sourcePath), 'utf8');
       if (record.source !== entry.sourcePath) {
@@ -265,7 +275,27 @@ export async function compileCatalog({
         );
       }
     }
-    loaded.push({ entry, record, recordBytes, sourceBytes });
+    if (entry.baselineOccurrencesPath !== undefined) {
+      baselineOccurrencesBytes = await readFile(
+        resolve(repositoryRoot, entry.baselineOccurrencesPath),
+        'utf8',
+      );
+    }
+    let crosswalkValidation;
+    if (record.kind === 'token') {
+      const baselineOccurrences = baselineOccurrencesBytes === undefined
+        ? undefined
+        : parseJsonStrict(baselineOccurrencesBytes);
+      crosswalkValidation = validateSourceCrosswalk(record, { baselineOccurrences });
+    }
+    loaded.push({
+      entry,
+      record,
+      recordBytes,
+      sourceBytes,
+      baselineOccurrencesBytes,
+      crosswalkValidation,
+    });
   }
 
   const records = loaded.map(({ record }) => record);
@@ -279,7 +309,7 @@ export async function compileCatalog({
       .map(({ record, sourceBytes }) => [record.id, sourceBytes]),
   );
 
-  const artifacts = loaded.map(({ entry, record, sourceBytes }) => {
+  const artifacts = loaded.map(({ entry, record, sourceBytes, crosswalkValidation }) => {
     const revision = contentRevision(entry.family, record, { sourceBytes });
     const tokenRequirementSets = record.kind === 'component'
       ? Object.fromEntries(Object.entries(record.bindings)
@@ -346,6 +376,9 @@ export async function compileCatalog({
       bindingSpecRevisions,
       tokenRequirementSets,
       platformSafetyRequirementSets,
+      ...(record.kind === 'token' ? {
+        sourceCrosswalkDigest: crosswalkValidation.digest,
+      } : {}),
       source: {
         record: entry.path,
         ...(entry.sourcePath === undefined ? {} : {
@@ -363,12 +396,16 @@ export async function compileCatalog({
     commandRegistryDigest: sha256Digest(commandRegistryBytes),
     pageBudgetProfileDigest: sha256Digest(pageBudgetProfileBytes),
     platformSafetyContractDigest: canonicalDigest(platformSafetyContract),
-    inputs: loaded.map(({ entry, recordBytes, sourceBytes }) => ({
+    inputs: loaded.map(({ entry, recordBytes, sourceBytes, baselineOccurrencesBytes }) => ({
       path: entry.path,
       digest: sha256Digest(recordBytes),
       ...(entry.sourcePath === undefined ? {} : {
         sourcePath: entry.sourcePath,
         sourceDigest: sha256Digest(sourceBytes),
+      }),
+      ...(entry.baselineOccurrencesPath === undefined ? {} : {
+        baselineOccurrencesPath: entry.baselineOccurrencesPath,
+        baselineOccurrencesDigest: sha256Digest(baselineOccurrencesBytes),
       }),
     })),
   });

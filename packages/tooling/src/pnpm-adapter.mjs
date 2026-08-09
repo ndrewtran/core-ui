@@ -13,7 +13,7 @@ import { valid, validRange } from 'semver';
 import { resolveCatalogGraph } from './local-resolver.mjs';
 
 const CATALOG_PACKAGE = '@core-ui/catalog';
-const TOOLING_VERSION = '0.1.0';
+const TOOLING_VERSION = '0.2.0';
 
 function sha256(value) {
   return `sha256:${createHash('sha256').update(value).digest('hex')}`;

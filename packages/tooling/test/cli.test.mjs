@@ -116,7 +116,7 @@ test('E-G0.3-02 human, JSON, and dense projections preserve one response object'
   assert.equal(response.meta.resolution.catalogSource, 'package');
 });
 
-test('TALE-TOKEN-A core get negotiates 1.1/1.2 and preserves page parity', () => {
+test('TALE-TOKEN-B core get negotiates 1.1/1.2/2.0 and preserves page parity', () => {
   const parsed = parseCliArguments([
     'get', 'core:token:button-minimum', '--query-api-version', '1.2.0',
     '--section', 'tokens', '--limit', '1', '--json',
@@ -139,7 +139,7 @@ test('TALE-TOKEN-A core get negotiates 1.1/1.2 and preserves page parity', () =>
     '--section', 'source-crosswalk',
   ]);
   assert.equal(absent.entries.status, 'absent');
-  assert.equal(absent.entries.tokenSourceSchemaVersion, '2.0.0');
+  assert.equal(absent.entries.tokenSourceSchemaVersion, '2.1.0');
 
   const historical = jsonResult([
     'get', 'core:token:button-minimum', '--query-api-version', '1.1.0', '--detail', 'full',
@@ -160,11 +160,14 @@ test('TALE-TOKEN-A core get negotiates 1.1/1.2 and preserves page parity', () =>
     assert.equal(error.apiVersion, '1.1.0');
   }
 
-  const unsupported = runCli([
+  const current = runCli([
     'get', 'core:token:button-minimum', '--query-api-version', '2.0.0', '--json',
   ]);
-  assert.equal(unsupported.exitCode, 2);
-  assert.equal(JSON.parse(unsupported.stdout).error.code, 'CORE_QUERY_API_VERSION_UNSUPPORTED');
+  assert.equal(current.exitCode, 0);
+  const currentResponse = JSON.parse(current.stdout);
+  assert.equal(currentResponse.apiVersion, '2.0.0');
+  assert.equal(Object.hasOwn(currentResponse.data.artifact, 'tokens'), false);
+  assert.deepEqual(currentResponse.data.artifact.availableSections, ['tokens', 'source-crosswalk']);
 });
 
 test('E-G0.3-03 dense outputs round-trip deterministically within every locked budget', () => {

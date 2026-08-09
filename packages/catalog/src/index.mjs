@@ -77,6 +77,16 @@ function assertBundle(bundle) {
   ) {
     throw new Error('CORE_CATALOG_INTEGRITY_MISMATCH: invalid selected query descriptor');
   }
+  for (const artifact of bundle.artifacts ?? []) {
+    if (artifact.kind !== 'token') continue;
+    validateFamily('token-source', artifact.record);
+    const expectedCrosswalkDigest = artifact.record.sourceCrosswalk === undefined
+      ? null
+      : canonicalDigest(artifact.record.sourceCrosswalk);
+    if (artifact.sourceCrosswalkDigest !== expectedCrosswalkDigest) {
+      throw new Error('CORE_CATALOG_INTEGRITY_MISMATCH: token crosswalk digest does not match its sole canonical field');
+    }
+  }
   validateFamily('token-section-page-budget-profile', bundle.pageBudgetProfile);
   return deepFreeze(structuredClone(bundle));
 }
@@ -114,6 +124,29 @@ function success(type, data, meta, { apiVersion = API_VERSION, warnings = [] } =
   const response = { apiVersion, type, data, meta, warnings };
   validateFamily('query-envelope', response);
   return deepFreeze(response);
+}
+
+export function validateTokenDetailSummary({ responseArtifact, selectedArtifact }) {
+  if (
+    !responseArtifact
+    || responseArtifact.kind !== 'token'
+    || !selectedArtifact
+    || selectedArtifact.kind !== 'token'
+  ) {
+    throw new Error('CORE_CATALOG_INTEGRITY_MISMATCH: token summary requires one selected token artifact');
+  }
+  const expected = {
+    availableSections: ['tokens', 'source-crosswalk'],
+    sourceCrosswalkDigest: selectedArtifact.sourceCrosswalkDigest,
+    tokenCount: Object.keys(selectedArtifact.record.tokens).length,
+    tokenSourceContentRevision: selectedArtifact.contentRevision,
+  };
+  for (const [field, value] of Object.entries(expected)) {
+    if (canonicalJson(responseArtifact[field]) !== canonicalJson(value)) {
+      throw new Error(`CORE_CATALOG_INTEGRITY_MISMATCH: token summary ${field} does not match the selected artifact`);
+    }
+  }
+  return true;
 }
 
 function normalizeRequest(request, operation, bundle) {
@@ -252,11 +285,11 @@ function decodeSectionCursor(value, profile) {
 
 function sectionPage(bundle, artifact, request) {
   const profile = bundle.pageBudgetProfile;
-  if (request.queryApiVersion !== '1.2.0') {
+  if (!['1.2.0', '2.0.0'].includes(request.queryApiVersion)) {
     return { error: queryError(
       'CORE_QUERY_INVALID',
       'query.section.version',
-      'Sectional token retrieval requires query API 1.2.0.',
+      'Sectional token retrieval requires query API 1.2.0 or 2.0.0.',
       { queryApiVersion: request.queryApiVersion, section: request.section },
       false,
       request.queryApiVersion,
@@ -285,7 +318,14 @@ function sectionPage(bundle, artifact, request) {
       request.queryApiVersion,
     ) };
   }
-  const tokenSourceContentRevision = artifact.contentRevision;
+  const tokenSourceContentRevision = (
+    request.queryApiVersion === '1.2.0'
+    && artifact.record.schemaVersion === '2.1.0'
+    && artifact.record.sourceCrosswalk === undefined
+  ) ? canonicalDigest({
+      ...artifact.record,
+      schemaVersion: '2.0.0',
+    }) : artifact.contentRevision;
   const selectorDigest = canonicalDigest({
     artifactId: artifact.id,
     platform: request.platform,
@@ -297,12 +337,30 @@ function sectionPage(bundle, artifact, request) {
   const sourceCrosswalk = artifact.record.sourceCrosswalk;
   const available = request.section === 'tokens'
     || (request.section === 'source-crosswalk' && Array.isArray(sourceCrosswalk?.entries));
+  const groupByOrdinal = new Map((sourceCrosswalk?.groups ?? []).flatMap((group) => (
+    group.members.map((member) => [member.ordinal, { group, member }])
+  )));
   const values = request.section === 'tokens'
     ? Object.entries(artifact.record.tokens)
       .map(([id, definition]) => ({ id, definition }))
       .sort((left, right) => compareText(left.id, right.id))
     : available
-      ? [...sourceCrosswalk.entries].sort((left, right) => (
+      ? sourceCrosswalk.entries.map((entry) => {
+        if (request.queryApiVersion !== '2.0.0' || entry.groupId === undefined) return entry;
+        const match = groupByOrdinal.get(entry.occurrence.ordinal);
+        if (!match || match.group.id !== entry.groupId) {
+          throw new Error('CORE_CATALOG_INTEGRITY_MISMATCH: validated crosswalk group projection is incomplete');
+        }
+        return {
+          ...entry,
+          group: {
+            id: match.group.id,
+            relationship: match.group.relationship,
+            ...(match.group.coreTokenId === undefined ? {} : { coreTokenId: match.group.coreTokenId }),
+            member: match.member,
+          },
+        };
+      }).sort((left, right) => (
         left.occurrence.ordinal - right.occurrence.ordinal
         || compareText(canonicalJson(left), canonicalJson(right))
       ))
@@ -399,10 +457,10 @@ function sectionPage(bundle, artifact, request) {
     ) };
   }
   const response = {
-    schemaVersion: '1.2.0',
+    schemaVersion: request.queryApiVersion,
     responseType: 'artifact.detail.section-page',
     meta: {
-      queryApiVersion: '1.2.0',
+      queryApiVersion: request.queryApiVersion,
       catalogVersion: bundle.catalogVersion,
       catalogDigest: bundle.catalogDigest,
       tokenSourceContentRevision,
@@ -496,6 +554,15 @@ function summary(artifact, detail = 'compact') {
   return {
     ...brief,
     contentRevision: artifact.contentRevision,
+  };
+}
+
+function tokenSectionSummary(artifact) {
+  return {
+    availableSections: ['tokens', 'source-crosswalk'],
+    sourceCrosswalkDigest: artifact.sourceCrosswalkDigest,
+    tokenCount: Object.keys(artifact.record.tokens).length,
+    tokenSourceContentRevision: artifact.contentRevision,
   };
 }
 
@@ -942,7 +1009,15 @@ export function createCatalogApi(inputBundle, options = {}) {
     } else if (normalized.detail === 'brief') {
       data = { artifact: summary(artifact, 'brief') };
     } else if (normalized.detail === 'compact') {
-      data = { artifact: summary(artifact), relations };
+      data = {
+        artifact: {
+          ...summary(artifact),
+          ...(normalized.queryApiVersion === '2.0.0' && artifact.kind === 'token'
+            ? tokenSectionSummary(artifact)
+            : {}),
+        },
+        relations,
+      };
     } else {
       const selectedRequirementSets = selectedBinding === null
         ? undefined
@@ -952,9 +1027,15 @@ export function createCatalogApi(inputBundle, options = {}) {
         ? undefined
         : Object.fromEntries(Object.entries(artifact.platformSafetyRequirementSets)
           .filter(([key]) => key.startsWith(`${selectedBinding.bindingId}:`)));
+      const { sourceCrosswalk: _sourceCrosswalk, tokens: _tokens, ...tokenRecordSummary } = artifact.record;
+      const selectedRecord = artifact.kind === 'token'
+        ? normalized.queryApiVersion === '2.0.0'
+          ? { ...tokenRecordSummary, ...tokenSectionSummary(artifact) }
+          : { ...tokenRecordSummary, tokens: artifact.record.tokens }
+        : artifact.record;
       data = {
         artifact: {
-          ...artifact.record,
+          ...selectedRecord,
           contentRevision: artifact.contentRevision,
           bindingSpecRevisions: artifact.bindingSpecRevisions,
           tokenRequirementSetDigests: Object.fromEntries(Object.entries(artifact.tokenRequirementSets)
@@ -996,12 +1077,22 @@ export function createCatalogApi(inputBundle, options = {}) {
         },
       }]
       : [];
-    return success(
+    const meta = baseMeta(bundle, resolutionContext, normalized, revisions);
+    const response = success(
       'artifact.detail',
       data,
-      baseMeta(bundle, resolutionContext, normalized, revisions),
+      meta,
       { apiVersion: normalized.queryApiVersion, warnings },
     );
+    if (
+      normalized.queryApiVersion === '2.0.0'
+      && normalized.section === null
+      && normalized.detail !== 'brief'
+      && artifact.kind === 'token'
+    ) {
+      validateTokenDetailSummary({ responseArtifact: response.data.artifact, selectedArtifact: artifact });
+    }
+    return response;
   }
 
   return deepFreeze({ getManifest, listArtifacts, searchArtifacts, getArtifact });

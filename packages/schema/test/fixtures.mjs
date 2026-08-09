@@ -1,6 +1,6 @@
 export function tokenSource() {
   return {
-    schemaVersion: '2.0.0',
+    schemaVersion: '2.1.0',
     id: 'core:token:button-minimum',
     kind: 'token',
     name: 'Button minimum tokens',

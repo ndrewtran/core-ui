@@ -47,7 +47,7 @@ function decodeSectionCursor(value) {
   if (
     !isObject(payload)
     || canonicalJson(Object.keys(payload).sort()) !== canonicalJson(keys)
-    || payload.queryApiVersion !== '1.2.0'
+    || !['1.2.0', '2.0.0'].includes(payload.queryApiVersion)
     || !/^sha256:[a-f0-9]{64}$/u.test(payload.catalogDigest)
     || !/^sha256:[a-f0-9]{64}$/u.test(payload.tokenSourceContentRevision)
     || !['tokens', 'source-crosswalk'].includes(payload.section)
@@ -405,9 +405,71 @@ function semanticIssues(family, value, ownership) {
         }
       }
     });
+    const artifact = value.type === 'artifact.detail' ? value.data?.artifact : null;
+    if (artifact?.kind === 'token') {
+      if (Object.hasOwn(artifact, 'sourceCrosswalk')) {
+        issues.push({ path: '$/data/artifact/sourceCrosswalk', message: 'authored crosswalk is sectional-only' });
+      }
+      if (value.apiVersion === '2.0.0' && value.meta?.detail !== 'brief') {
+        const exactFields = value.meta?.detail === 'compact'
+          ? [
+            'availableSections', 'contentRevision', 'id', 'kind', 'lifecycle', 'name',
+            'platforms', 'source', 'sourceCrosswalkDigest', 'summary', 'tokenCount',
+            'tokenSourceContentRevision',
+          ]
+          : [
+            'availableSections', 'bindingSpecRevisions', 'contentRevision', 'id', 'kind',
+            'lifecycle', 'name', 'platformSafetyRequirementSetDigests', 'schemaVersion',
+            'source', 'sourceCrosswalkDigest', 'summary', 'theme', 'tokenContractVersion',
+            'tokenCount', 'tokenRequirementSetDigests', 'tokenSourceContentRevision',
+          ];
+        if (canonicalJson(Object.keys(artifact).sort()) !== canonicalJson(exactFields)) {
+          issues.push({
+            path: '$/data/artifact',
+            message: `must contain exactly the closed query API 2.0 ${value.meta?.detail} token fields`,
+          });
+        }
+        const requiredSummary = [
+          'availableSections',
+          'sourceCrosswalkDigest',
+          'tokenCount',
+          'tokenSourceContentRevision',
+        ];
+        for (const field of requiredSummary) {
+          if (!Object.hasOwn(artifact, field)) {
+            issues.push({ path: `$/data/artifact/${field}`, message: 'is required by query API 2.0 token summary' });
+          }
+        }
+        if (Object.hasOwn(artifact, 'tokens')) {
+          issues.push({ path: '$/data/artifact/tokens', message: 'query API 2.0 requires sectional token retrieval' });
+        }
+        if (canonicalJson(artifact.availableSections) !== canonicalJson(['tokens', 'source-crosswalk'])) {
+          issues.push({ path: '$/data/artifact/availableSections', message: 'must use the canonical section order' });
+        }
+        if (
+          artifact.sourceCrosswalkDigest !== null
+          && !/^sha256:[a-f0-9]{64}$/u.test(artifact.sourceCrosswalkDigest)
+        ) issues.push({ path: '$/data/artifact/sourceCrosswalkDigest', message: 'must be null or a canonical digest' });
+        if (!Number.isInteger(artifact.tokenCount) || artifact.tokenCount < 0) {
+          issues.push({ path: '$/data/artifact/tokenCount', message: 'must be a non-negative integer' });
+        }
+        if (artifact.tokenSourceContentRevision !== value.meta?.revisions?.conceptContent) {
+          issues.push({ path: '$/data/artifact/tokenSourceContentRevision', message: 'must bind the selected token source revision' });
+        }
+      } else if (
+        ['1.1.0', '1.2.0'].includes(value.apiVersion)
+        && value.meta?.detail === 'full'
+        && !Object.hasOwn(artifact, 'tokens')
+      ) {
+        issues.push({ path: '$/data/artifact/tokens', message: 'historical full token response requires inline tokens' });
+      }
+    }
   }
   if (family === 'section-page') {
     const { entries, meta, page } = value;
+    if (value.schemaVersion !== meta?.queryApiVersion) {
+      issues.push({ path: '$/schemaVersion', message: 'must equal meta.queryApiVersion' });
+    }
     if (
       typeof meta?.catalogVersion === 'string'
       && (
@@ -452,11 +514,45 @@ function semanticIssues(family, value, ownership) {
             message: 'source-crosswalk entries must use strict ordinal and canonical-byte order',
           });
         }
+        for (const [index, item] of items.entries()) {
+          const path = `$/entries/items/${index}`;
+          if (meta.queryApiVersion === '1.2.0' && Object.hasOwn(item, 'group')) {
+            issues.push({ path: `${path}/group`, message: 'v1.2 retains only the historical groupId projection' });
+          }
+          if (meta.queryApiVersion === '2.0.0') {
+            if ((item.groupId === undefined) !== (item.group === undefined)) {
+              issues.push({ path, message: 'v2 group detail must be present exactly when groupId is present' });
+            }
+            if (item.group !== undefined) {
+              const { group } = item;
+              if (group.id !== item.groupId || group.member?.ordinal !== item.occurrence?.ordinal) {
+                issues.push({ path: `${path}/group`, message: 'must bind the exact occurrence and groupId' });
+              }
+              const expectedMode = group.relationship === 'mode-variants'
+                ? group.member?.role === 'default' ? 'motion.full'
+                  : ['reduced-system', 'reduced-explicit'].includes(group.member?.role) ? 'motion.reduced' : null
+                : undefined;
+              const allowedRole = group.relationship === 'equivalent-source-values'
+                ? group.member?.role === 'equivalent-source-value'
+                : group.relationship === 'selector-variants'
+                  ? ['base', 'web-responsive'].includes(group.member?.role)
+                  : expectedMode !== null;
+              if (!allowedRole || group.member?.mode !== expectedMode) {
+                issues.push({ path: `${path}/group/member`, message: 'relationship, member role, and mode are inconsistent' });
+              }
+            }
+          }
+        }
       }
     }
     if (entries?.status === 'absent' && meta?.section !== 'source-crosswalk') {
       issues.push({ path: '$/entries/status', message: 'typed absence requires section source-crosswalk' });
     }
+    if (
+      entries?.status === 'absent'
+      && meta?.queryApiVersion === '2.0.0'
+      && entries.reason !== 'token-source-omits-source-crosswalk'
+    ) issues.push({ path: '$/entries/reason', message: 'query API 2.0 requires schema-2.1 omitted absence' });
     if (page && entries) {
       if (page.returned !== entries.items?.length) {
         issues.push({ path: '$/page/returned', message: 'must equal entries.items length' });

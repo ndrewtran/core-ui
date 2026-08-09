@@ -12,6 +12,11 @@ import {
   assertTaleTokenPhaseAIndexSet,
   assertTaleTokenPhaseAProfile,
 } from '../../../../tests/evidence/tale-token-phase-a-profile.mjs';
+import {
+  assertTaleTokenPhaseBIndexSet,
+  assertTaleTokenPhaseBProfile,
+  TALE_TOKEN_PHASE_B_PROFILE_DIGEST,
+} from '../../../../tests/evidence/tale-token-phase-b-profile.mjs';
 
 export class EvidenceIntegrityError extends Error {
   constructor(code, message) {
@@ -114,6 +119,7 @@ export async function verifyEvidence(repositoryRoot) {
   const milestones = await readdir(evidenceRoot, { withFileTypes: true }).catch(() => []);
   const indexes = [];
   const phaseAIndexes = [];
+  const phaseBIndexes = [];
   let indexCount = 0;
   let recordCount = 0;
   let artifactCount = 0;
@@ -132,6 +138,15 @@ export async function verifyEvidence(repositoryRoot) {
       });
       phaseAIndexes.push({ name: entry.name, index: result.value });
     }
+    if (entry.name.startsWith('tale-token-phase-b-')) {
+      assertTaleTokenPhaseBProfile(result.value.applicabilityProfile, (message) => {
+        throw new EvidenceIntegrityError(
+          'EVIDENCE_APPLICABILITY_PROFILE_INVALID',
+          `tests/evidence/${entry.name}/index.json ${message}`,
+        );
+      });
+      phaseBIndexes.push({ name: entry.name, index: result.value });
+    }
     indexes.push({
       index: result.value,
       indexBytes: result.bytes,
@@ -144,6 +159,14 @@ export async function verifyEvidence(repositoryRoot) {
       throw new EvidenceIntegrityError(
         'EVIDENCE_APPLICABILITY_PROFILE_INVALID',
         `TALE-TOKEN-A ${message}`,
+      );
+    });
+  }
+  if (phaseBIndexes.length > 0) {
+    assertTaleTokenPhaseBIndexSet(phaseBIndexes, (message) => {
+      throw new EvidenceIntegrityError(
+        'EVIDENCE_APPLICABILITY_PROFILE_INVALID',
+        `TALE-TOKEN-B ${message}`,
       );
     });
   }
@@ -368,6 +391,9 @@ export async function verifyEvidence(repositoryRoot) {
   }
 
   const supersessionLeaves = new Map();
+  const supersededIndexPaths = new Set(
+    [...supersessionNodes.values()].map(({ target }) => target),
+  );
   const supersessionsByTarget = Map.groupBy(
     supersessionNodes.values(),
     ({ target }) => target,
@@ -513,19 +539,23 @@ export async function verifyEvidence(repositoryRoot) {
         },
       );
     }
-    await assertApplicabilityManifest(
-      repositoryRoot,
-      leaves[0].supersession.currentApplicabilityManifest,
-    );
+    if (!supersededIndexPaths.has(leaves[0].owner.relativePath)) {
+      await assertApplicabilityManifest(
+        repositoryRoot,
+        leaves[0].supersession.currentApplicabilityManifest,
+      );
+    }
     supersessionLeaves.set(target, leaves[0]);
   }
 
   for (const [target, leaf] of recertificationLeaves) {
     if (supersessionLeaves.has(target)) continue;
-    await assertApplicabilityManifest(
-      repositoryRoot,
-      leaf.recertification.currentApplicabilityManifest,
-    );
+    if (!supersededIndexPaths.has(leaf.owner.relativePath)) {
+      await assertApplicabilityManifest(
+        repositoryRoot,
+        leaf.recertification.currentApplicabilityManifest,
+      );
+    }
   }
 
   for (const { index, relativePath } of indexes) {
@@ -566,6 +596,14 @@ export async function verifyEvidence(repositoryRoot) {
       const record = await assertDigest(repositoryRoot, reference);
       if (relativePath.startsWith('tests/evidence/tale-token-phase-a-')) {
         assertTaleTokenPhaseAProfile(record.applicabilityProfile, (message) => {
+          throw new EvidenceIntegrityError(
+            'EVIDENCE_APPLICABILITY_PROFILE_INVALID',
+            `${reference.path} ${message}`,
+          );
+        });
+      }
+      if (relativePath.startsWith('tests/evidence/tale-token-phase-b-')) {
+        assertTaleTokenPhaseBProfile(record.applicabilityProfile, (message) => {
           throw new EvidenceIntegrityError(
             'EVIDENCE_APPLICABILITY_PROFILE_INVALID',
             `${reference.path} ${message}`,
@@ -657,6 +695,78 @@ export async function verifyEvidence(repositoryRoot) {
               throw new EvidenceIntegrityError(
                 'EVIDENCE_APPLICABILITY_PROFILE_INVALID',
                 `${record.artifact.path} has an invalid upstream profile/index binding`,
+              );
+            }
+          }
+        }
+      }
+      if (relativePath.startsWith('tests/evidence/tale-token-phase-b-')) {
+        assertTaleTokenPhaseBProfile(artifact.applicabilityProfile, (message) => {
+          throw new EvidenceIntegrityError(
+            'EVIDENCE_APPLICABILITY_PROFILE_INVALID',
+            `${record.artifact.path} ${message}`,
+          );
+        });
+        if (relativePath === 'tests/evidence/tale-token-phase-b-gate-0/index.json') {
+          const expectedPaths = [
+            'tests/evidence/g0.0/index.json',
+            'tests/evidence/tale-token-phase-b-g0.1/index.json',
+            'tests/evidence/tale-token-phase-b-g0.2/index.json',
+            'tests/evidence/tale-token-phase-b-g0.3/index.json',
+            'tests/evidence/tale-token-phase-b-g0.4/index.json',
+            'tests/evidence/tale-token-phase-b-g0.5/index.json',
+          ];
+          const upstream = artifact.observations?.upstreamEvidence?.indexes;
+          if (
+            !Array.isArray(upstream)
+            || canonicalJson(upstream.map(({ path }) => path)) !== canonicalJson(expectedPaths)
+          ) {
+            throw new EvidenceIntegrityError(
+              'EVIDENCE_APPLICABILITY_PROFILE_INVALID',
+              `${record.artifact.path} must bind G0.0 plus five exact TALE-TOKEN-B indexes`,
+            );
+          }
+          for (const upstreamReference of upstream) {
+            const bytes = await readFile(join(repositoryRoot, upstreamReference.path));
+            const expectedProfile = upstreamReference.path === 'tests/evidence/g0.0/index.json'
+              ? null
+              : TALE_TOKEN_PHASE_B_PROFILE_DIGEST;
+            if (
+              upstreamReference.sha256 !== `sha256:${sha256(bytes)}`
+              || upstreamReference.profileDigest !== expectedProfile
+            ) {
+              throw new EvidenceIntegrityError(
+                'EVIDENCE_APPLICABILITY_PROFILE_INVALID',
+                `${record.artifact.path} has an invalid upstream profile/index binding`,
+              );
+            }
+          }
+          const expectedSupersessionPaths = [
+            'tests/evidence/tale-token-phase-b-gate-0/supersessions/g0.1.json',
+            'tests/evidence/tale-token-phase-b-gate-0/supersessions/g0.2.json',
+            'tests/evidence/tale-token-phase-b-gate-0/supersessions/g0.3.json',
+            'tests/evidence/tale-token-phase-b-gate-0/supersessions/g0.4.json',
+            'tests/evidence/tale-token-phase-b-gate-0/supersessions/g0.5.json',
+            'tests/evidence/tale-token-phase-b-gate-0/supersessions/gate-0.json',
+          ];
+          if (
+            !Array.isArray(index.supersessions)
+            || canonicalJson(index.supersessions.map(({ path }) => path))
+              !== canonicalJson(expectedSupersessionPaths)
+          ) {
+            throw new EvidenceIntegrityError(
+              'EVIDENCE_SUPERSESSION_INVALID',
+              `${relativePath} must own exactly six Phase A supersessions`,
+            );
+          }
+          for (const reference of index.supersessions) {
+            const node = await assertDigest(repositoryRoot, reference);
+            const file = reference.path.split('/').at(-1);
+            const expectedHistorical = `tests/evidence/tale-token-phase-a-${file.replace(/\.json$/u, '')}/index.json`;
+            if (node.historicalIndex?.path !== expectedHistorical) {
+              throw new EvidenceIntegrityError(
+                'EVIDENCE_SUPERSESSION_INVALID',
+                `${reference.path} must target ${expectedHistorical}`,
               );
             }
           }

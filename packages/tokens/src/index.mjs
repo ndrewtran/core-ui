@@ -1,4 +1,4 @@
-import { canonicalDigest, validateFamily } from '@core-ui/schema';
+import { canonicalDigest, canonicalJson, validateFamily } from '@core-ui/schema';
 
 const LAYER_RANK = Object.freeze({ reference: 0, semantic: 1, component: 2 });
 const UNIT_BY_TYPE = Object.freeze({
@@ -36,6 +36,241 @@ export class TokenContractError extends Error {
 
 function fail(code, message, details) {
   throw new TokenContractError(code, message, details);
+}
+
+const CROSSWALK_TARGETS = Object.freeze([
+  'web.html',
+  'web.react',
+  'native.ios',
+  'native.android',
+  'native.react-native-web',
+]);
+
+function assertCrosswalkTargets(entry, path) {
+  const values = CROSSWALK_TARGETS.map((profile) => entry.targets[profile]);
+  if (['adopt', 'adapt'].includes(entry.disposition)) {
+    if (!values.includes('direct') || values.some((value) => !['direct', 'deferred'].includes(value))) {
+      fail('CORE_TOKEN_CROSSWALK_TARGET_INVALID', `${path} admitted targets require direct output and no rejection`, { path });
+    }
+  } else if (entry.disposition === 'defer' && values.some((value) => value !== 'deferred')) {
+    fail('CORE_TOKEN_CROSSWALK_TARGET_INVALID', `${path} deferred targets must all be deferred`, { path });
+  } else if (entry.disposition === 'reject' && values.some((value) => value !== 'rejected')) {
+    fail('CORE_TOKEN_CROSSWALK_TARGET_INVALID', `${path} rejected targets must all be rejected`, { path });
+  }
+}
+
+function assertGroupSemantics(group, path) {
+  const ordinals = group.members.map(({ ordinal }) => ordinal);
+  if (new Set(ordinals).size !== ordinals.length || ordinals.some((ordinal, index) => index > 0 && ordinal <= ordinals[index - 1])) {
+    fail('CORE_TOKEN_CROSSWALK_GROUP_INVALID', `${path} members must use unique ascending ordinals`, { path });
+  }
+  for (const [index, member] of group.members.entries()) {
+    const memberPath = `${path}/members/${index}`;
+    if (group.relationship === 'equivalent-source-values') {
+      if (member.role !== 'equivalent-source-value' || member.mode !== undefined) {
+        fail('CORE_TOKEN_CROSSWALK_GROUP_INVALID', `${memberPath} must be an unmoded equivalent source value`, { path: memberPath });
+      }
+    } else if (group.relationship === 'selector-variants') {
+      if (!['base', 'web-responsive'].includes(member.role) || member.mode !== undefined) {
+        fail('CORE_TOKEN_CROSSWALK_GROUP_INVALID', `${memberPath} must be an unmoded selector variant`, { path: memberPath });
+      }
+    } else {
+      const expectedMode = member.role === 'default' ? 'motion.full'
+        : ['reduced-system', 'reduced-explicit'].includes(member.role) ? 'motion.reduced' : null;
+      if (member.mode !== expectedMode) {
+        fail('CORE_TOKEN_CROSSWALK_GROUP_INVALID', `${memberPath} has an invalid motion role/mode`, { path: memberPath });
+      }
+    }
+  }
+}
+
+function assertBaselineSemantics(baseline, occurrences) {
+  const customProperties = occurrences.filter(({ name }) => name.startsWith('--'));
+  const nonCustomProperties = occurrences.length - customProperties.length;
+  const uniqueCustomPropertyNames = new Set(customProperties.map(({ name }) => name)).size;
+  if (
+    baseline.declarationOccurrences !== occurrences.length
+    || baseline.customPropertyOccurrences !== customProperties.length
+    || baseline.nonCustomPropertyOccurrences !== nonCustomProperties
+    || baseline.uniqueCustomPropertyNames !== uniqueCustomPropertyNames
+    || baseline.customPropertyOccurrences + baseline.nonCustomPropertyOccurrences
+      !== baseline.declarationOccurrences
+    || baseline.uniqueCustomPropertyNames > baseline.customPropertyOccurrences
+  ) {
+    fail(
+      'CORE_TOKEN_CROSSWALK_BASELINE_INVALID',
+      'baseline counts must exactly describe the explicitly supplied occurrences',
+      {
+        expected: {
+          declarationOccurrences: occurrences.length,
+          customPropertyOccurrences: customProperties.length,
+          uniqueCustomPropertyNames,
+          nonCustomPropertyOccurrences: nonCustomProperties,
+        },
+      },
+    );
+  }
+}
+
+function assertRelationshipClosure(group, memberEntries, path) {
+  const roles = group.members.map(({ role }) => role);
+  if (group.relationship === 'equivalent-source-values') {
+    const values = new Set(memberEntries.map(({ occurrence }) => occurrence.value));
+    const dispositions = new Set(memberEntries.map(({ disposition }) => disposition));
+    const coreTokenIds = new Set(memberEntries.map(({ coreTokenId }) => coreTokenId ?? null));
+    if (values.size !== 1 || dispositions.size !== 1 || coreTokenIds.size !== 1) {
+      fail(
+        'CORE_TOKEN_CROSSWALK_GROUP_INVALID',
+        `${path} equivalent members must share value, disposition, and Core-token identity`,
+        { path },
+      );
+    }
+    const coreTokenId = memberEntries[0].coreTokenId;
+    if ((coreTokenId === undefined) !== (group.coreTokenId === undefined)
+      || (coreTokenId !== undefined && group.coreTokenId !== coreTokenId)) {
+      fail('CORE_TOKEN_CROSSWALK_GROUP_INVALID', `${path} must bind its members' exact Core token`, { path });
+    }
+    return;
+  }
+  if (group.relationship === 'selector-variants') {
+    const baseEntries = memberEntries.filter((_, index) => roles[index] === 'base');
+    const responsiveEntries = memberEntries.filter((_, index) => roles[index] === 'web-responsive');
+    if (
+      baseEntries.length !== 1
+      || responsiveEntries.length < 1
+      || !['adopt', 'adapt'].includes(baseEntries[0].disposition)
+      || baseEntries[0].coreTokenId === undefined
+      || group.coreTokenId !== baseEntries[0].coreTokenId
+      || responsiveEntries.some(({ disposition, coreTokenId }) => (
+        disposition !== 'defer' || coreTokenId !== undefined
+      ))
+    ) {
+      fail(
+        'CORE_TOKEN_CROSSWALK_GROUP_INVALID',
+        `${path} requires one admitted base and one or more deferred responsive variants`,
+        { path },
+      );
+    }
+    return;
+  }
+  const expectedRoles = ['default', 'reduced-system', 'reduced-explicit'];
+  if (
+    roles.length !== expectedRoles.length
+    || expectedRoles.some((role) => roles.filter((candidate) => candidate === role).length !== 1)
+    || group.coreTokenId !== undefined
+    || memberEntries.some(({ disposition, coreTokenId }) => (
+      disposition !== 'defer' || coreTokenId !== undefined
+    ))
+  ) {
+    fail(
+      'CORE_TOKEN_CROSSWALK_GROUP_INVALID',
+      `${path} requires one deferred default and both deferred reduced-motion variants`,
+      { path },
+    );
+  }
+}
+
+export function validateSourceCrosswalk(source, { baselineOccurrences } = {}) {
+  validateFamily('token-source', source);
+  const crosswalk = source.sourceCrosswalk;
+  if (crosswalk === undefined) {
+    if (baselineOccurrences !== undefined) {
+      fail('CORE_TOKEN_CROSSWALK_BASELINE_INVALID', 'an omitted crosswalk cannot consume a baseline');
+    }
+    return Object.freeze({ status: 'absent', digest: null, crosswalk: null });
+  }
+  if (!Array.isArray(baselineOccurrences)) {
+    fail('CORE_TOKEN_CROSSWALK_BASELINE_INVALID', 'semantic validation requires explicit baseline occurrences');
+  }
+  assertBaselineSemantics(crosswalk.baseline, baselineOccurrences);
+  const entries = crosswalk.entries;
+  if (
+    baselineOccurrences.length !== crosswalk.baseline.declarationOccurrences
+    || entries.length !== baselineOccurrences.length
+  ) {
+    fail('CORE_TOKEN_CROSSWALK_COVERAGE_INVALID', 'crosswalk must cover the complete supplied baseline', {
+      baseline: baselineOccurrences.length,
+      entries: entries.length,
+    });
+  }
+  const entryByOrdinal = new Map();
+  for (const [index, entry] of entries.entries()) {
+    const ordinal = entry.occurrence.ordinal;
+    if (entryByOrdinal.has(ordinal) || ordinal !== index + 1) {
+      fail('CORE_TOKEN_CROSSWALK_COVERAGE_INVALID', 'entries must use each contiguous baseline ordinal exactly once', { ordinal, index });
+    }
+    if (canonicalJson(entry.occurrence) !== canonicalJson(baselineOccurrences[index])) {
+      fail('CORE_TOKEN_CROSSWALK_BASELINE_INVALID', 'entry occurrence differs from the supplied baseline', { ordinal });
+    }
+    if (['adopt', 'adapt'].includes(entry.disposition)) {
+      const target = source.tokens[entry.coreTokenId];
+      if (!target || target.layer !== 'reference') {
+        fail('CORE_TOKEN_CROSSWALK_TARGET_INVALID', `${entry.coreTokenId} must be an existing reference token`, { ordinal });
+      }
+    } else if (Object.hasOwn(entry, 'coreTokenId')) {
+      fail('CORE_TOKEN_CROSSWALK_TARGET_INVALID', `${entry.disposition} cannot claim a Core token`, { ordinal });
+    }
+    assertCrosswalkTargets(entry, `sourceCrosswalk/entries/${index}`);
+    entryByOrdinal.set(ordinal, entry);
+  }
+  const groupById = new Map();
+  const groupedOrdinals = new Map();
+  for (const [index, group] of crosswalk.groups.entries()) {
+    const path = `sourceCrosswalk/groups/${index}`;
+    if (groupById.has(group.id)) {
+      fail('CORE_TOKEN_CROSSWALK_GROUP_INVALID', `${group.id} is duplicated`, { path });
+    }
+    if (index > 0 && group.id <= crosswalk.groups[index - 1].id) {
+      fail('CORE_TOKEN_CROSSWALK_GROUP_INVALID', 'groups must use strict bytewise ID order', { path });
+    }
+    assertGroupSemantics(group, path);
+    const memberEntries = [];
+    for (const member of group.members) {
+      const entry = entryByOrdinal.get(member.ordinal);
+      if (!entry || entry.groupId !== group.id || groupedOrdinals.has(member.ordinal)) {
+        fail('CORE_TOKEN_CROSSWALK_GROUP_INVALID', `${group.id} membership is incomplete or duplicated`, { ordinal: member.ordinal });
+      }
+      memberEntries.push(entry);
+      if (
+        group.relationship === 'equivalent-source-values'
+        && group.coreTokenId !== undefined
+        && entry.coreTokenId !== group.coreTokenId
+      ) {
+        fail('CORE_TOKEN_CROSSWALK_GROUP_INVALID', `${group.id} Core token differs from its member`, { ordinal: member.ordinal });
+      }
+      groupedOrdinals.set(member.ordinal, group.id);
+    }
+    assertRelationshipClosure(group, memberEntries, path);
+    groupById.set(group.id, group);
+  }
+  for (const entry of entries) {
+    if (entry.groupId !== undefined && groupedOrdinals.get(entry.occurrence.ordinal) !== entry.groupId) {
+      fail('CORE_TOKEN_CROSSWALK_GROUP_INVALID', `${entry.groupId} lacks the reciprocal group member`, { ordinal: entry.occurrence.ordinal });
+    }
+  }
+  const ordinalsByCoreToken = new Map();
+  for (const entry of entries) {
+    if (entry.coreTokenId === undefined) continue;
+    const ordinals = ordinalsByCoreToken.get(entry.coreTokenId) ?? [];
+    ordinals.push(entry.occurrence.ordinal);
+    ordinalsByCoreToken.set(entry.coreTokenId, ordinals);
+  }
+  for (const [coreTokenId, ordinals] of ordinalsByCoreToken) {
+    if (ordinals.length < 2) continue;
+    const groupIds = new Set(ordinals.map((ordinal) => entryByOrdinal.get(ordinal).groupId));
+    if (groupIds.size !== 1 || groupIds.has(undefined) || !groupById.has([...groupIds][0])) {
+      fail(
+        'CORE_TOKEN_CROSSWALK_GROUP_INVALID',
+        `${coreTokenId} repeated mappings require one explicit complete group`,
+        { coreTokenId, ordinals },
+      );
+    }
+  }
+  return Object.freeze({
+    status: 'available',
+    digest: canonicalDigest(crosswalk),
+    crosswalk: Object.freeze(structuredClone(crosswalk)),
+  });
 }
 
 function validateLiteral(type, unit, value, path) {

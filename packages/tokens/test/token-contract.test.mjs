@@ -8,6 +8,7 @@ import {
   compileTokenGraph,
   compileTokenRequirementSet,
   compileWebTheme,
+  validateSourceCrosswalk,
   validateThemeForRequirementSet,
 } from '../src/index.mjs';
 import { consumeButtonStaticWebTransform } from '../../../tests/fixtures/g1.0/consumers/button-web.consumer.mjs';
@@ -28,6 +29,216 @@ const recipe = {
 function expectCode(code, operation) {
   assert.throws(operation, (error) => error instanceof TokenContractError && error.code === code);
 }
+
+function crosswalkFixture() {
+  const occurrences = [
+    { ordinal: 1, file: '_color.css', selector: ':root', name: '--action-dark', value: '#1f2937' },
+    { ordinal: 2, file: '_color.css', selector: '.dark', name: '--action-dark', value: '#1f2937' },
+  ];
+  const directTargets = {
+    'web.html': 'direct',
+    'web.react': 'direct',
+    'native.ios': 'direct',
+    'native.android': 'direct',
+    'native.react-native-web': 'deferred',
+  };
+  const candidate = structuredClone(source);
+  candidate.sourceCrosswalk = {
+    baseline: {
+      repository: 'Tale-UI/tale-ui',
+      revision: 'a'.repeat(40),
+      path: 'packages/tokens/tokens.json',
+      sha256: `sha256:${'b'.repeat(64)}`,
+      baseFontSizePx: 16,
+      declarationOccurrences: 2,
+      customPropertyOccurrences: 2,
+      uniqueCustomPropertyNames: 1,
+      nonCustomPropertyOccurrences: 0,
+    },
+    entries: occurrences.map((occurrence) => ({
+      occurrence,
+      disposition: 'adopt',
+      coreTokenId: 'reference.color.action-dark',
+      groupId: 'source.action-dark-equivalence',
+      reason: 'Both source occurrences are exactly the canonical dark action reference value.',
+      targets: directTargets,
+    })),
+    groups: [{
+      id: 'source.action-dark-equivalence',
+      relationship: 'equivalent-source-values',
+      coreTokenId: 'reference.color.action-dark',
+      members: occurrences.map(({ ordinal }) => ({ ordinal, role: 'equivalent-source-value' })),
+    }],
+  };
+  return { candidate, occurrences: structuredClone(occurrences) };
+}
+
+function selectorCrosswalkFixture() {
+  const occurrences = [
+    { ordinal: 1, file: '_space.css', selector: ':root', name: '--space-m', value: '16px' },
+    { ordinal: 2, file: '_space.css', selector: '@media (min-width: 48rem)', name: '--space-m', value: '24px' },
+  ];
+  const candidate = structuredClone(source);
+  candidate.sourceCrosswalk = {
+    baseline: {
+      repository: 'Tale-UI/tale-ui', revision: 'a'.repeat(40), path: 'packages/tokens/tokens.json',
+      sha256: `sha256:${'b'.repeat(64)}`, baseFontSizePx: 16, declarationOccurrences: 2,
+      customPropertyOccurrences: 2, uniqueCustomPropertyNames: 1, nonCustomPropertyOccurrences: 0,
+    },
+    entries: [
+      {
+        occurrence: occurrences[0], disposition: 'adapt', coreTokenId: 'reference.dimension.space-inline',
+        groupId: 'source.space-m-responsive', reason: 'The base value is portable.',
+        targets: { 'web.html': 'direct', 'web.react': 'direct', 'native.ios': 'direct', 'native.android': 'direct', 'native.react-native-web': 'deferred' },
+      },
+      {
+        occurrence: occurrences[1], disposition: 'defer', groupId: 'source.space-m-responsive',
+        reason: 'The responsive selector remains deferred.',
+        targets: { 'web.html': 'deferred', 'web.react': 'deferred', 'native.ios': 'deferred', 'native.android': 'deferred', 'native.react-native-web': 'deferred' },
+      },
+    ],
+    groups: [{
+      id: 'source.space-m-responsive', relationship: 'selector-variants',
+      coreTokenId: 'reference.dimension.space-inline',
+      members: [{ ordinal: 1, role: 'base' }, { ordinal: 2, role: 'web-responsive' }],
+    }],
+  };
+  return { candidate, occurrences: structuredClone(occurrences) };
+}
+
+function modeCrosswalkFixture() {
+  const occurrences = [
+    { ordinal: 1, file: '_motion.css', selector: ':root', name: '--motion', value: '120ms' },
+    { ordinal: 2, file: '_motion.css', selector: '@media (prefers-reduced-motion)', name: '--motion', value: '0ms' },
+    { ordinal: 3, file: '_motion.css', selector: '[data-reduced-motion]', name: '--motion', value: '0ms' },
+  ];
+  const deferredTargets = { 'web.html': 'deferred', 'web.react': 'deferred', 'native.ios': 'deferred', 'native.android': 'deferred', 'native.react-native-web': 'deferred' };
+  const candidate = structuredClone(source);
+  candidate.sourceCrosswalk = {
+    baseline: {
+      repository: 'Tale-UI/tale-ui', revision: 'a'.repeat(40), path: 'packages/tokens/tokens.json',
+      sha256: `sha256:${'b'.repeat(64)}`, baseFontSizePx: 16, declarationOccurrences: 3,
+      customPropertyOccurrences: 3, uniqueCustomPropertyNames: 1, nonCustomPropertyOccurrences: 0,
+    },
+    entries: occurrences.map((occurrence) => ({
+      occurrence, disposition: 'defer', groupId: 'source.motion-modes',
+      reason: 'Motion variants remain deferred.', targets: deferredTargets,
+    })),
+    groups: [{
+      id: 'source.motion-modes', relationship: 'mode-variants',
+      members: [
+        { ordinal: 1, role: 'default', mode: 'motion.full' },
+        { ordinal: 2, role: 'reduced-system', mode: 'motion.reduced' },
+        { ordinal: 3, role: 'reduced-explicit', mode: 'motion.reduced' },
+      ],
+    }],
+  };
+  return { candidate, occurrences: structuredClone(occurrences) };
+}
+
+function expectCrosswalkInvalid(value) {
+  assert.throws(
+    () => validateSourceCrosswalk(value.candidate, { baselineOccurrences: value.occurrences }),
+    (error) => error instanceof TokenContractError && error.code.startsWith('CORE_TOKEN_CROSSWALK_'),
+  );
+}
+
+test('TALE-TOKEN-B source-crosswalk validation binds coverage, reference targets, groups, and digest', () => {
+  assert.deepEqual(validateSourceCrosswalk(source), {
+    status: 'absent',
+    digest: null,
+    crosswalk: null,
+  });
+  const { candidate, occurrences } = crosswalkFixture();
+  const validated = validateSourceCrosswalk(candidate, { baselineOccurrences: occurrences });
+  assert.equal(validated.status, 'available');
+  assert.match(validated.digest, /^sha256:[a-f0-9]{64}$/u);
+  assert.deepEqual(validated.crosswalk, candidate.sourceCrosswalk);
+
+  for (const mutate of [
+    (value) => { value.occurrences[1].value = '#000001'; },
+    (value) => { value.candidate.sourceCrosswalk.entries[0].coreTokenId = 'semantic.action.background'; },
+    (value) => { value.candidate.sourceCrosswalk.entries[1].groupId = 'source.other'; },
+    (value) => { value.candidate.sourceCrosswalk.groups[0].members[1].role = 'base'; },
+    (value) => { value.candidate.sourceCrosswalk.entries[0].targets['native.ios'] = 'rejected'; },
+    (value) => { value.candidate.sourceCrosswalk.entries[1].occurrence.ordinal = 1; },
+    (value) => { value.candidate.sourceCrosswalk.entries.pop(); },
+    (value) => { value.candidate.sourceCrosswalk.entries.push(structuredClone(value.candidate.sourceCrosswalk.entries[1])); },
+    (value) => { value.candidate.sourceCrosswalk.baseline.customPropertyOccurrences = 1; },
+    (value) => { value.candidate.sourceCrosswalk.baseline.uniqueCustomPropertyNames = 3; },
+    (value) => { value.candidate.sourceCrosswalk.entries[1].occurrence.value = '#000001'; value.occurrences[1].value = '#000001'; },
+    (value) => { value.candidate.sourceCrosswalk.entries[1].disposition = 'adapt'; },
+    (value) => { delete value.candidate.sourceCrosswalk.groups[0].coreTokenId; },
+    (value) => { value.candidate.sourceCrosswalk.groups[0].coreTokenId = 'reference.color.text-light'; },
+    (value) => { value.candidate.sourceCrosswalk.groups.push({ ...structuredClone(value.candidate.sourceCrosswalk.groups[0]), id: 'source.second' }); },
+    (value) => { delete value.candidate.sourceCrosswalk.entries[0].groupId; delete value.candidate.sourceCrosswalk.entries[1].groupId; value.candidate.sourceCrosswalk.groups = []; },
+  ]) {
+    const invalid = crosswalkFixture();
+    mutate(invalid);
+    expectCrosswalkInvalid(invalid);
+  }
+
+  for (const fixture of [selectorCrosswalkFixture, modeCrosswalkFixture]) {
+    const valid = fixture();
+    assert.equal(validateSourceCrosswalk(valid.candidate, { baselineOccurrences: valid.occurrences }).status, 'available');
+  }
+
+  for (const mutate of [
+    (value) => { value.candidate.sourceCrosswalk.groups[0].members[1].role = 'base'; },
+    (value) => {
+      value.candidate.sourceCrosswalk.entries[1].disposition = 'reject';
+      for (const target of Object.keys(value.candidate.sourceCrosswalk.entries[1].targets)) {
+        value.candidate.sourceCrosswalk.entries[1].targets[target] = 'rejected';
+      }
+    },
+    (value) => { delete value.candidate.sourceCrosswalk.groups[0].coreTokenId; },
+  ]) {
+    const invalid = selectorCrosswalkFixture();
+    mutate(invalid);
+    expectCrosswalkInvalid(invalid);
+  }
+
+  for (const mutate of [
+    (value) => { value.candidate.sourceCrosswalk.groups[0].members[1].role = 'default'; value.candidate.sourceCrosswalk.groups[0].members[1].mode = 'motion.full'; },
+    (value) => { value.candidate.sourceCrosswalk.groups[0].members.pop(); value.candidate.sourceCrosswalk.entries.pop(); value.occurrences.pop(); value.candidate.sourceCrosswalk.baseline.declarationOccurrences = 2; value.candidate.sourceCrosswalk.baseline.customPropertyOccurrences = 2; },
+    (value) => { value.candidate.sourceCrosswalk.groups[0].coreTokenId = 'reference.duration.fast'; },
+    (value) => {
+      value.candidate.sourceCrosswalk.entries[1].disposition = 'reject';
+      for (const target of Object.keys(value.candidate.sourceCrosswalk.entries[1].targets)) {
+        value.candidate.sourceCrosswalk.entries[1].targets[target] = 'rejected';
+      }
+    },
+  ]) {
+    const invalid = modeCrosswalkFixture();
+    mutate(invalid);
+    expectCrosswalkInvalid(invalid);
+  }
+
+  const wrongGroupOrder = modeCrosswalkFixture();
+  const extraOccurrences = [
+    { ordinal: 4, file: '_weight.css', selector: ':root', name: '--weight', value: '400' },
+    { ordinal: 5, file: '_weight.css', selector: '.regular', name: '--weight', value: '400' },
+  ];
+  wrongGroupOrder.occurrences.push(...structuredClone(extraOccurrences));
+  wrongGroupOrder.candidate.sourceCrosswalk.baseline.declarationOccurrences = 5;
+  wrongGroupOrder.candidate.sourceCrosswalk.baseline.customPropertyOccurrences = 5;
+  wrongGroupOrder.candidate.sourceCrosswalk.baseline.uniqueCustomPropertyNames = 2;
+  wrongGroupOrder.candidate.sourceCrosswalk.entries.push(...extraOccurrences.map((occurrence) => ({
+    occurrence,
+    disposition: 'adapt',
+    coreTokenId: 'reference.dimension.space-inline',
+    groupId: 'source.aaa-out-of-order',
+    reason: 'Equivalent source values share one Core reference.',
+    targets: { 'web.html': 'direct', 'web.react': 'direct', 'native.ios': 'direct', 'native.android': 'direct', 'native.react-native-web': 'deferred' },
+  })));
+  wrongGroupOrder.candidate.sourceCrosswalk.groups.push({
+    id: 'source.aaa-out-of-order',
+    relationship: 'equivalent-source-values',
+    coreTokenId: 'reference.dimension.space-inline',
+    members: [{ ordinal: 4, role: 'equivalent-source-value' }, { ordinal: 5, role: 'equivalent-source-value' }],
+  });
+  expectCrosswalkInvalid(wrongGroupOrder);
+});
 
 test('E-G1.0-01 rejects cycles, reverse layers, incompatible units, and overrides', () => {
   const cycle = structuredClone(source);

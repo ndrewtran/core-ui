@@ -3413,6 +3413,356 @@
       "owner": "token-source-contract",
       "schema": "token-source.schema.json",
       "schemaPointer": "#/$defs/token/properties/platformRestrictions"
+    },
+    {
+      "class": "derived",
+      "owner": "query-envelope-contract",
+      "schema": "section-page.schema.json",
+      "name": "group",
+      "schemaPointer": "#/$defs/admittedCrosswalkEntry/properties/group"
+    },
+    {
+      "class": "derived",
+      "owner": "query-envelope-contract",
+      "schema": "section-page.schema.json",
+      "name": "coreTokenId",
+      "schemaPointer": "#/$defs/normalizedCrosswalkGroup/properties/coreTokenId"
+    },
+    {
+      "class": "derived",
+      "owner": "query-envelope-contract",
+      "schema": "section-page.schema.json",
+      "name": "id",
+      "schemaPointer": "#/$defs/normalizedCrosswalkGroup/properties/id"
+    },
+    {
+      "class": "derived",
+      "owner": "query-envelope-contract",
+      "schema": "section-page.schema.json",
+      "name": "member",
+      "schemaPointer": "#/$defs/normalizedCrosswalkGroup/properties/member"
+    },
+    {
+      "class": "derived",
+      "owner": "query-envelope-contract",
+      "schema": "section-page.schema.json",
+      "name": "relationship",
+      "schemaPointer": "#/$defs/normalizedCrosswalkGroup/properties/relationship"
+    },
+    {
+      "class": "derived",
+      "owner": "query-envelope-contract",
+      "schema": "section-page.schema.json",
+      "name": "mode",
+      "schemaPointer": "#/$defs/normalizedCrosswalkGroupMember/properties/mode"
+    },
+    {
+      "class": "derived",
+      "owner": "query-envelope-contract",
+      "schema": "section-page.schema.json",
+      "name": "ordinal",
+      "schemaPointer": "#/$defs/normalizedCrosswalkGroupMember/properties/ordinal"
+    },
+    {
+      "class": "derived",
+      "owner": "query-envelope-contract",
+      "schema": "section-page.schema.json",
+      "name": "role",
+      "schemaPointer": "#/$defs/normalizedCrosswalkGroupMember/properties/role"
+    },
+    {
+      "class": "derived",
+      "owner": "query-envelope-contract",
+      "schema": "section-page.schema.json",
+      "name": "group",
+      "schemaPointer": "#/$defs/unadmittedCrosswalkEntry/properties/group"
+    },
+    {
+      "class": "authored",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "name": "coreTokenId",
+      "schemaPointer": "#/$defs/admittedCrosswalkEntry/properties/coreTokenId"
+    },
+    {
+      "class": "authored",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "name": "disposition",
+      "schemaPointer": "#/$defs/admittedCrosswalkEntry/properties/disposition"
+    },
+    {
+      "class": "authored",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "name": "groupId",
+      "schemaPointer": "#/$defs/admittedCrosswalkEntry/properties/groupId"
+    },
+    {
+      "class": "authored",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "name": "occurrence",
+      "schemaPointer": "#/$defs/admittedCrosswalkEntry/properties/occurrence"
+    },
+    {
+      "class": "authored",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "name": "reason",
+      "schemaPointer": "#/$defs/admittedCrosswalkEntry/properties/reason"
+    },
+    {
+      "class": "authored",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "name": "targets",
+      "schemaPointer": "#/$defs/admittedCrosswalkEntry/properties/targets"
+    },
+    {
+      "class": "authored",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "name": "baseFontSizePx",
+      "schemaPointer": "#/$defs/crosswalkBaseline/properties/baseFontSizePx"
+    },
+    {
+      "class": "authored",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "name": "customPropertyOccurrences",
+      "schemaPointer": "#/$defs/crosswalkBaseline/properties/customPropertyOccurrences"
+    },
+    {
+      "class": "authored",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "name": "declarationOccurrences",
+      "schemaPointer": "#/$defs/crosswalkBaseline/properties/declarationOccurrences"
+    },
+    {
+      "class": "authored",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "name": "nonCustomPropertyOccurrences",
+      "schemaPointer": "#/$defs/crosswalkBaseline/properties/nonCustomPropertyOccurrences"
+    },
+    {
+      "class": "authored",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "name": "path",
+      "schemaPointer": "#/$defs/crosswalkBaseline/properties/path"
+    },
+    {
+      "class": "authored",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "name": "repository",
+      "schemaPointer": "#/$defs/crosswalkBaseline/properties/repository"
+    },
+    {
+      "class": "authored",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "name": "revision",
+      "schemaPointer": "#/$defs/crosswalkBaseline/properties/revision"
+    },
+    {
+      "class": "authored",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "name": "sha256",
+      "schemaPointer": "#/$defs/crosswalkBaseline/properties/sha256"
+    },
+    {
+      "class": "authored",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "name": "uniqueCustomPropertyNames",
+      "schemaPointer": "#/$defs/crosswalkBaseline/properties/uniqueCustomPropertyNames"
+    },
+    {
+      "class": "authored",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "name": "coreTokenId",
+      "schemaPointer": "#/$defs/crosswalkGroup/properties/coreTokenId"
+    },
+    {
+      "class": "authored",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "name": "id",
+      "schemaPointer": "#/$defs/crosswalkGroup/properties/id"
+    },
+    {
+      "class": "authored",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "name": "members",
+      "schemaPointer": "#/$defs/crosswalkGroup/properties/members"
+    },
+    {
+      "class": "authored",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "name": "relationship",
+      "schemaPointer": "#/$defs/crosswalkGroup/properties/relationship"
+    },
+    {
+      "class": "authored",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "name": "mode",
+      "schemaPointer": "#/$defs/crosswalkGroupMember/properties/mode"
+    },
+    {
+      "class": "authored",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "name": "ordinal",
+      "schemaPointer": "#/$defs/crosswalkGroupMember/properties/ordinal"
+    },
+    {
+      "class": "authored",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "name": "role",
+      "schemaPointer": "#/$defs/crosswalkGroupMember/properties/role"
+    },
+    {
+      "class": "authored",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "name": "file",
+      "schemaPointer": "#/$defs/crosswalkOccurrence/properties/file"
+    },
+    {
+      "class": "authored",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "name": "name",
+      "schemaPointer": "#/$defs/crosswalkOccurrence/properties/name"
+    },
+    {
+      "class": "authored",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "name": "ordinal",
+      "schemaPointer": "#/$defs/crosswalkOccurrence/properties/ordinal"
+    },
+    {
+      "class": "authored",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "name": "selector",
+      "schemaPointer": "#/$defs/crosswalkOccurrence/properties/selector"
+    },
+    {
+      "class": "authored",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "name": "value",
+      "schemaPointer": "#/$defs/crosswalkOccurrence/properties/value"
+    },
+    {
+      "class": "authored",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "name": "native.android",
+      "schemaPointer": "#/$defs/crosswalkTargets/properties/native.android"
+    },
+    {
+      "class": "authored",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "name": "native.ios",
+      "schemaPointer": "#/$defs/crosswalkTargets/properties/native.ios"
+    },
+    {
+      "class": "authored",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "name": "native.react-native-web",
+      "schemaPointer": "#/$defs/crosswalkTargets/properties/native.react-native-web"
+    },
+    {
+      "class": "authored",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "name": "web.html",
+      "schemaPointer": "#/$defs/crosswalkTargets/properties/web.html"
+    },
+    {
+      "class": "authored",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "name": "web.react",
+      "schemaPointer": "#/$defs/crosswalkTargets/properties/web.react"
+    },
+    {
+      "class": "authored",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "name": "baseline",
+      "schemaPointer": "#/$defs/sourceCrosswalk/properties/baseline"
+    },
+    {
+      "class": "authored",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "name": "entries",
+      "schemaPointer": "#/$defs/sourceCrosswalk/properties/entries"
+    },
+    {
+      "class": "authored",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "name": "groups",
+      "schemaPointer": "#/$defs/sourceCrosswalk/properties/groups"
+    },
+    {
+      "class": "authored",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "name": "disposition",
+      "schemaPointer": "#/$defs/unadmittedCrosswalkEntry/properties/disposition"
+    },
+    {
+      "class": "authored",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "name": "groupId",
+      "schemaPointer": "#/$defs/unadmittedCrosswalkEntry/properties/groupId"
+    },
+    {
+      "class": "authored",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "name": "occurrence",
+      "schemaPointer": "#/$defs/unadmittedCrosswalkEntry/properties/occurrence"
+    },
+    {
+      "class": "authored",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "name": "reason",
+      "schemaPointer": "#/$defs/unadmittedCrosswalkEntry/properties/reason"
+    },
+    {
+      "class": "authored",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "name": "targets",
+      "schemaPointer": "#/$defs/unadmittedCrosswalkEntry/properties/targets"
+    },
+    {
+      "class": "authored",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "name": "sourceCrosswalk",
+      "schemaPointer": "#/properties/sourceCrosswalk"
     }
   ],
   "governedSchemas": [
