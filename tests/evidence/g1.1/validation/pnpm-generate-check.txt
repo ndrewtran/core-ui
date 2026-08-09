@@ -109,4 +109,4 @@ Repository-policy package owns no projections; generation is a deterministic no-
 > node src/generate.mjs
 
 [react] generated compatibility identity matches the web binding
-[E-G0.0-04] isolated clean checkout 1022e37be71e8b415b6c15ea0a6959e3bd31498b remained clean after two generation runs (sha256:4973a37948df3cc71326998fa0db52bfc727aa7dd4e0b3d9c75425e2934d2d3a)
+[E-G0.0-04] isolated clean checkout ec2d345f1cd6c216d546d63e35a02d63388d3f49 remained clean after two generation runs (sha256:8c1de175a7607a01d69142408ebc214dc8a9acff2f4194e96a28b127077048a6)
