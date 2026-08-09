@@ -1,5 +1,5 @@
 ---
-scopeVersion: 1.0.1
+scopeVersion: 2.0.0
 status: execution-baseline
 product: Core UI
 architecture: ./monorepo-architecture.md
@@ -228,7 +228,7 @@ The `0.1` boundary also commits:
 
 | Scope ID | Commitment | Deliverable | Roadmap |
 | --- | --- | --- | --- |
-| `SCOPE-SYSTEM-TOKENS` | `committed` | Minimum token, default-theme, target-transform, fallback, requirement-set, and override system needed by the fixed slices. | G1.0 |
+| `SCOPE-SYSTEM-TOKENS` | `committed` | Pinned Tale-derived non-semantic reference baseline plus the semantic/component recipes, default theme, target transforms, fallbacks, requirement sets, and override system needed by the fixed slices. | G1.0 after the three-phase Gate 0 correction |
 | `SCOPE-SYSTEM-WEB` | `committed` | Framework-free CSS/HTML/JS substrate and React binding substrate with explicit runtime ownership. | G1.1 |
 | `SCOPE-SYSTEM-NATIVE` | `committed` | Native substrate, iOS/Android behavior, native token output, and explicit React Native Web profile semantics. | G1.2 |
 | `SCOPE-SYSTEM-CURRICULUM` | `committed` | Deterministic example selection by compatibility, binding/profile, purpose, prerequisites, preference, and complexity. | G1.3–G1.8 |
@@ -297,7 +297,7 @@ transitions, events, focus behavior, or implementation across platforms.
 | `SCOPE-API-ESCAPE-HATCH` | `committed` | Every styling, validation, suppression, or composition escape hatch is named, typed, bounded, documented, and excluded from canonical defaults. |
 | `SCOPE-API-RUNTIME-OWNERSHIP` | `committed` | Controllers, adapters, providers, focus restoration, dismissal, portals, global listeners, inert/background state, and scroll locks have one explicit lifecycle owner. |
 | `SCOPE-API-A11Y` | `committed` | Accessible naming, roles, states, values, relationships, keyboard/input behavior, announcements, and platform deviations are binding obligations with risk-proportionate proof. |
-| `SCOPE-API-DEPRECATION` | `committed` | Deprecation names a replacement or explicit no-replacement reason, notice window, version effect, retained retrieval, diagnostic, and migration path where applicable. |
+| `SCOPE-API-DEPRECATION` | `committed` | Deprecation names a replacement or explicit no-replacement reason, notice window, version effect, retained retrieval, diagnostic, and migration path. Query API v1.2 retains inline token responses for one complete accepted notice release before v2 removal. |
 
 Generated Core-owned types may represent serializable binding fields. Renderer
 source remains responsible for host-language inference, generic constraints,
@@ -310,7 +310,7 @@ preventing those refinements from becoming undocumented product API.
 | --- | --- | --- | --- |
 | `SCOPE-KIND-COMPONENT` | `committed` | `component` | Shared concept semantics plus explicit platform binding specs and runtime-profile dispositions. |
 | `SCOPE-KIND-PATTERN` | `committed` | `pattern` | Bounded composition with roles, relations, parameters, constraints, examples, alternatives, pitfalls, and unsupported cases. |
-| `SCOPE-KIND-TOKEN` | `committed` | `token` | Addressable token sets and values with typed layers, modes, aliases, requirements, transforms, fallbacks, and override policies. |
+| `SCOPE-KIND-TOKEN` | `committed` | `token` | Addressable token sets and values with typed layers, modes, aliases, requirements, transforms, fallbacks, override policies, and optional source-crosswalk provenance owned by the canonical token source. |
 | `SCOPE-KIND-FOUNDATION` | `committed` | `foundation` | Shared semantics, pure logic, and only evidence-backed optional portable interaction. |
 | `SCOPE-KIND-GUIDE` | `committed` | `guide` | Portable Markdown guidance with strict identity/frontmatter and optional bounded decision context. |
 | `SCOPE-KIND-EXAMPLE` | `committed` | `example` | Selection metadata plus exactly one executable source owner; normative/editorial impact is explicit. |
@@ -347,14 +347,14 @@ the site.
 
 | Scope ID | Commitment | Package | Public responsibility | Must not own |
 | --- | --- | --- | --- | --- |
-| `SCOPE-PKG-SCHEMA` | `committed` | `@core-ui/schema` | Versioned source/response schemas, generated types, platform IDs, and authoring helpers. | Product semantics, renderer implementation, or site content. |
-| `SCOPE-PKG-TOKENS` | `committed` | `@core-ui/tokens` | Canonical token data and deterministic web/native/design-tool transforms. | Component behavior or documentation rendering. |
+| `SCOPE-PKG-SCHEMA` | `committed` | `@core-ui/schema` | Versioned source/response schemas, generated types, platform IDs, authoring helpers, token-source `sourceCrosswalk` grammar, and bounded sectional query shapes. | Product semantics, renderer implementation, or site content. |
+| `SCOPE-PKG-TOKENS` | `committed` | `@core-ui/tokens` | Canonical Core-owned token data, Tale-source classification validation, and deterministic web/native/design-tool transforms. | Component behavior, documentation rendering, or Tale UI as a live owner. |
 | `SCOPE-PKG-FOUNDATION` | `committed` | `@core-ui/foundation` | Enforced semantic, pure-logic, and optional portable-interaction boundaries. | Selectors, React hooks, browser globals, native views, or mandatory transitions. |
 | `SCOPE-PKG-WEB` | `committed` | `@core-ui/web` | HTML binding specs, CSS, themes, optional vanilla controllers, and web entry points. | React or native implementation. |
 | `SCOPE-PKG-REACT` | `committed` | `@core-ui/react` | React bindings preserving applicable web semantics, styles, and observable hooks while owning React ergonomics. | Canonical component metadata or copied CSS. |
 | `SCOPE-PKG-REACT-NATIVE` | `committed` | `@core-ui/react-native` | Native components, explicit platform files, native accessibility, gestures, and responder behavior. | CSS parsing, DOM, Expo, or explorer hosts. |
-| `SCOPE-PKG-CATALOG` | `committed` | `@core-ui/catalog` | Immutable compiled catalog, search index, pure discovery/query/planning API, and package-level catalog identity. | CLI parsing, MCP transport, renderer runtime, or project mutation. |
-| `SCOPE-PKG-TOOLING` | `committed` | `@core-ui/tooling` | CLI, adapters, local resolver/validation, maintainer authoring, change-intent previews, and enabled safe operations. | A second artifact index, product decisions, or renderer implementation. |
+| `SCOPE-PKG-CATALOG` | `committed` | `@core-ui/catalog` | Immutable compiled catalog, search index, pure discovery/query/planning API, canonical page-budget profiles/page selection, response-version negotiation/historical semantics, bounded token/crosswalk sections, and package-level catalog identity. | CLI parsing, MCP transport, renderer runtime, or project mutation. |
+| `SCOPE-PKG-TOOLING` | `committed` | `@core-ui/tooling` | CLI, adapters, installed catalog/version selection, explicit query-version forwarding, response rendering, local validation, maintainer authoring, change-intent previews, and enabled safe operations. | A second artifact index, product/query-response decisions, page-boundary selection, or renderer implementation. |
 
 Renderer packages do not depend on the catalog at runtime. Official consumer
 profiles install compatible renderer packages plus project-local catalog and
@@ -366,8 +366,8 @@ tooling development dependencies.
 
 | Scope ID | Commitment | Surface | Earliest boundary | Product contract |
 | --- | --- | --- | --- | --- |
-| `SCOPE-SURFACE-API` | `committed` | Programmatic catalog API | Foundation | Pure manifest/list/search/get; planning only when enabled. |
-| `SCOPE-SURFACE-CLI` | `committed` | CLI human/JSON/dense | Foundation | Primary documentation interface over the same response object. |
+| `SCOPE-SURFACE-API` | `committed` | Programmatic catalog API | Foundation | Pure manifest/list/search/get with bounded versioned sections and historical response negotiation; planning only when enabled. |
+| `SCOPE-SURFACE-CLI` | `committed` | CLI human/JSON/dense | Foundation | Primary documentation interface over the same bounded, versioned response object. |
 | `SCOPE-SURFACE-SITE` | `committed` | Documentation site | Productization | Catalog client rendering canonical records and guide sources. |
 | `SCOPE-SURFACE-EXPLORER-WEB` | `committed` | Web/React explorer | Productization | Generated adapters over canonical executable examples. |
 | `SCOPE-SURFACE-EXPLORER-NATIVE` | `committed` | Native explorer host | Productization | Expo/native host used outside runtime packages. |
@@ -382,7 +382,7 @@ tooling development dependencies.
 | `SCOPE-CMD-MANIFEST` | `committed` | `core manifest` | Foundation | Cold-start capability, schema, grammar, platform, output, and version discovery. |
 | `SCOPE-CMD-LIST` | `committed` | `core list` | Foundation | Bounded deterministic artifact listing. |
 | `SCOPE-CMD-SEARCH` | `committed` | `core search` | Foundation | Deterministic explainable local search with match reasons. |
-| `SCOPE-CMD-GET` | `committed` | `core get` | Foundation | Exact artifact/binding/example/guidance retrieval with compatibility provenance. |
+| `SCOPE-CMD-GET` | `committed` | `core get` | Foundation | Exact artifact/binding/example/guidance retrieval with compatibility provenance plus bounded `tokens` / `source-crosswalk` sections and deterministic continuation. |
 | `SCOPE-CMD-VALIDATE-SOURCE` | `committed` | `core validate` | `0.1` | Core UI-owned catalog/example validation first. |
 | `SCOPE-CMD-VALIDATE-CONSUMER` | `committed` | `core validate` | Productization | Bounded supported consumer syntax/version analysis with false-positive policy. |
 | `SCOPE-CMD-PLAN` | `admitted` | `core plan` | Productization | Read-only grounded composition over proved patterns; unavailable until G2.4. |
@@ -395,11 +395,37 @@ example-purpose, limit, and cursor selectors. JSON writes one value to stdout;
 diagnostics and progress use stderr. Dense output is deterministic,
 section-selectable, token-budgeted, and round-trippable to the response object.
 
+Token-source retrieval follows a staged compatibility contract. Query API
+`1.2.0` retains v1.1's complete inline `tokens`, adds bounded `tokens` and
+`source-crosswalk` sections, and emits
+`CORE_QUERY_INLINE_TOKENS_DEPRECATED` with replacement guidance. After one
+complete retained and human-accepted v1.2 notice release, query API `2.0.0` may
+replace inline tokens with counts, digests, provenance, and available-section
+metadata. `@core-ui/schema` owns each versioned request/response and
+`TokenSectionPageBudgetProfile` grammar. `@core-ui/catalog` owns historical
+response negotiation, the canonical profile values, and page selection;
+tooling only selects a compatible installed catalog, forwards explicit version
+intent, renders the returned page, and rejects unsupported tuples without
+reinterpretation. Historical v1.1/v1.2 behavior remains explicitly
+negotiable. Those inline responses are retained compatibility artifacts,
+exempt from the v2 sectional page budget, never current/default behavior, and
+cannot satisfy proof of the v2 bounded path. The v1.2 `source-crosswalk`
+section returns typed `absent` for a token-source 2.0 record and for a 2.1
+record that omits the authored field. The profile fixes the query API and lexer versions, canonical
+entry-cost/order rule, normalized worst-case envelope preimage/reserve,
+default/max limits, minimum progress, 2,048-token dense-page budget, and
+`CORE_QUERY_PAGE_ENTRY_TOO_LARGE`. Its canonical JSON enters the catalog
+digest, adding no revision axis. Each v2 page uses canonical ordering and a
+cursor bound to query version, that catalog digest, token-source revision,
+section, selector state, and position. `limit` is an item ceiling; the catalog
+emits the greatest non-empty fitting prefix and rejects a single oversize entry
+without truncation.
+
 ## Token and theme scope
 
 | Scope ID | Commitment | Deliverable | Boundary |
 | --- | --- | --- | --- |
-| `SCOPE-THEME-DEFAULT` | `committed` | First-party brand-agnostic default theme | `0.1` |
+| `SCOPE-THEME-DEFAULT` | `committed` | First-party brand-agnostic default theme whose Core-owned reference baseline is classified from the pinned Tale UI source | `0.1` |
 | `SCOPE-TOKEN-LAYERS` | `committed` | Reference, semantic, and component token layers with acyclic allowed alias direction | `0.1` |
 | `SCOPE-TOKEN-MODES` | `committed` | Applicable typed color-scheme, contrast, motion, density, and direction axes | `0.1` |
 | `SCOPE-TOKEN-TRANSFORMS` | `committed` | Static web CSS and native theme-object transforms from canonical token sources | `0.1` |
@@ -414,6 +440,37 @@ section-selectable, token-budgeted, and round-trippable to the response object.
 CSS-derived values never become native authority. Consumer themes can assign
 only permitted existing roles and cannot change Core token identity, type,
 meaning, required modes, or canonical alias topology.
+
+The migration baseline is Tale UI commit
+`94bf62a26c02605c8928dfeb24f0ddc4be1c92fd`,
+`packages/tokens/tokens.json`, SHA-256
+`83b72fc79b34932ae1afa44d21f74460a23fa693407bc319fdfafb3a2bb64a86`:
+693 declaration occurrences, including 692 custom-property occurrences, 644
+unique custom-property names, and one ordinary declaration. Every occurrence
+is classified `adopt`, `adapt`, `defer`, or `reject`; repeated names require
+explicit logical-token/mode grouping. The accepted subset receives Core IDs,
+types/units, meanings, modes, override policies, platform dispositions, and
+pinned provenance in the existing `reference` layer. Tale names and CSS are
+inputs only: Tale UI is not a runtime dependency, ongoing synchronization
+source, fourth token layer, or second canonical owner.
+
+The existing token source under `catalog/tokens/` owns that classification and
+all authored Tale provenance through the optional stable token-source schema
+`2.1.0` `sourceCrosswalk` field, which is mandatory for the corrected default
+theme. Sources without a migration baseline omit the authored field; queries
+derive a typed `absent` status. Each occurrence key includes file, selector,
+name, value, and stable source-order ordinal and occurs exactly once. Every
+entry has one disposition and non-empty reason. An occurrence joins at most one
+duplicate-free group of at least two members with complete mode/member mapping.
+`adopt`/`adapt` require one Core token ID; `defer`/`reject` forbid one. The
+canonical preimage is the pinned baseline identity, occurrence entries in
+stable occurrence order, and groups in stable group-ID order; its SHA-256 is
+the derived `sourceCrosswalkDigest`. Token-level provenance and catalog/package
+digests derive from that owner. The field affects source content/provenance
+identity but not token IDs, semantic closure, requirement sets, search ranking,
+default summaries, or runtime output except through admitted Core token facts.
+Removing or incompatibly changing it requires a schema major, migration
+guidance, affected proof, and retained historical retrieval.
 
 ## Maintainer and agent-safe authoring scope
 
@@ -537,8 +594,8 @@ Raw component count is never a scope objective.
 
 | Product-scope family | Roadmap realization |
 | --- | --- |
-| Foundation, canonical knowledge, CLI baseline, local resolver, and maintainer authoring | G0.0–G0.5 and the Gate 0 integration exit |
-| Default tokens/theme and web/React/native substrates | G1.0–G1.2 |
+| Foundation, canonical knowledge, CLI baseline, local resolver, and maintainer authoring | G0.0–G0.5 and the Gate 0 integration exit; the Tale-token correction adds independently accepted Phase A, Phase B, and Phase C generations |
+| Default tokens/theme and web/React/native substrates | Corrected G1.0 after Phase B and Phase C correlation, then fresh G1.1 and G1.2 entry evaluation |
 | `0.1` components, Form pattern, examples, proof, source validation, and internal MCP | G1.3–G1.9 and the Gate 1 integration exit |
 | Tabs and Toast proof extension | G2.0 |
 | Public packages, descriptors, compatibility, releases, and historical catalogs | G2.1 |
@@ -611,6 +668,9 @@ accessibility, package, compatibility, integrity, or generation failures.
 - Button, TextField, Switch, Dialog, Select, and Form exist under their
   canonical owners with required examples, pitfalls, renderers, descriptors,
   and evidence;
+- the pinned Tale baseline is occurrence-complete, every source occurrence has
+  a reviewed disposition, and every admitted value has one Core-owned reference
+  identity with explicit web/native handling and provenance;
 - the first-party default token/theme system satisfies every binding/profile
   requirement and platform accessibility adaptation;
 - framework-free web, React, and native runtime ownership is explicit and
@@ -700,6 +760,77 @@ Every change must include:
 An adjacent implementation detail that does not alter product outcome,
 platform support, public surface, ownership, compatibility, or proof remains a
 tracker decision and does not require this document to change.
+
+### Accepted Tale foundation-token amendment (`2.0.0`)
+
+Architecture-maintenance issue #39 records the observed workflow and the
+designated human decision accepted on 2026-08-09. Core UI's `0.1` default theme
+is materially broadened from the minimum fixed-slice substrate to include the
+human-classified `adopt`/`adapt` subset of the pinned Tale UI non-semantic token
+baseline as Core-owned reference tokens. This is a major scope change from
+`1.0.1` to `2.0.0`.
+
+Affected immutable IDs are
+`SCOPE-FOUNDATION-002`, `SCOPE-FOUNDATION-003`,
+`SCOPE-FOUNDATION-004`, `SCOPE-FOUNDATION-005`,
+`SCOPE-FOUNDATION-006`, `SCOPE-KIND-TOKEN`, `SCOPE-SYSTEM-TOKENS`,
+`SCOPE-THEME-DEFAULT`, `SCOPE-TOKEN-LAYERS`, `SCOPE-TOKEN-MODES`,
+`SCOPE-TOKEN-TRANSFORMS`, `SCOPE-TOKEN-REQUIREMENTS`,
+`SCOPE-TOKEN-FALLBACKS`, `SCOPE-TOKEN-OVERRIDES`,
+`SCOPE-THEME-PLATFORM-SAFETY`, `SCOPE-THEME-ACCESSIBILITY`,
+`SCOPE-PKG-SCHEMA`, `SCOPE-PKG-CATALOG`, `SCOPE-PKG-TOKENS`,
+`SCOPE-PKG-TOOLING`, `SCOPE-SURFACE-API`, `SCOPE-SURFACE-CLI`,
+`SCOPE-CMD-GET`, `SCOPE-API-DEFAULTS`, `SCOPE-API-DEPRECATION`,
+`SCOPE-AUTHOR-SCAFFOLD`, `SCOPE-AUTHOR-DIAGNOSTICS`,
+`SCOPE-AUTHOR-DIFF`, `SCOPE-AUTHOR-REVISION`,
+`SCOPE-AUTHOR-CLOSURE`, `SCOPE-AUTHOR-AUTOFIX`,
+`SCOPE-QUALITY-COMPAT-PROFILE`, `SCOPE-QUALITY-GENERATOR-CONTRACT`,
+`SCOPE-QUALITY-PERFORMANCE`, `SCOPE-PROOF-SCHEMA`,
+`SCOPE-PROOF-CONFORMANCE`, `SCOPE-PROOF-GENERATION`, and
+`SCOPE-PROOF-PARITY`. Every item remains `committed`; there is no commitment
+transition or new scope ID.
+
+Roadmap and evidence effect: Phase A reactivates G0.1–G0.5 and Gate 0 for the
+`TALE-TOKEN-A` query API v1.2 deprecation/typed-absence profile; Phase B expires
+and preserves Phase A and repeats the complete Gate 0 proof under the
+`TALE-TOKEN-B` query API v2/schema/query-infrastructure profile;
+G1.0 then owns the real crosswalk and Core inventory; Phase C expires and
+preserves Phase B and repeats the complete Gate 0 proof under the
+`TALE-TOKEN-C` profile at that exact final G1.0 source. Only then may all
+`E-G1.0-01` through `E-G1.0-08` be accepted,
+followed by fresh `E-G1.1-01` through `E-G1.1-06`. G1.2–G1.9 and Gate 1 bind
+to the corrected token, catalog, package, and evidence identities.
+
+Release additions are the exact accepted Core reference-token identities, the
+optional stable token-source `sourceCrosswalk` member in schema `2.1.0`, query
+API v1.2 bounded sections/deprecation diagnostic, and query API v2 sectional
+response. Query API v2 removes inline full-response `tokens` only after the
+accepted v1.2 notice release and replaces it with summary metadata plus the
+bounded `tokens` section. Historical v1.1 and v1.2 retrieval remains available.
+The classification/compatibility annex must enumerate the exact token additions
+and classify catalog, command-registry, and `@core-ui/schema`,
+`@core-ui/catalog`, `@core-ui/tokens`, and `@core-ui/tooling` version effects
+before implementation. No package, platform, public command, theme count,
+component, or capability is added.
+
+Platform and migration rules preserve Core ownership and explicit target
+dispositions: CSS-only values require a native adaptation or reasoned
+defer/reject result, and native never parses CSS. Authoring support must cover
+scaffold, diagnostics, semantic diff, revision explanation, affected closure,
+and autofix rejection for authored crosswalk decisions. Proof includes complete
+occurrence coverage, grouping uniqueness, version negotiation, cursor
+integrity, response/dense budgets, oversize failure, API/human/JSON/dense
+parity, generation identity, target transforms, affected consumers, and
+renderer conformance. No consumer data is required; any later capture remains
+subject to the existing privacy/disclosure/retention contract. Security and
+integrity remain installed-local, version/digest-bound, fail-closed, and
+network-independent. Rollback selects the last accepted Core token/catalog
+tuple and its retained evidence without rewriting Tale or Core history.
+
+Open tracker migration covers issues #3 through #19, including Gate 0 exit #8,
+and every affected retained-evidence locator. Completed issues and evidence are
+preserved as historical exact-source records; Project workflow automation does
+not reactivate or complete a roadmap milestone.
 
 ## Tracker reference contract
 

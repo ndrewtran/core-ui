@@ -335,6 +335,17 @@ compile one real component without pre-building the full ontology.
 - Response-envelope versioning and append-only error-code policy.
 - Schema evolution rules for patch, minor, major, deprecation, and explicit
   source migration.
+- Token-source schema `2.1.0` with the optional closed `sourceCrosswalk` field,
+  authored omission plus typed derived absence, occurrence identity/grouping/
+  disposition grammar, disposition-dependent required/forbidden fields,
+  complete authored-field/provenance ownership, and deterministic
+  `2.0.0 -> 2.1.0` migration.
+- Query API v1.2 additive deprecation and v2 removal schemas for bounded
+  `tokens` / `source-crosswalk` sections, versioned cursors, summary metadata,
+  diagnostics, and historical v1.1/v1.2 retrieval.
+- Closed `TokenSectionPageBudgetProfile` grammar for the query/lexer versions,
+  canonical cost/order rule, envelope preimage/reserve, limits, progress,
+  2,048-token budget, and stable oversize diagnostic.
 
 **Acceptance evidence**
 
@@ -344,7 +355,7 @@ compile one real component without pre-building the full ontology.
 | `E-G0.1-02` | Whitespace/key-order changes preserve revisions while a meaningful authored change updates the correct revision. | Canonicalization fixture and digest comparison. |
 | `E-G0.1-03` | Editorial-only input changes content identity but not renderer compatibility; normative binding input changes `specRevision`. | Revision-closure fixture. |
 | `E-G0.1-04` | Renderer/package/source locations are derived and cannot be authored as duplicate inventory. | Field-ownership audit. |
-| `E-G0.1-05` | Schema compatibility fixtures enforce the declared patch/minor/major rules. | Version-negotiation matrix. |
+| `E-G0.1-05` | Schema compatibility fixtures enforce the declared patch/minor/major rules and every source/query version, migration, absence, page-profile, negotiation, and notice-boundary clause required by the active accepted correction profile. | Source/query version-negotiation matrix bound to the accepted correction-profile ID. |
 
 **Scope controls**
 
@@ -388,6 +399,15 @@ query it through a side-effect-free API.
 - Resolution/provenance metadata in every implementation-guidance response.
 - Query response schemas and stable type discriminators.
 - Explicit source pointers and bounded relation traversal.
+- Stable, complete, sectional `tokens` and `source-crosswalk` retrieval with
+  query-version/content-bound cursors and no unbounded current response;
+  explicitly negotiated historical v1.1/v1.2 inline compatibility responses
+  remain outside the v2 sectional page-budget claim.
+- Catalog-owned `TokenSectionPageBudgetProfile` canonical values and
+  budget-aware page selection. The profile's canonical JSON enters catalog
+  identity; `limit` is an item ceiling, the catalog reserves the declared
+  envelope, emits the greatest fitting non-empty prefix, and fails a single
+  oversize entry without truncation.
 
 **Acceptance evidence**
 
@@ -395,8 +415,8 @@ query it through a side-effect-free API.
 | --- | --- | --- |
 | `E-G0.2-01` | Two clean builds from the same sources produce byte-identical catalogs, indices, ordering, and digests. | Dual-build digest report. |
 | `E-G0.2-02` | Programmatic list/search/get requests are deterministic and include exact match reasons, provenance, authority, and compatibility context. | Golden API corpus. |
-| `E-G0.2-03` | Pagination is stable under the same catalog digest and rejects an invalid or cross-digest cursor. | Cursor fixture. |
-| `E-G0.2-04` | Search returns bounded summaries; retrieval returns selected complete records without copying the whole graph. | Response-size and relation-boundary test. |
+| `E-G0.2-03` | Pagination is stable under the same query API, catalog digest, token-source revision, section, and selector state and rejects invalid, cross-version, or cross-digest cursors. | Cursor integrity and historical-version fixture. |
+| `E-G0.2-04` | Search returns bounded summaries; under the current sectional contract, retrieval returns selected complete records without copying the whole graph and continuation enumerates every token/crosswalk entry within response and dense-page budgets. A single oversize entry fails closed without truncation. Explicitly negotiated historical inline compatibility responses remain deterministic and parity-proved but are not represented as sectional-budget proof. | Response-size, completeness, oversize, historical-compatibility, and relation-boundary test bound to the accepted correction-profile ID. |
 | `E-G0.2-05` | Query operations perform no writes, network requests, code execution, or environment-dependent ranking. | Hermeticity and side-effect audit. |
 
 **Scope controls**
@@ -437,6 +457,11 @@ surface over the query kernel.
   safe `nextCommand` objects with effect and confirmation metadata.
 - `core manifest --json` as cold-start discovery; bare `core --json` recovery.
 - Dense golden snapshots and per-command token budgets.
+- Generated `section`, `limit`, and `cursor` request/response types and help for
+  `tokens` / `source-crosswalk`, including query API v1.2 deprecation guidance
+  and v2 summary/continuation behavior.
+- Human, JSON, and dense rendering of catalog-selected pages without adapter-
+  owned entry costing or page-boundary selection.
 
 **Acceptance evidence**
 
@@ -444,8 +469,8 @@ surface over the query kernel.
 | --- | --- | --- |
 | `E-G0.3-01` | API and CLI JSON normalize to the same response for identical requests. | Surface-parity matrix. |
 | `E-G0.3-02` | Human, dense, and JSON outputs contain the same IDs, applicability, defaults, omissions, revisions, and follow-up actions. | Cross-renderer golden corpus. |
-| `E-G0.3-03` | Dense output is deterministic, round-trippable to the response object, and within budget. | Snapshot and token-count report. |
-| `E-G0.3-04` | Manifest, parser, help, completion, and response types agree; an undeclared command or response fails CI. | Command-registry consistency test. |
+| `E-G0.3-03` | Dense output is deterministic, round-trippable to the response object, and within the 2,048-token page budget across early page breaks, minimum progress, and oversize-entry rejection. | Snapshot, continuation, and token-count report. |
+| `E-G0.3-04` | Manifest, parser, help, completion, request/response types, section values, pagination metadata, and deprecation diagnostics agree; an undeclared command or response fails CI. | Command-registry consistency test. |
 | `E-G0.3-05` | Error consumers can branch on code and structured details without parsing prose; mutating suggestions require confirmation. | Error-schema and exit-status fixture. |
 | `E-G0.3-06` | An unprimed agent discovers the manifest and retrieves the artifact without repository crawling. | Informational cold-start smoke transcript. |
 
@@ -488,6 +513,10 @@ data.
 - Explicit content-addressed cache selection only by version and digest.
 - Resolver error precedence and all seven architecture-defined error codes.
 - Relative-path diagnostics and privacy-safe exact next commands.
+- Package/query compatibility metadata. The catalog owns deterministic
+  negotiation for retained query API v1.1, v1.2 notice, and v2 sectional
+  behavior; tooling selects a compatible installed catalog, forwards explicit
+  version intent, and rejects unsupported tuples without reinterpretation.
 
 **Acceptance evidence**
 
@@ -495,8 +524,8 @@ data.
 | --- | --- | --- |
 | `E-G0.4-01` | Hoisted, sibling, ancestor, and newer cached catalogs never replace the selected workspace’s direct declaration. | Multi-workspace resolver matrix. |
 | `E-G0.4-02` | Every reachable resolver code, precedence path, secondary detail, and safe next command is exercised. | Resolver taxonomy fixture. |
-| `E-G0.4-03` | Integrity, declaration drift, ambiguous resolution, and incompatible binding/token tuples fail without network fallback. | Negative package-graph corpus. |
-| `E-G0.4-04` | Installed-local authority and exact package/catalog tuple appear in every applicable response. | Query metadata assertion. |
+| `E-G0.4-03` | Integrity, declaration drift, ambiguous resolution, incompatible binding/token tuples, and unsupported query/cursor versions fail without network fallback or silent response reinterpretation. | Negative package-graph and query-version corpus. |
+| `E-G0.4-04` | Installed-local authority and exact package/catalog/query/schema tuple appear in every applicable response, including historical v1.1/v1.2 retrieval. | Query metadata assertion. |
 | `E-G0.4-05` | JSON exposes no absolute root, credentials, secret, access-bearing URL, or unrestricted storage locator. | Privacy scan. |
 
 **Scope controls**
@@ -535,6 +564,9 @@ informal projection patch from the first artifact onward.
 - Revision explainer listing normalized inputs for content/spec digests.
 - Affected-closure view over sources, projections, and required checks.
 - Preview-only, semantics-preserving autofixes with explicit changed paths.
+- Source-crosswalk scaffolding, source-linked coverage/grouping diagnostics,
+  semantic disposition diff, revision/affected-closure explanation, and a hard
+  autofix prohibition for authored `adopt`/`adapt`/`defer`/`reject` decisions.
 
 **Acceptance evidence**
 
@@ -542,8 +574,8 @@ informal projection patch from the first artifact onward.
 | --- | --- | --- |
 | `E-G0.5-01` | A maintainer scaffolds, validates, compiles, retrieves, breaks, diagnoses, and repairs the minimal artifact without editing a projection. | Authoring round-trip transcript and fixture. |
 | `E-G0.5-02` | The semantic diff and revision explainer identify the exact owning field and correct version/revision effect. | Golden change corpus. |
-| `E-G0.5-03` | Autofix rejects any change to intent, lifecycle, accessibility, public API, token meaning, migration, rationale, or exception. | Negative autofix policy tests. |
-| `E-G0.5-04` | A new stable schema field fails readiness until scaffold, diff, diagnostics, and affected-closure support understand it. | Schema-authoring coupling fixture. |
+| `E-G0.5-03` | Autofix rejects any change to intent, lifecycle, accessibility, public API, token meaning, migration, source-crosswalk disposition/grouping/rationale, or exception. | Negative autofix policy tests. |
+| `E-G0.5-04` | A new stable schema field, including `sourceCrosswalk`, fails readiness until scaffold, diff, diagnostics, revision explanation, and affected-closure support understand it. | Schema-authoring coupling fixture. |
 
 **Scope controls**
 
@@ -575,6 +607,69 @@ Gate 0 does not wait for renderer breadth, public MCP, a docs application,
 planning, project mutation, migration, hosted services, or model-evaluation
 stability.
 
+#### Accepted G1.0 token-correction sequence
+
+The Tale-to-Core default-theme correction reactivates G0.1 through G0.5 and
+this integration exit in three exact-source generations. A later generation
+expires the applicability of the prior generation without rewriting or
+deleting its immutable historical evidence.
+
+Before Phase A implementation, a separate human-accepted classification and
+compatibility annex enumerates every planned occurrence disposition, the exact
+Core token additions, final page-profile constants, token-contract/catalog/
+command-registry/package version effects, migration support, and rollback.
+Accepting the architecture direction does not accept that annex by implication.
+
+Each correction generation uses one immutable phase-specific applicability
+profile. A “complete” generation evaluates every listed evidence ID; unchanged
+assertions retain their milestone wording, while the following profile clauses
+define the exact version-dependent meaning of `E-G0.1-05`, `E-G0.2-03`,
+`E-G0.2-04`, and their API/CLI/dense parity dependents. A profile cannot claim
+or waive behavior assigned to a later phase.
+
+| Profile | Required version-dependent assertions |
+| --- | --- |
+| `TALE-TOKEN-A` | Token-source schema `2.0.0`; query API v1.1/v1.2 negotiation; v1.2 inline-token deprecation and notice diagnostics; bounded `tokens` and `source-crosswalk` sections; typed derived crosswalk absence for the pre-crosswalk 2.0 source; v1.2 cursor, page-profile, dense-page, oversize, and parity proof. Explicitly requested v1.1/v1.2 inline compatibility responses remain deterministic and parity-proved but are exempt from sectional page budgets. Schema 2.1 and query v2 are not yet asserted. |
+| `TALE-TOKEN-B` | Everything in Phase A plus token-source schema 2.1 migration/omission/typed-absence behavior, query v2 inline removal, complete v1.1/v1.2/v2 negotiation, v2 cursor/page-budget/oversize proof, and omitted or synthetic crosswalk fixtures only. Historical inline responses remain available solely through explicit v1.1/v1.2 negotiation. |
+| `TALE-TOKEN-C` | The complete Phase B contract repeated at the exact final G1.0 source/catalog identity with the real occurrence-complete crosswalk and admitted Core token inventory; no synthetic crosswalk can satisfy this profile. |
+
+1. **Phase A — query API `1.2.0` notice.** Against the pre-crosswalk token
+   source, retain v1.1 inline `tokens`; add bounded `tokens` and
+   `source-crosswalk` sections, `limit`/`cursor`, generated types/help,
+   `CORE_QUERY_INLINE_TOKENS_DEPRECATED`, replacement guidance, historical
+   negotiation, and response/dense-budget/oversize proof. Produce and
+   human-accept a complete fresh `TALE-TOKEN-A` generation of `E-G0.1-01`
+   through `E-G0.1-05`,
+   `E-G0.2-01` through `E-G0.2-05`, `E-G0.3-01` through `E-G0.3-06`,
+   `E-G0.4-01` through `E-G0.4-05`, `E-G0.5-01` through `E-G0.5-04`, and Gate
+   0 integration packet. That accepted release is the mandatory notice
+   boundary.
+2. **Phase B — query API `2.0.0` and schema/query infrastructure.** After
+   Phase A acceptance, remove inline `tokens`, add token-source schema `2.1.0`,
+   retain v1.1/v1.2 negotiation, and prove omitted authored crosswalks with a
+   typed derived absence plus synthetic fixtures only. Do not author the Tale classification
+   or expanded default-theme inventory in Gate 0. Expire and preserve Phase A,
+   then produce and human-accept a second complete G0.1–G0.5 and Gate 0
+   `TALE-TOKEN-B` generation at the exact Phase B source.
+3. **Phase C — final G1.0 source correlation.** After Phase B acceptance, G1.0
+   authors the real Tale classification, crosswalk, accepted Core reference
+   inventory, transforms, and requirement identities. That source/catalog
+   change expires and preserves Phase B. Before G1.0 evidence is captured or
+   accepted, produce and human-accept a third complete G0.1–G0.5 and Gate 0
+   `TALE-TOKEN-C` generation at the exact final G1.0 source.
+
+The previously accepted Gate 0, G1.0, and G1.1 records remain immutable proof
+of their original authority and source only. They do not satisfy the corrected
+contract. After Phase C, G1.0 requires complete fresh acceptance, followed by
+fresh `E-G1.1-01` through `E-G1.1-06` acceptance before G1.2 or G1.3 may treat
+the corrected token contract as an entry dependency.
+
+Under this corrected authority, the classification/compatibility annex is the
+next required decision artifact; Phase A becomes the next executable slice only
+after that annex is accepted. Phase B, corrected G1.0, and G1.1 remain
+`not-ready` until their documentary entry conditions are proved; mutable
+Project workflow status does not change those roadmap states.
+
 ## Gate 1 — representative vertical slices
 
 Gate 1 proves the architecture through a fixed, difficult `0.1` acceptance
@@ -600,15 +695,21 @@ retrieval parity at the same record revision.
 
 ### G1.0 Tokens, themes, and foundation boundaries
 
-**Objective:** Establish only the cross-renderer semantics, token transforms,
-and pure logic required by the fixed slices.
+**Objective:** Establish the cross-renderer semantics, token transforms, and
+pure logic required by the fixed slices, with the pinned Tale UI non-semantic
+foundation baseline classified into a Core-owned default-theme reference
+inventory.
 
 **Entry conditions**
 
-- Gate 0 is complete.
+- The Phase B Gate 0 generation in the accepted token-correction sequence is
+  complete and human-accepted.
 - Button, TextField, Switch, Dialog, Select, and Form token/semantic needs have
   been inventoried without implementing a generic UI runtime.
 - Web and native target transforms have concrete consumer fixtures.
+- The Tale baseline is pinned to commit
+  `94bf62a26c02605c8928dfeb24f0ddc4be1c92fd` and source SHA-256
+  `83b72fc79b34932ae1afa44d21f74460a23fa693407bc319fdfafb3a2bb64a86`.
 
 **Primary ownership**
 
@@ -625,6 +726,15 @@ and pure logic required by the fixed slices.
 
 - Reference, semantic, and component token layers with typed IDs, units, and
   acyclic aliasing.
+- A deterministic occurrence-complete `sourceCrosswalk` for all 693 pinned Tale
+  declarations—692 custom-property occurrences, 644 unique custom-property
+  names, and one ordinary declaration—with explicit logical-token/mode
+  grouping and one `adopt`, `adapt`, `defer`, or `reject` disposition and reason
+  per occurrence.
+- The human-accepted `adopt`/`adapt` subset materialized as Core-owned reference
+  tokens with stable Core IDs, types/units, meanings, modes, override policies,
+  web/native dispositions, and pinned Tale provenance. Tale names and file
+  groupings remain migration inputs rather than Core public API.
 - First-party default theme and typed mode axes for color scheme, contrast,
   motion, density, and direction where applicable.
 - Deterministic web CSS and native theme-object transforms from the same
@@ -663,6 +773,7 @@ and pure logic required by the fixed slices.
 | `E-G1.0-05` | Foundation dependency direction is enforced and a portable machine is available only on profiles with materially distinct retained proof. | Import-boundary and portability matrix. |
 | `E-G1.0-06` | Static theme output works without runtime switching; any runtime switch is separately declared and proved. | Web/native theme smoke fixtures. |
 | `E-G1.0-07` | Closed platform-safety declarations enter binding-spec revisions and compile into separate per-binding/profile `PlatformSafetyRequirementSet` digests plus query/package projections; unknown, missing, duplicate, wrong-profile, consumer-weakened, or prematurely fulfilled requirements fail deterministically. This assertion produces no CSS/native adaptation, support, accessibility, or availability result. | Safety-contract closure and negative corpus. |
+| `E-G1.0-08` | The pinned Tale baseline is occurrence-complete; every occurrence has exactly one reviewed disposition and non-empty reason, grouping/cardinality/mode mapping is valid and unique, adopt/adapt entries require one Core identity while defer/reject entries forbid one and make no runtime claim, all Tale provenance and derived digests trace to the sole crosswalk preimage, CSS-only values have explicit native adaptation or reasoned deferral/rejection, and generated CSS/native output derives only from admitted Core facts. | Crosswalk coverage, classification, provenance, target-disposition, and generated-output corpus. |
 
 **Scope controls**
 
@@ -671,14 +782,19 @@ and pure logic required by the fixed slices.
   transitions in foundation.
 - Do not add a component token unless a fixed slice needs a stable
   customization point.
+- Do not admit every Tale declaration automatically, preserve Tale variable
+  names as Core API, keep Tale as a live owner, or bulk-create speculative
+  semantic/component tokens.
 - Additional themes and design-tool interchange remain Gate 3.
 
-**Exit condition:** The fixed slices have the smallest sufficient semantic,
-logic, token, and optional portable-interaction substrate with cross-target
-provenance and fallback denial. The platform-safety requirement contract is
-closed, digest-bound, and consumer-non-removable, while web and native behavior
-remain explicitly unproved and unavailable until G1.1 and G1.2 supply their
-binding-owned evidence.
+**Exit condition:** The fixed slices have the complete classified Tale-derived
+Core reference baseline plus the smallest sufficient semantic, component,
+logic, and optional portable-interaction substrate, with cross-target
+provenance and fallback denial. Phase C Gate 0 evidence and all eight G1.0
+assertions are human-accepted at the same final source. The platform-safety
+requirement contract is closed, digest-bound, and consumer-non-removable, while
+web and native behavior remain explicitly unproved and unavailable until G1.1
+and G1.2 supply their binding-owned evidence.
 
 ### G1.1 Framework-free web and React substrate
 
@@ -687,8 +803,10 @@ canonical inventory or duplicating styles and runtime ownership.
 
 **Entry conditions**
 
-- Gate 0 is complete.
-- G1.0 exposes the token/theme and foundation inputs needed by the first slice.
+- The Phase C Gate 0 generation and corrected G1.0 are complete and
+  human-accepted.
+- G1.0 exposes the corrected token/theme and foundation inputs needed by the
+  first slice.
 - The `web.html` and `web.react` binding schemas are stable for Gate 1.
 
 **Primary ownership**
@@ -2091,9 +2209,9 @@ valid outcomes and do not make the core product incomplete.
 | G0.3 | CLI documentation baseline | G0.2 | Gate 0 exit, later adapters |
 | G0.4 | Project-local catalog package and resolver | G0.2, G0.3 envelopes | Gate 0 exit, G2.2 |
 | G0.5 | Maintainer authoring baseline | G0.0, G0.1, G0.2 | Gate 0 exit, Gate 1 authoring |
-| G1.0 | Tokens, themes, and foundation boundaries | Gate 0 | All Gate 1 slices |
-| G1.1 | Framework-free web and React substrate | Gate 0, G1.0 needs | Web/React slice cells |
-| G1.2 | React Native substrate and profiles | Gate 0, G1.0 needs | Native slice cells |
+| G1.0 | Tokens, themes, and foundation boundaries | Accepted Phase B Gate 0 correction generation; Phase C Gate 0 correlation before exit | All Gate 1 slices |
+| G1.1 | Framework-free web and React substrate | Phase C Gate 0, corrected G1.0 | Web/React slice cells |
+| G1.2 | React Native substrate and profiles | Phase C Gate 0, corrected G1.0 needs | Native slice cells |
 | G1.3 | Button slice | G1.0–G1.2 | Gate 1 exit, authoring path baseline |
 | G1.4 | TextField slice | G1.0–G1.3 as applicable | Form pattern, Gate 1 exit |
 | G1.5 | Switch slice | G1.0–G1.2 | Gate 1 exit |
@@ -2132,6 +2250,7 @@ valid outcomes and do not make the core product incomplete.
 | Change-intent closure | G1.9 | `E-G1.9-03` |
 | Packed descriptor derivation | G1.9, then real release at G2.1 | `E-G1.9-02`, `E-G2.1-02` |
 | Token fallback denial | G1.0 | `E-G1.0-03` |
+| Tale-to-Core token crosswalk | G1.0 after Phase C Gate 0 correlation | `E-G1.0-08` |
 | Platform theme safety and accessibility | G1.0 contract; G1.1/G1.2 test-only substrate behavior; G1.3–G1.7 per-slice binding/profile fulfillment; G1.9 exact contract/evidence correlation | `E-G1.0-07`, `E-G1.1-06`, `E-G1.2-05`, `E-G1.3-01`, `E-G1.3-02`, `E-G1.4-02`, `E-G1.4-03`, `E-G1.5-01` through `E-G1.5-03`, `E-G1.6-01`, `E-G1.6-03`, `E-G1.6-04`, `E-G1.7-01` through `E-G1.7-03`, `E-G1.9-01` |
 | Evidence advisory propagation | G1.9 | `E-G1.9-04` |
 | Operational exception enforcement | G1.9 | `E-G1.9-05` |
@@ -2162,7 +2281,7 @@ remove or weaken these assertions without changing the architecture.
 | Generation hygiene | G0.0 path policy, G0.2 deterministic compiler, every milestone’s no-projection-patch rule. |
 | Proof/evidence/disclosure/advisories | G1.9 evidence system, G2.1/G2.7 release manifests, G3.4 eval promotion. |
 | Lifecycle, SemVer, historical retrieval, trust | G0.1 schema rules, G2.1 version/release, G2.2 installed authority, G3.2 migrations. |
-| Token/theme/fallback/override policy | G1.0 default system and cross-platform safety contract, G1.1/G1.2 binding-owned platform proof, per-slice requirement sets, G1.9 integrated profile view, and G3.5 additional themes/interchange. |
+| Token/theme/fallback/override policy | Three-generation G0.1–G0.5/Gate 0 query/schema correction; G1.0 pinned Tale crosswalk, Core-owned default system, and cross-platform safety contract; G1.1/G1.2 binding-owned platform proof; per-slice requirement sets; G1.9 integrated profile view; and G3.5 additional themes/interchange. |
 | V1 product boundaries | Global guardrails, Gate 1 fixed matrix, Gate 2 capability enablement, independent Gate 3 admission. |
 | Design-tool interoperability | G3.5 export/import-proposal and round-trip proof. |
 | Promptable semantics | G3.6 observed-task discovery and bounded activation only. |
@@ -2241,14 +2360,18 @@ tracking, not this long-lived roadmap.
    minimal artifact.
 4. Close Gate 0 with the uninterrupted scaffold-to-query-to-repair evidence
    path.
-5. Activate G1.0, G1.1, and G1.2 only for the fixed slice requirements.
-6. Complete Button first, then TextField and Switch; use their proved substrate
+5. For the accepted Tale-token correction, complete and accept Phase A, then
+   Phase B; implement the G1.0 crosswalk/inventory; complete Phase C at that
+   exact source; then re-accept G1.0 and G1.1 before downstream activation.
+6. Activate G1.2 and the fixed slices only against the corrected accepted
+   dependencies.
+7. Complete Button first, then TextField and Switch; use their proved substrate
    for Dialog and Select without forcing false shared behavior.
-7. Complete the Form pattern/curriculum, then close the entire `0.1` matrix and
+8. Complete the Form pattern/curriculum, then close the entire `0.1` matrix and
    change-intent/evidence fixtures in G1.9.
-8. After Gate 1, productize packages/resolution first. Run docs, planning, and
+9. After Gate 1, productize packages/resolution first. Run docs, planning, and
    safe-operation milestones only when their own entries are ready.
-9. Admit Gate 3 capabilities independently. Design-tool interchange,
+10. Admit Gate 3 capabilities independently. Design-tool interchange,
    promptable-semantics activation, extensions, frameworks, and protocols never
    become implicit core prerequisites.
 
