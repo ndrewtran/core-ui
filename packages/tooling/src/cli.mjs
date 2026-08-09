@@ -7,7 +7,10 @@ import { renderDense, renderHuman, renderJson } from './renderers.mjs';
 
 const EXIT_CODES = {
   CORE_QUERY_INVALID: 2,
+  CORE_QUERY_API_VERSION_UNSUPPORTED: 2,
   CORE_CURSOR_INVALID: 3,
+  CORE_QUERY_PAGE_ENVELOPE_TOO_LARGE: 3,
+  CORE_QUERY_PAGE_ENTRY_TOO_LARGE: 3,
   CORE_ARTIFACT_NOT_FOUND: 4,
   CORE_PROJECT_NOT_FOUND: 10,
   CORE_CATALOG_NOT_DECLARED: 11,
@@ -35,16 +38,22 @@ export function executeCommand(command, request, api = catalogApi) {
     operationRequest[argument.requestKey ?? argument.name] = request[argument.name];
   }
   const response = operation(operationRequest);
-  if (response.type !== 'error' && response.type !== definition.responseType) {
+  const responseType = response.type ?? response.responseType;
+  if (
+    responseType !== 'error'
+    && responseType !== definition.responseType
+    && !(command === 'get' && responseType === 'artifact.detail.section-page')
+  ) {
     throw new Error(
-      `CLI_RESPONSE_TYPE_DRIFT: ${command} expected ${definition.responseType}, got ${response.type}`,
+      `CLI_RESPONSE_TYPE_DRIFT: ${command} expected ${definition.responseType}, got ${responseType}`,
     );
   }
   return response;
 }
 
 function diagnostics(response) {
-  return response.type === 'error' ? [response.error] : response.warnings;
+  if (response.type === 'error') return [response.error];
+  return response.warnings ?? response.diagnostics ?? [];
 }
 
 export function assertSafeDiagnostics(response) {
@@ -88,6 +97,7 @@ export function runCli(args) {
     artifact: parsed.command === 'get' ? parsed.request['id-or-alias'] : null,
     platform: parsed.request.platform ?? null,
     filterBindings: ['list', 'search'].includes(parsed.command),
+    queryApiVersion: parsed.request.queryApiVersion ?? null,
   });
   const response = assertSafeDiagnostics(
     parsed.error

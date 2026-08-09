@@ -10,55 +10,6 @@
       "name": "strategy",
       "owner": "binding-contract",
       "schema": "binding.schema.json",
-      "schemaPointer": "#/$defs/runtimeProfile/allOf/0/oneOf/0/properties/strategy"
-    },
-    {
-      "class": "authored",
-      "name": "strategy",
-      "owner": "binding-contract",
-      "schema": "binding.schema.json",
-      "schemaPointer": "#/$defs/runtimeProfile/allOf/0/oneOf/1/properties/strategy"
-    },
-    {
-      "class": "authored",
-      "name": "alternative",
-      "owner": "binding-contract",
-      "schema": "binding.schema.json",
-      "schemaPointer": "#/$defs/runtimeProfile/properties/alternative"
-    },
-    {
-      "class": "authored",
-      "name": "lifecycle",
-      "owner": "binding-contract",
-      "schema": "binding.schema.json",
-      "schemaPointer": "#/$defs/runtimeProfile/properties/lifecycle"
-    },
-    {
-      "class": "authored",
-      "name": "reason",
-      "owner": "binding-contract",
-      "schema": "binding.schema.json",
-      "schemaPointer": "#/$defs/runtimeProfile/properties/reason"
-    },
-    {
-      "class": "authored",
-      "name": "strategy",
-      "owner": "binding-contract",
-      "schema": "binding.schema.json",
-      "schemaPointer": "#/$defs/runtimeProfile/properties/strategy"
-    },
-    {
-      "class": "authored",
-      "name": "validationProfile",
-      "owner": "binding-contract",
-      "schema": "binding.schema.json",
-      "schemaPointer": "#/$defs/runtimeProfile/properties/validationProfile"
-    },
-    {
-      "class": "authored",
-      "name": "strategy",
-      "owner": "binding-contract",
-      "schema": "binding.schema.json",
       "schemaPointer": "#/allOf/0/oneOf/0/properties/strategy"
     },
     {
@@ -70,10 +21,31 @@
     },
     {
       "class": "authored",
-      "name": "accessibility",
+      "name": "schemaVersion",
       "owner": "binding-contract",
       "schema": "binding.schema.json",
-      "schemaPointer": "#/properties/accessibility"
+      "schemaPointer": "#/properties/schemaVersion"
+    },
+    {
+      "class": "authored",
+      "name": "lifecycle",
+      "owner": "binding-contract",
+      "schema": "binding.schema.json",
+      "schemaPointer": "#/properties/lifecycle"
+    },
+    {
+      "class": "authored",
+      "name": "strategy",
+      "owner": "binding-contract",
+      "schema": "binding.schema.json",
+      "schemaPointer": "#/properties/strategy"
+    },
+    {
+      "class": "authored",
+      "name": "reason",
+      "owner": "binding-contract",
+      "schema": "binding.schema.json",
+      "schemaPointer": "#/properties/reason"
     },
     {
       "class": "authored",
@@ -91,10 +63,10 @@
     },
     {
       "class": "authored",
-      "name": "defaults",
+      "name": "props",
       "owner": "binding-contract",
       "schema": "binding.schema.json",
-      "schemaPointer": "#/properties/api/properties/defaults"
+      "schemaPointer": "#/properties/api/properties/props"
     },
     {
       "class": "authored",
@@ -112,10 +84,10 @@
     },
     {
       "class": "authored",
-      "name": "props",
+      "name": "defaults",
       "owner": "binding-contract",
       "schema": "binding.schema.json",
-      "schemaPointer": "#/properties/api/properties/props"
+      "schemaPointer": "#/properties/api/properties/defaults"
     },
     {
       "class": "authored",
@@ -126,31 +98,38 @@
     },
     {
       "class": "authored",
-      "name": "editorialNotes",
+      "name": "accessibility",
       "owner": "binding-contract",
       "schema": "binding.schema.json",
-      "schemaPointer": "#/properties/editorialNotes"
+      "schemaPointer": "#/properties/accessibility"
     },
     {
       "class": "authored",
-      "name": "extensions",
+      "name": "tokenRecipe",
       "owner": "binding-contract",
       "schema": "binding.schema.json",
-      "schemaPointer": "#/properties/extensions"
+      "schemaPointer": "#/properties/tokenRecipe"
     },
     {
       "class": "authored",
-      "name": "lifecycle",
+      "name": "source",
       "owner": "binding-contract",
       "schema": "binding.schema.json",
-      "schemaPointer": "#/properties/lifecycle"
+      "schemaPointer": "#/properties/tokenRecipe/properties/source"
     },
     {
       "class": "authored",
-      "name": "reason",
+      "name": "requirements",
       "owner": "binding-contract",
       "schema": "binding.schema.json",
-      "schemaPointer": "#/properties/reason"
+      "schemaPointer": "#/properties/tokenRecipe/properties/requirements"
+    },
+    {
+      "class": "authored",
+      "name": "platformSafety",
+      "owner": "binding-contract",
+      "schema": "binding.schema.json",
+      "schemaPointer": "#/properties/platformSafety"
     },
     {
       "class": "authored",
@@ -158,20 +137,6 @@
       "owner": "binding-contract",
       "schema": "binding.schema.json",
       "schemaPointer": "#/properties/runtimeProfiles"
-    },
-    {
-      "class": "authored",
-      "name": "android",
-      "owner": "binding-contract",
-      "schema": "binding.schema.json",
-      "schemaPointer": "#/properties/runtimeProfiles/properties/android"
-    },
-    {
-      "class": "authored",
-      "name": "validationProfile",
-      "owner": "binding-contract",
-      "schema": "binding.schema.json",
-      "schemaPointer": "#/properties/runtimeProfiles/properties/android/allOf/1/properties/validationProfile"
     },
     {
       "class": "authored",
@@ -189,6 +154,20 @@
     },
     {
       "class": "authored",
+      "name": "android",
+      "owner": "binding-contract",
+      "schema": "binding.schema.json",
+      "schemaPointer": "#/properties/runtimeProfiles/properties/android"
+    },
+    {
+      "class": "authored",
+      "name": "validationProfile",
+      "owner": "binding-contract",
+      "schema": "binding.schema.json",
+      "schemaPointer": "#/properties/runtimeProfiles/properties/android/allOf/1/properties/validationProfile"
+    },
+    {
+      "class": "authored",
       "name": "native.react-native-web",
       "owner": "binding-contract",
       "schema": "binding.schema.json",
@@ -203,38 +182,213 @@
     },
     {
       "class": "authored",
-      "name": "schemaVersion",
+      "name": "editorialNotes",
       "owner": "binding-contract",
       "schema": "binding.schema.json",
-      "schemaPointer": "#/properties/schemaVersion"
+      "schemaPointer": "#/properties/editorialNotes"
+    },
+    {
+      "class": "authored",
+      "name": "extensions",
+      "owner": "binding-contract",
+      "schema": "binding.schema.json",
+      "schemaPointer": "#/properties/extensions"
+    },
+    {
+      "class": "authored",
+      "name": "profile",
+      "owner": "binding-contract",
+      "schema": "binding.schema.json",
+      "schemaPointer": "#/$defs/platformSafetyDeclaration/properties/profile"
+    },
+    {
+      "class": "authored",
+      "name": "validationProfile",
+      "owner": "binding-contract",
+      "schema": "binding.schema.json",
+      "schemaPointer": "#/$defs/platformSafetyDeclaration/properties/validationProfile"
+    },
+    {
+      "class": "authored",
+      "name": "requirements",
+      "owner": "binding-contract",
+      "schema": "binding.schema.json",
+      "schemaPointer": "#/$defs/platformSafetyDeclaration/properties/requirements"
+    },
+    {
+      "class": "authored",
+      "name": "id",
+      "owner": "binding-contract",
+      "schema": "binding.schema.json",
+      "schemaPointer": "#/$defs/platformSafetyDisposition/properties/id"
+    },
+    {
+      "class": "authored",
+      "name": "disposition",
+      "owner": "binding-contract",
+      "schema": "binding.schema.json",
+      "schemaPointer": "#/$defs/platformSafetyDisposition/properties/disposition"
+    },
+    {
+      "class": "authored",
+      "name": "reason",
+      "owner": "binding-contract",
+      "schema": "binding.schema.json",
+      "schemaPointer": "#/$defs/platformSafetyDisposition/properties/reason"
+    },
+    {
+      "class": "authored",
+      "name": "token",
+      "owner": "binding-contract",
+      "schema": "binding.schema.json",
+      "schemaPointer": "#/$defs/tokenRequirement/properties/token"
+    },
+    {
+      "class": "authored",
+      "name": "requirement",
+      "owner": "binding-contract",
+      "schema": "binding.schema.json",
+      "schemaPointer": "#/$defs/tokenRequirement/properties/requirement"
+    },
+    {
+      "class": "authored",
+      "name": "profiles",
+      "owner": "binding-contract",
+      "schema": "binding.schema.json",
+      "schemaPointer": "#/$defs/tokenRequirement/properties/profiles"
+    },
+    {
+      "class": "authored",
+      "name": "fallback",
+      "owner": "binding-contract",
+      "schema": "binding.schema.json",
+      "schemaPointer": "#/$defs/tokenRequirement/properties/fallback"
+    },
+    {
+      "class": "authored",
+      "name": "kind",
+      "owner": "binding-contract",
+      "schema": "binding.schema.json",
+      "schemaPointer": "#/$defs/fallbackToken/properties/kind"
+    },
+    {
+      "class": "authored",
+      "name": "profiles",
+      "owner": "binding-contract",
+      "schema": "binding.schema.json",
+      "schemaPointer": "#/$defs/fallbackToken/properties/profiles"
+    },
+    {
+      "class": "authored",
+      "name": "evidenceIds",
+      "owner": "binding-contract",
+      "schema": "binding.schema.json",
+      "schemaPointer": "#/$defs/fallbackToken/properties/evidenceIds"
+    },
+    {
+      "class": "authored",
+      "name": "token",
+      "owner": "binding-contract",
+      "schema": "binding.schema.json",
+      "schemaPointer": "#/$defs/fallbackToken/properties/token"
+    },
+    {
+      "class": "authored",
+      "name": "kind",
+      "owner": "binding-contract",
+      "schema": "binding.schema.json",
+      "schemaPointer": "#/$defs/fallbackValue/properties/kind"
+    },
+    {
+      "class": "authored",
+      "name": "profiles",
+      "owner": "binding-contract",
+      "schema": "binding.schema.json",
+      "schemaPointer": "#/$defs/fallbackValue/properties/profiles"
+    },
+    {
+      "class": "authored",
+      "name": "evidenceIds",
+      "owner": "binding-contract",
+      "schema": "binding.schema.json",
+      "schemaPointer": "#/$defs/fallbackValue/properties/evidenceIds"
+    },
+    {
+      "class": "authored",
+      "name": "type",
+      "owner": "binding-contract",
+      "schema": "binding.schema.json",
+      "schemaPointer": "#/$defs/fallbackValue/properties/type"
+    },
+    {
+      "class": "authored",
+      "name": "unit",
+      "owner": "binding-contract",
+      "schema": "binding.schema.json",
+      "schemaPointer": "#/$defs/fallbackValue/properties/unit"
+    },
+    {
+      "class": "authored",
+      "name": "value",
+      "owner": "binding-contract",
+      "schema": "binding.schema.json",
+      "schemaPointer": "#/$defs/fallbackValue/properties/value"
     },
     {
       "class": "authored",
       "name": "strategy",
       "owner": "binding-contract",
       "schema": "binding.schema.json",
-      "schemaPointer": "#/properties/strategy"
+      "schemaPointer": "#/$defs/runtimeProfile/allOf/0/oneOf/0/properties/strategy"
     },
     {
       "class": "authored",
-      "name": "availability",
-      "owner": "capability-contract",
-      "schema": "capability.schema.json",
-      "schemaPointer": "#/properties/availability"
+      "name": "strategy",
+      "owner": "binding-contract",
+      "schema": "binding.schema.json",
+      "schemaPointer": "#/$defs/runtimeProfile/allOf/0/oneOf/1/properties/strategy"
     },
     {
       "class": "authored",
-      "name": "availableOn",
-      "owner": "capability-contract",
-      "schema": "capability.schema.json",
-      "schemaPointer": "#/properties/availableOn"
+      "name": "strategy",
+      "owner": "binding-contract",
+      "schema": "binding.schema.json",
+      "schemaPointer": "#/$defs/runtimeProfile/properties/strategy"
     },
     {
       "class": "authored",
-      "name": "extensions",
+      "name": "lifecycle",
+      "owner": "binding-contract",
+      "schema": "binding.schema.json",
+      "schemaPointer": "#/$defs/runtimeProfile/properties/lifecycle"
+    },
+    {
+      "class": "authored",
+      "name": "validationProfile",
+      "owner": "binding-contract",
+      "schema": "binding.schema.json",
+      "schemaPointer": "#/$defs/runtimeProfile/properties/validationProfile"
+    },
+    {
+      "class": "authored",
+      "name": "reason",
+      "owner": "binding-contract",
+      "schema": "binding.schema.json",
+      "schemaPointer": "#/$defs/runtimeProfile/properties/reason"
+    },
+    {
+      "class": "authored",
+      "name": "alternative",
+      "owner": "binding-contract",
+      "schema": "binding.schema.json",
+      "schemaPointer": "#/$defs/runtimeProfile/properties/alternative"
+    },
+    {
+      "class": "authored",
+      "name": "schemaVersion",
       "owner": "capability-contract",
       "schema": "capability.schema.json",
-      "schemaPointer": "#/properties/extensions"
+      "schemaPointer": "#/properties/schemaVersion"
     },
     {
       "class": "authored",
@@ -252,6 +406,20 @@
     },
     {
       "class": "authored",
+      "name": "name",
+      "owner": "capability-contract",
+      "schema": "capability.schema.json",
+      "schemaPointer": "#/properties/name"
+    },
+    {
+      "class": "authored",
+      "name": "summary",
+      "owner": "capability-contract",
+      "schema": "capability.schema.json",
+      "schemaPointer": "#/properties/summary"
+    },
+    {
+      "class": "authored",
       "name": "lifecycle",
       "owner": "capability-contract",
       "schema": "capability.schema.json",
@@ -259,10 +427,10 @@
     },
     {
       "class": "authored",
-      "name": "name",
+      "name": "availability",
       "owner": "capability-contract",
       "schema": "capability.schema.json",
-      "schemaPointer": "#/properties/name"
+      "schemaPointer": "#/properties/availability"
     },
     {
       "class": "authored",
@@ -287,17 +455,94 @@
     },
     {
       "class": "authored",
-      "name": "schemaVersion",
+      "name": "availableOn",
       "owner": "capability-contract",
       "schema": "capability.schema.json",
+      "schemaPointer": "#/properties/availableOn"
+    },
+    {
+      "class": "authored",
+      "name": "extensions",
+      "owner": "capability-contract",
+      "schema": "capability.schema.json",
+      "schemaPointer": "#/properties/extensions"
+    },
+    {
+      "class": "authored",
+      "name": "schemaVersion",
+      "owner": "component-contract",
+      "schema": "component.schema.json",
       "schemaPointer": "#/properties/schemaVersion"
     },
     {
       "class": "authored",
+      "name": "id",
+      "owner": "component-contract",
+      "schema": "component.schema.json",
+      "schemaPointer": "#/properties/id"
+    },
+    {
+      "class": "authored",
+      "name": "kind",
+      "owner": "component-contract",
+      "schema": "component.schema.json",
+      "schemaPointer": "#/properties/kind"
+    },
+    {
+      "class": "authored",
+      "name": "name",
+      "owner": "component-contract",
+      "schema": "component.schema.json",
+      "schemaPointer": "#/properties/name"
+    },
+    {
+      "class": "authored",
       "name": "summary",
-      "owner": "capability-contract",
-      "schema": "capability.schema.json",
+      "owner": "component-contract",
+      "schema": "component.schema.json",
       "schemaPointer": "#/properties/summary"
+    },
+    {
+      "class": "authored",
+      "name": "lifecycle",
+      "owner": "component-contract",
+      "schema": "component.schema.json",
+      "schemaPointer": "#/properties/lifecycle"
+    },
+    {
+      "class": "authored",
+      "name": "intent",
+      "owner": "component-contract",
+      "schema": "component.schema.json",
+      "schemaPointer": "#/properties/intent"
+    },
+    {
+      "class": "authored",
+      "name": "useWhen",
+      "owner": "component-contract",
+      "schema": "component.schema.json",
+      "schemaPointer": "#/properties/intent/properties/useWhen"
+    },
+    {
+      "class": "authored",
+      "name": "avoidWhen",
+      "owner": "component-contract",
+      "schema": "component.schema.json",
+      "schemaPointer": "#/properties/intent/properties/avoidWhen"
+    },
+    {
+      "class": "authored",
+      "name": "anatomy",
+      "owner": "component-contract",
+      "schema": "component.schema.json",
+      "schemaPointer": "#/properties/anatomy"
+    },
+    {
+      "class": "authored",
+      "name": "states",
+      "owner": "component-contract",
+      "schema": "component.schema.json",
+      "schemaPointer": "#/properties/states"
     },
     {
       "class": "authored",
@@ -322,24 +567,10 @@
     },
     {
       "class": "authored",
-      "name": "anatomy",
-      "owner": "component-contract",
-      "schema": "component.schema.json",
-      "schemaPointer": "#/properties/anatomy"
-    },
-    {
-      "class": "authored",
       "name": "bindings",
       "owner": "component-contract",
       "schema": "component.schema.json",
       "schemaPointer": "#/properties/bindings"
-    },
-    {
-      "class": "authored",
-      "name": "native.react-native",
-      "owner": "component-contract",
-      "schema": "component.schema.json",
-      "schemaPointer": "#/properties/bindings/properties/native.react-native"
     },
     {
       "class": "authored",
@@ -357,143 +588,17 @@
     },
     {
       "class": "authored",
+      "name": "native.react-native",
+      "owner": "component-contract",
+      "schema": "component.schema.json",
+      "schemaPointer": "#/properties/bindings/properties/native.react-native"
+    },
+    {
+      "class": "authored",
       "name": "extensions",
       "owner": "component-contract",
       "schema": "component.schema.json",
       "schemaPointer": "#/properties/extensions"
-    },
-    {
-      "class": "authored",
-      "name": "id",
-      "owner": "component-contract",
-      "schema": "component.schema.json",
-      "schemaPointer": "#/properties/id"
-    },
-    {
-      "class": "authored",
-      "name": "intent",
-      "owner": "component-contract",
-      "schema": "component.schema.json",
-      "schemaPointer": "#/properties/intent"
-    },
-    {
-      "class": "authored",
-      "name": "avoidWhen",
-      "owner": "component-contract",
-      "schema": "component.schema.json",
-      "schemaPointer": "#/properties/intent/properties/avoidWhen"
-    },
-    {
-      "class": "authored",
-      "name": "useWhen",
-      "owner": "component-contract",
-      "schema": "component.schema.json",
-      "schemaPointer": "#/properties/intent/properties/useWhen"
-    },
-    {
-      "class": "authored",
-      "name": "kind",
-      "owner": "component-contract",
-      "schema": "component.schema.json",
-      "schemaPointer": "#/properties/kind"
-    },
-    {
-      "class": "authored",
-      "name": "lifecycle",
-      "owner": "component-contract",
-      "schema": "component.schema.json",
-      "schemaPointer": "#/properties/lifecycle"
-    },
-    {
-      "class": "authored",
-      "name": "name",
-      "owner": "component-contract",
-      "schema": "component.schema.json",
-      "schemaPointer": "#/properties/name"
-    },
-    {
-      "class": "authored",
-      "name": "schemaVersion",
-      "owner": "component-contract",
-      "schema": "component.schema.json",
-      "schemaPointer": "#/properties/schemaVersion"
-    },
-    {
-      "class": "authored",
-      "name": "states",
-      "owner": "component-contract",
-      "schema": "component.schema.json",
-      "schemaPointer": "#/properties/states"
-    },
-    {
-      "class": "authored",
-      "name": "summary",
-      "owner": "component-contract",
-      "schema": "component.schema.json",
-      "schemaPointer": "#/properties/summary"
-    },
-    {
-      "class": "derived",
-      "name": "code",
-      "owner": "diagnostic-contract",
-      "schema": "diagnostic.schema.json",
-      "schemaPointer": "#/properties/code"
-    },
-    {
-      "class": "derived",
-      "name": "details",
-      "owner": "diagnostic-contract",
-      "schema": "diagnostic.schema.json",
-      "schemaPointer": "#/properties/details"
-    },
-    {
-      "class": "derived",
-      "name": "message",
-      "owner": "diagnostic-contract",
-      "schema": "diagnostic.schema.json",
-      "schemaPointer": "#/properties/message"
-    },
-    {
-      "class": "derived",
-      "name": "nextCommand",
-      "owner": "diagnostic-contract",
-      "schema": "diagnostic.schema.json",
-      "schemaPointer": "#/properties/nextCommand"
-    },
-    {
-      "class": "derived",
-      "name": "command",
-      "owner": "diagnostic-contract",
-      "schema": "diagnostic.schema.json",
-      "schemaPointer": "#/properties/nextCommand/properties/command"
-    },
-    {
-      "class": "derived",
-      "name": "effect",
-      "owner": "diagnostic-contract",
-      "schema": "diagnostic.schema.json",
-      "schemaPointer": "#/properties/nextCommand/properties/effect"
-    },
-    {
-      "class": "derived",
-      "name": "requiresConfirmation",
-      "owner": "diagnostic-contract",
-      "schema": "diagnostic.schema.json",
-      "schemaPointer": "#/properties/nextCommand/properties/requiresConfirmation"
-    },
-    {
-      "class": "derived",
-      "name": "retryable",
-      "owner": "diagnostic-contract",
-      "schema": "diagnostic.schema.json",
-      "schemaPointer": "#/properties/retryable"
-    },
-    {
-      "class": "derived",
-      "name": "ruleId",
-      "owner": "diagnostic-contract",
-      "schema": "diagnostic.schema.json",
-      "schemaPointer": "#/properties/ruleId"
     },
     {
       "class": "derived",
@@ -661,6 +766,69 @@
       "name": "code",
       "owner": "diagnostic-contract",
       "schema": "diagnostic.schema.json",
+      "schemaPointer": "#/properties/code"
+    },
+    {
+      "class": "derived",
+      "name": "ruleId",
+      "owner": "diagnostic-contract",
+      "schema": "diagnostic.schema.json",
+      "schemaPointer": "#/properties/ruleId"
+    },
+    {
+      "class": "derived",
+      "name": "message",
+      "owner": "diagnostic-contract",
+      "schema": "diagnostic.schema.json",
+      "schemaPointer": "#/properties/message"
+    },
+    {
+      "class": "derived",
+      "name": "retryable",
+      "owner": "diagnostic-contract",
+      "schema": "diagnostic.schema.json",
+      "schemaPointer": "#/properties/retryable"
+    },
+    {
+      "class": "derived",
+      "name": "details",
+      "owner": "diagnostic-contract",
+      "schema": "diagnostic.schema.json",
+      "schemaPointer": "#/properties/details"
+    },
+    {
+      "class": "derived",
+      "name": "nextCommand",
+      "owner": "diagnostic-contract",
+      "schema": "diagnostic.schema.json",
+      "schemaPointer": "#/properties/nextCommand"
+    },
+    {
+      "class": "derived",
+      "name": "command",
+      "owner": "diagnostic-contract",
+      "schema": "diagnostic.schema.json",
+      "schemaPointer": "#/properties/nextCommand/properties/command"
+    },
+    {
+      "class": "derived",
+      "name": "effect",
+      "owner": "diagnostic-contract",
+      "schema": "diagnostic.schema.json",
+      "schemaPointer": "#/properties/nextCommand/properties/effect"
+    },
+    {
+      "class": "derived",
+      "name": "requiresConfirmation",
+      "owner": "diagnostic-contract",
+      "schema": "diagnostic.schema.json",
+      "schemaPointer": "#/properties/nextCommand/properties/requiresConfirmation"
+    },
+    {
+      "class": "derived",
+      "name": "code",
+      "owner": "diagnostic-contract",
+      "schema": "diagnostic.schema.json",
       "schemaPointer": "#/oneOf/0/properties/code"
     },
     {
@@ -763,10 +931,59 @@
     },
     {
       "class": "authored",
+      "name": "schemaVersion",
+      "owner": "example-contract",
+      "schema": "example.schema.json",
+      "schemaPointer": "#/properties/schemaVersion"
+    },
+    {
+      "class": "authored",
+      "name": "id",
+      "owner": "example-contract",
+      "schema": "example.schema.json",
+      "schemaPointer": "#/properties/id"
+    },
+    {
+      "class": "authored",
+      "name": "kind",
+      "owner": "example-contract",
+      "schema": "example.schema.json",
+      "schemaPointer": "#/properties/kind"
+    },
+    {
+      "class": "authored",
+      "name": "name",
+      "owner": "example-contract",
+      "schema": "example.schema.json",
+      "schemaPointer": "#/properties/name"
+    },
+    {
+      "class": "authored",
+      "name": "summary",
+      "owner": "example-contract",
+      "schema": "example.schema.json",
+      "schemaPointer": "#/properties/summary"
+    },
+    {
+      "class": "authored",
+      "name": "lifecycle",
+      "owner": "example-contract",
+      "schema": "example.schema.json",
+      "schemaPointer": "#/properties/lifecycle"
+    },
+    {
+      "class": "authored",
       "name": "binding",
       "owner": "example-contract",
       "schema": "example.schema.json",
       "schemaPointer": "#/properties/binding"
+    },
+    {
+      "class": "authored",
+      "name": "ref",
+      "owner": "example-contract",
+      "schema": "example.schema.json",
+      "schemaPointer": "#/properties/binding/properties/ref"
     },
     {
       "class": "authored",
@@ -777,13 +994,6 @@
     },
     {
       "class": "authored",
-      "name": "preference",
-      "owner": "example-contract",
-      "schema": "example.schema.json",
-      "schemaPointer": "#/properties/binding/properties/preference"
-    },
-    {
-      "class": "authored",
       "name": "purposes",
       "owner": "example-contract",
       "schema": "example.schema.json",
@@ -791,10 +1001,10 @@
     },
     {
       "class": "authored",
-      "name": "ref",
+      "name": "preference",
       "owner": "example-contract",
       "schema": "example.schema.json",
-      "schemaPointer": "#/properties/binding/properties/ref"
+      "schemaPointer": "#/properties/binding/properties/preference"
     },
     {
       "class": "authored",
@@ -812,52 +1022,10 @@
     },
     {
       "class": "authored",
-      "name": "extensions",
-      "owner": "example-contract",
-      "schema": "example.schema.json",
-      "schemaPointer": "#/properties/extensions"
-    },
-    {
-      "class": "authored",
-      "name": "id",
-      "owner": "example-contract",
-      "schema": "example.schema.json",
-      "schemaPointer": "#/properties/id"
-    },
-    {
-      "class": "authored",
-      "name": "kind",
-      "owner": "example-contract",
-      "schema": "example.schema.json",
-      "schemaPointer": "#/properties/kind"
-    },
-    {
-      "class": "authored",
-      "name": "lifecycle",
-      "owner": "example-contract",
-      "schema": "example.schema.json",
-      "schemaPointer": "#/properties/lifecycle"
-    },
-    {
-      "class": "authored",
-      "name": "name",
-      "owner": "example-contract",
-      "schema": "example.schema.json",
-      "schemaPointer": "#/properties/name"
-    },
-    {
-      "class": "authored",
       "name": "prerequisites",
       "owner": "example-contract",
       "schema": "example.schema.json",
       "schemaPointer": "#/properties/prerequisites"
-    },
-    {
-      "class": "authored",
-      "name": "schemaVersion",
-      "owner": "example-contract",
-      "schema": "example.schema.json",
-      "schemaPointer": "#/properties/schemaVersion"
     },
     {
       "class": "authored",
@@ -868,17 +1036,17 @@
     },
     {
       "class": "authored",
-      "name": "summary",
+      "name": "extensions",
       "owner": "example-contract",
       "schema": "example.schema.json",
-      "schemaPointer": "#/properties/summary"
+      "schemaPointer": "#/properties/extensions"
     },
     {
       "class": "authored",
-      "name": "extensions",
+      "name": "schemaVersion",
       "owner": "guide-contract",
       "schema": "guide.schema.json",
-      "schemaPointer": "#/properties/extensions"
+      "schemaPointer": "#/properties/schemaVersion"
     },
     {
       "class": "authored",
@@ -886,6 +1054,34 @@
       "owner": "guide-contract",
       "schema": "guide.schema.json",
       "schemaPointer": "#/properties/id"
+    },
+    {
+      "class": "authored",
+      "name": "kind",
+      "owner": "guide-contract",
+      "schema": "guide.schema.json",
+      "schemaPointer": "#/properties/kind"
+    },
+    {
+      "class": "authored",
+      "name": "name",
+      "owner": "guide-contract",
+      "schema": "guide.schema.json",
+      "schemaPointer": "#/properties/name"
+    },
+    {
+      "class": "authored",
+      "name": "summary",
+      "owner": "guide-contract",
+      "schema": "guide.schema.json",
+      "schemaPointer": "#/properties/summary"
+    },
+    {
+      "class": "authored",
+      "name": "lifecycle",
+      "owner": "guide-contract",
+      "schema": "guide.schema.json",
+      "schemaPointer": "#/properties/lifecycle"
     },
     {
       "class": "authored",
@@ -896,38 +1092,10 @@
     },
     {
       "class": "authored",
-      "name": "kind",
-      "owner": "guide-contract",
-      "schema": "guide.schema.json",
-      "schemaPointer": "#/properties/kind"
-    },
-    {
-      "class": "authored",
-      "name": "lifecycle",
-      "owner": "guide-contract",
-      "schema": "guide.schema.json",
-      "schemaPointer": "#/properties/lifecycle"
-    },
-    {
-      "class": "authored",
-      "name": "name",
-      "owner": "guide-contract",
-      "schema": "guide.schema.json",
-      "schemaPointer": "#/properties/name"
-    },
-    {
-      "class": "authored",
       "name": "platforms",
       "owner": "guide-contract",
       "schema": "guide.schema.json",
       "schemaPointer": "#/properties/platforms"
-    },
-    {
-      "class": "authored",
-      "name": "schemaVersion",
-      "owner": "guide-contract",
-      "schema": "guide.schema.json",
-      "schemaPointer": "#/properties/schemaVersion"
     },
     {
       "class": "authored",
@@ -938,10 +1106,10 @@
     },
     {
       "class": "authored",
-      "name": "summary",
+      "name": "extensions",
       "owner": "guide-contract",
       "schema": "guide.schema.json",
-      "schemaPointer": "#/properties/summary"
+      "schemaPointer": "#/properties/extensions"
     },
     {
       "class": "derived",
@@ -1239,419 +1407,6 @@
     },
     {
       "class": "derived",
-      "name": "formatVersion",
-      "owner": "query-envelope-contract",
-      "schema": "query-envelope.schema.json",
-      "schemaPointer": "#/$defs/manifestData/properties/formatVersion"
-    },
-    {
-      "class": "derived",
-      "name": "catalogVersion",
-      "owner": "query-envelope-contract",
-      "schema": "query-envelope.schema.json",
-      "schemaPointer": "#/$defs/manifestData/properties/catalogVersion"
-    },
-    {
-      "class": "derived",
-      "name": "catalogDigest",
-      "owner": "query-envelope-contract",
-      "schema": "query-envelope.schema.json",
-      "schemaPointer": "#/$defs/manifestData/properties/catalogDigest"
-    },
-    {
-      "class": "derived",
-      "name": "sourceRevision",
-      "owner": "query-envelope-contract",
-      "schema": "query-envelope.schema.json",
-      "schemaPointer": "#/$defs/manifestData/properties/sourceRevision"
-    },
-    {
-      "class": "derived",
-      "name": "operations",
-      "owner": "query-envelope-contract",
-      "schema": "query-envelope.schema.json",
-      "schemaPointer": "#/$defs/manifestData/properties/operations"
-    },
-    {
-      "class": "derived",
-      "name": "responseTypes",
-      "owner": "query-envelope-contract",
-      "schema": "query-envelope.schema.json",
-      "schemaPointer": "#/$defs/manifestData/properties/responseTypes"
-    },
-    {
-      "class": "derived",
-      "name": "selectors",
-      "owner": "query-envelope-contract",
-      "schema": "query-envelope.schema.json",
-      "schemaPointer": "#/$defs/manifestData/properties/selectors"
-    },
-    {
-      "class": "derived",
-      "name": "artifactKinds",
-      "owner": "query-envelope-contract",
-      "schema": "query-envelope.schema.json",
-      "schemaPointer": "#/$defs/manifestData/properties/artifactKinds"
-    },
-    {
-      "class": "derived",
-      "name": "platforms",
-      "owner": "query-envelope-contract",
-      "schema": "query-envelope.schema.json",
-      "schemaPointer": "#/$defs/manifestData/properties/platforms"
-    },
-    {
-      "class": "derived",
-      "name": "capabilities",
-      "owner": "query-envelope-contract",
-      "schema": "query-envelope.schema.json",
-      "schemaPointer": "#/$defs/manifestData/properties/capabilities"
-    },
-    {
-      "class": "derived",
-      "name": "items",
-      "owner": "query-envelope-contract",
-      "schema": "query-envelope.schema.json",
-      "schemaPointer": "#/$defs/listData/properties/items"
-    },
-    {
-      "class": "derived",
-      "name": "query",
-      "owner": "query-envelope-contract",
-      "schema": "query-envelope.schema.json",
-      "schemaPointer": "#/$defs/searchData/properties/query"
-    },
-    {
-      "class": "derived",
-      "name": "items",
-      "owner": "query-envelope-contract",
-      "schema": "query-envelope.schema.json",
-      "schemaPointer": "#/$defs/searchData/properties/items"
-    },
-    {
-      "class": "derived",
-      "name": "type",
-      "owner": "query-envelope-contract",
-      "schema": "query-envelope.schema.json",
-      "schemaPointer": "#/$defs/relation/properties/type"
-    },
-    {
-      "class": "derived",
-      "name": "source",
-      "owner": "query-envelope-contract",
-      "schema": "query-envelope.schema.json",
-      "schemaPointer": "#/$defs/relation/properties/source"
-    },
-    {
-      "class": "derived",
-      "name": "target",
-      "owner": "query-envelope-contract",
-      "schema": "query-envelope.schema.json",
-      "schemaPointer": "#/$defs/relation/properties/target"
-    },
-    {
-      "class": "derived",
-      "name": "artifact",
-      "owner": "query-envelope-contract",
-      "schema": "query-envelope.schema.json",
-      "schemaPointer": "#/$defs/detailData/properties/artifact"
-    },
-    {
-      "class": "derived",
-      "name": "id",
-      "owner": "query-envelope-contract",
-      "schema": "query-envelope.schema.json",
-      "schemaPointer": "#/$defs/detailData/properties/artifact/properties/id"
-    },
-    {
-      "class": "derived",
-      "name": "kind",
-      "owner": "query-envelope-contract",
-      "schema": "query-envelope.schema.json",
-      "schemaPointer": "#/$defs/detailData/properties/artifact/properties/kind"
-    },
-    {
-      "class": "derived",
-      "name": "source",
-      "owner": "query-envelope-contract",
-      "schema": "query-envelope.schema.json",
-      "schemaPointer": "#/$defs/detailData/properties/artifact/properties/source"
-    },
-    {
-      "class": "derived",
-      "name": "relations",
-      "owner": "query-envelope-contract",
-      "schema": "query-envelope.schema.json",
-      "schemaPointer": "#/$defs/detailData/properties/relations"
-    },
-    {
-      "class": "derived",
-      "name": "section",
-      "owner": "query-envelope-contract",
-      "schema": "query-envelope.schema.json",
-      "schemaPointer": "#/$defs/detailData/properties/section"
-    },
-    {
-      "class": "derived",
-      "name": "value",
-      "owner": "query-envelope-contract",
-      "schema": "query-envelope.schema.json",
-      "schemaPointer": "#/$defs/detailData/properties/value"
-    },
-    {
-      "class": "derived",
-      "name": "apiVersion",
-      "owner": "query-envelope-contract",
-      "schema": "query-envelope.schema.json",
-      "schemaPointer": "#/$defs/successBase/properties/apiVersion"
-    },
-    {
-      "class": "derived",
-      "name": "type",
-      "owner": "query-envelope-contract",
-      "schema": "query-envelope.schema.json",
-      "schemaPointer": "#/$defs/successBase/properties/type"
-    },
-    {
-      "class": "derived",
-      "name": "data",
-      "owner": "query-envelope-contract",
-      "schema": "query-envelope.schema.json",
-      "schemaPointer": "#/$defs/successBase/properties/data"
-    },
-    {
-      "class": "derived",
-      "name": "meta",
-      "owner": "query-envelope-contract",
-      "schema": "query-envelope.schema.json",
-      "schemaPointer": "#/$defs/successBase/properties/meta"
-    },
-    {
-      "class": "derived",
-      "name": "warnings",
-      "owner": "query-envelope-contract",
-      "schema": "query-envelope.schema.json",
-      "schemaPointer": "#/$defs/successBase/properties/warnings"
-    },
-    {
-      "class": "derived",
-      "name": "type",
-      "owner": "query-envelope-contract",
-      "schema": "query-envelope.schema.json",
-      "schemaPointer": "#/$defs/manifestResponse/allOf/1/properties/type"
-    },
-    {
-      "class": "derived",
-      "name": "data",
-      "owner": "query-envelope-contract",
-      "schema": "query-envelope.schema.json",
-      "schemaPointer": "#/$defs/manifestResponse/allOf/1/properties/data"
-    },
-    {
-      "class": "derived",
-      "name": "type",
-      "owner": "query-envelope-contract",
-      "schema": "query-envelope.schema.json",
-      "schemaPointer": "#/$defs/listResponse/allOf/1/properties/type"
-    },
-    {
-      "class": "derived",
-      "name": "data",
-      "owner": "query-envelope-contract",
-      "schema": "query-envelope.schema.json",
-      "schemaPointer": "#/$defs/listResponse/allOf/1/properties/data"
-    },
-    {
-      "class": "derived",
-      "name": "type",
-      "owner": "query-envelope-contract",
-      "schema": "query-envelope.schema.json",
-      "schemaPointer": "#/$defs/searchResponse/allOf/1/properties/type"
-    },
-    {
-      "class": "derived",
-      "name": "data",
-      "owner": "query-envelope-contract",
-      "schema": "query-envelope.schema.json",
-      "schemaPointer": "#/$defs/searchResponse/allOf/1/properties/data"
-    },
-    {
-      "class": "derived",
-      "name": "type",
-      "owner": "query-envelope-contract",
-      "schema": "query-envelope.schema.json",
-      "schemaPointer": "#/$defs/detailResponse/allOf/1/properties/type"
-    },
-    {
-      "class": "derived",
-      "name": "data",
-      "owner": "query-envelope-contract",
-      "schema": "query-envelope.schema.json",
-      "schemaPointer": "#/$defs/detailResponse/allOf/1/properties/data"
-    },
-    {
-      "class": "derived",
-      "name": "meta",
-      "owner": "query-envelope-contract",
-      "schema": "query-envelope.schema.json",
-      "schemaPointer": "#/$defs/detailResponse/allOf/1/properties/meta"
-    },
-    {
-      "class": "derived",
-      "name": "apiVersion",
-      "owner": "query-envelope-contract",
-      "schema": "query-envelope.schema.json",
-      "schemaPointer": "#/$defs/errorResponse/properties/apiVersion"
-    },
-    {
-      "class": "derived",
-      "name": "type",
-      "owner": "query-envelope-contract",
-      "schema": "query-envelope.schema.json",
-      "schemaPointer": "#/$defs/errorResponse/properties/type"
-    },
-    {
-      "class": "derived",
-      "name": "error",
-      "owner": "query-envelope-contract",
-      "schema": "query-envelope.schema.json",
-      "schemaPointer": "#/$defs/errorResponse/properties/error"
-    },
-    {
-      "class": "authored",
-      "name": "relations",
-      "owner": "relation-registry",
-      "schema": "relation.schema.json",
-      "schemaPointer": "#/properties/relations"
-    },
-    {
-      "class": "authored",
-      "name": "consumer",
-      "owner": "relation-registry",
-      "schema": "relation.schema.json",
-      "schemaPointer": "#/properties/relations/items/properties/consumer"
-    },
-    {
-      "class": "authored",
-      "name": "guidanceImpact",
-      "owner": "relation-registry",
-      "schema": "relation.schema.json",
-      "schemaPointer": "#/properties/relations/items/properties/guidanceImpact"
-    },
-    {
-      "class": "authored",
-      "name": "maximum",
-      "owner": "relation-registry",
-      "schema": "relation.schema.json",
-      "schemaPointer": "#/properties/relations/items/properties/maximum"
-    },
-    {
-      "class": "authored",
-      "name": "minimum",
-      "owner": "relation-registry",
-      "schema": "relation.schema.json",
-      "schemaPointer": "#/properties/relations/items/properties/minimum"
-    },
-    {
-      "class": "authored",
-      "name": "owner",
-      "owner": "relation-registry",
-      "schema": "relation.schema.json",
-      "schemaPointer": "#/properties/relations/items/properties/owner"
-    },
-    {
-      "class": "authored",
-      "name": "source",
-      "owner": "relation-registry",
-      "schema": "relation.schema.json",
-      "schemaPointer": "#/properties/relations/items/properties/source"
-    },
-    {
-      "class": "authored",
-      "name": "target",
-      "owner": "relation-registry",
-      "schema": "relation.schema.json",
-      "schemaPointer": "#/properties/relations/items/properties/target"
-    },
-    {
-      "class": "authored",
-      "name": "type",
-      "owner": "relation-registry",
-      "schema": "relation.schema.json",
-      "schemaPointer": "#/properties/relations/items/properties/type"
-    },
-    {
-      "class": "authored",
-      "name": "schemaVersion",
-      "owner": "relation-registry",
-      "schema": "relation.schema.json",
-      "schemaPointer": "#/properties/schemaVersion"
-    },
-    {
-      "class": "authored",
-      "name": "extensions",
-      "owner": "token-source-contract",
-      "schema": "token-source.schema.json",
-      "schemaPointer": "#/properties/extensions"
-    },
-    {
-      "class": "authored",
-      "name": "id",
-      "owner": "token-source-contract",
-      "schema": "token-source.schema.json",
-      "schemaPointer": "#/properties/id"
-    },
-    {
-      "class": "authored",
-      "name": "kind",
-      "owner": "token-source-contract",
-      "schema": "token-source.schema.json",
-      "schemaPointer": "#/properties/kind"
-    },
-    {
-      "class": "authored",
-      "name": "lifecycle",
-      "owner": "token-source-contract",
-      "schema": "token-source.schema.json",
-      "schemaPointer": "#/properties/lifecycle"
-    },
-    {
-      "class": "authored",
-      "name": "name",
-      "owner": "token-source-contract",
-      "schema": "token-source.schema.json",
-      "schemaPointer": "#/properties/name"
-    },
-    {
-      "class": "authored",
-      "name": "schemaVersion",
-      "owner": "token-source-contract",
-      "schema": "token-source.schema.json",
-      "schemaPointer": "#/properties/schemaVersion"
-    },
-    {
-      "class": "authored",
-      "name": "summary",
-      "owner": "token-source-contract",
-      "schema": "token-source.schema.json",
-      "schemaPointer": "#/properties/summary"
-    },
-    {
-      "class": "authored",
-      "name": "tokenContractVersion",
-      "owner": "token-source-contract",
-      "schema": "token-source.schema.json",
-      "schemaPointer": "#/properties/tokenContractVersion"
-    },
-    {
-      "class": "authored",
-      "name": "tokens",
-      "owner": "token-source-contract",
-      "schema": "token-source.schema.json",
-      "schemaPointer": "#/properties/tokens"
-    },
-    {
-      "class": "derived",
       "name": "available",
       "owner": "query-envelope-contract",
       "schema": "query-envelope.schema.json",
@@ -1750,6 +1505,13 @@
     },
     {
       "class": "derived",
+      "name": "available",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/cliUnavailableCapability/properties/available"
+    },
+    {
+      "class": "derived",
       "name": "name",
       "owner": "query-envelope-contract",
       "schema": "query-envelope.schema.json",
@@ -1789,6 +1551,13 @@
       "owner": "query-envelope-contract",
       "schema": "query-envelope.schema.json",
       "schemaPointer": "#/$defs/cliOption/properties/flag"
+    },
+    {
+      "class": "derived",
+      "name": "requestKey",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/cliOption/properties/requestKey"
     },
     {
       "class": "derived",
@@ -2142,6 +1911,76 @@
     },
     {
       "class": "derived",
+      "name": "formatVersion",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/manifestData/properties/formatVersion"
+    },
+    {
+      "class": "derived",
+      "name": "catalogVersion",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/manifestData/properties/catalogVersion"
+    },
+    {
+      "class": "derived",
+      "name": "catalogDigest",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/manifestData/properties/catalogDigest"
+    },
+    {
+      "class": "derived",
+      "name": "sourceRevision",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/manifestData/properties/sourceRevision"
+    },
+    {
+      "class": "derived",
+      "name": "operations",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/manifestData/properties/operations"
+    },
+    {
+      "class": "derived",
+      "name": "responseTypes",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/manifestData/properties/responseTypes"
+    },
+    {
+      "class": "derived",
+      "name": "selectors",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/manifestData/properties/selectors"
+    },
+    {
+      "class": "derived",
+      "name": "artifactKinds",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/manifestData/properties/artifactKinds"
+    },
+    {
+      "class": "derived",
+      "name": "platforms",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/manifestData/properties/platforms"
+    },
+    {
+      "class": "derived",
+      "name": "capabilities",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/manifestData/properties/capabilities"
+    },
+    {
+      "class": "derived",
       "name": "cli",
       "owner": "query-envelope-contract",
       "schema": "query-envelope.schema.json",
@@ -2149,164 +1988,45 @@
     },
     {
       "class": "derived",
-      "name": "available",
+      "name": "items",
       "owner": "query-envelope-contract",
       "schema": "query-envelope.schema.json",
-      "schemaPointer": "#/$defs/cliUnavailableCapability/properties/available"
+      "schemaPointer": "#/$defs/listData/properties/items"
     },
     {
-      "class": "authored",
-      "name": "evidenceIds",
-      "owner": "binding-contract",
-      "schema": "binding.schema.json",
-      "schemaPointer": "#/$defs/fallbackToken/properties/evidenceIds"
+      "class": "derived",
+      "name": "query",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/searchData/properties/query"
     },
     {
-      "class": "authored",
-      "name": "kind",
-      "owner": "binding-contract",
-      "schema": "binding.schema.json",
-      "schemaPointer": "#/$defs/fallbackToken/properties/kind"
+      "class": "derived",
+      "name": "items",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/searchData/properties/items"
     },
     {
-      "class": "authored",
-      "name": "profiles",
-      "owner": "binding-contract",
-      "schema": "binding.schema.json",
-      "schemaPointer": "#/$defs/fallbackToken/properties/profiles"
-    },
-    {
-      "class": "authored",
-      "name": "token",
-      "owner": "binding-contract",
-      "schema": "binding.schema.json",
-      "schemaPointer": "#/$defs/fallbackToken/properties/token"
-    },
-    {
-      "class": "authored",
-      "name": "evidenceIds",
-      "owner": "binding-contract",
-      "schema": "binding.schema.json",
-      "schemaPointer": "#/$defs/fallbackValue/properties/evidenceIds"
-    },
-    {
-      "class": "authored",
-      "name": "kind",
-      "owner": "binding-contract",
-      "schema": "binding.schema.json",
-      "schemaPointer": "#/$defs/fallbackValue/properties/kind"
-    },
-    {
-      "class": "authored",
-      "name": "profiles",
-      "owner": "binding-contract",
-      "schema": "binding.schema.json",
-      "schemaPointer": "#/$defs/fallbackValue/properties/profiles"
-    },
-    {
-      "class": "authored",
+      "class": "derived",
       "name": "type",
-      "owner": "binding-contract",
-      "schema": "binding.schema.json",
-      "schemaPointer": "#/$defs/fallbackValue/properties/type"
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/relation/properties/type"
     },
     {
-      "class": "authored",
-      "name": "unit",
-      "owner": "binding-contract",
-      "schema": "binding.schema.json",
-      "schemaPointer": "#/$defs/fallbackValue/properties/unit"
-    },
-    {
-      "class": "authored",
-      "name": "value",
-      "owner": "binding-contract",
-      "schema": "binding.schema.json",
-      "schemaPointer": "#/$defs/fallbackValue/properties/value"
-    },
-    {
-      "class": "authored",
-      "name": "fallback",
-      "owner": "binding-contract",
-      "schema": "binding.schema.json",
-      "schemaPointer": "#/$defs/tokenRequirement/properties/fallback"
-    },
-    {
-      "class": "authored",
-      "name": "profiles",
-      "owner": "binding-contract",
-      "schema": "binding.schema.json",
-      "schemaPointer": "#/$defs/tokenRequirement/properties/profiles"
-    },
-    {
-      "class": "authored",
-      "name": "requirement",
-      "owner": "binding-contract",
-      "schema": "binding.schema.json",
-      "schemaPointer": "#/$defs/tokenRequirement/properties/requirement"
-    },
-    {
-      "class": "authored",
-      "name": "token",
-      "owner": "binding-contract",
-      "schema": "binding.schema.json",
-      "schemaPointer": "#/$defs/tokenRequirement/properties/token"
-    },
-    {
-      "class": "authored",
-      "name": "tokenRecipe",
-      "owner": "binding-contract",
-      "schema": "binding.schema.json",
-      "schemaPointer": "#/properties/tokenRecipe"
-    },
-    {
-      "class": "authored",
-      "name": "requirements",
-      "owner": "binding-contract",
-      "schema": "binding.schema.json",
-      "schemaPointer": "#/properties/tokenRecipe/properties/requirements"
-    },
-    {
-      "class": "authored",
+      "class": "derived",
       "name": "source",
-      "owner": "binding-contract",
-      "schema": "binding.schema.json",
-      "schemaPointer": "#/properties/tokenRecipe/properties/source"
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/relation/properties/source"
     },
     {
       "class": "derived",
-      "name": "tokenRequirementSets",
+      "name": "target",
       "owner": "query-envelope-contract",
       "schema": "query-envelope.schema.json",
-      "schemaPointer": "#/$defs/detailData/properties/artifact/properties/tokenRequirementSets"
-    },
-    {
-      "class": "derived",
-      "name": "fallback",
-      "owner": "query-envelope-contract",
-      "schema": "query-envelope.schema.json",
-      "schemaPointer": "#/$defs/tokenRequirement/properties/fallback"
-    },
-    {
-      "class": "derived",
-      "name": "modes",
-      "owner": "query-envelope-contract",
-      "schema": "query-envelope.schema.json",
-      "schemaPointer": "#/$defs/tokenRequirement/properties/modes"
-    },
-    {
-      "class": "derived",
-      "name": "overridePolicy",
-      "owner": "query-envelope-contract",
-      "schema": "query-envelope.schema.json",
-      "schemaPointer": "#/$defs/tokenRequirement/properties/overridePolicy"
-    },
-    {
-      "class": "derived",
-      "name": "requirement",
-      "owner": "query-envelope-contract",
-      "schema": "query-envelope.schema.json",
-      "schemaPointer": "#/$defs/tokenRequirement/properties/requirement"
+      "schemaPointer": "#/$defs/relation/properties/target"
     },
     {
       "class": "derived",
@@ -2314,6 +2034,13 @@
       "owner": "query-envelope-contract",
       "schema": "query-envelope.schema.json",
       "schemaPointer": "#/$defs/tokenRequirement/properties/token"
+    },
+    {
+      "class": "derived",
+      "name": "requirement",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/tokenRequirement/properties/requirement"
     },
     {
       "class": "derived",
@@ -2331,38 +2058,80 @@
     },
     {
       "class": "derived",
-      "name": "bindingId",
+      "name": "modes",
       "owner": "query-envelope-contract",
       "schema": "query-envelope.schema.json",
-      "schemaPointer": "#/$defs/tokenRequirementSet/properties/bindingId"
+      "schemaPointer": "#/$defs/tokenRequirement/properties/modes"
     },
     {
       "class": "derived",
-      "name": "closure",
+      "name": "overridePolicy",
       "owner": "query-envelope-contract",
       "schema": "query-envelope.schema.json",
-      "schemaPointer": "#/$defs/tokenRequirementSet/properties/closure"
+      "schemaPointer": "#/$defs/tokenRequirement/properties/overridePolicy"
     },
     {
       "class": "derived",
-      "name": "digest",
+      "name": "fallback",
       "owner": "query-envelope-contract",
       "schema": "query-envelope.schema.json",
-      "schemaPointer": "#/$defs/tokenRequirementSet/properties/digest"
+      "schemaPointer": "#/$defs/tokenRequirement/properties/fallback"
     },
     {
       "class": "derived",
-      "name": "profile",
+      "name": "token",
       "owner": "query-envelope-contract",
       "schema": "query-envelope.schema.json",
-      "schemaPointer": "#/$defs/tokenRequirementSet/properties/profile"
+      "schemaPointer": "#/$defs/tokenClosureEntry/properties/token"
     },
     {
       "class": "derived",
-      "name": "requirements",
+      "name": "layer",
       "owner": "query-envelope-contract",
       "schema": "query-envelope.schema.json",
-      "schemaPointer": "#/$defs/tokenRequirementSet/properties/requirements"
+      "schemaPointer": "#/$defs/tokenClosureEntry/properties/layer"
+    },
+    {
+      "class": "derived",
+      "name": "type",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/tokenClosureEntry/properties/type"
+    },
+    {
+      "class": "derived",
+      "name": "unit",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/tokenClosureEntry/properties/unit"
+    },
+    {
+      "class": "derived",
+      "name": "meaning",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/tokenClosureEntry/properties/meaning"
+    },
+    {
+      "class": "derived",
+      "name": "overridePolicy",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/tokenClosureEntry/properties/overridePolicy"
+    },
+    {
+      "class": "derived",
+      "name": "resolved",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/tokenClosureEntry/properties/resolved"
+    },
+    {
+      "class": "derived",
+      "name": "dependencies",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/tokenClosureEntry/properties/dependencies"
     },
     {
       "class": "derived",
@@ -2370,6 +2139,20 @@
       "owner": "query-envelope-contract",
       "schema": "query-envelope.schema.json",
       "schemaPointer": "#/$defs/tokenRequirementSet/properties/schemaVersion"
+    },
+    {
+      "class": "derived",
+      "name": "bindingId",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/tokenRequirementSet/properties/bindingId"
+    },
+    {
+      "class": "derived",
+      "name": "profile",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/tokenRequirementSet/properties/profile"
     },
     {
       "class": "derived",
@@ -2393,242 +2176,25 @@
       "schemaPointer": "#/$defs/tokenRequirementSet/properties/tokenContractVersion"
     },
     {
-      "class": "authored",
-      "name": "alias",
-      "owner": "token-source-contract",
-      "schema": "token-source.schema.json",
-      "schemaPointer": "#/$defs/token/properties/alias"
-    },
-    {
-      "class": "authored",
-      "name": "equivalence",
-      "owner": "token-source-contract",
-      "schema": "token-source.schema.json",
-      "schemaPointer": "#/$defs/token/properties/equivalence"
-    },
-    {
-      "class": "authored",
-      "name": "layer",
-      "owner": "token-source-contract",
-      "schema": "token-source.schema.json",
-      "schemaPointer": "#/$defs/token/properties/layer"
-    },
-    {
-      "class": "authored",
-      "name": "meaning",
-      "owner": "token-source-contract",
-      "schema": "token-source.schema.json",
-      "schemaPointer": "#/$defs/token/properties/meaning"
-    },
-    {
-      "class": "authored",
-      "name": "modes",
-      "owner": "token-source-contract",
-      "schema": "token-source.schema.json",
-      "schemaPointer": "#/$defs/token/properties/modes"
-    },
-    {
-      "class": "authored",
-      "name": "overridePolicy",
-      "owner": "token-source-contract",
-      "schema": "token-source.schema.json",
-      "schemaPointer": "#/$defs/token/properties/overridePolicy"
-    },
-    {
-      "class": "authored",
-      "name": "platformRestrictions",
-      "owner": "token-source-contract",
-      "schema": "token-source.schema.json",
-      "schemaPointer": "#/$defs/token/properties/platformRestrictions"
-    },
-    {
-      "class": "authored",
-      "name": "type",
-      "owner": "token-source-contract",
-      "schema": "token-source.schema.json",
-      "schemaPointer": "#/$defs/token/properties/type"
-    },
-    {
-      "class": "authored",
-      "name": "unit",
-      "owner": "token-source-contract",
-      "schema": "token-source.schema.json",
-      "schemaPointer": "#/$defs/token/properties/unit"
-    },
-    {
-      "class": "authored",
-      "name": "value",
-      "owner": "token-source-contract",
-      "schema": "token-source.schema.json",
-      "schemaPointer": "#/$defs/token/properties/value"
-    },
-    {
-      "class": "authored",
-      "name": "value",
-      "owner": "token-source-contract",
-      "schema": "token-source.schema.json",
-      "schemaPointer": "#/$defs/valueOrAlias/oneOf/0/properties/value"
-    },
-    {
-      "class": "authored",
-      "name": "alias",
-      "owner": "token-source-contract",
-      "schema": "token-source.schema.json",
-      "schemaPointer": "#/$defs/valueOrAlias/oneOf/1/properties/alias"
-    },
-    {
-      "class": "authored",
-      "name": "theme",
-      "owner": "token-source-contract",
-      "schema": "token-source.schema.json",
-      "schemaPointer": "#/properties/theme"
-    },
-    {
-      "class": "authored",
-      "name": "defaultModes",
-      "owner": "token-source-contract",
-      "schema": "token-source.schema.json",
-      "schemaPointer": "#/properties/theme/properties/defaultModes"
-    },
-    {
-      "class": "authored",
-      "name": "colorScheme",
-      "owner": "token-source-contract",
-      "schema": "token-source.schema.json",
-      "schemaPointer": "#/properties/theme/properties/defaultModes/properties/colorScheme"
-    },
-    {
-      "class": "authored",
-      "name": "contrast",
-      "owner": "token-source-contract",
-      "schema": "token-source.schema.json",
-      "schemaPointer": "#/properties/theme/properties/defaultModes/properties/contrast"
-    },
-    {
-      "class": "authored",
-      "name": "density",
-      "owner": "token-source-contract",
-      "schema": "token-source.schema.json",
-      "schemaPointer": "#/properties/theme/properties/defaultModes/properties/density"
-    },
-    {
-      "class": "authored",
-      "name": "direction",
-      "owner": "token-source-contract",
-      "schema": "token-source.schema.json",
-      "schemaPointer": "#/properties/theme/properties/defaultModes/properties/direction"
-    },
-    {
-      "class": "authored",
-      "name": "motion",
-      "owner": "token-source-contract",
-      "schema": "token-source.schema.json",
-      "schemaPointer": "#/properties/theme/properties/defaultModes/properties/motion"
-    },
-    {
-      "class": "authored",
-      "name": "modeAxes",
-      "owner": "token-source-contract",
-      "schema": "token-source.schema.json",
-      "schemaPointer": "#/properties/theme/properties/modeAxes"
-    },
-    {
-      "class": "authored",
-      "name": "colorScheme",
-      "owner": "token-source-contract",
-      "schema": "token-source.schema.json",
-      "schemaPointer": "#/properties/theme/properties/modeAxes/properties/colorScheme"
-    },
-    {
-      "class": "authored",
-      "name": "contrast",
-      "owner": "token-source-contract",
-      "schema": "token-source.schema.json",
-      "schemaPointer": "#/properties/theme/properties/modeAxes/properties/contrast"
-    },
-    {
-      "class": "authored",
-      "name": "density",
-      "owner": "token-source-contract",
-      "schema": "token-source.schema.json",
-      "schemaPointer": "#/properties/theme/properties/modeAxes/properties/density"
-    },
-    {
-      "class": "authored",
-      "name": "direction",
-      "owner": "token-source-contract",
-      "schema": "token-source.schema.json",
-      "schemaPointer": "#/properties/theme/properties/modeAxes/properties/direction"
-    },
-    {
-      "class": "authored",
-      "name": "motion",
-      "owner": "token-source-contract",
-      "schema": "token-source.schema.json",
-      "schemaPointer": "#/properties/theme/properties/modeAxes/properties/motion"
-    },
-    {
-      "class": "authored",
-      "name": "name",
-      "owner": "token-source-contract",
-      "schema": "token-source.schema.json",
-      "schemaPointer": "#/properties/theme/properties/name"
-    },
-    {
-      "class": "authored",
-      "name": "runtimeSwitching",
-      "owner": "token-source-contract",
-      "schema": "token-source.schema.json",
-      "schemaPointer": "#/properties/theme/properties/runtimeSwitching"
-    },
-    {
-      "class": "authored",
-      "name": "platformSafety",
-      "owner": "binding-contract",
-      "schema": "binding.schema.json",
-      "schemaPointer": "#/properties/platformSafety"
-    },
-    {
-      "class": "authored",
-      "name": "profile",
-      "owner": "binding-contract",
-      "schema": "binding.schema.json",
-      "schemaPointer": "#/$defs/platformSafetyDeclaration/properties/profile"
-    },
-    {
-      "class": "authored",
-      "name": "validationProfile",
-      "owner": "binding-contract",
-      "schema": "binding.schema.json",
-      "schemaPointer": "#/$defs/platformSafetyDeclaration/properties/validationProfile"
-    },
-    {
-      "class": "authored",
+      "class": "derived",
       "name": "requirements",
-      "owner": "binding-contract",
-      "schema": "binding.schema.json",
-      "schemaPointer": "#/$defs/platformSafetyDeclaration/properties/requirements"
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/tokenRequirementSet/properties/requirements"
     },
     {
-      "class": "authored",
-      "name": "id",
-      "owner": "binding-contract",
-      "schema": "binding.schema.json",
-      "schemaPointer": "#/$defs/platformSafetyDisposition/properties/id"
+      "class": "derived",
+      "name": "closure",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/tokenRequirementSet/properties/closure"
     },
     {
-      "class": "authored",
-      "name": "disposition",
-      "owner": "binding-contract",
-      "schema": "binding.schema.json",
-      "schemaPointer": "#/$defs/platformSafetyDisposition/properties/disposition"
-    },
-    {
-      "class": "authored",
-      "name": "reason",
-      "owner": "binding-contract",
-      "schema": "binding.schema.json",
-      "schemaPointer": "#/$defs/platformSafetyDisposition/properties/reason"
+      "class": "derived",
+      "name": "digest",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/tokenRequirementSet/properties/digest"
     },
     {
       "class": "derived",
@@ -2716,69 +2282,6 @@
     },
     {
       "class": "derived",
-      "name": "platformSafetyRequirementSets",
-      "owner": "query-envelope-contract",
-      "schema": "query-envelope.schema.json",
-      "schemaPointer": "#/$defs/detailData/properties/artifact/properties/platformSafetyRequirementSets"
-    },
-    {
-      "class": "derived",
-      "name": "token",
-      "owner": "query-envelope-contract",
-      "schema": "query-envelope.schema.json",
-      "schemaPointer": "#/$defs/tokenClosureEntry/properties/token"
-    },
-    {
-      "class": "derived",
-      "name": "layer",
-      "owner": "query-envelope-contract",
-      "schema": "query-envelope.schema.json",
-      "schemaPointer": "#/$defs/tokenClosureEntry/properties/layer"
-    },
-    {
-      "class": "derived",
-      "name": "type",
-      "owner": "query-envelope-contract",
-      "schema": "query-envelope.schema.json",
-      "schemaPointer": "#/$defs/tokenClosureEntry/properties/type"
-    },
-    {
-      "class": "derived",
-      "name": "unit",
-      "owner": "query-envelope-contract",
-      "schema": "query-envelope.schema.json",
-      "schemaPointer": "#/$defs/tokenClosureEntry/properties/unit"
-    },
-    {
-      "class": "derived",
-      "name": "meaning",
-      "owner": "query-envelope-contract",
-      "schema": "query-envelope.schema.json",
-      "schemaPointer": "#/$defs/tokenClosureEntry/properties/meaning"
-    },
-    {
-      "class": "derived",
-      "name": "overridePolicy",
-      "owner": "query-envelope-contract",
-      "schema": "query-envelope.schema.json",
-      "schemaPointer": "#/$defs/tokenClosureEntry/properties/overridePolicy"
-    },
-    {
-      "class": "derived",
-      "name": "resolved",
-      "owner": "query-envelope-contract",
-      "schema": "query-envelope.schema.json",
-      "schemaPointer": "#/$defs/tokenClosureEntry/properties/resolved"
-    },
-    {
-      "class": "derived",
-      "name": "dependencies",
-      "owner": "query-envelope-contract",
-      "schema": "query-envelope.schema.json",
-      "schemaPointer": "#/$defs/tokenClosureEntry/properties/dependencies"
-    },
-    {
-      "class": "derived",
       "name": "recipe",
       "owner": "query-envelope-contract",
       "schema": "query-envelope.schema.json",
@@ -2846,6 +2349,1070 @@
       "owner": "query-envelope-contract",
       "schema": "query-envelope.schema.json",
       "schemaPointer": "#/$defs/detailData/allOf/0/oneOf/1/properties/value"
+    },
+    {
+      "class": "derived",
+      "name": "artifact",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/detailData/properties/artifact"
+    },
+    {
+      "class": "derived",
+      "name": "id",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/detailData/properties/artifact/properties/id"
+    },
+    {
+      "class": "derived",
+      "name": "kind",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/detailData/properties/artifact/properties/kind"
+    },
+    {
+      "class": "derived",
+      "name": "source",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/detailData/properties/artifact/properties/source"
+    },
+    {
+      "class": "derived",
+      "name": "tokenRequirementSets",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/detailData/properties/artifact/properties/tokenRequirementSets"
+    },
+    {
+      "class": "derived",
+      "name": "platformSafetyRequirementSets",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/detailData/properties/artifact/properties/platformSafetyRequirementSets"
+    },
+    {
+      "class": "derived",
+      "name": "relations",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/detailData/properties/relations"
+    },
+    {
+      "class": "derived",
+      "name": "section",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/detailData/properties/section"
+    },
+    {
+      "class": "derived",
+      "name": "value",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/detailData/properties/value"
+    },
+    {
+      "class": "derived",
+      "name": "apiVersion",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/successBase/properties/apiVersion"
+    },
+    {
+      "class": "derived",
+      "name": "type",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/successBase/properties/type"
+    },
+    {
+      "class": "derived",
+      "name": "data",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/successBase/properties/data"
+    },
+    {
+      "class": "derived",
+      "name": "meta",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/successBase/properties/meta"
+    },
+    {
+      "class": "derived",
+      "name": "warnings",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/successBase/properties/warnings"
+    },
+    {
+      "class": "derived",
+      "name": "type",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/manifestResponse/allOf/1/properties/type"
+    },
+    {
+      "class": "derived",
+      "name": "data",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/manifestResponse/allOf/1/properties/data"
+    },
+    {
+      "class": "derived",
+      "name": "type",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/listResponse/allOf/1/properties/type"
+    },
+    {
+      "class": "derived",
+      "name": "data",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/listResponse/allOf/1/properties/data"
+    },
+    {
+      "class": "derived",
+      "name": "type",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/searchResponse/allOf/1/properties/type"
+    },
+    {
+      "class": "derived",
+      "name": "data",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/searchResponse/allOf/1/properties/data"
+    },
+    {
+      "class": "derived",
+      "name": "type",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/detailResponse/allOf/1/properties/type"
+    },
+    {
+      "class": "derived",
+      "name": "data",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/detailResponse/allOf/1/properties/data"
+    },
+    {
+      "class": "derived",
+      "name": "meta",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/detailResponse/allOf/1/properties/meta"
+    },
+    {
+      "class": "derived",
+      "name": "apiVersion",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/errorResponse/properties/apiVersion"
+    },
+    {
+      "class": "derived",
+      "name": "type",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/errorResponse/properties/type"
+    },
+    {
+      "class": "derived",
+      "name": "error",
+      "owner": "query-envelope-contract",
+      "schema": "query-envelope.schema.json",
+      "schemaPointer": "#/$defs/errorResponse/properties/error"
+    },
+    {
+      "class": "derived",
+      "name": "id",
+      "owner": "query-envelope-contract",
+      "schema": "section-page.schema.json",
+      "schemaPointer": "#/$defs/tokenEntry/properties/id"
+    },
+    {
+      "class": "derived",
+      "name": "definition",
+      "owner": "query-envelope-contract",
+      "schema": "section-page.schema.json",
+      "schemaPointer": "#/$defs/tokenEntry/properties/definition"
+    },
+    {
+      "class": "derived",
+      "name": "ordinal",
+      "owner": "query-envelope-contract",
+      "schema": "section-page.schema.json",
+      "schemaPointer": "#/$defs/occurrence/properties/ordinal"
+    },
+    {
+      "class": "derived",
+      "name": "file",
+      "owner": "query-envelope-contract",
+      "schema": "section-page.schema.json",
+      "schemaPointer": "#/$defs/occurrence/properties/file"
+    },
+    {
+      "class": "derived",
+      "name": "selector",
+      "owner": "query-envelope-contract",
+      "schema": "section-page.schema.json",
+      "schemaPointer": "#/$defs/occurrence/properties/selector"
+    },
+    {
+      "class": "derived",
+      "name": "name",
+      "owner": "query-envelope-contract",
+      "schema": "section-page.schema.json",
+      "schemaPointer": "#/$defs/occurrence/properties/name"
+    },
+    {
+      "class": "derived",
+      "name": "value",
+      "owner": "query-envelope-contract",
+      "schema": "section-page.schema.json",
+      "schemaPointer": "#/$defs/occurrence/properties/value"
+    },
+    {
+      "class": "derived",
+      "name": "web.html",
+      "owner": "query-envelope-contract",
+      "schema": "section-page.schema.json",
+      "schemaPointer": "#/$defs/targets/properties/web.html"
+    },
+    {
+      "class": "derived",
+      "name": "web.react",
+      "owner": "query-envelope-contract",
+      "schema": "section-page.schema.json",
+      "schemaPointer": "#/$defs/targets/properties/web.react"
+    },
+    {
+      "class": "derived",
+      "name": "native.ios",
+      "owner": "query-envelope-contract",
+      "schema": "section-page.schema.json",
+      "schemaPointer": "#/$defs/targets/properties/native.ios"
+    },
+    {
+      "class": "derived",
+      "name": "native.android",
+      "owner": "query-envelope-contract",
+      "schema": "section-page.schema.json",
+      "schemaPointer": "#/$defs/targets/properties/native.android"
+    },
+    {
+      "class": "derived",
+      "name": "native.react-native-web",
+      "owner": "query-envelope-contract",
+      "schema": "section-page.schema.json",
+      "schemaPointer": "#/$defs/targets/properties/native.react-native-web"
+    },
+    {
+      "class": "derived",
+      "name": "occurrence",
+      "owner": "query-envelope-contract",
+      "schema": "section-page.schema.json",
+      "schemaPointer": "#/$defs/admittedCrosswalkEntry/properties/occurrence"
+    },
+    {
+      "class": "derived",
+      "name": "disposition",
+      "owner": "query-envelope-contract",
+      "schema": "section-page.schema.json",
+      "schemaPointer": "#/$defs/admittedCrosswalkEntry/properties/disposition"
+    },
+    {
+      "class": "derived",
+      "name": "coreTokenId",
+      "owner": "query-envelope-contract",
+      "schema": "section-page.schema.json",
+      "schemaPointer": "#/$defs/admittedCrosswalkEntry/properties/coreTokenId"
+    },
+    {
+      "class": "derived",
+      "name": "groupId",
+      "owner": "query-envelope-contract",
+      "schema": "section-page.schema.json",
+      "schemaPointer": "#/$defs/admittedCrosswalkEntry/properties/groupId"
+    },
+    {
+      "class": "derived",
+      "name": "reason",
+      "owner": "query-envelope-contract",
+      "schema": "section-page.schema.json",
+      "schemaPointer": "#/$defs/admittedCrosswalkEntry/properties/reason"
+    },
+    {
+      "class": "derived",
+      "name": "targets",
+      "owner": "query-envelope-contract",
+      "schema": "section-page.schema.json",
+      "schemaPointer": "#/$defs/admittedCrosswalkEntry/properties/targets"
+    },
+    {
+      "class": "derived",
+      "name": "occurrence",
+      "owner": "query-envelope-contract",
+      "schema": "section-page.schema.json",
+      "schemaPointer": "#/$defs/unadmittedCrosswalkEntry/properties/occurrence"
+    },
+    {
+      "class": "derived",
+      "name": "disposition",
+      "owner": "query-envelope-contract",
+      "schema": "section-page.schema.json",
+      "schemaPointer": "#/$defs/unadmittedCrosswalkEntry/properties/disposition"
+    },
+    {
+      "class": "derived",
+      "name": "groupId",
+      "owner": "query-envelope-contract",
+      "schema": "section-page.schema.json",
+      "schemaPointer": "#/$defs/unadmittedCrosswalkEntry/properties/groupId"
+    },
+    {
+      "class": "derived",
+      "name": "reason",
+      "owner": "query-envelope-contract",
+      "schema": "section-page.schema.json",
+      "schemaPointer": "#/$defs/unadmittedCrosswalkEntry/properties/reason"
+    },
+    {
+      "class": "derived",
+      "name": "targets",
+      "owner": "query-envelope-contract",
+      "schema": "section-page.schema.json",
+      "schemaPointer": "#/$defs/unadmittedCrosswalkEntry/properties/targets"
+    },
+    {
+      "class": "derived",
+      "name": "status",
+      "owner": "query-envelope-contract",
+      "schema": "section-page.schema.json",
+      "schemaPointer": "#/$defs/availableEntries/properties/status"
+    },
+    {
+      "class": "derived",
+      "name": "items",
+      "owner": "query-envelope-contract",
+      "schema": "section-page.schema.json",
+      "schemaPointer": "#/$defs/availableEntries/properties/items"
+    },
+    {
+      "class": "derived",
+      "name": "status",
+      "owner": "query-envelope-contract",
+      "schema": "section-page.schema.json",
+      "schemaPointer": "#/$defs/undeclaredSourceCrosswalk/properties/status"
+    },
+    {
+      "class": "derived",
+      "name": "reason",
+      "owner": "query-envelope-contract",
+      "schema": "section-page.schema.json",
+      "schemaPointer": "#/$defs/undeclaredSourceCrosswalk/properties/reason"
+    },
+    {
+      "class": "derived",
+      "name": "tokenSourceSchemaVersion",
+      "owner": "query-envelope-contract",
+      "schema": "section-page.schema.json",
+      "schemaPointer": "#/$defs/undeclaredSourceCrosswalk/properties/tokenSourceSchemaVersion"
+    },
+    {
+      "class": "derived",
+      "name": "items",
+      "owner": "query-envelope-contract",
+      "schema": "section-page.schema.json",
+      "schemaPointer": "#/$defs/undeclaredSourceCrosswalk/properties/items"
+    },
+    {
+      "class": "derived",
+      "name": "status",
+      "owner": "query-envelope-contract",
+      "schema": "section-page.schema.json",
+      "schemaPointer": "#/$defs/omittedSourceCrosswalk/properties/status"
+    },
+    {
+      "class": "derived",
+      "name": "reason",
+      "owner": "query-envelope-contract",
+      "schema": "section-page.schema.json",
+      "schemaPointer": "#/$defs/omittedSourceCrosswalk/properties/reason"
+    },
+    {
+      "class": "derived",
+      "name": "tokenSourceSchemaVersion",
+      "owner": "query-envelope-contract",
+      "schema": "section-page.schema.json",
+      "schemaPointer": "#/$defs/omittedSourceCrosswalk/properties/tokenSourceSchemaVersion"
+    },
+    {
+      "class": "derived",
+      "name": "items",
+      "owner": "query-envelope-contract",
+      "schema": "section-page.schema.json",
+      "schemaPointer": "#/$defs/omittedSourceCrosswalk/properties/items"
+    },
+    {
+      "class": "derived",
+      "name": "schemaVersion",
+      "owner": "query-envelope-contract",
+      "schema": "section-page.schema.json",
+      "schemaPointer": "#/properties/schemaVersion"
+    },
+    {
+      "class": "derived",
+      "name": "responseType",
+      "owner": "query-envelope-contract",
+      "schema": "section-page.schema.json",
+      "schemaPointer": "#/properties/responseType"
+    },
+    {
+      "class": "derived",
+      "name": "meta",
+      "owner": "query-envelope-contract",
+      "schema": "section-page.schema.json",
+      "schemaPointer": "#/properties/meta"
+    },
+    {
+      "class": "derived",
+      "name": "queryApiVersion",
+      "owner": "query-envelope-contract",
+      "schema": "section-page.schema.json",
+      "schemaPointer": "#/properties/meta/properties/queryApiVersion"
+    },
+    {
+      "class": "derived",
+      "name": "catalogVersion",
+      "owner": "query-envelope-contract",
+      "schema": "section-page.schema.json",
+      "schemaPointer": "#/properties/meta/properties/catalogVersion"
+    },
+    {
+      "class": "derived",
+      "name": "catalogDigest",
+      "owner": "query-envelope-contract",
+      "schema": "section-page.schema.json",
+      "schemaPointer": "#/properties/meta/properties/catalogDigest"
+    },
+    {
+      "class": "derived",
+      "name": "tokenSourceContentRevision",
+      "owner": "query-envelope-contract",
+      "schema": "section-page.schema.json",
+      "schemaPointer": "#/properties/meta/properties/tokenSourceContentRevision"
+    },
+    {
+      "class": "derived",
+      "name": "artifactId",
+      "owner": "query-envelope-contract",
+      "schema": "section-page.schema.json",
+      "schemaPointer": "#/properties/meta/properties/artifactId"
+    },
+    {
+      "class": "derived",
+      "name": "section",
+      "owner": "query-envelope-contract",
+      "schema": "section-page.schema.json",
+      "schemaPointer": "#/properties/meta/properties/section"
+    },
+    {
+      "class": "derived",
+      "name": "selectorDigest",
+      "owner": "query-envelope-contract",
+      "schema": "section-page.schema.json",
+      "schemaPointer": "#/properties/meta/properties/selectorDigest"
+    },
+    {
+      "class": "derived",
+      "name": "entries",
+      "owner": "query-envelope-contract",
+      "schema": "section-page.schema.json",
+      "schemaPointer": "#/properties/entries"
+    },
+    {
+      "class": "derived",
+      "name": "page",
+      "owner": "query-envelope-contract",
+      "schema": "section-page.schema.json",
+      "schemaPointer": "#/properties/page"
+    },
+    {
+      "class": "derived",
+      "name": "position",
+      "owner": "query-envelope-contract",
+      "schema": "section-page.schema.json",
+      "schemaPointer": "#/properties/page/properties/position"
+    },
+    {
+      "class": "derived",
+      "name": "returned",
+      "owner": "query-envelope-contract",
+      "schema": "section-page.schema.json",
+      "schemaPointer": "#/properties/page/properties/returned"
+    },
+    {
+      "class": "derived",
+      "name": "remaining",
+      "owner": "query-envelope-contract",
+      "schema": "section-page.schema.json",
+      "schemaPointer": "#/properties/page/properties/remaining"
+    },
+    {
+      "class": "derived",
+      "name": "nextCursor",
+      "owner": "query-envelope-contract",
+      "schema": "section-page.schema.json",
+      "schemaPointer": "#/properties/page/properties/nextCursor"
+    },
+    {
+      "class": "derived",
+      "name": "entryTokens",
+      "owner": "query-envelope-contract",
+      "schema": "section-page.schema.json",
+      "schemaPointer": "#/properties/page/properties/entryTokens"
+    },
+    {
+      "class": "derived",
+      "name": "densePageBudget",
+      "owner": "query-envelope-contract",
+      "schema": "section-page.schema.json",
+      "schemaPointer": "#/properties/page/properties/densePageBudget"
+    },
+    {
+      "class": "derived",
+      "name": "diagnostics",
+      "owner": "query-envelope-contract",
+      "schema": "section-page.schema.json",
+      "schemaPointer": "#/properties/diagnostics"
+    },
+    {
+      "class": "derived",
+      "name": "schema",
+      "owner": "query-page-budget-profile-contract",
+      "schema": "token-section-page-budget-profile.schema.json",
+      "schemaPointer": "#/properties/schema"
+    },
+    {
+      "class": "derived",
+      "name": "id",
+      "owner": "query-page-budget-profile-contract",
+      "schema": "token-section-page-budget-profile.schema.json",
+      "schemaPointer": "#/properties/id"
+    },
+    {
+      "class": "derived",
+      "name": "queryApiVersion",
+      "owner": "query-page-budget-profile-contract",
+      "schema": "token-section-page-budget-profile.schema.json",
+      "schemaPointer": "#/properties/queryApiVersion"
+    },
+    {
+      "class": "derived",
+      "name": "lexerVersion",
+      "owner": "query-page-budget-profile-contract",
+      "schema": "token-section-page-budget-profile.schema.json",
+      "schemaPointer": "#/properties/lexerVersion"
+    },
+    {
+      "class": "derived",
+      "name": "canonicalEntryOrder",
+      "owner": "query-page-budget-profile-contract",
+      "schema": "token-section-page-budget-profile.schema.json",
+      "schemaPointer": "#/properties/canonicalEntryOrder"
+    },
+    {
+      "class": "derived",
+      "name": "entryCostRule",
+      "owner": "query-page-budget-profile-contract",
+      "schema": "token-section-page-budget-profile.schema.json",
+      "schemaPointer": "#/properties/entryCostRule"
+    },
+    {
+      "class": "derived",
+      "name": "densePageBudgetTokens",
+      "owner": "query-page-budget-profile-contract",
+      "schema": "token-section-page-budget-profile.schema.json",
+      "schemaPointer": "#/properties/densePageBudgetTokens"
+    },
+    {
+      "class": "derived",
+      "name": "normalizedWorstCaseEnvelopeSha256",
+      "owner": "query-page-budget-profile-contract",
+      "schema": "token-section-page-budget-profile.schema.json",
+      "schemaPointer": "#/properties/normalizedWorstCaseEnvelopeSha256"
+    },
+    {
+      "class": "derived",
+      "name": "measuredWorstCaseEnvelopeTokens",
+      "owner": "query-page-budget-profile-contract",
+      "schema": "token-section-page-budget-profile.schema.json",
+      "schemaPointer": "#/properties/measuredWorstCaseEnvelopeTokens"
+    },
+    {
+      "class": "derived",
+      "name": "envelopeReserveTokens",
+      "owner": "query-page-budget-profile-contract",
+      "schema": "token-section-page-budget-profile.schema.json",
+      "schemaPointer": "#/properties/envelopeReserveTokens"
+    },
+    {
+      "class": "derived",
+      "name": "maximumEntryTokens",
+      "owner": "query-page-budget-profile-contract",
+      "schema": "token-section-page-budget-profile.schema.json",
+      "schemaPointer": "#/properties/maximumEntryTokens"
+    },
+    {
+      "class": "derived",
+      "name": "defaultItemLimit",
+      "owner": "query-page-budget-profile-contract",
+      "schema": "token-section-page-budget-profile.schema.json",
+      "schemaPointer": "#/properties/defaultItemLimit"
+    },
+    {
+      "class": "derived",
+      "name": "maximumItemLimit",
+      "owner": "query-page-budget-profile-contract",
+      "schema": "token-section-page-budget-profile.schema.json",
+      "schemaPointer": "#/properties/maximumItemLimit"
+    },
+    {
+      "class": "derived",
+      "name": "minimumProgressEntries",
+      "owner": "query-page-budget-profile-contract",
+      "schema": "token-section-page-budget-profile.schema.json",
+      "schemaPointer": "#/properties/minimumProgressEntries"
+    },
+    {
+      "class": "derived",
+      "name": "selection",
+      "owner": "query-page-budget-profile-contract",
+      "schema": "token-section-page-budget-profile.schema.json",
+      "schemaPointer": "#/properties/selection"
+    },
+    {
+      "class": "derived",
+      "name": "oversizeCode",
+      "owner": "query-page-budget-profile-contract",
+      "schema": "token-section-page-budget-profile.schema.json",
+      "schemaPointer": "#/properties/oversizeCode"
+    },
+    {
+      "class": "derived",
+      "name": "cursorProfile",
+      "owner": "query-page-budget-profile-contract",
+      "schema": "token-section-page-budget-profile.schema.json",
+      "schemaPointer": "#/properties/cursorProfile"
+    },
+    {
+      "class": "derived",
+      "name": "cursorPayloadCanonicalization",
+      "owner": "query-page-budget-profile-contract",
+      "schema": "token-section-page-budget-profile.schema.json",
+      "schemaPointer": "#/properties/cursorPayloadCanonicalization"
+    },
+    {
+      "class": "derived",
+      "name": "cursorEncoding",
+      "owner": "query-page-budget-profile-contract",
+      "schema": "token-section-page-budget-profile.schema.json",
+      "schemaPointer": "#/properties/cursorEncoding"
+    },
+    {
+      "class": "derived",
+      "name": "cursorMaximumBytes",
+      "owner": "query-page-budget-profile-contract",
+      "schema": "token-section-page-budget-profile.schema.json",
+      "schemaPointer": "#/properties/cursorMaximumBytes"
+    },
+    {
+      "class": "derived",
+      "name": "cursorBindings",
+      "owner": "query-page-budget-profile-contract",
+      "schema": "token-section-page-budget-profile.schema.json",
+      "schemaPointer": "#/properties/cursorBindings"
+    },
+    {
+      "class": "derived",
+      "name": "truncation",
+      "owner": "query-page-budget-profile-contract",
+      "schema": "token-section-page-budget-profile.schema.json",
+      "schemaPointer": "#/properties/truncation"
+    },
+    {
+      "class": "derived",
+      "name": "artifactIdMaximumBytes",
+      "owner": "query-page-budget-profile-contract",
+      "schema": "token-section-page-budget-profile.schema.json",
+      "schemaPointer": "#/properties/artifactIdMaximumBytes"
+    },
+    {
+      "class": "derived",
+      "name": "artifactIdMaximumLexemes",
+      "owner": "query-page-budget-profile-contract",
+      "schema": "token-section-page-budget-profile.schema.json",
+      "schemaPointer": "#/properties/artifactIdMaximumLexemes"
+    },
+    {
+      "class": "derived",
+      "name": "cursorPositionMaximum",
+      "owner": "query-page-budget-profile-contract",
+      "schema": "token-section-page-budget-profile.schema.json",
+      "schemaPointer": "#/properties/cursorPositionMaximum"
+    },
+    {
+      "class": "derived",
+      "name": "catalogVersionMaximumBytes",
+      "owner": "query-page-budget-profile-contract",
+      "schema": "token-section-page-budget-profile.schema.json",
+      "schemaPointer": "#/properties/catalogVersionMaximumBytes"
+    },
+    {
+      "class": "derived",
+      "name": "catalogVersionMaximumLexemes",
+      "owner": "query-page-budget-profile-contract",
+      "schema": "token-section-page-budget-profile.schema.json",
+      "schemaPointer": "#/properties/catalogVersionMaximumLexemes"
+    },
+    {
+      "class": "derived",
+      "name": "envelopeOversizeCode",
+      "owner": "query-page-budget-profile-contract",
+      "schema": "token-section-page-budget-profile.schema.json",
+      "schemaPointer": "#/properties/envelopeOversizeCode"
+    },
+    {
+      "class": "authored",
+      "name": "schemaVersion",
+      "owner": "relation-registry",
+      "schema": "relation.schema.json",
+      "schemaPointer": "#/properties/schemaVersion"
+    },
+    {
+      "class": "authored",
+      "name": "relations",
+      "owner": "relation-registry",
+      "schema": "relation.schema.json",
+      "schemaPointer": "#/properties/relations"
+    },
+    {
+      "class": "authored",
+      "name": "type",
+      "owner": "relation-registry",
+      "schema": "relation.schema.json",
+      "schemaPointer": "#/properties/relations/items/properties/type"
+    },
+    {
+      "class": "authored",
+      "name": "source",
+      "owner": "relation-registry",
+      "schema": "relation.schema.json",
+      "schemaPointer": "#/properties/relations/items/properties/source"
+    },
+    {
+      "class": "authored",
+      "name": "target",
+      "owner": "relation-registry",
+      "schema": "relation.schema.json",
+      "schemaPointer": "#/properties/relations/items/properties/target"
+    },
+    {
+      "class": "authored",
+      "name": "owner",
+      "owner": "relation-registry",
+      "schema": "relation.schema.json",
+      "schemaPointer": "#/properties/relations/items/properties/owner"
+    },
+    {
+      "class": "authored",
+      "name": "minimum",
+      "owner": "relation-registry",
+      "schema": "relation.schema.json",
+      "schemaPointer": "#/properties/relations/items/properties/minimum"
+    },
+    {
+      "class": "authored",
+      "name": "maximum",
+      "owner": "relation-registry",
+      "schema": "relation.schema.json",
+      "schemaPointer": "#/properties/relations/items/properties/maximum"
+    },
+    {
+      "class": "authored",
+      "name": "guidanceImpact",
+      "owner": "relation-registry",
+      "schema": "relation.schema.json",
+      "schemaPointer": "#/properties/relations/items/properties/guidanceImpact"
+    },
+    {
+      "class": "authored",
+      "name": "consumer",
+      "owner": "relation-registry",
+      "schema": "relation.schema.json",
+      "schemaPointer": "#/properties/relations/items/properties/consumer"
+    },
+    {
+      "class": "authored",
+      "name": "schemaVersion",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "schemaPointer": "#/properties/schemaVersion"
+    },
+    {
+      "class": "authored",
+      "name": "id",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "schemaPointer": "#/properties/id"
+    },
+    {
+      "class": "authored",
+      "name": "kind",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "schemaPointer": "#/properties/kind"
+    },
+    {
+      "class": "authored",
+      "name": "name",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "schemaPointer": "#/properties/name"
+    },
+    {
+      "class": "authored",
+      "name": "summary",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "schemaPointer": "#/properties/summary"
+    },
+    {
+      "class": "authored",
+      "name": "lifecycle",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "schemaPointer": "#/properties/lifecycle"
+    },
+    {
+      "class": "authored",
+      "name": "tokenContractVersion",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "schemaPointer": "#/properties/tokenContractVersion"
+    },
+    {
+      "class": "authored",
+      "name": "theme",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "schemaPointer": "#/properties/theme"
+    },
+    {
+      "class": "authored",
+      "name": "name",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "schemaPointer": "#/properties/theme/properties/name"
+    },
+    {
+      "class": "authored",
+      "name": "modeAxes",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "schemaPointer": "#/properties/theme/properties/modeAxes"
+    },
+    {
+      "class": "authored",
+      "name": "colorScheme",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "schemaPointer": "#/properties/theme/properties/modeAxes/properties/colorScheme"
+    },
+    {
+      "class": "authored",
+      "name": "contrast",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "schemaPointer": "#/properties/theme/properties/modeAxes/properties/contrast"
+    },
+    {
+      "class": "authored",
+      "name": "motion",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "schemaPointer": "#/properties/theme/properties/modeAxes/properties/motion"
+    },
+    {
+      "class": "authored",
+      "name": "density",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "schemaPointer": "#/properties/theme/properties/modeAxes/properties/density"
+    },
+    {
+      "class": "authored",
+      "name": "direction",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "schemaPointer": "#/properties/theme/properties/modeAxes/properties/direction"
+    },
+    {
+      "class": "authored",
+      "name": "defaultModes",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "schemaPointer": "#/properties/theme/properties/defaultModes"
+    },
+    {
+      "class": "authored",
+      "name": "colorScheme",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "schemaPointer": "#/properties/theme/properties/defaultModes/properties/colorScheme"
+    },
+    {
+      "class": "authored",
+      "name": "contrast",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "schemaPointer": "#/properties/theme/properties/defaultModes/properties/contrast"
+    },
+    {
+      "class": "authored",
+      "name": "motion",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "schemaPointer": "#/properties/theme/properties/defaultModes/properties/motion"
+    },
+    {
+      "class": "authored",
+      "name": "density",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "schemaPointer": "#/properties/theme/properties/defaultModes/properties/density"
+    },
+    {
+      "class": "authored",
+      "name": "direction",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "schemaPointer": "#/properties/theme/properties/defaultModes/properties/direction"
+    },
+    {
+      "class": "authored",
+      "name": "runtimeSwitching",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "schemaPointer": "#/properties/theme/properties/runtimeSwitching"
+    },
+    {
+      "class": "authored",
+      "name": "tokens",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "schemaPointer": "#/properties/tokens"
+    },
+    {
+      "class": "authored",
+      "name": "extensions",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "schemaPointer": "#/properties/extensions"
+    },
+    {
+      "class": "authored",
+      "name": "value",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "schemaPointer": "#/$defs/valueOrAlias/oneOf/0/properties/value"
+    },
+    {
+      "class": "authored",
+      "name": "alias",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "schemaPointer": "#/$defs/valueOrAlias/oneOf/1/properties/alias"
+    },
+    {
+      "class": "authored",
+      "name": "layer",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "schemaPointer": "#/$defs/token/properties/layer"
+    },
+    {
+      "class": "authored",
+      "name": "type",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "schemaPointer": "#/$defs/token/properties/type"
+    },
+    {
+      "class": "authored",
+      "name": "unit",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "schemaPointer": "#/$defs/token/properties/unit"
+    },
+    {
+      "class": "authored",
+      "name": "meaning",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "schemaPointer": "#/$defs/token/properties/meaning"
+    },
+    {
+      "class": "authored",
+      "name": "overridePolicy",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "schemaPointer": "#/$defs/token/properties/overridePolicy"
+    },
+    {
+      "class": "authored",
+      "name": "value",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "schemaPointer": "#/$defs/token/properties/value"
+    },
+    {
+      "class": "authored",
+      "name": "alias",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "schemaPointer": "#/$defs/token/properties/alias"
+    },
+    {
+      "class": "authored",
+      "name": "equivalence",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "schemaPointer": "#/$defs/token/properties/equivalence"
+    },
+    {
+      "class": "authored",
+      "name": "modes",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "schemaPointer": "#/$defs/token/properties/modes"
+    },
+    {
+      "class": "authored",
+      "name": "platformRestrictions",
+      "owner": "token-source-contract",
+      "schema": "token-source.schema.json",
+      "schemaPointer": "#/$defs/token/properties/platformRestrictions"
     }
   ],
   "governedSchemas": [
@@ -2893,6 +3460,16 @@
       "class": "derived",
       "file": "query-envelope.schema.json",
       "owner": "query-envelope-contract"
+    },
+    {
+      "class": "derived",
+      "file": "section-page.schema.json",
+      "owner": "query-envelope-contract"
+    },
+    {
+      "class": "derived",
+      "file": "token-section-page-budget-profile.schema.json",
+      "owner": "query-page-budget-profile-contract"
     },
     {
       "class": "authored",

@@ -1,7 +1,11 @@
 {
   "schema": "core-ui-catalog-source-manifest-v1",
+  "authorityDecisionPath": "decisions/0003-tale-token-classification-annex.json",
   "commandRegistryPath": "packages/tooling/command-registry.json",
+  "pageBudgetProfilePath": "packages/catalog/token-section-page-budget-profile.json",
   "platformSafetyContractPath": "strategy/platform-safety-contract.json",
+  "queryApiVersion": "1.2.0",
+  "supportedQueryApiVersions": ["1.1.0", "1.2.0"],
   "records": [
     {
       "family": "capability",

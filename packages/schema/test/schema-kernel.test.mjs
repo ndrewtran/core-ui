@@ -17,6 +17,7 @@ import {
   parseArtifactRef,
   parseJsonStrict,
   relationEdges,
+  sha256Digest,
   validateCatalogRecords,
   validateFamily,
   validateFieldOwnershipRegistry,
@@ -59,6 +60,15 @@ function validationIssues(family, value) {
     return error.issues;
   }
   assert.fail(`${family} unexpectedly validated`);
+}
+
+function sectionCursor(payload) {
+  const bytes = canonicalJson(payload);
+  return `c1.${Buffer.from(bytes, 'utf8').toString('base64url')}.${sha256Digest(bytes).slice(7)}`;
+}
+
+function countLexemes(value) {
+  return canonicalJson(value).match(/[\p{L}\p{N}_]+/gu)?.length ?? 0;
 }
 
 test('E-G0.1-01: minimum records, envelopes, diagnostics, ownership, and relations validate', () => {
@@ -686,6 +696,204 @@ test('E-G0.1-04: package/source locations remain derived and generated types ret
   const generated = await readFile(resolve(import.meta.dirname, '../generated/types.d.ts'), 'utf8');
   assert.match(generated, /@generated-from: packages\/schema\/schemas\/type-projection\.json/);
   assert.match(generated, /export type ArtifactKind/);
+});
+
+test('TALE-TOKEN-A section-page grammar is closed, typed, and position-safe', () => {
+  const page = {
+    schemaVersion: '1.2.0',
+    responseType: 'artifact.detail.section-page',
+    meta: {
+      queryApiVersion: '1.2.0',
+      catalogVersion: '0.1.0',
+      catalogDigest: `sha256:${'a'.repeat(64)}`,
+      tokenSourceContentRevision: `sha256:${'b'.repeat(64)}`,
+      artifactId: 'core:token:button-minimum',
+      section: 'tokens',
+      selectorDigest: `sha256:${'c'.repeat(64)}`,
+    },
+    entries: {
+      status: 'available',
+      items: [{
+        id: 'reference.color.black',
+        definition: {
+          layer: 'reference',
+          type: 'color',
+          unit: 'hex',
+          meaning: 'Pinned black reference value.',
+          overridePolicy: 'fixed',
+          value: '#000000',
+        },
+      }],
+    },
+    page: {
+      position: 0,
+      returned: 1,
+      remaining: 0,
+      nextCursor: null,
+      entryTokens: 20,
+      densePageBudget: 2048,
+    },
+    diagnostics: [],
+  };
+  assert.doesNotThrow(() => validateFamily('section-page', page));
+  assert.doesNotThrow(() => validateFamily('query-envelope', page));
+
+  const continued = structuredClone(page);
+  continued.page.remaining = 1;
+  continued.page.nextCursor = sectionCursor({
+    catalogDigest: continued.meta.catalogDigest,
+    nextPosition: 1,
+    queryApiVersion: continued.meta.queryApiVersion,
+    section: continued.meta.section,
+    selectorDigest: continued.meta.selectorDigest,
+    tokenSourceContentRevision: continued.meta.tokenSourceContentRevision,
+  });
+  assert.doesNotThrow(() => validateFamily('section-page', continued));
+
+  for (const mutate of [
+    (value) => { value.extra = true; },
+    (value) => { value.entries.status = 1; },
+    (value) => { value.entries.reason = 'not-allowed-when-available'; },
+    (value) => { value.entries.tokenSourceSchemaVersion = '2.0.0'; },
+    (value) => { value.page.returned = 0; },
+    (value) => { value.page.remaining = 1; },
+    (value) => { value.page.position = 4294967295; value.page.returned = 1; },
+    (value) => { value.meta.catalogVersion = '1'.repeat(65); },
+    (value) => { value.meta.catalogVersion = 'not-semver'; },
+    (value) => { value.meta.artifactId = `core:token:${'a-'.repeat(130)}a`; },
+    (value) => { value.page.remaining = 1; value.page.nextCursor = 'c1.e30.0000000000000000000000000000000000000000000000000000000000000000'; },
+  ]) {
+    const invalid = structuredClone(page);
+    mutate(invalid);
+    assert.throws(() => validateFamily('section-page', invalid), /CORE_SCHEMA_INVALID/);
+  }
+
+  const terminal = structuredClone(page);
+  terminal.entries.items = [];
+  terminal.page = {
+    position: 4294967295,
+    returned: 0,
+    remaining: 0,
+    nextCursor: null,
+    entryTokens: 0,
+    densePageBudget: 2048,
+  };
+  assert.doesNotThrow(() => validateFamily('section-page', terminal));
+
+  const absent = structuredClone(page);
+  absent.meta.section = 'source-crosswalk';
+  absent.entries = {
+    status: 'absent',
+    reason: 'token-source-schema-does-not-declare-source-crosswalk',
+    tokenSourceSchemaVersion: '2.0.0',
+    items: [],
+  };
+  absent.page = {
+    position: 0,
+    returned: 0,
+    remaining: 0,
+    nextCursor: null,
+    entryTokens: 0,
+    densePageBudget: 2048,
+  };
+  assert.doesNotThrow(() => validateFamily('section-page', absent));
+
+  const omitted = structuredClone(absent);
+  omitted.entries.reason = 'token-source-omits-source-crosswalk';
+  omitted.entries.tokenSourceSchemaVersion = '2.1.0';
+  assert.doesNotThrow(() => validateFamily('section-page', omitted));
+
+  const sourceCrosswalk = structuredClone(page);
+  sourceCrosswalk.meta.section = 'source-crosswalk';
+  sourceCrosswalk.entries.items = [{
+    occurrence: {
+      ordinal: 1,
+      file: '_base.css',
+      selector: 'html',
+      name: 'font-size',
+      value: '100%',
+    },
+    disposition: 'reject',
+    reason: 'This is an HTML root style, not a portable token declaration.',
+    targets: {
+      'web.html': 'rejected',
+      'web.react': 'rejected',
+      'native.ios': 'rejected',
+      'native.android': 'rejected',
+      'native.react-native-web': 'rejected',
+    },
+  }];
+  sourceCrosswalk.page.entryTokens = countLexemes(sourceCrosswalk.entries.items[0]);
+  assert.doesNotThrow(() => validateFamily('section-page', sourceCrosswalk));
+
+  const ordinalTie = structuredClone(sourceCrosswalk);
+  const tiedEntry = structuredClone(ordinalTie.entries.items[0]);
+  tiedEntry.occurrence.name = '--tale-font-size';
+  tiedEntry.occurrence.value = '1rem';
+  ordinalTie.entries.items = [ordinalTie.entries.items[0], tiedEntry]
+    .sort((left, right) => {
+      const leftBytes = canonicalJson(left);
+      const rightBytes = canonicalJson(right);
+      return leftBytes < rightBytes ? -1 : leftBytes > rightBytes ? 1 : 0;
+    });
+  ordinalTie.page.returned = ordinalTie.entries.items.length;
+  ordinalTie.page.entryTokens = ordinalTie.entries.items.reduce(
+    (total, entry) => total + countLexemes(entry),
+    0,
+  );
+  assert.doesNotThrow(() => validateFamily('section-page', ordinalTie));
+  const reversedOrdinalTie = structuredClone(ordinalTie);
+  reversedOrdinalTie.entries.items.reverse();
+  assert.throws(() => validateFamily('section-page', reversedOrdinalTie), /CORE_SCHEMA_INVALID/);
+  const duplicateOrdinalTie = structuredClone(ordinalTie);
+  duplicateOrdinalTie.entries.items[1] = structuredClone(duplicateOrdinalTie.entries.items[0]);
+  duplicateOrdinalTie.page.entryTokens = duplicateOrdinalTie.entries.items.reduce(
+    (total, entry) => total + countLexemes(entry),
+    0,
+  );
+  assert.throws(() => validateFamily('section-page', duplicateOrdinalTie), /CORE_SCHEMA_INVALID/);
+
+  for (const mutate of [
+    (value) => { value.entries.items[0].coreTokenId = 'reference.color.black'; },
+    (value) => { value.entries.items[0].occurrence.ordinal = 0; },
+    (value) => { value.entries.items[0].targets['web.html'] = 'invented'; },
+    (value) => { value.meta.section = 'tokens'; },
+  ]) {
+    const invalid = structuredClone(sourceCrosswalk);
+    mutate(invalid);
+    assert.throws(() => validateFamily('section-page', invalid), /CORE_SCHEMA_INVALID/);
+  }
+
+  const wrongCursorBinding = structuredClone(continued);
+  wrongCursorBinding.meta.selectorDigest = `sha256:${'d'.repeat(64)}`;
+  assert.throws(() => validateFamily('section-page', wrongCursorBinding), /CORE_SCHEMA_INVALID/);
+  const tamperedCursor = structuredClone(continued);
+  tamperedCursor.page.nextCursor = `${continued.page.nextCursor.slice(0, -1)}${continued.page.nextCursor.endsWith('0') ? '1' : '0'}`;
+  assert.throws(() => validateFamily('section-page', tamperedCursor), /CORE_SCHEMA_INVALID/);
+});
+
+test('TALE-TOKEN-A page budget profile grammar is closed and internally bounded', async () => {
+  const profile = parseJsonStrict(await readFile(
+    resolve(import.meta.dirname, '../../catalog/token-section-page-budget-profile.json'),
+    'utf8',
+  ));
+  assert.doesNotThrow(() => validateFamily('token-section-page-budget-profile', profile));
+  for (const mutate of [
+    (value) => { value.unowned = true; },
+    (value) => { value.cursorBindings.reverse(); },
+    (value) => { value.maximumEntryTokens -= 1; },
+    (value) => { value.defaultItemLimit = value.maximumItemLimit + 1; },
+    (value) => { value.normalizedWorstCaseEnvelopeSha256 = 'not-a-digest'; },
+    (value) => { value.id = 'core-ui-token-section-page-budget-2-0-0'; },
+    (value) => { value.queryApiVersion = '2.0.0'; },
+  ]) {
+    const invalid = structuredClone(profile);
+    mutate(invalid);
+    assert.throws(
+      () => validateFamily('token-section-page-budget-profile', invalid),
+      /CORE_SCHEMA_INVALID/,
+    );
+  }
 });
 
 test('E-G0.1-05: schema evolution and append-only response policy enforce declared effects', () => {

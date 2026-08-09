@@ -5,13 +5,14 @@ import { join, resolve } from 'node:path';
 import test from 'node:test';
 import {
   canonicalDigest,
+  canonicalJson,
   bindingContentRevision,
   contentRevision,
   relationEdges,
   validateFamily,
 } from '@core-ui/schema';
 import { catalogJson } from '../generated/catalog.mjs';
-import { compileCatalog } from '../src/compiler.mjs';
+import { assertPhaseAQueryProfile, compileCatalog } from '../src/compiler.mjs';
 import {
   createCatalogApi,
   getArtifact,
@@ -26,6 +27,10 @@ const baseBundle = JSON.parse(catalogJson);
 function preimage(bundle) {
   const { catalogDigest: _catalogDigest, ...value } = bundle;
   return value;
+}
+
+function countTokens(value) {
+  return value.match(/[\p{L}\p{N}_]+/gu)?.length ?? 0;
 }
 
 test('E-G0.2-01: declared sources compile to byte-identical ordered bundles', async () => {
@@ -174,6 +179,264 @@ test('E-G0.2-03: pagination is digest- and request-bound', () => {
     cursor: first.meta.nextCursor,
   });
   assert.equal(crossDigest.error.code, 'CORE_CURSOR_INVALID');
+});
+
+test('TALE-TOKEN-A query 1.2 retains inline 1.1 meaning and adds bounded token sections', () => {
+  const api = createCatalogApi(baseBundle);
+  const v11 = api.getArtifact({
+    id: 'core:token:button-minimum',
+    queryApiVersion: '1.1.0',
+    detail: 'full',
+  });
+  assert.equal(v11.apiVersion, '1.1.0');
+  assert.deepEqual(v11.warnings, []);
+  assert.ok(Object.hasOwn(v11.data.artifact, 'tokens'));
+
+  const v12 = api.getArtifact({
+    id: 'core:token:button-minimum',
+    queryApiVersion: '1.2.0',
+    detail: 'full',
+  });
+  assert.equal(v12.apiVersion, '1.2.0');
+  assert.ok(Object.hasOwn(v12.data.artifact, 'tokens'));
+  assert.equal(v12.warnings[0].code, 'CORE_QUERY_INLINE_TOKENS_DEPRECATED');
+  assert.equal(v12.warnings[0].details.replacement, 'section=tokens');
+  validateFamily('query-envelope', v11);
+  validateFamily('query-envelope', v12);
+
+  const first = api.getArtifact({
+    id: 'core:token:button-minimum',
+    queryApiVersion: '1.2.0',
+    section: 'tokens',
+    limit: 1,
+  });
+  assert.equal(first.responseType, 'artifact.detail.section-page');
+  assert.equal(first.entries.status, 'available');
+  assert.equal(first.entries.items.length, 1);
+  assert.equal(first.page.returned, 1);
+  assert.ok(first.page.remaining > 0);
+  assert.equal(typeof first.page.nextCursor, 'string');
+  assert.ok(first.page.entryTokens <= 1536);
+  const { entries: _entries, ...envelope } = first;
+  assert.ok(countTokens(canonicalJson(envelope)) <= 512);
+  validateFamily('section-page', first);
+  validateFamily('query-envelope', first);
+
+  const second = api.getArtifact({
+    id: 'core:token:button-minimum',
+    queryApiVersion: '1.2.0',
+    section: 'tokens',
+    limit: 1,
+    cursor: first.page.nextCursor,
+  });
+  assert.equal(second.page.position, 1);
+  assert.notEqual(second.entries.items[0].id, first.entries.items[0].id);
+
+  const absent = api.getArtifact({
+    id: 'core:token:button-minimum',
+    queryApiVersion: '1.2.0',
+    section: 'source-crosswalk',
+  });
+  assert.deepEqual(absent.entries, {
+    status: 'absent',
+    reason: 'token-source-schema-does-not-declare-source-crosswalk',
+    tokenSourceSchemaVersion: '2.0.0',
+    items: [],
+  });
+  assert.deepEqual(absent.page, {
+    position: 0,
+    returned: 0,
+    remaining: 0,
+    nextCursor: null,
+    entryTokens: 0,
+    densePageBudget: 2048,
+  });
+  validateFamily('section-page', absent);
+
+  const futurePreimage = structuredClone(preimage(baseBundle));
+  const futureToken = futurePreimage.artifacts.find(({ kind }) => kind === 'token');
+  futureToken.record.schemaVersion = '2.1.0';
+  futureToken.record.sourceCrosswalk = {
+    entries: [{
+      occurrence: {
+        ordinal: 1,
+        file: '_base.css',
+        selector: 'html',
+        name: 'font-size',
+        value: '100%',
+      },
+      disposition: 'reject',
+      reason: 'This is an HTML root style, not a portable token declaration.',
+      targets: {
+        'web.html': 'rejected',
+        'web.react': 'rejected',
+        'native.ios': 'rejected',
+        'native.android': 'rejected',
+        'native.react-native-web': 'rejected',
+      },
+    }],
+  };
+  const futureApi = createCatalogApi({
+    ...futurePreimage,
+    catalogDigest: canonicalDigest(futurePreimage),
+  });
+  const availableCrosswalk = futureApi.getArtifact({
+    id: 'core:token:button-minimum',
+    queryApiVersion: '1.2.0',
+    section: 'source-crosswalk',
+  });
+  assert.equal(availableCrosswalk.entries.status, 'available');
+  assert.equal(availableCrosswalk.entries.items[0].occurrence.ordinal, 1);
+  validateFamily('section-page', availableCrosswalk);
+
+  delete futureToken.record.sourceCrosswalk;
+  const omittedApi = createCatalogApi({
+    ...futurePreimage,
+    catalogDigest: canonicalDigest(futurePreimage),
+  });
+  assert.deepEqual(omittedApi.getArtifact({
+    id: 'core:token:button-minimum',
+    queryApiVersion: '1.2.0',
+    section: 'source-crosswalk',
+  }).entries, {
+    status: 'absent',
+    reason: 'token-source-omits-source-crosswalk',
+    tokenSourceSchemaVersion: '2.1.0',
+    items: [],
+  });
+});
+
+test('TALE-TOKEN-A section cursors fail closed across tampering, selectors, and catalog identities', () => {
+  const api = createCatalogApi(baseBundle);
+  const request = {
+    id: 'core:token:button-minimum',
+    queryApiVersion: '1.2.0',
+    section: 'tokens',
+    limit: 1,
+  };
+  const first = api.getArtifact(request);
+  for (const cursor of [
+    'not-a-cursor',
+    `${first.page.nextCursor.slice(0, -1)}${first.page.nextCursor.endsWith('0') ? '1' : '0'}`,
+  ]) {
+    assert.equal(api.getArtifact({ ...request, cursor }).error.code, 'CORE_CURSOR_INVALID');
+  }
+  assert.equal(api.getArtifact({ ...request, limit: 2, cursor: first.page.nextCursor }).error.code, 'CORE_CURSOR_INVALID');
+
+  const changed = { ...preimage(baseBundle), catalogVersion: '0.1.1' };
+  const changedApi = createCatalogApi({ ...changed, catalogDigest: canonicalDigest(changed) });
+  assert.equal(changedApi.getArtifact({ ...request, cursor: first.page.nextCursor }).error.code, 'CORE_CURSOR_INVALID');
+  assert.equal(api.getArtifact({ ...request, queryApiVersion: '2.0.0' }).error.code, 'CORE_QUERY_API_VERSION_UNSUPPORTED');
+  assert.equal(api.getArtifact({ ...request, queryApiVersion: '1.3.0' }).error.code, 'CORE_QUERY_INVALID');
+  assert.equal(api.getArtifact({ ...request, queryApiVersion: 1.2 }).error.code, 'CORE_QUERY_INVALID');
+  assert.equal(api.getArtifact({ ...request, invented: true }).error.code, 'CORE_QUERY_INVALID');
+});
+
+test('TALE-TOKEN-A page budget profile binds the exact accepted annex envelope', async () => {
+  const profile = JSON.parse(await readFile(
+    join(repositoryRoot, 'packages/catalog/token-section-page-budget-profile.json'),
+    'utf8',
+  ));
+  const annex = JSON.parse(await readFile(
+    join(repositoryRoot, 'decisions/0003-tale-token-classification-annex.json'),
+    'utf8',
+  ));
+  const accepted = annex.pageProfiles.find(({ queryApiVersion }) => queryApiVersion === '1.2.0');
+  assert.equal(
+    canonicalDigest(accepted.normalizedWorstCaseEnvelopePreimage),
+    profile.normalizedWorstCaseEnvelopeSha256,
+  );
+  assert.equal(countTokens(canonicalJson(accepted.normalizedWorstCaseEnvelopePreimage)), 201);
+  assert.equal(profile.maximumEntryTokens + profile.envelopeReserveTokens, 2048);
+  assert.equal(profile.cursorPositionMaximum, 4294967295);
+  for (const mutate of [
+    (value) => { value.id = 'core-ui-token-section-page-budget-2-0-0'; },
+    (value) => { value.queryApiVersion = '2.0.0'; },
+  ]) {
+    const invalidProfile = structuredClone(baseBundle.pageBudgetProfile);
+    mutate(invalidProfile);
+    const invalidPreimage = { ...preimage(baseBundle), pageBudgetProfile: invalidProfile };
+    assert.throws(
+      () => createCatalogApi({ ...invalidPreimage, catalogDigest: canonicalDigest(invalidPreimage) }),
+      /CORE_SCHEMA_INVALID/,
+    );
+  }
+  const manifest = JSON.parse(await readFile(
+    join(repositoryRoot, 'packages/catalog/catalog-sources.json'),
+    'utf8',
+  ));
+  assert.equal(assertPhaseAQueryProfile({
+    manifest,
+    pageBudgetProfile: profile,
+    authorityDecision: annex,
+  }), profile);
+  for (const mutate of [
+    (value) => { value.profile.unowned = true; },
+    (value) => { value.profile.cursorMaximumBytes -= 1; },
+    (value) => { value.profile.envelopeOversizeCode = 'CORE_QUERY_PAGE_ENTRY_TOO_LARGE'; },
+    (value) => { value.profile.cursorBindings.reverse(); },
+    (value) => { value.profile.normalizedWorstCaseEnvelopeSha256 = `sha256:${'0'.repeat(64)}`; },
+    (value) => { value.manifest.queryApiVersion = '1.1.0'; },
+    (value) => { value.manifest.supportedQueryApiVersions = ['1.2.0']; },
+  ]) {
+    const invalid = { manifest: structuredClone(manifest), profile: structuredClone(profile) };
+    mutate(invalid);
+    assert.throws(
+      () => assertPhaseAQueryProfile({
+        manifest: invalid.manifest,
+        pageBudgetProfile: invalid.profile,
+        authorityDecision: annex,
+      }),
+      /CORE_(?:CATALOG_SOURCE|SCHEMA)_INVALID/,
+    );
+  }
+});
+
+test('TALE-TOKEN-A selected catalog descriptor owns query defaults and support', () => {
+  const historicalPreimage = {
+    ...preimage(baseBundle),
+    apiVersion: '1.1.0',
+    supportedQueryApiVersions: ['1.1.0'],
+  };
+  const historical = createCatalogApi({
+    ...historicalPreimage,
+    catalogDigest: canonicalDigest(historicalPreimage),
+  });
+  assert.equal(historical.getManifest().apiVersion, '1.1.0');
+  assert.equal(historical.getArtifact({
+    id: 'core:token:button-minimum',
+    queryApiVersion: '1.1.0',
+  }).apiVersion, '1.1.0');
+  const unsupported = historical.getArtifact({
+    id: 'core:token:button-minimum',
+    queryApiVersion: '1.2.0',
+  });
+  assert.equal(unsupported.apiVersion, '1.1.0');
+  assert.equal(unsupported.error.code, 'CORE_QUERY_API_VERSION_UNSUPPORTED');
+
+  for (const response of [
+    historical.listArtifacts({ kind: 'not-a-kind' }),
+    historical.listArtifacts({ cursor: 'not-a-cursor' }),
+    historical.searchArtifacts({ query: '' }),
+    historical.getArtifact({ id: 'not-an-artifact-ref' }),
+    historical.getArtifact({ id: 'core:component:not-present' }),
+    historical.getArtifact({ id: 'core:token:button-minimum', cursor: 'not-a-cursor' }),
+  ]) {
+    assert.equal(response.type, 'error');
+    assert.equal(response.apiVersion, '1.1.0');
+  }
+
+  const inconsistentPreimage = {
+    ...preimage(baseBundle),
+    supportedQueryApiVersions: ['1.1.0'],
+  };
+  assert.throws(
+    () => createCatalogApi({
+      ...inconsistentPreimage,
+      catalogDigest: canonicalDigest(inconsistentPreimage),
+    }),
+    /CORE_CATALOG_INTEGRITY_MISMATCH/,
+  );
 });
 
 test('E-G0.2-04: search is bounded and retrieval traverses only direct relations', () => {

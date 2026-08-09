@@ -18,6 +18,7 @@
             "CORE_CATALOG_DECLARATION_DRIFT",
             "CORE_CATALOG_INTEGRITY_MISMATCH",
             "CORE_CATALOG_RESOLUTION_AMBIGUOUS",
+            "CORE_QUERY_API_VERSION_UNSUPPORTED",
             "CORE_CATALOG_INCOMPATIBLE"
           ]
         },
@@ -42,7 +43,7 @@
       "required": ["dimension", "required", "actual"],
       "properties": {
         "dimension": {
-          "enum": ["schema", "tooling-api", "binding-spec", "renderer-package", "export", "token", "platform-safety", "release-manifest"]
+          "enum": ["schema", "tooling-api", "query-api", "binding-spec", "renderer-package", "export", "token", "platform-safety", "release-manifest"]
         },
         "required": { "type": "string", "minLength": 1 },
         "actual": { "type": "string", "minLength": 1 }
@@ -98,6 +99,10 @@
             "CORE_FIELD_OWNERSHIP_INVALID",
             "CORE_SCHEMA_VERSION_UNSUPPORTED",
             "CORE_QUERY_INVALID",
+            "CORE_QUERY_API_VERSION_UNSUPPORTED",
+            "CORE_QUERY_INLINE_TOKENS_DEPRECATED",
+            "CORE_QUERY_PAGE_ENVELOPE_TOO_LARGE",
+            "CORE_QUERY_PAGE_ENTRY_TOO_LARGE",
             "CORE_CURSOR_INVALID",
             "CORE_ARTIFACT_NOT_FOUND"
           ]

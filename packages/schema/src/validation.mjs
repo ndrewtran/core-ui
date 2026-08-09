@@ -1,4 +1,4 @@
-import { canonicalJson } from './canonical.mjs';
+import { canonicalJson, parseJsonStrict, sha256Digest } from './canonical.mjs';
 import { platformSafetyRequirementIds } from '../generated/platform-safety-contract.mjs';
 import {
   loadFamilySchema,
@@ -23,6 +23,41 @@ function isObject(value) {
 
 function sameValue(left, right) {
   return canonicalJson(left) === canonicalJson(right);
+}
+
+const SEMVER_PATTERN = /^(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)(?:-(?:0|[1-9]\d*|\d*[A-Za-z-][0-9A-Za-z-]*)(?:\.(?:0|[1-9]\d*|\d*[A-Za-z-][0-9A-Za-z-]*))*)?(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?$/u;
+
+function decodeSectionCursor(value) {
+  const match = /^c1\.([A-Za-z0-9_-]+)\.([a-f0-9]{64})$/u.exec(value);
+  if (!match) throw new Error('cursor syntax');
+  const bytes = Buffer.from(match[1], 'base64url').toString('utf8');
+  if (Buffer.from(bytes, 'utf8').toString('base64url') !== match[1]) {
+    throw new Error('cursor encoding');
+  }
+  if (sha256Digest(bytes).slice(7) !== match[2]) throw new Error('cursor digest');
+  const payload = parseJsonStrict(bytes);
+  const keys = [
+    'catalogDigest',
+    'nextPosition',
+    'queryApiVersion',
+    'section',
+    'selectorDigest',
+    'tokenSourceContentRevision',
+  ];
+  if (
+    !isObject(payload)
+    || canonicalJson(Object.keys(payload).sort()) !== canonicalJson(keys)
+    || payload.queryApiVersion !== '1.2.0'
+    || !/^sha256:[a-f0-9]{64}$/u.test(payload.catalogDigest)
+    || !/^sha256:[a-f0-9]{64}$/u.test(payload.tokenSourceContentRevision)
+    || !['tokens', 'source-crosswalk'].includes(payload.section)
+    || !/^sha256:[a-f0-9]{64}$/u.test(payload.selectorDigest)
+    || !Number.isInteger(payload.nextPosition)
+    || payload.nextPosition < 1
+    || payload.nextPosition > 4294967295
+    || canonicalJson(payload) !== bytes
+  ) throw new Error('cursor payload');
+  return payload;
 }
 
 function matchesType(value, type) {
@@ -116,9 +151,15 @@ function evaluate(schema, value, path, currentFile, issues, documents) {
     if (schema.pattern && !new RegExp(schema.pattern).test(value)) {
       issues.push({ path, message: `does not match ${schema.pattern}` });
     }
+    if (schema.maxLength !== undefined && value.length > schema.maxLength) {
+      issues.push({ path, message: `must have length at most ${schema.maxLength}` });
+    }
   }
   if (typeof value === 'number' && schema.minimum !== undefined && value < schema.minimum) {
     issues.push({ path, message: `must be at least ${schema.minimum}` });
+  }
+  if (typeof value === 'number' && schema.maximum !== undefined && value > schema.maximum) {
+    issues.push({ path, message: `must be at most ${schema.maximum}` });
   }
   if (Array.isArray(value)) {
     if (schema.minItems !== undefined && value.length < schema.minItems) {
@@ -364,6 +405,143 @@ function semanticIssues(family, value, ownership) {
         }
       }
     });
+  }
+  if (family === 'section-page') {
+    const { entries, meta, page } = value;
+    if (
+      typeof meta?.catalogVersion === 'string'
+      && (
+        !SEMVER_PATTERN.test(meta.catalogVersion)
+        || Buffer.byteLength(meta.catalogVersion, 'utf8') > 64
+      )
+    ) issues.push({ path: '$/meta/catalogVersion', message: 'must be SemVer within 64 UTF-8 bytes' });
+    if (
+      typeof meta?.artifactId === 'string'
+      && Buffer.byteLength(meta.artifactId, 'utf8') > 256
+    ) issues.push({ path: '$/meta/artifactId', message: 'must be within 256 UTF-8 bytes' });
+    if (entries?.status === 'available') {
+      const items = entries.items ?? [];
+      if (meta?.section === 'tokens') {
+        const complete = items.every((item) => (
+          isObject(item) && Object.hasOwn(item, 'id') && Object.hasOwn(item, 'definition')
+        ));
+        if (!complete) {
+          issues.push({ path: '$/entries/items', message: 'tokens section requires complete token entries' });
+        }
+        const ids = complete ? items.map(({ id }) => id) : [];
+        if (complete && canonicalJson(ids) !== canonicalJson([...ids].sort())) {
+          issues.push({ path: '$/entries/items', message: 'token entries must use bytewise ID order' });
+        }
+      } else if (meta?.section === 'source-crosswalk') {
+        const complete = items.every((item) => (
+          isObject(item) && Object.hasOwn(item, 'occurrence') && Object.hasOwn(item, 'disposition')
+        ));
+        if (!complete) {
+          issues.push({ path: '$/entries/items', message: 'source-crosswalk section requires complete occurrence entries' });
+        }
+        const order = complete ? items.map((item) => ({
+          ordinal: item.occurrence?.ordinal,
+          bytes: canonicalJson(item),
+        })) : [];
+        if (complete && order.some((item, index) => index > 0 && (
+          item.ordinal < order[index - 1].ordinal
+          || (item.ordinal === order[index - 1].ordinal && item.bytes <= order[index - 1].bytes)
+        ))) {
+          issues.push({
+            path: '$/entries/items',
+            message: 'source-crosswalk entries must use strict ordinal and canonical-byte order',
+          });
+        }
+      }
+    }
+    if (entries?.status === 'absent' && meta?.section !== 'source-crosswalk') {
+      issues.push({ path: '$/entries/status', message: 'typed absence requires section source-crosswalk' });
+    }
+    if (page && entries) {
+      if (page.returned !== entries.items?.length) {
+        issues.push({ path: '$/page/returned', message: 'must equal entries.items length' });
+      }
+      const measuredEntryTokens = (entries.items ?? []).reduce(
+        (total, entry) => total + (canonicalJson(entry).match(/[\p{L}\p{N}_]+/gu)?.length ?? 0),
+        0,
+      );
+      if (page.entryTokens !== measuredEntryTokens) {
+        issues.push({ path: '$/page/entryTokens', message: 'must equal the complete-entry lexeme cost' });
+      }
+      if (page.position + page.returned > 4294967295) {
+        issues.push({ path: '$/page/returned', message: 'must not overflow the cursor position bound' });
+      }
+      if ((page.remaining > 0) !== (page.nextCursor !== null)) {
+        issues.push({ path: '$/page/nextCursor', message: 'must be non-null exactly when entries remain' });
+      }
+      if (page.nextCursor !== null && typeof page.nextCursor === 'string') {
+        try {
+          const cursor = decodeSectionCursor(page.nextCursor);
+          if (
+            cursor.nextPosition !== page.position + page.returned
+            || cursor.queryApiVersion !== meta?.queryApiVersion
+            || cursor.catalogDigest !== meta?.catalogDigest
+            || cursor.tokenSourceContentRevision !== meta?.tokenSourceContentRevision
+            || cursor.section !== meta?.section
+            || cursor.selectorDigest !== meta?.selectorDigest
+          ) {
+            issues.push({ path: '$/page/nextCursor', message: 'must bind the exact page continuation and metadata' });
+          }
+        } catch {
+          issues.push({ path: '$/page/nextCursor', message: 'must be one canonical integrity-bound section cursor' });
+        }
+      }
+      if (page.remaining > 0 && page.returned < 1) {
+        issues.push({ path: '$/page/returned', message: 'must make one-entry minimum progress' });
+      }
+      if (page.position === 4294967295 && page.nextCursor !== null) {
+        issues.push({ path: '$/page/nextCursor', message: 'maximum position must be terminal' });
+      }
+      if (entries.status === 'absent' && (
+        page.position !== 0
+        || page.returned !== 0
+        || page.remaining !== 0
+        || page.nextCursor !== null
+        || page.entryTokens !== 0
+      )) {
+        issues.push({ path: '$/page', message: 'typed absence must use the canonical empty page' });
+      }
+    }
+  }
+  if (family === 'token-section-page-budget-profile') {
+    const expectedProfileId = {
+      '1.2.0': 'core-ui-token-section-page-budget-1-2-0',
+      '2.0.0': 'core-ui-token-section-page-budget-2-0-0',
+    }[value.queryApiVersion];
+    if (expectedProfileId !== value.id) {
+      issues.push({ path: '$/id', message: 'must identify the exact queryApiVersion budget profile' });
+    }
+    const expectedBindings = [
+      'queryApiVersion',
+      'catalogDigest',
+      'tokenSourceContentRevision',
+      'section',
+      'selectorDigest',
+      'nextPosition',
+    ];
+    if (canonicalJson(value.cursorBindings) !== canonicalJson(expectedBindings)) {
+      issues.push({ path: '$/cursorBindings', message: 'must use the canonical cursor payload field order' });
+    }
+    if (value.maximumEntryTokens + value.envelopeReserveTokens !== value.densePageBudgetTokens) {
+      issues.push({ path: '$/densePageBudgetTokens', message: 'must equal entry budget plus envelope reserve' });
+    }
+    if (value.measuredWorstCaseEnvelopeTokens > value.envelopeReserveTokens) {
+      issues.push({ path: '$/measuredWorstCaseEnvelopeTokens', message: 'must fit within the envelope reserve' });
+    }
+    if (value.defaultItemLimit > value.maximumItemLimit) {
+      issues.push({ path: '$/defaultItemLimit', message: 'must not exceed maximumItemLimit' });
+    }
+    if (value.artifactIdMaximumLexemes > value.maximumEntryTokens) {
+      issues.push({ path: '$/artifactIdMaximumLexemes', message: 'must fit within the maximum entry budget' });
+    }
+    if (value.catalogVersionMaximumLexemes > value.envelopeReserveTokens) {
+      issues.push({ path: '$/catalogVersionMaximumLexemes', message: 'must fit within the envelope reserve' });
+    }
   }
   if (family === 'example') {
     const implementationPurposes = new Set(['generation', 'validation', 'migration']);

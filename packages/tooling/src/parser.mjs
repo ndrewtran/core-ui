@@ -5,10 +5,11 @@ import {
   helpText,
   parserMetadata,
 } from '../generated/command-surface.mjs';
+import { API_VERSION } from '@core-ui/schema';
 
 function usageError(ruleId, message, details, nextCommand = 'core --json') {
   return {
-    apiVersion: '1.1.0',
+    apiVersion: API_VERSION,
     type: 'error',
     error: {
       code: 'CORE_QUERY_INVALID',
@@ -189,7 +190,7 @@ export function parseCliArguments(args) {
     if (['catalog-digest', 'catalog-version', 'dense', 'help', 'json', 'project'].includes(option.name)) {
       continue;
     }
-    request[option.name] = values[option.name];
+    request[option.requestKey ?? option.name] = values[option.name];
   }
   return {
     kind: 'command',

@@ -137,8 +137,12 @@ function validateManifest(manifest) {
   if (
     !isObject(manifest)
     || manifest.schema !== SOURCE_MANIFEST_SCHEMA
+    || typeof manifest.authorityDecisionPath !== 'string'
     || typeof manifest.commandRegistryPath !== 'string'
+    || typeof manifest.pageBudgetProfilePath !== 'string'
     || typeof manifest.platformSafetyContractPath !== 'string'
+    || typeof manifest.queryApiVersion !== 'string'
+    || !Array.isArray(manifest.supportedQueryApiVersions)
     || !Array.isArray(manifest.records)
   ) {
     throw new AuthoringPolicyError(
@@ -146,7 +150,9 @@ function validateManifest(manifest) {
       'the declared catalog source manifest is invalid',
     );
   }
+  assertRelativePath(manifest.authorityDecisionPath, 'authorityDecisionPath');
   assertRelativePath(manifest.commandRegistryPath, 'commandRegistryPath');
+  assertRelativePath(manifest.pageBudgetProfilePath, 'pageBudgetProfilePath');
   assertRelativePath(manifest.platformSafetyContractPath, 'platformSafetyContractPath');
   for (const [index, entry] of manifest.records.entries()) {
     if (!isObject(entry) || typeof entry.family !== 'string') {
@@ -627,7 +633,9 @@ function schemaSources(authoring = {}) {
 }
 
 function isCatalogSource(context, path) {
-  return context.sourceManifest.commandRegistryPath === path
+  return context.sourceManifest.authorityDecisionPath === path
+    || context.sourceManifest.commandRegistryPath === path
+    || context.sourceManifest.pageBudgetProfilePath === path
     || context.sourceManifest.platformSafetyContractPath === path
     || context.sourceManifest.records.some((entry) => (
       entry.path === path || entry.sourcePath === path

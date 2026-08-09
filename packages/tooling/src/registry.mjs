@@ -1,5 +1,6 @@
 import {
   QUERY_RESPONSE_TYPES,
+  QUERY_API_VERSIONS,
   QUERY_ENVELOPE_SCHEMA_ID,
   QUERY_SELECTORS,
   canonicalJson,
@@ -12,7 +13,7 @@ const BASELINE_GLOBAL_OPTIONS = [
 ];
 const OUTPUT_OPTIONS = ['dense', 'help', 'json'];
 const RESOLUTION_OPTIONS = ['catalog-digest', 'catalog-version', 'project'];
-const BASELINE_SELECTORS = ['cursor', 'detail', 'limit', 'platform', 'purpose', 'section'];
+const BASELINE_SELECTORS = ['cursor', 'detail', 'limit', 'platform', 'purpose', 'query-api-version', 'section'];
 const UNAVAILABLE_COMMANDS = ['doctor', 'init', 'migrate', 'plan', 'validate'];
 const DETAILS = ['brief', 'compact', 'full'];
 const CATALOG_MANIFEST = getManifest({ detail: 'full' });
@@ -101,7 +102,7 @@ export function validateCommandRegistry(registry) {
     canonicalJson(registry.selectors.map(({ name }) => name).sort(compareText))
       === canonicalJson(BASELINE_SELECTORS),
     'CLI_OPTION_SURFACE_DRIFT',
-    'selectors must be exactly cursor, detail, limit, platform, purpose, and section',
+    'selectors must be exactly cursor, detail, limit, platform, purpose, query-api-version, and section',
   );
 
   for (const option of registry.globalOptions) {
@@ -127,7 +128,7 @@ export function validateCommandRegistry(registry) {
   for (const selector of registry.selectors) {
     assertKeys(
       selector,
-      ['name', 'flag', 'type', 'choices', 'default', 'minimum', 'maximum'],
+      ['name', 'flag', 'requestKey', 'type', 'choices', 'default', 'minimum', 'maximum'],
       `registry.selectors.${selector.name ?? 'unknown'}`,
     );
     if (QUERY_SELECTORS[selector.name]) {
@@ -135,6 +136,13 @@ export function validateCommandRegistry(registry) {
         canonicalJson(selector.choices) === canonicalJson(QUERY_SELECTORS[selector.name]),
         'CLI_SELECTOR_SCHEMA_DRIFT',
         `${selector.name} choices must come from @core-ui/schema`,
+      );
+    }
+    if (selector.name === 'query-api-version') {
+      assert(
+        canonicalJson(selector.choices) === canonicalJson(QUERY_API_VERSIONS),
+        'CLI_SELECTOR_SCHEMA_DRIFT',
+        'query-api-version choices must come from @core-ui/schema',
       );
     }
     assert(
@@ -213,7 +221,9 @@ export function validateCommandRegistry(registry) {
     );
     const operationRequestKeys = [
       ...command.arguments.map(({ name, requestKey }) => requestKey ?? name),
-      ...command.options.filter((name) => !BASELINE_GLOBAL_OPTIONS.includes(name)),
+      ...command.options
+        .filter((name) => !BASELINE_GLOBAL_OPTIONS.includes(name))
+        .map((name) => optionsByName.get(name).requestKey ?? name),
     ].sort(compareText);
     assert(
       canonicalJson(operationRequestKeys)

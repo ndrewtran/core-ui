@@ -12,6 +12,7 @@
     "CORE_CATALOG_DECLARATION_DRIFT",
     "CORE_CATALOG_INTEGRITY_MISMATCH",
     "CORE_CATALOG_RESOLUTION_AMBIGUOUS",
+    "CORE_QUERY_API_VERSION_UNSUPPORTED",
     "CORE_CATALOG_INCOMPATIBLE"
   ],
   "catalogs": [
@@ -21,7 +22,8 @@
       "version": "1.0.0",
       "catalogVersion": "1.0.0",
       "catalogDigest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-      "queryApiVersion": "1.1.0",
+      "queryApiVersion": "1.2.0",
+      "supportedQueryApiVersions": ["1.1.0", "1.2.0"],
       "schemaRange": "^2.0.0",
       "sourceRevision": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
       "provenance": {
@@ -48,6 +50,7 @@
       "catalogVersion": "1.1.0",
       "catalogDigest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
       "queryApiVersion": "2.0.0",
+      "supportedQueryApiVersions": ["1.1.0", "1.2.0", "2.0.0"],
       "schemaRange": "^3.0.0",
       "sourceRevision": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
       "provenance": {
@@ -142,7 +145,7 @@
       "id": "release-compatible",
       "releaseVersion": "1.0.0",
       "schemaVersion": "2.0.0",
-      "queryApiVersion": "1.1.0",
+      "queryApiVersion": "1.2.0",
       "tokenContractVersion": "1.1.0",
       "sourceRevision": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
       "catalog": {
@@ -263,7 +266,7 @@
         "type": "error",
         "code": "CORE_CATALOG_DECLARATION_DRIFT",
         "secondaryCodes": [
-          "CORE_CATALOG_INCOMPATIBLE"
+          "CORE_QUERY_API_VERSION_UNSUPPORTED"
         ],
         "nextCommand": {
           "command": "pnpm --dir apps/consumer why @core-ui/catalog",
@@ -699,6 +702,60 @@
         "secondaryCodes": [],
         "nextCommand": {
           "command": "pnpm --dir . list --depth 0",
+          "effect": "read-only",
+          "requiresConfirmation": false
+        }
+      }
+    },
+    {
+      "id": "query-api-version-unsupported",
+      "selectedWorkspace": "apps/consumer",
+      "workspaceRoot": ".",
+      "workspaces": [
+        {
+          "path": ".",
+          "name": "fixture-root",
+          "packageManager": "pnpm@10.33.0",
+          "catalogRange": null
+        },
+        {
+          "path": "apps/consumer",
+          "name": "consumer",
+          "packageManager": null,
+          "catalogRange": "1.0.0"
+        }
+      ],
+      "lockfile": [
+        {
+          "workspace": "apps/consumer",
+          "name": "@core-ui/catalog",
+          "version": "1.0.0",
+          "integrity": "sha512:catalog-compatible"
+        }
+      ],
+      "installed": [
+        {
+          "workspace": "apps/consumer",
+          "name": "@core-ui/catalog",
+          "version": "1.0.0",
+          "kind": "catalog",
+          "fixture": "catalog-compatible",
+          "relativePath": "apps/consumer/node_modules/@core-ui/catalog",
+          "observedDigest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        }
+      ],
+      "caches": [],
+      "request": {
+        "bindings": [],
+        "cache": null,
+        "queryApiVersion": "2.0.0"
+      },
+      "expected": {
+        "type": "error",
+        "code": "CORE_QUERY_API_VERSION_UNSUPPORTED",
+        "secondaryCodes": [],
+        "nextCommand": {
+          "command": "pnpm --dir apps/consumer why @core-ui/catalog",
           "effect": "read-only",
           "requiresConfirmation": false
         }

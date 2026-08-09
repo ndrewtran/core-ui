@@ -1,6 +1,6 @@
 {
   "name": "@core-ui/catalog",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "private": true,
   "type": "module",
   "engines": {
@@ -11,7 +11,8 @@
     "./compiler": "./src/compiler.mjs",
     "./bundle": "./generated/catalog.mjs",
     "./catalog.json": "./generated/catalog.json",
-    "./catalog-package.json": "./generated/catalog-package.json"
+    "./catalog-package.json": "./generated/catalog-package.json",
+    "./token-section-page-budget-profile.json": "./token-section-page-budget-profile.json"
   },
   "coreUi": {
     "catalogPackage": "./generated/catalog-package.json"

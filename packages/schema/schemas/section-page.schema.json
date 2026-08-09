@@ -1,0 +1,155 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://core-ui.dev/schema/section-page.schema.json",
+  "title": "Core UI artifact section page",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "responseType", "meta", "entries", "page", "diagnostics"],
+  "$defs": {
+    "digest": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+    "tokenId": { "type": "string", "pattern": "^(reference|semantic|component)\\.[a-z][a-z0-9]*(?:\\.[a-z][a-z0-9-]*)+$" },
+    "tokenEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "definition"],
+      "properties": {
+        "id": { "$ref": "#/$defs/tokenId" },
+        "definition": { "$ref": "token-source.schema.json#/$defs/token" }
+      }
+    },
+    "occurrence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ordinal", "file", "selector", "name", "value"],
+      "properties": {
+        "ordinal": { "type": "integer", "minimum": 1, "maximum": 4294967295 },
+        "file": { "type": "string", "minLength": 1, "maxLength": 256 },
+        "selector": { "type": "string", "minLength": 1, "maxLength": 512 },
+        "name": { "type": "string", "minLength": 1, "maxLength": 256 },
+        "value": { "type": "string", "minLength": 1, "maxLength": 2048 }
+      }
+    },
+    "targets": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["web.html", "web.react", "native.ios", "native.android", "native.react-native-web"],
+      "properties": {
+        "web.html": { "enum": ["direct", "deferred", "rejected"] },
+        "web.react": { "enum": ["direct", "deferred", "rejected"] },
+        "native.ios": { "enum": ["direct", "deferred", "rejected"] },
+        "native.android": { "enum": ["direct", "deferred", "rejected"] },
+        "native.react-native-web": { "enum": ["direct", "deferred", "rejected"] }
+      }
+    },
+    "admittedCrosswalkEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["occurrence", "disposition", "coreTokenId", "reason", "targets"],
+      "properties": {
+        "occurrence": { "$ref": "#/$defs/occurrence" },
+        "disposition": { "enum": ["adopt", "adapt"] },
+        "coreTokenId": { "$ref": "#/$defs/tokenId" },
+        "groupId": { "type": "string", "minLength": 1, "maxLength": 256 },
+        "reason": { "type": "string", "minLength": 1, "maxLength": 2048 },
+        "targets": { "$ref": "#/$defs/targets" }
+      }
+    },
+    "unadmittedCrosswalkEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["occurrence", "disposition", "reason", "targets"],
+      "properties": {
+        "occurrence": { "$ref": "#/$defs/occurrence" },
+        "disposition": { "enum": ["defer", "reject"] },
+        "groupId": { "type": "string", "minLength": 1, "maxLength": 256 },
+        "reason": { "type": "string", "minLength": 1, "maxLength": 2048 },
+        "targets": { "$ref": "#/$defs/targets" }
+      }
+    },
+    "sourceCrosswalkEntry": {
+      "oneOf": [
+        { "$ref": "#/$defs/admittedCrosswalkEntry" },
+        { "$ref": "#/$defs/unadmittedCrosswalkEntry" }
+      ]
+    },
+    "availableEntries": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "items"],
+      "properties": {
+        "status": { "const": "available" },
+        "items": {
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "oneOf": [
+              { "$ref": "#/$defs/tokenEntry" },
+              { "$ref": "#/$defs/sourceCrosswalkEntry" }
+            ]
+          }
+        }
+      }
+    },
+    "undeclaredSourceCrosswalk": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "reason", "tokenSourceSchemaVersion", "items"],
+      "properties": {
+        "status": { "const": "absent" },
+        "reason": { "const": "token-source-schema-does-not-declare-source-crosswalk" },
+        "tokenSourceSchemaVersion": { "const": "2.0.0" },
+        "items": { "type": "array", "maxItems": 0 }
+      }
+    },
+    "omittedSourceCrosswalk": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "reason", "tokenSourceSchemaVersion", "items"],
+      "properties": {
+        "status": { "const": "absent" },
+        "reason": { "const": "token-source-omits-source-crosswalk" },
+        "tokenSourceSchemaVersion": { "const": "2.1.0" },
+        "items": { "type": "array", "maxItems": 0 }
+      }
+    }
+  },
+  "properties": {
+    "schemaVersion": { "const": "1.2.0" },
+    "responseType": { "const": "artifact.detail.section-page" },
+    "meta": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["queryApiVersion", "catalogVersion", "catalogDigest", "tokenSourceContentRevision", "artifactId", "section", "selectorDigest"],
+      "properties": {
+        "queryApiVersion": { "const": "1.2.0" },
+        "catalogVersion": { "type": "string", "minLength": 5, "maxLength": 64 },
+        "catalogDigest": { "$ref": "#/$defs/digest" },
+        "tokenSourceContentRevision": { "$ref": "#/$defs/digest" },
+        "artifactId": { "$ref": "artifact-ref.schema.json", "maxLength": 256 },
+        "section": { "enum": ["tokens", "source-crosswalk"] },
+        "selectorDigest": { "$ref": "#/$defs/digest" }
+      }
+    },
+    "entries": {
+      "oneOf": [
+        { "$ref": "#/$defs/availableEntries" },
+        { "$ref": "#/$defs/undeclaredSourceCrosswalk" },
+        { "$ref": "#/$defs/omittedSourceCrosswalk" }
+      ]
+    },
+    "page": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["position", "returned", "remaining", "nextCursor", "entryTokens", "densePageBudget"],
+      "properties": {
+        "position": { "type": "integer", "minimum": 0, "maximum": 4294967295 },
+        "returned": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "remaining": { "type": "integer", "minimum": 0, "maximum": 4294967295 },
+        "nextCursor": { "anyOf": [{ "type": "string", "pattern": "^c1\\.[A-Za-z0-9_-]+\\.[a-f0-9]{64}$", "maxLength": 556 }, { "type": "null" }] },
+        "entryTokens": { "type": "integer", "minimum": 0, "maximum": 1536 },
+        "densePageBudget": { "const": 2048 }
+      }
+    },
+    "diagnostics": { "type": "array", "maxItems": 0, "items": { "$ref": "diagnostic.schema.json" } }
+  }
+}
