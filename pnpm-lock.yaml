@@ -95,7 +95,11 @@ importers:
         specifier: 1.62.1
         version: 1.62.1
 
-  tooling/audits/repository-policy: {}
+  tooling/audits/repository-policy:
+    dependencies:
+      '@core-ui/schema':
+        specifier: workspace:*
+        version: link:../../../packages/schema
 
 packages:
 
