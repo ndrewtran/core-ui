@@ -1588,6 +1588,31 @@ supersession is represented by a separate, signed, append-only
 effective time, public reason code, disclosure class, and optional replacement
 digest. It never edits the original evidence record or release manifest.
 
+Before G1.9 enables the signed catalog/query/release `EvidenceAdvisory`
+surface, repository proof may use a narrower internal
+`EvidenceApplicabilitySupersession` only to close a retained applicability or
+recertification chain after a human-accepted authority change. It is not an
+`EvidenceAdvisory`, cannot withdraw the historical result, does not enter a
+catalog or release manifest, and cannot satisfy current evidence, promotion,
+or support. The content-addressed certificate binds the exact historical index
+digest, terminal recertification digest when present, superseded and current
+applicability manifests, affected assertion IDs, exact source commit/tree, and
+an immutable repository decision record containing the provider-supplied
+designated owner's stable actor identity, comment identity and timestamp, and
+decision-body digest. The grammar is closed and the verifier rejects unknown fields,
+malformed identities, forks, cycles, duplicate references, stale current
+manifests, and a certificate that does not represent an actual applicability
+change.
+
+The certificate closes that historical recertification chain permanently: a
+later source-only drift may append one digest-linked supersession certificate,
+but no later passing recertification may extend the superseded chain. Compatible
+replacement proof starts a new immutable evidence index bound to its new
+authority/source profile. The original index, records, artifacts,
+recertifications, and certificates remain byte-for-byte historical. Enabling
+the public signed advisory surface still requires the complete G1.9 contract;
+this internal certificate does not satisfy `SCOPE-TRUST-ADVISORY` by itself.
+
 Queries resolve evidence with `evidenceStatus: valid | superseded | withdrawn`
 and surface the advisory without exposing restricted detail. Supersession keeps
 the historical result valid for its original release unless the advisory says
@@ -1696,6 +1721,7 @@ Breaking-change scope is classified before release:
 | Add a supported runtime profile | Catalog minor and affected package minor. | Profile-specific behavior, package, and accessibility evidence. |
 | Change `direct`/`adapted`/`native-alternative` behavior incompatibly | Catalog major and affected renderer major. | Platform review, updated binding evidence, examples, and migration guidance. |
 | Change a public token name, type, layer, or semantic meaning incompatibly | Token contract major; catalog and affected renderers major when their public contract changes. | Theme impact analysis across supported profiles and migration guidance. |
+| Remove an inline query-response field | Deprecate in an additive query-API minor, retain the field and emit replacement guidance for one complete accepted notice release, then remove in the next query-API major at earliest. | Historical version negotiation, retained prior responses, generated type/help changes, migration guidance, and API/human/JSON/dense parity evidence. |
 | Implementation fix with no public contract change | Renderer patch; no catalog content version change unless canonical guidance or compatibility facts change. | Affected regression and package evidence; release manifest points to new evidence digests. |
 | Editorial or search metadata correction | Catalog patch; no renderer release. | Schema/search checks; no behavioral migration. |
 
@@ -1740,6 +1766,27 @@ tools never rewrite source records silently while reading or querying them.
 Deprecated fields remain readable for their declared compatibility window and
 cannot be repurposed with new meaning.
 
+Query-response deprecation follows the same rule. `@core-ui/schema` owns each
+versioned request/response grammar. `@core-ui/catalog` owns response-version
+negotiation and historical query semantics; adapters cannot reinterpret them.
+Query API `1.2.0` is the
+required additive notice release for moving large token-source payloads out of
+the `artifact.detail` full-response `tokens` member. It retains the complete
+query API `1.1.0` inline member, adds the bounded `tokens` and
+`source-crosswalk` sections, and emits
+`CORE_QUERY_INLINE_TOKENS_DEPRECATED` with replacement guidance. Only after
+that exact release has complete retained Gate 0 evidence and human acceptance
+may query API `2.0.0` remove inline `tokens`. The catalog retains and negotiates
+historical v1.1, v1.2, and v2 behavior. Tooling selects a compatible installed
+catalog, forwards explicit version intent, renders the returned response, and
+rejects unsupported tuples without silently translating response or cursor
+meaning. The v1.2 `source-crosswalk` section returns a typed derived `absent`
+status for a token-source `2.0.0` record and for a `2.1.0` record that omits the
+authored field; clients never infer absence from a missing response member.
+Explicitly negotiated v1.1/v1.2 inline responses are retained compatibility
+artifacts: they are exempt from the v2 sectional page budget, are never the
+current/default response, and do not satisfy proof of the v2 bounded path.
+
 Extension bytes are canonical input, so changing them updates the owning
 record's `contentRevision` and, when published, requires at least a catalog
 patch plus a new digest. An
@@ -1776,6 +1823,79 @@ is acyclic and may point from component to semantic to reference, never in the
 opposite direction. A same-layer alias is allowed only for documented semantic
 equivalence or a deprecation bridge; it cannot conceal a role change.
 Components consume semantic or component tokens only.
+
+The first-party default theme uses Tale UI's non-semantic foundation tokens as
+a pinned migration baseline, not as a live dependency or second owner. The
+baseline is Tale UI commit
+`94bf62a26c02605c8928dfeb24f0ddc4be1c92fd`, source
+`packages/tokens/tokens.json`, SHA-256
+`83b72fc79b34932ae1afa44d21f74460a23fa693407bc319fdfafb3a2bb64a86`.
+It contains 693 declaration occurrences: 692 custom-property occurrences, 644
+unique custom-property names, and one ordinary `html { font-size: 100% }`
+declaration. Those occurrences are candidates, not automatically Core tokens.
+
+The canonical Core token source under `catalog/tokens/` owns the complete
+Tale-to-Core classification. Token-source schema `2.1.0` adds one optional,
+closed `sourceCrosswalk` field; it is mandatory for the corrected default-theme
+source. A source with no migration baseline omits the authored field, while the
+query projection returns a typed derived `absent` status. Each Tale occurrence
+is identified by source file, selector, declaration name, value, and a stable
+source-order ordinal and appears exactly once. Every entry has exactly one
+`adopt`, `adapt`, `defer`, or `reject` disposition and a non-empty reason.
+Repeated names become one logical token or mode only through an explicit group;
+an occurrence belongs to at most one group, every group has at least two
+members, and its mode/member mapping is complete and duplicate-free. `adopt`
+and `adapt` require exactly one resulting Core reference-token ID; `defer` and
+`reject` forbid a Core token ID and make no runtime-token claim. Every admitted
+Core token owns its stable Core ID, type, unit, meaning, mode applicability, and
+override policy. Tale provenance is authored only by `sourceCrosswalk`.
+
+`sourceCrosswalk` is the sole authored Tale provenance and migration metadata.
+Its canonical preimage is the pinned baseline identity, occurrence entries in
+stable occurrence order, and group definitions in stable group-ID order. The
+derived `sourceCrosswalkDigest` is SHA-256 of that canonical JSON preimage; the
+complete field also enters the token source's `contentRevision` but creates no
+independent revision axis. Token-level provenance, catalog projections, and
+package provenance digests derive from this owner and are never authored again.
+The field does not enter token IDs, semantic
+dependency closure, requirement sets, search ranking, default summaries, or
+runtime CSS/native values. Package and catalog metadata may expose the derived
+digest without copying its entries. CSS variable names and
+Tale file groupings are migration inputs, not permanent Core public API, a
+fourth token layer, or an ongoing synchronization promise. Web CSS and native
+theme objects continue to derive only from admitted Core token facts; native
+never parses Tale or Core CSS.
+
+The optional field is a token-source schema minor from `2.0.0` to `2.1.0`.
+Existing sources remain valid, corrected sources migrate through an explicit,
+deterministic, idempotent `2.0.0 -> 2.1.0` source migrator, and readers never
+rewrite a source silently. Removing or changing the field incompatibly requires
+a token-source schema major, migration guidance, affected-closure proof, and
+preserved historical retrieval.
+
+Under current query API v2 behavior, complete token and crosswalk populations
+are retrieved only through the versioned `tokens` and `source-crosswalk`
+sections of `getArtifact` / `core get`. Explicit version negotiation may still
+retrieve the retained v1.1/v1.2 inline compatibility members described above;
+those historical responses cannot become the default or be represented as
+section-budget proof. `@core-ui/schema` owns the closed
+`TokenSectionPageBudgetProfile` grammar;
+the catalog owns the canonical profile values and page selection. The profile
+contains the query API version, Core lexer version, canonical entry-order/cost
+rules, normalized worst-case envelope preimage and reserve, default and maximum
+item limits, minimum-progress rule, 2,048-token dense-page budget, and stable
+oversize code `CORE_QUERY_PAGE_ENTRY_TOO_LARGE`. Its canonical JSON enters the
+catalog digest, so it adds no independent revision axis. Section entries use
+stable canonical ordering. A cursor binds the query
+API version, catalog digest, token-source `contentRevision`, section, selector
+state, and next position; invalid, cross-version, or cross-digest cursors fail
+closed. `limit` is only an item-count ceiling. Using the profile, the catalog
+query kernel selects the greatest non-empty canonical-entry prefix that fits
+after the envelope reserve. No field or entry is truncated. A single entry that
+cannot fit fails with the stable source-linked oversize diagnostic. Tooling
+renders the already selected page and proves parity; it never chooses a page
+boundary. API, human, JSON, and dense pages remain equivalent and continuation
+enumerates the complete source without an unbounded response.
 
 Each binding spec references a canonical token recipe. The compiler resolves
 that recipe into a `TokenRequirementSet` containing:

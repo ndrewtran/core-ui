@@ -36,6 +36,7 @@ async function fixture({
       'platform-specific install\n',
     );
     applicabilityManifest = {
+      algorithm: 'sha256',
       paths: ['packages/source'],
       profile: 'core-ui-path-manifest-v1',
       sha256: `sha256:${sha256(canonicalJson([{
@@ -61,6 +62,7 @@ async function fixture({
   await writeFile(
     join(root, 'tests/evidence/g0.0/index.json'),
     canonicalJson({
+      milestone: 'G0.0',
       records: [{
         assertionId: 'E-G0.0-01',
         path: recordPath,
@@ -82,6 +84,7 @@ async function addRecertification(root, mutate = (value) => value) {
   const currentBytes = 'repository-owned-current\n';
   await writeFile(join(root, ownedPath), currentBytes);
   const currentApplicabilityManifest = {
+    algorithm: 'sha256',
     paths: historicalIndex.applicabilityManifest.paths,
     profile: 'core-ui-path-manifest-v1',
     sha256: `sha256:${sha256(canonicalJson([{
@@ -130,6 +133,7 @@ async function addRecertificationContinuation(
   const currentBytes = `repository-owned-${name}-current\n`;
   await writeFile(join(root, ownedPath), currentBytes);
   const currentApplicabilityManifest = {
+    algorithm: 'sha256',
     paths: historicalIndex.applicabilityManifest.paths,
     profile: 'core-ui-path-manifest-v1',
     sha256: `sha256:${sha256(canonicalJson([{
@@ -176,9 +180,122 @@ async function addRecertificationContinuation(
   return { recertification, recertificationBytes, recertificationPath };
 }
 
+async function addApplicabilitySupersession(
+  root,
+  {
+    recertification,
+    directory = 'supersession',
+    historicalPath = 'tests/evidence/g0.0/index.json',
+    name = 'G0.0',
+    mutateAuthorityDecision = (value) => value,
+    previousSupersession,
+    mutate = (value) => value,
+  } = {},
+) {
+  const historicalBytes = await readFile(join(root, historicalPath), 'utf8');
+  const historicalIndex = JSON.parse(historicalBytes);
+  const ownedPath = 'packages/source/owned.txt';
+  const currentBytes = `repository-owned-${directory}-${name}\n`;
+  await writeFile(join(root, ownedPath), currentBytes);
+  const currentApplicabilityManifest = {
+    algorithm: 'sha256',
+    paths: historicalIndex.applicabilityManifest.paths,
+    profile: 'core-ui-path-manifest-v1',
+    sha256: `sha256:${sha256(canonicalJson([{
+      path: ownedPath,
+      sha256: `sha256:${sha256(currentBytes)}`,
+    }]))}`,
+  };
+  const supersededApplicabilityManifest = previousSupersession
+    ? previousSupersession.supersession.currentApplicabilityManifest
+    : recertification?.recertification.currentApplicabilityManifest
+      ?? historicalIndex.applicabilityManifest;
+  const supersessionPath = `tests/evidence/${directory}/supersessions/${name}.json`;
+  const authorityDecisionPath = 'decisions/0002-tale-token-authority.json';
+  const authorityDecision = mutateAuthorityDecision({
+    bodySha256: `sha256:${'c'.repeat(64)}`,
+    commentId: 5229802192,
+    commentNodeId: 'IC_fixture',
+    createdAt: '2026-08-09T04:41:54Z',
+    decisionId: 'core-ui:decision:0002',
+    issueNumber: 39,
+    outcome: 'accepted',
+    owner: 'ndrewtran',
+    ownerNodeId: 'U_fixture',
+    provider: 'github',
+    repository: 'ndrewtran/core-ui',
+    schema: 'core-ui-authority-decision-v1',
+    url: 'https://github.com/ndrewtran/core-ui/issues/39#issuecomment-5229802192',
+  });
+  const authorityDecisionBytes = canonicalJson(authorityDecision);
+  await mkdir(join(root, 'decisions'), { recursive: true });
+  await writeFile(join(root, authorityDecisionPath), authorityDecisionBytes);
+  const supersession = mutate({
+    affectedAssertions: historicalIndex.records
+      .map(({ assertionId }) => assertionId)
+      .sort(),
+    authorization: {
+      path: authorityDecisionPath,
+      sha256: `sha256:${sha256(authorityDecisionBytes)}`,
+    },
+    currentApplicabilityManifest,
+    disclosureClass: 'public-sanitized',
+    effectiveAt: '2026-08-09T04:41:54Z',
+    evidenceStatus: 'superseded',
+    historicalIndex: {
+      path: historicalPath,
+      sha256: `sha256:${sha256(historicalBytes)}`,
+    },
+    owner: 'ndrewtran',
+    ...(previousSupersession ? {
+      previousSupersession: {
+        path: previousSupersession.supersessionPath,
+        sha256: `sha256:${sha256(previousSupersession.supersessionBytes)}`,
+      },
+    } : {}),
+    reasonCode: 'governing-authority-changed',
+    replacementPlan: ['TALE-TOKEN-A', 'TALE-TOKEN-B', 'TALE-TOKEN-C'],
+    replacementStatus: 'pending',
+    schema: 'core-ui-evidence-applicability-supersession-v1',
+    sourceRevision: 'a'.repeat(40),
+    sourceTree: 'b'.repeat(40),
+    supersededApplicabilityManifest,
+    ...(!previousSupersession && recertification ? {
+      supersededRecertification: {
+        path: recertification.recertificationPath,
+        sha256: `sha256:${sha256(recertification.recertificationBytes)}`,
+      },
+    } : {}),
+  });
+  const supersessionBytes = canonicalJson(supersession);
+  await mkdir(join(root, `tests/evidence/${directory}/supersessions`), { recursive: true });
+  await writeFile(join(root, supersessionPath), supersessionBytes);
+  await writeFile(join(root, `tests/evidence/${directory}/index.json`), canonicalJson({
+    supersessions: [{
+      milestone: 'G0.0',
+      path: supersessionPath,
+      sha256: `sha256:${sha256(supersessionBytes)}`,
+    }],
+    records: [],
+    schema: 'core-ui-evidence-index-v1',
+    sourceRevision: 'a'.repeat(40),
+    sourceTree: 'b'.repeat(40),
+  }));
+  return { supersession, supersessionBytes, supersessionPath };
+}
+
+async function assertEvidenceError(promise, code) {
+  await assert.rejects(promise, (error) => {
+    assert.ok(error instanceof EvidenceIntegrityError);
+    assert.equal(error.code, code);
+    return true;
+  });
+}
+
 test('content-addressed evidence index verifies canonical records and artifacts', async () => {
   const { root } = await fixture();
   assert.deepEqual(await verifyEvidence(root), {
+    supersessionCount: 0,
     indexCount: 1,
     recordCount: 1,
     artifactCount: 1,
@@ -189,6 +306,7 @@ test('content-addressed evidence index verifies canonical records and artifacts'
 test('content-addressed evidence verifies one shared validation result', async () => {
   const { root } = await fixture({ validation: true });
   assert.deepEqual(await verifyEvidence(root), {
+    supersessionCount: 0,
     indexCount: 1,
     recordCount: 1,
     artifactCount: 1,
@@ -199,6 +317,7 @@ test('content-addressed evidence verifies one shared validation result', async (
 test('applicability manifests ignore platform-specific install directories', async () => {
   const { root } = await fixture({ applicability: true });
   assert.deepEqual(await verifyEvidence(root), {
+    supersessionCount: 0,
     indexCount: 1,
     recordCount: 1,
     artifactCount: 1,
@@ -232,6 +351,7 @@ test('append-only recertification preserves a stale historical index', async () 
   const { root } = await fixture({ applicability: true });
   await addRecertification(root);
   assert.deepEqual(await verifyEvidence(root), {
+    supersessionCount: 0,
     indexCount: 2,
     recordCount: 1,
     artifactCount: 1,
@@ -244,6 +364,7 @@ test('append-only recertification extends through one digest-linked leaf', async
   const previous = await addRecertification(root);
   await addRecertificationContinuation(root, previous);
   assert.deepEqual(await verifyEvidence(root), {
+    supersessionCount: 0,
     indexCount: 3,
     recordCount: 1,
     artifactCount: 1,
@@ -331,4 +452,323 @@ test('recertification rejects a stale current manifest', async () => {
     assert.equal(error.code, 'EVIDENCE_APPLICABILITY_MISMATCH');
     return true;
   });
+});
+
+test('append-only supersession preserves a superseded historical index', async () => {
+  const { root } = await fixture({ applicability: true });
+  await addApplicabilitySupersession(root);
+  assert.deepEqual(await verifyEvidence(root), {
+    supersessionCount: 1,
+    indexCount: 2,
+    recordCount: 1,
+    artifactCount: 1,
+    recertificationCount: 0,
+  });
+});
+
+test('append-only supersession supersedes one exact terminal recertification', async () => {
+  const { root } = await fixture({ applicability: true });
+  const recertification = await addRecertification(root);
+  await addApplicabilitySupersession(root, { recertification });
+  assert.deepEqual(await verifyEvidence(root), {
+    supersessionCount: 1,
+    indexCount: 3,
+    recordCount: 1,
+    artifactCount: 1,
+    recertificationCount: 1,
+  });
+});
+
+test('append-only supersession extends through one digest-linked leaf', async () => {
+  const { root } = await fixture({ applicability: true });
+  const previousSupersession = await addApplicabilitySupersession(root);
+  await addApplicabilitySupersession(root, {
+    directory: 'supersession-next',
+    previousSupersession,
+  });
+  assert.deepEqual(await verifyEvidence(root), {
+    supersessionCount: 2,
+    indexCount: 3,
+    recordCount: 1,
+    artifactCount: 1,
+    recertificationCount: 0,
+  });
+});
+
+test('supersession rejects a wrong historical digest', async () => {
+  const { root } = await fixture({ applicability: true });
+  await addApplicabilitySupersession(root, {
+    mutate: (value) => ({
+      ...value,
+      historicalIndex: {
+        ...value.historicalIndex,
+        sha256: `sha256:${'0'.repeat(64)}`,
+      },
+    }),
+  });
+  await assert.rejects(verifyEvidence(root), (error) => {
+    assert.ok(error instanceof EvidenceIntegrityError);
+    assert.equal(error.code, 'EVIDENCE_SUPERSESSION_INVALID');
+    return true;
+  });
+});
+
+test('supersession rejects a wrong terminal recertification', async () => {
+  const { root } = await fixture({ applicability: true });
+  const recertification = await addRecertification(root);
+  await addApplicabilitySupersession(root, {
+    recertification,
+    mutate: (value) => ({
+      ...value,
+      supersededRecertification: {
+        ...value.supersededRecertification,
+        sha256: `sha256:${'0'.repeat(64)}`,
+      },
+    }),
+  });
+  await assert.rejects(verifyEvidence(root), (error) => {
+    assert.ok(error instanceof EvidenceIntegrityError);
+    assert.equal(error.code, 'EVIDENCE_SUPERSESSION_INVALID');
+    return true;
+  });
+});
+
+test('supersession cannot supersede an unchanged applicability manifest', async () => {
+  const { root } = await fixture({ applicability: true });
+  await addApplicabilitySupersession(root, {
+    mutate: (value) => ({
+      ...value,
+      currentApplicabilityManifest: value.supersededApplicabilityManifest,
+    }),
+  });
+  await assert.rejects(verifyEvidence(root), (error) => {
+    assert.ok(error instanceof EvidenceIntegrityError);
+    assert.equal(error.code, 'EVIDENCE_SUPERSESSION_INVALID');
+    return true;
+  });
+});
+
+test('supersession rejects a stale terminal current manifest', async () => {
+  const { root } = await fixture({ applicability: true });
+  await addApplicabilitySupersession(root);
+  await writeFile(join(root, 'packages/source/owned.txt'), 'changed-after-supersession\n');
+  await assert.rejects(verifyEvidence(root), (error) => {
+    assert.ok(error instanceof EvidenceIntegrityError);
+    assert.equal(error.code, 'EVIDENCE_APPLICABILITY_MISMATCH');
+    return true;
+  });
+});
+
+test('supersession rejects unknown top-level and nested manifest fields', async () => {
+  const topLevel = await fixture({ applicability: true });
+  await addApplicabilitySupersession(topLevel.root, {
+    mutate: (value) => ({ ...value, unexpected: true }),
+  });
+  await assertEvidenceError(
+    verifyEvidence(topLevel.root),
+    'EVIDENCE_SUPERSESSION_SCHEMA_INVALID',
+  );
+
+  const nested = await fixture({ applicability: true });
+  await addApplicabilitySupersession(nested.root, {
+    mutate: (value) => ({
+      ...value,
+      currentApplicabilityManifest: {
+        ...value.currentApplicabilityManifest,
+        unexpected: true,
+      },
+    }),
+  });
+  await assertEvidenceError(
+    verifyEvidence(nested.root),
+    'EVIDENCE_SUPERSESSION_SCHEMA_INVALID',
+  );
+
+  const recertificationReference = await fixture({ applicability: true });
+  const recertification = await addRecertification(recertificationReference.root);
+  await addApplicabilitySupersession(recertificationReference.root, {
+    recertification,
+    mutate: (value) => ({
+      ...value,
+      supersededRecertification: {
+        ...value.supersededRecertification,
+        milestone: 'G0.0',
+      },
+    }),
+  });
+  await assertEvidenceError(
+    verifyEvidence(recertificationReference.root),
+    'EVIDENCE_SUPERSESSION_SCHEMA_INVALID',
+  );
+});
+
+test('supersession rejects malformed status, owner, and timestamp identities', async () => {
+  for (const mutate of [
+    (value) => ({ ...value, evidenceStatus: 'valid' }),
+    (value) => ({ ...value, owner: 'not an owner' }),
+    (value) => ({ ...value, effectiveAt: '2026-99-99T99:99:99Z' }),
+  ]) {
+    const { root } = await fixture({ applicability: true });
+    await addApplicabilitySupersession(root, { mutate });
+    await assertEvidenceError(
+      verifyEvidence(root),
+      'EVIDENCE_SUPERSESSION_SCHEMA_INVALID',
+    );
+  }
+});
+
+test('supersession rejects malformed or internally inconsistent authorization', async () => {
+  const malformed = await fixture({ applicability: true });
+  await addApplicabilitySupersession(malformed.root, {
+    mutateAuthorityDecision: (value) => ({
+      ...value,
+      createdAt: '2026-99-99T99:99:99Z',
+    }),
+  });
+  await assertEvidenceError(
+    verifyEvidence(malformed.root),
+    'EVIDENCE_SUPERSESSION_AUTHORIZATION_INVALID',
+  );
+
+  const inconsistent = await fixture({ applicability: true });
+  await addApplicabilitySupersession(inconsistent.root, {
+    mutateAuthorityDecision: (value) => ({ ...value, issueNumber: 40 }),
+  });
+  await assertEvidenceError(
+    verifyEvidence(inconsistent.root),
+    'EVIDENCE_SUPERSESSION_AUTHORIZATION_INVALID',
+  );
+});
+
+test('supersession rejects duplicate references', async () => {
+  const { root } = await fixture({ applicability: true });
+  await addApplicabilitySupersession(root);
+  const indexPath = join(root, 'tests/evidence/supersession/index.json');
+  const index = JSON.parse(await readFile(indexPath, 'utf8'));
+  index.supersessions.push(index.supersessions[0]);
+  await writeFile(indexPath, canonicalJson(index));
+  await assertEvidenceError(
+    verifyEvidence(root),
+    'EVIDENCE_SUPERSESSION_DUPLICATE_REFERENCE',
+  );
+});
+
+test('supersession rejects a reference milestone that differs from its target index', async () => {
+  const { root } = await fixture({ applicability: true });
+  await addApplicabilitySupersession(root);
+  const indexPath = join(root, 'tests/evidence/supersession/index.json');
+  const index = JSON.parse(await readFile(indexPath, 'utf8'));
+  index.supersessions[0].milestone = 'Wrong milestone';
+  await writeFile(indexPath, canonicalJson(index));
+  await assertEvidenceError(
+    verifyEvidence(root),
+    'EVIDENCE_SUPERSESSION_MILESTONE_MISMATCH',
+  );
+});
+
+test('supersession rejects an unknown target or missing predecessor', async () => {
+  const unknownTarget = await fixture({ applicability: true });
+  await addApplicabilitySupersession(unknownTarget.root, {
+    mutate: (value) => ({
+      ...value,
+      historicalIndex: {
+        ...value.historicalIndex,
+        path: 'tests/evidence/unknown/index.json',
+      },
+    }),
+  });
+  await assertEvidenceError(
+    verifyEvidence(unknownTarget.root),
+    'EVIDENCE_SUPERSESSION_INVALID',
+  );
+
+  const missingPredecessor = await fixture({ applicability: true });
+  const previousSupersession = await addApplicabilitySupersession(missingPredecessor.root);
+  await addApplicabilitySupersession(missingPredecessor.root, {
+    directory: 'supersession-next',
+    previousSupersession,
+    mutate: (value) => ({
+      ...value,
+      previousSupersession: {
+        path: 'tests/evidence/missing/supersession.json',
+        sha256: `sha256:${'0'.repeat(64)}`,
+      },
+    }),
+  });
+  await assertEvidenceError(
+    verifyEvidence(missingPredecessor.root),
+    'EVIDENCE_SUPERSESSION_INVALID',
+  );
+});
+
+test('supersession rejects a predecessor from another historical target', async () => {
+  const { root } = await fixture({ applicability: true });
+  const historicalBytes = await readFile(join(root, 'tests/evidence/g0.0/index.json'), 'utf8');
+  await mkdir(join(root, 'tests/evidence/g0.alt'), { recursive: true });
+  await writeFile(join(root, 'tests/evidence/g0.alt/index.json'), historicalBytes);
+  const previousSupersession = await addApplicabilitySupersession(root);
+  await addApplicabilitySupersession(root, {
+    directory: 'supersession-cross-target',
+    historicalPath: 'tests/evidence/g0.alt/index.json',
+    previousSupersession,
+  });
+  await writeFile(
+    join(root, 'packages/source/owned.txt'),
+    'repository-owned-supersession-G0.0\n',
+  );
+  await assertEvidenceError(
+    verifyEvidence(root),
+    'EVIDENCE_SUPERSESSION_INVALID',
+  );
+});
+
+test('supersession rejects forks and self-referential cycles', async () => {
+  const fork = await fixture({ applicability: true });
+  const forkRoot = await addApplicabilitySupersession(fork.root);
+  await addApplicabilitySupersession(fork.root, {
+    directory: 'supersession-left',
+    previousSupersession: forkRoot,
+  });
+  await addApplicabilitySupersession(fork.root, {
+    directory: 'supersession-right',
+    previousSupersession: forkRoot,
+  });
+  await assertEvidenceError(
+    verifyEvidence(fork.root),
+    'EVIDENCE_SUPERSESSION_FORK',
+  );
+
+  const cycle = await fixture({ applicability: true });
+  await addApplicabilitySupersession(cycle.root, {
+    mutate: (value) => ({
+      ...value,
+      previousSupersession: {
+        path: 'tests/evidence/supersession/supersessions/G0.0.json',
+        sha256: `sha256:${'0'.repeat(64)}`,
+      },
+    }),
+  });
+  await assertEvidenceError(
+    verifyEvidence(cycle.root),
+    'EVIDENCE_SUPERSESSION_CYCLE',
+  );
+});
+
+test('a passing recertification cannot extend a superseded chain', async () => {
+  const { root } = await fixture({ applicability: true });
+  const recertification = await addRecertification(root);
+  await addApplicabilitySupersession(root, { recertification });
+  await addRecertificationContinuation(root, recertification);
+  await assertEvidenceError(
+    verifyEvidence(root),
+    'EVIDENCE_RECERTIFICATION_AFTER_SUPERSESSION',
+  );
+
+  const withoutPriorRecertification = await fixture({ applicability: true });
+  await addApplicabilitySupersession(withoutPriorRecertification.root);
+  await addRecertification(withoutPriorRecertification.root);
+  await assertEvidenceError(
+    verifyEvidence(withoutPriorRecertification.root),
+    'EVIDENCE_RECERTIFICATION_AFTER_SUPERSESSION',
+  );
 });
