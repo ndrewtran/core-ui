@@ -116,7 +116,7 @@ test('E-G0.3-02 human, JSON, and dense projections preserve one response object'
   assert.equal(response.meta.resolution.catalogSource, 'package');
 });
 
-test('TALE-TOKEN-B core get negotiates 1.1/1.2/2.0 and preserves page parity', () => {
+test('TALE-TOKEN-C core get negotiates 1.1/1.2/2.0 and preserves materialized page parity', () => {
   const parsed = parseCliArguments([
     'get', 'core:token:button-minimum', '--query-api-version', '1.2.0',
     '--section', 'tokens', '--limit', '1', '--json',
@@ -134,12 +134,13 @@ test('TALE-TOKEN-B core get negotiates 1.1/1.2/2.0 and preserves page parity', (
   assert.deepEqual(parseHuman(renderHuman(page)), page);
   assert.ok(countTokens(renderDense(page)) <= 2048);
 
-  const absent = jsonResult([
+  const crosswalk = jsonResult([
     'get', 'core:token:button-minimum', '--query-api-version', '1.2.0',
     '--section', 'source-crosswalk',
   ]);
-  assert.equal(absent.entries.status, 'absent');
-  assert.equal(absent.entries.tokenSourceSchemaVersion, '2.1.0');
+  assert.equal(crosswalk.entries.status, 'available');
+  assert.equal(crosswalk.entries.items.length, 20);
+  assert.equal(crosswalk.entries.items[0].occurrence.ordinal, 1);
 
   const historical = jsonResult([
     'get', 'core:token:button-minimum', '--query-api-version', '1.1.0', '--detail', 'full',

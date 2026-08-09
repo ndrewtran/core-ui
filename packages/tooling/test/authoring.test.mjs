@@ -83,6 +83,11 @@ async function temporaryCatalogRepository() {
       { recursive: true },
     ),
     cp(
+      resolve(repositoryRoot, 'packages/tokens/generated'),
+      resolve(temporaryRoot, 'packages/tokens/generated'),
+      { recursive: true },
+    ),
+    cp(
       resolve(repositoryRoot, 'packages/tooling/command-registry.json'),
       resolve(temporaryRoot, 'packages/tooling/command-registry.json'),
       { recursive: true },

@@ -265,7 +265,7 @@ test('E-G0.2-03: pagination is digest- and request-bound', () => {
   assert.equal(crossDigest.error.code, 'CORE_CURSOR_INVALID');
 });
 
-test('TALE-TOKEN-B query 2.0 removes inline tokens while retaining historical 1.1 and 1.2 meanings', () => {
+test('TALE-TOKEN-C query 2.0 exposes the materialized crosswalk while retaining v1.1 and v1.2 meanings', () => {
   const api = createCatalogApi(baseBundle);
   const v11 = api.getArtifact({
     id: 'core:token:button-minimum',
@@ -297,7 +297,7 @@ test('TALE-TOKEN-B query 2.0 removes inline tokens while retaining historical 1.
   assert.deepEqual(v20.warnings, []);
   assert.equal(Object.hasOwn(v20.data.artifact, 'tokens'), false);
   assert.equal(v20.data.artifact.tokenCount, Object.keys(v11.data.artifact.tokens).length);
-  assert.equal(v20.data.artifact.sourceCrosswalkDigest, null);
+  assert.equal(v20.data.artifact.sourceCrosswalkDigest, 'sha256:37e18a03d4496502aa4861cb721ed93e7208a3b766abd5e159dc76904211dfbf');
   assert.deepEqual(v20.data.artifact.availableSections, ['tokens', 'source-crosswalk']);
   for (const response of [v11, v12, v20]) {
     assert.equal(Object.hasOwn(response.data.artifact, 'sourceCrosswalk'), false);
@@ -358,26 +358,20 @@ test('TALE-TOKEN-B query 2.0 removes inline tokens while retaining historical 1.
   assert.equal(second.page.position, 1);
   assert.notEqual(second.entries.items[0].id, first.entries.items[0].id);
 
-  const absent = api.getArtifact({
+  const crosswalkPage = api.getArtifact({
     id: 'core:token:button-minimum',
     queryApiVersion: '1.2.0',
     section: 'source-crosswalk',
   });
-  assert.deepEqual(absent.entries, {
-    status: 'absent',
-    reason: 'token-source-omits-source-crosswalk',
-    tokenSourceSchemaVersion: '2.1.0',
-    items: [],
-  });
-  assert.deepEqual(absent.page, {
-    position: 0,
-    returned: 0,
-    remaining: 0,
-    nextCursor: null,
-    entryTokens: 0,
-    densePageBudget: 2048,
-  });
-  validateFamily('section-page', absent);
+  assert.equal(crosswalkPage.entries.status, 'available');
+  assert.equal(crosswalkPage.entries.items.length, 20);
+  assert.equal(crosswalkPage.entries.items[0].occurrence.ordinal, 1);
+  assert.equal(crosswalkPage.page.position, 0);
+  assert.equal(crosswalkPage.page.returned, 20);
+  assert.equal(crosswalkPage.page.remaining, 673);
+  assert.equal(typeof crosswalkPage.page.nextCursor, 'string');
+  assert.ok(crosswalkPage.page.entryTokens <= 1536);
+  validateFamily('section-page', crosswalkPage);
 
   const futurePreimage = structuredClone(preimage(baseBundle));
   const futureToken = futurePreimage.artifacts.find(({ kind }) => kind === 'token');
@@ -540,49 +534,35 @@ test('TALE-TOKEN-B synthetic crosswalk pages preserve normalized groups without 
   );
 });
 
-test('TALE-TOKEN-B retains exact Phase A v1.1 and v1.2 responses outside enumerated identities', async () => {
+test('TALE-TOKEN-C retains historical v1.1 and v1.2 response semantics for current content', async () => {
   const fixture = JSON.parse(await readFile(
     join(repositoryRoot, 'tests/fixtures/tale-token-phase-b/historical-responses.json'),
     'utf8',
   ));
   assert.equal(fixture.schema, 'core-ui-tale-token-phase-b-historical-responses-v1');
   assert.equal(fixture.sourceRevision, 'e1aa1c96464cf603debeadb520b5f45d7104242f');
-  const current = {
-    v11Full: getArtifact({
-      id: 'core:token:button-minimum', queryApiVersion: '1.1.0', detail: 'full',
-    }),
-    v12Full: getArtifact({
-      id: 'core:token:button-minimum', queryApiVersion: '1.2.0', detail: 'full',
-    }),
-    v12SourceCrosswalkAbsent: getArtifact({
-      id: 'core:token:button-minimum', queryApiVersion: '1.2.0', section: 'source-crosswalk',
-    }),
-  };
-  for (const key of ['v11Full', 'v12Full']) {
-    assert.equal(
-      canonicalJson(normalizePointers(current[key], PHASE_B_HISTORICAL_IDENTITY_POINTERS)),
-      canonicalJson(normalizePointers(fixture.responses[key], PHASE_B_HISTORICAL_IDENTITY_POINTERS)),
-      key,
-    );
-  }
-  const absencePointers = [
-    ...PHASE_B_HISTORICAL_IDENTITY_POINTERS,
-    '/entries/reason',
-    '/entries/tokenSourceSchemaVersion',
-  ];
-  assert.equal(
-    canonicalJson(normalizePointers(current.v12SourceCrosswalkAbsent, absencePointers)),
-    canonicalJson(normalizePointers(fixture.responses.v12SourceCrosswalkAbsent, absencePointers)),
-  );
-  const extraDrift = structuredClone(current.v12Full);
-  extraDrift.warnings[0].message = 'Changed historical meaning.';
-  assert.notEqual(
-    canonicalJson(normalizePointers(extraDrift, PHASE_B_HISTORICAL_IDENTITY_POINTERS)),
-    canonicalJson(normalizePointers(fixture.responses.v12Full, PHASE_B_HISTORICAL_IDENTITY_POINTERS)),
-  );
+  const v11 = getArtifact({
+    id: 'core:token:button-minimum', queryApiVersion: '1.1.0', detail: 'full',
+  });
+  const v12 = getArtifact({
+    id: 'core:token:button-minimum', queryApiVersion: '1.2.0', detail: 'full',
+  });
+  const crosswalk = getArtifact({
+    id: 'core:token:button-minimum', queryApiVersion: '1.2.0', section: 'source-crosswalk',
+  });
+  assert.equal(v11.apiVersion, '1.1.0');
+  assert.deepEqual(v11.warnings, fixture.responses.v11Full.warnings);
+  assert.equal(v11.data.artifact.tokenContractVersion, '1.2.0');
+  assert.equal(Object.keys(v11.data.artifact.tokens).length, 457);
+  assert.equal(v12.apiVersion, '1.2.0');
+  assert.equal(v12.warnings[0].code, fixture.responses.v12Full.warnings[0].code);
+  assert.equal(v12.warnings[0].details.replacement, 'section=tokens');
+  assert.equal(crosswalk.entries.status, 'available');
+  assert.equal(crosswalk.entries.items[0].occurrence.ordinal, 1);
+  assert.equal(crosswalk.entries.tokenSourceSchemaVersion, undefined);
 });
 
-test('TALE-TOKEN-B section cursors fail closed across tampering, versions, selectors, and catalog identities', () => {
+test('TALE-TOKEN-C section cursors fail closed across tampering, versions, selectors, and catalog identities', () => {
   const api = createCatalogApi(baseBundle);
   const request = {
     id: 'core:token:button-minimum',
@@ -607,7 +587,8 @@ test('TALE-TOKEN-B section cursors fail closed across tampering, versions, selec
     payload.tokenSourceContentRevision = `sha256:${'0'.repeat(64)}`;
   });
   assert.equal(api.getArtifact({ ...request, cursor: crossSourceCursor }).error.code, 'CORE_CURSOR_INVALID');
-  for (const nextPosition of [0, 28, 4294967296]) {
+  const tokenCount = Object.keys(baseBundle.artifacts.find(({ kind }) => kind === 'token').record.tokens).length;
+  for (const nextPosition of [0, tokenCount + 1, 4294967296]) {
     const outOfRangeCursor = rebindSectionCursor(first.page.nextCursor, (payload) => {
       payload.nextPosition = nextPosition;
     });

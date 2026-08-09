@@ -36,6 +36,10 @@
     {
       "path": "packages/catalog/generated/catalog-package.json",
       "provenance": "packages/catalog/generated/catalog-package.json.provenance"
+    },
+    {
+      "path": "packages/tokens/generated/tale-token-occurrences.json",
+      "provenance": "packages/tokens/generated/tale-token-occurrences.json.provenance"
     }
   ],
   "globalTaskInputs": [

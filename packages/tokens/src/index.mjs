@@ -1,5 +1,18 @@
 import { canonicalDigest, canonicalJson, validateFamily } from '@core-ui/schema';
 
+export {
+  TALE_TOKEN_ANNEX_PATH,
+  TALE_TOKEN_CROSSWALK_DIGEST,
+  TALE_TOKEN_PHASE_B_SOURCE_DIGEST,
+  TALE_TOKEN_SOURCE_PATH,
+  assertMaterializedTaleTokenSource,
+  enumerateTaleTokenOccurrences,
+  materializeTaleTokenSource,
+  projectedTaleTokenOccurrences,
+  projectTaleTokenCrosswalk,
+  rollbackMaterializedTaleTokenSource,
+} from './tale-token-materialization.mjs';
+
 const LAYER_RANK = Object.freeze({ reference: 0, semantic: 1, component: 2 });
 const UNIT_BY_TYPE = Object.freeze({
   color: new Set(['hex']),
@@ -607,8 +620,8 @@ export function validateThemeForRequirementSet({ requirementSet, values }) {
   return Object.freeze({ values: Object.freeze(resolved), diagnostics: Object.freeze(diagnostics) });
 }
 
-function publicTokenEntries(graph) {
-  return Object.values(graph.tokens).filter(({ layer }) => layer !== 'reference');
+function emittedTokenEntries(graph) {
+  return Object.values(graph.tokens);
 }
 
 function cssName(tokenId) {
@@ -623,7 +636,7 @@ function cssValue(token) {
 
 export function compileWebTheme(source, options = {}) {
   const graph = compileTokenGraph(source, options);
-  const declarations = publicTokenEntries(graph)
+  const declarations = emittedTokenEntries(graph)
     .map((token) => `  ${cssName(token.id)}: ${cssValue(token)};`)
     .join('\n');
   return Object.freeze({
@@ -654,7 +667,7 @@ export function compileNativeTheme(source, { profile, ...options } = {}) {
     modes: graph.modes,
     runtimeSwitching: false,
     provenance: Object.freeze({ source: 'canonical-token-source', digest: graph.sourceRevision }),
-    theme: Object.freeze(Object.fromEntries(publicTokenEntries(graph).map((token) => [token.id, Object.freeze({
+    theme: Object.freeze(Object.fromEntries(emittedTokenEntries(graph).map((token) => [token.id, Object.freeze({
       type: token.type,
       unit: token.unit,
       value: token.value,

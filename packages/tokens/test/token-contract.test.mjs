@@ -18,6 +18,14 @@ const source = parseJsonStrict(await readFile(
   new URL('../../../catalog/tokens/button-minimum.json', import.meta.url),
   'utf8',
 ));
+const taleOccurrences = parseJsonStrict(await readFile(
+  new URL('../generated/tale-token-occurrences.json', import.meta.url),
+  'utf8',
+));
+const taleAnnex = parseJsonStrict(await readFile(
+  new URL('../../../decisions/0003-tale-token-classification-annex.json', import.meta.url),
+  'utf8',
+));
 const recipe = {
   source: source.id,
   requirements: [
@@ -143,12 +151,12 @@ function expectCrosswalkInvalid(value) {
   );
 }
 
-test('TALE-TOKEN-B source-crosswalk validation binds coverage, reference targets, groups, and digest', () => {
-  assert.deepEqual(validateSourceCrosswalk(source), {
-    status: 'absent',
-    digest: null,
-    crosswalk: null,
-  });
+test('TALE-TOKEN-C source-crosswalk validation binds the complete materialized inventory', () => {
+  const materialized = validateSourceCrosswalk(source, { baselineOccurrences: taleOccurrences });
+  assert.equal(materialized.status, 'available');
+  assert.equal(materialized.digest, 'sha256:37e18a03d4496502aa4861cb721ed93e7208a3b766abd5e159dc76904211dfbf');
+  assert.equal(materialized.crosswalk.entries.length, 693);
+  assert.equal(materialized.crosswalk.groups.length, 41);
   const { candidate, occurrences } = crosswalkFixture();
   const validated = validateSourceCrosswalk(candidate, { baselineOccurrences: occurrences });
   assert.equal(validated.status, 'available');
@@ -268,14 +276,26 @@ test('E-G1.0-01 rejects cycles, reverse layers, incompatible units, and override
   }));
 });
 
-test('E-G1.0-02 web and native transforms retain canonical provenance without cross-target authority', () => {
+test('E-G1.0-02 web and native transforms emit accepted Core references with canonical provenance', () => {
   const web = compileWebTheme(source);
   const react = compileWebTheme(source);
   const ios = compileNativeTheme(source, { profile: 'native.ios' });
   const android = compileNativeTheme(source, { profile: 'native.android' });
   assert.equal(web.css, react.css);
-  assert.equal(web.css.includes('--core-reference-'), false);
-  assert.equal(Object.keys(ios.theme).some((id) => id.startsWith('reference.')), false);
+  const admittedIds = taleAnnex.coreTokens.map(({ id }) => id);
+  assert.equal(admittedIds.length, 431);
+  assert.equal(Object.keys(ios.theme).length, 457);
+  assert.deepEqual(ios.theme, android.theme);
+  for (const id of admittedIds) {
+    assert.match(web.css, new RegExp(`--core-${id.replaceAll('.', '-')}:`, 'u'));
+    assert.equal(Object.hasOwn(ios.theme, id), true);
+  }
+  for (const entry of taleAnnex.entries.filter(({ disposition }) => ['defer', 'reject'].includes(disposition))) {
+    assert.equal(entry.coreTokenId, undefined);
+  }
+  for (const taleName of new Set(taleAnnex.entries.map(({ occurrence }) => occurrence.name).filter((name) => name.startsWith('--')))) {
+    assert.equal(web.css.includes(`  ${taleName}:`), false);
+  }
   assert.equal(Object.hasOwn(ios, 'css'), false);
   assert.equal(ios.provenance.digest, web.provenance.digest);
   assert.equal(android.provenance.digest, web.provenance.digest);
@@ -283,6 +303,9 @@ test('E-G1.0-02 web and native transforms retain canonical provenance without cr
   consumeButtonStaticWebTransform(react, { target: 'web.react' });
   consumeButtonStaticNativeTransform(ios, { profile: 'native.ios' });
   consumeButtonStaticNativeTransform(android, { profile: 'native.android' });
+  expectCode('CORE_TOKEN_PROFILE_INVALID', () => compileNativeTheme(source, {
+    profile: 'native.react-native-web',
+  }));
   for (const profile of ['native.ios', 'native.android']) {
     for (const field of ['css', 'cssSource']) {
       expectCode('CORE_TOKEN_OPTIONS_INVALID', () => compileNativeTheme(source, {

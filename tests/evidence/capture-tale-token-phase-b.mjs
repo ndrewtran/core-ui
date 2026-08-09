@@ -23,18 +23,33 @@ import {
   TALE_TOKEN_PHASE_B_PROFILE,
   TALE_TOKEN_PHASE_B_PROFILE_DIGEST,
 } from './tale-token-phase-b-profile.mjs';
+import {
+  TALE_TOKEN_PHASE_C_PROFILE,
+  TALE_TOKEN_PHASE_C_PROFILE_DIGEST,
+} from './tale-token-phase-c-profile.mjs';
 
 const execFile = promisify(execFileCallback);
 const repositoryRoot = resolve(import.meta.dirname, '../..');
+const phaseC = process.argv.includes('--phase-c');
+const phaseId = phaseC ? 'TALE-TOKEN-C' : 'TALE-TOKEN-B';
+const phaseSlug = phaseC ? 'c' : 'b';
+const profile = phaseC ? TALE_TOKEN_PHASE_C_PROFILE : TALE_TOKEN_PHASE_B_PROFILE;
+const profileDigest = phaseC
+  ? TALE_TOKEN_PHASE_C_PROFILE_DIGEST
+  : TALE_TOKEN_PHASE_B_PROFILE_DIGEST;
+const captureProcedure = phaseC
+  ? 'node tests/evidence/capture-tale-token-phase-c.mjs'
+  : 'node tests/evidence/capture-tale-token-phase-b.mjs';
+const issueNumber = phaseC ? 46 : 44;
 const roots = Object.freeze([
-  { key: 'g0.1', milestone: 'G0.1', source: 'tale-token-phase-a-g0.1' },
-  { key: 'g0.2', milestone: 'G0.2', source: 'tale-token-phase-a-g0.2' },
-  { key: 'g0.3', milestone: 'G0.3', source: 'tale-token-phase-a-g0.3' },
-  { key: 'g0.4', milestone: 'G0.4', source: 'tale-token-phase-a-g0.4' },
-  { key: 'g0.5', milestone: 'G0.5', source: 'tale-token-phase-a-g0.5' },
-  { key: 'gate-0', milestone: 'Gate 0 exit', source: 'tale-token-phase-a-gate-0' },
+  { key: 'g0.1', milestone: 'G0.1', source: `tale-token-phase-${phaseC ? 'b' : 'a'}-g0.1` },
+  { key: 'g0.2', milestone: 'G0.2', source: `tale-token-phase-${phaseC ? 'b' : 'a'}-g0.2` },
+  { key: 'g0.3', milestone: 'G0.3', source: `tale-token-phase-${phaseC ? 'b' : 'a'}-g0.3` },
+  { key: 'g0.4', milestone: 'G0.4', source: `tale-token-phase-${phaseC ? 'b' : 'a'}-g0.4` },
+  { key: 'g0.5', milestone: 'G0.5', source: `tale-token-phase-${phaseC ? 'b' : 'a'}-g0.5` },
+  { key: 'gate-0', milestone: 'Gate 0 exit', source: `tale-token-phase-${phaseC ? 'b' : 'a'}-gate-0` },
 ]);
-const targetPath = (key) => `tests/evidence/tale-token-phase-b-${key}`;
+const targetPath = (key) => `tests/evidence/tale-token-phase-${phaseSlug}-${key}`;
 const applicabilityPaths = Object.freeze([
   'package.json',
   'pnpm-lock.yaml',
@@ -46,9 +61,18 @@ const applicabilityPaths = Object.freeze([
   'packages/tooling',
   'tooling/audits/repository-policy',
   'tests/fixtures/g0.4',
-  'tests/fixtures/tale-token-phase-b',
-  'tests/evidence/capture-tale-token-phase-b.mjs',
-  'tests/evidence/tale-token-phase-b-profile.mjs',
+  ...(phaseC ? [
+    'tests/fixtures/g1.0',
+    'tests/fixtures/tale-token-classification',
+    'tests/evidence/capture-tale-token-phase-b.mjs',
+    'tests/evidence/capture-tale-token-phase-c.mjs',
+    'tests/evidence/tale-token-phase-b-profile.mjs',
+    'tests/evidence/tale-token-phase-c-profile.mjs',
+  ] : [
+    'tests/fixtures/tale-token-phase-b',
+    'tests/evidence/capture-tale-token-phase-b.mjs',
+    'tests/evidence/tale-token-phase-b-profile.mjs',
+  ]),
 ]);
 const acceptancePath = 'decisions/0003-tale-token-classification-acceptance.json';
 const annexPath = 'decisions/0003-tale-token-classification-annex.json';
@@ -178,7 +202,7 @@ async function captureAt(root, sourceRevision, captureTimestamp) {
   )).output.trim();
   if (untracked) throw new Error(`TALE_TOKEN_PHASE_B_WORKTREE_DRIFT: ${untracked}`);
   const committedAnnex = await readFile(join(root, annexPath));
-  if (`sha256:${sha256(committedAnnex)}` !== TALE_TOKEN_PHASE_B_PROFILE.decision.sha256) {
+  if (`sha256:${sha256(committedAnnex)}` !== profile.decision.sha256) {
     throw new Error('TALE_TOKEN_PHASE_B_PROFILE_DECISION_MISMATCH');
   }
   const committedEntries = await manifestEntries(root, applicabilityPaths);
@@ -238,8 +262,8 @@ async function captureAt(root, sourceRevision, captureTimestamp) {
     }
     const validationPath = `${outputRoot}/validation.json`;
     const validationBytes = await writeCanonical(root, validationPath, {
-      applicabilityProfile: TALE_TOKEN_PHASE_B_PROFILE,
-      captureProcedure: 'node tests/evidence/capture-tale-token-phase-b.mjs',
+      applicabilityProfile: profile,
+      captureProcedure,
       environment: env,
       results: resultRefs,
       schema: 'core-ui-evidence-validation-v1',
@@ -254,7 +278,7 @@ async function captureAt(root, sourceRevision, captureTimestamp) {
       const artifactBytes = await writeCanonical(root, artifactPath, {
         applicability: {
           applicabilityManifest,
-          applicabilityProfileDigest: TALE_TOKEN_PHASE_B_PROFILE_DIGEST,
+          applicabilityProfileDigest: profileDigest,
           catalog: {
             catalogDigest: catalogBundle.catalogDigest,
             catalogVersion: catalogBundle.catalogVersion,
@@ -269,7 +293,7 @@ async function captureAt(root, sourceRevision, captureTimestamp) {
             supportedQueryApiVersions: catalogPackage.supportedQueryApiVersions,
           },
         },
-        applicabilityProfile: TALE_TOKEN_PHASE_B_PROFILE,
+        applicabilityProfile: profile,
         assertionId: oldRecord.assertionId,
         captureTimestamp,
         command: commandKeys.map((key) => normalized[key].command).join(' && '),
@@ -280,7 +304,7 @@ async function captureAt(root, sourceRevision, captureTimestamp) {
         exitState: 0,
         observations: {
           checks: resultRefs.map(({ command, rawOutput }) => ({ command, outputSha256: rawOutput.sha256 })),
-          phase: 'TALE-TOKEN-B',
+          phase: phaseId,
           ...(upstreamEvidence === null ? {} : { upstreamEvidence }),
         },
         outcome: 'pass',
@@ -294,10 +318,10 @@ async function captureAt(root, sourceRevision, captureTimestamp) {
         advisoryRefs: [],
         applicability: {
           applicabilityManifest,
-          applicabilityProfileDigest: TALE_TOKEN_PHASE_B_PROFILE_DIGEST,
+          applicabilityProfileDigest: profileDigest,
         },
         applicabilityManifest,
-        applicabilityProfile: TALE_TOKEN_PHASE_B_PROFILE,
+        applicabilityProfile: profile,
         artifact: { path: artifactPath, sha256: `sha256:${sha256(artifactBytes)}` },
         assertionId: oldRecord.assertionId,
         captureTimestamp,
@@ -307,11 +331,11 @@ async function captureAt(root, sourceRevision, captureTimestamp) {
         evidenceKind: oldRecord.evidenceKind,
         executedRevision: sourceRevision,
         executedTree: sourceTree,
-        expiry: 'Any TALE-TOKEN-B source, catalog/package/query identity, applicability profile, environment tuple, retained result, or human acceptance change',
+        expiry: `Any ${phaseId} source, catalog/package/query identity, applicability profile, environment tuple, retained result, or human acceptance change`,
         milestone: item.milestone,
         outcome: 'pass',
         owner: 'ndrewtran',
-        retentionPolicy: 'Content-addressed Git records retained by issue #44 pull-request and default-branch history after merge; issue #44 is a mutable locator',
+        retentionPolicy: `Content-addressed Git records retained by issue #${issueNumber} pull-request and default-branch history after merge; issue #${issueNumber} is a mutable locator`,
         schema: 'core-ui-evidence-record-v1',
         sourceRevision,
         sourceTree,
@@ -326,20 +350,20 @@ async function captureAt(root, sourceRevision, captureTimestamp) {
     const indexPath = `${outputRoot}/index.json`;
     const indexBytes = await writeCanonical(root, indexPath, {
       applicabilityManifest,
-      applicabilityProfile: TALE_TOKEN_PHASE_B_PROFILE,
+      applicabilityProfile: profile,
       captureTimestamp,
       disclosureClass: 'public-sanitized',
       milestone: item.milestone,
       owner: 'ndrewtran',
       records: recordRefs,
-      retentionPolicy: 'Content-addressed Git records retained by issue #44 pull-request and default-branch history after merge; issue #44 is a mutable locator',
+      retentionPolicy: `Content-addressed Git records retained by issue #${issueNumber} pull-request and default-branch history after merge; issue #${issueNumber} is a mutable locator`,
       schema: 'core-ui-evidence-index-v1',
       sourceRevision,
       sourceTree,
       ...(supersessions.length === 0 ? {} : { supersessions }),
       validation,
     });
-    return { path: indexPath, sha256: `sha256:${sha256(indexBytes)}`, profileDigest: TALE_TOKEN_PHASE_B_PROFILE_DIGEST };
+    return { path: indexPath, sha256: `sha256:${sha256(indexBytes)}`, profileDigest };
   }
 
   const upstream = [];
@@ -380,7 +404,7 @@ async function captureAt(root, sourceRevision, captureTimestamp) {
       historicalIndex: { path: historicalPath, sha256: `sha256:${sha256(historical.bytes)}` },
       owner: acceptance.owner,
       reasonCode: 'governing-authority-changed',
-      replacementPlan: ['TALE-TOKEN-B', 'TALE-TOKEN-C'],
+      replacementPlan: phaseC ? ['TALE-TOKEN-C', 'G1.0'] : ['TALE-TOKEN-B', 'TALE-TOKEN-C'],
       replacementStatus: 'pending',
       schema: 'core-ui-evidence-applicability-supersession-v1',
       sourceRevision,
@@ -449,7 +473,7 @@ if (checkOnly) {
       || index.value.captureTimestamp !== captureTimestamp
     ) throw new Error('TALE_TOKEN_PHASE_B_RETAINED_IDENTITY_MISMATCH');
   }
-  const temporary = await mkdtemp(join(tmpdir(), 'core-ui-tale-token-phase-b-'));
+  const temporary = await mkdtemp(join(tmpdir(), `core-ui-tale-token-phase-${phaseSlug}-`));
   const checkout = join(temporary, 'checkout');
   try {
     await exec('git', ['worktree', 'add', '--detach', checkout, sourceRevision]);
@@ -460,7 +484,7 @@ if (checkOnly) {
     await exec('git', ['worktree', 'remove', '--force', checkout]).catch(() => null);
     await rm(temporary, { recursive: true, force: true });
   }
-  console.log(`[TALE-TOKEN-B] verified six exact evidence roots at ${sourceRevision}`);
+  console.log(`[${phaseId}] verified six exact evidence roots at ${sourceRevision}`);
 } else {
   const source = argument('--source');
   const timestamp = argument('--timestamp');
@@ -469,5 +493,5 @@ if (checkOnly) {
   }
   const sourceRevision = await git('rev-parse', source);
   await captureAt(repositoryRoot, sourceRevision, timestamp);
-  console.log(`[TALE-TOKEN-B] captured six exact evidence roots at ${sourceRevision}`);
+  console.log(`[${phaseId}] captured six exact evidence roots at ${sourceRevision}`);
 }

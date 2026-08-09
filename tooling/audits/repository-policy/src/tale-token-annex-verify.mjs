@@ -1,6 +1,10 @@
 import { access, readFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { canonicalJson, parseJsonStrict } from '@core-ui/schema';
+import {
+  TALE_TOKEN_PHASE_B_SOURCE_DIGEST,
+  assertMaterializedTaleTokenSource,
+} from '@core-ui/tokens';
 import { sha256 } from './policy.mjs';
 import {
   acceptanceCommentBody,
@@ -317,7 +321,7 @@ function verifyGroups(groups, entries, profile, expectedCount) {
   }
 }
 
-function verifyTokenDefinitions(coreTokens, entries, currentTokenSource, profile) {
+function verifyTokenDefinitions(coreTokens, entries, currentTokenSource, profile, state) {
   const ids = new Set();
   const mappedIds = new Set(entries.flatMap((entry) => entry.coreTokenId ? [entry.coreTokenId] : []));
   let previousId = '';
@@ -344,7 +348,9 @@ function verifyTokenDefinitions(coreTokens, entries, currentTokenSource, profile
     }
     if (token.action === 'reuse') {
       if (canonicalJson(currentTokenSource.tokens[token.id]) !== canonicalJson(token.definition)) fail('TALE_ANNEX_REUSE_MISMATCH', `${token.id} must exactly preserve Core`);
-    } else if (currentTokenSource.tokens[token.id]) fail('TALE_ANNEX_TOKEN_COLLISION', `${token.id} already exists`);
+    } else if (state === 'preimplementation' && currentTokenSource.tokens[token.id]) {
+      fail('TALE_ANNEX_TOKEN_COLLISION', `${token.id} already exists`);
+    }
     if (!mappedIds.has(token.id)) fail('TALE_ANNEX_TOKEN_UNMAPPED', `${token.id} has no occurrence`);
   }
   for (const id of mappedIds) if (!ids.has(id)) fail('TALE_ANNEX_TOKEN_MAPPING_INVALID', `${id} has no definition`);
@@ -590,6 +596,10 @@ export function assertTaleAnnexAcceptanceRecord(record, annexPath, annexBytes, a
 export { acceptanceCommentBody };
 
 export async function verifyTaleTokenAnnex(repositoryRoot, options = {}) {
+  const state = options.state;
+  if (!['preimplementation', 'materialized'].includes(state)) {
+    fail('TALE_ANNEX_STATE_REQUIRED', 'state must explicitly be preimplementation or materialized');
+  }
   const packageRoot = join(repositoryRoot, 'tooling/audits/repository-policy');
   const profileDocument = options.profileValue
     ? { bytes: canonicalJson(options.profileValue), value: options.profileValue }
@@ -607,7 +617,10 @@ export async function verifyTaleTokenAnnex(repositoryRoot, options = {}) {
   const annex = annexDocument.value;
   const sourceDocument = await strictFile(join(repositoryRoot, profile.sourceFixturePath), profile.sourceFixturePath);
   const source = sourceDocument.value;
-  const currentTokenSource = (await strictFile(join(repositoryRoot, 'catalog/tokens/button-minimum.json'), 'current token source')).value;
+  const currentTokenSource = options.currentTokenSourceValue ?? (await strictFile(
+    join(repositoryRoot, 'catalog/tokens/button-minimum.json'),
+    'current token source',
+  )).value;
   const productScope = await readFile(join(repositoryRoot, 'strategy/product-scope.md'), 'utf8');
   const architecture = await readFile(join(repositoryRoot, 'strategy/monorepo-architecture.md'), 'utf8');
   const bindingSchema = await readFile(join(repositoryRoot, 'packages/schema/schemas/binding.schema.json'), 'utf8');
@@ -647,7 +660,7 @@ export async function verifyTaleTokenAnnex(repositoryRoot, options = {}) {
   annex.entries.forEach((entry, index) => verifyEntry(entry, sourceEntries[index], profile, index));
 
   exactKeys(annex.summary, ['dispositionCounts', 'logicalGroups', 'admittedCoreTokens', 'addedCoreTokens', 'reusedExistingCoreTokens', 'candidateSourceCrosswalkDigest', 'candidateSourceCrosswalkDigestProfile'], 'summary');
-  verifyTokenDefinitions(annex.coreTokens, annex.entries, currentTokenSource, profile);
+  verifyTokenDefinitions(annex.coreTokens, annex.entries, currentTokenSource, profile, state);
   verifyEntryDefinitionMappings(annex.entries, annex.coreTokens, sourceEntries, profile);
   verifyGroups(annex.groups, annex.entries, profile, annex.summary.logicalGroups);
   verifyAuthoredReasonReferences(annex.entries, annex.coreTokens);
@@ -668,22 +681,37 @@ export async function verifyTaleTokenAnnex(repositoryRoot, options = {}) {
   exactKeys(annex.releaseAdditions, ['addedCoreTokenCount', 'addedCoreTokenIdsDigest', 'reusedExistingCoreTokenCount', 'removals', 'source'], 'releaseAdditions');
   if (annex.releaseAdditions.source !== 'derived from coreTokens action values; coreTokens is the sole token-definition inventory' || annex.releaseAdditions.addedCoreTokenCount !== added.length || annex.releaseAdditions.reusedExistingCoreTokenCount !== reuse.length || annex.releaseAdditions.removals !== 0 || digest(added.map((token) => token.id)) !== annex.releaseAdditions.addedCoreTokenIdsDigest) fail('TALE_ANNEX_RELEASE_MISMATCH', 'derived release additions');
 
+  if (state === 'preimplementation') {
+    if (digest(currentTokenSource) !== TALE_TOKEN_PHASE_B_SOURCE_DIGEST) {
+      fail('TALE_ANNEX_PREIMPLEMENTATION_BASE_MISMATCH', 'preimplementation requires the exact retained Phase B source');
+    }
+  } else {
+    try {
+      assertMaterializedTaleTokenSource(currentTokenSource, annex, source);
+    } catch (error) {
+      fail('TALE_ANNEX_MATERIALIZATION_MISMATCH', error.message);
+    }
+  }
+
   let acceptance = options.acceptanceValue;
   if (acceptance === undefined) {
     const acceptancePath = join(repositoryRoot, profile.acceptanceRecordPath);
     try { await access(acceptancePath); acceptance = (await strictFile(acceptancePath, profile.acceptanceRecordPath)).value; } catch (error) { if (error?.code !== 'ENOENT') throw error; }
   }
   if (acceptance !== undefined) assertTaleAnnexAcceptanceRecord(acceptance, profile.annexPath, annexDocument.bytes, profile.acceptanceRecordSchema);
-  return { entries: annex.entries.length, groups: annex.groups.length, added: added.length, reused: reuse.length, dispositionCounts: counts, crosswalkDigest: annex.summary.candidateSourceCrosswalkDigest, accepted: acceptance !== undefined };
+  return { state, entries: annex.entries.length, groups: annex.groups.length, added: added.length, reused: reuse.length, dispositionCounts: counts, crosswalkDigest: annex.summary.candidateSourceCrosswalkDigest, materializedCrosswalkDigest: state === 'materialized' ? currentTokenSource.sourceCrosswalk && digest(currentTokenSource.sourceCrosswalk) : null, accepted: acceptance !== undefined };
 }
 
 const invokedPath = process.argv[1] ? resolve(process.argv[1]) : null;
 if (invokedPath === resolve(import.meta.filename)) {
   const repositoryRoot = resolve(import.meta.dirname, '../../../..');
   try {
-    const result = await verifyTaleTokenAnnex(repositoryRoot);
+    const stateIndex = process.argv.indexOf('--state');
+    const state = stateIndex === -1 ? undefined : process.argv[stateIndex + 1];
+    const result = await verifyTaleTokenAnnex(repositoryRoot, { state });
     console.log(`[TALE-TOKEN-ANNEX] verified ${result.entries} occurrences, ${result.groups} groups, ${result.added} additions, and ${result.reused} exact reuse`);
     console.log(`[TALE-TOKEN-ANNEX] candidate crosswalk ${result.crosswalkDigest}`);
+    console.log(`[TALE-TOKEN-ANNEX] verification state ${result.state}${result.materializedCrosswalkDigest ? `; materialized crosswalk ${result.materializedCrosswalkDigest}` : ''}`);
     console.log(`[TALE-TOKEN-ANNEX] human acceptance ${result.accepted ? 'bound' : 'pending'}`);
     if (process.argv.includes('--require-acceptance') && !result.accepted) {
       fail('TALE_ANNEX_ACCEPTANCE_REQUIRED', 'repository merge checks require the exact digest-bound human acceptance record');

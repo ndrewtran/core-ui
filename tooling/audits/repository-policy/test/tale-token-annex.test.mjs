@@ -5,11 +5,12 @@ import { resolve } from 'node:path';
 import { promisify } from 'node:util';
 import test from 'node:test';
 import { canonicalJson } from '@core-ui/schema';
+import { rollbackMaterializedTaleTokenSource } from '@core-ui/tokens';
 import { sha256 } from '../src/policy.mjs';
 import {
   acceptanceCommentBody,
   TaleTokenAnnexError,
-  verifyTaleTokenAnnex,
+  verifyTaleTokenAnnex as verifyTaleTokenAnnexRaw,
 } from '../src/tale-token-annex-verify.mjs';
 import { acceptanceRecordFromGitHubComment } from '../src/tale-token-annex-acceptance.mjs';
 
@@ -17,6 +18,10 @@ const repositoryRoot = resolve(import.meta.dirname, '../../../..');
 const annexPath = resolve(repositoryRoot, 'decisions/0003-tale-token-classification-annex.json');
 const profilePath = resolve(repositoryRoot, 'tooling/audits/repository-policy/tale-token-annex-profile.json');
 const execFile = promisify(execFileCallback);
+
+function verifyTaleTokenAnnex(root, options = {}) {
+  return verifyTaleTokenAnnexRaw(root, { state: 'materialized', ...options });
+}
 
 async function annex() {
   return JSON.parse(await readFile(annexPath, 'utf8'));
@@ -81,6 +86,45 @@ test('verifies the complete accepted Tale classification annex', async () => {
   assert.equal(result.added, 430);
   assert.equal(result.reused, 1);
   assert.equal(result.accepted, true);
+  assert.equal(result.state, 'materialized');
+  assert.equal(result.materializedCrosswalkDigest, 'sha256:37e18a03d4496502aa4861cb721ed93e7208a3b766abd5e159dc76904211dfbf');
+});
+
+test('requires an explicit verification state and preserves the exact Phase B preimplementation boundary', async () => {
+  await assert.rejects(
+    verifyTaleTokenAnnexRaw(repositoryRoot),
+    (error) => error instanceof TaleTokenAnnexError && error.code === 'TALE_ANNEX_STATE_REQUIRED',
+  );
+  const value = await annex();
+  const current = JSON.parse(await readFile(resolve(repositoryRoot, 'catalog/tokens/button-minimum.json'), 'utf8'));
+  const phaseB = rollbackMaterializedTaleTokenSource(current, value);
+  const result = await verifyTaleTokenAnnexRaw(repositoryRoot, {
+    state: 'preimplementation',
+    currentTokenSourceValue: phaseB,
+  });
+  assert.equal(result.state, 'preimplementation');
+  assert.equal(result.materializedCrosswalkDigest, null);
+});
+
+test('materialized state rejects missing, changed, extra, or crosswalk-divergent Core facts', async () => {
+  const current = JSON.parse(await readFile(resolve(repositoryRoot, 'catalog/tokens/button-minimum.json'), 'utf8'));
+  for (const mutate of [
+    (value) => { delete value.tokens['reference.color.amber-10']; },
+    (value) => { value.tokens['reference.color.amber-10'].value = '#000000'; },
+    (value) => { value.tokens['reference.color.unaccepted'] = structuredClone(value.tokens['reference.color.amber-10']); },
+    (value) => { value.sourceCrosswalk.entries[87].groupId = 'core-logical:wrong'; },
+    (value) => { value.sourceCrosswalk.entries[0].reason = 'Changed after acceptance.'; },
+  ]) {
+    const invalid = structuredClone(current);
+    mutate(invalid);
+    await assert.rejects(
+      verifyTaleTokenAnnexRaw(repositoryRoot, {
+        state: 'materialized',
+        currentTokenSourceValue: invalid,
+      }),
+      (error) => error instanceof TaleTokenAnnexError && error.code === 'TALE_ANNEX_MATERIALIZATION_MISMATCH',
+    );
+  }
 });
 
 test('accepts an exact synthetic digest-bound human record', async () => {
@@ -413,7 +457,7 @@ test('reports pending when the acceptance record is absent', async () => {
 test('repository merge mode accepts the bound human decision', async () => {
   const result = await execFile(
     process.execPath,
-    ['tooling/audits/repository-policy/src/tale-token-annex-verify.mjs', '--require-acceptance'],
+    ['tooling/audits/repository-policy/src/tale-token-annex-verify.mjs', '--state', 'materialized', '--require-acceptance'],
     { cwd: repositoryRoot, encoding: 'utf8' },
   );
   assert.match(result.stdout, /human acceptance bound/u);

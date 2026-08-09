@@ -11,7 +11,7 @@ async function findManifests(repositoryRoot, current) {
   for (const entry of entries.sort((a, b) => a.name.localeCompare(b.name))) {
     const path = join(current, entry.name);
     if (entry.isDirectory()) {
-      if (!IGNORED.has(entry.name)) {
+      if (!IGNORED.has(entry.name) && !entry.name.startsWith('.')) {
         manifests.push(...await findManifests(repositoryRoot, path));
       }
     } else if (entry.isFile() && entry.name === 'package.json') {

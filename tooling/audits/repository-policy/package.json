@@ -7,10 +7,11 @@
     "node": ">=24.19.0 <25"
   },
   "dependencies": {
-    "@core-ui/schema": "workspace:*"
+    "@core-ui/schema": "workspace:*",
+    "@core-ui/tokens": "workspace:*"
   },
   "scripts": {
-    "check": "node src/cli.mjs && node src/tale-token-annex-verify.mjs && node src/evidence-verify.mjs && node src/tale-token-annex-verify.mjs --require-acceptance && node --test test/*.test.mjs ../../../.github/scripts/validate-planning-pr.test.cjs",
+    "check": "node src/cli.mjs && node src/tale-token-annex-verify.mjs --state materialized && node src/evidence-verify.mjs && node src/tale-token-annex-verify.mjs --state materialized --require-acceptance && node --test test/*.test.mjs ../../../.github/scripts/validate-planning-pr.test.cjs",
     "generate": "node src/generate.mjs",
     "generate:check": "node src/generate.mjs --check"
   }
