@@ -461,6 +461,7 @@ test('E-G0.5-04: affected closure is graph-derived and extends through declared 
     '@core-ui/tokens',
     '@core-ui/tooling',
     '@core-ui/web',
+    '@core-ui/repository-policy',
   ]);
   assert.throws(
     () => affectedClosure({ context, sourcePaths: ['catalog/components/inferred.json'] }),

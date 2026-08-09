@@ -6,6 +6,7 @@ import test from 'node:test';
 import { canonicalJson } from '../src/canonical-json.mjs';
 import { EvidenceIntegrityError, verifyEvidence } from '../src/evidence-verify.mjs';
 import { sha256 } from '../src/policy.mjs';
+import { acceptanceCommentBody } from '../src/tale-token-annex-acceptance.mjs';
 
 async function fixture({
   applicability = false,
@@ -187,6 +188,7 @@ async function addApplicabilitySupersession(
     directory = 'supersession',
     historicalPath = 'tests/evidence/g0.0/index.json',
     name = 'G0.0',
+    continuationDecision = 3,
     mutateAuthorityDecision = (value) => value,
     previousSupersession,
     mutate = (value) => value,
@@ -211,8 +213,9 @@ async function addApplicabilitySupersession(
     : recertification?.recertification.currentApplicabilityManifest
       ?? historicalIndex.applicabilityManifest;
   const supersessionPath = `tests/evidence/${directory}/supersessions/${name}.json`;
-  const authorityDecisionPath = 'decisions/0002-tale-token-authority.json';
-  const authorityDecision = mutateAuthorityDecision({
+  await mkdir(join(root, 'decisions'), { recursive: true });
+  let authorityDecisionPath = 'decisions/0002-tale-token-authority.json';
+  let authorityDecision = {
     bodySha256: `sha256:${'c'.repeat(64)}`,
     commentId: 5229802192,
     commentNodeId: 'IC_fixture',
@@ -226,9 +229,57 @@ async function addApplicabilitySupersession(
     repository: 'ndrewtran/core-ui',
     schema: 'core-ui-authority-decision-v1',
     url: 'https://github.com/ndrewtran/core-ui/issues/39#issuecomment-5229802192',
-  });
+  };
+  if (previousSupersession) {
+    const annexPath = 'decisions/0003-tale-token-classification-annex.json';
+    if (continuationDecision === 3) {
+      authorityDecisionPath = 'decisions/0003-tale-token-classification-acceptance.json';
+      const annexBytes = '{"schema":"fixture-annex"}';
+      const annexSha256 = `sha256:${sha256(annexBytes)}`;
+      const commentBody = acceptanceCommentBody({
+        annexPath,
+        annexSha256,
+        annexBytes: Buffer.byteLength(annexBytes),
+      });
+      authorityDecision = {
+        bodySha256: `sha256:${sha256(commentBody)}`,
+        commentId: 1,
+        commentNodeId: 'IC_fixture_annex',
+        createdAt: '2026-08-09T05:00:00Z',
+        decisionId: 'core-ui:decision:0003',
+        issueNumber: 39,
+        outcome: 'accepted',
+        owner: 'ndrewtran',
+        ownerNodeId: 'MDQ6VXNlcjc0MzE0OTg0',
+        provider: 'github',
+        repository: 'ndrewtran/core-ui',
+        schema: 'core-ui-authority-decision-v1',
+        url: 'https://github.com/ndrewtran/core-ui/issues/39#issuecomment-1',
+      };
+      await writeFile(join(root, annexPath), annexBytes);
+    } else {
+      authorityDecisionPath = 'decisions/0004-future-authority.json';
+      authorityDecision = {
+        bodySha256: `sha256:${'d'.repeat(64)}`,
+        commentId: 2,
+        commentNodeId: 'IC_fixture_future',
+        createdAt: '2026-08-09T06:00:00Z',
+        decisionId: 'core-ui:decision:0004',
+        issueNumber: 39,
+        outcome: 'accepted',
+        owner: 'ndrewtran',
+        ownerNodeId: 'U_fixture',
+        provider: 'github',
+        repository: 'ndrewtran/core-ui',
+        schema: 'core-ui-authority-decision-v1',
+        url: 'https://github.com/ndrewtran/core-ui/issues/39#issuecomment-2',
+      };
+    }
+  }
+  const supersessionOwner = authorityDecision.owner;
+  const supersessionEffectiveAt = authorityDecision.createdAt;
+  authorityDecision = mutateAuthorityDecision(authorityDecision);
   const authorityDecisionBytes = canonicalJson(authorityDecision);
-  await mkdir(join(root, 'decisions'), { recursive: true });
   await writeFile(join(root, authorityDecisionPath), authorityDecisionBytes);
   const supersession = mutate({
     affectedAssertions: historicalIndex.records
@@ -240,13 +291,13 @@ async function addApplicabilitySupersession(
     },
     currentApplicabilityManifest,
     disclosureClass: 'public-sanitized',
-    effectiveAt: '2026-08-09T04:41:54Z',
+    effectiveAt: supersessionEffectiveAt,
     evidenceStatus: 'superseded',
     historicalIndex: {
       path: historicalPath,
       sha256: `sha256:${sha256(historicalBytes)}`,
     },
-    owner: 'ndrewtran',
+    owner: supersessionOwner,
     ...(previousSupersession ? {
       previousSupersession: {
         path: previousSupersession.supersessionPath,
@@ -493,6 +544,46 @@ test('append-only supersession extends through one digest-linked leaf', async ()
     artifactCount: 1,
     recertificationCount: 0,
   });
+});
+
+test('a later Tale continuation uses its own standard authority decision', async () => {
+  const { root } = await fixture({ applicability: true });
+  const authorityRoot = await addApplicabilitySupersession(root);
+  const annexTransition = await addApplicabilitySupersession(root, {
+    directory: 'supersession-next',
+    previousSupersession: authorityRoot,
+  });
+  await addApplicabilitySupersession(root, {
+    continuationDecision: 4,
+    directory: 'supersession-future',
+    previousSupersession: annexTransition,
+  });
+  assert.deepEqual(await verifyEvidence(root), {
+    supersessionCount: 3,
+    indexCount: 4,
+    recordCount: 1,
+    artifactCount: 1,
+    recertificationCount: 0,
+  });
+});
+
+test('Tale authority continuation requires the exact acceptance authorization path', async () => {
+  const { root } = await fixture({ applicability: true });
+  const previous = await addApplicabilitySupersession(root);
+  await addApplicabilitySupersession(root, {
+    directory: 'supersession-next',
+    previousSupersession: previous,
+    mutate(value) {
+      value.authorization = previous.supersession.authorization;
+      value.owner = previous.supersession.owner;
+      value.effectiveAt = previous.supersession.effectiveAt;
+      return value;
+    },
+  });
+  await assertEvidenceError(
+    verifyEvidence(root),
+    'EVIDENCE_SUPERSESSION_ACCEPTANCE_REQUIRED',
+  );
 });
 
 test('supersession rejects a wrong historical digest', async () => {

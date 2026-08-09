@@ -7,6 +7,7 @@ import {
   assertAuthorityDecisionShape,
 } from './evidence-applicability-supersession.mjs';
 import { isIgnoredRepositoryEntry, sha256 } from './policy.mjs';
+import { assertTaleAnnexAcceptanceRecord } from './tale-token-annex-acceptance.mjs';
 
 export class EvidenceIntegrityError extends Error {
   constructor(code, message) {
@@ -457,6 +458,36 @@ export async function verifyEvidence(repositoryRoot) {
       throw new EvidenceIntegrityError(
         'EVIDENCE_SUPERSESSION_INVALID',
         `${target} contains a disconnected or cyclic supersession chain`,
+      );
+    }
+    const taleAuthorityChain = roots[0].supersession.authorization.path
+      === 'decisions/0002-tale-token-authority.json';
+    for (const node of nodes) {
+      const supersession = node.supersession;
+      if (
+        !taleAuthorityChain
+        || supersession.previousSupersession?.path !== roots[0].reference.path
+      ) continue;
+      const acceptancePath = 'decisions/0003-tale-token-classification-acceptance.json';
+      const annexPath = 'decisions/0003-tale-token-classification-annex.json';
+      if (supersession.authorization.path !== acceptancePath) {
+        throw new EvidenceIntegrityError(
+          'EVIDENCE_SUPERSESSION_ACCEPTANCE_REQUIRED',
+          `${node.reference.path} authorization must bind ${acceptancePath}`,
+        );
+      }
+      const acceptance = await assertDigest(repositoryRoot, supersession.authorization);
+      const annexBytes = await readFile(join(repositoryRoot, annexPath));
+      assertTaleAnnexAcceptanceRecord(
+        acceptance,
+        annexPath,
+        annexBytes,
+        (message) => {
+          throw new EvidenceIntegrityError(
+            'EVIDENCE_SUPERSESSION_ACCEPTANCE_INVALID',
+            `${acceptancePath}: ${message}`,
+          );
+        },
       );
     }
     await assertApplicabilityManifest(
