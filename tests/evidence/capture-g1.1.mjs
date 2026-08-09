@@ -2,7 +2,8 @@ import { createHash } from 'node:crypto';
 import { execFileSync, spawnSync } from 'node:child_process';
 import { mkdir, readFile, readdir, stat, writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
-import { canonicalJson, parseJsonStrict } from '../../packages/schema/src/index.mjs';
+import { compileCatalog } from '../../packages/catalog/src/compiler.mjs';
+import { canonicalDigest, canonicalJson, parseJsonStrict } from '../../packages/schema/src/index.mjs';
 import { isIgnoredRepositoryEntry } from '../../tooling/audits/repository-policy/src/policy.mjs';
 import { webCompatibility, webSurfaces } from '../../packages/web/src/index.mjs';
 import { platformSafetyFixture } from '../../packages/web/src/testing.mjs';
@@ -79,6 +80,14 @@ const environment = {
   typescript: await packageVersion('packages/react/node_modules/typescript/package.json'),
 };
 
+const tokenSourcePath = 'catalog/tokens/button-minimum.json';
+const componentPath = 'catalog/components/button/artifact.json';
+const tokenSource = parseJsonStrict(await readFile(join(repositoryRoot, tokenSourcePath), 'utf8'));
+const component = parseJsonStrict(await readFile(join(repositoryRoot, componentPath), 'utf8'));
+const compiled = await compileCatalog({ repositoryRoot });
+const componentArtifact = compiled.bundle.artifacts.find(({ id }) => id === component.id);
+if (componentArtifact === undefined) throw new Error('EVIDENCE_COMPONENT_IDENTITY_MISSING');
+
 const paths = [
   'package.json',
   'pnpm-lock.yaml',
@@ -143,6 +152,20 @@ for (const [key, value] of Object.entries(expectedHooks)) {
   }
 }
 
+const bindingPackages = {
+  'web.html': '@core-ui/web',
+  'web.react': '@core-ui/react',
+};
+const bindingIds = Object.keys(bindingPackages);
+for (const bindingId of bindingIds) {
+  const tokenRequirementSet = componentArtifact.tokenRequirementSets[`${bindingId}:${bindingId}`];
+  const compatibility = webCompatibility.bindings[bindingId];
+  if (
+    tokenRequirementSet?.digest !== compatibility?.tokenRequirementSetDigest
+    || componentArtifact.bindingSpecRevisions[bindingId] !== compatibility?.specRevision
+  ) throw new Error(`EVIDENCE_BINDING_IDENTITY_DIVERGED: ${bindingId}`);
+}
+
 const canonicalExamples = await Promise.all([
   {
     descriptor: 'catalog/components/button/examples/html/basic.example.json',
@@ -191,7 +214,37 @@ if (
 ) throw new Error('EVIDENCE_REACT_STYLE_SOURCE_DIVERGED');
 
 const applicableIdentities = {
+  catalog: {
+    catalogDigest: compiled.bundle.catalogDigest,
+    catalogVersion: compiled.bundle.catalogVersion,
+    sourceRevision: compiled.bundle.sourceRevision,
+  },
+  component: {
+    id: componentArtifact.id,
+    contentRevision: componentArtifact.contentRevision,
+    source: componentPath,
+  },
+  bindings: Object.fromEntries(bindingIds.map((bindingId) => [bindingId, {
+    bindingContentRevision: componentArtifact.bindingContentRevisions[bindingId],
+    bindingSpecRevision: componentArtifact.bindingSpecRevisions[bindingId],
+    lifecycle: componentArtifact.record.bindings[bindingId].lifecycle,
+    ref: `${componentArtifact.id}#${bindingId}`,
+    rendererPackage: bindingPackages[bindingId],
+    runtimeProfile: bindingId,
+    strategy: componentArtifact.record.bindings[bindingId].strategy,
+  }])),
   packages: packageIdentities,
+  tokenSource: {
+    contentRevision: canonicalDigest(tokenSource),
+    id: tokenSource.id,
+    schemaVersion: tokenSource.schemaVersion,
+    source: tokenSourcePath,
+    tokenContractVersion: tokenSource.tokenContractVersion,
+  },
+  tokenRequirementSets: Object.fromEntries(bindingIds.map((bindingId) => [
+    `${bindingId}:${bindingId}`,
+    componentArtifact.tokenRequirementSets[`${bindingId}:${bindingId}`].digest,
+  ])),
   webCompatibility: {
     sourceRevision: webCompatibility.sourceRevision,
     webHtmlSpecRevision: webCompatibility.bindings['web.html'].specRevision,
@@ -219,7 +272,10 @@ const rollbackOrDisable = {
 };
 const applicability = {
   applicabilityManifest: manifest,
+  catalog: applicableIdentities.catalog,
+  component: applicableIdentities.component,
   stylesheetDigest: platformSafetyFixture.stylesheetDigest,
+  tokenSource: applicableIdentities.tokenSource,
   webCompatibilitySourceRevision: webCompatibility.sourceRevision,
 };
 const definitions = [
