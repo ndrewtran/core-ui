@@ -1588,6 +1588,31 @@ supersession is represented by a separate, signed, append-only
 effective time, public reason code, disclosure class, and optional replacement
 digest. It never edits the original evidence record or release manifest.
 
+Before G1.9 enables the signed catalog/query/release `EvidenceAdvisory`
+surface, repository proof may use a narrower internal
+`EvidenceApplicabilitySupersession` only to close a retained applicability or
+recertification chain after a human-accepted authority change. It is not an
+`EvidenceAdvisory`, cannot withdraw the historical result, does not enter a
+catalog or release manifest, and cannot satisfy current evidence, promotion,
+or support. The content-addressed certificate binds the exact historical index
+digest, terminal recertification digest when present, superseded and current
+applicability manifests, affected assertion IDs, exact source commit/tree, and
+an immutable repository decision record containing the provider-supplied
+designated owner's stable actor identity, comment identity and timestamp, and
+decision-body digest. The grammar is closed and the verifier rejects unknown fields,
+malformed identities, forks, cycles, duplicate references, stale current
+manifests, and a certificate that does not represent an actual applicability
+change.
+
+The certificate closes that historical recertification chain permanently: a
+later source-only drift may append one digest-linked supersession certificate,
+but no later passing recertification may extend the superseded chain. Compatible
+replacement proof starts a new immutable evidence index bound to its new
+authority/source profile. The original index, records, artifacts,
+recertifications, and certificates remain byte-for-byte historical. Enabling
+the public signed advisory surface still requires the complete G1.9 contract;
+this internal certificate does not satisfy `SCOPE-TRUST-ADVISORY` by itself.
+
 Queries resolve evidence with `evidenceStatus: valid | superseded | withdrawn`
 and surface the advisory without exposing restricted detail. Supersession keeps
 the historical result valid for its original release unless the advisory says

@@ -1,6 +1,11 @@
 import { readFile, readdir, stat } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { canonicalJson } from './canonical-json.mjs';
+import {
+  assertApplicabilitySupersessionReference,
+  assertApplicabilitySupersessionShape,
+  assertAuthorityDecisionShape,
+} from './evidence-applicability-supersession.mjs';
 import { isIgnoredRepositoryEntry, sha256 } from './policy.mjs';
 
 export class EvidenceIntegrityError extends Error {
@@ -78,10 +83,15 @@ async function manifestEntries(repositoryRoot, declaredPaths) {
 }
 
 async function assertApplicabilityManifest(repositoryRoot, manifest) {
-  if (manifest.profile !== 'core-ui-path-manifest-v1') {
+  if (
+    manifest?.algorithm !== 'sha256'
+    || manifest?.profile !== 'core-ui-path-manifest-v1'
+    || !Array.isArray(manifest?.paths)
+    || !/^sha256:[0-9a-f]{64}$/u.test(manifest?.sha256)
+  ) {
     throw new EvidenceIntegrityError(
       'EVIDENCE_MANIFEST_PROFILE_INVALID',
-      `unsupported applicability manifest profile ${manifest.profile}`,
+      'applicability manifest must use the sha256 core-ui-path-manifest-v1 profile',
     );
   }
   const entries = await manifestEntries(repositoryRoot, manifest.paths);
@@ -102,6 +112,7 @@ export async function verifyEvidence(repositoryRoot) {
   let recordCount = 0;
   let artifactCount = 0;
   let recertificationCount = 0;
+  let supersessionCount = 0;
 
   for (const entry of milestones.filter((item) => item.isDirectory())) {
     const indexPath = join(evidenceRoot, entry.name, 'index.json');
@@ -261,11 +272,206 @@ export async function verifyEvidence(repositoryRoot) {
         `${target} contains a disconnected or cyclic recertification chain`,
       );
     }
+    recertificationLeaves.set(target, leaves[0]);
+  }
+
+  const supersessionNodes = new Map();
+  for (const owner of indexes) {
+    for (const reference of owner.index.supersessions ?? []) {
+      assertApplicabilitySupersessionReference(reference, (message) => {
+        throw new EvidenceIntegrityError('EVIDENCE_SUPERSESSION_SCHEMA_INVALID', message);
+      });
+      if (supersessionNodes.has(reference.path)) {
+        throw new EvidenceIntegrityError(
+          'EVIDENCE_SUPERSESSION_DUPLICATE_REFERENCE',
+          `${reference.path} is referenced more than once`,
+        );
+      }
+      const supersession = await assertDigest(repositoryRoot, reference);
+      assertApplicabilitySupersessionShape(supersession, (message) => {
+        throw new EvidenceIntegrityError(
+          'EVIDENCE_SUPERSESSION_SCHEMA_INVALID',
+          `${reference.path}: ${message}`,
+        );
+      });
+      const authorityDecision = await assertDigest(repositoryRoot, supersession.authorization);
+      assertAuthorityDecisionShape(authorityDecision, (message) => {
+        throw new EvidenceIntegrityError(
+          'EVIDENCE_SUPERSESSION_AUTHORIZATION_INVALID',
+          `${supersession.authorization.path}: ${message}`,
+        );
+      });
+      const target = supersession.historicalIndex?.path;
+      const historical = indexes.find(({ relativePath }) => relativePath === target);
+      const historicalDigest = historical
+        ? `sha256:${sha256(historical.indexBytes)}`
+        : null;
+      const affectedAssertions = historical
+        ? historical.index.records.map(({ assertionId }) => assertionId).sort()
+        : [];
+      if (historical && reference.milestone !== historical.index.milestone) {
+        throw new EvidenceIntegrityError(
+          'EVIDENCE_SUPERSESSION_MILESTONE_MISMATCH',
+          `${reference.path} names ${reference.milestone}; expected ${historical.index.milestone}`,
+        );
+      }
+      if (
+        !historical?.index.applicabilityManifest
+        || supersession.historicalIndex.sha256 !== historicalDigest
+        || supersession.sourceRevision !== owner.index.sourceRevision
+        || supersession.sourceTree !== owner.index.sourceTree
+        || supersession.owner !== authorityDecision.owner
+        || supersession.effectiveAt !== authorityDecision.createdAt
+        || canonicalJson(supersession.affectedAssertions) !== canonicalJson(affectedAssertions)
+        || canonicalJson(supersession.currentApplicabilityManifest.paths)
+          !== canonicalJson(historical.index.applicabilityManifest.paths)
+        || supersession.currentApplicabilityManifest.sha256
+          === supersession.supersededApplicabilityManifest.sha256
+      ) {
+        throw new EvidenceIntegrityError(
+          'EVIDENCE_SUPERSESSION_INVALID',
+          `${reference.path} must be one uniquely addressed applicability supersession`,
+        );
+      }
+      supersessionNodes.set(reference.path, {
+        supersession,
+        owner,
+        reference,
+        target,
+      });
+      supersessionCount += 1;
+    }
+  }
+
+  const supersessionLeaves = new Map();
+  const supersessionsByTarget = Map.groupBy(
+    supersessionNodes.values(),
+    ({ target }) => target,
+  );
+  for (const [target, nodes] of supersessionsByTarget) {
+    const historical = indexes.find(({ relativePath }) => relativePath === target);
+    const recertificationLeaf = recertificationLeaves.get(target);
+    const children = new Map();
+    const roots = [];
+    for (const node of nodes) {
+      const previous = node.supersession.previousSupersession;
+      if (previous === undefined) {
+        roots.push(node);
+        const expectedManifest = recertificationLeaf
+          ? recertificationLeaf.recertification.currentApplicabilityManifest
+          : historical.index.applicabilityManifest;
+        const expectedRecertification = recertificationLeaf
+          ? {
+              path: recertificationLeaf.reference.path,
+              sha256: recertificationLeaf.reference.sha256,
+            }
+          : undefined;
+        const boundRecertification = node.supersession.supersededRecertification;
+        if (
+          recertificationLeaf
+          && boundRecertification?.path !== recertificationLeaf.reference.path
+        ) {
+          throw new EvidenceIntegrityError(
+            'EVIDENCE_RECERTIFICATION_AFTER_SUPERSESSION',
+            `${target} cannot extend a recertification chain after supersession`,
+          );
+        }
+        if (
+          canonicalJson(node.supersession.supersededApplicabilityManifest)
+            !== canonicalJson(expectedManifest)
+          || canonicalJson(node.supersession.supersededRecertification)
+            !== canonicalJson(expectedRecertification)
+        ) {
+          throw new EvidenceIntegrityError(
+            'EVIDENCE_SUPERSESSION_INVALID',
+            `${node.reference.path} root does not bind the terminal historical evidence identity`,
+          );
+        }
+        continue;
+      }
+      if (previous.path === node.reference.path) {
+        throw new EvidenceIntegrityError(
+          'EVIDENCE_SUPERSESSION_CYCLE',
+          `${node.reference.path} cannot name itself as its predecessor`,
+        );
+      }
+      const predecessor = supersessionNodes.get(previous.path);
+      if (
+        !predecessor
+        || predecessor.target !== target
+        || previous.sha256 !== predecessor.reference.sha256
+        || node.supersession.supersededRecertification !== undefined
+        || canonicalJson(node.supersession.supersededApplicabilityManifest)
+          !== canonicalJson(predecessor.supersession.currentApplicabilityManifest)
+      ) {
+        throw new EvidenceIntegrityError(
+          'EVIDENCE_SUPERSESSION_INVALID',
+          `${node.reference.path} does not bind its exact predecessor`,
+        );
+      }
+      const successorPaths = children.get(previous.path) ?? [];
+      successorPaths.push(node.reference.path);
+      children.set(previous.path, successorPaths);
+    }
+    for (const node of nodes) {
+      const visited = new Set();
+      let cursor = node;
+      while (cursor?.supersession.previousSupersession) {
+        if (visited.has(cursor.reference.path)) {
+          throw new EvidenceIntegrityError(
+            'EVIDENCE_SUPERSESSION_CYCLE',
+            `${target} contains a supersession cycle`,
+          );
+        }
+        visited.add(cursor.reference.path);
+        cursor = supersessionNodes.get(cursor.supersession.previousSupersession.path);
+      }
+    }
+    if (roots.length !== 1 || [...children.values()].some((paths) => paths.length !== 1)) {
+      throw new EvidenceIntegrityError(
+        'EVIDENCE_SUPERSESSION_FORK',
+        `${target} must have one supersession root and at most one successor per supersession`,
+      );
+    }
+    const leaves = nodes.filter(({ reference }) => !children.has(reference.path));
+    if (leaves.length !== 1) {
+      throw new EvidenceIntegrityError(
+        'EVIDENCE_SUPERSESSION_FORK',
+        `${target} must have exactly one terminal supersession`,
+      );
+    }
+    const visited = new Set();
+    let cursor = leaves[0];
+    while (cursor) {
+      if (visited.has(cursor.reference.path)) {
+        throw new EvidenceIntegrityError(
+          'EVIDENCE_SUPERSESSION_CYCLE',
+          `${target} contains a supersession cycle`,
+        );
+      }
+      visited.add(cursor.reference.path);
+      const previousPath = cursor.supersession.previousSupersession?.path;
+      cursor = previousPath === undefined ? null : supersessionNodes.get(previousPath);
+    }
+    if (visited.size !== nodes.length || !visited.has(roots[0].reference.path)) {
+      throw new EvidenceIntegrityError(
+        'EVIDENCE_SUPERSESSION_INVALID',
+        `${target} contains a disconnected or cyclic supersession chain`,
+      );
+    }
     await assertApplicabilityManifest(
       repositoryRoot,
-      leaves[0].recertification.currentApplicabilityManifest,
+      leaves[0].supersession.currentApplicabilityManifest,
     );
-    recertificationLeaves.set(target, leaves[0].recertification);
+    supersessionLeaves.set(target, leaves[0]);
+  }
+
+  for (const [target, leaf] of recertificationLeaves) {
+    if (supersessionLeaves.has(target)) continue;
+    await assertApplicabilityManifest(
+      repositoryRoot,
+      leaf.recertification.currentApplicabilityManifest,
+    );
   }
 
   for (const { index, relativePath } of indexes) {
@@ -276,7 +482,10 @@ export async function verifyEvidence(repositoryRoot) {
         if (
           !(error instanceof EvidenceIntegrityError)
           || error.code !== 'EVIDENCE_APPLICABILITY_MISMATCH'
-          || !recertificationLeaves.has(relativePath)
+          || (
+            !recertificationLeaves.has(relativePath)
+            && !supersessionLeaves.has(relativePath)
+          )
         ) throw error;
       }
     }
@@ -352,7 +561,13 @@ export async function verifyEvidence(repositoryRoot) {
     }
   }
 
-  return { indexCount, recordCount, artifactCount, recertificationCount };
+  return {
+    indexCount,
+    recordCount,
+    artifactCount,
+    recertificationCount,
+    supersessionCount,
+  };
 }
 
 if (process.argv[1] === new URL(import.meta.url).pathname) {
@@ -362,7 +577,8 @@ if (process.argv[1] === new URL(import.meta.url).pathname) {
     console.log(
       `[evidence] verified ${result.indexCount} immutable index, `
         + `${result.recordCount} records, ${result.artifactCount} artifacts, and `
-        + `${result.recertificationCount} recertifications`,
+        + `${result.recertificationCount} recertifications and `
+        + `${result.supersessionCount} supersessions`,
     );
   } catch (error) {
     console.error(error.message);

@@ -786,9 +786,12 @@ Affected immutable IDs are
 `SCOPE-AUTHOR-CLOSURE`, `SCOPE-AUTHOR-AUTOFIX`,
 `SCOPE-QUALITY-COMPAT-PROFILE`, `SCOPE-QUALITY-GENERATOR-CONTRACT`,
 `SCOPE-QUALITY-PERFORMANCE`, `SCOPE-PROOF-SCHEMA`,
-`SCOPE-PROOF-CONFORMANCE`, `SCOPE-PROOF-GENERATION`, and
-`SCOPE-PROOF-PARITY`. Every item remains `committed`; there is no commitment
-transition or new scope ID.
+`SCOPE-PROOF-CONFORMANCE`, `SCOPE-PROOF-GENERATION`, `SCOPE-PROOF-PARITY`,
+`SCOPE-TRUST-EVIDENCE`, `SCOPE-TRUST-ADVISORY`, and
+`SCOPE-TRUST-HISTORY`. Every item remains `committed`; there is no commitment
+transition or new scope ID. The internal applicability-supersession certificate
+preserves historical proof while replacement is pending; it is not the signed
+public advisory surface and does not satisfy `SCOPE-TRUST-ADVISORY` activation.
 
 Roadmap and evidence effect: Phase A reactivates G0.1–G0.5 and Gate 0 for the
 `TALE-TOKEN-A` query API v1.2 deprecation/typed-absence profile; Phase B expires
@@ -799,7 +802,10 @@ preserves Phase B and repeats the complete Gate 0 proof under the
 `TALE-TOKEN-C` profile at that exact final G1.0 source. Only then may all
 `E-G1.0-01` through `E-G1.0-08` be accepted,
 followed by fresh `E-G1.1-01` through `E-G1.1-06`. G1.2–G1.9 and Gate 1 bind
-to the corrected token, catalog, package, and evidence identities.
+to the corrected token, catalog, package, and evidence identities. Current
+expiry is represented by digest-bound internal applicability-supersession
+certificates that close, but never recertify, the historical chains; every
+replacement generation begins a new immutable evidence index.
 
 Release additions are the exact accepted Core reference-token identities, the
 optional stable token-source `sourceCrosswalk` member in schema `2.1.0`, query

@@ -614,6 +614,16 @@ this integration exit in three exact-source generations. A later generation
 expires the applicability of the prior generation without rewriting or
 deleting its immutable historical evidence.
 
+The accepted authority change records current expiry through closed,
+content-addressed internal `EvidenceApplicabilitySupersession` certificates.
+Each certificate binds the exact historical index, the terminal recertification
+when present, the superseded/current applicability manifests, affected
+assertions, source commit/tree, and the digest-bound designated-owner decision
+identity. It closes the old recertification chain without claiming new proof.
+Phase A, Phase B, and Phase C replacement evidence each starts a new immutable
+index; none extends a superseded chain or treats the certificate as a passing
+assertion.
+
 Before Phase A implementation, a separate human-accepted classification and
 compatibility annex enumerates every planned occurrence disposition, the exact
 Core token additions, final page-profile constants, token-contract/catalog/
