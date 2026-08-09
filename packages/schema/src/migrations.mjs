@@ -1,4 +1,5 @@
 import { SchemaValidationError, validateFamily } from './validation.mjs';
+import { canonicalJson } from './canonical.mjs';
 
 function migrationError(path, message) {
   throw new SchemaValidationError('CORE_SCHEMA_MIGRATION_REQUIRED', [{ path, message }]);
@@ -10,6 +11,15 @@ function assertPlainObject(value, path) {
   }
 }
 
+function validateTokenSourceV2(source) {
+  const candidate = structuredClone(source);
+  candidate.schemaVersion = '2.1.0';
+  if (Object.hasOwn(candidate, 'sourceCrosswalk')) {
+    migrationError('$/sourceCrosswalk', 'token-source 2.0 cannot declare sourceCrosswalk');
+  }
+  validateFamily('token-source', candidate);
+}
+
 export function migrateTokenSourceV1ToV2(source, {
   theme,
   tokenMetadata,
@@ -17,7 +27,7 @@ export function migrateTokenSourceV1ToV2(source, {
 } = {}) {
   assertPlainObject(source, '$');
   if (source.schemaVersion === '2.0.0') {
-    validateFamily('token-source', source);
+    validateTokenSourceV2(source);
     return structuredClone(source);
   }
   if (source.schemaVersion !== '1.0.0') {
@@ -63,8 +73,51 @@ export function migrateTokenSourceV1ToV2(source, {
     theme: structuredClone(theme),
     tokens,
   };
-  validateFamily('token-source', migrated);
+  validateTokenSourceV2(migrated);
   return migrated;
+}
+
+export function migrateTokenSourceV2ToV2_1(source, {
+  sourceCrosswalk,
+  dryRun = false,
+} = {}) {
+  assertPlainObject(source, '$');
+  if (typeof dryRun !== 'boolean') migrationError('$migration/dryRun', 'must be a boolean');
+  if (source.schemaVersion === '2.1.0') {
+    validateFamily('token-source', source);
+    if (
+      sourceCrosswalk !== undefined
+      && canonicalJson(sourceCrosswalk) !== canonicalJson(source.sourceCrosswalk)
+    ) {
+      migrationError('$migration/sourceCrosswalk', 'cannot reinterpret an existing 2.1 crosswalk');
+    }
+    const plan = {
+      from: '2.1.0',
+      to: '2.1.0',
+      changed: false,
+      readRewrite: false,
+      sourceCrosswalk: Object.hasOwn(source, 'sourceCrosswalk') ? 'preserved' : 'omitted',
+    };
+    return dryRun ? plan : structuredClone(source);
+  }
+  if (source.schemaVersion !== '2.0.0') {
+    migrationError('$/schemaVersion', `${source.schemaVersion} is not migratable`);
+  }
+  validateTokenSourceV2(source);
+  const migrated = {
+    ...structuredClone(source),
+    schemaVersion: '2.1.0',
+    ...(sourceCrosswalk === undefined ? {} : { sourceCrosswalk: structuredClone(sourceCrosswalk) }),
+  };
+  validateFamily('token-source', migrated);
+  const plan = {
+    from: '2.0.0',
+    to: '2.1.0',
+    changed: true,
+    readRewrite: false,
+    sourceCrosswalk: sourceCrosswalk === undefined ? 'omitted' : 'authored-input',
+  };
+  return dryRun ? plan : migrated;
 }
 
 export function migrateBindingV1ToV2(binding, { tokenRecipe, platformSafety } = {}) {

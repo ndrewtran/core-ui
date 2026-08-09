@@ -20,11 +20,12 @@ export const QUERY_SELECTORS = Object.freeze(
       .map(([key, values]) => [key, Object.freeze([...values])]),
   ),
 );
-export const SCHEMA_VERSION = '2.0.0';
-export const API_VERSION = '1.2.0';
-export const QUERY_SCHEMA_VERSION = '1.2.0';
+export const SCHEMA_VERSION = '2.1.0';
+export const API_VERSION = '2.0.0';
+export const QUERY_SCHEMA_VERSION = '2.0.0';
 export const QUERY_API_VERSIONS = Object.freeze(['1.1.0', '1.2.0', '2.0.0']);
 export const PHASE_A_QUERY_API_VERSIONS = Object.freeze(['1.1.0', '1.2.0']);
+export const PHASE_B_QUERY_API_VERSIONS = QUERY_API_VERSIONS;
 
 export function parseArtifactRef(value, { requireEnabledRecordKind = false } = {}) {
   const match = new RegExp(ARTIFACT_REF_PATTERN).exec(value);
@@ -52,6 +53,7 @@ export {
   migrateBindingV1ToV2,
   migrateComponentBindingsV1ToV2,
   migrateTokenSourceV1ToV2,
+  migrateTokenSourceV2ToV2_1,
 } from './migrations.mjs';
 export {
   authoringMetadata,

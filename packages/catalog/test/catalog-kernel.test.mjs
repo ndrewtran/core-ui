@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
 import { mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
@@ -12,13 +13,14 @@ import {
   validateFamily,
 } from '@core-ui/schema';
 import { catalogJson } from '../generated/catalog.mjs';
-import { assertPhaseAQueryProfile, compileCatalog } from '../src/compiler.mjs';
+import { assertAcceptedQueryProfile, compileCatalog } from '../src/compiler.mjs';
 import {
   createCatalogApi,
   getArtifact,
   getManifest,
   listArtifacts,
   searchArtifacts,
+  validateTokenDetailSummary,
 } from '../src/index.mjs';
 
 const repositoryRoot = resolve(import.meta.dirname, '../../..');
@@ -31,6 +33,88 @@ function preimage(bundle) {
 
 function countTokens(value) {
   return value.match(/[\p{L}\p{N}_]+/gu)?.length ?? 0;
+}
+
+function withCatalogDigest(bundle) {
+  return { ...bundle, catalogDigest: canonicalDigest(bundle) };
+}
+
+function syntheticCrosswalkBundle(entries, { pageBudgetProfile } = {}) {
+  const bundle = structuredClone(preimage(baseBundle));
+  const artifact = bundle.artifacts.find(({ kind }) => kind === 'token');
+  const customPropertyNames = entries
+    .map(({ occurrence }) => occurrence.name)
+    .filter((name) => name.startsWith('--'));
+  artifact.record.sourceCrosswalk = {
+    baseline: {
+      repository: 'Tale-UI/tale-ui', revision: 'a'.repeat(40), path: 'packages/tokens/tokens.json',
+      sha256: `sha256:${'b'.repeat(64)}`, baseFontSizePx: 16,
+      declarationOccurrences: entries.length,
+      customPropertyOccurrences: customPropertyNames.length,
+      uniqueCustomPropertyNames: new Set(customPropertyNames).size,
+      nonCustomPropertyOccurrences: entries.length - customPropertyNames.length,
+    },
+    entries,
+    groups: [],
+  };
+  artifact.sourceCrosswalkDigest = canonicalDigest(artifact.record.sourceCrosswalk);
+  artifact.contentRevision = contentRevision('token-source', artifact.record);
+  if (pageBudgetProfile !== undefined) bundle.pageBudgetProfile = pageBudgetProfile;
+  return withCatalogDigest(bundle);
+}
+
+function rejectEntry(ordinal, { reason = 'Deferred test occurrence.', value = `${ordinal}px` } = {}) {
+  return {
+    occurrence: { ordinal, file: '_test.css', selector: ':root', name: `--test-${ordinal}`, value },
+    disposition: 'reject',
+    reason,
+    targets: {
+      'web.html': 'rejected', 'web.react': 'rejected', 'native.ios': 'rejected',
+      'native.android': 'rejected', 'native.react-native-web': 'rejected',
+    },
+  };
+}
+
+function rebindSectionCursor(cursor, mutate) {
+  const [, payloadPart] = cursor.split('.');
+  const payload = JSON.parse(Buffer.from(payloadPart, 'base64url').toString('utf8'));
+  mutate(payload);
+  const bytes = canonicalJson(payload);
+  const digest = createHash('sha256').update(bytes).digest('hex');
+  return `c1.${Buffer.from(bytes).toString('base64url')}.${digest}`;
+}
+
+const PHASE_B_HISTORICAL_IDENTITY_POINTERS = Object.freeze([
+  '/data/artifact/schemaVersion',
+  '/data/artifact/contentRevision',
+  '/meta/coreVersion',
+  '/meta/revisions/conceptContent',
+  '/meta/catalogVersion',
+  '/meta/catalogDigest',
+  '/meta/sourceRevision',
+  '/meta/resolution/sourceRevision',
+  '/meta/resolution/revisions/conceptContent',
+  '/meta/resolution/targetPackages/@core-ui~1catalog',
+]);
+
+function normalizePointers(value, pointers) {
+  const normalized = JSON.parse(canonicalJson(value));
+  for (const pointer of pointers) {
+    const segments = pointer.slice(1).split('/').map((segment) => (
+      segment.replaceAll('~1', '/').replaceAll('~0', '~')
+    ));
+    let owner = normalized;
+    for (const segment of segments.slice(0, -1)) {
+      if (owner?.[segment] === undefined) {
+        owner = null;
+        break;
+      }
+      owner = owner[segment];
+    }
+    const field = segments.at(-1);
+    if (owner !== null && Object.hasOwn(owner, field)) owner[field] = `<normalized:${pointer}>`;
+  }
+  return normalized;
 }
 
 test('E-G0.2-01: declared sources compile to byte-identical ordered bundles', async () => {
@@ -181,7 +265,7 @@ test('E-G0.2-03: pagination is digest- and request-bound', () => {
   assert.equal(crossDigest.error.code, 'CORE_CURSOR_INVALID');
 });
 
-test('TALE-TOKEN-A query 1.2 retains inline 1.1 meaning and adds bounded token sections', () => {
+test('TALE-TOKEN-B query 2.0 removes inline tokens while retaining historical 1.1 and 1.2 meanings', () => {
   const api = createCatalogApi(baseBundle);
   const v11 = api.getArtifact({
     id: 'core:token:button-minimum',
@@ -203,6 +287,48 @@ test('TALE-TOKEN-A query 1.2 retains inline 1.1 meaning and adds bounded token s
   assert.equal(v12.warnings[0].details.replacement, 'section=tokens');
   validateFamily('query-envelope', v11);
   validateFamily('query-envelope', v12);
+
+  const v20 = api.getArtifact({
+    id: 'core:token:button-minimum',
+    queryApiVersion: '2.0.0',
+    detail: 'full',
+  });
+  assert.equal(v20.apiVersion, '2.0.0');
+  assert.deepEqual(v20.warnings, []);
+  assert.equal(Object.hasOwn(v20.data.artifact, 'tokens'), false);
+  assert.equal(v20.data.artifact.tokenCount, Object.keys(v11.data.artifact.tokens).length);
+  assert.equal(v20.data.artifact.sourceCrosswalkDigest, null);
+  assert.deepEqual(v20.data.artifact.availableSections, ['tokens', 'source-crosswalk']);
+  for (const response of [v11, v12, v20]) {
+    assert.equal(Object.hasOwn(response.data.artifact, 'sourceCrosswalk'), false);
+  }
+  validateFamily('query-envelope', v20);
+  for (const mutate of [
+    (value) => { value.data.artifact.availableSections.reverse(); },
+    (value) => { value.data.artifact.tokenCount = -1; },
+    (value) => { value.data.artifact.tokenSourceContentRevision = `sha256:${'0'.repeat(64)}`; },
+    (value) => { value.data.artifact.tokens = {}; },
+    (value) => { value.data.artifact.sourceCrosswalk = {}; },
+    (value) => { value.data.artifact.unownedSummary = true; },
+  ]) {
+    const invalid = structuredClone(v20);
+    mutate(invalid);
+    assert.throws(() => validateFamily('query-envelope', invalid), /CORE_SCHEMA_INVALID/u);
+  }
+  const selectedTokenArtifact = baseBundle.artifacts.find(({ kind }) => kind === 'token');
+  for (const mutate of [
+    (value) => { value.sourceCrosswalkDigest = `sha256:${'0'.repeat(64)}`; },
+    (value) => { value.tokenCount += 1; },
+    (value) => { value.tokenSourceContentRevision = `sha256:${'0'.repeat(64)}`; },
+    (value) => { value.availableSections.reverse(); },
+  ]) {
+    const invalid = structuredClone(v20.data.artifact);
+    mutate(invalid);
+    assert.throws(
+      () => validateTokenDetailSummary({ responseArtifact: invalid, selectedArtifact: selectedTokenArtifact }),
+      /CORE_CATALOG_INTEGRITY_MISMATCH/u,
+    );
+  }
 
   const first = api.getArtifact({
     id: 'core:token:button-minimum',
@@ -239,8 +365,8 @@ test('TALE-TOKEN-A query 1.2 retains inline 1.1 meaning and adds bounded token s
   });
   assert.deepEqual(absent.entries, {
     status: 'absent',
-    reason: 'token-source-schema-does-not-declare-source-crosswalk',
-    tokenSourceSchemaVersion: '2.0.0',
+    reason: 'token-source-omits-source-crosswalk',
+    tokenSourceSchemaVersion: '2.1.0',
     items: [],
   });
   assert.deepEqual(absent.page, {
@@ -255,8 +381,18 @@ test('TALE-TOKEN-A query 1.2 retains inline 1.1 meaning and adds bounded token s
 
   const futurePreimage = structuredClone(preimage(baseBundle));
   const futureToken = futurePreimage.artifacts.find(({ kind }) => kind === 'token');
-  futureToken.record.schemaVersion = '2.1.0';
   futureToken.record.sourceCrosswalk = {
+    baseline: {
+      repository: 'Tale-UI/tale-ui',
+      revision: 'a'.repeat(40),
+      path: 'packages/tokens/tokens.json',
+      sha256: `sha256:${'b'.repeat(64)}`,
+      baseFontSizePx: 16,
+      declarationOccurrences: 1,
+      customPropertyOccurrences: 0,
+      uniqueCustomPropertyNames: 0,
+      nonCustomPropertyOccurrences: 1,
+    },
     entries: [{
       occurrence: {
         ordinal: 1,
@@ -275,14 +411,17 @@ test('TALE-TOKEN-A query 1.2 retains inline 1.1 meaning and adds bounded token s
         'native.react-native-web': 'rejected',
       },
     }],
+    groups: [],
   };
+  futureToken.sourceCrosswalkDigest = canonicalDigest(futureToken.record.sourceCrosswalk);
+  futureToken.contentRevision = contentRevision('token-source', futureToken.record);
   const futureApi = createCatalogApi({
     ...futurePreimage,
     catalogDigest: canonicalDigest(futurePreimage),
   });
   const availableCrosswalk = futureApi.getArtifact({
     id: 'core:token:button-minimum',
-    queryApiVersion: '1.2.0',
+    queryApiVersion: '2.0.0',
     section: 'source-crosswalk',
   });
   assert.equal(availableCrosswalk.entries.status, 'available');
@@ -290,6 +429,8 @@ test('TALE-TOKEN-A query 1.2 retains inline 1.1 meaning and adds bounded token s
   validateFamily('section-page', availableCrosswalk);
 
   delete futureToken.record.sourceCrosswalk;
+  futureToken.sourceCrosswalkDigest = null;
+  futureToken.contentRevision = contentRevision('token-source', futureToken.record);
   const omittedApi = createCatalogApi({
     ...futurePreimage,
     catalogDigest: canonicalDigest(futurePreimage),
@@ -306,7 +447,142 @@ test('TALE-TOKEN-A query 1.2 retains inline 1.1 meaning and adds bounded token s
   });
 });
 
-test('TALE-TOKEN-A section cursors fail closed across tampering, selectors, and catalog identities', () => {
+test('TALE-TOKEN-B synthetic crosswalk pages preserve normalized groups without changing v1.2 projection', () => {
+  const bundle = structuredClone(preimage(baseBundle));
+  const artifact = bundle.artifacts.find(({ kind }) => kind === 'token');
+  const occurrences = [
+    { ordinal: 1, file: '_color.css', selector: ':root', name: '--action-dark', value: '#1f2937' },
+    { ordinal: 2, file: '_color.css', selector: '.dark', name: '--action-dark', value: '#1f2937' },
+  ];
+  const targets = {
+    'web.html': 'direct',
+    'web.react': 'direct',
+    'native.ios': 'direct',
+    'native.android': 'direct',
+    'native.react-native-web': 'deferred',
+  };
+  artifact.record.sourceCrosswalk = {
+    baseline: {
+      repository: 'Tale-UI/tale-ui',
+      revision: 'a'.repeat(40),
+      path: 'packages/tokens/tokens.json',
+      sha256: `sha256:${'b'.repeat(64)}`,
+      baseFontSizePx: 16,
+      declarationOccurrences: 2,
+      customPropertyOccurrences: 2,
+      uniqueCustomPropertyNames: 1,
+      nonCustomPropertyOccurrences: 0,
+    },
+    entries: occurrences.map((occurrence) => ({
+      occurrence,
+      disposition: 'adopt',
+      coreTokenId: 'reference.color.action-dark',
+      groupId: 'source.action-dark-equivalence',
+      reason: 'The two source occurrences are exactly equivalent.',
+      targets,
+    })),
+    groups: [{
+      id: 'source.action-dark-equivalence',
+      relationship: 'equivalent-source-values',
+      coreTokenId: 'reference.color.action-dark',
+      members: occurrences.map(({ ordinal }) => ({ ordinal, role: 'equivalent-source-value' })),
+    }],
+  };
+  artifact.sourceCrosswalkDigest = canonicalDigest(artifact.record.sourceCrosswalk);
+  artifact.contentRevision = contentRevision('token-source', artifact.record);
+  const api = createCatalogApi({ ...bundle, catalogDigest: canonicalDigest(bundle) });
+  const summary = api.getArtifact({
+    id: artifact.id,
+    queryApiVersion: '2.0.0',
+    detail: 'full',
+  });
+  assert.equal(summary.data.artifact.sourceCrosswalkDigest, artifact.sourceCrosswalkDigest);
+
+  const pages = [];
+  let cursor = null;
+  do {
+    const page = api.getArtifact({
+      id: artifact.id,
+      queryApiVersion: '2.0.0',
+      section: 'source-crosswalk',
+      limit: 1,
+      cursor,
+    });
+    validateFamily('section-page', page);
+    pages.push(page);
+    cursor = page.page.nextCursor;
+  } while (cursor !== null);
+  const items = pages.flatMap(({ entries }) => entries.items);
+  assert.deepEqual(items.map(({ occurrence }) => occurrence.ordinal), [1, 2]);
+  const reconstructed = [{
+    id: items[0].group.id,
+    relationship: items[0].group.relationship,
+    coreTokenId: items[0].group.coreTokenId,
+    members: items.map(({ group }) => group.member),
+  }];
+  assert.deepEqual(reconstructed, artifact.record.sourceCrosswalk.groups);
+
+  const historical = api.getArtifact({
+    id: artifact.id,
+    queryApiVersion: '1.2.0',
+    section: 'source-crosswalk',
+    limit: 100,
+  });
+  assert.ok(historical.entries.items.every((entry) => (
+    entry.groupId === 'source.action-dark-equivalence' && entry.group === undefined
+  )));
+
+  const mismatched = structuredClone(bundle);
+  mismatched.artifacts.find(({ kind }) => kind === 'token').sourceCrosswalkDigest = `sha256:${'0'.repeat(64)}`;
+  assert.throws(
+    () => createCatalogApi({ ...mismatched, catalogDigest: canonicalDigest(mismatched) }),
+    /CORE_CATALOG_INTEGRITY_MISMATCH/u,
+  );
+});
+
+test('TALE-TOKEN-B retains exact Phase A v1.1 and v1.2 responses outside enumerated identities', async () => {
+  const fixture = JSON.parse(await readFile(
+    join(repositoryRoot, 'tests/fixtures/tale-token-phase-b/historical-responses.json'),
+    'utf8',
+  ));
+  assert.equal(fixture.schema, 'core-ui-tale-token-phase-b-historical-responses-v1');
+  assert.equal(fixture.sourceRevision, 'e1aa1c96464cf603debeadb520b5f45d7104242f');
+  const current = {
+    v11Full: getArtifact({
+      id: 'core:token:button-minimum', queryApiVersion: '1.1.0', detail: 'full',
+    }),
+    v12Full: getArtifact({
+      id: 'core:token:button-minimum', queryApiVersion: '1.2.0', detail: 'full',
+    }),
+    v12SourceCrosswalkAbsent: getArtifact({
+      id: 'core:token:button-minimum', queryApiVersion: '1.2.0', section: 'source-crosswalk',
+    }),
+  };
+  for (const key of ['v11Full', 'v12Full']) {
+    assert.equal(
+      canonicalJson(normalizePointers(current[key], PHASE_B_HISTORICAL_IDENTITY_POINTERS)),
+      canonicalJson(normalizePointers(fixture.responses[key], PHASE_B_HISTORICAL_IDENTITY_POINTERS)),
+      key,
+    );
+  }
+  const absencePointers = [
+    ...PHASE_B_HISTORICAL_IDENTITY_POINTERS,
+    '/entries/reason',
+    '/entries/tokenSourceSchemaVersion',
+  ];
+  assert.equal(
+    canonicalJson(normalizePointers(current.v12SourceCrosswalkAbsent, absencePointers)),
+    canonicalJson(normalizePointers(fixture.responses.v12SourceCrosswalkAbsent, absencePointers)),
+  );
+  const extraDrift = structuredClone(current.v12Full);
+  extraDrift.warnings[0].message = 'Changed historical meaning.';
+  assert.notEqual(
+    canonicalJson(normalizePointers(extraDrift, PHASE_B_HISTORICAL_IDENTITY_POINTERS)),
+    canonicalJson(normalizePointers(fixture.responses.v12Full, PHASE_B_HISTORICAL_IDENTITY_POINTERS)),
+  );
+});
+
+test('TALE-TOKEN-B section cursors fail closed across tampering, versions, selectors, and catalog identities', () => {
   const api = createCatalogApi(baseBundle);
   const request = {
     id: 'core:token:button-minimum',
@@ -326,13 +602,94 @@ test('TALE-TOKEN-A section cursors fail closed across tampering, selectors, and 
   const changed = { ...preimage(baseBundle), catalogVersion: '0.1.1' };
   const changedApi = createCatalogApi({ ...changed, catalogDigest: canonicalDigest(changed) });
   assert.equal(changedApi.getArtifact({ ...request, cursor: first.page.nextCursor }).error.code, 'CORE_CURSOR_INVALID');
-  assert.equal(api.getArtifact({ ...request, queryApiVersion: '2.0.0' }).error.code, 'CORE_QUERY_API_VERSION_UNSUPPORTED');
+  assert.equal(api.getArtifact({ ...request, queryApiVersion: '2.0.0', cursor: first.page.nextCursor }).error.code, 'CORE_CURSOR_INVALID');
+  const crossSourceCursor = rebindSectionCursor(first.page.nextCursor, (payload) => {
+    payload.tokenSourceContentRevision = `sha256:${'0'.repeat(64)}`;
+  });
+  assert.equal(api.getArtifact({ ...request, cursor: crossSourceCursor }).error.code, 'CORE_CURSOR_INVALID');
+  for (const nextPosition of [0, 28, 4294967296]) {
+    const outOfRangeCursor = rebindSectionCursor(first.page.nextCursor, (payload) => {
+      payload.nextPosition = nextPosition;
+    });
+    assert.equal(
+      api.getArtifact({ ...request, cursor: outOfRangeCursor }).error.code,
+      'CORE_CURSOR_INVALID',
+    );
+  }
   assert.equal(api.getArtifact({ ...request, queryApiVersion: '1.3.0' }).error.code, 'CORE_QUERY_INVALID');
   assert.equal(api.getArtifact({ ...request, queryApiVersion: 1.2 }).error.code, 'CORE_QUERY_INVALID');
   assert.equal(api.getArtifact({ ...request, invented: true }).error.code, 'CORE_QUERY_INVALID');
 });
 
-test('TALE-TOKEN-A page budget profile binds the exact accepted annex envelope', async () => {
+test('TALE-TOKEN-B runtime paging proves budget breaks, oversize errors, continuation, and position bounds', () => {
+  const boundedEntries = [1, 2, 3].map((ordinal) => rejectEntry(ordinal, {
+    reason: 'x '.repeat(250).trim(),
+    value: 'y '.repeat(300).trim(),
+  }));
+  const api = createCatalogApi(syntheticCrosswalkBundle(boundedEntries));
+  const pages = [];
+  let cursor = null;
+  do {
+    const page = api.getArtifact({
+      id: 'core:token:button-minimum', queryApiVersion: '2.0.0',
+      section: 'source-crosswalk', limit: 100, cursor,
+    });
+    assert.equal(page.responseType, 'artifact.detail.section-page');
+    assert.ok(page.page.returned >= 1);
+    assert.ok(page.page.entryTokens <= 1536);
+    pages.push(page);
+    cursor = page.page.nextCursor;
+  } while (cursor !== null);
+  assert.ok(pages.length > 1, 'the runtime must break before the item limit when the token budget fills');
+  assert.deepEqual(
+    pages.flatMap(({ entries }) => entries.items.map(({ occurrence }) => occurrence.ordinal)),
+    [1, 2, 3],
+  );
+
+  const oversizeApi = createCatalogApi(syntheticCrosswalkBundle([
+    rejectEntry(1, { reason: 'x '.repeat(1024).trim(), value: 'y '.repeat(1024).trim() }),
+  ]));
+  assert.equal(oversizeApi.getArtifact({
+    id: 'core:token:button-minimum', queryApiVersion: '2.0.0',
+    section: 'source-crosswalk', limit: 1,
+  }).error.code, 'CORE_QUERY_PAGE_ENTRY_TOO_LARGE');
+
+  const envelopeBundle = structuredClone(preimage(syntheticCrosswalkBundle([rejectEntry(1)])));
+  envelopeBundle.catalogVersion = `1.0.0+${'a'.repeat(65)}`;
+  const envelopeApi = createCatalogApi(withCatalogDigest(envelopeBundle));
+  assert.equal(envelopeApi.getArtifact({
+    id: 'core:token:button-minimum', queryApiVersion: '2.0.0',
+    section: 'source-crosswalk', limit: 1,
+  }).error.code, 'CORE_QUERY_PAGE_ENVELOPE_TOO_LARGE');
+
+  const overflowProfile = structuredClone(baseBundle.pageBudgetProfile);
+  overflowProfile.cursorPositionMaximum = 1;
+  const overflowApi = createCatalogApi(syntheticCrosswalkBundle(
+    [rejectEntry(1), rejectEntry(2)], { pageBudgetProfile: overflowProfile },
+  ));
+  assert.equal(overflowApi.getArtifact({
+    id: 'core:token:button-minimum', queryApiVersion: '2.0.0',
+    section: 'source-crosswalk', limit: 1,
+  }).error.code, 'CORE_CURSOR_INVALID');
+
+  const terminalProfile = structuredClone(baseBundle.pageBudgetProfile);
+  terminalProfile.cursorPositionMaximum = 2;
+  const terminalApi = createCatalogApi(syntheticCrosswalkBundle(
+    [rejectEntry(1), rejectEntry(2)], { pageBudgetProfile: terminalProfile },
+  ));
+  const first = terminalApi.getArtifact({
+    id: 'core:token:button-minimum', queryApiVersion: '2.0.0',
+    section: 'source-crosswalk', limit: 1,
+  });
+  const terminal = terminalApi.getArtifact({
+    id: 'core:token:button-minimum', queryApiVersion: '2.0.0',
+    section: 'source-crosswalk', limit: 1, cursor: first.page.nextCursor,
+  });
+  assert.equal(terminal.page.remaining, 0);
+  assert.equal(terminal.page.nextCursor, null);
+});
+
+test('TALE-TOKEN-B page budget profile binds the exact accepted annex envelope', async () => {
   const profile = JSON.parse(await readFile(
     join(repositoryRoot, 'packages/catalog/token-section-page-budget-profile.json'),
     'utf8',
@@ -341,7 +698,7 @@ test('TALE-TOKEN-A page budget profile binds the exact accepted annex envelope',
     join(repositoryRoot, 'decisions/0003-tale-token-classification-annex.json'),
     'utf8',
   ));
-  const accepted = annex.pageProfiles.find(({ queryApiVersion }) => queryApiVersion === '1.2.0');
+  const accepted = annex.pageProfiles.find(({ queryApiVersion }) => queryApiVersion === '2.0.0');
   assert.equal(
     canonicalDigest(accepted.normalizedWorstCaseEnvelopePreimage),
     profile.normalizedWorstCaseEnvelopeSha256,
@@ -350,8 +707,8 @@ test('TALE-TOKEN-A page budget profile binds the exact accepted annex envelope',
   assert.equal(profile.maximumEntryTokens + profile.envelopeReserveTokens, 2048);
   assert.equal(profile.cursorPositionMaximum, 4294967295);
   for (const mutate of [
-    (value) => { value.id = 'core-ui-token-section-page-budget-2-0-0'; },
-    (value) => { value.queryApiVersion = '2.0.0'; },
+    (value) => { value.id = 'core-ui-token-section-page-budget-1-2-0'; },
+    (value) => { value.queryApiVersion = '1.2.0'; },
   ]) {
     const invalidProfile = structuredClone(baseBundle.pageBudgetProfile);
     mutate(invalidProfile);
@@ -365,7 +722,7 @@ test('TALE-TOKEN-A page budget profile binds the exact accepted annex envelope',
     join(repositoryRoot, 'packages/catalog/catalog-sources.json'),
     'utf8',
   ));
-  assert.equal(assertPhaseAQueryProfile({
+  assert.equal(assertAcceptedQueryProfile({
     manifest,
     pageBudgetProfile: profile,
     authorityDecision: annex,
@@ -382,7 +739,7 @@ test('TALE-TOKEN-A page budget profile binds the exact accepted annex envelope',
     const invalid = { manifest: structuredClone(manifest), profile: structuredClone(profile) };
     mutate(invalid);
     assert.throws(
-      () => assertPhaseAQueryProfile({
+      () => assertAcceptedQueryProfile({
         manifest: invalid.manifest,
         pageBudgetProfile: invalid.profile,
         authorityDecision: annex,

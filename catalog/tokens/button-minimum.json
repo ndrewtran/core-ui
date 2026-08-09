@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "2.0.0",
+  "schemaVersion": "2.1.0",
   "id": "core:token:button-minimum",
   "kind": "token",
   "name": "Core UI default theme tokens",

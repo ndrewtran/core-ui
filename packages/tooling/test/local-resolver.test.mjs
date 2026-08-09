@@ -293,7 +293,7 @@ test('E-G0.4 CLI requires exact bindings and filters project-wide discovery', ()
   assert.equal(discovery.exitCode, 0);
   const response = JSON.parse(discovery.stdout);
   assert.equal(response.meta.authority, 'installed-local');
-  assert.deepEqual(response.meta.resolution.targetPackages, { '@core-ui/catalog': '0.1.0' });
+  assert.deepEqual(response.meta.resolution.targetPackages, { '@core-ui/catalog': '0.2.0' });
   assert.equal(response.data.items.some(({ id }) => id === 'core:component:button'), false);
   assert.equal(response.data.items.some(({ id }) => id === 'core:example:button-basic-react'), false);
 });
@@ -316,7 +316,7 @@ test('E-G0.4 pnpm adapter fails closed for missing projects and cache tuples', (
 
   const cache = runCli([
     'manifest',
-    '--catalog-version', '0.1.0',
+    '--catalog-version', '0.2.0',
     '--catalog-digest', 'sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
     '--json',
   ]);
@@ -424,7 +424,7 @@ test('E-G0.4 pnpm adapter normalizes renderer packages into the single resolver'
     await writeFile(join(fixtureRoot, 'pnpm-workspace.yaml'), "packages:\n  - catalog\n  - renderer\n");
     await writeJson(join(catalogRoot, 'package.json'), {
       name: '@core-ui/catalog',
-      version: '0.1.0',
+      version: '0.2.0',
       private: true,
       coreUi: { catalogPackage: './generated/catalog-package.json' },
     });
@@ -455,7 +455,7 @@ test('E-G0.4 pnpm adapter normalizes renderer packages into the single resolver'
       version: '1.0.0',
       bindingSchemaRange: '^2.0.0',
       tokenContractRange: '^1.1.0',
-      releaseProvenance: `core-ui-release:0.1.0:${bundle.sourceRevision}`,
+      releaseProvenance: `core-ui-release:0.2.0:${bundle.sourceRevision}`,
       bindings: {
         [binding]: {
           specRevision: bundle.artifacts.find(({ id }) => id === 'core:component:button')
@@ -475,11 +475,11 @@ test('E-G0.4 pnpm adapter normalizes renderer packages into the single resolver'
     const identity = {
       schema: 'core-ui-catalog-package-v2',
       name: '@core-ui/catalog',
-      version: '0.1.0',
-      catalogVersion: '0.1.0',
+      version: '0.2.0',
+      catalogVersion: '0.2.0',
       catalogDigest: bundle.catalogDigest,
       queryApiVersion: bundle.apiVersion,
-      supportedQueryApiVersions: ['1.1.0', '1.2.0'],
+      supportedQueryApiVersions: ['1.1.0', '1.2.0', '2.0.0'],
       schemaRange: '^2.0.0',
       sourceRevision: bundle.sourceRevision,
       provenance: { kind: 'source-revision', value: bundle.sourceRevision },
@@ -497,14 +497,14 @@ test('E-G0.4 pnpm adapter normalizes renderer packages into the single resolver'
       },
       releaseManifest: {
         id: descriptor.releaseProvenance,
-        releaseVersion: '0.1.0',
-        schemaVersion: '2.0.0',
-        queryApiVersion: '1.2.0',
+        releaseVersion: '0.2.0',
+        schemaVersion: '2.1.0',
+        queryApiVersion: '2.0.0',
         tokenContractVersion: '1.1.0',
         sourceRevision: bundle.sourceRevision,
         catalog: {
-          id: `@core-ui/catalog@0.1.0:${bundle.catalogDigest}`,
-          version: '0.1.0',
+          id: `@core-ui/catalog@0.2.0:${bundle.catalogDigest}`,
+          version: '0.2.0',
           digest: bundle.catalogDigest,
         },
         bindings: [{

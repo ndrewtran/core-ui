@@ -50,6 +50,7 @@
         "disposition": { "enum": ["adopt", "adapt"] },
         "coreTokenId": { "$ref": "#/$defs/tokenId" },
         "groupId": { "type": "string", "minLength": 1, "maxLength": 256 },
+        "group": { "$ref": "#/$defs/normalizedCrosswalkGroup" },
         "reason": { "type": "string", "minLength": 1, "maxLength": 2048 },
         "targets": { "$ref": "#/$defs/targets" }
       }
@@ -62,6 +63,7 @@
         "occurrence": { "$ref": "#/$defs/occurrence" },
         "disposition": { "enum": ["defer", "reject"] },
         "groupId": { "type": "string", "minLength": 1, "maxLength": 256 },
+        "group": { "$ref": "#/$defs/normalizedCrosswalkGroup" },
         "reason": { "type": "string", "minLength": 1, "maxLength": 2048 },
         "targets": { "$ref": "#/$defs/targets" }
       }
@@ -71,6 +73,27 @@
         { "$ref": "#/$defs/admittedCrosswalkEntry" },
         { "$ref": "#/$defs/unadmittedCrosswalkEntry" }
       ]
+    },
+    "normalizedCrosswalkGroupMember": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ordinal", "role"],
+      "properties": {
+        "ordinal": { "type": "integer", "minimum": 1, "maximum": 4294967295 },
+        "role": { "enum": ["base", "default", "equivalent-source-value", "reduced-explicit", "reduced-system", "web-responsive"] },
+        "mode": { "enum": ["motion.full", "motion.reduced"] }
+      }
+    },
+    "normalizedCrosswalkGroup": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "relationship", "member"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "maxLength": 256 },
+        "relationship": { "enum": ["equivalent-source-values", "mode-variants", "selector-variants"] },
+        "coreTokenId": { "$ref": "#/$defs/tokenId" },
+        "member": { "$ref": "#/$defs/normalizedCrosswalkGroupMember" }
+      }
     },
     "availableEntries": {
       "type": "object",
@@ -114,14 +137,14 @@
     }
   },
   "properties": {
-    "schemaVersion": { "const": "1.2.0" },
+    "schemaVersion": { "enum": ["1.2.0", "2.0.0"] },
     "responseType": { "const": "artifact.detail.section-page" },
     "meta": {
       "type": "object",
       "additionalProperties": false,
       "required": ["queryApiVersion", "catalogVersion", "catalogDigest", "tokenSourceContentRevision", "artifactId", "section", "selectorDigest"],
       "properties": {
-        "queryApiVersion": { "const": "1.2.0" },
+        "queryApiVersion": { "enum": ["1.2.0", "2.0.0"] },
         "catalogVersion": { "type": "string", "minLength": 5, "maxLength": 64 },
         "catalogDigest": { "$ref": "#/$defs/digest" },
         "tokenSourceContentRevision": { "$ref": "#/$defs/digest" },

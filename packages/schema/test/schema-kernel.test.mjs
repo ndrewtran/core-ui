@@ -13,6 +13,7 @@ import {
   canonicalJson,
   classifySchemaChange,
   contentRevision,
+  migrateTokenSourceV2ToV2_1,
   negotiateSchemaVersion,
   parseArtifactRef,
   parseJsonStrict,
@@ -698,6 +699,60 @@ test('E-G0.1-04: package/source locations remain derived and generated types ret
   assert.match(generated, /export type ArtifactKind/);
 });
 
+test('TALE-TOKEN-B token-source 2.0 to 2.1 migration is explicit, omission-preserving, and idempotent', () => {
+  const legacy = tokenSource();
+  legacy.schemaVersion = '2.0.0';
+  const omitted = migrateTokenSourceV2ToV2_1(legacy);
+  assert.equal(omitted.schemaVersion, '2.1.0');
+  assert.equal(Object.hasOwn(omitted, 'sourceCrosswalk'), false);
+  assert.deepEqual(migrateTokenSourceV2ToV2_1(omitted), omitted);
+  assert.deepEqual(migrateTokenSourceV2ToV2_1(legacy, { dryRun: true }), {
+    from: '2.0.0',
+    to: '2.1.0',
+    changed: true,
+    readRewrite: false,
+    sourceCrosswalk: 'omitted',
+  });
+
+  const sourceCrosswalk = {
+    baseline: {
+      repository: 'Tale-UI/tale-ui',
+      revision: 'a'.repeat(40),
+      path: 'packages/tokens/tokens.json',
+      sha256: `sha256:${'b'.repeat(64)}`,
+      baseFontSizePx: 16,
+      declarationOccurrences: 1,
+      customPropertyOccurrences: 0,
+      uniqueCustomPropertyNames: 0,
+      nonCustomPropertyOccurrences: 1,
+    },
+    entries: [{
+      occurrence: { ordinal: 1, file: '_base.css', selector: 'html', name: 'font-size', value: '100%' },
+      disposition: 'reject',
+      reason: 'An HTML root style is not a portable token declaration.',
+      targets: {
+        'web.html': 'rejected',
+        'web.react': 'rejected',
+        'native.ios': 'rejected',
+        'native.android': 'rejected',
+        'native.react-native-web': 'rejected',
+      },
+    }],
+    groups: [],
+  };
+  const migrated = migrateTokenSourceV2ToV2_1(legacy, { sourceCrosswalk });
+  assert.deepEqual(migrated.sourceCrosswalk, sourceCrosswalk);
+  assert.deepEqual(migrateTokenSourceV2ToV2_1(migrated, { sourceCrosswalk }), migrated);
+  assert.throws(
+    () => migrateTokenSourceV2ToV2_1(migrated, { sourceCrosswalk: { ...sourceCrosswalk, extra: true } }),
+    expectCode('CORE_SCHEMA_MIGRATION_REQUIRED'),
+  );
+  assert.throws(
+    () => migrateTokenSourceV2ToV2_1(legacy, { dryRun: 'true' }),
+    expectCode('CORE_SCHEMA_MIGRATION_REQUIRED'),
+  );
+});
+
 test('TALE-TOKEN-A section-page grammar is closed, typed, and position-safe', () => {
   const page = {
     schemaVersion: '1.2.0',
@@ -872,7 +927,7 @@ test('TALE-TOKEN-A section-page grammar is closed, typed, and position-safe', ()
   assert.throws(() => validateFamily('section-page', tamperedCursor), /CORE_SCHEMA_INVALID/);
 });
 
-test('TALE-TOKEN-A page budget profile grammar is closed and internally bounded', async () => {
+test('TALE-TOKEN-B page budget profile grammar is closed and internally bounded', async () => {
   const profile = parseJsonStrict(await readFile(
     resolve(import.meta.dirname, '../../catalog/token-section-page-budget-profile.json'),
     'utf8',
@@ -884,8 +939,8 @@ test('TALE-TOKEN-A page budget profile grammar is closed and internally bounded'
     (value) => { value.maximumEntryTokens -= 1; },
     (value) => { value.defaultItemLimit = value.maximumItemLimit + 1; },
     (value) => { value.normalizedWorstCaseEnvelopeSha256 = 'not-a-digest'; },
-    (value) => { value.id = 'core-ui-token-section-page-budget-2-0-0'; },
-    (value) => { value.queryApiVersion = '2.0.0'; },
+    (value) => { value.id = 'core-ui-token-section-page-budget-1-2-0'; },
+    (value) => { value.queryApiVersion = '1.2.0'; },
   ]) {
     const invalid = structuredClone(profile);
     mutate(invalid);

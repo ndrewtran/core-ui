@@ -374,7 +374,7 @@ test('G0.4 entry corpus provides deterministic renderer and package-graph fixtur
   const second = validateResolverFixtureCorpus(await readCorpus());
   assert.equal(first.digest, second.digest);
   assert.equal(first.corpus.rendererDescriptors.length, 3);
-  assert.equal(first.corpus.graphs.length, 9);
+  assert.equal(first.corpus.graphs.length, 10);
 });
 
 test('G0.4 entry corpus rejects malformed or duplicate fixture authority', async () => {
