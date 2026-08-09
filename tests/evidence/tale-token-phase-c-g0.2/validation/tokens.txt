@@ -1,0 +1,18 @@
+
+> @core-ui/tokens@0.2.0 check <repository>/packages/tokens
+> node --test test/*.test.mjs
+
+✔ TALE-TOKEN-C source-crosswalk validation binds the complete materialized inventory (duration)
+✔ E-G1.0-01 rejects cycles, reverse layers, incompatible units, and overrides (duration)
+✔ E-G1.0-02 web and native transforms emit accepted Core references with canonical provenance (duration)
+✔ E-G1.0-03 missing required tokens fail per profile and exact proved fallbacks diagnose use (duration)
+✔ E-G1.0-04 requirement digests track exact semantic closure only (duration)
+✔ E-G1.0-06 static mode output works while runtime switching remains unavailable (duration)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms <duration>
