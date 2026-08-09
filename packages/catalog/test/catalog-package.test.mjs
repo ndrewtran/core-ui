@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 import { canonicalDigest, parseJsonStrict, validateFamily } from '@core-ui/schema';
-import { createCatalogApi } from '../src/index.mjs';
+import { createCatalogApi, migrateCatalogPackageV1ToV2 } from '../src/index.mjs';
 import {
   assertPackedCompatibilityFixture,
   createPackedCompatibilityFixture,
@@ -18,7 +18,7 @@ test('E-G0.4 package layout binds package, catalog, API, schema, digest, and sou
   const bundle = await readJson('../generated/catalog.json');
   const { catalogDigest: _catalogDigest, ...preimage } = bundle;
   assert.equal(packageManifest.coreUi.catalogPackage, './generated/catalog-package.json');
-  assert.equal(identity.schema, 'core-ui-catalog-package-v1');
+  assert.equal(identity.schema, 'core-ui-catalog-package-v2');
   assert.equal(identity.name, packageManifest.name);
   assert.equal(identity.version, packageManifest.version);
   assert.equal(identity.catalogVersion, packageManifest.version);
@@ -26,6 +26,9 @@ test('E-G0.4 package layout binds package, catalog, API, schema, digest, and sou
   assert.equal(identity.catalogDigest, canonicalDigest(preimage));
   assert.equal(identity.catalogDigest, bundle.catalogDigest);
   assert.equal(identity.queryApiVersion, bundle.apiVersion);
+  assert.deepEqual(identity.supportedQueryApiVersions, ['1.1.0', '1.2.0']);
+  assert.deepEqual(identity.supportedQueryApiVersions, bundle.supportedQueryApiVersions);
+  assert.equal(identity.releaseManifest.queryApiVersion, identity.queryApiVersion);
   assert.equal(identity.schemaRange, '^2.0.0');
   assert.equal(identity.sourceRevision, bundle.sourceRevision);
   assert.equal(identity.provenance.kind, 'source-revision');
@@ -55,6 +58,21 @@ test('E-G0.4 package layout binds package, catalog, API, schema, digest, and sou
     );
   }
   assert.equal(identity.bundle, './catalog.json');
+});
+
+test('TALE-TOKEN-A descriptor v1-to-v2 migration is deterministic and idempotent', async () => {
+  const current = await readJson('../generated/catalog-package.json');
+  const historical = structuredClone(current);
+  historical.schema = 'core-ui-catalog-package-v1';
+  delete historical.supportedQueryApiVersions;
+  const migrated = migrateCatalogPackageV1ToV2(historical);
+  assert.equal(migrated.schema, 'core-ui-catalog-package-v2');
+  assert.deepEqual(migrated.supportedQueryApiVersions, [historical.queryApiVersion]);
+  assert.deepEqual(migrateCatalogPackageV1ToV2(migrated), migrated);
+  assert.throws(
+    () => migrateCatalogPackageV1ToV2({ schema: 'core-ui-catalog-package-v2' }),
+    /CORE_CATALOG_PACKAGE_INVALID/,
+  );
 });
 
 test('E-G0.4 installed-local resolution context is catalog-owned response metadata', async () => {

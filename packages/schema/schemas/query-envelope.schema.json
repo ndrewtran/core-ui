@@ -7,12 +7,13 @@
     "artifact.list",
     "artifact.search",
     "artifact.detail",
+    "artifact.detail.section-page",
     "error"
   ],
   "x-core-ui-selectors": {
     "platform": ["web.html", "web.react", "native.react-native", "native.react-native-web"],
     "detail": ["brief", "compact", "full"],
-    "section": ["api", "examples", "guidance", "decision-context", "accessibility", "styling", "source"],
+    "section": ["api", "examples", "guidance", "decision-context", "accessibility", "styling", "source", "tokens", "source-crosswalk"],
     "purpose": ["generation", "explanation", "validation", "migration"]
   },
   "$defs": {
@@ -77,7 +78,7 @@
         "nextCursor"
       ],
       "properties": {
-        "schemaVersion": { "const": "1.1.0" },
+        "schemaVersion": { "enum": ["1.1.0", "1.2.0"] },
         "authority": { "enum": ["installed-local", "advisory"] },
         "revisions": { "$ref": "#/$defs/revisionSet" },
         "coreVersion": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(?:-[0-9A-Za-z.-]+)?$" },
@@ -221,6 +222,7 @@
       "properties": {
         "name": { "type": "string", "minLength": 1 },
         "flag": { "type": "string", "pattern": "^--[a-z][a-z-]*$" },
+        "requestKey": { "type": "string", "minLength": 1 },
         "type": { "enum": ["boolean", "integer", "string"] },
         "default": {},
         "choices": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
@@ -572,7 +574,7 @@
       "additionalProperties": true,
       "required": ["apiVersion", "type", "data", "meta", "warnings"],
       "properties": {
-        "apiVersion": { "const": "1.1.0" },
+        "apiVersion": { "enum": ["1.1.0", "1.2.0"] },
         "type": { "enum": ["catalog.manifest", "artifact.list", "artifact.search", "artifact.detail"] },
         "data": { "type": "object" },
         "meta": { "$ref": "#/$defs/responseMeta" },
@@ -614,7 +616,7 @@
       "additionalProperties": true,
       "required": ["apiVersion", "type", "error"],
       "properties": {
-        "apiVersion": { "const": "1.1.0" },
+        "apiVersion": { "enum": ["1.1.0", "1.2.0"] },
         "type": { "const": "error" },
         "error": { "$ref": "diagnostic.schema.json" }
       }
@@ -625,6 +627,7 @@
     { "$ref": "#/$defs/listResponse" },
     { "$ref": "#/$defs/searchResponse" },
     { "$ref": "#/$defs/detailResponse" },
-    { "$ref": "#/$defs/errorResponse" }
+    { "$ref": "#/$defs/errorResponse" },
+    { "$ref": "section-page.schema.json" }
   ]
 }

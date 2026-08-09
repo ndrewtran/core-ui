@@ -16,6 +16,8 @@ export const familyFiles = Object.freeze({
   example: 'example.schema.json',
   guide: 'guide.schema.json',
   'query-envelope': 'query-envelope.schema.json',
+  'section-page': 'section-page.schema.json',
+  'token-section-page-budget-profile': 'token-section-page-budget-profile.schema.json',
   'token-source': 'token-source.schema.json',
 });
 
@@ -33,6 +35,8 @@ export const requiredFieldOwnershipContexts = freezeContractRows([
   { file: 'example.schema.json', class: 'authored', owner: 'example-contract' },
   { file: 'guide.schema.json', class: 'authored', owner: 'guide-contract' },
   { file: 'query-envelope.schema.json', class: 'derived', owner: 'query-envelope-contract' },
+  { file: 'section-page.schema.json', class: 'derived', owner: 'query-envelope-contract' },
+  { file: 'token-section-page-budget-profile.schema.json', class: 'derived', owner: 'query-page-budget-profile-contract' },
   { file: 'relation.schema.json', class: 'authored', owner: 'relation-registry' },
   { file: 'token-source.schema.json', class: 'authored', owner: 'token-source-contract' },
 ]);

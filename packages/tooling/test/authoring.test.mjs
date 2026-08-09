@@ -66,12 +66,17 @@ async function temporaryCatalogRepository() {
   const temporaryRoot = await mkdtemp(join(tmpdir(), 'core-ui-g0-5-'));
   await Promise.all([
     mkdir(resolve(temporaryRoot, 'packages/tooling'), { recursive: true }),
+    mkdir(resolve(temporaryRoot, 'decisions'), { recursive: true }),
     mkdir(resolve(temporaryRoot, 'tooling/audits/repository-policy'), { recursive: true }),
     mkdir(resolve(temporaryRoot, 'packages/schema/schemas'), { recursive: true }),
     mkdir(resolve(temporaryRoot, 'strategy'), { recursive: true }),
   ]);
   await Promise.all([
     cp(resolve(repositoryRoot, 'catalog'), resolve(temporaryRoot, 'catalog'), { recursive: true }),
+    cp(
+      resolve(repositoryRoot, 'decisions/0003-tale-token-classification-annex.json'),
+      resolve(temporaryRoot, 'decisions/0003-tale-token-classification-annex.json'),
+    ),
     cp(
       resolve(repositoryRoot, 'packages/catalog'),
       resolve(temporaryRoot, 'packages/catalog'),

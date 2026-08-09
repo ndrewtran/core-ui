@@ -2,7 +2,7 @@
   "schemaVersion": "1.0.0",
   "cli": {
     "name": "core",
-    "version": "0.0.0",
+    "version": "0.1.0",
     "description": "Deterministic Core UI documentation over the local catalog query API."
   },
   "tokenizer": {
@@ -80,7 +80,7 @@
       "name": "section",
       "flag": "--section",
       "type": "string",
-      "choices": ["api", "examples", "guidance", "decision-context", "accessibility", "styling", "source"],
+      "choices": ["api", "examples", "guidance", "decision-context", "accessibility", "styling", "source", "tokens", "source-crosswalk"],
       "default": null
     },
     {
@@ -102,6 +102,14 @@
       "name": "cursor",
       "flag": "--cursor",
       "type": "string",
+      "default": null
+    },
+    {
+      "name": "query-api-version",
+      "flag": "--query-api-version",
+      "requestKey": "queryApiVersion",
+      "type": "string",
+      "choices": ["1.1.0", "1.2.0", "2.0.0"],
       "default": null
     }
   ],
@@ -147,8 +155,8 @@
       "arguments": [
         { "name": "id-or-alias", "requestKey": "id", "required": true, "type": "string" }
       ],
-      "options": ["platform", "detail", "section", "purpose", "json", "dense", "help", "project", "catalog-version", "catalog-digest"],
-      "examples": ["core get core:component:button --platform web.react --json", "core get core:component:button --detail compact --dense"],
+      "options": ["platform", "detail", "section", "purpose", "limit", "cursor", "query-api-version", "json", "dense", "help", "project", "catalog-version", "catalog-digest"],
+      "examples": ["core get core:component:button --platform web.react --json", "core get core:token:button-minimum --query-api-version 1.2.0 --section tokens --limit 20 --dense"],
       "budgetFixture": { "id-or-alias": "core:component:button" },
       "tokenBudgets": { "brief": 384, "compact": 1024, "full": 2048 }
     }

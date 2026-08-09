@@ -116,6 +116,57 @@ test('E-G0.3-02 human, JSON, and dense projections preserve one response object'
   assert.equal(response.meta.resolution.catalogSource, 'package');
 });
 
+test('TALE-TOKEN-A core get negotiates 1.1/1.2 and preserves page parity', () => {
+  const parsed = parseCliArguments([
+    'get', 'core:token:button-minimum', '--query-api-version', '1.2.0',
+    '--section', 'tokens', '--limit', '1', '--json',
+  ]);
+  assert.equal(parsed.request.queryApiVersion, '1.2.0');
+  assert.equal(parsed.request.limit, 1);
+  assert.equal(parsed.request.section, 'tokens');
+
+  const page = executeCommand('get', parsed.request);
+  assert.equal(page.responseType, 'artifact.detail.section-page');
+  assert.equal(page.entries.status, 'available');
+  assert.equal(page.entries.items.length, 1);
+  assert.deepEqual(JSON.parse(renderJson(page)), page);
+  assert.deepEqual(parseDense(renderDense(page)), page);
+  assert.deepEqual(parseHuman(renderHuman(page)), page);
+  assert.ok(countTokens(renderDense(page)) <= 2048);
+
+  const absent = jsonResult([
+    'get', 'core:token:button-minimum', '--query-api-version', '1.2.0',
+    '--section', 'source-crosswalk',
+  ]);
+  assert.equal(absent.entries.status, 'absent');
+  assert.equal(absent.entries.tokenSourceSchemaVersion, '2.0.0');
+
+  const historical = jsonResult([
+    'get', 'core:token:button-minimum', '--query-api-version', '1.1.0', '--detail', 'full',
+  ]);
+  assert.equal(historical.apiVersion, '1.1.0');
+  assert.deepEqual(historical.warnings, []);
+  assert.ok(Object.hasOwn(historical.data.artifact, 'tokens'));
+
+  for (const args of [
+    ['get', 'core:component:missing', '--query-api-version', '1.1.0', '--json'],
+    [
+      'get', 'core:token:button-minimum', '--query-api-version', '1.1.0',
+      '--cursor', 'not-a-cursor', '--json',
+    ],
+  ]) {
+    const error = JSON.parse(runCli(args).stdout);
+    assert.equal(error.type, 'error');
+    assert.equal(error.apiVersion, '1.1.0');
+  }
+
+  const unsupported = runCli([
+    'get', 'core:token:button-minimum', '--query-api-version', '2.0.0', '--json',
+  ]);
+  assert.equal(unsupported.exitCode, 2);
+  assert.equal(JSON.parse(unsupported.stdout).error.code, 'CORE_QUERY_API_VERSION_UNSUPPORTED');
+});
+
 test('E-G0.3-03 dense outputs round-trip deterministically within every locked budget', () => {
   for (const [command, makeCase] of Object.entries(commandCases)) {
     for (const detail of details) {

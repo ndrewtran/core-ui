@@ -3,12 +3,17 @@ import { createHash } from 'node:crypto';
 import { existsSync, readFileSync, statSync } from 'node:fs';
 import { dirname, isAbsolute, join, relative, resolve } from 'node:path';
 import { createCatalogApi, createCatalogDiagnostic } from '@core-ui/catalog';
-import { canonicalDigest, parseJsonStrict } from '@core-ui/schema';
+import {
+  QUERY_API_VERSIONS,
+  canonicalDigest,
+  canonicalJson,
+  parseJsonStrict,
+} from '@core-ui/schema';
 import { valid, validRange } from 'semver';
 import { resolveCatalogGraph } from './local-resolver.mjs';
 
 const CATALOG_PACKAGE = '@core-ui/catalog';
-const TOOLING_VERSION = '0.0.0';
+const TOOLING_VERSION = '0.1.0';
 
 function sha256(value) {
   return `sha256:${createHash('sha256').update(value).digest('hex')}`;
@@ -163,12 +168,12 @@ function loadCatalogCandidate(packageRoot) {
     identity = parseJsonStrict(identityBytes);
     const identityFields = [
       'bundle', 'catalogDigest', 'catalogVersion', 'name', 'provenance',
-      'queryApiVersion', 'releaseManifest', 'schema', 'schemaRange',
+      'queryApiVersion', 'supportedQueryApiVersions', 'releaseManifest', 'schema', 'schemaRange',
       'sourceRevision', 'tokenRequirementSets', 'platformSafetyContract',
       'platformSafetyRequirementSets', 'version',
     ];
     identityValid = (
-      identity.schema !== 'core-ui-catalog-package-v1'
+      identity.schema !== 'core-ui-catalog-package-v2'
       ? false
       : hasExactFields(identity, identityFields)
         && hasExactFields(identity.provenance, ['kind', 'value'])
@@ -179,6 +184,11 @@ function loadCatalogCandidate(packageRoot) {
         && identity.platformSafetyRequirementSets !== null
         && typeof identity.platformSafetyRequirementSets === 'object'
         && !Array.isArray(identity.platformSafetyRequirementSets)
+        && Array.isArray(identity.supportedQueryApiVersions)
+        && identity.supportedQueryApiVersions.length > 0
+        && identity.supportedQueryApiVersions.every((value) => typeof value === 'string')
+        && new Set(identity.supportedQueryApiVersions).size === identity.supportedQueryApiVersions.length
+        && identity.supportedQueryApiVersions.includes(identity.queryApiVersion)
         && [
           identity.bundle,
           identity.catalogDigest,
@@ -230,7 +240,11 @@ function loadCatalogCandidate(packageRoot) {
       || identity.provenance?.kind !== 'source-revision'
       || identity.provenance.value !== bundle.sourceRevision
     ) failures.push('catalog-provenance-mismatch');
-    if (identity.queryApiVersion !== bundle.apiVersion) failures.push('query-api-mismatch');
+    if (
+      identity.queryApiVersion !== bundle.apiVersion
+      || canonicalJson(identity.supportedQueryApiVersions ?? [])
+        !== canonicalJson(bundle.supportedQueryApiVersions ?? [])
+    ) failures.push('query-api-mismatch');
     try {
       createCatalogApi(bundle);
     } catch {
@@ -274,6 +288,7 @@ function loadCatalogCandidate(packageRoot) {
       || release?.sourceRevision !== identity.sourceRevision
       || release?.catalog?.version !== identity.version
       || release?.catalog?.digest !== identity.catalogDigest
+      || release?.queryApiVersion !== identity.queryApiVersion
       || !Array.isArray(release?.bindings)
     ) failures.push('release-manifest-mismatch');
     if (releaseValid) releaseManifest = release;
@@ -341,7 +356,7 @@ function projectFailure(packageManager = 'pnpm@0.0.0') {
       lockfile: [],
       installed: [],
       caches: [],
-      request: { bindings: [], cache: null },
+      request: { bindings: [], cache: null, queryApiVersion: null },
     },
   });
 }
@@ -403,6 +418,7 @@ export function resolvePnpmProjectCatalog({
   artifact = null,
   platform = null,
   filterBindings = false,
+  queryApiVersion = null,
 } = {}) {
   if (
     !Array.isArray(bindings)
@@ -410,6 +426,7 @@ export function resolvePnpmProjectCatalog({
     || (artifact !== null && typeof artifact !== 'string')
     || (platform !== null && typeof platform !== 'string')
     || typeof filterBindings !== 'boolean'
+    || (queryApiVersion !== null && !QUERY_API_VERSIONS.includes(queryApiVersion))
     || (project !== null && !isSafeRelative(project))
   ) return projectFailure();
   const selectedPath = resolve(process.cwd(), project ?? '.');
@@ -459,6 +476,7 @@ export function resolvePnpmProjectCatalog({
     catalogVersion: identity.catalogVersion,
     catalogDigest: identity.catalogDigest,
     queryApiVersion: identity.queryApiVersion,
+    supportedQueryApiVersions: identity.supportedQueryApiVersions,
     schemaRange: identity.schemaRange,
     sourceRevision: identity.sourceRevision,
     provenance: identity.provenance,
@@ -568,7 +586,7 @@ export function resolvePnpmProjectCatalog({
       catalogs,
       rendererDescriptors,
       releaseManifests,
-      graph: { id, ...graphBase, request: { bindings: requested, cache } },
+      graph: { id, ...graphBase, request: { bindings: requested, cache, queryApiVersion } },
     });
   }
   let finalResolution;

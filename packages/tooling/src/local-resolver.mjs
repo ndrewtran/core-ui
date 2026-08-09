@@ -1,5 +1,10 @@
 import { createCatalogDiagnostic } from '@core-ui/catalog';
-import { canonicalJson } from '@core-ui/schema';
+import {
+  API_VERSION,
+  QUERY_API_VERSIONS,
+  SCHEMA_VERSION,
+  canonicalJson,
+} from '@core-ui/schema';
 import { satisfies, valid, validRange } from 'semver';
 
 export const RESOLVER_ERROR_PRECEDENCE = Object.freeze([
@@ -9,12 +14,13 @@ export const RESOLVER_ERROR_PRECEDENCE = Object.freeze([
   'CORE_CATALOG_DECLARATION_DRIFT',
   'CORE_CATALOG_INTEGRITY_MISMATCH',
   'CORE_CATALOG_RESOLUTION_AMBIGUOUS',
+  'CORE_QUERY_API_VERSION_UNSUPPORTED',
   'CORE_CATALOG_INCOMPATIBLE',
 ]);
 
-const TOOLING_API_VERSION = '1.1.0';
-const TOOLING_SCHEMA_VERSION = '2.0.0';
-const TOOLING_VERSION = '0.0.0';
+const TOOLING_API_VERSION = API_VERSION;
+const TOOLING_SCHEMA_VERSION = SCHEMA_VERSION;
+const TOOLING_VERSION = '0.1.0';
 
 function compareText(left, right) {
   return left < right ? -1 : left > right ? 1 : 0;
@@ -128,10 +134,19 @@ function validateNormalizedInput(input) {
   for (const catalog of input.catalogs) {
     assertClosed(catalog, [
       'id', 'name', 'version', 'catalogVersion', 'catalogDigest', 'queryApiVersion',
+      'supportedQueryApiVersions',
       'schemaRange', 'sourceRevision', 'provenance', 'releaseManifest',
       'tokenRequirementSets', 'platformSafetyRequirementSets',
     ], `catalog ${catalog.id ?? '<unknown>'}`);
     assertClosed(catalog.provenance, ['kind', 'value'], `${catalog.id}.provenance`);
+    assertArray(catalog.supportedQueryApiVersions, `${catalog.id}.supportedQueryApiVersions`);
+    if (
+      new Set(catalog.supportedQueryApiVersions).size !== catalog.supportedQueryApiVersions.length
+      || catalog.supportedQueryApiVersions.some((version) => (
+        !QUERY_API_VERSIONS.includes(version)
+      ))
+      || !catalog.supportedQueryApiVersions.includes(catalog.queryApiVersion)
+    ) inputError(`${catalog.id}.supportedQueryApiVersions is inconsistent`);
     assertCatalogDigestMap(catalog.tokenRequirementSets, `${catalog.id}.tokenRequirementSets`);
     assertCatalogDigestMap(
       catalog.platformSafetyRequirementSets,
@@ -206,7 +221,7 @@ function validateNormalizedInput(input) {
       'cache entry',
     );
   }
-  assertClosed(graph.request, ['bindings', 'cache'], 'resolver request');
+  assertClosed(graph.request, ['bindings', 'cache', 'queryApiVersion'], 'resolver request');
   assertArray(graph.request.bindings, 'resolver request bindings');
   if (new Set(graph.request.bindings).size !== graph.request.bindings.length) {
     inputError('resolver request bindings must be unique');
@@ -214,6 +229,10 @@ function validateNormalizedInput(input) {
   if (graph.request.cache !== null) {
     assertClosed(graph.request.cache, ['version', 'digest'], 'resolver cache request');
   }
+  if (
+    graph.request.queryApiVersion != null
+    && !QUERY_API_VERSIONS.includes(graph.request.queryApiVersion)
+  ) inputError('resolver request queryApiVersion must be an admitted exact version');
 }
 
 function rangeAllows(range, version) {
@@ -265,14 +284,23 @@ function compatibilityFor({
   installedRenderers,
   descriptors,
   locks,
+  requestedQueryApiVersion,
 }) {
   const failures = [];
   let failingPackage = '@core-ui/catalog';
-  if (catalog.queryApiVersion !== TOOLING_API_VERSION) {
+  const supportedQueryApiVersions = catalog.supportedQueryApiVersions;
+  const selectedQueryApiVersion = requestedQueryApiVersion ?? catalog.queryApiVersion;
+  if (
+    !Array.isArray(supportedQueryApiVersions)
+    || new Set(supportedQueryApiVersions).size !== supportedQueryApiVersions.length
+    || !supportedQueryApiVersions.includes(catalog.queryApiVersion)
+    || !supportedQueryApiVersions.includes(selectedQueryApiVersion)
+    || catalog.queryApiVersion !== TOOLING_API_VERSION
+  ) {
     failures.push({
-      dimension: 'tooling-api',
-      required: TOOLING_API_VERSION,
-      actual: catalog.queryApiVersion,
+      dimension: 'query-api',
+      required: canonicalJson(supportedQueryApiVersions ?? []),
+      actual: selectedQueryApiVersion,
     });
   }
   if (!rangeAllows(catalog.schemaRange, TOOLING_SCHEMA_VERSION)) {
@@ -454,6 +482,10 @@ function diagnosticSpec(code) {
     CORE_CATALOG_INCOMPATIBLE: {
       ruleId: 'resolver.catalog.compatibility',
       message: 'The resolved catalog is incompatible with the requested local binding graph.',
+    },
+    CORE_QUERY_API_VERSION_UNSUPPORTED: {
+      ruleId: 'resolver.query-api.supported',
+      message: 'The selected catalog does not support the requested query API version.',
     },
   }[code];
 }
@@ -660,10 +692,13 @@ export function resolveCatalogGraph(input) {
       )),
       descriptors,
       locks: graph.lockfile.filter((item) => item.workspace === graph.selectedWorkspace),
+      requestedQueryApiVersion: graph.request.queryApiVersion,
     });
     if (compatibility.failures.length > 0) {
       failures.push({
-        code: 'CORE_CATALOG_INCOMPATIBLE',
+        code: compatibility.failures.some(({ dimension }) => dimension === 'query-api')
+          ? 'CORE_QUERY_API_VERSION_UNSUPPORTED'
+          : 'CORE_CATALOG_INCOMPATIBLE',
         reason: compatibility.failures.map(({ dimension }) => dimension).join(', '),
       });
     }
@@ -691,7 +726,7 @@ export function resolveCatalogGraph(input) {
       })).sort((left, right) => compareText(left.relativePath, right.relativePath)),
       compatibilityFailures: compatibility.failures,
     };
-    const inspectedPackage = primary === 'CORE_CATALOG_INCOMPATIBLE'
+    const inspectedPackage = ['CORE_CATALOG_INCOMPATIBLE', 'CORE_QUERY_API_VERSION_UNSUPPORTED'].includes(primary)
       ? safePackageName(compatibility.failingPackage)
       : '@core-ui/catalog';
     return resolverError(

@@ -14,6 +14,7 @@ const ERROR_PRECEDENCE = [
   'CORE_CATALOG_DECLARATION_DRIFT',
   'CORE_CATALOG_INTEGRITY_MISMATCH',
   'CORE_CATALOG_RESOLUTION_AMBIGUOUS',
+  'CORE_QUERY_API_VERSION_UNSUPPORTED',
   'CORE_CATALOG_INCOMPATIBLE',
 ];
 const DIGEST = /^sha256:[a-f0-9]{64}$/;
@@ -71,6 +72,7 @@ function sortedIds(values, name) {
 function validateCatalog(catalog) {
   const fields = [
     'id', 'name', 'version', 'catalogVersion', 'catalogDigest', 'queryApiVersion',
+    'supportedQueryApiVersions',
     'schemaRange', 'sourceRevision', 'provenance', 'releaseManifest',
     'tokenRequirementSets', 'platformSafetyRequirementSets',
   ];
@@ -322,10 +324,22 @@ export function validateResolverFixtureCorpus(corpus) {
         fail(`${graph.id} cache does not match ${cache.catalog}`);
       }
     }
-    closed(graph.request, ['bindings', 'cache'], `${graph.id}.request`);
+    closed(graph.request, ['bindings', 'cache', 'queryApiVersion'], `${graph.id}.request`);
     required(graph.request, ['bindings', 'cache'], `${graph.id}.request`);
-    if (!Array.isArray(graph.request.bindings) || graph.request.bindings.length === 0) {
-      fail(`${graph.id} request must name a binding`);
+    if (!Array.isArray(graph.request.bindings)) {
+      fail(`${graph.id} request bindings must be an array`);
+    }
+    if (
+      graph.request.bindings.length === 0
+      && graph.request.queryApiVersion === undefined
+    ) {
+      fail(`${graph.id} request must name a binding or query API version`);
+    }
+    if (
+      graph.request.queryApiVersion !== undefined
+      && !['1.1.0', '1.2.0', '2.0.0'].includes(graph.request.queryApiVersion)
+    ) {
+      fail(`${graph.id} request queryApiVersion is not admitted`);
     }
     if (graph.request.cache !== null) {
       closed(graph.request.cache, ['version', 'digest'], `${graph.id}.request.cache`);

@@ -5,9 +5,12 @@ import {
   QUERY_ENVELOPE_SCHEMA_ID,
   QUERY_RESPONSE_TYPES,
   QUERY_SCHEMA_VERSION,
+  QUERY_API_VERSIONS,
   QUERY_SELECTORS,
   canonicalDigest,
+  canonicalJson,
   parseJsonStrict,
+  sha256Digest,
   validateFamily,
 } from '@core-ui/schema';
 import { catalogJson } from '../generated/catalog.mjs';
@@ -34,7 +37,7 @@ const OPERATIONS = {
   },
   getArtifact: {
     available: true,
-    requestKeys: ['detail', 'id', 'platform', 'purpose', 'section'],
+    requestKeys: ['cursor', 'detail', 'id', 'limit', 'platform', 'purpose', 'queryApiVersion', 'section'],
     responseType: 'artifact.detail',
   },
   planComposition: {
@@ -64,6 +67,17 @@ function assertBundle(bundle) {
   if (catalogDigest !== canonicalDigest(preimage)) {
     throw new Error('CORE_CATALOG_INTEGRITY_MISMATCH: catalog digest does not match bundle');
   }
+  if (
+    !QUERY_API_VERSIONS.includes(bundle.apiVersion)
+    || !Array.isArray(bundle.supportedQueryApiVersions)
+    || bundle.supportedQueryApiVersions.length === 0
+    || bundle.supportedQueryApiVersions.some((version) => !QUERY_API_VERSIONS.includes(version))
+    || new Set(bundle.supportedQueryApiVersions).size !== bundle.supportedQueryApiVersions.length
+    || !bundle.supportedQueryApiVersions.includes(bundle.apiVersion)
+  ) {
+    throw new Error('CORE_CATALOG_INTEGRITY_MISMATCH: invalid selected query descriptor');
+  }
+  validateFamily('token-section-page-budget-profile', bundle.pageBudgetProfile);
   return deepFreeze(structuredClone(bundle));
 }
 
@@ -74,9 +88,10 @@ export function createCatalogDiagnostic({
   details,
   retryable = false,
   nextCommand,
+  apiVersion = API_VERSION,
 }) {
   const response = {
-    apiVersion: API_VERSION,
+    apiVersion,
     type: 'error',
     error: {
       code,
@@ -91,17 +106,19 @@ export function createCatalogDiagnostic({
   return deepFreeze(response);
 }
 
-function queryError(code, ruleId, message, details, retryable = false) {
-  return createCatalogDiagnostic({ code, ruleId, message, details, retryable });
+function queryError(code, ruleId, message, details, retryable = false, apiVersion = API_VERSION) {
+  return createCatalogDiagnostic({ code, ruleId, message, details, retryable, apiVersion });
 }
 
-function success(type, data, meta) {
-  const response = { apiVersion: API_VERSION, type, data, meta, warnings: [] };
+function success(type, data, meta, { apiVersion = API_VERSION, warnings = [] } = {}) {
+  const response = { apiVersion, type, data, meta, warnings };
   validateFamily('query-envelope', response);
   return deepFreeze(response);
 }
 
-function normalizeRequest(request, operation) {
+function normalizeRequest(request, operation, bundle) {
+  const currentQueryApiVersion = bundle.apiVersion;
+  const supportedQueryApiVersions = bundle.supportedQueryApiVersions;
   if (request === undefined) request = {};
   if (request === null || typeof request !== 'object' || Array.isArray(request)) {
     return { error: queryError(
@@ -109,6 +126,8 @@ function normalizeRequest(request, operation) {
       'query.request.object',
       `${operation} request must be an object.`,
       { operation },
+      false,
+      currentQueryApiVersion,
     ) };
   }
   const operationKeys = OPERATIONS[operation]?.requestKeys ?? [];
@@ -120,20 +139,32 @@ function normalizeRequest(request, operation) {
       'query.request.unknown-field',
       `${operation} request contains unknown fields.`,
       { operation, fields: unknown },
+      false,
+      currentQueryApiVersion,
     ) };
   }
+  const pagedSection = operation === 'getArtifact'
+    && ['tokens', 'source-crosswalk'].includes(request.section ?? null);
+  const defaultLimit = pagedSection
+    ? bundle.pageBudgetProfile.defaultItemLimit
+    : DEFAULT_LIMIT;
+  const maximumLimit = pagedSection
+    ? bundle.pageBudgetProfile.maximumItemLimit
+    : MAX_LIMIT;
   const normalized = {
     detail: request.detail ?? 'compact',
-    limit: request.limit ?? DEFAULT_LIMIT,
+    limit: request.limit ?? defaultLimit,
     platform: request.platform ?? null,
     purpose: request.purpose ?? null,
     section: request.section ?? null,
     cursor: request.cursor ?? null,
+    queryApiVersion: request.queryApiVersion ?? currentQueryApiVersion,
   };
   for (const key of operationKeys) {
     if (!Object.hasOwn(normalized, key)) normalized[key] = request[key] ?? null;
   }
   const failures = [];
+  if (!QUERY_API_VERSIONS.includes(normalized.queryApiVersion)) failures.push('queryApiVersion');
   if (!QUERY_SELECTORS.detail.includes(normalized.detail)) failures.push('detail');
   if (normalized.platform !== null && !QUERY_SELECTORS.platform.includes(normalized.platform)) {
     failures.push('platform');
@@ -144,7 +175,7 @@ function normalizeRequest(request, operation) {
   if (normalized.section !== null && !QUERY_SELECTORS.section.includes(normalized.section)) {
     failures.push('section');
   }
-  if (!Number.isInteger(normalized.limit) || normalized.limit < 1 || normalized.limit > MAX_LIMIT) {
+  if (!Number.isInteger(normalized.limit) || normalized.limit < 1 || normalized.limit > maximumLimit) {
     failures.push('limit');
   }
   if (normalized.cursor !== null && typeof normalized.cursor !== 'string') failures.push('cursor');
@@ -154,9 +185,29 @@ function normalizeRequest(request, operation) {
       'query.request.selector',
       `${operation} request has invalid selectors.`,
       { operation, fields: failures.sort(compareText) },
+      false,
+      currentQueryApiVersion,
+    ) };
+  }
+  if (!supportedQueryApiVersions.includes(normalized.queryApiVersion)) {
+    return { error: unsupportedQueryVersion(
+      normalized.queryApiVersion,
+      supportedQueryApiVersions,
+      currentQueryApiVersion,
     ) };
   }
   return { normalized };
+}
+
+function unsupportedQueryVersion(version, supported, currentQueryApiVersion = API_VERSION) {
+  return queryError(
+    'CORE_QUERY_API_VERSION_UNSUPPORTED',
+    'query.api-version.supported',
+    `Query API ${version} is not supported by the selected catalog.`,
+    { queryApiVersion: version, supportedQueryApiVersions: supported },
+    false,
+    currentQueryApiVersion,
+  );
 }
 
 function encodeCursor(value) {
@@ -165,6 +216,233 @@ function encodeCursor(value) {
 
 function decodeCursor(value) {
   return parseJsonStrict(Buffer.from(value, 'base64url').toString('utf8'));
+}
+
+function countLexemes(value) {
+  return canonicalJson(value).match(/[\p{L}\p{N}_]+/gu)?.length ?? 0;
+}
+
+function encodeSectionCursor(payload, profile) {
+  const bytes = canonicalJson(payload);
+  if (profile.cursorProfile !== 'core-ui-section-cursor-v1') throw new Error('invalid cursor profile');
+  return `c1.${Buffer.from(bytes, 'utf8').toString('base64url')}.${sha256Digest(bytes).slice(7)}`;
+}
+
+function decodeSectionCursor(value, profile) {
+  if (
+    profile.cursorProfile !== 'core-ui-section-cursor-v1'
+    || typeof value !== 'string'
+    || Buffer.byteLength(value, 'utf8') > profile.cursorMaximumBytes
+  ) throw new Error('invalid cursor');
+  const match = /^c1\.([A-Za-z0-9_-]+)\.([a-f0-9]{64})$/u.exec(value);
+  if (!match) throw new Error('invalid cursor');
+  const bytes = Buffer.from(match[1], 'base64url').toString('utf8');
+  if (Buffer.from(bytes, 'utf8').toString('base64url') !== match[1]) throw new Error('invalid cursor');
+  if (sha256Digest(bytes).slice(7) !== match[2]) throw new Error('invalid cursor');
+  const payload = parseJsonStrict(bytes);
+  const keys = [...profile.cursorBindings].sort(compareText);
+  if (
+    payload === null
+    || typeof payload !== 'object'
+    || Array.isArray(payload)
+    || canonicalJson(Object.keys(payload).sort(compareText)) !== canonicalJson(keys)
+  ) throw new Error('invalid cursor');
+  return payload;
+}
+
+function sectionPage(bundle, artifact, request) {
+  const profile = bundle.pageBudgetProfile;
+  if (request.queryApiVersion !== '1.2.0') {
+    return { error: queryError(
+      'CORE_QUERY_INVALID',
+      'query.section.version',
+      'Sectional token retrieval requires query API 1.2.0.',
+      { queryApiVersion: request.queryApiVersion, section: request.section },
+      false,
+      request.queryApiVersion,
+    ) };
+  }
+  if (artifact.kind !== 'token') {
+    return { error: queryError(
+      'CORE_QUERY_INVALID',
+      'query.section.artifact-kind',
+      'Token sections require a token artifact.',
+      { id: artifact.id, section: request.section },
+      false,
+      request.queryApiVersion,
+    ) };
+  }
+  if (
+    Buffer.byteLength(artifact.id, 'utf8') > profile.artifactIdMaximumBytes
+    || Buffer.byteLength(bundle.catalogVersion, 'utf8') > profile.catalogVersionMaximumBytes
+  ) {
+    return { error: queryError(
+      profile.envelopeOversizeCode,
+      'query.page.envelope-bound',
+      'The requested page identity exceeds the accepted envelope bound.',
+      { artifactId: artifact.id, catalogVersion: bundle.catalogVersion },
+      false,
+      request.queryApiVersion,
+    ) };
+  }
+  const tokenSourceContentRevision = artifact.contentRevision;
+  const selectorDigest = canonicalDigest({
+    artifactId: artifact.id,
+    platform: request.platform,
+    detail: request.detail,
+    purpose: request.purpose,
+    section: request.section,
+    limit: request.limit,
+  });
+  const sourceCrosswalk = artifact.record.sourceCrosswalk;
+  const available = request.section === 'tokens'
+    || (request.section === 'source-crosswalk' && Array.isArray(sourceCrosswalk?.entries));
+  const values = request.section === 'tokens'
+    ? Object.entries(artifact.record.tokens)
+      .map(([id, definition]) => ({ id, definition }))
+      .sort((left, right) => compareText(left.id, right.id))
+    : available
+      ? [...sourceCrosswalk.entries].sort((left, right) => (
+        left.occurrence.ordinal - right.occurrence.ordinal
+        || compareText(canonicalJson(left), canonicalJson(right))
+      ))
+      : [];
+  let position = 0;
+  if (request.cursor !== null) {
+    try {
+      const payload = decodeSectionCursor(request.cursor, profile);
+      if (
+        payload.queryApiVersion !== request.queryApiVersion
+        || payload.catalogDigest !== bundle.catalogDigest
+        || payload.tokenSourceContentRevision !== tokenSourceContentRevision
+        || payload.section !== request.section
+        || payload.selectorDigest !== selectorDigest
+        || !Number.isInteger(payload.nextPosition)
+        || payload.nextPosition < 1
+        || payload.nextPosition > profile.cursorPositionMaximum
+        || payload.nextPosition > values.length
+      ) throw new Error('cursor identity mismatch');
+      position = payload.nextPosition;
+    } catch {
+      return { error: queryError(
+        'CORE_CURSOR_INVALID',
+        'query.section.cursor.identity',
+        'The section cursor does not belong to this catalog, source, version, and selector.',
+        { artifactId: artifact.id, section: request.section },
+        true,
+        request.queryApiVersion,
+      ) };
+    }
+  }
+  const items = [];
+  let entryTokens = 0;
+  for (const entry of values.slice(position, position + request.limit)) {
+    const cost = countLexemes(entry);
+    if (cost > profile.maximumEntryTokens) {
+      return { error: queryError(
+        profile.oversizeCode,
+        'query.page.entry-bound',
+        'One complete section entry exceeds the accepted page-entry budget.',
+        { artifactId: artifact.id, section: request.section, entryId: entry.id, entryTokens: cost },
+        false,
+        request.queryApiVersion,
+      ) };
+    }
+    if (
+      entryTokens + cost
+      > profile.densePageBudgetTokens - profile.envelopeReserveTokens
+    ) break;
+    items.push(entry);
+    entryTokens += cost;
+  }
+  if (position < values.length && items.length === 0) {
+    return { error: queryError(
+      profile.oversizeCode,
+      'query.page.minimum-progress',
+      'The page cannot make the required one-entry minimum progress.',
+      { artifactId: artifact.id, section: request.section, position },
+      false,
+      request.queryApiVersion,
+    ) };
+  }
+  const nextPosition = position + items.length;
+  const remaining = values.length - nextPosition;
+  if (remaining > 0 && nextPosition >= profile.cursorPositionMaximum) {
+    return { error: queryError(
+      'CORE_CURSOR_INVALID',
+      'query.section.cursor.position-overflow',
+      'The next section position exceeds the cursor profile.',
+      { artifactId: artifact.id, section: request.section, position: nextPosition },
+      false,
+      request.queryApiVersion,
+    ) };
+  }
+  const nextCursor = remaining > 0 ? encodeSectionCursor({
+    catalogDigest: bundle.catalogDigest,
+    nextPosition,
+    queryApiVersion: request.queryApiVersion,
+    section: request.section,
+    selectorDigest,
+    tokenSourceContentRevision,
+  }, profile) : null;
+  if (
+    nextCursor !== null
+    && Buffer.byteLength(nextCursor, 'utf8') > profile.cursorMaximumBytes
+  ) {
+    return { error: queryError(
+      profile.envelopeOversizeCode,
+      'query.page.cursor-bound',
+      'The next section cursor exceeds the accepted envelope bound.',
+      { artifactId: artifact.id, section: request.section },
+      false,
+      request.queryApiVersion,
+    ) };
+  }
+  const response = {
+    schemaVersion: '1.2.0',
+    responseType: 'artifact.detail.section-page',
+    meta: {
+      queryApiVersion: '1.2.0',
+      catalogVersion: bundle.catalogVersion,
+      catalogDigest: bundle.catalogDigest,
+      tokenSourceContentRevision,
+      artifactId: artifact.id,
+      section: request.section,
+      selectorDigest,
+    },
+    entries: available
+      ? { status: 'available', items }
+      : {
+        status: 'absent',
+        reason: artifact.record.schemaVersion === '2.0.0'
+          ? 'token-source-schema-does-not-declare-source-crosswalk'
+          : 'token-source-omits-source-crosswalk',
+        tokenSourceSchemaVersion: artifact.record.schemaVersion,
+        items: [],
+      },
+    page: {
+      position,
+      returned: items.length,
+      remaining,
+      nextCursor,
+      entryTokens,
+      densePageBudget: profile.densePageBudgetTokens,
+    },
+    diagnostics: [],
+  };
+  const { entries: _entries, ...normalizedEnvelope } = response;
+  if (countLexemes(normalizedEnvelope) > profile.envelopeReserveTokens) {
+    return { error: queryError(
+      profile.envelopeOversizeCode,
+      'query.page.envelope-budget',
+      'The section page envelope exceeds the accepted token reserve.',
+      { artifactId: artifact.id, section: request.section },
+      false,
+      request.queryApiVersion,
+    ) };
+  }
+  validateFamily('section-page', response);
+  return { response: deepFreeze(response) };
 }
 
 function paginate(values, operation, request, catalogDigest) {
@@ -192,6 +470,7 @@ function paginate(values, operation, request, catalogDigest) {
         'The cursor does not belong to this catalog and request.',
         { operation, catalogDigest },
         true,
+        request.queryApiVersion,
       ) };
     }
   }
@@ -361,7 +640,7 @@ function assertResolutionContext(bundle, input) {
 
 function baseMeta(bundle, resolutionContext, request = {}, revisions = {}) {
   return {
-    schemaVersion: QUERY_SCHEMA_VERSION,
+    schemaVersion: request.queryApiVersion ?? QUERY_SCHEMA_VERSION,
     authority: resolutionContext.authority,
     revisions,
     coreVersion: resolutionContext.coreVersion,
@@ -473,7 +752,7 @@ export function createCatalogApi(inputBundle, options = {}) {
   }
 
   function getManifest(request) {
-    const parsed = normalizeRequest(request, 'getManifest');
+    const parsed = normalizeRequest(request, 'getManifest', bundle);
     if (parsed.error) return parsed.error;
     const { normalized } = parsed;
     return success('catalog.manifest', {
@@ -490,11 +769,13 @@ export function createCatalogApi(inputBundle, options = {}) {
         .filter(({ kind }) => kind === 'capability')
         .map(({ record }) => record),
       cli: cliRegistryForDetail(bundle, normalized.detail),
-    }, baseMeta(bundle, resolutionContext, normalized));
+    }, baseMeta(bundle, resolutionContext, normalized), {
+      apiVersion: normalized.queryApiVersion,
+    });
   }
 
   function listArtifacts(request) {
-    const parsed = normalizeRequest(request, 'listArtifacts');
+    const parsed = normalizeRequest(request, 'listArtifacts', bundle);
     if (parsed.error) return parsed.error;
     const { normalized } = parsed;
     if (normalized.kind !== null && !ARTIFACT_KINDS.includes(normalized.kind)) {
@@ -503,6 +784,8 @@ export function createCatalogApi(inputBundle, options = {}) {
         'query.list.kind',
         'listArtifacts kind must be an enabled ArtifactKind.',
         { kind: normalized.kind },
+        false,
+        normalized.queryApiVersion,
       );
     }
     const values = bundle.artifacts
@@ -519,11 +802,11 @@ export function createCatalogApi(inputBundle, options = {}) {
       ...baseMeta(bundle, resolutionContext, normalized),
       truncated: page.truncated,
       nextCursor: page.nextCursor,
-    });
+    }, { apiVersion: normalized.queryApiVersion });
   }
 
   function searchArtifacts(request) {
-    const parsed = normalizeRequest(request, 'searchArtifacts');
+    const parsed = normalizeRequest(request, 'searchArtifacts', bundle);
     if (parsed.error) return parsed.error;
     const { normalized } = parsed;
     if (
@@ -536,6 +819,8 @@ export function createCatalogApi(inputBundle, options = {}) {
         'query.search.text',
         `searchArtifacts query must contain 1-${MAX_QUERY_LENGTH} characters.`,
         { query: normalized.query },
+        false,
+        normalized.queryApiVersion,
       );
     }
     const queryTerms = [...new Set(
@@ -547,6 +832,8 @@ export function createCatalogApi(inputBundle, options = {}) {
         'query.search.terms',
         'searchArtifacts query must contain an ASCII letter or number.',
         { query: normalized.query },
+        false,
+        normalized.queryApiVersion,
       );
     }
     const matches = [];
@@ -593,11 +880,11 @@ export function createCatalogApi(inputBundle, options = {}) {
       ...baseMeta(bundle, resolutionContext, normalized),
       truncated: page.truncated,
       nextCursor: page.nextCursor,
-    });
+    }, { apiVersion: normalized.queryApiVersion });
   }
 
   function getArtifact(request) {
-    const parsed = normalizeRequest(request, 'getArtifact');
+    const parsed = normalizeRequest(request, 'getArtifact', bundle);
     if (parsed.error) return parsed.error;
     const { normalized } = parsed;
     if (
@@ -609,6 +896,8 @@ export function createCatalogApi(inputBundle, options = {}) {
         'query.get.id',
         'getArtifact id must be an ArtifactRef string.',
         { id: normalized.id },
+        false,
+        normalized.queryApiVersion,
       );
     }
     const artifact = artifactsById.get(normalized.id);
@@ -624,6 +913,21 @@ export function createCatalogApi(inputBundle, options = {}) {
         `No artifact matched ${JSON.stringify(normalized.id)}.`,
         { id: normalized.id, platform: normalized.platform },
         true,
+        normalized.queryApiVersion,
+      );
+    }
+    if (['tokens', 'source-crosswalk'].includes(normalized.section)) {
+      const page = sectionPage(bundle, artifact, normalized);
+      return page.error ?? page.response;
+    }
+    if (normalized.cursor !== null) {
+      return queryError(
+        'CORE_QUERY_INVALID',
+        'query.get.cursor-section',
+        'getArtifact cursor requires section=tokens or section=source-crosswalk.',
+        { section: normalized.section },
+        false,
+        normalized.queryApiVersion,
       );
     }
     const relations = related(bundle, artifact.id);
@@ -677,10 +981,26 @@ export function createCatalogApi(inputBundle, options = {}) {
         ? (artifact.bindingSpecRevisions[selectedBinding.bindingId] ?? null)
         : null,
     };
+    const warnings = normalized.queryApiVersion === '1.2.0'
+      && normalized.section === null
+      && normalized.detail === 'full'
+      && artifact.kind === 'token'
+      ? [{
+        code: 'CORE_QUERY_INLINE_TOKENS_DEPRECATED',
+        ruleId: 'query.inline-tokens.deprecated',
+        message: 'Inline token retrieval is deprecated and is removed in query API 2.0.0.',
+        retryable: false,
+        details: {
+          replacement: 'section=tokens',
+          noticeBoundary: 'complete separately human-accepted Phase A release',
+        },
+      }]
+      : [];
     return success(
       'artifact.detail',
       data,
       baseMeta(bundle, resolutionContext, normalized, revisions),
+      { apiVersion: normalized.queryApiVersion, warnings },
     );
   }
 
@@ -693,3 +1013,24 @@ export const getManifest = defaultApi.getManifest;
 export const listArtifacts = defaultApi.listArtifacts;
 export const searchArtifacts = defaultApi.searchArtifacts;
 export const getArtifact = defaultApi.getArtifact;
+
+export function migrateCatalogPackageV1ToV2(input) {
+  if (input === null || typeof input !== 'object' || Array.isArray(input)) {
+    throw new Error('CORE_CATALOG_PACKAGE_INVALID: descriptor must be an object');
+  }
+  if (input.schema === 'core-ui-catalog-package-v2') {
+    if (
+      !Array.isArray(input.supportedQueryApiVersions)
+      || !input.supportedQueryApiVersions.includes(input.queryApiVersion)
+    ) throw new Error('CORE_CATALOG_PACKAGE_INVALID: v2 query versions are inconsistent');
+    return deepFreeze(structuredClone(input));
+  }
+  if (input.schema !== 'core-ui-catalog-package-v1' || typeof input.queryApiVersion !== 'string') {
+    throw new Error('CORE_CATALOG_PACKAGE_INVALID: expected a v1 or v2 descriptor');
+  }
+  return deepFreeze({
+    ...structuredClone(input),
+    schema: 'core-ui-catalog-package-v2',
+    supportedQueryApiVersions: [input.queryApiVersion],
+  });
+}

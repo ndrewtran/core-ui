@@ -70,12 +70,13 @@ const releaseManifest = {
   bindings: [],
 };
 const packageData = {
-  schema: 'core-ui-catalog-package-v1',
+  schema: 'core-ui-catalog-package-v2',
   name: packageManifest.name,
   version: packageManifest.version,
   catalogVersion: bundle.catalogVersion,
   catalogDigest: bundle.catalogDigest,
   queryApiVersion: bundle.apiVersion,
+  supportedQueryApiVersions: bundle.supportedQueryApiVersions,
   schemaRange: '^2.0.0',
   sourceRevision: bundle.sourceRevision,
   tokenRequirementSets: Object.fromEntries(bindingDescriptors.map((descriptor) => [

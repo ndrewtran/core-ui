@@ -1,7 +1,7 @@
 import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import {
-  API_VERSION,
+  QUERY_API_VERSIONS,
   SCHEMA_VERSION,
   bindingContentRevision,
   bindingSpecRevision,
@@ -52,14 +52,33 @@ function validateSourceManifest(manifest) {
     || manifest.schema !== SOURCE_MANIFEST_SCHEMA
     || !Array.isArray(manifest.records)
     || manifest.records.length === 0
-    || Object.keys(manifest).some((key) => !['schema', 'commandRegistryPath', 'platformSafetyContractPath', 'records'].includes(key))
+    || Object.keys(manifest).some((key) => ![
+      'schema',
+      'authorityDecisionPath',
+      'commandRegistryPath',
+      'pageBudgetProfilePath',
+      'platformSafetyContractPath',
+      'queryApiVersion',
+      'records',
+      'supportedQueryApiVersions',
+    ].includes(key))
+    || typeof manifest.authorityDecisionPath !== 'string'
     || typeof manifest.commandRegistryPath !== 'string'
+    || typeof manifest.pageBudgetProfilePath !== 'string'
     || typeof manifest.platformSafetyContractPath !== 'string'
+    || !QUERY_API_VERSIONS.includes(manifest.queryApiVersion)
+    || !Array.isArray(manifest.supportedQueryApiVersions)
+    || manifest.supportedQueryApiVersions.length === 0
+    || manifest.supportedQueryApiVersions.some((version) => !QUERY_API_VERSIONS.includes(version))
+    || new Set(manifest.supportedQueryApiVersions).size !== manifest.supportedQueryApiVersions.length
+    || !manifest.supportedQueryApiVersions.includes(manifest.queryApiVersion)
   ) {
     throw new Error('CORE_CATALOG_SOURCE_INVALID: invalid catalog source manifest');
   }
   const paths = new Set();
+  assertRelativePath(manifest.authorityDecisionPath, 'authorityDecisionPath');
   assertRelativePath(manifest.commandRegistryPath, 'commandRegistryPath');
+  assertRelativePath(manifest.pageBudgetProfilePath, 'pageBudgetProfilePath');
   assertRelativePath(manifest.platformSafetyContractPath, 'platformSafetyContractPath');
   for (const [index, entry] of manifest.records.entries()) {
     if (
@@ -82,10 +101,49 @@ function validateSourceManifest(manifest) {
   }
   return {
     schema: manifest.schema,
+    authorityDecisionPath: manifest.authorityDecisionPath,
     commandRegistryPath: manifest.commandRegistryPath,
+    pageBudgetProfilePath: manifest.pageBudgetProfilePath,
     platformSafetyContractPath: manifest.platformSafetyContractPath,
+    queryApiVersion: manifest.queryApiVersion,
     records: [...manifest.records].sort((left, right) => compareText(left.path, right.path)),
+    supportedQueryApiVersions: [...manifest.supportedQueryApiVersions],
   };
+}
+
+function countLexemes(value) {
+  return canonicalJson(value).match(/[\p{L}\p{N}_]+/gu)?.length ?? 0;
+}
+
+export function assertPhaseAQueryProfile({ manifest, pageBudgetProfile, authorityDecision }) {
+  validateFamily('token-section-page-budget-profile', pageBudgetProfile);
+  const acceptedPageProfile = authorityDecision.pageProfiles?.find(
+    ({ queryApiVersion }) => queryApiVersion === manifest.queryApiVersion,
+  );
+  const phase = authorityDecision.queryCompatibility?.phases?.find(
+    ({ phase: phaseId }) => phaseId === 'A',
+  );
+  if (!acceptedPageProfile || !phase) {
+    throw new Error('CORE_CATALOG_SOURCE_INVALID: accepted Phase A profile is missing');
+  }
+  const { normalizedWorstCaseEnvelopePreimage, ...acceptedPageValues } = acceptedPageProfile;
+  const expectedPageBudgetProfile = {
+    schema: 'core-ui-token-section-page-budget-profile-v1',
+    ...acceptedPageValues,
+  };
+  if (
+    canonicalJson(pageBudgetProfile) !== canonicalJson(expectedPageBudgetProfile)
+    || canonicalDigest(normalizedWorstCaseEnvelopePreimage)
+      !== pageBudgetProfile.normalizedWorstCaseEnvelopeSha256
+    || countLexemes(normalizedWorstCaseEnvelopePreimage)
+      !== pageBudgetProfile.measuredWorstCaseEnvelopeTokens
+    || manifest.queryApiVersion !== phase.selectedCatalogQueryApiVersion
+    || canonicalJson(manifest.supportedQueryApiVersions)
+      !== canonicalJson(phase.selectedCatalogSupportedQueryApiVersions)
+  ) {
+    throw new Error('CORE_CATALOG_SOURCE_INVALID: Phase A profile differs from accepted authority');
+  }
+  return pageBudgetProfile;
 }
 
 function tokenize(value) {
@@ -167,6 +225,26 @@ export async function compileCatalog({
     'utf8',
   );
   const commandRegistry = parseJsonStrict(commandRegistryBytes);
+  const queryVersionOption = commandRegistry.selectors?.find(
+    ({ requestKey }) => requestKey === 'queryApiVersion',
+  );
+  if (
+    !queryVersionOption
+    || canonicalJson(queryVersionOption.choices) !== canonicalJson(QUERY_API_VERSIONS)
+  ) {
+    throw new Error('CORE_CATALOG_SOURCE_INVALID: query-version CLI choices must project schema grammar');
+  }
+  const authorityDecisionBytes = await readFile(
+    resolve(repositoryRoot, manifest.authorityDecisionPath),
+    'utf8',
+  );
+  const authorityDecision = parseJsonStrict(authorityDecisionBytes);
+  const pageBudgetProfileBytes = await readFile(
+    resolve(repositoryRoot, manifest.pageBudgetProfilePath),
+    'utf8',
+  );
+  const pageBudgetProfile = parseJsonStrict(pageBudgetProfileBytes);
+  assertPhaseAQueryProfile({ manifest, pageBudgetProfile, authorityDecision });
   const platformSafetyContractBytes = await readFile(
     resolve(repositoryRoot, manifest.platformSafetyContractPath),
     'utf8',
@@ -281,7 +359,9 @@ export async function compileCatalog({
 
   const sourceRevision = canonicalDigest({
     manifest,
+    authorityDecisionDigest: sha256Digest(authorityDecisionBytes),
     commandRegistryDigest: sha256Digest(commandRegistryBytes),
+    pageBudgetProfileDigest: sha256Digest(pageBudgetProfileBytes),
     platformSafetyContractDigest: canonicalDigest(platformSafetyContract),
     inputs: loaded.map(({ entry, recordBytes, sourceBytes }) => ({
       path: entry.path,
@@ -298,11 +378,13 @@ export async function compileCatalog({
   }));
   const preimage = {
     formatVersion: '1.0.0',
-    apiVersion: API_VERSION,
+    apiVersion: manifest.queryApiVersion,
+    supportedQueryApiVersions: manifest.supportedQueryApiVersions,
     schemaVersion: SCHEMA_VERSION,
     catalogVersion,
     sourceRevision,
     commandRegistry,
+    pageBudgetProfile,
     platformSafetyContract,
     platformSafetyContractDigest: canonicalDigest(platformSafetyContract),
     artifacts,

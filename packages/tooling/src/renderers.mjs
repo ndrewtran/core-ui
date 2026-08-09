@@ -3,6 +3,10 @@ import { canonicalJson } from '@core-ui/schema';
 const DENSE_HEADER = '@core-ui/dense=1';
 
 function responseEntries(response) {
+  if (response.responseType === 'artifact.detail.section-page') {
+    return ['schemaVersion', 'responseType', 'meta', 'entries', 'page', 'diagnostics']
+      .map((key) => [key, response[key]]);
+  }
   const order = response.type === 'error'
     ? ['apiVersion', 'type', 'error']
     : ['apiVersion', 'type', 'data', 'meta', 'warnings'];
@@ -32,7 +36,7 @@ export function parseDense(text) {
 
 export function renderHuman(response) {
   return `${[
-    `Core UI ${response.type}`,
+    `Core UI ${response.type ?? response.responseType}`,
     ...responseEntries(response).map(([key, value]) => `${key}: ${canonicalJson(value)}`),
   ].join('\n')}\n`;
 }
