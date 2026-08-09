@@ -1,0 +1,29 @@
+{
+  "name": "@core-ui/react",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=24.19.0 <25" },
+  "exports": {
+    ".": { "types": "./src/index.d.ts", "default": "./src/index.mjs" },
+    "./compatibility": "./generated/compatibility.mjs",
+    "./testing": "./src/testing.mjs"
+  },
+  "scripts": {
+    "check": "node src/generate.mjs --check && node --test test/*.test.mjs && tsc --noEmit -p test/tsconfig.json",
+    "generate": "node src/generate.mjs",
+    "generate:check": "node src/generate.mjs --check"
+  },
+  "dependencies": { "@core-ui/web": "workspace:*" },
+  "peerDependencies": { "react": ">=19.2.0 <20", "react-dom": ">=19.2.0 <20" },
+  "devDependencies": {
+    "@core-ui/schema": "workspace:*",
+    "@types/jsdom": "30.0.0",
+    "@types/react": "19.2.18",
+    "@types/react-dom": "19.2.4",
+    "jsdom": "30.0.1",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "typescript": "7.0.2"
+  }
+}
