@@ -87,7 +87,11 @@ async function committedManifestEntries(sourceRevision, declaredPaths) {
     '--',
     ...declaredPaths,
   );
-  const paths = names.toString('utf8').split('\0').filter(Boolean).sort();
+  const paths = names
+    .toString('utf8')
+    .split('\0')
+    .filter(Boolean)
+    .sort((left, right) => left.localeCompare(right));
   const entries = [];
   for (const path of paths) {
     const bytes = await gitBytes('show', `${sourceRevision}:${path}`);
