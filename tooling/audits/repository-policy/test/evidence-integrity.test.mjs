@@ -583,6 +583,23 @@ test('supersession rejects unknown top-level and nested manifest fields', async 
     verifyEvidence(nested.root),
     'EVIDENCE_SUPERSESSION_SCHEMA_INVALID',
   );
+
+  const recertificationReference = await fixture({ applicability: true });
+  const recertification = await addRecertification(recertificationReference.root);
+  await addApplicabilitySupersession(recertificationReference.root, {
+    recertification,
+    mutate: (value) => ({
+      ...value,
+      supersededRecertification: {
+        ...value.supersededRecertification,
+        milestone: 'G0.0',
+      },
+    }),
+  });
+  await assertEvidenceError(
+    verifyEvidence(recertificationReference.root),
+    'EVIDENCE_SUPERSESSION_SCHEMA_INVALID',
+  );
 });
 
 test('supersession rejects malformed status, owner, and timestamp identities', async () => {

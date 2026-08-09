@@ -210,7 +210,10 @@ for (const directory of targets) {
     sourceTree,
     supersededApplicabilityManifest,
     ...(recertificationLeaf ? {
-      supersededRecertification: recertificationLeaf.reference,
+      supersededRecertification: {
+        path: recertificationLeaf.reference.path,
+        sha256: recertificationLeaf.reference.sha256,
+      },
     } : {}),
   };
   assertApplicabilitySupersessionShape(supersession, (message) => {
