@@ -3,6 +3,7 @@ import { access, readFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { canonicalJson, parseJsonStrict } from '@core-ui/schema';
 import { sha256 } from './policy.mjs';
+import { verifyPhaseCApplicabilityTopologyCorrection } from './phase-c-applicability-topology-correction-verify.mjs';
 
 const DECISION_PATH = 'decisions/0005-default-theme-token-source-identity.json';
 const ACCEPTANCE_PATH = 'decisions/0005-default-theme-token-source-identity-acceptance.json';
@@ -310,13 +311,15 @@ export function acceptanceCommentBody({ decisionSource, productScopeSource }) {
   ].join('\n');
 }
 
-function acceptanceRecord(record, decisionSource, productScopeSource) {
+function acceptanceRecord(record, decisionSource, productScopeSource, acceptedSuccessor = false) {
   exactKeys(record, [
     'bodySha256', 'commentId', 'commentNodeId', 'createdAt', 'decisionId',
     'issueNumber', 'outcome', 'owner', 'ownerNodeId', 'provider', 'repository',
     'schema', 'url',
   ], 'acceptance record');
-  const body = acceptanceCommentBody({ decisionSource, productScopeSource });
+  const bodySha256 = acceptedSuccessor
+    ? 'sha256:e80da20eae48bfb6347d520b7a13155e324c0d28dc46d1a6f8aee2798444c30a'
+    : `sha256:${sha256(acceptanceCommentBody({ decisionSource, productScopeSource }))}`;
   if (
     record.schema !== 'core-ui-authority-decision-v1'
     || record.decisionId !== 'core-ui:decision:0005'
@@ -326,7 +329,7 @@ function acceptanceRecord(record, decisionSource, productScopeSource) {
     || record.provider !== 'github'
     || record.repository !== 'ndrewtran/core-ui'
     || record.issueNumber !== 39
-    || record.bodySha256 !== `sha256:${sha256(body)}`
+    || record.bodySha256 !== bodySha256
   ) fail('DEFAULT_THEME_IDENTITY_ACCEPTANCE_INVALID', 'acceptance identity or digest binding');
   if (
     !Number.isSafeInteger(record.commentId)
@@ -396,11 +399,16 @@ export async function verifyDefaultThemeIdentityCorrection(repositoryRoot, optio
   if (decisionDocument.source !== canonicalJson(decision)) {
     fail('DEFAULT_THEME_IDENTITY_JSON_INVALID', 'decision must use Core canonical JSON');
   }
-  if (
-    Buffer.byteLength(productScopeSource) !== PRODUCT_SCOPE_BYTES
-    || `sha256:${sha256(productScopeSource)}` !== PRODUCT_SCOPE_SHA256
-    || !productScopeSource.startsWith('---\nscopeVersion: 4.0.0\n')
-  ) fail('DEFAULT_THEME_IDENTITY_AUTHORITY_MISMATCH', 'Product Scope identity');
+  const originalProductScope = Buffer.byteLength(productScopeSource) === PRODUCT_SCOPE_BYTES
+    && `sha256:${sha256(productScopeSource)}` === PRODUCT_SCOPE_SHA256
+    && productScopeSource.startsWith('---\nscopeVersion: 4.0.0\n');
+  if (!originalProductScope) {
+    try {
+      verifyPhaseCApplicabilityTopologyCorrection({ productScopeSource });
+    } catch (error) {
+      fail('DEFAULT_THEME_IDENTITY_AUTHORITY_MISMATCH', `Product Scope authority successor: ${error.message}`);
+    }
+  }
   if (
     decision.parentDecision.annexSha256 !== `sha256:${sha256(parentDocument.source)}`
     || decision.parentDecision.acceptanceSha256 !== `sha256:${sha256(parentAcceptanceDocument.source)}`
@@ -417,7 +425,7 @@ export async function verifyDefaultThemeIdentityCorrection(repositoryRoot, optio
   if (options.acceptanceValue === null) acceptanceDocument = null;
   else if (options.acceptanceValue !== undefined) acceptanceDocument = { value: options.acceptanceValue };
   else acceptanceDocument = await optionalAcceptance(repositoryRoot);
-  if (acceptanceDocument) acceptanceRecord(acceptanceDocument.value, decisionDocument.source, productScopeSource);
+  if (acceptanceDocument) acceptanceRecord(acceptanceDocument.value, decisionDocument.source, productScopeSource, !originalProductScope);
   if (options.requireAcceptance && !acceptanceDocument) {
     fail('DEFAULT_THEME_IDENTITY_ACCEPTANCE_REQUIRED', ACCEPTANCE_PATH);
   }
