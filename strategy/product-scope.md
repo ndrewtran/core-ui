@@ -1,5 +1,5 @@
 ---
-scopeVersion: 2.0.0
+scopeVersion: 3.0.0
 status: execution-baseline
 product: Core UI
 architecture: ./monorepo-architecture.md
@@ -837,6 +837,91 @@ Open tracker migration covers issues #3 through #19, including Gate 0 exit #8,
 and every affected retained-evidence locator. Completed issues and evidence are
 preserved as historical exact-source records; Project workflow automation does
 not reactivate or complete a roadmap milestone.
+
+### Tale-only reference-baseline correction (`3.0.0`)
+
+Architecture-maintenance issue #39 records the observed workflow: Core UI is to
+begin its reference-token baseline with the accepted Tale-derived inventory,
+rather than preserve the ten provisional reference IDs introduced for the
+original fixed button slice. The product outcome is one Core-owned baseline in
+which the 430 accepted Tale additions plus the exact existing
+`reference.duration.fast` reuse are the complete reference layer. Decision
+annex `decisions/0004-tale-only-reference-baseline-annex.json` is the sole
+machine-readable owner of the reset delta. It preserves decision 0003's pinned
+Tale source, 693 occurrence classifications, 41 groups, target dispositions,
+crosswalk/query/page contracts, and 430-addition/one-reuse boundary, while
+superseding only the exact pointers listed in its `supersession` member.
+
+This is a major scope change from `2.0.0` to `3.0.0`. It removes ten committed
+public reference-token IDs, remaps every semantic alias that depended on them,
+and changes generated web/native token outputs and renderer compatibility. The
+annex owns the exact 66 affected immutable Scope IDs and the reason each
+cross-cutting proof owner is included. Every affected item remains `committed`;
+there is no commitment transition and no new Scope ID. Architecture remains
+compatible: canonical facts are still Core-owned once, Tale is pinned input and
+provenance rather than a runtime or release dependency, token layers remain
+acyclic, and platform transforms remain typed and CSS-independent on native.
+
+The exact version effects are Product Scope `2.0.0` to `3.0.0`, token contract
+`1.1.0` to `2.0.0`, catalog `0.2.0` to `1.0.0`, `@core-ui/catalog` `0.2.0` to
+`1.0.0`, `@core-ui/tokens` `0.1.0` to `1.0.0`, `@core-ui/tooling` `0.2.0` to
+`0.3.0`, and the private experimental `@core-ui/web` and `@core-ui/react`
+packages from `0.0.0` to `1.0.0`. Query API `2.0.0`, token-source schema
+`2.1.0`, command-registry schema `1.0.0`, catalog-package schema v2, and
+`@core-ui/schema` `0.2.0` remain unchanged. `@core-ui/react-native` does not
+yet exist, so it has no current package transition; its future compatibility
+must bind token contract `^2.0.0`. Web and React compatibility must likewise
+bind `^2.0.0`. These are implementation and compatibility identities, not a
+package-publication claim.
+
+Release removals are exactly the ten IDs in the annex. Each has explicit
+replacement or no-replacement guidance, and no compatibility alias preserves
+the removed public name. Release additions remain decision 0003's exact 430
+Core reference-token additions. `reference.duration.fast` is retained
+byte-for-byte, including its reduced-motion mode. The eleven semantic IDs and
+five component IDs are retained; no semantic or component ID is added. The
+annex authorizes one bounded recipe change: `semantic.control.padding-inline`
+receives an explicit `density.compact` alias to
+`reference.dimension.space-3xs`, replacing compact behavior that previously
+came from a removed reference token. No other recipe or mode expansion is
+authorized.
+
+The roadmap text requires no structural amendment because its accepted Tale
+correction sequence already requires authority, then exact-source Gate 0,
+G1.0, and renderer reproof. The reset affects G0.1–G0.5, Gate 0, G1.0–G1.9,
+Gate 1, and downstream G2.1 compatibility. The replacement Phase C source must
+start from the accepted Phase B source, produce six new immutable
+`TALE-TOKEN-C` evidence roots and six certificates that supersede only the
+exact Phase B index digests, then obtain fresh G1.0 and G1.1 acceptance before
+later Gate 1 work proceeds. PR #47 and its evidence remain unaccepted proposal
+history and are not predecessors of the replacement evidence chains.
+
+The annex owns a deterministic, no-network reset and rollback profile. The new
+catalog answers query API v1.1, v1.2, and v2 using the same current 447-token
+contract; query version changes response shape, not token history. The retained
+Phase B 27-token contract is available only by selecting its exact retained
+catalog/package `0.2.0` tuple and digest. Installed-local selection is explicit,
+digest-bound, fail-closed, and never rewrites a historical catalog. Rollback
+restores that exact tuple rather than recreating deleted IDs in the new major.
+
+Proof must cover every removal and replacement, absence of stale aliases,
+materializer/check/rollback identity, catalog and installed-local selection,
+query-version behavior, renderer outputs, native no-CSS behavior, React Native
+Web rejection, affected consumers, generation identity, packages, privacy,
+provenance, and the complete replacement evidence topology. Informational
+contrast arithmetic is not accessibility acceptance; every affected component
+and pattern still requires its roadmap-owned behavior, accessibility, visual,
+package, and parity evidence. No consumer data is required. No public release,
+new component, new capability, new theme, support claim, or Tale runtime/build
+dependency is admitted by this correction.
+
+Tracker migration is decision-bearing and exact: after acceptance, #39 remains
+the accepted architecture/change record and links this authority PR; #46
+remains the sole implementation issue, moves to a blocked workflow state until
+the authority PR is merged, and returns to active only after the replacement
+implementation PR is linked; PR #47 remains draft and is superseded or closed
+only after the replacement path exists. Completed issues and immutable evidence
+remain historical; automation never infers milestone acceptance.
 
 ## Tracker reference contract
 
