@@ -2,12 +2,15 @@ import { access, readFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { canonicalJson, parseJsonStrict, validateFamily } from '@core-ui/schema';
 import { RESOLVER_ERROR_PRECEDENCE } from '@core-ui/tooling/resolver';
+import { verifyDefaultThemeIdentityCorrection } from './default-theme-identity-correction-verify.mjs';
 import { sha256 } from './policy.mjs';
 
 const ANNEX_PATH = 'decisions/0004-tale-only-reference-baseline-annex.json';
 const ACCEPTANCE_PATH = 'decisions/0004-tale-only-reference-baseline-acceptance.json';
 const ARCHITECTURE_PATH = 'strategy/monorepo-architecture.md';
 const PRODUCT_SCOPE_PATH = 'strategy/product-scope.md';
+const ACCEPTED_PRODUCT_SCOPE_BYTES = 73816;
+const ACCEPTED_PRODUCT_SCOPE_SHA256 = 'sha256:c691b0bf0c3933ac7b91121f99904e911ea6439ad79badea9a491085bfe6f0e8';
 const PARENT_ANNEX_PATH = 'decisions/0003-tale-token-classification-annex.json';
 const PARENT_ACCEPTANCE_PATH = 'decisions/0003-tale-token-classification-acceptance.json';
 const TOKEN_SOURCE_PATH = 'catalog/tokens/button-minimum.json';
@@ -475,12 +478,13 @@ export function acceptanceCommentBody({ annexBytes, annexSha256, architectureByt
   ].join('\n');
 }
 
-function verifyAcceptance(record, annexBytes, architectureBytes, productScopeBytes) {
+function verifyAcceptance(record, annexBytes, architectureBytes) {
   exactKeys(record, ['schema', 'decisionId', 'outcome', 'owner', 'ownerNodeId', 'provider', 'repository', 'issueNumber', 'commentId', 'commentNodeId', 'createdAt', 'url', 'bodySha256'], 'acceptance record');
   const body = acceptanceCommentBody({
     annexBytes: Buffer.byteLength(annexBytes), annexSha256: `sha256:${sha256(annexBytes)}`,
     architectureBytes: Buffer.byteLength(architectureBytes), architectureSha256: `sha256:${sha256(architectureBytes)}`,
-    productScopeBytes: Buffer.byteLength(productScopeBytes), productScopeSha256: `sha256:${sha256(productScopeBytes)}`,
+    productScopeBytes: ACCEPTED_PRODUCT_SCOPE_BYTES,
+    productScopeSha256: ACCEPTED_PRODUCT_SCOPE_SHA256,
   });
   if (record.schema !== 'core-ui-authority-decision-v1' || record.decisionId !== 'core-ui:decision:0004' || record.outcome !== 'accepted' || record.owner !== 'ndrewtran' || record.ownerNodeId !== OWNER_NODE_ID || record.provider !== 'github' || record.repository !== 'ndrewtran/core-ui' || record.issueNumber !== 39 || record.bodySha256 !== `sha256:${sha256(body)}`) fail('TALE_RESET_ACCEPTANCE_INVALID', 'identity or digest binding');
   if (!Number.isSafeInteger(record.commentId) || record.commentId < 1 || !COMMENT_NODE_ID.test(record.commentNodeId ?? '') || !RFC3339.test(record.createdAt ?? '') || Number.isNaN(Date.parse(record.createdAt)) || record.url !== `https://github.com/ndrewtran/core-ui/issues/39#issuecomment-${record.commentId}`) fail('TALE_RESET_ACCEPTANCE_INVALID', 'comment identity');
@@ -546,14 +550,25 @@ export async function verifyTaleTokenBaselineReset(repositoryRoot, options = {})
     if (!SHA256.test(annex.digests[name]) || annex.digests[name] !== expected) fail('TALE_RESET_DIGEST_MISMATCH', name);
   }
   if (annex.compatibility.currentCatalog.tokenCount !== finalIds.length) fail('TALE_RESET_COMPATIBILITY_MISMATCH', 'current catalog token count');
-  if (!productScopeBytes.startsWith(`---\nscopeVersion: ${annex.versions.scopeVersion.to}\n`) || !productScopeBytes.includes(`### Tale-only reference-baseline correction (\`${annex.versions.scopeVersion.to}\`)`) || !productScopeBytes.includes(ANNEX_PATH)) fail('TALE_RESET_SCOPE_MISMATCH', 'Product Scope authority');
+  const acceptedProductScope = Buffer.byteLength(productScopeBytes) === ACCEPTED_PRODUCT_SCOPE_BYTES
+    && `sha256:${sha256(productScopeBytes)}` === ACCEPTED_PRODUCT_SCOPE_SHA256
+    && productScopeBytes.startsWith(`---\nscopeVersion: ${annex.versions.scopeVersion.to}\n`)
+    && productScopeBytes.includes(`### Tale-only reference-baseline correction (\`${annex.versions.scopeVersion.to}\`)`)
+    && productScopeBytes.includes(ANNEX_PATH);
+  if (!acceptedProductScope) {
+    try {
+      await verifyDefaultThemeIdentityCorrection(repositoryRoot, { requireAcceptance: true });
+    } catch (error) {
+      fail('TALE_RESET_SCOPE_MISMATCH', `Product Scope authority successor: ${error.message}`);
+    }
+  }
 
   const acceptanceOverrideProvided = Object.hasOwn(options, 'acceptanceValue');
   let acceptance = acceptanceOverrideProvided ? options.acceptanceValue : undefined;
   if (!acceptanceOverrideProvided) {
     try { await access(join(repositoryRoot, ACCEPTANCE_PATH)); acceptance = (await strictFile(join(repositoryRoot, ACCEPTANCE_PATH), ACCEPTANCE_PATH)).value; } catch (error) { if (error?.code !== 'ENOENT') throw error; }
   }
-  if (acceptance !== undefined && acceptance !== null) verifyAcceptance(acceptance, annexDocument.bytes, architectureBytes, productScopeBytes);
+  if (acceptance !== undefined && acceptance !== null) verifyAcceptance(acceptance, annexDocument.bytes, architectureBytes);
   if (options.requireAcceptance && (acceptance === undefined || acceptance === null)) fail('TALE_RESET_ACCEPTANCE_REQUIRED', ACCEPTANCE_PATH);
   return { accepted: acceptance !== undefined && acceptance !== null, finalTokenCount: finalIds.length, finalTokenSourceDigest: expectedDigests.finalTokenSource, removed: annex.removals.length, affectedScopeIds: annex.affectedScopeIds.length };
 }

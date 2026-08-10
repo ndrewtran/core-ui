@@ -1,5 +1,5 @@
 ---
-scopeVersion: 3.0.0
+scopeVersion: 4.0.0
 status: execution-baseline
 product: Core UI
 architecture: ./monorepo-architecture.md
@@ -957,6 +957,113 @@ the authority PR is merged, and returns to active only after the replacement
 implementation PR is linked; PR #47 remains draft and is superseded or closed
 only after the replacement path exists. Completed issues and immutable evidence
 remain historical; automation never infers milestone acceptance.
+
+### Default-theme token-source identity correction (`4.0.0`)
+
+Architecture-maintenance issue #39 records the observed naming defect and the
+designated human decision. The accepted Tale-only reference baseline is the
+complete Core UI default theme, but its current canonical path and artifact ID
+still describe the original Button-only G1.0 proof slice. Decision
+`core-ui:decision:0005` replaces only that misleading current identity:
+
+- `catalog/tokens/button-minimum.json` becomes `catalog/tokens/default-theme.json`;
+- `core:token:button-minimum` becomes `core:token:default-theme`.
+
+This is a major scope change from `3.0.0` to `4.0.0` because a committed public
+catalog artifact identity is removed and replaced. It changes no Scope ID or
+commitment state. The exact affected set remains decision 0004's 67 committed
+IDs, including `SCOPE-API-NAMING`, token/catalog/query/package ownership,
+component consumers, renderer compatibility, generation, evidence, history,
+privacy, and release integrity.
+
+The correction changes no token ID, value, type, unit, meaning, mode, alias,
+override policy, crosswalk entry, group, target disposition, requirement
+membership, query grammar, schema fact, or renderer behavior. The final
+contract remains 312 tokens: 296 reference, 11 semantic, and five component.
+Token contract `2.0.0`, query API `2.0.0`, token-source schema `2.1.0`, and
+`@core-ui/schema` `0.2.0` remain unchanged.
+
+Catalog and `@core-ui/catalog` move from `1.0.0` to `2.0.0`;
+`@core-ui/tokens` moves from `1.0.0` to `2.0.0`; `@core-ui/tooling` moves from
+`0.3.0` to `1.0.0`; `@core-ui/web` and `@core-ui/react` move from `1.0.0` to
+`1.0.1` for compatibility/provenance identity only. No package is published.
+The renderer public CSS, React surface, native typed values, and token-contract
+ranges remain unchanged.
+
+The old artifact is `experimental`, has `introducedIn: null`, and exists only in
+private unpublished candidate packages and catalogs. It has never entered a
+release, so the stable-release deprecation notice window is not activated.
+The major change packet still supplies replacement guidance, exact migration
+and rollback, current-catalog denial, and retained historical retrieval. The
+corrected current catalog returns `CORE_ARTIFACT_NOT_FOUND` for
+`core:token:button-minimum`; it does not retain a current compatibility alias.
+Exact historical catalogs and evidence keep the old artifact ID and path
+byte-for-byte and remain selectable only through their retained
+package/version/digest tuples. Query-version negotiation never selects token
+history.
+
+The exact current installed-local tuple is tooling `1.0.0`, catalog package and
+catalog `2.0.0`, token source `core:token:default-theme`, token contract
+`2.0.0`, query API `2.0.0`, and supported query requests `1.1.0`, `1.2.0`, and
+`2.0.0`. The sole accepted current-tooling historical positive tuple is tooling
+`1.0.0` selecting retained catalog package/catalog `0.2.0`, token contract
+`1.1.0`, catalog digest
+`sha256:e296cbeb86100405e79615b83172ef790845c0e324af8c80e5a12897617161cc`,
+and catalog source revision
+`sha256:8daba3efee87302e3ac95fc030453ac218536bc1b489b464830ac56bdc62bdab`.
+The installed-local resolver retains the accepted declaration, integrity,
+ambiguity, query-version, and compatibility failure precedence.
+
+`@core-ui/tokens` owns one closed path/ID migration module. It accepts only the
+exact decision-0004 current source bytes/digest at the old path with the new
+path absent, or the exact corrected source at the new path with the old path
+absent. Write, check, dry-run, repeated-write, rollback, and repeated-rollback
+states are deterministic. Both-path, neither-path, near-match, stale-current-
+reference, current-alias, authority-drift, and historical-write states fail
+with stable diagnostics. Rollback restores the exact decision-0004 current
+tuple; decision 0004's separate Phase-B rollback continues to restore the
+retained 27-token tuple.
+
+Authoring effects are confined to the existing token, catalog, query, package,
+component-recipe, renderer-provenance, and proof owners. No schema field,
+artifact kind, command, query version, or trust boundary is added. G0.5 must
+prove renamed-path scaffold/diff/diagnostic/revision/closure behavior and
+autofix denial. No consumer, personal, device, prompt, screen, credential, or
+new security data is introduced. Catalog selection remains exact
+version/digest/provenance bound and network-independent. Phase C re-proves
+schema, catalog/query, tooling, installed-local selection, token graph,
+renderers, generation, privacy, provenance, history, rollback, and package
+compatibility. No publication, support, lifecycle, availability, Gate, or
+release claim follows.
+
+The roadmap needs no structural amendment. The existing authority -> final
+G1.0 source -> Phase C -> fresh G1.0 -> fresh G1.1 order remains authoritative.
+After digest-specific decision-0005 acceptance and the authority source commit,
+but before the authority PR merges, the test-owned
+`tests/evidence/capture-authority-39-default-theme-identity-supersessions.mjs`
+must add exactly one append-only successor to each of the 20 terminal
+decision-0004 applicability chains under the single new root
+`tests/evidence/authority-39-default-theme-identity/index.json`. Each successor
+binds the exact decision-0005 receipt, terminal predecessor, source commit/tree,
+historical index and assertions, unchanged path list, predecessor current
+manifest, and freshly computed current manifest. This records authority-driven
+expiry only; it is not replacement proof, Phase C, milestone evidence, or
+acceptance. Every pre-existing evidence byte remains immutable.
+
+Every fresh Phase C root and applicability manifest must bind the exact decision
+0003/0004/0005 candidates and acceptance receipts, Product Scope `4.0.0`, and
+the retained corrected source commit/tree. No Phase C capture may occur before
+the decision-0005 acceptance receipt and authority merge. Separate human Phase
+C acceptance precedes fresh G1.0 capture/acceptance; fresh G1.0 acceptance
+precedes fresh G1.1 capture/acceptance.
+
+Open-tracker migration keeps #39 as the architecture/change record and #46 as
+the sole implementation owner. #46 remains blocked while the correction is
+pending. After the authority correction merges and the replacement
+implementation PR is linked, its complete authority, dependency, deliverable,
+evidence, acceptance-command, non-goal, blocker, and PR references move to
+decision 0005/Product Scope `4.0.0` and require the exact Phase C bindings.
+Completed evidence and historical tracker facts are not rewritten.
 
 ## Tracker reference contract
 
