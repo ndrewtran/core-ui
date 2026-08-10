@@ -1,6 +1,6 @@
 {
   "name": "@core-ui/tokens",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "private": true,
   "type": "module",
   "engines": {
@@ -8,16 +8,19 @@
   },
   "exports": {
     ".": "./src/index.mjs",
+    "./identity-migration": "./src/default-theme-identity-migration.mjs",
     "./materialization": "./src/tale-token-materialization.mjs"
   },
   "dependencies": {
     "@core-ui/schema": "workspace:*"
   },
   "scripts": {
-    "check": "node src/tale-token-materialization.mjs --check && node src/generate.mjs --check && node --test test/*.test.mjs",
+    "check": "node src/default-theme-identity-migration.mjs --check && node src/tale-token-materialization.mjs --check && node src/generate.mjs --check && node --test test/*.test.mjs",
     "generate": "node src/generate.mjs",
     "generate:check": "node src/generate.mjs --check",
     "materialize": "node src/tale-token-materialization.mjs",
-    "materialize:check": "node src/tale-token-materialization.mjs --check"
+    "materialize:check": "node src/tale-token-materialization.mjs --check",
+    "migrate:identity": "node src/default-theme-identity-migration.mjs",
+    "migrate:identity:check": "node src/default-theme-identity-migration.mjs --check"
   }
 }

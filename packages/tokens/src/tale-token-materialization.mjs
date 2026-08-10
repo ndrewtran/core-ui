@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import { readFile, writeFile } from 'node:fs/promises';
+import { readFile, unlink, writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import {
   canonicalDigest,
@@ -8,10 +8,23 @@ import {
   validateFamily,
 } from '@core-ui/schema';
 import { validateSourceCrosswalk } from './index.mjs';
+import {
+  assertDefaultThemeIdentityAuthority,
+  DEFAULT_THEME_IDENTITY_PATHS,
+  migrateDefaultThemeIdentityValue,
+  runDefaultThemeIdentityMigration,
+} from './default-theme-identity-migration.mjs';
+import {
+  assertDefaultThemeRepositoryState,
+  transitionDefaultThemeRepository,
+} from './internal/default-theme-repository-transition.mjs';
 
 export const TALE_TOKEN_MATERIALIZATION_PATHS = Object.freeze({
   acceptance: 'decisions/0004-tale-only-reference-baseline-acceptance.json',
-  currentSource: 'catalog/tokens/button-minimum.json',
+  currentSource: 'catalog/tokens/default-theme.json',
+  preIdentitySource: 'catalog/tokens/button-minimum.json',
+  identityAcceptance: 'decisions/0005-default-theme-token-source-identity-acceptance.json',
+  identityDecision: 'decisions/0005-default-theme-token-source-identity.json',
   parentAcceptance: 'decisions/0003-tale-token-classification-acceptance.json',
   parentDecision: 'decisions/0003-tale-token-classification-annex.json',
   phaseBSource: 'packages/tokens/fixtures/button-minimum-phase-b.json',
@@ -20,7 +33,10 @@ export const TALE_TOKEN_MATERIALIZATION_PATHS = Object.freeze({
 
 export const TALE_TOKEN_MATERIALIZATION_IDENTITIES = Object.freeze({
   acceptance: 'sha256:eff0ddc420e87a861d1c9f8fa3cd3d1353ea8f4d6fdb3aa830bc86006107aee7',
-  finalSource: 'sha256:670f2a45ada8c90b39e6de4bc4e6fef9e175313607c428067c21b7c2b1c5eac2',
+  decision0004FinalSource: 'sha256:670f2a45ada8c90b39e6de4bc4e6fef9e175313607c428067c21b7c2b1c5eac2',
+  finalSource: 'sha256:01982f878f3f4b29bf889fcc0cc9577e1bde3fb69a646f1972e74dd8b9347757',
+  identityAcceptance: 'sha256:48ac9f5af1990743224ab8fbdf093d08c092268842714a7d238a7d21b03c5c57',
+  identityDecision: 'sha256:747eb372d7cb53351d1cc30f4092cd703feb7986d3ea12814da6974616b85262',
   parentAcceptance: 'sha256:6ef7a0d4fa92cda7ea3222551074ae488a45a359a7de0600d3ee59180f3d1a17',
   parentDecision: 'sha256:c94518bc3e9d3a98a1752311f0a4bc37be106d75fa16db5bfc2555b3894d9604',
   phaseBCanonical: 'sha256:b6a86d8c22f7eb193b4cb8b6a203a40a56a01e581b8175e14f4228084f43d679',
@@ -261,46 +277,90 @@ export function materializeTaleTokenSource({ phaseBSource, parentDecision, reset
   return source;
 }
 
+export function materializeDefaultThemeTokenSource(inputs) {
+  const decision0004Source = materializeTaleTokenSource(inputs);
+  if (canonicalDigest(decision0004Source) !== TALE_TOKEN_MATERIALIZATION_IDENTITIES.decision0004FinalSource) {
+    fail('CORE_TALE_RESET_FINAL_IDENTITY_MISMATCH', 'decision 0004 source identity');
+  }
+  return migrateDefaultThemeIdentityValue(decision0004Source);
+}
+
 async function exactFile(repositoryRoot, path, expectedDigest) {
   const bytes = await readFile(join(repositoryRoot, path), 'utf8');
   if (sha256(bytes) !== expectedDigest) fail('CORE_TALE_RESET_DECISION_MISMATCH', path);
   return { bytes, value: strict(bytes, path) };
 }
 
+async function optionalFile(repositoryRoot, path) {
+  try {
+    return await readFile(join(repositoryRoot, path), 'utf8');
+  } catch (error) {
+    if (error?.code === 'ENOENT') return null;
+    throw error;
+  }
+}
+
 export async function loadTaleTokenMaterialization(repositoryRoot) {
   const paths = TALE_TOKEN_MATERIALIZATION_PATHS;
   const identities = TALE_TOKEN_MATERIALIZATION_IDENTITIES;
-  const [currentBytes, phaseB, parentDecision, parentAcceptance, resetDecision, acceptance] = await Promise.all([
-    readFile(join(repositoryRoot, paths.currentSource), 'utf8'),
+  const [
+    preIdentityBytes,
+    postIdentityBytes,
+    phaseB,
+    parentDecision,
+    parentAcceptance,
+    resetDecision,
+    acceptance,
+    identityDecision,
+    identityAcceptance,
+  ] = await Promise.all([
+    optionalFile(repositoryRoot, paths.preIdentitySource),
+    optionalFile(repositoryRoot, paths.currentSource),
     exactFile(repositoryRoot, paths.phaseBSource, identities.phaseBFile),
     exactFile(repositoryRoot, paths.parentDecision, identities.parentDecision),
     exactFile(repositoryRoot, paths.parentAcceptance, identities.parentAcceptance),
     exactFile(repositoryRoot, paths.resetDecision, identities.resetDecision),
     exactFile(repositoryRoot, paths.acceptance, identities.acceptance),
+    exactFile(repositoryRoot, paths.identityDecision, identities.identityDecision),
+    exactFile(repositoryRoot, paths.identityAcceptance, identities.identityAcceptance),
   ]);
   if (canonicalDigest(phaseB.value) !== identities.phaseBCanonical) {
     fail('CORE_TALE_RESET_BASE_DRIFT', 'Phase-B canonical content digest');
   }
-  const finalSource = materializeTaleTokenSource({
+  if ((preIdentityBytes === null) === (postIdentityBytes === null)) {
+    fail('CORE_TALE_RESET_BASE_DRIFT', 'exactly one current token-source path must exist');
+  }
+  const decision0004Source = materializeTaleTokenSource({
     phaseBSource: phaseB.value,
     parentDecision: parentDecision.value,
     resetDecision: resetDecision.value,
   });
+  const finalSource = migrateDefaultThemeIdentityValue(decision0004Source);
   if (canonicalDigest(finalSource) !== identities.finalSource) {
     fail('CORE_TALE_RESET_FINAL_IDENTITY_MISMATCH', 'final source constant');
   }
-  const currentSource = strict(currentBytes, paths.currentSource);
+  const currentBytes = preIdentityBytes ?? postIdentityBytes;
+  const currentPath = preIdentityBytes === null ? paths.currentSource : paths.preIdentitySource;
+  const currentSource = strict(currentBytes, currentPath);
   const currentCanonical = canonicalDigest(currentSource);
-  const state = currentBytes === phaseB.bytes ? 'phase-b'
-    : currentCanonical === identities.finalSource ? 'materialized'
-      : null;
-  if (state === null) fail('CORE_TALE_RESET_BASE_DRIFT', paths.currentSource);
+  const state = preIdentityBytes !== null && currentBytes === phaseB.bytes ? 'phase-b'
+    : preIdentityBytes !== null && currentCanonical === identities.decision0004FinalSource
+      ? 'decision-0004'
+      : postIdentityBytes !== null && currentCanonical === identities.finalSource
+        ? 'materialized'
+        : null;
+  if (state === null) fail('CORE_TALE_RESET_BASE_DRIFT', currentPath);
   return {
     acceptance: acceptance.value,
     currentBytes,
+    currentPath,
     currentSource,
+    decision0004Bytes: `${JSON.stringify(decision0004Source, null, 2)}\n`,
+    decision0004Source,
     finalBytes: `${JSON.stringify(finalSource, null, 2)}\n`,
     finalSource,
+    identityAcceptance: identityAcceptance.value,
+    identityDecision: identityDecision.value,
     parentAcceptance: parentAcceptance.value,
     parentDecision: parentDecision.value,
     phaseBBytes: phaseB.bytes,
@@ -310,27 +370,92 @@ export async function loadTaleTokenMaterialization(repositoryRoot) {
   };
 }
 
-export async function runTaleTokenMaterialization(repositoryRoot, { mode = 'write' } = {}) {
-  const loaded = await loadTaleTokenMaterialization(repositoryRoot);
-  const currentPath = join(repositoryRoot, TALE_TOKEN_MATERIALIZATION_PATHS.currentSource);
+export async function runTaleTokenMaterialization(
+  repositoryRoot,
+  options = {},
+) {
+  const { mode = 'write' } = options;
+  let loaded = await loadTaleTokenMaterialization(repositoryRoot);
+  const preIdentityPath = join(repositoryRoot, TALE_TOKEN_MATERIALIZATION_PATHS.preIdentitySource);
   if (mode === 'check') {
     if (loaded.state !== 'materialized') fail('CORE_TALE_RESET_FINAL_IDENTITY_MISMATCH', 'source is not materialized');
+    await runDefaultThemeIdentityMigration(repositoryRoot, { mode: 'check' });
     return { changed: false, mode, state: loaded.state };
   }
   if (mode === 'dry-run') {
+    if (loaded.state === 'phase-b') {
+      await assertDefaultThemeIdentityAuthority(repositoryRoot);
+      await assertDefaultThemeRepositoryState(repositoryRoot, 'phase-b');
+    } else {
+      await runDefaultThemeIdentityMigration(repositoryRoot, { mode: 'dry-run' });
+    }
     return { changed: loaded.state === 'phase-b', mode, state: loaded.state };
   }
   if (mode === 'rollback-check') {
-    if (loaded.currentBytes !== loaded.phaseBBytes) fail('CORE_TALE_RESET_BASE_DRIFT', 'source is not byte-exact Phase B');
+    if (loaded.state !== 'phase-b') fail('CORE_TALE_RESET_BASE_DRIFT', 'source is not byte-exact Phase B');
+    await assertDefaultThemeIdentityAuthority(repositoryRoot);
+    await assertDefaultThemeRepositoryState(repositoryRoot, 'phase-b');
     return { changed: false, mode, state: 'phase-b' };
   }
   if (mode === 'rollback') {
-    if (loaded.state === 'materialized') await writeFile(currentPath, loaded.phaseBBytes);
-    return { changed: loaded.state === 'materialized', mode, state: 'phase-b' };
+    const changed = loaded.state !== 'phase-b';
+    await assertDefaultThemeIdentityAuthority(repositoryRoot);
+    if (loaded.state === 'materialized') {
+      await transitionDefaultThemeRepository(repositoryRoot, {
+        fromState: 'post-migration',
+        toState: 'phase-b',
+        writeSource: async () => {
+          await writeFile(preIdentityPath, loaded.phaseBBytes);
+          await unlink(join(repositoryRoot, TALE_TOKEN_MATERIALIZATION_PATHS.currentSource));
+        },
+        validate: async () => {
+          const next = await loadTaleTokenMaterialization(repositoryRoot);
+          if (next.state !== 'phase-b') fail('CORE_TALE_RESET_BASE_DRIFT', 'rollback source state');
+          await assertDefaultThemeRepositoryState(repositoryRoot, 'phase-b');
+        },
+      });
+    } else if (loaded.state === 'decision-0004') {
+      await transitionDefaultThemeRepository(repositoryRoot, {
+        fromState: 'decision-0004',
+        toState: 'phase-b',
+        writeSource: () => writeFile(preIdentityPath, loaded.phaseBBytes),
+        validate: async () => {
+          const next = await loadTaleTokenMaterialization(repositoryRoot);
+          if (next.state !== 'phase-b') fail('CORE_TALE_RESET_BASE_DRIFT', 'rollback source state');
+          await assertDefaultThemeRepositoryState(repositoryRoot, 'phase-b');
+        },
+      });
+    } else {
+      await assertDefaultThemeRepositoryState(repositoryRoot, 'phase-b');
+    }
+    return { changed, mode, state: 'phase-b' };
   }
   if (mode !== 'write') fail('CORE_TALE_RESET_DECISION_MISMATCH', `unknown mode ${mode}`);
-  if (loaded.state === 'phase-b') await writeFile(currentPath, loaded.finalBytes);
-  return { changed: loaded.state === 'phase-b', mode, state: 'materialized' };
+  const changed = loaded.state !== 'materialized';
+  if (loaded.state === 'phase-b') {
+    await assertDefaultThemeIdentityAuthority(repositoryRoot);
+    await transitionDefaultThemeRepository(repositoryRoot, {
+      fromState: 'phase-b',
+      toState: 'post-migration',
+      writeSource: async () => {
+        await writeFile(
+          join(repositoryRoot, TALE_TOKEN_MATERIALIZATION_PATHS.currentSource),
+          loaded.finalBytes,
+        );
+        await unlink(preIdentityPath);
+      },
+      validate: async () => {
+        const next = await loadTaleTokenMaterialization(repositoryRoot);
+        if (next.state !== 'materialized') fail('CORE_TALE_RESET_BASE_DRIFT', 'materialized source state');
+        await runDefaultThemeIdentityMigration(repositoryRoot, { mode: 'check' });
+      },
+    });
+  } else if (loaded.state === 'decision-0004') {
+    await runDefaultThemeIdentityMigration(repositoryRoot, { mode: 'write' });
+  } else {
+    await runDefaultThemeIdentityMigration(repositoryRoot, { mode: 'check' });
+  }
+  return { changed, mode, state: 'materialized' };
 }
 
 const invokedPath = process.argv[1] ? resolve(process.argv[1]) : null;

@@ -10,7 +10,7 @@ const packageRoot = resolve(import.meta.dirname, '..');
 const manifest = JSON.parse(await readFile(resolve(packageRoot, 'package.json'), 'utf8'));
 const bundle = JSON.parse(catalogJson);
 const button = bundle.artifacts.find(({ id }) => id === 'core:component:button');
-const tokenSource = bundle.artifacts.find(({ id }) => id === 'core:token:button-minimum')?.record;
+const tokenSource = bundle.artifacts.find(({ id }) => id === 'core:token:default-theme')?.record;
 if (!button || !tokenSource) throw new Error('CORE_WEB_GENERATION_INPUT_MISSING');
 const packageExports = Object.keys(manifest.exports);
 const surfaces = Object.fromEntries(['web.html', 'web.react'].map((bindingId) => [

@@ -118,7 +118,7 @@ test('E-G0.3-02 human, JSON, and dense projections preserve one response object'
 
 test('TALE-TOKEN-B core get negotiates 1.1/1.2/2.0 and preserves page parity', () => {
   const parsed = parseCliArguments([
-    'get', 'core:token:button-minimum', '--query-api-version', '1.2.0',
+    'get', 'core:token:default-theme', '--query-api-version', '1.2.0',
     '--section', 'tokens', '--limit', '1', '--json',
   ]);
   assert.equal(parsed.request.queryApiVersion, '1.2.0');
@@ -135,7 +135,7 @@ test('TALE-TOKEN-B core get negotiates 1.1/1.2/2.0 and preserves page parity', (
   assert.ok(countTokens(renderDense(page)) <= 2048);
 
   const sourceCrosswalk = jsonResult([
-    'get', 'core:token:button-minimum', '--query-api-version', '1.2.0',
+    'get', 'core:token:default-theme', '--query-api-version', '1.2.0',
     '--section', 'source-crosswalk',
   ]);
   assert.equal(sourceCrosswalk.entries.status, 'available');
@@ -143,7 +143,7 @@ test('TALE-TOKEN-B core get negotiates 1.1/1.2/2.0 and preserves page parity', (
   assert.equal(sourceCrosswalk.page.remaining, 673);
 
   const historical = jsonResult([
-    'get', 'core:token:button-minimum', '--query-api-version', '1.1.0', '--detail', 'full',
+    'get', 'core:token:default-theme', '--query-api-version', '1.1.0', '--detail', 'full',
   ]);
   assert.equal(historical.apiVersion, '1.1.0');
   assert.deepEqual(historical.warnings, []);
@@ -152,7 +152,7 @@ test('TALE-TOKEN-B core get negotiates 1.1/1.2/2.0 and preserves page parity', (
   for (const args of [
     ['get', 'core:component:missing', '--query-api-version', '1.1.0', '--json'],
     [
-      'get', 'core:token:button-minimum', '--query-api-version', '1.1.0',
+      'get', 'core:token:default-theme', '--query-api-version', '1.1.0',
       '--cursor', 'not-a-cursor', '--json',
     ],
   ]) {
@@ -162,13 +162,18 @@ test('TALE-TOKEN-B core get negotiates 1.1/1.2/2.0 and preserves page parity', (
   }
 
   const current = runCli([
-    'get', 'core:token:button-minimum', '--query-api-version', '2.0.0', '--json',
+    'get', 'core:token:default-theme', '--query-api-version', '2.0.0', '--json',
   ]);
   assert.equal(current.exitCode, 0);
   const currentResponse = JSON.parse(current.stdout);
   assert.equal(currentResponse.apiVersion, '2.0.0');
   assert.equal(Object.hasOwn(currentResponse.data.artifact, 'tokens'), false);
   assert.deepEqual(currentResponse.data.artifact.availableSections, ['tokens', 'source-crosswalk']);
+  const removedCurrentIdentity = runCli([
+    'get', 'core:token:button-minimum', '--query-api-version', '2.0.0', '--json',
+  ]);
+  assert.equal(removedCurrentIdentity.exitCode, 4);
+  assert.equal(JSON.parse(removedCurrentIdentity.stdout).error.code, 'CORE_ARTIFACT_NOT_FOUND');
 });
 
 test('E-G0.3-03 dense outputs round-trip deterministically within every locked budget', () => {

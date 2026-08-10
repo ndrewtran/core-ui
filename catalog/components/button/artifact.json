@@ -29,7 +29,7 @@
       "behavior": ["Activation requests one immediate action"],
       "accessibility": ["Expose accessible name and disabled state"],
       "tokenRecipe": {
-        "source": "core:token:button-minimum",
+        "source": "core:token:default-theme",
         "requirements": [
           { "token": "component.button.background", "requirement": "required" },
           { "token": "component.button.foreground", "requirement": "required" },
@@ -66,7 +66,7 @@
       "behavior": ["Activation requests one immediate action"],
       "accessibility": ["Expose accessible name and disabled state"],
       "tokenRecipe": {
-        "source": "core:token:button-minimum",
+        "source": "core:token:default-theme",
         "requirements": [
           { "token": "component.button.background", "requirement": "required" },
           { "token": "component.button.foreground", "requirement": "required" },
@@ -103,7 +103,7 @@
       "behavior": ["Activation requests one immediate action"],
       "accessibility": ["Expose accessible name and disabled state"],
       "tokenRecipe": {
-        "source": "core:token:button-minimum",
+        "source": "core:token:default-theme",
         "requirements": [
           { "token": "component.button.background", "requirement": "required", "profiles": ["native.ios", "native.android"] },
           { "token": "component.button.foreground", "requirement": "required", "profiles": ["native.ios", "native.android"] },

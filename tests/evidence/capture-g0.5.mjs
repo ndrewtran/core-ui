@@ -602,7 +602,7 @@ try {
 }
 if (
   !closure.artifacts.includes('core:example:button-basic-react')
-  || !closure.artifacts.includes('core:token:button-minimum')
+  || !closure.artifacts.includes('core:token:default-theme')
   || !closure.projections.includes('packages/catalog/generated/catalog.json')
   || !schemaClosure.projections.includes('packages/schema/generated/types.d.ts')
   || !schemaClosure.artifacts.includes(componentArtifact.id)
@@ -615,6 +615,13 @@ const paths = [
   'pnpm-lock.yaml',
   'pnpm-workspace.yaml',
   'catalog',
+  'decisions/0003-tale-token-classification-annex.json',
+  'decisions/0003-tale-token-classification-acceptance.json',
+  'decisions/0004-tale-only-reference-baseline-annex.json',
+  'decisions/0004-tale-only-reference-baseline-acceptance.json',
+  'decisions/0005-default-theme-token-source-identity.json',
+  'decisions/0005-default-theme-token-source-identity-acceptance.json',
+  'strategy/product-scope.md',
   'packages/schema',
   'packages/catalog',
   'packages/tooling',

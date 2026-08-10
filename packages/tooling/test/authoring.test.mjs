@@ -441,7 +441,7 @@ test('E-G0.5-04: affected closure is graph-derived and extends through declared 
   assert.equal(closure.sourceRevision, context.sourceRevision);
   assert.ok(closure.artifacts.includes('core:component:button'));
   assert.ok(closure.artifacts.includes('core:example:button-basic-react'));
-  assert.ok(closure.artifacts.includes('core:token:button-minimum'));
+  assert.ok(closure.artifacts.includes('core:token:default-theme'));
   assert.ok(closure.canonicalSources.includes(component.source.record));
   assert.ok(closure.projections.includes('packages/catalog/generated/catalog.json'));
   assert.deepEqual(closure.packages.map(({ name }) => name), [

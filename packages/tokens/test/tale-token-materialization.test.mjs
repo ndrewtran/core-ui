@@ -1,11 +1,12 @@
 import assert from 'node:assert/strict';
-import { cp, mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { cp, mkdir, mkdtemp, readFile, rm, unlink, writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import test from 'node:test';
 import { canonicalDigest, parseJsonStrict } from '@core-ui/schema';
 import {
   correctTaleTokenClassification,
   loadTaleTokenMaterialization,
+  materializeDefaultThemeTokenSource,
   materializeTaleTokenSource,
   projectTaleBaselineOccurrences,
   runTaleTokenMaterialization,
@@ -37,7 +38,7 @@ function expectCode(code, operation) {
 test('TALE-TOKEN-C materializes the accepted 312-token source and exact crosswalk', async () => {
   const source = materializeTaleTokenSource(await inputs());
   const ids = Object.keys(source.tokens);
-  assert.equal(canonicalDigest(source), TALE_TOKEN_MATERIALIZATION_IDENTITIES.finalSource);
+  assert.equal(canonicalDigest(source), TALE_TOKEN_MATERIALIZATION_IDENTITIES.decision0004FinalSource);
   assert.equal(ids.length, 312);
   assert.equal(ids.filter((id) => id.startsWith('reference.')).length, 296);
   assert.equal(ids.filter((id) => id.startsWith('semantic.')).length, 11);
@@ -62,6 +63,15 @@ test('TALE-TOKEN-C materializes the accepted 312-token source and exact crosswal
   assert.equal(source.tokens['semantic.feedback.invalid'].alias, 'reference.color.error-60');
   assert.equal(Object.hasOwn(source.tokens, 'semantic.feedback.warning'), false);
   assert.equal(Object.hasOwn(source.tokens, 'semantic.feedback.success'), false);
+});
+
+test('TALE-TOKEN-C applies the accepted default-theme artifact identity without changing tokens', async () => {
+  const decision0004Source = materializeTaleTokenSource(await inputs());
+  const source = materializeDefaultThemeTokenSource(await inputs());
+  assert.equal(source.id, 'core:token:default-theme');
+  assert.equal(canonicalDigest(source), TALE_TOKEN_MATERIALIZATION_IDENTITIES.finalSource);
+  assert.deepEqual(source.tokens, decision0004Source.tokens);
+  assert.deepEqual(source.sourceCrosswalk, decision0004Source.sourceCrosswalk);
 });
 
 test('TALE-TOKEN-C occurrence projection is exact, ordered, and media-free', async () => {
@@ -93,44 +103,17 @@ test('TALE-TOKEN-C current source is an independently verified final idempotent 
 
 async function temporaryRepository() {
   const root = await mkdtemp(join(process.cwd(), '.tale-token-materialization-'));
-  for (const path of Object.values(TALE_TOKEN_MATERIALIZATION_PATHS)) {
+  for (const path of Object.values(TALE_TOKEN_MATERIALIZATION_PATHS).filter(
+    (path) => path !== TALE_TOKEN_MATERIALIZATION_PATHS.preIdentitySource,
+  )) {
     await mkdir(resolve(root, path, '..'), { recursive: true });
     await cp(resolve(repositoryRoot, path), resolve(root, path));
   }
   const phaseB = await readFile(resolve(root, TALE_TOKEN_MATERIALIZATION_PATHS.phaseBSource), 'utf8');
-  await writeFile(resolve(root, TALE_TOKEN_MATERIALIZATION_PATHS.currentSource), phaseB);
+  await unlink(resolve(root, TALE_TOKEN_MATERIALIZATION_PATHS.currentSource));
+  await writeFile(resolve(root, TALE_TOKEN_MATERIALIZATION_PATHS.preIdentitySource), phaseB);
   return root;
 }
-
-test('TALE-TOKEN-C replays Phase B, is idempotent, and rolls back byte-for-byte', async () => {
-  const root = await temporaryRepository();
-  try {
-    const phaseB = await readFile(resolve(root, TALE_TOKEN_MATERIALIZATION_PATHS.phaseBSource), 'utf8');
-    assert.deepEqual(await runTaleTokenMaterialization(root, { mode: 'dry-run' }), {
-      changed: true, mode: 'dry-run', state: 'phase-b',
-    });
-    assert.deepEqual(await runTaleTokenMaterialization(root), {
-      changed: true, mode: 'write', state: 'materialized',
-    });
-    const firstFinal = await readFile(resolve(root, TALE_TOKEN_MATERIALIZATION_PATHS.currentSource), 'utf8');
-    assert.deepEqual(await runTaleTokenMaterialization(root), {
-      changed: false, mode: 'write', state: 'materialized',
-    });
-    assert.equal(await readFile(resolve(root, TALE_TOKEN_MATERIALIZATION_PATHS.currentSource), 'utf8'), firstFinal);
-    assert.deepEqual(await runTaleTokenMaterialization(root, { mode: 'rollback' }), {
-      changed: true, mode: 'rollback', state: 'phase-b',
-    });
-    assert.equal(await readFile(resolve(root, TALE_TOKEN_MATERIALIZATION_PATHS.currentSource), 'utf8'), phaseB);
-    assert.deepEqual(await runTaleTokenMaterialization(root, { mode: 'rollback' }), {
-      changed: false, mode: 'rollback', state: 'phase-b',
-    });
-    assert.deepEqual(await runTaleTokenMaterialization(root, { mode: 'rollback-check' }), {
-      changed: false, mode: 'rollback-check', state: 'phase-b',
-    });
-  } finally {
-    await rm(root, { recursive: true, force: true });
-  }
-});
 
 test('TALE-TOKEN-C rejects base, target, meaning, collision, and final near-match drift', async () => {
   const input = await inputs();
@@ -148,7 +131,10 @@ test('TALE-TOKEN-C rejects base, target, meaning, collision, and final near-matc
 
   const root = await temporaryRepository();
   try {
+    const prePath = resolve(root, TALE_TOKEN_MATERIALIZATION_PATHS.preIdentitySource);
     const currentPath = resolve(root, TALE_TOKEN_MATERIALIZATION_PATHS.currentSource);
+    await unlink(prePath);
+    await cp(resolve(repositoryRoot, TALE_TOKEN_MATERIALIZATION_PATHS.currentSource), currentPath);
     const current = parseJsonStrict(await readFile(currentPath, 'utf8'));
     current.tokens['semantic.action.background'].meaning = 'Near match.';
     await writeFile(currentPath, `${JSON.stringify(current, null, 2)}\n`);

@@ -1,6 +1,6 @@
 {
   "schemaVersion": "2.1.0",
-  "id": "core:token:button-minimum",
+  "id": "core:token:default-theme",
   "kind": "token",
   "name": "Core UI default theme tokens",
   "summary": "The brand-agnostic default theme and minimum fixed-slice token contract.",

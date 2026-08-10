@@ -28,7 +28,7 @@
     {
       "id": "g1.0-packed-react",
       "package": "@core-ui/react",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "bindingSchemaRange": "^2.0.0",
       "tokenContractRange": "^2.0.0",
       "bindings": [
@@ -44,7 +44,7 @@
     {
       "id": "g1.0-packed-web",
       "package": "@core-ui/web",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "bindingSchemaRange": "^2.0.0",
       "tokenContractRange": "^2.0.0",
       "bindings": [

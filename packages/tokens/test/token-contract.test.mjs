@@ -15,7 +15,7 @@ import { consumeButtonStaticWebTransform } from '../../../tests/fixtures/g1.0/co
 import { consumeButtonStaticNativeTransform } from '../../../tests/fixtures/g1.0/consumers/button-native.consumer.mjs';
 
 const source = parseJsonStrict(await readFile(
-  new URL('../../../catalog/tokens/button-minimum.json', import.meta.url),
+  new URL('../../../catalog/tokens/default-theme.json', import.meta.url),
   'utf8',
 ));
 const baselineOccurrences = parseJsonStrict(await readFile(
@@ -301,6 +301,30 @@ test('E-G1.0-02 web and native transforms retain canonical provenance without cr
   expectCode('CORE_TOKEN_PROFILE_INVALID', () => compileNativeTheme(source, {
     profile: 'native.react-native-web',
   }));
+});
+
+test('Decision 0005 changes only renderer source and provenance identity', () => {
+  const decision0004 = structuredClone(source);
+  decision0004.id = 'core:token:button-minimum';
+  const beforeWeb = compileWebTheme(decision0004);
+  const afterWeb = compileWebTheme(source);
+  const beforeIos = compileNativeTheme(decision0004, { profile: 'native.ios' });
+  const beforeAndroid = compileNativeTheme(decision0004, { profile: 'native.android' });
+  const afterIos = compileNativeTheme(source, { profile: 'native.ios' });
+  const afterAndroid = compileNativeTheme(source, { profile: 'native.android' });
+  assert.equal(beforeWeb.css, afterWeb.css);
+  assert.deepEqual(beforeIos.theme, afterIos.theme);
+  assert.deepEqual(beforeAndroid.theme, afterAndroid.theme);
+  assert.equal(Object.hasOwn(beforeIos, 'css'), false);
+  assert.equal(Object.hasOwn(afterIos, 'css'), false);
+  assert.equal(Object.hasOwn(beforeAndroid, 'css'), false);
+  assert.equal(Object.hasOwn(afterAndroid, 'css'), false);
+  assert.notEqual(beforeWeb.provenance.digest, afterWeb.provenance.digest);
+  assert.notEqual(beforeIos.provenance.digest, afterIos.provenance.digest);
+  assert.notEqual(beforeAndroid.provenance.digest, afterAndroid.provenance.digest);
+  assert.equal(beforeWeb.tokenContractVersion, afterWeb.tokenContractVersion);
+  assert.equal(beforeIos.tokenContractVersion, afterIos.tokenContractVersion);
+  assert.equal(beforeAndroid.tokenContractVersion, afterAndroid.tokenContractVersion);
 });
 
 test('E-G1.0-03 missing required tokens fail per profile and exact proved fallbacks diagnose use', () => {

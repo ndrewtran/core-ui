@@ -6,6 +6,7 @@ import {
   materializeTaleTokenSource,
   TaleTokenMaterializationError,
 } from '@core-ui/tokens/materialization';
+import { migrateDefaultThemeIdentityValue } from '@core-ui/tokens/identity-migration';
 import { RESOLVER_ERROR_PRECEDENCE } from '@core-ui/tooling/resolver';
 import { verifyDefaultThemeIdentityCorrection } from './default-theme-identity-correction-verify.mjs';
 import { sha256 } from './policy.mjs';
@@ -18,7 +19,7 @@ const ACCEPTED_PRODUCT_SCOPE_BYTES = 73816;
 const ACCEPTED_PRODUCT_SCOPE_SHA256 = 'sha256:c691b0bf0c3933ac7b91121f99904e911ea6439ad79badea9a491085bfe6f0e8';
 const PARENT_ANNEX_PATH = 'decisions/0003-tale-token-classification-annex.json';
 const PARENT_ACCEPTANCE_PATH = 'decisions/0003-tale-token-classification-acceptance.json';
-const TOKEN_SOURCE_PATH = 'catalog/tokens/button-minimum.json';
+const TOKEN_SOURCE_PATH = 'catalog/tokens/default-theme.json';
 const PHASE_B_SOURCE_PATH = 'packages/tokens/fixtures/button-minimum-phase-b.json';
 const SHA256 = /^sha256:[0-9a-f]{64}$/u;
 const SCOPE_ID = /^SCOPE-[A-Z0-9-]+$/u;
@@ -439,10 +440,11 @@ export async function verifyTaleTokenBaselineReset(repositoryRoot, options = {})
     parentDecision: parentDocument.value,
     resetDecision: annex,
   }));
+  const currentFinalSource = tokenOwned(() => migrateDefaultThemeIdentityValue(finalSource));
   const correctedParent = tokenOwned(() => correctTaleTokenClassification(parentDocument.value, annex));
   if (
     currentDocument.bytes !== baseDocument.bytes
-    && canonicalJson(currentDocument.value) !== canonicalJson(finalSource)
+    && canonicalJson(currentDocument.value) !== canonicalJson(currentFinalSource)
   ) fail('TALE_RESET_MIGRATION_MISMATCH', 'current token source is neither exact Phase B nor accepted final');
   validateFamily('token-source', finalSource);
   const finalIds = Object.keys(finalSource.tokens).sort(bytewise);

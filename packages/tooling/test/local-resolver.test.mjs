@@ -346,11 +346,19 @@ test('TALE-TOKEN-C installed-local selection retains the exact Phase B catalog t
       historicalV11.data.artifact.tokens,
       'reference.color.action-dark',
     ), true);
+    for (const queryApiVersion of ['1.1.0', '1.2.0', '2.0.0']) {
+      assert.equal(historical.api.getArtifact({
+        id: 'core:token:button-minimum', queryApiVersion, detail: 'full',
+      }).data.artifact.id, 'core:token:button-minimum');
+      assert.equal(historical.api.getArtifact({
+        id: 'core:token:default-theme', queryApiVersion, detail: 'full',
+      }).error.code, 'CORE_ARTIFACT_NOT_FOUND');
+    }
 
     const current = resolvePnpmProjectCatalog();
     assert.equal(current.type, 'success');
     const currentV11 = current.api.getArtifact({
-      id: 'core:token:button-minimum', queryApiVersion: '1.1.0', detail: 'full',
+      id: 'core:token:default-theme', queryApiVersion: '1.1.0', detail: 'full',
     });
     assert.equal(currentV11.apiVersion, '1.1.0');
     assert.equal(currentV11.data.artifact.tokenContractVersion, '2.0.0');
@@ -362,6 +370,14 @@ test('TALE-TOKEN-C installed-local selection retains the exact Phase B catalog t
       currentV11.data.artifact.tokens,
       'reference.color.neutral-50',
     ), true);
+    for (const queryApiVersion of ['1.1.0', '1.2.0', '2.0.0']) {
+      assert.equal(current.api.getArtifact({
+        id: 'core:token:default-theme', queryApiVersion, detail: 'full',
+      }).data.artifact.id, 'core:token:default-theme');
+      assert.equal(current.api.getArtifact({
+        id: 'core:token:button-minimum', queryApiVersion, detail: 'full',
+      }).error.code, 'CORE_ARTIFACT_NOT_FOUND');
+    }
 
     const bundlePath = join(catalogRoot, 'generated/catalog.json');
     const bundleBytes = await readFile(bundlePath, 'utf8');
@@ -395,7 +411,7 @@ test('E-G0.4 CLI requires exact bindings and filters project-wide discovery', ()
   assert.equal(discovery.exitCode, 0);
   const response = JSON.parse(discovery.stdout);
   assert.equal(response.meta.authority, 'installed-local');
-  assert.deepEqual(response.meta.resolution.targetPackages, { '@core-ui/catalog': '1.0.0' });
+  assert.deepEqual(response.meta.resolution.targetPackages, { '@core-ui/catalog': '2.0.0' });
   assert.equal(response.data.items.some(({ id }) => id === 'core:component:button'), false);
   assert.equal(response.data.items.some(({ id }) => id === 'core:example:button-basic-react'), false);
 });
@@ -530,13 +546,13 @@ test('E-G0.4 pnpm adapter normalizes renderer packages into the single resolver'
     await writeFile(join(fixtureRoot, 'pnpm-workspace.yaml'), "packages:\n  - catalog\n  - renderer\n");
     await writeJson(join(catalogRoot, 'package.json'), {
       name: '@core-ui/catalog',
-      version: '1.0.0',
+      version: '2.0.0',
       private: true,
       coreUi: { catalogPackage: './generated/catalog-package.json' },
     });
     await writeJson(join(rendererRoot, 'package.json'), {
       name: '@core-ui/react',
-      version: '1.0.0',
+      version: '1.0.1',
       private: true,
       exports: { './button': './button.mjs' },
       coreUi: { rendererDescriptor: './generated/renderer-descriptor.json' },
@@ -558,10 +574,10 @@ test('E-G0.4 pnpm adapter normalizes renderer packages into the single resolver'
       id: 'renderer-react-compatible',
       descriptorVersion: '1.0.0',
       package: '@core-ui/react',
-      version: '1.0.0',
+      version: '1.0.1',
       bindingSchemaRange: '^2.0.0',
       tokenContractRange: '^2.0.0',
-      releaseProvenance: `core-ui-release:1.0.0:${bundle.sourceRevision}`,
+      releaseProvenance: `core-ui-release:1.0.1:${bundle.sourceRevision}`,
       bindings: {
         [binding]: {
           specRevision: bundle.artifacts.find(({ id }) => id === 'core:component:button')
@@ -581,8 +597,8 @@ test('E-G0.4 pnpm adapter normalizes renderer packages into the single resolver'
     const identity = {
       schema: 'core-ui-catalog-package-v2',
       name: '@core-ui/catalog',
-      version: '1.0.0',
-      catalogVersion: '1.0.0',
+      version: '2.0.0',
+      catalogVersion: '2.0.0',
       catalogDigest: bundle.catalogDigest,
       queryApiVersion: bundle.apiVersion,
       supportedQueryApiVersions: ['1.1.0', '1.2.0', '2.0.0'],
@@ -603,21 +619,21 @@ test('E-G0.4 pnpm adapter normalizes renderer packages into the single resolver'
       },
       releaseManifest: {
         id: descriptor.releaseProvenance,
-        releaseVersion: '1.0.0',
+        releaseVersion: '1.0.1',
         schemaVersion: '2.1.0',
         queryApiVersion: '2.0.0',
         tokenContractVersion: '2.0.0',
         sourceRevision: bundle.sourceRevision,
         catalog: {
-          id: `@core-ui/catalog@1.0.0:${bundle.catalogDigest}`,
-          version: '1.0.0',
+          id: `@core-ui/catalog@2.0.0:${bundle.catalogDigest}`,
+          version: '2.0.0',
           digest: bundle.catalogDigest,
         },
         bindings: [{
           descriptor: descriptor.id,
           binding,
           package: '@core-ui/react',
-          version: '1.0.0',
+          version: '1.0.1',
           export: descriptor.bindings[binding].export,
           specRevision: descriptor.bindings[binding].specRevision,
           tokenRequirementSetDigests: descriptor.bindings[binding].tokenRequirementSetDigests,
@@ -652,7 +668,7 @@ test('E-G0.4 pnpm adapter normalizes renderer packages into the single resolver'
       purpose: null,
       section: null,
     });
-    assert.equal(response.meta.resolution.targetPackages['@core-ui/react'], '1.0.0');
+    assert.equal(response.meta.resolution.targetPackages['@core-ui/react'], '1.0.1');
     const cliSuccess = runCli([
       'get', 'core:component:button', '--project', project,
       '--platform', 'web.react', '--json',
@@ -660,7 +676,7 @@ test('E-G0.4 pnpm adapter normalizes renderer packages into the single resolver'
     assert.equal(cliSuccess.exitCode, 0);
     assert.equal(
       JSON.parse(cliSuccess.stdout).meta.resolution.targetPackages['@core-ui/react'],
-      '1.0.0',
+      '1.0.1',
     );
 
     descriptor.bindings[binding].export = '@core-ui/react/unsafe-drift';

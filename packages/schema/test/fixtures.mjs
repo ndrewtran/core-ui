@@ -1,7 +1,7 @@
 export function tokenSource() {
   return {
     schemaVersion: '2.1.0',
-    id: 'core:token:button-minimum',
+    id: 'core:token:default-theme',
     kind: 'token',
     name: 'Button minimum tokens',
     summary: 'The minimum token source used by the G0.1 proof artifact.',
@@ -113,7 +113,7 @@ function webBinding(profile = 'web.react') {
     behavior: ['Activation requests one immediate action'],
     accessibility: ['Expose accessible name and disabled state'],
     tokenRecipe: {
-      source: 'core:token:button-minimum',
+      source: 'core:token:default-theme',
       requirements: [{ token: 'semantic.action.background', requirement: 'required' }],
     },
     platformSafety: webPlatformSafety(profile),

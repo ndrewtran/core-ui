@@ -268,7 +268,7 @@ test('E-G0.2-03: pagination is digest- and request-bound', () => {
 test('TALE-TOKEN-B query 2.0 removes inline tokens while retaining historical 1.1 and 1.2 meanings', () => {
   const api = createCatalogApi(baseBundle);
   const v11 = api.getArtifact({
-    id: 'core:token:button-minimum',
+    id: 'core:token:default-theme',
     queryApiVersion: '1.1.0',
     detail: 'full',
   });
@@ -277,7 +277,7 @@ test('TALE-TOKEN-B query 2.0 removes inline tokens while retaining historical 1.
   assert.ok(Object.hasOwn(v11.data.artifact, 'tokens'));
 
   const v12 = api.getArtifact({
-    id: 'core:token:button-minimum',
+    id: 'core:token:default-theme',
     queryApiVersion: '1.2.0',
     detail: 'full',
   });
@@ -289,7 +289,7 @@ test('TALE-TOKEN-B query 2.0 removes inline tokens while retaining historical 1.
   validateFamily('query-envelope', v12);
 
   const v20 = api.getArtifact({
-    id: 'core:token:button-minimum',
+    id: 'core:token:default-theme',
     queryApiVersion: '2.0.0',
     detail: 'full',
   });
@@ -306,6 +306,14 @@ test('TALE-TOKEN-B query 2.0 removes inline tokens while retaining historical 1.
     assert.equal(Object.hasOwn(response.data.artifact, 'sourceCrosswalk'), false);
   }
   validateFamily('query-envelope', v20);
+  for (const queryApiVersion of ['1.1.0', '1.2.0', '2.0.0']) {
+    assert.equal(api.getArtifact({
+      id: 'core:token:default-theme', queryApiVersion, detail: 'full',
+    }).data.artifact.id, 'core:token:default-theme');
+    assert.equal(api.getArtifact({
+      id: 'core:token:button-minimum', queryApiVersion, detail: 'full',
+    }).error.code, 'CORE_ARTIFACT_NOT_FOUND');
+  }
   for (const mutate of [
     (value) => { value.data.artifact.availableSections.reverse(); },
     (value) => { value.data.artifact.tokenCount = -1; },
@@ -334,7 +342,7 @@ test('TALE-TOKEN-B query 2.0 removes inline tokens while retaining historical 1.
   }
 
   const first = api.getArtifact({
-    id: 'core:token:button-minimum',
+    id: 'core:token:default-theme',
     queryApiVersion: '1.2.0',
     section: 'tokens',
     limit: 1,
@@ -352,7 +360,7 @@ test('TALE-TOKEN-B query 2.0 removes inline tokens while retaining historical 1.
   validateFamily('query-envelope', first);
 
   const second = api.getArtifact({
-    id: 'core:token:button-minimum',
+    id: 'core:token:default-theme',
     queryApiVersion: '1.2.0',
     section: 'tokens',
     limit: 1,
@@ -362,7 +370,7 @@ test('TALE-TOKEN-B query 2.0 removes inline tokens while retaining historical 1.
   assert.notEqual(second.entries.items[0].id, first.entries.items[0].id);
 
   const currentCrosswalk = api.getArtifact({
-    id: 'core:token:button-minimum',
+    id: 'core:token:default-theme',
     queryApiVersion: '1.2.0',
     section: 'source-crosswalk',
   });
@@ -415,7 +423,7 @@ test('TALE-TOKEN-B query 2.0 removes inline tokens while retaining historical 1.
     catalogDigest: canonicalDigest(futurePreimage),
   });
   const availableCrosswalk = futureApi.getArtifact({
-    id: 'core:token:button-minimum',
+    id: 'core:token:default-theme',
     queryApiVersion: '2.0.0',
     section: 'source-crosswalk',
   });
@@ -431,7 +439,7 @@ test('TALE-TOKEN-B query 2.0 removes inline tokens while retaining historical 1.
     catalogDigest: canonicalDigest(futurePreimage),
   });
   assert.deepEqual(omittedApi.getArtifact({
-    id: 'core:token:button-minimum',
+    id: 'core:token:default-theme',
     queryApiVersion: '1.2.0',
     section: 'source-crosswalk',
   }).entries, {
@@ -561,6 +569,14 @@ test('TALE-TOKEN-B retains exact Phase A v1.1 and v1.2 responses outside enumera
       id: 'core:token:button-minimum', queryApiVersion: '1.2.0', section: 'source-crosswalk',
     }),
   };
+  for (const queryApiVersion of ['1.1.0', '1.2.0', '2.0.0']) {
+    assert.equal(historicalApi.getArtifact({
+      id: 'core:token:button-minimum', queryApiVersion, detail: 'full',
+    }).data.artifact.id, 'core:token:button-minimum');
+    assert.equal(historicalApi.getArtifact({
+      id: 'core:token:default-theme', queryApiVersion, detail: 'full',
+    }).error.code, 'CORE_ARTIFACT_NOT_FOUND');
+  }
   for (const key of ['v11Full', 'v12Full']) {
     assert.equal(
       canonicalJson(normalizePointers(current[key], PHASE_B_HISTORICAL_IDENTITY_POINTERS)),
@@ -588,7 +604,7 @@ test('TALE-TOKEN-B retains exact Phase A v1.1 and v1.2 responses outside enumera
 test('TALE-TOKEN-B section cursors fail closed across tampering, versions, selectors, and catalog identities', () => {
   const api = createCatalogApi(baseBundle);
   const request = {
-    id: 'core:token:button-minimum',
+    id: 'core:token:default-theme',
     queryApiVersion: '1.2.0',
     section: 'tokens',
     limit: 1,
@@ -635,7 +651,7 @@ test('TALE-TOKEN-B runtime paging proves budget breaks, oversize errors, continu
   let cursor = null;
   do {
     const page = api.getArtifact({
-      id: 'core:token:button-minimum', queryApiVersion: '2.0.0',
+      id: 'core:token:default-theme', queryApiVersion: '2.0.0',
       section: 'source-crosswalk', limit: 100, cursor,
     });
     assert.equal(page.responseType, 'artifact.detail.section-page');
@@ -654,7 +670,7 @@ test('TALE-TOKEN-B runtime paging proves budget breaks, oversize errors, continu
     rejectEntry(1, { reason: 'x '.repeat(1024).trim(), value: 'y '.repeat(1024).trim() }),
   ]));
   assert.equal(oversizeApi.getArtifact({
-    id: 'core:token:button-minimum', queryApiVersion: '2.0.0',
+    id: 'core:token:default-theme', queryApiVersion: '2.0.0',
     section: 'source-crosswalk', limit: 1,
   }).error.code, 'CORE_QUERY_PAGE_ENTRY_TOO_LARGE');
 
@@ -662,7 +678,7 @@ test('TALE-TOKEN-B runtime paging proves budget breaks, oversize errors, continu
   envelopeBundle.catalogVersion = `1.0.0+${'a'.repeat(65)}`;
   const envelopeApi = createCatalogApi(withCatalogDigest(envelopeBundle));
   assert.equal(envelopeApi.getArtifact({
-    id: 'core:token:button-minimum', queryApiVersion: '2.0.0',
+    id: 'core:token:default-theme', queryApiVersion: '2.0.0',
     section: 'source-crosswalk', limit: 1,
   }).error.code, 'CORE_QUERY_PAGE_ENVELOPE_TOO_LARGE');
 
@@ -672,7 +688,7 @@ test('TALE-TOKEN-B runtime paging proves budget breaks, oversize errors, continu
     [rejectEntry(1), rejectEntry(2)], { pageBudgetProfile: overflowProfile },
   ));
   assert.equal(overflowApi.getArtifact({
-    id: 'core:token:button-minimum', queryApiVersion: '2.0.0',
+    id: 'core:token:default-theme', queryApiVersion: '2.0.0',
     section: 'source-crosswalk', limit: 1,
   }).error.code, 'CORE_CURSOR_INVALID');
 
@@ -682,11 +698,11 @@ test('TALE-TOKEN-B runtime paging proves budget breaks, oversize errors, continu
     [rejectEntry(1), rejectEntry(2)], { pageBudgetProfile: terminalProfile },
   ));
   const first = terminalApi.getArtifact({
-    id: 'core:token:button-minimum', queryApiVersion: '2.0.0',
+    id: 'core:token:default-theme', queryApiVersion: '2.0.0',
     section: 'source-crosswalk', limit: 1,
   });
   const terminal = terminalApi.getArtifact({
-    id: 'core:token:button-minimum', queryApiVersion: '2.0.0',
+    id: 'core:token:default-theme', queryApiVersion: '2.0.0',
     section: 'source-crosswalk', limit: 1, cursor: first.page.nextCursor,
   });
   assert.equal(terminal.page.remaining, 0);
@@ -765,11 +781,11 @@ test('TALE-TOKEN-A selected catalog descriptor owns query defaults and support',
   });
   assert.equal(historical.getManifest().apiVersion, '1.1.0');
   assert.equal(historical.getArtifact({
-    id: 'core:token:button-minimum',
+    id: 'core:token:default-theme',
     queryApiVersion: '1.1.0',
   }).apiVersion, '1.1.0');
   const unsupported = historical.getArtifact({
-    id: 'core:token:button-minimum',
+    id: 'core:token:default-theme',
     queryApiVersion: '1.2.0',
   });
   assert.equal(unsupported.apiVersion, '1.1.0');
@@ -781,7 +797,7 @@ test('TALE-TOKEN-A selected catalog descriptor owns query defaults and support',
     historical.searchArtifacts({ query: '' }),
     historical.getArtifact({ id: 'not-an-artifact-ref' }),
     historical.getArtifact({ id: 'core:component:not-present' }),
-    historical.getArtifact({ id: 'core:token:button-minimum', cursor: 'not-a-cursor' }),
+    historical.getArtifact({ id: 'core:token:default-theme', cursor: 'not-a-cursor' }),
   ]) {
     assert.equal(response.type, 'error');
     assert.equal(response.apiVersion, '1.1.0');
