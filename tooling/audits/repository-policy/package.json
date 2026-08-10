@@ -11,7 +11,7 @@
     "@core-ui/tooling": "workspace:*"
   },
   "scripts": {
-    "check": "node src/cli.mjs && node src/tale-token-annex-verify.mjs && node src/tale-token-baseline-reset-verify.mjs && node src/tale-token-baseline-reset-verify.mjs --require-acceptance && node src/evidence-verify.mjs && node src/tale-token-annex-verify.mjs --require-acceptance && node --test test/*.test.mjs ../../../.github/scripts/validate-planning-pr.test.cjs",
+    "check": "node src/cli.mjs && node src/tale-token-annex-verify.mjs && node src/tale-token-baseline-reset-verify.mjs && node src/tale-token-baseline-reset-verify.mjs --require-acceptance && node src/default-theme-identity-correction-verify.mjs && node src/default-theme-identity-correction-verify.mjs --require-acceptance && node src/evidence-verify.mjs && node src/tale-token-annex-verify.mjs --require-acceptance && node --test test/*.test.mjs ../../../.github/scripts/validate-planning-pr.test.cjs",
     "generate": "node src/generate.mjs",
     "generate:check": "node src/generate.mjs --check"
   }
