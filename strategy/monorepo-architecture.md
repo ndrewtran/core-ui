@@ -1824,6 +1824,19 @@ opposite direction. A same-layer alias is allowed only for documented semantic
 equivalence or a deprecation bridge; it cannot conceal a role change.
 Components consume semantic or component tokens only.
 
+A closed default-theme exception permits the fixed reference families
+`reference.color.error-*`, `reference.color.warning-*`, and
+`reference.color.success-*` when an accepted authority decision pins their
+exclusive system-status family meaning and exact source values. These remain
+reference palette values, not component states or permission to introduce
+other role-named reference families. Core UI components and binding token
+recipes never consume them directly; component styling and behavior reach them
+only through semantic or component aliases. Target compilers may intentionally
+emit their admitted typed public reference values. That emission does not prove
+support, accessibility, lifecycle, availability, or parity. Consumer
+customization remains limited to permitted semantic/component roles and
+private reference values under the existing override policy.
+
 The first-party default theme uses Tale UI's non-semantic foundation tokens as
 a pinned migration baseline, not as a live dependency or second owner. The
 baseline is Tale UI commit

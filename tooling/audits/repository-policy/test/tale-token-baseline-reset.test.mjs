@@ -11,6 +11,7 @@ import {
 
 const repositoryRoot = resolve(import.meta.dirname, '../../../..');
 const annexPath = resolve(repositoryRoot, 'decisions/0004-tale-only-reference-baseline-annex.json');
+const architecturePath = resolve(repositoryRoot, 'strategy/monorepo-architecture.md');
 const productScopePath = resolve(repositoryRoot, 'strategy/product-scope.md');
 
 async function annex() {
@@ -28,10 +29,13 @@ async function rejects(code, mutate) {
 
 async function acceptance(overrides = {}) {
   const annexBytes = await readFile(annexPath, 'utf8');
+  const architectureBytes = await readFile(architecturePath, 'utf8');
   const productScopeBytes = await readFile(productScopePath, 'utf8');
   const body = acceptanceCommentBody({
     annexBytes: Buffer.byteLength(annexBytes),
     annexSha256: `sha256:${sha256(annexBytes)}`,
+    architectureBytes: Buffer.byteLength(architectureBytes),
+    architectureSha256: `sha256:${sha256(architectureBytes)}`,
     productScopeBytes: Buffer.byteLength(productScopeBytes),
     productScopeSha256: `sha256:${sha256(productScopeBytes)}`,
   });
@@ -56,15 +60,64 @@ async function acceptance(overrides = {}) {
 test('verifies the exact Tale-only reference baseline reset candidate', async () => {
   assert.deepEqual(await verifyTaleTokenBaselineReset(repositoryRoot), {
     accepted: false,
-    affectedScopeIds: 66,
-    finalTokenCount: 447,
-    finalTokenSourceDigest: 'sha256:55a72347e1191881ceed9afbd7290e287a193163b639ce0ff24fd97fafd00377',
+    affectedScopeIds: 67,
+    finalTokenCount: 312,
+    finalTokenSourceDigest: 'sha256:670f2a45ada8c90b39e6de4bc4e6fef9e175313607c428067c21b7c2b1c5eac2',
     removed: 10,
   });
 });
 
 test('rejects unknown decision fields', async () => {
   await rejects('TALE_RESET_UNKNOWN_FIELD', (value) => { value.unknown = true; });
+});
+
+test('rejects an unknown classification-delta profile', async () => {
+  await rejects('TALE_RESET_CLASSIFICATION_MISMATCH', (value) => {
+    value.classificationDelta.profile = 'core-ui-tale-reference-family-correction-v9';
+  });
+});
+
+test('rejects a rename family disconnected from its result prefix', async () => {
+  await rejects('TALE_RESET_CLASSIFICATION_MISMATCH', (value) => {
+    value.classificationDelta.renames[0].family = 'warning';
+  });
+});
+
+test('rejects overlapping classification ranges', async () => {
+  await rejects('TALE_RESET_CLASSIFICATION_MISMATCH', (value) => {
+    value.classificationDelta.deferrals[1].ordinalFrom = value.classificationDelta.deferrals[0].ordinalTo;
+  });
+});
+
+test('rejects a classification range disconnected from the accepted parent IDs', async () => {
+  await rejects('TALE_RESET_CLASSIFICATION_MISMATCH', (value) => {
+    value.classificationDelta.deferrals[0].previousCoreIdPrefix = 'reference.color.neutral-missing-';
+  });
+});
+
+test('rejects retaining the obsolete adoption reason for deferred families', async () => {
+  await rejects('TALE_RESET_CLASSIFICATION_MISMATCH', (value) => {
+    value.classificationDelta.deferralReason = 'Admit the literal neutral palette value under a normalized Core reference ID.';
+  });
+});
+
+test('rejects target emission for a deferred neutral family', async () => {
+  await rejects('TALE_RESET_TARGET_MISMATCH', (value) => {
+    value.classificationDelta.deferredTargets['web.html'] = 'direct';
+  });
+});
+
+test('rejects an incomplete authored meaning template', async () => {
+  await rejects('TALE_RESET_MEANING_MISMATCH', (value) => {
+    value.classificationDelta.renames[0].meaningTemplate = 'Core error palette.';
+  });
+});
+
+test('rejects duplicate rename families and result prefixes', async () => {
+  await rejects('TALE_RESET_CLASSIFICATION_MISMATCH', (value) => {
+    value.classificationDelta.renames[1].family = 'error';
+    value.classificationDelta.renames[1].resultCoreIdPrefix = 'reference.color.error-';
+  });
 });
 
 test('rejects a missing legacy-token removal', async () => {
@@ -77,6 +130,12 @@ test('rejects a replacement outside the accepted Tale reference inventory', asyn
 
 test('rejects incomplete semantic remapping', async () => {
   await rejects('TALE_RESET_ALIAS_SET_MISMATCH', (value) => { value.semanticMappings.pop(); });
+});
+
+test('rejects speculative warning or success semantic roles', async () => {
+  await rejects('TALE_RESET_ALIAS_SET_MISMATCH', (value) => {
+    value.semanticMappings.push({ id: 'semantic.feedback.warning', alias: 'reference.color.warning-60', modes: {} });
+  });
 });
 
 test('rejects an unaccepted compact semantic recipe', async () => {
@@ -132,6 +191,12 @@ test('rejects affected-scope omission', async () => {
   await rejects('TALE_RESET_SUMMARY_MISMATCH', (value) => { value.affectedScopeIds.pop(); });
 });
 
+test('rejects omission of the public naming scope owner', async () => {
+  await rejects('TALE_RESET_SUMMARY_MISMATCH', (value) => {
+    value.affectedScopeIds.splice(value.affectedScopeIds.indexOf('SCOPE-API-NAMING'), 1);
+  });
+});
+
 test('rejects parent-decision supersession drift', async () => {
   await rejects('TALE_RESET_SUMMARY_MISMATCH', (value) => { value.supersession.pointers.pop(); });
 });
@@ -159,6 +224,22 @@ test('rejects overlapping field-ownership classifications', async () => {
   await rejects('TALE_RESET_OWNERSHIP_MISMATCH', (value) => { value.fieldOwnership.derived.push(value.fieldOwnership.authored[0]); });
 });
 
+test('rejects missing or reclassified ownership of the authored delta', async () => {
+  await rejects('TALE_RESET_OWNERSHIP_MISMATCH', (value) => {
+    value.fieldOwnership.authored[value.fieldOwnership.authored.indexOf('classificationDelta')] = 'arbitrary prose';
+  });
+  await rejects('TALE_RESET_OWNERSHIP_MISMATCH', (value) => {
+    value.fieldOwnership.authored.splice(value.fieldOwnership.authored.indexOf('classificationDelta'), 1);
+    value.fieldOwnership.referenced.push('classificationDelta');
+  });
+});
+
+test('rejects wrong or untyped current-catalog token counts and empty behavior', async () => {
+  await rejects('TALE_RESET_COMPATIBILITY_MISMATCH', (value) => { value.compatibility.currentCatalog.tokenCount = 313; });
+  await rejects('TALE_RESET_VALUE_INVALID', (value) => { value.compatibility.currentCatalog.tokenCount = '312'; });
+  await rejects('TALE_RESET_VALUE_INVALID', (value) => { value.compatibility.currentCatalog.behavior = ''; });
+});
+
 test('rejects a Git commit mislabeled as the historical catalog source revision', async () => {
   await rejects('TALE_RESET_COMPATIBILITY_MISMATCH', (value) => { value.compatibility.historicalTokenContract.catalogSourceRevision = '5dbda278493d05c72880e745adb088e7a2df0b07'; });
 });
@@ -176,7 +257,7 @@ test('requires exact human acceptance only when requested', async () => {
   assert.equal(result.accepted, true);
 });
 
-test('rejects an acceptance record not bound to both exact authority files', async () => {
+test('rejects an acceptance record not bound to all three exact authority files', async () => {
   const record = await acceptance({ bodySha256: `sha256:${'0'.repeat(64)}` });
   await assert.rejects(
     verifyTaleTokenBaselineReset(repositoryRoot, { acceptanceValue: record }),

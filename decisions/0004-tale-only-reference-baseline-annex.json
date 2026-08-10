@@ -5,7 +5,7 @@
   "humanDecisionOwner": "ndrewtran",
   "parentIssue": 39,
   "observedWorkflow": "The designated owner wants Core UI's corrected default-theme reference layer to start from the human-classified Tale foundation baseline rather than retain ten temporary minimum-substrate reference IDs that have no pinned Tale occurrence or accepted Tale mapping.",
-  "productOutcome": "Core UI owns one clean Tale-derived reference baseline of 431 stable Core identities while retaining the smallest fixed-slice semantic and component layers above it.",
+  "productOutcome": "Core UI owns one canonical 296-token reference baseline: the pinned Tale neutral-warm values under generic neutral IDs, the admitted Tale status values under consistent error/warning/success IDs, the remaining accepted Tale foundations, and the exact existing duration reuse, while retaining only the observed fixed-slice semantic and component layers above it.",
   "parentDecision": {
     "decisionId": "core-ui:decision:0003",
     "annexPath": "decisions/0003-tale-token-classification-annex.json",
@@ -16,28 +16,24 @@
   "supersession": {
     "profile": "core-ui-decision-json-pointer-supersession-v1",
     "pointers": [
-      "/migration/phaseC/preservesExistingTokenIds",
-      "/migration/phaseC/tokenContractVersion",
+      "/coreTokens",
+      "/entries",
+      "/migration/phaseC",
       "/nonGoals/semanticOrComponentRecipeExpansion",
-      "/releaseAdditions/removals",
+      "/releaseAdditions",
       "/rollback/phaseC",
+      "/summary",
       "/versions/phaseC/catalogVersion",
       "/versions/phaseC/packages",
       "/versions/phaseC/tokenContractVersion"
     ],
     "preservedPointers": [
-      "/coreTokens",
-      "/entries",
       "/groups",
       "/migration/phaseA",
       "/migration/phaseB",
       "/pageProfiles",
       "/queryCompatibility",
-      "/releaseAdditions/addedCoreTokenCount",
-      "/releaseAdditions/addedCoreTokenIdsDigest",
-      "/releaseAdditions/reusedExistingCoreTokenCount",
       "/source",
-      "/summary",
       "/targetProfiles",
       "/versions/phaseC/catalogPackageSchema",
       "/versions/phaseC/commandRegistrySchemaVersion",
@@ -47,6 +43,7 @@
   },
   "fieldOwnership": {
     "authored": [
+      "classificationDelta",
       "removals",
       "semanticMappings",
       "versions",
@@ -81,30 +78,115 @@
       "package and release identity"
     ]
   },
+  "classificationDelta": {
+    "profile": "core-ui-tale-reference-family-correction-v1",
+    "deferralReason": "Defer this Tale neutral family because Core UI admits the pinned Tale neutral-warm values as its sole canonical neutral reference palette; consumers may represent other neutral families only with private reference tokens.",
+    "deferrals": [
+      {
+        "family": "neutral-cool",
+        "ordinalFrom": 365,
+        "ordinalTo": 391,
+        "previousCoreIdPrefix": "reference.color.neutral-cool-"
+      },
+      {
+        "family": "neutral-slate",
+        "ordinalFrom": 392,
+        "ordinalTo": 418,
+        "previousCoreIdPrefix": "reference.color.neutral-slate-"
+      },
+      {
+        "family": "neutral-gray",
+        "ordinalFrom": 419,
+        "ordinalTo": 445,
+        "previousCoreIdPrefix": "reference.color.neutral-gray-"
+      },
+      {
+        "family": "neutral-onyx",
+        "ordinalFrom": 446,
+        "ordinalTo": 472,
+        "previousCoreIdPrefix": "reference.color.neutral-onyx-"
+      },
+      {
+        "family": "neutral-mono",
+        "ordinalFrom": 473,
+        "ordinalTo": 499,
+        "previousCoreIdPrefix": "reference.color.neutral-mono-"
+      }
+    ],
+    "renames": [
+      {
+        "family": "error",
+        "ordinalFrom": 321,
+        "ordinalTo": 331,
+        "previousCoreIdPrefix": "reference.color.red-muted-",
+        "resultCoreIdPrefix": "reference.color.error-",
+        "meaningTemplate": "Core canonical error system-status palette step {step}, using the pinned Tale --error-{step} literal."
+      },
+      {
+        "family": "warning",
+        "ordinalFrom": 332,
+        "ordinalTo": 342,
+        "previousCoreIdPrefix": "reference.color.amber-vivid-",
+        "resultCoreIdPrefix": "reference.color.warning-",
+        "meaningTemplate": "Core canonical warning system-status palette step {step}, using the pinned Tale --warning-{step} literal."
+      },
+      {
+        "family": "success",
+        "ordinalFrom": 343,
+        "ordinalTo": 353,
+        "previousCoreIdPrefix": "reference.color.green-muted-",
+        "resultCoreIdPrefix": "reference.color.success-",
+        "meaningTemplate": "Core canonical success system-status palette step {step}, using the pinned Tale --success-{step} literal."
+      },
+      {
+        "family": "neutral",
+        "ordinalFrom": 500,
+        "ordinalTo": 526,
+        "previousCoreIdPrefix": "reference.color.neutral-warm-",
+        "resultCoreIdPrefix": "reference.color.neutral-",
+        "meaningTemplate": "Core canonical neutral palette step {step}, using the pinned Tale --neutral-warm-{step} literal."
+      }
+    ],
+    "deferredTargets": {
+      "web.html": "deferred",
+      "web.react": "deferred",
+      "native.ios": "deferred",
+      "native.android": "deferred",
+      "native.react-native-web": "deferred"
+    },
+    "retainedTargets": {
+      "web.html": "direct",
+      "web.react": "direct",
+      "native.ios": "direct",
+      "native.android": "direct",
+      "native.react-native-web": "deferred"
+    },
+    "consumptionBoundary": "Core UI components and binding token recipes never consume designated status references directly; target compilers emit admitted typed reference values. Direct emission is not a support, accessibility, lifecycle, availability, or parity claim."
+  },
   "removals": [
-    { "id": "reference.color.action-dark", "replacement": "reference.color.neutral-cool-90" },
-    { "id": "reference.color.action-light", "replacement": "reference.color.neutral-cool-5" },
+    { "id": "reference.color.action-dark", "replacement": "reference.color.neutral-90" },
+    { "id": "reference.color.action-light", "replacement": "reference.color.neutral-5" },
     { "id": "reference.color.focus", "replacement": "reference.color.indigo-60" },
-    { "id": "reference.color.invalid", "replacement": "reference.color.red-70" },
-    { "id": "reference.color.surface", "replacement": "reference.color.neutral-cool-5" },
-    { "id": "reference.color.text-dark", "replacement": "reference.color.neutral-cool-96" },
-    { "id": "reference.color.text-light", "replacement": "reference.color.neutral-cool-5" },
+    { "id": "reference.color.invalid", "replacement": "reference.color.error-60" },
+    { "id": "reference.color.surface", "replacement": "reference.color.neutral-5" },
+    { "id": "reference.color.text-dark", "replacement": "reference.color.neutral-96" },
+    { "id": "reference.color.text-light", "replacement": "reference.color.neutral-5" },
     { "id": "reference.dimension.control-height", "replacement": "reference.dimension.space-l" },
     { "id": "reference.dimension.radius-medium", "replacement": "reference.dimension.radius-xs" },
     { "id": "reference.dimension.space-inline", "replacement": "reference.dimension.space-xs", "modeReplacements": { "density.compact": "reference.dimension.space-3xs" } }
   ],
   "semanticMappings": [
-    { "id": "semantic.action.background", "alias": "reference.color.neutral-cool-90", "modes": { "colorScheme.dark": { "alias": "reference.color.neutral-cool-5" } } },
-    { "id": "semantic.action.foreground", "alias": "reference.color.neutral-cool-5", "modes": { "colorScheme.dark": { "alias": "reference.color.neutral-cool-96" } } },
+    { "id": "semantic.action.background", "alias": "reference.color.neutral-90", "modes": { "colorScheme.dark": { "alias": "reference.color.neutral-5" } } },
+    { "id": "semantic.action.foreground", "alias": "reference.color.neutral-5", "modes": { "colorScheme.dark": { "alias": "reference.color.neutral-96" } } },
     { "id": "semantic.control.min-height", "alias": "reference.dimension.space-l", "modes": {} },
     { "id": "semantic.control.padding-inline", "alias": "reference.dimension.space-xs", "modes": { "density.compact": { "alias": "reference.dimension.space-3xs" } } },
     { "id": "semantic.control.radius", "alias": "reference.dimension.radius-xs", "modes": {} },
-    { "id": "semantic.feedback.invalid", "alias": "reference.color.red-70", "modes": {} },
-    { "id": "semantic.field.background", "alias": "reference.color.neutral-cool-5", "modes": {} },
+    { "id": "semantic.feedback.invalid", "alias": "reference.color.error-60", "modes": {} },
+    { "id": "semantic.field.background", "alias": "reference.color.neutral-5", "modes": {} },
     { "id": "semantic.focus.ring", "alias": "reference.color.indigo-60", "modes": {} },
     { "id": "semantic.motion.feedback", "alias": "reference.duration.fast", "modes": {} },
-    { "id": "semantic.overlay.background", "alias": "reference.color.neutral-cool-5", "modes": {} },
-    { "id": "semantic.selection.track", "alias": "reference.color.neutral-cool-90", "modes": {} }
+    { "id": "semantic.overlay.background", "alias": "reference.color.neutral-5", "modes": {} },
+    { "id": "semantic.selection.track", "alias": "reference.color.neutral-90", "modes": {} }
   ],
   "semanticRecipeEffect": {
     "authorizedExpansion": [
@@ -139,8 +221,8 @@
       "queryApiVersion": "2.0.0",
       "supportedQueryApiVersions": ["1.1.0", "1.2.0", "2.0.0"],
       "tokenContractVersion": "2.0.0",
-      "tokenCount": 447,
-      "behavior": "Every negotiated query response from this selected catalog describes the same current 447-token contract; query versions change response shape only and never select token history."
+      "tokenCount": 312,
+      "behavior": "Every negotiated query response from this selected catalog describes the same current 312-token contract; query versions change response shape only and never select token history."
     },
     "historicalTokenContract": {
       "tokenContractVersion": "1.1.0",
@@ -195,12 +277,13 @@
       "parentDecisionAcceptanceSha256": "sha256:6ef7a0d4fa92cda7ea3222551074ae488a45a359a7de0600d3ee59180f3d1a17",
       "historicalCatalogDigest": "sha256:e296cbeb86100405e79615b83172ef790845c0e324af8c80e5a12897617161cc",
       "historicalCatalogSourceRevision": "sha256:8daba3efee87302e3ac95fc030453ac218536bc1b489b464830ac56bdc62bdab",
-      "finalTokenSourceCanonicalDigest": "sha256:55a72347e1191881ceed9afbd7290e287a193163b639ce0ff24fd97fafd00377",
+      "finalTokenSourceCanonicalDigest": "sha256:670f2a45ada8c90b39e6de4bc4e6fef9e175313607c428067c21b7c2b1c5eac2",
       "finalTokenSourceCanonicalProfile": "Core canonical JSON SHA-256 over the complete token-source object"
     },
     "procedure": [
       "Validate the exact Phase B input source and decision 0003/0004 identities.",
-      "Materialize decision 0003's exact 430 additions, sole duration reuse, and unchanged sourceCrosswalk.",
+      "Apply the exact decision-0004 classification delta to decision 0003: defer ordinals 365 through 499 with the exact replacement reason and target map, and rename ordinals 321 through 353 and 500 through 526 with the exact ID-prefix and meaning-template rules.",
+      "Materialize the resulting exact 295 additions, sole duration reuse, and corrected sourceCrosswalk.",
       "Remove exactly the ten decision-0004 IDs.",
       "Apply exactly the eleven decision-0004 semantic mappings including the one authorized compact branch.",
       "Set tokenContractVersion to 2.0.0 and validate the final graph, counts, digests, transforms, descriptors, catalog, installed-local tuple, and historical selection.",
@@ -215,6 +298,9 @@
       "CORE_TALE_RESET_ALIAS_STALE",
       "CORE_TALE_RESET_ALIAS_MISMATCH",
       "CORE_TALE_RESET_MODE_MISMATCH",
+      "CORE_TALE_RESET_CLASSIFICATION_MISMATCH",
+      "CORE_TALE_RESET_MEANING_MISMATCH",
+      "CORE_TALE_RESET_TARGET_MISMATCH",
       "CORE_TALE_RESET_TOKEN_COLLISION",
       "CORE_TALE_RESET_FINAL_IDENTITY_MISMATCH"
     ],
@@ -230,6 +316,7 @@
   "affectedScopeIds": [
     "SCOPE-API-DEFAULTS",
     "SCOPE-API-DEPRECATION",
+    "SCOPE-API-NAMING",
     "SCOPE-AUTHOR-AUTOFIX",
     "SCOPE-AUTHOR-CLOSURE",
     "SCOPE-AUTHOR-DIAGNOSTICS",
@@ -336,40 +423,56 @@
     "statusSource": "Project workflow transition logic remains unverified and never proves authority or evidence acceptance."
   },
   "nonGoals": [
-    "Changing decision 0003's Tale occurrence classifications, groups, 430 additions, sole duration reuse, target dispositions, crosswalk projection, or query/page grammar.",
+    "Changing any decision 0003 Tale occurrence, group, Core-token, reason, target, or meaning outside the exact classificationDelta; changing the pinned Tale source, query/page grammar, or schema facts.",
     "Adding any semantic or component ID; the only semantic recipe expansion is the exact compact-mode replacement authored above.",
+    "Admitting neutral-cool, neutral-slate, neutral-gray, neutral-onyx, or neutral-mono as Core reference tokens, or creating a general role-named reference-token escape hatch.",
+    "Treating warning or success references as semantic roles before an observed slice separately admits those roles.",
     "Keeping Tale as a live owner or synchronization dependency.",
     "Adding a token layer, source kind, package, public command, query version, schema field, or runtime capability.",
     "Claiming renderer support, accessibility, RNW parity, component availability, publication, Gate 1 exit, or product release.",
     "Rewriting accepted Phase A, Phase B, or other historical evidence."
   ],
   "summary": {
+    "sourceOccurrenceCount": 693,
+    "dispositionCounts": {
+      "adopt": 209,
+      "adapt": 95,
+      "defer": 328,
+      "reject": 61
+    },
+    "deferredNeutralOccurrenceCount": 135,
+    "renamedReferenceTokenCount": 60,
+    "addedTaleReferenceTokenCount": 295,
+    "reusedExistingReferenceTokenCount": 1,
     "removedReferenceTokenCount": 10,
-    "retainedTaleReferenceTokenCount": 431,
+    "finalReferenceTokenCount": 296,
     "semanticTokenCount": 11,
     "componentTokenCount": 5,
-    "finalTokenCount": 447,
+    "finalTokenCount": 312,
     "newSemanticIds": 0,
     "newComponentIds": 0,
     "authorizedSemanticModeBranches": 1,
-    "affectedScopeCount": 66,
+    "affectedScopeCount": 67,
     "affectedMilestoneCount": 18,
-    "supersededPointerCount": 8
+    "supersededPointerCount": 10
   },
   "digests": {
     "profile": "Core canonical JSON SHA-256 over each named preimage",
+    "correctedSourceCrosswalk": "sha256:7835e06c02297e667b4fd2cf9076d5c604de5a37bb64a7d587b4a0fa7cd5e45e",
+    "addedCoreTokenIds": "sha256:72fbf7b8f07ceabd6d813d81db433c8aa22ca8b3df5c2e9987274c694a84e95d",
     "removalIds": "sha256:42e007b03853ea64b7e2823b59126fec66000e80aa0b5d7f062776240c451355",
-    "semanticMappings": "sha256:4094e5fd93b159b3ffd6faf42c2e97551d84415e55467a58147b8ce6c9e608ca",
-    "affectedScopeIds": "sha256:3600a92aa5a7b90cd64c8cb29724d038b959be715b2df0eff7b40fef346fa6ec",
-    "supersededPointers": "sha256:d4c37c190964a1ab24ee38580e094240df326448615100d4bd5c2144598cbdc9",
-    "finalTokenIds": "sha256:9a76a496e6d0521366dd1f3c71f85ddccb838e07868641f7f7a34c5c0e45669c",
-    "finalTokenSource": "sha256:55a72347e1191881ceed9afbd7290e287a193163b639ce0ff24fd97fafd00377"
+    "semanticMappings": "sha256:2f3bda55d47c17e3f106b764556373e77107fe78e1ca442510ea981c0c7e1650",
+    "affectedScopeIds": "sha256:c0c373a6efe0ca0355d7d6d6214dacc51a6f6a4c4c1c8a7fb61821663867eb65",
+    "supersededPointers": "sha256:61fd4df6896b6ef399f21cc295180ae927f4bf0af875ea1373176b5347a19d83",
+    "finalTokenIds": "sha256:835a5933102bac89e9fce8e8d7f0765b39fac65c50cb4f21fd8372993eadea21",
+    "finalTokenSource": "sha256:670f2a45ada8c90b39e6de4bc4e6fef9e175313607c428067c21b7c2b1c5eac2"
   },
   "acceptanceTopology": {
     "annexPath": "decisions/0004-tale-only-reference-baseline-annex.json",
+    "architecturePath": "strategy/monorepo-architecture.md",
     "productScopePath": "strategy/product-scope.md",
     "receiptPath": "decisions/0004-tale-only-reference-baseline-acceptance.json",
-    "requiredOwnerComment": "One authenticated ndrewtran comment must name and accept the exact annex path/SHA-256/bytes and exact Product Scope path/SHA-256/bytes. Any byte change requires a new acceptance comment.",
+    "requiredOwnerComment": "One authenticated ndrewtran comment must name and accept the exact architecture, Product Scope, and annex paths, SHA-256 values, and byte lengths. Any byte change requires a new acceptance comment.",
     "implementationBoundary": "Before the receipt and authority merge, routine tracker synchronization may only record the pending authority draft and preserve #46 as non-executable; it may not claim acceptance or activate implementation. No implementation, replacement Phase C capture, PR #47 closure, or acceptance/implementation-state transition occurs before the receipt is committed and the accepted authority PR is merged."
   }
 }

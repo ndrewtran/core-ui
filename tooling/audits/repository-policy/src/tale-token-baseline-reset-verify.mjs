@@ -6,6 +6,7 @@ import { sha256 } from './policy.mjs';
 
 const ANNEX_PATH = 'decisions/0004-tale-only-reference-baseline-annex.json';
 const ACCEPTANCE_PATH = 'decisions/0004-tale-only-reference-baseline-acceptance.json';
+const ARCHITECTURE_PATH = 'strategy/monorepo-architecture.md';
 const PRODUCT_SCOPE_PATH = 'strategy/product-scope.md';
 const PARENT_ANNEX_PATH = 'decisions/0003-tale-token-classification-annex.json';
 const PARENT_ACCEPTANCE_PATH = 'decisions/0003-tale-token-classification-acceptance.json';
@@ -24,7 +25,7 @@ const RESOLVER_FAILURE_DIMENSIONS = new Set([
 const TOP_LEVEL_KEYS = [
   'schema', 'decisionId', 'state', 'humanDecisionOwner', 'parentIssue',
   'observedWorkflow', 'productOutcome', 'parentDecision', 'supersession',
-  'fieldOwnership', 'removals', 'semanticMappings', 'semanticRecipeEffect',
+  'fieldOwnership', 'classificationDelta', 'removals', 'semanticMappings', 'semanticRecipeEffect',
   'versions', 'compatibility', 'migration', 'affectedScopeIds',
   'scopeEffectRationale', 'roadmapImpact', 'evidenceTopology',
   'trackerMigration', 'nonGoals', 'summary', 'digests', 'acceptanceTopology',
@@ -90,6 +91,17 @@ function stringArray(value, path, { sorted = false, pattern = null } = {}) {
   if (sorted && canonicalJson(value) !== canonicalJson([...value].sort(bytewise))) fail('TALE_RESET_VALUE_INVALID', `${path} must be bytewise sorted`);
 }
 
+function safePositiveInteger(value, path) {
+  if (!Number.isSafeInteger(value) || value < 1) fail('TALE_RESET_VALUE_INVALID', `${path} must be a positive safe integer`);
+}
+
+function suffixFromId(id, prefix, path) {
+  if (typeof id !== 'string' || !id.startsWith(prefix)) fail('TALE_RESET_CLASSIFICATION_MISMATCH', `${path} does not use ${prefix}`);
+  const suffix = id.slice(prefix.length);
+  if (!/^\d+$/u.test(suffix)) fail('TALE_RESET_CLASSIFICATION_MISMATCH', `${path} has an invalid numeric suffix`);
+  return suffix;
+}
+
 function semver(value, path) {
   if (typeof value !== 'string' || !/^\d+\.\d+\.\d+$/u.test(value)) fail('TALE_RESET_VERSION_MISMATCH', `${path} must be SemVer`);
 }
@@ -138,6 +150,54 @@ function rendererPackageForScope(scopeId) {
   }[scopeId] ?? null;
 }
 
+function verifyClassificationDelta(delta, parent) {
+  exactKeys(delta, ['profile', 'deferralReason', 'deferrals', 'renames', 'deferredTargets', 'retainedTargets', 'consumptionBoundary'], 'classificationDelta');
+  for (const key of ['profile', 'deferralReason', 'consumptionBoundary']) nonEmpty(delta[key], `classificationDelta.${key}`);
+  if (delta.profile !== 'core-ui-tale-reference-family-correction-v1') fail('TALE_RESET_CLASSIFICATION_MISMATCH', 'classificationDelta.profile');
+  if (!Array.isArray(delta.deferrals) || delta.deferrals.length === 0 || !Array.isArray(delta.renames) || delta.renames.length === 0) fail('TALE_RESET_CLASSIFICATION_MISMATCH', 'classification delta families');
+  const claimedOrdinals = new Set();
+  for (const [index, rule] of delta.deferrals.entries()) {
+    exactKeys(rule, ['family', 'ordinalFrom', 'ordinalTo', 'previousCoreIdPrefix'], `classificationDelta.deferrals[${index}]`);
+    for (const key of ['family', 'previousCoreIdPrefix']) nonEmpty(rule[key], `classificationDelta.deferrals[${index}].${key}`);
+    if (rule.previousCoreIdPrefix !== `reference.color.${rule.family}-`) fail('TALE_RESET_CLASSIFICATION_MISMATCH', `classificationDelta.deferrals[${index}] family/prefix relation`);
+    safePositiveInteger(rule.ordinalFrom, `classificationDelta.deferrals[${index}].ordinalFrom`);
+    safePositiveInteger(rule.ordinalTo, `classificationDelta.deferrals[${index}].ordinalTo`);
+    if (rule.ordinalTo < rule.ordinalFrom) fail('TALE_RESET_CLASSIFICATION_MISMATCH', `classificationDelta.deferrals[${index}] range`);
+    for (let ordinal = rule.ordinalFrom; ordinal <= rule.ordinalTo; ordinal += 1) {
+      if (claimedOrdinals.has(ordinal)) fail('TALE_RESET_CLASSIFICATION_MISMATCH', `ordinal ${ordinal} is changed twice`);
+      claimedOrdinals.add(ordinal);
+    }
+  }
+  for (const [index, rule] of delta.renames.entries()) {
+    exactKeys(rule, ['family', 'ordinalFrom', 'ordinalTo', 'previousCoreIdPrefix', 'resultCoreIdPrefix', 'meaningTemplate'], `classificationDelta.renames[${index}]`);
+    for (const key of ['family', 'previousCoreIdPrefix', 'resultCoreIdPrefix', 'meaningTemplate']) nonEmpty(rule[key], `classificationDelta.renames[${index}].${key}`);
+    if (rule.resultCoreIdPrefix !== `reference.color.${rule.family}-`) fail('TALE_RESET_CLASSIFICATION_MISMATCH', `classificationDelta.renames[${index}] family/prefix relation`);
+    if (rule.previousCoreIdPrefix === rule.resultCoreIdPrefix || rule.meaningTemplate.split('{step}').length !== 3) fail('TALE_RESET_MEANING_MISMATCH', `classificationDelta.renames[${index}] template`);
+    safePositiveInteger(rule.ordinalFrom, `classificationDelta.renames[${index}].ordinalFrom`);
+    safePositiveInteger(rule.ordinalTo, `classificationDelta.renames[${index}].ordinalTo`);
+    if (rule.ordinalTo < rule.ordinalFrom) fail('TALE_RESET_CLASSIFICATION_MISMATCH', `classificationDelta.renames[${index}] range`);
+    for (let ordinal = rule.ordinalFrom; ordinal <= rule.ordinalTo; ordinal += 1) {
+      if (claimedOrdinals.has(ordinal)) fail('TALE_RESET_CLASSIFICATION_MISMATCH', `ordinal ${ordinal} is changed twice`);
+      claimedOrdinals.add(ordinal);
+    }
+  }
+  for (const [label, values] of [
+    ['deferral families', delta.deferrals.map(({ family }) => family)],
+    ['deferral prefixes', delta.deferrals.map(({ previousCoreIdPrefix }) => previousCoreIdPrefix)],
+    ['rename families', delta.renames.map(({ family }) => family)],
+    ['rename previous prefixes', delta.renames.map(({ previousCoreIdPrefix }) => previousCoreIdPrefix)],
+    ['rename result prefixes', delta.renames.map(({ resultCoreIdPrefix }) => resultCoreIdPrefix)],
+  ]) if (new Set(values).size !== values.length) fail('TALE_RESET_CLASSIFICATION_MISMATCH', `duplicate ${label}`);
+  const targetNames = Object.keys(parent.targetProfiles).filter((name) => name.includes('.')).sort(bytewise);
+  exactKeys(delta.deferredTargets, targetNames, 'classificationDelta.deferredTargets');
+  exactKeys(delta.retainedTargets, targetNames, 'classificationDelta.retainedTargets');
+  for (const target of targetNames) {
+    if (delta.deferredTargets[target] !== 'deferred') fail('TALE_RESET_TARGET_MISMATCH', `classificationDelta.deferredTargets.${target}`);
+    const expectedRetained = target === 'native.react-native-web' ? 'deferred' : 'direct';
+    if (delta.retainedTargets[target] !== expectedRetained) fail('TALE_RESET_TARGET_MISMATCH', `classificationDelta.retainedTargets.${target}`);
+  }
+}
+
 function verifyGrammar(annex, parent, productScopeBytes) {
   nonEmpty(annex.observedWorkflow, 'observedWorkflow');
   nonEmpty(annex.productOutcome, 'productOutcome');
@@ -163,6 +223,9 @@ function verifyGrammar(annex, parent, productScopeBytes) {
   for (const name of Object.keys(annex.fieldOwnership)) stringArray(annex.fieldOwnership[name], `fieldOwnership.${name}`);
   const ownershipEntries = Object.values(annex.fieldOwnership).flat();
   if (new Set(ownershipEntries).size !== ownershipEntries.length) fail('TALE_RESET_OWNERSHIP_MISMATCH', 'field ownership categories overlap');
+  if (!annex.fieldOwnership.authored.includes('classificationDelta')) fail('TALE_RESET_OWNERSHIP_MISMATCH', 'classificationDelta must be authored');
+
+  verifyClassificationDelta(annex.classificationDelta, parent);
 
   exactKeys(annex.semanticRecipeEffect, ['authorizedExpansion', 'reason', 'newSemanticIds', 'newComponentIds'], 'semanticRecipeEffect');
   stringArray(annex.semanticRecipeEffect.authorizedExpansion, 'semanticRecipeEffect.authorizedExpansion');
@@ -183,6 +246,9 @@ function verifyGrammar(annex, parent, productScopeBytes) {
 
   exactKeys(annex.compatibility, ['currentCatalog', 'historicalTokenContract', 'rendererTokenContractRanges', 'installedLocal'], 'compatibility');
   exactKeys(annex.compatibility.currentCatalog, ['catalogVersion', 'queryApiVersion', 'supportedQueryApiVersions', 'tokenContractVersion', 'tokenCount', 'behavior'], 'compatibility.currentCatalog');
+  for (const key of ['catalogVersion', 'queryApiVersion', 'tokenContractVersion']) semver(annex.compatibility.currentCatalog[key], `compatibility.currentCatalog.${key}`);
+  safePositiveInteger(annex.compatibility.currentCatalog.tokenCount, 'compatibility.currentCatalog.tokenCount');
+  nonEmpty(annex.compatibility.currentCatalog.behavior, 'compatibility.currentCatalog.behavior');
   stringArray(annex.compatibility.currentCatalog.supportedQueryApiVersions, 'compatibility.currentCatalog.supportedQueryApiVersions');
   for (const [index, version] of annex.compatibility.currentCatalog.supportedQueryApiVersions.entries()) semver(version, `compatibility.currentCatalog.supportedQueryApiVersions[${index}]`);
   exact(annex.compatibility.currentCatalog.supportedQueryApiVersions, parent.queryCompatibility.request.allowed, 'TALE_RESET_COMPATIBILITY_MISMATCH', 'supported query API versions');
@@ -241,9 +307,60 @@ function verifyGrammar(annex, parent, productScopeBytes) {
   exactKeys(annex.trackerMigration.afterAcceptance, ['issue39Status', 'issue46Status', 'pullRequest47', 'projectReadme', 'decisionBearingFields', 'linkedPullRequest'], 'trackerMigration.afterAcceptance');
   stringArray(annex.trackerMigration.afterAcceptance.decisionBearingFields, 'trackerMigration.afterAcceptance.decisionBearingFields');
   stringArray(annex.nonGoals, 'nonGoals');
-  exactKeys(annex.summary, ['removedReferenceTokenCount', 'retainedTaleReferenceTokenCount', 'semanticTokenCount', 'componentTokenCount', 'finalTokenCount', 'newSemanticIds', 'newComponentIds', 'authorizedSemanticModeBranches', 'affectedScopeCount', 'affectedMilestoneCount', 'supersededPointerCount'], 'summary');
-  exactKeys(annex.acceptanceTopology, ['annexPath', 'productScopePath', 'receiptPath', 'requiredOwnerComment', 'implementationBoundary'], 'acceptanceTopology');
-  if (annex.acceptanceTopology.annexPath !== ANNEX_PATH || annex.acceptanceTopology.productScopePath !== PRODUCT_SCOPE_PATH || annex.acceptanceTopology.receiptPath !== ACCEPTANCE_PATH) fail('TALE_RESET_ACCEPTANCE_INVALID', 'acceptance paths');
+  exactKeys(annex.summary, ['sourceOccurrenceCount', 'dispositionCounts', 'deferredNeutralOccurrenceCount', 'renamedReferenceTokenCount', 'addedTaleReferenceTokenCount', 'reusedExistingReferenceTokenCount', 'removedReferenceTokenCount', 'finalReferenceTokenCount', 'semanticTokenCount', 'componentTokenCount', 'finalTokenCount', 'newSemanticIds', 'newComponentIds', 'authorizedSemanticModeBranches', 'affectedScopeCount', 'affectedMilestoneCount', 'supersededPointerCount'], 'summary');
+  exactKeys(annex.summary.dispositionCounts, ['adopt', 'adapt', 'defer', 'reject'], 'summary.dispositionCounts');
+  exactKeys(annex.acceptanceTopology, ['annexPath', 'architecturePath', 'productScopePath', 'receiptPath', 'requiredOwnerComment', 'implementationBoundary'], 'acceptanceTopology');
+  if (annex.acceptanceTopology.annexPath !== ANNEX_PATH || annex.acceptanceTopology.architecturePath !== ARCHITECTURE_PATH || annex.acceptanceTopology.productScopePath !== PRODUCT_SCOPE_PATH || annex.acceptanceTopology.receiptPath !== ACCEPTANCE_PATH) fail('TALE_RESET_ACCEPTANCE_INVALID', 'acceptance paths');
+}
+
+function ruleForOrdinal(rules, ordinal) {
+  return rules.find((rule) => ordinal >= rule.ordinalFrom && ordinal <= rule.ordinalTo);
+}
+
+function correctedParentDecision(parent, annex) {
+  const delta = annex.classificationDelta;
+  const affectedOrdinals = new Set();
+  const entries = parent.entries.map((entry) => {
+    const ordinal = entry.occurrence.ordinal;
+    const deferral = ruleForOrdinal(delta.deferrals, ordinal);
+    const rename = ruleForOrdinal(delta.renames, ordinal);
+    if (!deferral && !rename) return structuredClone(entry);
+    affectedOrdinals.add(ordinal);
+    if (entry.groupId !== undefined || parent.groups.some((group) => group.members.some((member) => member.ordinal === ordinal))) fail('TALE_RESET_CLASSIFICATION_MISMATCH', `affected ordinal ${ordinal} belongs to a group`);
+    if (deferral) {
+      if (entry.disposition !== 'adopt') fail('TALE_RESET_CLASSIFICATION_MISMATCH', `ordinal ${ordinal} is not adopted`);
+      if (delta.deferralReason === entry.reason) fail('TALE_RESET_CLASSIFICATION_MISMATCH', `ordinal ${ordinal} retains its adoption reason`);
+      suffixFromId(entry.coreTokenId, deferral.previousCoreIdPrefix, `entry ${ordinal}`);
+      exact(entry.targets, delta.retainedTargets, 'TALE_RESET_TARGET_MISMATCH', `entry ${ordinal} prior targets`);
+      const { coreTokenId: _coreTokenId, ...rest } = entry;
+      return { ...rest, disposition: 'defer', reason: delta.deferralReason, targets: structuredClone(delta.deferredTargets) };
+    }
+    const step = suffixFromId(entry.coreTokenId, rename.previousCoreIdPrefix, `entry ${ordinal}`);
+    if (!entry.occurrence.name.endsWith(`-${step}`)) fail('TALE_RESET_CLASSIFICATION_MISMATCH', `entry ${ordinal} source suffix`);
+    exact(entry.targets, delta.retainedTargets, 'TALE_RESET_TARGET_MISMATCH', `entry ${ordinal} retained targets`);
+    return { ...structuredClone(entry), coreTokenId: `${rename.resultCoreIdPrefix}${step}` };
+  });
+  const expectedAffected = [...delta.deferrals, ...delta.renames].reduce((count, rule) => count + rule.ordinalTo - rule.ordinalFrom + 1, 0);
+  if (affectedOrdinals.size !== expectedAffected) fail('TALE_RESET_CLASSIFICATION_MISMATCH', 'affected ordinal closure');
+
+  const coreTokens = parent.coreTokens.flatMap((candidate) => {
+    const deferral = delta.deferrals.find((rule) => candidate.id.startsWith(rule.previousCoreIdPrefix));
+    if (deferral) return [];
+    const rename = delta.renames.find((rule) => candidate.id.startsWith(rule.previousCoreIdPrefix));
+    if (!rename) return [structuredClone(candidate)];
+    const step = suffixFromId(candidate.id, rename.previousCoreIdPrefix, candidate.id);
+    return [{
+      ...structuredClone(candidate),
+      id: `${rename.resultCoreIdPrefix}${step}`,
+      definition: { ...structuredClone(candidate.definition), meaning: rename.meaningTemplate.replaceAll('{step}', step) },
+    }];
+  });
+  const ids = coreTokens.map(({ id }) => id);
+  if (new Set(ids).size !== ids.length) fail('TALE_RESET_TOKEN_COLLISION', 'classification delta creates duplicate Core IDs');
+  const entryIds = new Set(entries.flatMap((entry) => entry.coreTokenId ? [entry.coreTokenId] : []));
+  const tokenIds = new Set(ids);
+  if ([...entryIds].some((id) => !tokenIds.has(id)) || [...tokenIds].some((id) => !entryIds.has(id) && id !== 'reference.duration.fast')) fail('TALE_RESET_CLASSIFICATION_MISMATCH', 'corrected entry/token closure');
+  return { ...parent, entries, coreTokens };
 }
 
 function projectedCrosswalk(parent) {
@@ -271,7 +388,8 @@ function projectedCrosswalk(parent) {
 
 function materializeFinalSource(base, parent, annex) {
   const source = structuredClone(base);
-  for (const candidate of parent.coreTokens) {
+  const correctedParent = correctedParentDecision(parent, annex);
+  for (const candidate of correctedParent.coreTokens) {
     if (candidate.action === 'add') {
       if (source.tokens[candidate.id]) fail('TALE_RESET_TOKEN_COLLISION', candidate.id);
       source.tokens[candidate.id] = candidate.definition;
@@ -281,7 +399,7 @@ function materializeFinalSource(base, parent, annex) {
       fail('TALE_RESET_PARENT_INVALID', `unsupported parent action ${candidate.action}`);
     }
   }
-  source.sourceCrosswalk = projectedCrosswalk(parent);
+  source.sourceCrosswalk = projectedCrosswalk(correctedParent);
   for (const removal of annex.removals) {
     if (!source.tokens[removal.id]) fail('TALE_RESET_REMOVAL_MISSING', removal.id);
     delete source.tokens[removal.id];
@@ -302,7 +420,8 @@ function verifyRemovalAndMappingClosure(annex, base, parent) {
   const removalIds = annex.removals.map(({ id }) => id);
   exact(removalIds, baseReferenceIds.filter((id) => id !== 'reference.duration.fast'), 'TALE_RESET_REMOVAL_SET_MISMATCH', 'removals');
   if (new Set(removalIds).size !== removalIds.length) fail('TALE_RESET_REMOVAL_SET_MISMATCH', 'duplicate removal');
-  const admittedDefinitions = new Map(parent.coreTokens.map(({ id, definition }) => [id, definition]));
+  const correctedParent = correctedParentDecision(parent, annex);
+  const admittedDefinitions = new Map(correctedParent.coreTokens.map(({ id, definition }) => [id, definition]));
   for (const [index, removal] of annex.removals.entries()) {
     exactKeys(removal, removal.modeReplacements ? ['id', 'replacement', 'modeReplacements'] : ['id', 'replacement'], `removals[${index}]`);
     if (!admittedDefinitions.has(removal.replacement)) fail('TALE_RESET_REPLACEMENT_INVALID', removal.replacement);
@@ -338,12 +457,15 @@ function verifyRemovalAndMappingClosure(annex, base, parent) {
   return { authorizedExpansionCount: expansions.length };
 }
 
-export function acceptanceCommentBody({ annexBytes, annexSha256, productScopeBytes, productScopeSha256 }) {
+export function acceptanceCommentBody({ annexBytes, annexSha256, architectureBytes, architectureSha256, productScopeBytes, productScopeSha256 }) {
   return [
     'Accept Tale-only Core reference baseline correction',
     `Annex path: ${ANNEX_PATH}`,
     `Annex SHA-256: ${annexSha256}`,
     `Annex bytes: ${annexBytes}`,
+    `Architecture path: ${ARCHITECTURE_PATH}`,
+    `Architecture SHA-256: ${architectureSha256}`,
+    `Architecture bytes: ${architectureBytes}`,
     `Product Scope path: ${PRODUCT_SCOPE_PATH}`,
     `Product Scope SHA-256: ${productScopeSha256}`,
     `Product Scope bytes: ${productScopeBytes}`,
@@ -353,10 +475,11 @@ export function acceptanceCommentBody({ annexBytes, annexSha256, productScopeByt
   ].join('\n');
 }
 
-function verifyAcceptance(record, annexBytes, productScopeBytes) {
+function verifyAcceptance(record, annexBytes, architectureBytes, productScopeBytes) {
   exactKeys(record, ['schema', 'decisionId', 'outcome', 'owner', 'ownerNodeId', 'provider', 'repository', 'issueNumber', 'commentId', 'commentNodeId', 'createdAt', 'url', 'bodySha256'], 'acceptance record');
   const body = acceptanceCommentBody({
     annexBytes: Buffer.byteLength(annexBytes), annexSha256: `sha256:${sha256(annexBytes)}`,
+    architectureBytes: Buffer.byteLength(architectureBytes), architectureSha256: `sha256:${sha256(architectureBytes)}`,
     productScopeBytes: Buffer.byteLength(productScopeBytes), productScopeSha256: `sha256:${sha256(productScopeBytes)}`,
   });
   if (record.schema !== 'core-ui-authority-decision-v1' || record.decisionId !== 'core-ui:decision:0004' || record.outcome !== 'accepted' || record.owner !== 'ndrewtran' || record.ownerNodeId !== OWNER_NODE_ID || record.provider !== 'github' || record.repository !== 'ndrewtran/core-ui' || record.issueNumber !== 39 || record.bodySha256 !== `sha256:${sha256(body)}`) fail('TALE_RESET_ACCEPTANCE_INVALID', 'identity or digest binding');
@@ -371,6 +494,7 @@ export async function verifyTaleTokenBaselineReset(repositoryRoot, options = {})
   const parentAcceptance = await strictFile(join(repositoryRoot, PARENT_ACCEPTANCE_PATH), PARENT_ACCEPTANCE_PATH);
   const baseDocument = await strictFile(join(repositoryRoot, TOKEN_SOURCE_PATH), TOKEN_SOURCE_PATH);
   const base = baseDocument.value;
+  const architectureBytes = await readFile(join(repositoryRoot, ARCHITECTURE_PATH), 'utf8');
   const productScopeBytes = await readFile(join(repositoryRoot, PRODUCT_SCOPE_PATH), 'utf8');
   const annex = annexDocument.value;
 
@@ -387,11 +511,18 @@ export async function verifyTaleTokenBaselineReset(repositoryRoot, options = {})
   if (annex.migration.input.tokenSourceFileSha256 !== `sha256:${sha256(baseDocument.bytes)}` || annex.migration.input.tokenCount !== Object.keys(base.tokens).length || annex.migration.input.tokenContractVersion !== base.tokenContractVersion || annex.migration.input.parentDecisionAnnexSha256 !== annex.parentDecision.annexSha256 || annex.migration.input.parentDecisionAcceptanceSha256 !== annex.parentDecision.acceptanceSha256 || annex.migration.input.historicalCatalogDigest !== annex.compatibility.historicalTokenContract.catalogDigest || annex.migration.input.historicalCatalogSourceRevision !== annex.compatibility.historicalTokenContract.catalogSourceRevision || annex.migration.input.finalTokenSourceCanonicalDigest !== annex.digests.finalTokenSource || annex.migration.input.finalTokenSourceCanonicalProfile !== 'Core canonical JSON SHA-256 over the complete token-source object') fail('TALE_RESET_MIGRATION_MISMATCH', 'migration input relation');
 
   const finalSource = materializeFinalSource(base, parentDocument.value, annex);
+  const correctedParent = correctedParentDecision(parentDocument.value, annex);
   validateFamily('token-source', finalSource);
   const finalIds = Object.keys(finalSource.tokens).sort(bytewise);
+  const dispositionCounts = correctedParent.entries.reduce((counts, entry) => ({ ...counts, [entry.disposition]: counts[entry.disposition] + 1 }), { adopt: 0, adapt: 0, defer: 0, reject: 0 });
   const counts = {
+    sourceOccurrenceCount: correctedParent.entries.length,
+    deferredNeutralOccurrenceCount: annex.classificationDelta.deferrals.reduce((count, rule) => count + rule.ordinalTo - rule.ordinalFrom + 1, 0),
+    renamedReferenceTokenCount: annex.classificationDelta.renames.reduce((count, rule) => count + rule.ordinalTo - rule.ordinalFrom + 1, 0),
+    addedTaleReferenceTokenCount: correctedParent.coreTokens.filter(({ action }) => action === 'add').length,
+    reusedExistingReferenceTokenCount: correctedParent.coreTokens.filter(({ action }) => action === 'reuse').length,
     finalTokenCount: finalIds.length,
-    retainedTaleReferenceTokenCount: finalIds.filter((id) => id.startsWith('reference.')).length,
+    finalReferenceTokenCount: finalIds.filter((id) => id.startsWith('reference.')).length,
     semanticTokenCount: finalIds.filter((id) => id.startsWith('semantic.')).length,
     componentTokenCount: finalIds.filter((id) => id.startsWith('component.')).length,
     removedReferenceTokenCount: annex.removals.length,
@@ -400,10 +531,13 @@ export async function verifyTaleTokenBaselineReset(repositoryRoot, options = {})
     authorizedSemanticModeBranches: mappingClosure.authorizedExpansionCount,
   };
   for (const [key, value] of Object.entries(counts)) if (annex.summary[key] !== value) fail('TALE_RESET_SUMMARY_MISMATCH', key);
+  exact(annex.summary.dispositionCounts, dispositionCounts, 'TALE_RESET_SUMMARY_MISMATCH', 'disposition counts');
   if (annex.semanticRecipeEffect.newSemanticIds !== counts.newSemanticIds || annex.semanticRecipeEffect.newComponentIds !== counts.newComponentIds) fail('TALE_RESET_SUMMARY_MISMATCH', 'recipe effect counts');
   if (annex.summary.affectedScopeCount !== annex.affectedScopeIds.length || annex.summary.affectedMilestoneCount !== annex.roadmapImpact.affectedMilestones.length || annex.summary.supersededPointerCount !== annex.supersession.pointers.length) fail('TALE_RESET_SUMMARY_MISMATCH', 'authority closure counts');
-  exactKeys(annex.digests, ['profile', 'removalIds', 'semanticMappings', 'affectedScopeIds', 'supersededPointers', 'finalTokenIds', 'finalTokenSource'], 'digests');
+  exactKeys(annex.digests, ['profile', 'correctedSourceCrosswalk', 'addedCoreTokenIds', 'removalIds', 'semanticMappings', 'affectedScopeIds', 'supersededPointers', 'finalTokenIds', 'finalTokenSource'], 'digests');
+  const addedCoreTokenIds = correctedParent.coreTokens.filter(({ action }) => action === 'add').map(({ id }) => id).sort(bytewise);
   const expectedDigests = {
+    correctedSourceCrosswalk: digest(finalSource.sourceCrosswalk), addedCoreTokenIds: digest(addedCoreTokenIds),
     removalIds: digest(annex.removals.map(({ id }) => id)), semanticMappings: digest(annex.semanticMappings),
     affectedScopeIds: digest(annex.affectedScopeIds), supersededPointers: digest(annex.supersession.pointers),
     finalTokenIds: digest(finalIds), finalTokenSource: digest(finalSource),
@@ -411,13 +545,14 @@ export async function verifyTaleTokenBaselineReset(repositoryRoot, options = {})
   for (const [name, expected] of Object.entries(expectedDigests)) {
     if (!SHA256.test(annex.digests[name]) || annex.digests[name] !== expected) fail('TALE_RESET_DIGEST_MISMATCH', name);
   }
+  if (annex.compatibility.currentCatalog.tokenCount !== finalIds.length) fail('TALE_RESET_COMPATIBILITY_MISMATCH', 'current catalog token count');
   if (!productScopeBytes.startsWith(`---\nscopeVersion: ${annex.versions.scopeVersion.to}\n`) || !productScopeBytes.includes(`### Tale-only reference-baseline correction (\`${annex.versions.scopeVersion.to}\`)`) || !productScopeBytes.includes(ANNEX_PATH)) fail('TALE_RESET_SCOPE_MISMATCH', 'Product Scope authority');
 
   let acceptance = options.acceptanceValue;
   if (acceptance === undefined) {
     try { await access(join(repositoryRoot, ACCEPTANCE_PATH)); acceptance = (await strictFile(join(repositoryRoot, ACCEPTANCE_PATH), ACCEPTANCE_PATH)).value; } catch (error) { if (error?.code !== 'ENOENT') throw error; }
   }
-  if (acceptance !== undefined) verifyAcceptance(acceptance, annexDocument.bytes, productScopeBytes);
+  if (acceptance !== undefined) verifyAcceptance(acceptance, annexDocument.bytes, architectureBytes, productScopeBytes);
   if (options.requireAcceptance && acceptance === undefined) fail('TALE_RESET_ACCEPTANCE_REQUIRED', ACCEPTANCE_PATH);
   return { accepted: acceptance !== undefined, finalTokenCount: finalIds.length, finalTokenSourceDigest: expectedDigests.finalTokenSource, removed: annex.removals.length, affectedScopeIds: annex.affectedScopeIds.length };
 }
