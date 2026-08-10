@@ -443,11 +443,13 @@ test('E-G0.5-04: affected closure is graph-derived and extends through declared 
     '@core-ui/react',
     '@core-ui/tooling',
     '@core-ui/web',
+    '@core-ui/repository-policy',
   ]);
   assert.ok(closure.requiredChecks.includes('pnpm --filter @core-ui/catalog check'));
   assert.ok(closure.requiredChecks.includes('pnpm --filter @core-ui/react check'));
   assert.ok(closure.requiredChecks.includes('pnpm --filter @core-ui/tooling check'));
   assert.ok(closure.requiredChecks.includes('pnpm --filter @core-ui/web check'));
+  assert.ok(closure.requiredChecks.includes('pnpm --filter @core-ui/repository-policy check'));
   assert.deepEqual(closure.deferred, [{
     capability: 'renderer-proof-evaluation-closure',
     readiness: 'unavailable',
