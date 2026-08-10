@@ -2,11 +2,11 @@
   "schema": "core-ui-g1.0-packed-compatibility-source-v1",
   "classification": "test-only-synthetic-pack-input",
   "release": {
-    "idPrefix": "core-ui-test-release:0.0.0",
-    "releaseVersion": "0.0.0",
+    "idPrefix": "core-ui-test-release:1.0.0",
+    "releaseVersion": "1.0.0",
     "schemaVersion": "2.0.0",
-    "queryApiVersion": "1.1.0",
-    "tokenContractVersion": "1.1.0"
+    "queryApiVersion": "2.0.0",
+    "tokenContractVersion": "2.0.0"
   },
   "descriptors": [
     {
@@ -14,7 +14,7 @@
       "package": "@core-ui/react-native",
       "version": "0.0.0",
       "bindingSchemaRange": "^2.0.0",
-      "tokenContractRange": "^1.1.0",
+      "tokenContractRange": "^2.0.0",
       "bindings": [
         {
           "artifact": "core:component:button",
@@ -28,9 +28,9 @@
     {
       "id": "g1.0-packed-react",
       "package": "@core-ui/react",
-      "version": "0.0.0",
+      "version": "1.0.0",
       "bindingSchemaRange": "^2.0.0",
-      "tokenContractRange": "^1.1.0",
+      "tokenContractRange": "^2.0.0",
       "bindings": [
         {
           "artifact": "core:component:button",
@@ -43,15 +43,15 @@
     },
     {
       "id": "g1.0-packed-web",
-      "package": "@core-ui/html",
-      "version": "0.0.0",
+      "package": "@core-ui/web",
+      "version": "1.0.0",
       "bindingSchemaRange": "^2.0.0",
-      "tokenContractRange": "^1.1.0",
+      "tokenContractRange": "^2.0.0",
       "bindings": [
         {
           "artifact": "core:component:button",
           "binding": "web.html",
-          "export": "@core-ui/html/button",
+          "export": "@core-ui/web/button.css",
           "tokenProfiles": ["web.html"],
           "platformSafetyProfiles": ["web.html"]
         }

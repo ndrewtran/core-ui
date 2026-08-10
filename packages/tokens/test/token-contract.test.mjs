@@ -18,6 +18,10 @@ const source = parseJsonStrict(await readFile(
   new URL('../../../catalog/tokens/button-minimum.json', import.meta.url),
   'utf8',
 ));
+const baselineOccurrences = parseJsonStrict(await readFile(
+  new URL('../generated/tale-token-occurrences.json', import.meta.url),
+  'utf8',
+));
 const recipe = {
   source: source.id,
   requirements: [
@@ -58,7 +62,7 @@ function crosswalkFixture() {
     entries: occurrences.map((occurrence) => ({
       occurrence,
       disposition: 'adopt',
-      coreTokenId: 'reference.color.action-dark',
+      coreTokenId: 'reference.color.neutral-90',
       groupId: 'source.action-dark-equivalence',
       reason: 'Both source occurrences are exactly the canonical dark action reference value.',
       targets: directTargets,
@@ -66,7 +70,7 @@ function crosswalkFixture() {
     groups: [{
       id: 'source.action-dark-equivalence',
       relationship: 'equivalent-source-values',
-      coreTokenId: 'reference.color.action-dark',
+      coreTokenId: 'reference.color.neutral-90',
       members: occurrences.map(({ ordinal }) => ({ ordinal, role: 'equivalent-source-value' })),
     }],
   };
@@ -87,7 +91,7 @@ function selectorCrosswalkFixture() {
     },
     entries: [
       {
-        occurrence: occurrences[0], disposition: 'adapt', coreTokenId: 'reference.dimension.space-inline',
+        occurrence: occurrences[0], disposition: 'adapt', coreTokenId: 'reference.dimension.space-xs',
         groupId: 'source.space-m-responsive', reason: 'The base value is portable.',
         targets: { 'web.html': 'direct', 'web.react': 'direct', 'native.ios': 'direct', 'native.android': 'direct', 'native.react-native-web': 'deferred' },
       },
@@ -99,7 +103,7 @@ function selectorCrosswalkFixture() {
     ],
     groups: [{
       id: 'source.space-m-responsive', relationship: 'selector-variants',
-      coreTokenId: 'reference.dimension.space-inline',
+      coreTokenId: 'reference.dimension.space-xs',
       members: [{ ordinal: 1, role: 'base' }, { ordinal: 2, role: 'web-responsive' }],
     }],
   };
@@ -143,12 +147,10 @@ function expectCrosswalkInvalid(value) {
   );
 }
 
-test('TALE-TOKEN-B source-crosswalk validation binds coverage, reference targets, groups, and digest', () => {
-  assert.deepEqual(validateSourceCrosswalk(source), {
-    status: 'absent',
-    digest: null,
-    crosswalk: null,
-  });
+test('TALE-TOKEN-C source-crosswalk validation binds coverage, reference targets, groups, and digest', () => {
+  const canonical = validateSourceCrosswalk(source, { baselineOccurrences });
+  assert.equal(canonical.status, 'available');
+  assert.equal(canonical.digest, 'sha256:7835e06c02297e667b4fd2cf9076d5c604de5a37bb64a7d587b4a0fa7cd5e45e');
   const { candidate, occurrences } = crosswalkFixture();
   const validated = validateSourceCrosswalk(candidate, { baselineOccurrences: occurrences });
   assert.equal(validated.status, 'available');
@@ -169,7 +171,7 @@ test('TALE-TOKEN-B source-crosswalk validation binds coverage, reference targets
     (value) => { value.candidate.sourceCrosswalk.entries[1].occurrence.value = '#000001'; value.occurrences[1].value = '#000001'; },
     (value) => { value.candidate.sourceCrosswalk.entries[1].disposition = 'adapt'; },
     (value) => { delete value.candidate.sourceCrosswalk.groups[0].coreTokenId; },
-    (value) => { value.candidate.sourceCrosswalk.groups[0].coreTokenId = 'reference.color.text-light'; },
+    (value) => { value.candidate.sourceCrosswalk.groups[0].coreTokenId = 'reference.color.neutral-5'; },
     (value) => { value.candidate.sourceCrosswalk.groups.push({ ...structuredClone(value.candidate.sourceCrosswalk.groups[0]), id: 'source.second' }); },
     (value) => { delete value.candidate.sourceCrosswalk.entries[0].groupId; delete value.candidate.sourceCrosswalk.entries[1].groupId; value.candidate.sourceCrosswalk.groups = []; },
   ]) {
@@ -226,7 +228,7 @@ test('TALE-TOKEN-B source-crosswalk validation binds coverage, reference targets
   wrongGroupOrder.candidate.sourceCrosswalk.entries.push(...extraOccurrences.map((occurrence) => ({
     occurrence,
     disposition: 'adapt',
-    coreTokenId: 'reference.dimension.space-inline',
+    coreTokenId: 'reference.dimension.space-xs',
     groupId: 'source.aaa-out-of-order',
     reason: 'Equivalent source values share one Core reference.',
     targets: { 'web.html': 'direct', 'web.react': 'direct', 'native.ios': 'direct', 'native.android': 'direct', 'native.react-native-web': 'deferred' },
@@ -234,7 +236,7 @@ test('TALE-TOKEN-B source-crosswalk validation binds coverage, reference targets
   wrongGroupOrder.candidate.sourceCrosswalk.groups.push({
     id: 'source.aaa-out-of-order',
     relationship: 'equivalent-source-values',
-    coreTokenId: 'reference.dimension.space-inline',
+    coreTokenId: 'reference.dimension.space-xs',
     members: [{ ordinal: 4, role: 'equivalent-source-value' }, { ordinal: 5, role: 'equivalent-source-value' }],
   });
   expectCrosswalkInvalid(wrongGroupOrder);
@@ -253,8 +255,8 @@ test('E-G1.0-01 rejects cycles, reverse layers, incompatible units, and override
   expectCode('CORE_TOKEN_ALIAS_CYCLE', () => compileTokenGraph(cycle));
 
   const reverse = structuredClone(source);
-  delete reverse.tokens['reference.color.action-dark'].value;
-  reverse.tokens['reference.color.action-dark'].alias = 'semantic.action.background';
+  delete reverse.tokens['reference.color.neutral-90'].value;
+  reverse.tokens['reference.color.neutral-90'].alias = 'semantic.action.background';
   expectCode('CORE_TOKEN_LAYER_DIRECTION', () => compileTokenGraph(reverse));
 
   const incompatible = structuredClone(source);
@@ -263,7 +265,7 @@ test('E-G1.0-01 rejects cycles, reverse layers, incompatible units, and override
 
   expectCode('CORE_TOKEN_OVERRIDE_UNAUTHORIZED', () => compileTokenGraph(source, {
     overrides: {
-      'reference.color.action-dark': { type: 'color', unit: 'hex', value: '#000000' },
+      'reference.color.neutral-90': { type: 'color', unit: 'hex', value: '#000000' },
     },
   }));
 });
@@ -274,11 +276,16 @@ test('E-G1.0-02 web and native transforms retain canonical provenance without cr
   const ios = compileNativeTheme(source, { profile: 'native.ios' });
   const android = compileNativeTheme(source, { profile: 'native.android' });
   assert.equal(web.css, react.css);
-  assert.equal(web.css.includes('--core-reference-'), false);
-  assert.equal(Object.keys(ios.theme).some((id) => id.startsWith('reference.')), false);
+  assert.equal((web.css.match(/--core-reference-/gu) ?? []).length, 296);
+  assert.equal(Object.keys(ios.theme).filter((id) => id.startsWith('reference.')).length, 296);
+  assert.equal(Object.keys(ios.theme).filter((id) => id.startsWith('semantic.')).length, 11);
+  assert.equal(Object.keys(ios.theme).filter((id) => id.startsWith('component.')).length, 5);
+  assert.deepEqual(android.theme, ios.theme);
   assert.equal(Object.hasOwn(ios, 'css'), false);
   assert.equal(ios.provenance.digest, web.provenance.digest);
   assert.equal(android.provenance.digest, web.provenance.digest);
+  assert.equal(Object.keys(ios.theme).length, 312);
+  assert.equal(web.tokenContractVersion, '2.0.0');
   consumeButtonStaticWebTransform(web, { target: 'web.html' });
   consumeButtonStaticWebTransform(react, { target: 'web.react' });
   consumeButtonStaticNativeTransform(ios, { profile: 'native.ios' });
@@ -291,6 +298,9 @@ test('E-G1.0-02 web and native transforms retain canonical provenance without cr
       }));
     }
   }
+  expectCode('CORE_TOKEN_PROFILE_INVALID', () => compileNativeTheme(source, {
+    profile: 'native.react-native-web',
+  }));
 });
 
 test('E-G1.0-03 missing required tokens fail per profile and exact proved fallbacks diagnose use', () => {
@@ -376,7 +386,7 @@ test('E-G1.0-04 requirement digests track exact semantic closure only', () => {
   assert.notEqual(unrelatedSet.sourceRevision, base.sourceRevision);
 
   const dependency = structuredClone(source);
-  dependency.tokens['reference.color.action-dark'].value = '#000001';
+  dependency.tokens['reference.color.neutral-90'].value = '#000001';
   const dependencySet = compileTokenRequirementSet({
     source: dependency, recipe, bindingId: 'web.html', profile: 'web.html',
   });

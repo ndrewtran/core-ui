@@ -32,7 +32,8 @@
     },
     {
       "family": "token-source",
-      "path": "catalog/tokens/button-minimum.json"
+      "path": "catalog/tokens/button-minimum.json",
+      "baselineOccurrencesPath": "packages/tokens/generated/tale-token-occurrences.json"
     }
   ]
 }

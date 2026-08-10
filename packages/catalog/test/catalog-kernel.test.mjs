@@ -297,7 +297,10 @@ test('TALE-TOKEN-B query 2.0 removes inline tokens while retaining historical 1.
   assert.deepEqual(v20.warnings, []);
   assert.equal(Object.hasOwn(v20.data.artifact, 'tokens'), false);
   assert.equal(v20.data.artifact.tokenCount, Object.keys(v11.data.artifact.tokens).length);
-  assert.equal(v20.data.artifact.sourceCrosswalkDigest, null);
+  assert.equal(
+    v20.data.artifact.sourceCrosswalkDigest,
+    'sha256:7835e06c02297e667b4fd2cf9076d5c604de5a37bb64a7d587b4a0fa7cd5e45e',
+  );
   assert.deepEqual(v20.data.artifact.availableSections, ['tokens', 'source-crosswalk']);
   for (const response of [v11, v12, v20]) {
     assert.equal(Object.hasOwn(response.data.artifact, 'sourceCrosswalk'), false);
@@ -358,26 +361,18 @@ test('TALE-TOKEN-B query 2.0 removes inline tokens while retaining historical 1.
   assert.equal(second.page.position, 1);
   assert.notEqual(second.entries.items[0].id, first.entries.items[0].id);
 
-  const absent = api.getArtifact({
+  const currentCrosswalk = api.getArtifact({
     id: 'core:token:button-minimum',
     queryApiVersion: '1.2.0',
     section: 'source-crosswalk',
   });
-  assert.deepEqual(absent.entries, {
-    status: 'absent',
-    reason: 'token-source-omits-source-crosswalk',
-    tokenSourceSchemaVersion: '2.1.0',
-    items: [],
-  });
-  assert.deepEqual(absent.page, {
-    position: 0,
-    returned: 0,
-    remaining: 0,
-    nextCursor: null,
-    entryTokens: 0,
-    densePageBudget: 2048,
-  });
-  validateFamily('section-page', absent);
+  assert.equal(currentCrosswalk.entries.status, 'available');
+  assert.equal(currentCrosswalk.entries.items.length, 20);
+  assert.equal(currentCrosswalk.page.position, 0);
+  assert.equal(currentCrosswalk.page.returned, 20);
+  assert.equal(currentCrosswalk.page.remaining, 673);
+  assert.equal(typeof currentCrosswalk.page.nextCursor, 'string');
+  validateFamily('section-page', currentCrosswalk);
 
   const futurePreimage = structuredClone(preimage(baseBundle));
   const futureToken = futurePreimage.artifacts.find(({ kind }) => kind === 'token');
@@ -545,16 +540,24 @@ test('TALE-TOKEN-B retains exact Phase A v1.1 and v1.2 responses outside enumera
     join(repositoryRoot, 'tests/fixtures/tale-token-phase-b/historical-responses.json'),
     'utf8',
   ));
+  const historicalBundle = JSON.parse(await readFile(
+    join(
+      repositoryRoot,
+      'tests/fixtures/tale-token-phase-b/installed-catalog/generated/catalog.json',
+    ),
+    'utf8',
+  ));
+  const historicalApi = createCatalogApi(historicalBundle);
   assert.equal(fixture.schema, 'core-ui-tale-token-phase-b-historical-responses-v1');
   assert.equal(fixture.sourceRevision, 'e1aa1c96464cf603debeadb520b5f45d7104242f');
   const current = {
-    v11Full: getArtifact({
+    v11Full: historicalApi.getArtifact({
       id: 'core:token:button-minimum', queryApiVersion: '1.1.0', detail: 'full',
     }),
-    v12Full: getArtifact({
+    v12Full: historicalApi.getArtifact({
       id: 'core:token:button-minimum', queryApiVersion: '1.2.0', detail: 'full',
     }),
-    v12SourceCrosswalkAbsent: getArtifact({
+    v12SourceCrosswalkAbsent: historicalApi.getArtifact({
       id: 'core:token:button-minimum', queryApiVersion: '1.2.0', section: 'source-crosswalk',
     }),
   };
@@ -607,7 +610,8 @@ test('TALE-TOKEN-B section cursors fail closed across tampering, versions, selec
     payload.tokenSourceContentRevision = `sha256:${'0'.repeat(64)}`;
   });
   assert.equal(api.getArtifact({ ...request, cursor: crossSourceCursor }).error.code, 'CORE_CURSOR_INVALID');
-  for (const nextPosition of [0, 28, 4294967296]) {
+  const tokenCount = Object.keys(baseBundle.artifacts.find(({ kind }) => kind === 'token').record.tokens).length;
+  for (const nextPosition of [0, tokenCount + 1, 4294967296]) {
     const outOfRangeCursor = rebindSectionCursor(first.page.nextCursor, (payload) => {
       payload.nextPosition = nextPosition;
     });

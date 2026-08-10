@@ -134,12 +134,13 @@ test('TALE-TOKEN-B core get negotiates 1.1/1.2/2.0 and preserves page parity', (
   assert.deepEqual(parseHuman(renderHuman(page)), page);
   assert.ok(countTokens(renderDense(page)) <= 2048);
 
-  const absent = jsonResult([
+  const sourceCrosswalk = jsonResult([
     'get', 'core:token:button-minimum', '--query-api-version', '1.2.0',
     '--section', 'source-crosswalk',
   ]);
-  assert.equal(absent.entries.status, 'absent');
-  assert.equal(absent.entries.tokenSourceSchemaVersion, '2.1.0');
+  assert.equal(sourceCrosswalk.entries.status, 'available');
+  assert.equal(sourceCrosswalk.entries.items.length, 20);
+  assert.equal(sourceCrosswalk.page.remaining, 673);
 
   const historical = jsonResult([
     'get', 'core:token:button-minimum', '--query-api-version', '1.1.0', '--detail', 'full',

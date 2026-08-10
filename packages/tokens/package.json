@@ -1,20 +1,23 @@
 {
   "name": "@core-ui/tokens",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "type": "module",
   "engines": {
     "node": ">=24.19.0 <25"
   },
   "exports": {
-    ".": "./src/index.mjs"
+    ".": "./src/index.mjs",
+    "./materialization": "./src/tale-token-materialization.mjs"
   },
   "dependencies": {
     "@core-ui/schema": "workspace:*"
   },
   "scripts": {
-    "check": "node --test test/*.test.mjs",
-    "generate": "node -e \"console.log('[tokens] no generated package-owned outputs')\"",
-    "generate:check": "node -e \"console.log('[tokens] no generated package-owned outputs')\""
+    "check": "node src/tale-token-materialization.mjs --check && node src/generate.mjs --check && node --test test/*.test.mjs",
+    "generate": "node src/generate.mjs",
+    "generate:check": "node src/generate.mjs --check",
+    "materialize": "node src/tale-token-materialization.mjs",
+    "materialize:check": "node src/tale-token-materialization.mjs --check"
   }
 }

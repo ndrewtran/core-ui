@@ -608,7 +608,7 @@ export function validateThemeForRequirementSet({ requirementSet, values }) {
 }
 
 function publicTokenEntries(graph) {
-  return Object.values(graph.tokens).filter(({ layer }) => layer !== 'reference');
+  return Object.values(graph.tokens);
 }
 
 function cssName(tokenId) {
