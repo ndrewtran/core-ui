@@ -1,5 +1,5 @@
 ---
-scopeVersion: 4.0.0
+scopeVersion: 4.0.1
 status: execution-baseline
 product: Core UI
 architecture: ./monorepo-architecture.md
@@ -1064,6 +1064,100 @@ implementation PR is linked, its complete authority, dependency, deliverable,
 evidence, acceptance-command, non-goal, blocker, and PR references move to
 decision 0005/Product Scope `4.0.0` and require the exact Phase C bindings.
 Completed evidence and historical tracker facts are not rewritten.
+
+### Phase C applicability-chain topology correction (`4.0.1`)
+
+Issue #46 exposed a proof-topology omission after decision 0005 was merged. The
+decision-0005 authority correction correctly appended successors to all twenty
+then-terminal applicability chains. The accepted Phase C topology correctly
+reserved six future successors for the six accepted Phase-B indexes, owned by
+the Phase C Gate root. The same implementation source change also invalidates
+the current applicability manifests of the remaining fourteen historical and
+Phase-A terminal chains, but no accepted owner was assigned to those successors.
+Architecture requires those stale terminal manifests to fail closed; a status,
+name, path, or pending-replacement bypass is prohibited.
+
+Decision `core-ui:decision:0006` is the sole machine-readable owner of the
+correction. It defines two append-only generations. Before the authority PR may
+merge, one zero-record authority-stage root continues all twenty exact
+decision-0005 terminal certificates at the authority source commit. After the
+implementation source commit, its twenty terminal certificates partition without
+overlap or omission:
+
+- the Phase C Gate root continues to own exactly six successors, targeting only
+  the accepted Phase-B G0.1 through G0.5 and Gate 0 index chains; and
+- one separate root,
+  `tests/evidence/authority-46-phase-c-applicability/index.json`, owns exactly
+  fourteen successors targeting the eight original historical and six Phase-A
+  chains listed with exact predecessor, index, assertion, and manifest identities
+  in decision 0006.
+
+Both added roots are internal applicability maintenance, not replacement proof.
+The pre-merge authority-stage root has zero records and exactly twenty successors.
+The later maintenance root has zero records and exactly fourteen successors.
+Its index has zero evidence records and no Phase C profile, milestone assertion,
+upstream-evidence role, support result, promotion result, or release result. It
+cannot satisfy any evidence ID or acceptance gate. Phase C remains exactly six
+fresh immutable `TALE-TOKEN-C` roots. The Gate root still integrates the five
+fresh G0 roots plus unchanged G0.0 and owns exactly the six Phase-B successors.
+The maintenance root is not a seventh Phase C root.
+
+The authority-stage root and successors retain direct bindings
+to the exact accepted decision-0003, decision-0004, and decision-0005 candidates
+and receipts. They add direct bindings to decision 0006, its acceptance receipt,
+and Product Scope 4.0.1; no earlier authority identity is replaced or inferred.
+Its twenty successors bind the exact decision-0006 acceptance receipt and
+the same accepted authority source commit/tree. The authority PR cannot be ready
+or merge until this zero-record generation is retained and stale-terminal
+verification passes. Later, all six Phase C roots and all twenty generation-two
+successors retain those authority bindings and bind the same exact accepted
+implementation source commit/tree, their exact authority-stage terminal
+predecessor, unchanged historical index and assertion list, predecessor current
+manifest, freshly computed current manifest, and pending
+`TALE-TOKEN-C`/`E-G1.0`/`E-G1.1` replacement plan. The dedicated authority capture writes the first generation atomically and
+reproduces it in no-write check mode. After authority merge, the existing
+`tests/evidence/capture-tale-token-phase-c.mjs` orchestration writes the six
+proof roots and the separate maintenance root atomically after the implementation
+source commit; one later evidence-only commit retains all outputs. Check mode
+recreates them from explicit retained source identity and timestamp inputs in a
+temporary directory and compares exact bytes without using checkout `HEAD` or
+the current clock as substitute identity.
+
+This is a patch from Product Scope `4.0.0` to `4.0.1`. It clarifies the
+internal proof topology without changing a Scope ID, commitment, product outcome,
+release boundary, platform, package, public surface, artifact kind, durable
+product relation, schema, query, token, renderer, compatibility tuple, or
+non-goal. All 67 affected Scope IDs and their committed states remain exact to
+decisions 0004 and 0005. Catalog, package, token-contract, query, and schema
+versions remain unchanged; there are no release additions or removals.
+
+Architecture and roadmap need no structural amendment. The architecture already
+permits one digest-linked successor after later source drift and requires stale
+current manifests to be rejected. The sequence is accepted authority -> authority applicability continuation ->
+authority merge -> implementation source -> Phase C -> fresh G1.0 -> fresh G1.1.
+Human Phase C acceptance remains separate and follows the evidence-only commit.
+
+Authoring remains with the existing owners: `tests/` owns cross-package capture
+orchestration, while package, catalog, tooling, authority, and evidence owners
+supply the canonical inputs. No consumer migration changes. Privacy remains
+public-sanitized and introduces no consumer or personal data. Security remains
+digest-, predecessor-, source-, tree-, and receipt-bound with no network or
+mutable-latest fallback. Before capture, rollback is omission of uncommitted
+outputs; after append-only capture, no certificate is deleted or rewritten.
+
+A deterministic current-state projection remains deferred. It may later improve
+navigation over retained history, but it is not required by Phase C and is not
+admitted by this correction. This correction likewise does not authorize token
+implementation changes, historical rewrites, package publication, issue closure,
+or any Phase C, G1.0, G1.1, Gate 1, support, accessibility, parity, or release
+claim.
+
+After digest-specific acceptance and authority merge, Project README and issue
+#46 may be reconciled to Product Scope `4.0.1` and decisions 0003 through 0006.
+#46 remains blocked before that merge. Its eventual implementation references
+must distinguish the six Phase C roots/six Gate-owned Phase-B successors from the
+fourteen-successor non-proof maintenance root. Workflow automation never proves
+authority or evidence acceptance.
 
 ## Tracker reference contract
 
