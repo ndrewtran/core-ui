@@ -59,7 +59,7 @@ async function acceptance(overrides = {}) {
 
 test('verifies the exact Tale-only reference baseline reset candidate', async () => {
   assert.deepEqual(await verifyTaleTokenBaselineReset(repositoryRoot), {
-    accepted: false,
+    accepted: true,
     affectedScopeIds: 67,
     finalTokenCount: 312,
     finalTokenSourceDigest: 'sha256:670f2a45ada8c90b39e6de4bc4e6fef9e175313607c428067c21b7c2b1c5eac2',
@@ -249,8 +249,9 @@ test('rejects a non-idempotent rollback contract', async () => {
 });
 
 test('requires exact human acceptance only when requested', async () => {
+  assert.equal((await verifyTaleTokenBaselineReset(repositoryRoot, { acceptanceValue: null })).accepted, false);
   await assert.rejects(
-    verifyTaleTokenBaselineReset(repositoryRoot, { requireAcceptance: true }),
+    verifyTaleTokenBaselineReset(repositoryRoot, { acceptanceValue: null, requireAcceptance: true }),
     (error) => error instanceof TaleTokenBaselineResetError && error.code === 'TALE_RESET_ACCEPTANCE_REQUIRED',
   );
   const result = await verifyTaleTokenBaselineReset(repositoryRoot, { acceptanceValue: await acceptance(), requireAcceptance: true });

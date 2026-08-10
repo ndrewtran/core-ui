@@ -548,13 +548,14 @@ export async function verifyTaleTokenBaselineReset(repositoryRoot, options = {})
   if (annex.compatibility.currentCatalog.tokenCount !== finalIds.length) fail('TALE_RESET_COMPATIBILITY_MISMATCH', 'current catalog token count');
   if (!productScopeBytes.startsWith(`---\nscopeVersion: ${annex.versions.scopeVersion.to}\n`) || !productScopeBytes.includes(`### Tale-only reference-baseline correction (\`${annex.versions.scopeVersion.to}\`)`) || !productScopeBytes.includes(ANNEX_PATH)) fail('TALE_RESET_SCOPE_MISMATCH', 'Product Scope authority');
 
-  let acceptance = options.acceptanceValue;
-  if (acceptance === undefined) {
+  const acceptanceOverrideProvided = Object.hasOwn(options, 'acceptanceValue');
+  let acceptance = acceptanceOverrideProvided ? options.acceptanceValue : undefined;
+  if (!acceptanceOverrideProvided) {
     try { await access(join(repositoryRoot, ACCEPTANCE_PATH)); acceptance = (await strictFile(join(repositoryRoot, ACCEPTANCE_PATH), ACCEPTANCE_PATH)).value; } catch (error) { if (error?.code !== 'ENOENT') throw error; }
   }
-  if (acceptance !== undefined) verifyAcceptance(acceptance, annexDocument.bytes, architectureBytes, productScopeBytes);
-  if (options.requireAcceptance && acceptance === undefined) fail('TALE_RESET_ACCEPTANCE_REQUIRED', ACCEPTANCE_PATH);
-  return { accepted: acceptance !== undefined, finalTokenCount: finalIds.length, finalTokenSourceDigest: expectedDigests.finalTokenSource, removed: annex.removals.length, affectedScopeIds: annex.affectedScopeIds.length };
+  if (acceptance !== undefined && acceptance !== null) verifyAcceptance(acceptance, annexDocument.bytes, architectureBytes, productScopeBytes);
+  if (options.requireAcceptance && (acceptance === undefined || acceptance === null)) fail('TALE_RESET_ACCEPTANCE_REQUIRED', ACCEPTANCE_PATH);
+  return { accepted: acceptance !== undefined && acceptance !== null, finalTokenCount: finalIds.length, finalTokenSourceDigest: expectedDigests.finalTokenSource, removed: annex.removals.length, affectedScopeIds: annex.affectedScopeIds.length };
 }
 
 const invokedPath = process.argv[1] ? resolve(process.argv[1]) : null;
