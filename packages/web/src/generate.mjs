@@ -3,14 +3,14 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { catalogJson } from '@core-ui/catalog/bundle';
 import { canonicalJson } from '@core-ui/schema';
-import { compileTokenGraph } from '@core-ui/tokens';
+import { compileTokenGraph, compileWebTheme } from '@core-ui/tokens';
 import { compileWebSurface } from './compile-surface.mjs';
 
 const packageRoot = resolve(import.meta.dirname, '..');
 const manifest = JSON.parse(await readFile(resolve(packageRoot, 'package.json'), 'utf8'));
 const bundle = JSON.parse(catalogJson);
 const button = bundle.artifacts.find(({ id }) => id === 'core:component:button');
-const tokenSource = bundle.artifacts.find(({ id }) => id === 'core:token:button-minimum')?.record;
+const tokenSource = bundle.artifacts.find(({ id }) => id === 'core:token:default-theme')?.record;
 if (!button || !tokenSource) throw new Error('CORE_WEB_GENERATION_INPUT_MISSING');
 const packageExports = Object.keys(manifest.exports);
 const surfaces = Object.fromEntries(['web.html', 'web.react'].map((bindingId) => [
@@ -18,12 +18,15 @@ const surfaces = Object.fromEntries(['web.html', 'web.react'].map((bindingId) =>
   compileWebSurface({ artifact: button, bindingId, packageExports, tokenSource }),
 ]));
 const graph = compileTokenGraph(tokenSource);
+const theme = compileWebTheme(tokenSource);
 const cssValue = (tokenId) => {
   const token = graph.tokens[tokenId];
   return `${token.value}${token.unit === 'px' ? 'px' : token.unit === 'ms' ? 'ms' : ''}`;
 };
 const source = 'packages/catalog/catalog-sources.json';
 const cssBody = [
+  theme.css.trimEnd(),
+  '',
   '@layer core.tokens, core.components, core.utilities;',
   '',
   '@layer core.components {',
@@ -73,7 +76,7 @@ const compatibility = {
   package: manifest.name,
   version: manifest.version,
   bindingSchemaRange: '^2.0.0',
-  tokenContractRange: '^1.1.0',
+  tokenContractRange: `^${graph.tokenContractVersion}`,
   sourceRevision: bundle.sourceRevision,
   bindings: Object.fromEntries(Object.entries(surfaces).map(([id, surface]) => [id, {
     ref: surface.bindingRef,

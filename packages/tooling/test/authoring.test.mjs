@@ -66,6 +66,7 @@ async function temporaryCatalogRepository() {
   const temporaryRoot = await mkdtemp(join(tmpdir(), 'core-ui-g0-5-'));
   await Promise.all([
     mkdir(resolve(temporaryRoot, 'packages/tooling'), { recursive: true }),
+    mkdir(resolve(temporaryRoot, 'packages/tokens'), { recursive: true }),
     mkdir(resolve(temporaryRoot, 'decisions'), { recursive: true }),
     mkdir(resolve(temporaryRoot, 'tooling/audits/repository-policy'), { recursive: true }),
     mkdir(resolve(temporaryRoot, 'packages/schema/schemas'), { recursive: true }),
@@ -85,6 +86,11 @@ async function temporaryCatalogRepository() {
     cp(
       resolve(repositoryRoot, 'packages/tooling/command-registry.json'),
       resolve(temporaryRoot, 'packages/tooling/command-registry.json'),
+      { recursive: true },
+    ),
+    cp(
+      resolve(repositoryRoot, 'packages/tokens/generated'),
+      resolve(temporaryRoot, 'packages/tokens/generated'),
       { recursive: true },
     ),
     cp(
@@ -435,7 +441,7 @@ test('E-G0.5-04: affected closure is graph-derived and extends through declared 
   assert.equal(closure.sourceRevision, context.sourceRevision);
   assert.ok(closure.artifacts.includes('core:component:button'));
   assert.ok(closure.artifacts.includes('core:example:button-basic-react'));
-  assert.ok(closure.artifacts.includes('core:token:button-minimum'));
+  assert.ok(closure.artifacts.includes('core:token:default-theme'));
   assert.ok(closure.canonicalSources.includes(component.source.record));
   assert.ok(closure.projections.includes('packages/catalog/generated/catalog.json'));
   assert.deepEqual(closure.packages.map(({ name }) => name), [

@@ -3,7 +3,7 @@ import { join, relative } from 'node:path';
 import { normalizePath } from './policy.mjs';
 
 const WORKSPACE_ROOTS = ['apps', 'packages', 'tooling'];
-const IGNORED = new Set(['node_modules', 'fixtures']);
+const IGNORED = new Set(['.cache', 'node_modules', 'fixtures']);
 
 async function findManifests(repositoryRoot, current) {
   const entries = await readdir(current, { withFileTypes: true }).catch(() => []);

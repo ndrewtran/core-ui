@@ -6,7 +6,7 @@ import { catalogJson } from '@core-ui/catalog/bundle';
 
 const bundle = JSON.parse(catalogJson);
 const button = bundle.artifacts.find(({ id }) => id === 'core:component:button');
-const tokenSource = bundle.artifacts.find(({ id }) => id === 'core:token:button-minimum').record;
+const tokenSource = bundle.artifacts.find(({ id }) => id === 'core:token:default-theme').record;
 
 test('E-G1.1-02 machine-enumerates only binding and token-policy derived hooks', () => {
   const html = webSurfaces['web.html'].surface;

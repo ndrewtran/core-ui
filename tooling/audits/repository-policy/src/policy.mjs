@@ -46,7 +46,13 @@ export async function loadPolicy(repositoryRoot) {
 export function classifyPath(repositoryPath, policy) {
   const normalized = normalizePath(repositoryPath);
   const segments = normalized.split('/');
-  if (segments.some((segment) => policy.projectionPathSegments.includes(segment))) {
+  const retainedFixture = policy.retainedProjectionFixtureRoots?.some(
+    (root) => normalized === root || normalized.startsWith(`${root}/`),
+  ) ?? false;
+  if (
+    !retainedFixture
+    && segments.some((segment) => policy.projectionPathSegments.includes(segment))
+  ) {
     return 'projection';
   }
 

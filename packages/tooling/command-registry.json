@@ -2,7 +2,7 @@
   "schemaVersion": "1.0.0",
   "cli": {
     "name": "core",
-    "version": "0.2.0",
+    "version": "1.0.0",
     "description": "Deterministic Core UI documentation over the local catalog query API."
   },
   "tokenizer": {
@@ -156,7 +156,7 @@
         { "name": "id-or-alias", "requestKey": "id", "required": true, "type": "string" }
       ],
       "options": ["platform", "detail", "section", "purpose", "limit", "cursor", "query-api-version", "json", "dense", "help", "project", "catalog-version", "catalog-digest"],
-      "examples": ["core get core:component:button --platform web.react --json", "core get core:token:button-minimum --query-api-version 1.2.0 --section tokens --limit 20 --dense"],
+      "examples": ["core get core:component:button --platform web.react --json", "core get core:token:default-theme --query-api-version 1.2.0 --section tokens --limit 20 --dense"],
       "budgetFixture": { "id-or-alias": "core:component:button" },
       "tokenBudgets": { "brief": 384, "compact": 1024, "full": 2048 }
     }

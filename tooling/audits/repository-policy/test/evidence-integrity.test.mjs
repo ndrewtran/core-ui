@@ -4,9 +4,35 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
 import { canonicalJson } from '../src/canonical-json.mjs';
-import { EvidenceIntegrityError, verifyEvidence } from '../src/evidence-verify.mjs';
+import {
+  EvidenceIntegrityError,
+  hasUnsanitizedEvidenceOutput,
+  verifyEvidence,
+} from '../src/evidence-verify.mjs';
 import { sha256 } from '../src/policy.mjs';
 import { acceptanceCommentBody } from '../src/tale-token-annex-acceptance.mjs';
+
+test('evidence output privacy recognizes canonical token IDs without accepting credentials', () => {
+  const root = '/workspace/core-ui';
+  assert.equal(hasUnsanitizedEvidenceOutput(
+    '{"artifactId":"core:token:default-theme"}',
+    root,
+  ), false);
+  assert.equal(hasUnsanitizedEvidenceOutput('token=secret-value', root), true);
+  assert.equal(hasUnsanitizedEvidenceOutput('foo:token=secret-value', root), true);
+  assert.equal(hasUnsanitizedEvidenceOutput('core:token=secret-value', root), true);
+  assert.equal(hasUnsanitizedEvidenceOutput('auth:token: secret-value', root), true);
+  assert.equal(hasUnsanitizedEvidenceOutput('x:token:secret-value', root), true);
+  assert.equal(hasUnsanitizedEvidenceOutput('"core:token:default--theme"', root), true);
+  assert.equal(hasUnsanitizedEvidenceOutput('"core:token:default.theme"', root), true);
+  assert.equal(hasUnsanitizedEvidenceOutput('"core:token:default/theme"', root), true);
+  assert.equal(hasUnsanitizedEvidenceOutput('"core:token:default-theme:secret"', root), true);
+  assert.equal(hasUnsanitizedEvidenceOutput('authorization: Bearer-secret', root), true);
+  assert.equal(hasUnsanitizedEvidenceOutput('api-key=secret-value', root), true);
+  assert.equal(hasUnsanitizedEvidenceOutput('/Users/example/private.txt', root), true);
+  assert.equal(hasUnsanitizedEvidenceOutput('/private/var/folders/example/private.txt', root), true);
+  assert.equal(hasUnsanitizedEvidenceOutput(`${root}/packages/tokens`, root), true);
+});
 
 async function fixture({
   applicability = false,

@@ -13,6 +13,8 @@ import {
 import { resolvePnpmProjectCatalog } from '../src/pnpm-adapter.mjs';
 import { runCli } from '../src/cli.mjs';
 
+const repositoryRoot = resolvePath(import.meta.dirname, '../../..');
+
 async function corpus() {
   return parseJsonStrict(await readFile(
     new URL('../../../tests/fixtures/g0.4/corpus.json', import.meta.url),
@@ -282,6 +284,122 @@ test('E-G0.4 pnpm adapter resolves the selected direct package and drives the CL
   assert.equal(selected.meta.catalogDigest, root.package.catalogDigest);
 });
 
+test('TALE-TOKEN-C installed-local selection retains the exact Phase B catalog tuple', async () => {
+  await mkdir(join(process.cwd(), 'fixtures'), { recursive: true });
+  const fixtureRoot = await mkdtemp(join(process.cwd(), 'fixtures/.tale-phase-b-installed-'));
+  const catalogRoot = join(fixtureRoot, 'catalog');
+  const schemaRoot = join(fixtureRoot, 'schema');
+  const tokensRoot = join(fixtureRoot, 'tokens');
+  const fixtureCatalogRoot = join(
+    repositoryRoot,
+    'tests/fixtures/tale-token-phase-b/installed-catalog',
+  );
+  try {
+    await cp(fixtureCatalogRoot, catalogRoot, { recursive: true });
+    await mkdir(schemaRoot, { recursive: true });
+    await mkdir(tokensRoot, { recursive: true });
+    await writeJson(join(fixtureRoot, 'package.json'), {
+      name: 'core-ui-tale-phase-b-installed-fixture',
+      version: '1.0.0',
+      private: true,
+      packageManager: 'pnpm@10.33.0',
+      dependencies: { '@core-ui/catalog': 'workspace:*' },
+    });
+    await writeFile(
+      join(fixtureRoot, 'pnpm-workspace.yaml'),
+      "packages:\n  - catalog\n  - schema\n  - tokens\n",
+    );
+    await writeJson(join(schemaRoot, 'package.json'), {
+      name: '@core-ui/schema', version: '0.2.0', private: true,
+    });
+    await writeJson(join(tokensRoot, 'package.json'), {
+      name: '@core-ui/tokens', version: '0.1.0', private: true,
+    });
+    const install = spawnSync('pnpm', ['install', '--offline', '--ignore-scripts'], {
+      cwd: fixtureRoot,
+      encoding: 'utf8',
+    });
+    assert.equal(install.status, 0, install.stderr);
+
+    const project = relative(process.cwd(), fixtureRoot).split('\\').join('/');
+    const historical = resolvePnpmProjectCatalog({ project });
+    const historicalIdentity = JSON.parse(await readFile(
+      join(catalogRoot, 'generated/catalog-package.json'),
+      'utf8',
+    ));
+    assert.equal(historical.type, 'success');
+    assert.equal(historical.package.version, '0.2.0');
+    assert.equal(historical.package.catalogVersion, '0.2.0');
+    assert.equal(historicalIdentity.queryApiVersion, '2.0.0');
+    assert.deepEqual(
+      historicalIdentity.supportedQueryApiVersions,
+      ['1.1.0', '1.2.0', '2.0.0'],
+    );
+    assert.equal(historicalIdentity.releaseManifest.tokenContractVersion, '1.1.0');
+
+    const historicalV11 = historical.api.getArtifact({
+      id: 'core:token:button-minimum', queryApiVersion: '1.1.0', detail: 'full',
+    });
+    assert.equal(historicalV11.apiVersion, '1.1.0');
+    assert.equal(historicalV11.data.artifact.tokenContractVersion, '1.1.0');
+    assert.equal(Object.hasOwn(
+      historicalV11.data.artifact.tokens,
+      'reference.color.action-dark',
+    ), true);
+    for (const queryApiVersion of ['1.1.0', '1.2.0', '2.0.0']) {
+      assert.equal(historical.api.getArtifact({
+        id: 'core:token:button-minimum', queryApiVersion, detail: 'full',
+      }).data.artifact.id, 'core:token:button-minimum');
+      assert.equal(historical.api.getArtifact({
+        id: 'core:token:default-theme', queryApiVersion, detail: 'full',
+      }).error.code, 'CORE_ARTIFACT_NOT_FOUND');
+    }
+
+    const current = resolvePnpmProjectCatalog();
+    assert.equal(current.type, 'success');
+    const currentV11 = current.api.getArtifact({
+      id: 'core:token:default-theme', queryApiVersion: '1.1.0', detail: 'full',
+    });
+    assert.equal(currentV11.apiVersion, '1.1.0');
+    assert.equal(currentV11.data.artifact.tokenContractVersion, '2.0.0');
+    assert.equal(Object.hasOwn(
+      currentV11.data.artifact.tokens,
+      'reference.color.action-dark',
+    ), false);
+    assert.equal(Object.hasOwn(
+      currentV11.data.artifact.tokens,
+      'reference.color.neutral-50',
+    ), true);
+    for (const queryApiVersion of ['1.1.0', '1.2.0', '2.0.0']) {
+      assert.equal(current.api.getArtifact({
+        id: 'core:token:default-theme', queryApiVersion, detail: 'full',
+      }).data.artifact.id, 'core:token:default-theme');
+      assert.equal(current.api.getArtifact({
+        id: 'core:token:button-minimum', queryApiVersion, detail: 'full',
+      }).error.code, 'CORE_ARTIFACT_NOT_FOUND');
+    }
+
+    const bundlePath = join(catalogRoot, 'generated/catalog.json');
+    const bundleBytes = await readFile(bundlePath, 'utf8');
+    await writeFile(bundlePath, `${bundleBytes} `);
+    assert.equal(
+      resolvePnpmProjectCatalog({ project }).error.code,
+      'CORE_CATALOG_INTEGRITY_MISMATCH',
+    );
+    await writeFile(bundlePath, bundleBytes);
+
+    const fixtureManifest = JSON.parse(await readFile(join(fixtureRoot, 'package.json'), 'utf8'));
+    fixtureManifest.dependencies['@core-ui/catalog'] = 'workspace:^1.0.0';
+    await writeJson(join(fixtureRoot, 'package.json'), fixtureManifest);
+    assert.equal(
+      resolvePnpmProjectCatalog({ project }).error.code,
+      'CORE_CATALOG_DECLARATION_DRIFT',
+    );
+  } finally {
+    await rm(fixtureRoot, { recursive: true, force: true });
+  }
+});
+
 test('E-G0.4 CLI requires exact bindings and filters project-wide discovery', () => {
   const detail = runCli([
     'get', 'core:component:button', '--platform', 'web.react', '--json',
@@ -293,7 +411,7 @@ test('E-G0.4 CLI requires exact bindings and filters project-wide discovery', ()
   assert.equal(discovery.exitCode, 0);
   const response = JSON.parse(discovery.stdout);
   assert.equal(response.meta.authority, 'installed-local');
-  assert.deepEqual(response.meta.resolution.targetPackages, { '@core-ui/catalog': '0.2.0' });
+  assert.deepEqual(response.meta.resolution.targetPackages, { '@core-ui/catalog': '2.0.0' });
   assert.equal(response.data.items.some(({ id }) => id === 'core:component:button'), false);
   assert.equal(response.data.items.some(({ id }) => id === 'core:example:button-basic-react'), false);
 });
@@ -314,9 +432,11 @@ test('E-G0.4 pnpm adapter fails closed for missing projects and cache tuples', (
   assert.equal(hostile.exitCode, 2);
   assert.doesNotMatch(hostile.stdout, /echo-unsafe|;/u);
 
+  const selected = resolvePnpmProjectCatalog();
+  assert.equal(selected.type, 'success');
   const cache = runCli([
     'manifest',
-    '--catalog-version', '0.2.0',
+    '--catalog-version', selected.package.version,
     '--catalog-digest', 'sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
     '--json',
   ]);
@@ -326,7 +446,8 @@ test('E-G0.4 pnpm adapter fails closed for missing projects and cache tuples', (
 });
 
 test('E-G0.4 pnpm adapter translates malformed project JSON into one typed response', async () => {
-  const fixtureRoot = await mkdtemp(join(process.cwd(), '.g0-4-malformed-'));
+  await mkdir(join(process.cwd(), 'fixtures'), { recursive: true });
+  const fixtureRoot = await mkdtemp(join(process.cwd(), 'fixtures/.g0-4-malformed-'));
   try {
     await writeFile(join(fixtureRoot, 'package.json'), '{not-json\n');
     const project = relative(process.cwd(), fixtureRoot).split('\\').join('/');
@@ -402,7 +523,8 @@ test('E-G0.4 pnpm adapter admits only an exact verified cache tuple', async () =
 });
 
 test('E-G0.4 pnpm adapter normalizes renderer packages into the single resolver', async () => {
-  const fixtureRoot = await mkdtemp(join(process.cwd(), '.g0-4-pnpm-fixture-'));
+  await mkdir(join(process.cwd(), 'fixtures'), { recursive: true });
+  const fixtureRoot = await mkdtemp(join(process.cwd(), 'fixtures/.g0-4-pnpm-fixture-'));
   const catalogRoot = join(fixtureRoot, 'catalog');
   const rendererRoot = join(fixtureRoot, 'renderer');
   const generatedCatalog = join(catalogRoot, 'generated');
@@ -424,13 +546,13 @@ test('E-G0.4 pnpm adapter normalizes renderer packages into the single resolver'
     await writeFile(join(fixtureRoot, 'pnpm-workspace.yaml'), "packages:\n  - catalog\n  - renderer\n");
     await writeJson(join(catalogRoot, 'package.json'), {
       name: '@core-ui/catalog',
-      version: '0.2.0',
+      version: '2.0.0',
       private: true,
       coreUi: { catalogPackage: './generated/catalog-package.json' },
     });
     await writeJson(join(rendererRoot, 'package.json'), {
       name: '@core-ui/react',
-      version: '1.0.0',
+      version: '1.0.1',
       private: true,
       exports: { './button': './button.mjs' },
       coreUi: { rendererDescriptor: './generated/renderer-descriptor.json' },
@@ -452,10 +574,10 @@ test('E-G0.4 pnpm adapter normalizes renderer packages into the single resolver'
       id: 'renderer-react-compatible',
       descriptorVersion: '1.0.0',
       package: '@core-ui/react',
-      version: '1.0.0',
+      version: '1.0.1',
       bindingSchemaRange: '^2.0.0',
-      tokenContractRange: '^1.1.0',
-      releaseProvenance: `core-ui-release:0.2.0:${bundle.sourceRevision}`,
+      tokenContractRange: '^2.0.0',
+      releaseProvenance: `core-ui-release:1.0.1:${bundle.sourceRevision}`,
       bindings: {
         [binding]: {
           specRevision: bundle.artifacts.find(({ id }) => id === 'core:component:button')
@@ -475,8 +597,8 @@ test('E-G0.4 pnpm adapter normalizes renderer packages into the single resolver'
     const identity = {
       schema: 'core-ui-catalog-package-v2',
       name: '@core-ui/catalog',
-      version: '0.2.0',
-      catalogVersion: '0.2.0',
+      version: '2.0.0',
+      catalogVersion: '2.0.0',
       catalogDigest: bundle.catalogDigest,
       queryApiVersion: bundle.apiVersion,
       supportedQueryApiVersions: ['1.1.0', '1.2.0', '2.0.0'],
@@ -497,21 +619,21 @@ test('E-G0.4 pnpm adapter normalizes renderer packages into the single resolver'
       },
       releaseManifest: {
         id: descriptor.releaseProvenance,
-        releaseVersion: '0.2.0',
+        releaseVersion: '1.0.1',
         schemaVersion: '2.1.0',
         queryApiVersion: '2.0.0',
-        tokenContractVersion: '1.1.0',
+        tokenContractVersion: '2.0.0',
         sourceRevision: bundle.sourceRevision,
         catalog: {
-          id: `@core-ui/catalog@0.2.0:${bundle.catalogDigest}`,
-          version: '0.2.0',
+          id: `@core-ui/catalog@2.0.0:${bundle.catalogDigest}`,
+          version: '2.0.0',
           digest: bundle.catalogDigest,
         },
         bindings: [{
           descriptor: descriptor.id,
           binding,
           package: '@core-ui/react',
-          version: '1.0.0',
+          version: '1.0.1',
           export: descriptor.bindings[binding].export,
           specRevision: descriptor.bindings[binding].specRevision,
           tokenRequirementSetDigests: descriptor.bindings[binding].tokenRequirementSetDigests,
@@ -546,7 +668,7 @@ test('E-G0.4 pnpm adapter normalizes renderer packages into the single resolver'
       purpose: null,
       section: null,
     });
-    assert.equal(response.meta.resolution.targetPackages['@core-ui/react'], '1.0.0');
+    assert.equal(response.meta.resolution.targetPackages['@core-ui/react'], '1.0.1');
     const cliSuccess = runCli([
       'get', 'core:component:button', '--project', project,
       '--platform', 'web.react', '--json',
@@ -554,7 +676,7 @@ test('E-G0.4 pnpm adapter normalizes renderer packages into the single resolver'
     assert.equal(cliSuccess.exitCode, 0);
     assert.equal(
       JSON.parse(cliSuccess.stdout).meta.resolution.targetPackages['@core-ui/react'],
-      '1.0.0',
+      '1.0.1',
     );
 
     descriptor.bindings[binding].export = '@core-ui/react/unsafe-drift';

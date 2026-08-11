@@ -607,7 +607,10 @@ export async function verifyTaleTokenAnnex(repositoryRoot, options = {}) {
   const annex = annexDocument.value;
   const sourceDocument = await strictFile(join(repositoryRoot, profile.sourceFixturePath), profile.sourceFixturePath);
   const source = sourceDocument.value;
-  const currentTokenSource = (await strictFile(join(repositoryRoot, 'catalog/tokens/button-minimum.json'), 'current token source')).value;
+  const phaseBTokenSource = (await strictFile(
+    join(repositoryRoot, 'packages/tokens/fixtures/button-minimum-phase-b.json'),
+    'retained Phase B token source',
+  )).value;
   const productScope = await readFile(join(repositoryRoot, 'strategy/product-scope.md'), 'utf8');
   const architecture = await readFile(join(repositoryRoot, 'strategy/monorepo-architecture.md'), 'utf8');
   const bindingSchema = await readFile(join(repositoryRoot, 'packages/schema/schemas/binding.schema.json'), 'utf8');
@@ -647,7 +650,7 @@ export async function verifyTaleTokenAnnex(repositoryRoot, options = {}) {
   annex.entries.forEach((entry, index) => verifyEntry(entry, sourceEntries[index], profile, index));
 
   exactKeys(annex.summary, ['dispositionCounts', 'logicalGroups', 'admittedCoreTokens', 'addedCoreTokens', 'reusedExistingCoreTokens', 'candidateSourceCrosswalkDigest', 'candidateSourceCrosswalkDigestProfile'], 'summary');
-  verifyTokenDefinitions(annex.coreTokens, annex.entries, currentTokenSource, profile);
+  verifyTokenDefinitions(annex.coreTokens, annex.entries, phaseBTokenSource, profile);
   verifyEntryDefinitionMappings(annex.entries, annex.coreTokens, sourceEntries, profile);
   verifyGroups(annex.groups, annex.entries, profile, annex.summary.logicalGroups);
   verifyAuthoredReasonReferences(annex.entries, annex.coreTokens);

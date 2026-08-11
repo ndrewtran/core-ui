@@ -7,12 +7,14 @@ import {
   PolicyError,
   auditAliases,
   auditRepository,
+  classifyPath,
   generatedText,
   loadPolicy,
   sha256,
   validateGeneratedFile,
 } from '../src/policy.mjs';
 import { GenerationProofError, verifyGenerationState } from '../src/generation-proof.mjs';
+import { discoverWorkspacePackages } from '../src/workspace-packages.mjs';
 
 const repositoryRoot = resolve(import.meta.dirname, '../../../..');
 const policy = await loadPolicy(repositoryRoot);
@@ -42,6 +44,31 @@ test('E-G0.0-03: generated output validates against its source and digest', asyn
     policy,
   );
   assert.equal(result.source, 'catalog/source.txt');
+});
+
+test('TALE-TOKEN-C retained installed catalogs remain proof fixtures, not live projections', () => {
+  assert.equal(
+    classifyPath(
+      'tests/fixtures/tale-token-phase-b/installed-catalog/generated/catalog.json',
+      policy,
+    ),
+    'proof',
+  );
+  assert.equal(classifyPath('packages/catalog/generated/catalog.json', policy), 'projection');
+});
+
+test('TALE-TOKEN-C runtime catalog caches cannot become workspace package owners', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'core-ui-workspace-cache-'));
+  await mkdir(join(root, 'packages/live/.cache/catalog'), { recursive: true });
+  await writeFile(join(root, 'packages/live/package.json'), '{"name":"@core-ui/live"}\n');
+  await writeFile(
+    join(root, 'packages/live/.cache/catalog/package.json'),
+    '{"name":"@core-ui/catalog"}\n',
+  );
+  assert.deepEqual(
+    (await discoverWorkspacePackages(root)).map(({ name }) => name),
+    ['@core-ui/live'],
+  );
 });
 
 test('E-G0.0-03 negative: a direct projection edit is rejected with its owner', async () => {

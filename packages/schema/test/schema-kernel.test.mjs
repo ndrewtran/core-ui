@@ -381,7 +381,7 @@ test('E-G0.1-01 negative: unknown, duplicate, invalid-relation, and unowned fiel
     api: { props: [], events: [], parts: [], defaults: {} },
     behavior: [],
     accessibility: [],
-    tokenRecipe: { source: 'core:token:button-minimum', requirements: [] },
+    tokenRecipe: { source: 'core:token:default-theme', requirements: [] },
     runtimeProfiles: {
       ios: {
         strategy: 'adapted',
@@ -762,7 +762,7 @@ test('TALE-TOKEN-A section-page grammar is closed, typed, and position-safe', ()
       catalogVersion: '0.1.0',
       catalogDigest: `sha256:${'a'.repeat(64)}`,
       tokenSourceContentRevision: `sha256:${'b'.repeat(64)}`,
-      artifactId: 'core:token:button-minimum',
+      artifactId: 'core:token:default-theme',
       section: 'tokens',
       selectorDigest: `sha256:${'c'.repeat(64)}`,
     },

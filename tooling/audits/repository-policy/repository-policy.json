@@ -23,6 +23,9 @@
     "dist",
     "generated"
   ],
+  "retainedProjectionFixtureRoots": [
+    "tests/fixtures"
+  ],
   "slugPattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
   "generatedMarkers": {
     "source": "@generated-from:",
@@ -36,6 +39,10 @@
     {
       "path": "packages/catalog/generated/catalog-package.json",
       "provenance": "packages/catalog/generated/catalog-package.json.provenance"
+    },
+    {
+      "path": "packages/tokens/generated/tale-token-occurrences.json",
+      "provenance": "packages/tokens/generated/tale-token-occurrences.json.provenance"
     }
   ],
   "globalTaskInputs": [

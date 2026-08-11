@@ -25,7 +25,7 @@ const theme = {
 
 const previousTokenSource = {
   schemaVersion: '1.0.0',
-  id: 'core:token:button-minimum',
+  id: 'core:token:default-theme',
   kind: 'token',
   name: 'Button minimum tokens',
   summary: 'The previous token source.',
@@ -71,11 +71,11 @@ test('G1.0 binding v1-to-v2 migration requires the binding-owned token recipe', 
     api: { props: [], events: [], parts: [], defaults: {} },
     behavior: [],
     accessibility: [],
-    tokenSources: ['core:token:button-minimum'],
+    tokenSources: ['core:token:default-theme'],
     runtimeProfiles: {},
   };
   const tokenRecipe = {
-    source: 'core:token:button-minimum',
+    source: 'core:token:default-theme',
     requirements: [{ token: 'semantic.action.background', requirement: 'required' }],
   };
   const platformSafety = webPlatformSafety('web.react');

@@ -20,7 +20,7 @@ export const RESOLVER_ERROR_PRECEDENCE = Object.freeze([
 
 const TOOLING_API_VERSION = API_VERSION;
 const TOOLING_SCHEMA_VERSION = SCHEMA_VERSION;
-const TOOLING_VERSION = '0.2.0';
+const TOOLING_VERSION = '1.0.0';
 
 function compareText(left, right) {
   return left < right ? -1 : left > right ? 1 : 0;

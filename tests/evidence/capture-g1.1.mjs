@@ -80,7 +80,7 @@ const environment = {
   typescript: await packageVersion('packages/react/node_modules/typescript/package.json'),
 };
 
-const tokenSourcePath = 'catalog/tokens/button-minimum.json';
+const tokenSourcePath = 'catalog/tokens/default-theme.json';
 const componentPath = 'catalog/components/button/artifact.json';
 const tokenSource = parseJsonStrict(await readFile(join(repositoryRoot, tokenSourcePath), 'utf8'));
 const component = parseJsonStrict(await readFile(join(repositoryRoot, componentPath), 'utf8'));
@@ -93,6 +93,12 @@ const paths = [
   'pnpm-lock.yaml',
   'pnpm-workspace.yaml',
   'catalog',
+  'decisions/0003-tale-token-classification-annex.json',
+  'decisions/0003-tale-token-classification-acceptance.json',
+  'decisions/0004-tale-only-reference-baseline-annex.json',
+  'decisions/0004-tale-only-reference-baseline-acceptance.json',
+  'decisions/0005-default-theme-token-source-identity.json',
+  'decisions/0005-default-theme-token-source-identity-acceptance.json',
   'strategy/platform-safety-contract.json',
   'strategy/monorepo-architecture.md',
   'strategy/milestone-roadmap.md',
