@@ -7,3 +7,7 @@ meaning.
 
 Use `pnpm check` for affected proof and `pnpm check:all` before milestone
 evidence capture.
+
+Before retaining evidence, follow `evidence/README.md`. Keep source, executed,
+proof-tool, and evidence identities distinct and resolve applicability and
+invalidation values from the repository-policy delivery profile.

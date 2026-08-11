@@ -46,6 +46,7 @@
     }
   ],
   "globalTaskInputs": [
+    ".agents/",
     ".github/",
     "decisions/",
     "strategy/",

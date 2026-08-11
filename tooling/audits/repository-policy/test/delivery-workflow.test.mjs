@@ -7,6 +7,7 @@ import { registerOwnershipTests } from './delivery/ownership.mjs';
 import { registerPacketTests } from './delivery/packet.mjs';
 import { registerRollbackTests } from './delivery/rollback.mjs';
 import { registerReviewRoutingTests } from './delivery/review-routing.mjs';
+import { registerTemplateTests } from './delivery/templates.mjs';
 
 const repositoryRoot = resolve(import.meta.dirname, '../../../..');
 
@@ -18,3 +19,4 @@ registerHostedRoutingTests(repositoryRoot);
 registerRollbackTests(repositoryRoot);
 registerDisableTests(repositoryRoot);
 registerGuardrailTests(repositoryRoot);
+registerTemplateTests(repositoryRoot);
