@@ -279,6 +279,18 @@ test('TALE-TOKEN-C repository transition is reversible and idempotent across gen
     await rejectsAuthorityMutation(firstSuccessorAbsolute, (successor) => {
       successor.authorization.unexpected = true;
     });
+    await rejectsAuthorityMutation(
+      join(worktree, 'decisions/0007-delivery-workflow-authority.json'),
+      (deliveryDecision) => {
+        deliveryDecision.authorityAmendment.productScope.sha256 = `sha256:${'0'.repeat(64)}`;
+      },
+    );
+    await rejectsAuthorityMutation(
+      join(worktree, 'decisions/0007-delivery-workflow-authority-acceptance.json'),
+      (deliveryAcceptance) => {
+        deliveryAcceptance.owner = 'not-the-decision-owner';
+      },
+    );
     await rejectsAuthorityMutation(firstSuccessorAbsolute, (successor) => {
       successor.supersededApplicabilityManifest.sha256 = `sha256:${'0'.repeat(64)}`;
     });

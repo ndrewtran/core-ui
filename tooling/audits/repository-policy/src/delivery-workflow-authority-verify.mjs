@@ -8,10 +8,10 @@ const ACCEPTANCE_PATH = 'decisions/0007-delivery-workflow-authority-acceptance.j
 const PRODUCT_SCOPE_PATH = 'strategy/product-scope.md';
 const ARCHITECTURE_PATH = 'strategy/monorepo-architecture.md';
 const ROADMAP_PATH = 'strategy/milestone-roadmap.md';
-const DECISION_BYTES = 40330;
-const DECISION_SHA256 = 'sha256:20b1532c0cb9a8eed9282ecfc50798875071556f8f68678fd0da0dae34ef21c1';
+const DECISION_BYTES = 40822;
+const DECISION_SHA256 = 'sha256:97aa9d33adb4da0cd9b6bf4d692993b8b8938401d73cb7cb20912c3f6e382c8f';
 const ACCEPTANCE_BYTES = 558;
-const ACCEPTANCE_SHA256 = 'sha256:e8be77fc0253af030156a8a932ca8d20281bacc54800a77f56b649f3deccd6a5';
+const ACCEPTANCE_SHA256 = 'sha256:282defb18bd1d897c14dc62e3ebc44cabf0d3cdbf4cd8c0419d71b9d1d03ed8d';
 const PRODUCT_SCOPE_BYTES = 90165;
 const PRODUCT_SCOPE_SHA256 = 'sha256:7c8404e20d01f6a0cc975b17a7893f5594f6f0d313806a6fced9d0c62d886873';
 const ARCHITECTURE_SHA256 = 'sha256:bdf8eb132fcdace479a05569020fd91acb0bde02dd1b24b33ce0f96ceaf39371';
@@ -64,10 +64,10 @@ export function verifyDeliveryWorkflowAuthority(repositoryRoot, options = {}) {
 
   const expectedAcceptance = {
     authorAssociation: 'OWNER',
-    bodySha256: 'sha256:8835ba20629b4966d8083df12d7d5a3bcc8ff7d835959473c058cc341393587e',
-    commentId: 5259117083,
-    commentNodeId: 'IC_kwDOTtLjcM8AAAABOXfCGw',
-    createdAt: '2026-08-11T21:34:11Z',
+    bodySha256: 'sha256:3f8cd91a9bc2233d3736d6abecb53a138f0e10d794f0d74585f0b38a99da0abf',
+    commentId: 5259468261,
+    commentNodeId: 'IC_kwDOTtLjcM8AAAABOX0d5Q',
+    createdAt: '2026-08-11T22:15:23Z',
     decisionId: 'core-ui:decision:0007',
     issueNumber: 54,
     outcome: 'accepted',
@@ -76,8 +76,8 @@ export function verifyDeliveryWorkflowAuthority(repositoryRoot, options = {}) {
     provider: 'github',
     repository: 'ndrewtran/core-ui',
     schema: 'core-ui-authority-decision-v1',
-    updatedAt: '2026-08-11T21:34:11Z',
-    url: 'https://github.com/ndrewtran/core-ui/issues/54#issuecomment-5259117083',
+    updatedAt: '2026-08-11T22:15:23Z',
+    url: 'https://github.com/ndrewtran/core-ui/issues/54#issuecomment-5259468261',
   };
   exact(acceptance, expectedAcceptance, 'acceptance receipt');
 
