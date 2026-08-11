@@ -76,6 +76,7 @@ consistently:
 | Capability | Manifest-declared operation or projection with explicit availability and policy on a particular surface. |
 | Runtime protocol | Ownership and lifecycle rules for controllers, adapters, global effects, providers, and renderer integration. |
 | Change intent envelope | Versioned, derived preview of a proposed write: objective, authority, effect, affected closure, invalidated proof, required checks, and confirmation policy. It neither owns product truth nor grants authority to mutate. |
+| Delivery workflow record | Private repository-policy procedure that validates and renders references to authority, source, proof, review, publication, and recovery facts owned elsewhere. Its lifecycle labels are procedural states, not product commitment, roadmap status, artifact lifecycle, capability availability, evidence acceptance, or write authority. |
 | Operational exception | Explicit, scoped, expiring permission to narrow support or defer a waivable obligation. It cannot alter canonical truth, manufacture proof, broaden compatibility, or authorize a generated-file patch. |
 
 Use **public contract** only as an explicitly qualified collective phrase, such
@@ -1405,6 +1406,83 @@ Readiness starts as `unknown` or `blocked`; only completed deterministic checks
 and retained evidence can make it `proved`. An explanation-only result has an
 empty write set. This makes “what changes, why, and what becomes stale”
 machine-readable without creating a second source of product truth.
+
+
+### Private repository delivery workflow
+
+Core UI may maintain one private, repository-policy-owned delivery workflow
+record to make the existing authority, proof, review, disclosure, publication,
+and recovery sequence deterministic for repository-working maintainers and
+agents. It is an internal conformance and operator-guidance surface, not a
+public command, package, capability, product artifact, evidence record, or
+mutation protocol.
+
+The record may own only its closed procedural schema, process-state
+vocabulary, exact schema-pointer-to-invalidation-domain map, deterministic
+advisory packet and PR-body rendering, stable diagnostics, local limits, and
+rollback/recovery grammar. It references every product, authority, source,
+affected-set, proof, review, human-decision, hosted, tracker, and release fact
+through the canonical owner plus exact identity. It cannot author those facts,
+infer external state, manufacture clearance, accept evidence, or execute a
+repository, provider, Project, package, publication, or release mutation.
+
+The procedural states `AUTHORITY_ALIGNED` and `CHANGE_PLAN_READY` mean only
+that required owner references and packet fields are present and internally
+valid. They do not mean the governing human accepted a decision, the affected
+closure is complete, or a write is authorized. Local machine validation may
+advance only through `PACKET_RENDERED`; clearance, review, acceptance,
+publication, hosted, tracker, readiness, merge, release, and completion state
+remain externally observed and locally `unknown` unless supplied as immutable
+reviewed inputs. A local record cannot promote itself from those inputs.
+
+`ChangeIntentEnvelope` remains the sole owner of objective, graph-derived
+authoritative write set, affected/stale closure, compatibility/version effects,
+confirmation policy, base-drift rejection, and operation-journal binding.
+Before G1.9, a delivery workflow record may validate a human-authored expected
+path set only as an explicitly incomplete procedural bound and may not call it
+graph-derived or complete. From G1.9 onward, a record that concerns an authored
+repository change binds the exact final `ChangeIntentEnvelope` digest and
+projects, rather than re-authors, its write set and affected closure. A
+contradiction fails closed.
+
+The accepted plan retains its reviewed validation source `3026adc082861cb5f096193b8c2ca384d368aac1` and tree `28a7f6fb70a30eda983c0be3b95f8d9d1da77b97`. Its only admitted tree-equivalent implementation successor is merge commit `5a2d9d175dc02b40b619e7f183c7c9b3e18269e0`, whose second parent is the reviewed source and whose tree is byte-identical. This narrow lineage rule does not authorize another commit, parent topology, tree, or content change; any such change expires the plan application and requires a new decision.
+
+The private schema/profile family uses normal Core UI SemVer interpretation. Version `1.0.0` has readable range `>=1.0.0 <2.0.0`; unsupported or incompatible versions fail closed. Whole-control disable/removal is operational rollback and does not substitute for an incompatible field migration within a retained schema family.
+
+The private schema/profile family is admitted only while all of these remain
+true:
+
+- `tooling/audits/repository-policy/` is the sole owner and consumer;
+- repository templates and the repository-local skill provide the scaffold;
+- stable diagnostics point to the earliest editable owner;
+- the exact field-domain map provides the procedural semantic diff and
+  invalidation route without replacing graph-derived affected closure;
+- positive, negative, disclosure-order, drift, hosted-routing, race, rollback,
+  and interruption fixtures prove the bounded protocol;
+- the package-internal operations are read-only and unavailable as public Core
+  UI capabilities;
+- removal disables enforcement first and then removes only the recorded write
+  set in dependency order with digest and path-subset checks; and
+- timing and false-invalidation observations remain non-authoritative
+  operational telemetry, never product or milestone acceptance.
+
+Authority acceptance precedes every repository write, but publication uses one combined protected PR. That PR contains the exact accepted authority bytes, the RB-01 and RB-02 implementation boundaries, and one evidence-only child that appends the 28 applicability successors against the frozen final source after RB-02. No earlier authority-stage successor generation is authored, so the accepted successors remain terminal through the combined merge.
+
+The repository-local skill is operator guidance for this private procedure. It
+is not the G2.3 public bootstrap, does not enter the Core UI capability
+manifest, and cannot duplicate product facts or grant mutation authority. The
+entire control may be removed without changing a public package, command,
+catalog, renderer, token, binding, release identity, or retained historical
+evidence.
+
+The immediate renderer consumer is G1.2 delivery and
+`fixture:platform-safety-native`: the workflow is intended to reduce repeated
+packet construction, invalidation, and review overhead while preserving its
+exact proof. Activation is an adjacent repository control, not a G1.2 entry
+condition or deliverable, and cannot delay G1.2 except when a canonical-source,
+integrity, disclosure, compatibility, or required-proof failure would already
+block that work. Later G1.3-G1.9 work may use the same procedure under its own
+authority and evidence.
 
 ## Generation and repository hygiene
 

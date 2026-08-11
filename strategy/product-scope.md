@@ -1,5 +1,5 @@
 ---
-scopeVersion: 4.0.1
+scopeVersion: 4.0.2
 status: execution-baseline
 product: Core UI
 architecture: ./monorepo-architecture.md
@@ -485,6 +485,26 @@ guidance, affected proof, and retained historical retrieval.
 | `SCOPE-AUTHOR-CLOSURE` | `committed` | Affected closure over canonical sources, renderers, projections, proof, packages, and evaluations | `0.1` |
 | `SCOPE-AUTHOR-CHANGE-INTENT` | `committed` | Read-only `ChangeIntentEnvelope` with base, objective, write set, invalidation, version/proof effects, readiness, and confirmation policy | `0.1` |
 | `SCOPE-AUTHOR-AUTOFIX` | `committed` | Preview-only semantics-preserving mechanical autofixes | Foundation |
+
+
+### Private repository delivery control
+
+The repository may implement the decision-0007 deterministic delivery workflow
+as an internal maintainer procedure under `SCOPE-FOUNDATION-001` and the
+existing proof/privacy/integrity commitments. This is a patch clarification,
+not a product outcome or new scope item. It adds no public command, package,
+capability, artifact kind, durable product relation, renderer, platform,
+support claim, release boundary, or commitment transition. It does not satisfy
+`SCOPE-AUTHOR-CLOSURE` or `SCOPE-AUTHOR-CHANGE-INTENT`; from G1.9 onward it
+consumes their owned output by exact digest. Its repository-local skill is not
+the G2.3 public bootstrap.
+
+The workflow's schema/profile, packet rendering, invalidation routing,
+diagnostics, fixtures, and rollback are private repository-policy
+implementation details. Operational duration and false-invalidation counts may
+be retained as task-local observations, but they are not `SCOPE-METRIC-005`,
+are not product metrics, and cannot promote a capability, milestone, package,
+support claim, or release.
 
 ### Initial allowlisted canonical proposals
 
@@ -1158,6 +1178,45 @@ After digest-specific acceptance and authority merge, Project README and issue
 must distinguish the six Phase C roots/six Gate-owned Phase-B successors from the
 fourteen-successor non-proof maintenance root. Workflow automation never proves
 authority or evidence acceptance.
+
+
+### Deterministic delivery workflow clarification (`4.0.2`)
+
+Issue #54 records the observed workflow: repeated broad verification, packet
+reconstruction, review redispatch, disclosure handling, and invalidation
+dominated bounded renderer-proof tasks after G1.1. Decision
+`core-ui:decision:0007` admits the exact plan
+`sha256:b8ca578a368e9010133f76beb16a1499262c85b18e699a791d0715d40001f4c9`
+only as the private adjacent repository control defined by Architecture and the
+roadmap. The reviewed source commit `3026adc082861cb5f096193b8c2ca384d368aac1`
+and implementation-base merge `5a2d9d175dc02b40b619e7f183c7c9b3e18269e0`
+share exact tree `28a7f6fb70a30eda983c0be3b95f8d9d1da77b97` and are
+accepted only through the merge-parent rule recorded by decision 0007.
+
+Affected existing scope IDs are `SCOPE-FOUNDATION-001`,
+`SCOPE-QUALITY-GENERATOR-CONTRACT`, `SCOPE-TRUST-EVIDENCE-PRIVACY`,
+`SCOPE-TRUST-EVIDENCE`, and `SCOPE-TRUST-DISCLOSURE`; every commitment
+remains unchanged. `SCOPE-METRIC-005` is explicitly unaffected. There are no
+release additions/removals, package or compatibility changes, consumer
+migration, product authoring surface, public schema, new operation type, or
+platform effect.
+
+The private schema is scaffolded by repository templates and the
+repository-local skill, diagnosed by repository policy, semantically
+classified by its exact field-domain map, proved by the decision-0007
+activation assertions, and removed through the full-removal rollback. Privacy
+remains default-deny and public-sanitized; no consumer context is captured.
+Security remains local, read-only, exact-identity, and fail-closed. Trusted
+hosted enforcement, automated mutation, and content-addressed proof replay
+remain separately deferred.
+
+Open-tracker migration updates #54 to the adjacent-control routing and decision
+0007/Product Scope 4.0.2, removes G0.0 evidence and `SCOPE-METRIC-005`, and
+keeps G1.2 as the named non-blocking consumer. Project README and #46 receive
+only routine documentary reconciliation for the already accepted/merged G1.1
+state. Authority acceptance remains a pre-write human boundary. The accepted authority and implementation publish through one protected PR; the one 28-successor applicability root is generated only from the frozen final RB-02 source and committed as a separate evidence-only child. Completed evidence is not rewritten; exact authority-applicability
+successors are appended for every terminal manifest made stale by this
+authority change.
 
 ## Tracker reference contract
 

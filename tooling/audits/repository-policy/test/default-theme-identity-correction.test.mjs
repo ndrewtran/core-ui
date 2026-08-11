@@ -31,9 +31,9 @@ async function syntheticAcceptance(overrides = {}) {
   const decisionSource = await readFile(decisionPath, 'utf8');
   const productScopeSource = await readFile(productScopePath, 'utf8');
   const body = acceptanceCommentBody({ decisionSource, productScopeSource });
-  const bodySha256 = productScopeSource.startsWith('---\nscopeVersion: 4.0.1\n')
-    ? 'sha256:e80da20eae48bfb6347d520b7a13155e324c0d28dc46d1a6f8aee2798444c30a'
-    : `sha256:${sha256(body)}`;
+  const bodySha256 = productScopeSource.startsWith('---\nscopeVersion: 4.0.0\n')
+    ? `sha256:${sha256(body)}`
+    : 'sha256:e80da20eae48bfb6347d520b7a13155e324c0d28dc46d1a6f8aee2798444c30a';
   return {
     bodySha256,
     commentId: 1,
