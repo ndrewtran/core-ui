@@ -83,9 +83,11 @@ function validateApplicability(contract, record) {
 }
 
 export function validateDeliveryWorkflow(contract, rawRecord, {
+  currentIdentity,
   packetContext,
   patchBytes,
   postconditionRecords,
+  proofToolInput,
   records = new Map(),
   scanPreimages,
 } = {}) {
@@ -101,8 +103,10 @@ export function validateDeliveryWorkflow(contract, rawRecord, {
   let rollback = null;
   if (record.stage === 'ROLLBACK_RECOVERY_REQUIRED') {
     rollback = validateDeliveryRollback(contract, record.rollback, {
+      currentIdentity,
       patchBytes,
       postconditionRecords,
+      proofToolInput,
       scanPreimages,
     });
   }
