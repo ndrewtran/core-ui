@@ -447,12 +447,14 @@ test('E-G0.5-04: affected closure is graph-derived and extends through declared 
   assert.deepEqual(closure.packages.map(({ name }) => name), [
     '@core-ui/catalog',
     '@core-ui/react',
+    '@core-ui/react-native',
     '@core-ui/tooling',
     '@core-ui/web',
     '@core-ui/repository-policy',
   ]);
   assert.ok(closure.requiredChecks.includes('pnpm --filter @core-ui/catalog check'));
   assert.ok(closure.requiredChecks.includes('pnpm --filter @core-ui/react check'));
+  assert.ok(closure.requiredChecks.includes('pnpm --filter @core-ui/react-native check'));
   assert.ok(closure.requiredChecks.includes('pnpm --filter @core-ui/tooling check'));
   assert.ok(closure.requiredChecks.includes('pnpm --filter @core-ui/web check'));
   assert.ok(closure.requiredChecks.includes('pnpm --filter @core-ui/repository-policy check'));
@@ -470,6 +472,7 @@ test('E-G0.5-04: affected closure is graph-derived and extends through declared 
   assert.deepEqual(schemaClosure.packages.map(({ name }) => name), [
     '@core-ui/catalog',
     '@core-ui/react',
+    '@core-ui/react-native',
     '@core-ui/schema',
     '@core-ui/tokens',
     '@core-ui/tooling',

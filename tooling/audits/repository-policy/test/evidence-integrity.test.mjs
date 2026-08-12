@@ -1,17 +1,65 @@
 import assert from 'node:assert/strict';
 import { mkdtemp, mkdir, readFile, writeFile } from 'node:fs/promises';
+import { execFile as execFileCallback } from 'node:child_process';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
+import { promisify } from 'node:util';
 import { canonicalJson } from '../src/canonical-json.mjs';
 import {
   EvidenceIntegrityError,
   hasUnsanitizedEvidenceOutput,
+  resolveG12EvidenceIdentity,
   verifyEvidence,
 } from '../src/evidence-verify.mjs';
 import { sha256 } from '../src/policy.mjs';
 import { acceptanceCommentBody } from '../src/tale-token-annex-acceptance.mjs';
 import { assertAuthorityDecisionShape } from '../src/evidence-applicability-supersession.mjs';
+
+const execFile = promisify(execFileCallback);
+
+async function git(root, ...args) {
+  return (await execFile('git', args, { cwd: root, encoding: 'utf8' })).stdout.trim();
+}
+
+async function g12TopologyFixture({ extraEvidencePath = false, preexistingRootPayload = false } = {}) {
+  const root = await mkdtemp(join(tmpdir(), 'core-ui-g12-topology-'));
+  await git(root, 'init', '-q', '-b', 'main');
+  await git(root, 'config', 'user.name', 'Fixture');
+  await git(root, 'config', 'user.email', 'fixture@example.invalid');
+  await writeFile(join(root, 'base.txt'), 'base\n');
+  await git(root, 'add', 'base.txt');
+  await git(root, 'commit', '-q', '-m', 'base');
+  await git(root, 'switch', '-q', '-c', 'topic');
+  await writeFile(join(root, 'source.txt'), 'source\n');
+  if (preexistingRootPayload) {
+    await mkdir(join(root, 'tests/evidence/g1.2/artifacts'), { recursive: true });
+    await writeFile(join(root, 'tests/evidence/g1.2/artifacts/preexisting.json'), '{}\n');
+  }
+  await git(root, 'add', 'source.txt');
+  if (preexistingRootPayload) await git(root, 'add', 'tests/evidence/g1.2/artifacts/preexisting.json');
+  await git(root, 'commit', '-q', '-m', 'source');
+  const sourceRevision = await git(root, 'rev-parse', 'HEAD');
+  const sourceTree = await git(root, 'rev-parse', 'HEAD^{tree}');
+  await mkdir(join(root, 'tests/evidence/g1.2'), { recursive: true });
+  await mkdir(join(root, 'tests/evidence/authority-11-g1-2-applicability-v1'), { recursive: true });
+  await writeFile(join(root, 'tests/evidence/g1.2/index.json'), '{}\n');
+  await writeFile(join(root, 'tests/evidence/authority-11-g1-2-applicability-v1/index.json'), '{}\n');
+  if (extraEvidencePath) await writeFile(join(root, 'unrelated.txt'), 'unrelated\n');
+  await git(root, 'add', '.');
+  await git(root, 'commit', '-q', '-m', 'evidence');
+  const evidenceRevision = await git(root, 'rev-parse', 'HEAD');
+  const evidenceTree = await git(root, 'rev-parse', 'HEAD^{tree}');
+  await git(root, 'switch', '-q', 'main');
+  await git(root, 'merge', '-q', '--no-ff', 'topic', '-m', 'synthetic merge');
+  const mergeRevision = await git(root, 'rev-parse', 'HEAD');
+  await git(root, 'switch', '-q', 'topic');
+  await writeFile(join(root, 'after-evidence.txt'), 'unchanged descendant\n');
+  await git(root, 'add', 'after-evidence.txt');
+  await git(root, 'commit', '-q', '-m', 'unchanged descendant');
+  const unchangedDescendant = await git(root, 'rev-parse', 'HEAD');
+  return { evidenceRevision, evidenceTree, mergeRevision, root, sourceRevision, sourceTree, unchangedDescendant };
+}
 
 test('authority decision receipts admit exact OWNER association and edit timestamp provenance', () => {
   const value = {
@@ -58,6 +106,96 @@ test('evidence output privacy recognizes canonical token IDs without accepting c
   assert.equal(hasUnsanitizedEvidenceOutput('/Users/example/private.txt', root), true);
   assert.equal(hasUnsanitizedEvidenceOutput('/private/var/folders/example/private.txt', root), true);
   assert.equal(hasUnsanitizedEvidenceOutput(`${root}/packages/tokens`, root), true);
+});
+
+test('evidence verification rejects an in-progress G1.2 publication journal', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'core-ui-evidence-transaction-'));
+  await mkdir(join(root, 'tests/evidence'), { recursive: true });
+  await writeFile(join(root, 'tests/evidence/.g1-2-transaction.json'), canonicalJson({
+    profile: 'core-ui-g1-2-evidence-transaction-v1',
+    roots: ['tests/evidence/authority-11-g1-2-applicability-v1', 'tests/evidence/g1.2'],
+    transactionPath: 'tests/.g1-2-transaction-fixture',
+  }));
+  await assert.rejects(
+    verifyEvidence(root),
+    (error) => error instanceof EvidenceIntegrityError && error.code === 'EVIDENCE_TRANSACTION_INCOMPLETE',
+  );
+});
+
+test('G1.2 topology resolves the exact evidence child from direct and synthetic-merge heads', async () => {
+  const fixture = await g12TopologyFixture();
+  const expected = {
+    evidenceRevision: fixture.evidenceRevision,
+    evidenceTree: fixture.evidenceTree,
+    sourceRevision: fixture.sourceRevision,
+    sourceTree: fixture.sourceTree,
+  };
+  assert.deepEqual(
+    await resolveG12EvidenceIdentity(fixture.root, fixture.evidenceRevision),
+    expected,
+  );
+  assert.deepEqual(
+    await resolveG12EvidenceIdentity(fixture.root, fixture.mergeRevision),
+    expected,
+  );
+  assert.deepEqual(
+    await resolveG12EvidenceIdentity(fixture.root, fixture.unchangedDescendant),
+    expected,
+  );
+});
+
+test('G1.2 topology rejects an evidence introduction containing unrelated paths', async () => {
+  const fixture = await g12TopologyFixture({ extraEvidencePath: true });
+  await assert.rejects(
+    resolveG12EvidenceIdentity(fixture.root, fixture.mergeRevision),
+    (error) => error instanceof EvidenceIntegrityError && error.code === 'EVIDENCE_G12_TOPOLOGY_INVALID',
+  );
+});
+
+test('G1.2 topology rejects roots partially present in the source parent', async () => {
+  const fixture = await g12TopologyFixture({ preexistingRootPayload: true });
+  await assert.rejects(
+    resolveG12EvidenceIdentity(fixture.root, fixture.evidenceRevision),
+    (error) => error instanceof EvidenceIntegrityError && error.code === 'EVIDENCE_G12_TOPOLOGY_INVALID',
+  );
+});
+
+test('G1.2 topology rejects descendant and merge revisions that rewrite either evidence root', async () => {
+  const fixture = await g12TopologyFixture();
+  await git(fixture.root, 'switch', '-q', 'topic');
+  await writeFile(join(fixture.root, 'tests/evidence/g1.2/index.json'), '{"changed":true}\n');
+  await git(fixture.root, 'add', 'tests/evidence/g1.2/index.json');
+  await git(fixture.root, 'commit', '-q', '-m', 'rewrite evidence');
+  const changedDescendant = await git(fixture.root, 'rev-parse', 'HEAD');
+  await assert.rejects(
+    resolveG12EvidenceIdentity(fixture.root, changedDescendant),
+    (error) => error instanceof EvidenceIntegrityError && error.code === 'EVIDENCE_G12_TOPOLOGY_INVALID',
+  );
+  await git(fixture.root, 'switch', '-q', 'main');
+  await git(fixture.root, 'merge', '-q', '--no-ff', 'topic', '-m', 'merge rewritten evidence');
+  const changedMerge = await git(fixture.root, 'rev-parse', 'HEAD');
+  await assert.rejects(
+    resolveG12EvidenceIdentity(fixture.root, changedMerge),
+    (error) => error instanceof EvidenceIntegrityError && error.code === 'EVIDENCE_G12_TOPOLOGY_INVALID',
+  );
+});
+
+test('G1.2 topology rejects parallel byte-identical evidence introductions', async () => {
+  const fixture = await g12TopologyFixture();
+  await git(fixture.root, 'switch', '-q', '-c', 'parallel-evidence', fixture.sourceRevision);
+  await mkdir(join(fixture.root, 'tests/evidence/g1.2'), { recursive: true });
+  await mkdir(join(fixture.root, 'tests/evidence/authority-11-g1-2-applicability-v1'), { recursive: true });
+  await writeFile(join(fixture.root, 'tests/evidence/g1.2/index.json'), '{}\n');
+  await writeFile(join(fixture.root, 'tests/evidence/authority-11-g1-2-applicability-v1/index.json'), '{}\n');
+  await git(fixture.root, 'add', 'tests/evidence');
+  await git(fixture.root, 'commit', '-q', '-m', 'parallel evidence');
+  await git(fixture.root, 'switch', '-q', 'main');
+  await git(fixture.root, 'merge', '-q', '--no-ff', 'parallel-evidence', '-m', 'merge parallel evidence');
+  const parallelMerge = await git(fixture.root, 'rev-parse', 'HEAD');
+  await assert.rejects(
+    resolveG12EvidenceIdentity(fixture.root, parallelMerge),
+    (error) => error instanceof EvidenceIntegrityError && error.code === 'EVIDENCE_G12_TOPOLOGY_INVALID',
+  );
 });
 
 async function fixture({
