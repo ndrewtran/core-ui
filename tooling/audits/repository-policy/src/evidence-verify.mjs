@@ -22,6 +22,16 @@ import {
   assertTaleTokenPhaseCProfile,
   TALE_TOKEN_PHASE_C_PROFILE_DIGEST,
 } from '../../../../tests/evidence/capture-tale-token-phase-c.mjs';
+import {
+  G12_MAINTENANCE_ROOT,
+  G12_ROOT,
+  assertG12MaintenanceRootDirectory,
+  assertG12RootDirectory,
+} from '../../../../tests/evidence/g1.2-profile.mjs';
+import { execFile as execFileCallback } from 'node:child_process';
+import { promisify } from 'node:util';
+
+const execFile = promisify(execFileCallback);
 
 export class EvidenceIntegrityError extends Error {
   constructor(code, message) {
@@ -80,6 +90,96 @@ async function assertFileDigest(root, reference) {
   return bytes;
 }
 
+export async function resolveG12EvidenceIdentity(repositoryRoot, revision = 'HEAD') {
+  const indexPaths = [`${G12_ROOT}/index.json`, `${G12_MAINTENANCE_ROOT}/index.json`];
+  const additions = (await execFile(
+    'git',
+    ['log', '--full-history', '--format=%H', '--diff-filter=A', revision, '--', ...indexPaths],
+    { cwd: repositoryRoot, encoding: 'utf8' },
+  )).stdout.trim().split('\n').filter(Boolean);
+  const uniqueAdditions = [...new Set(additions)];
+  if (uniqueAdditions.length !== 1) {
+    throw new EvidenceIntegrityError(
+      'EVIDENCE_G12_TOPOLOGY_INVALID',
+      'G1.2 roots must have one unique reachable introduction commit',
+    );
+  }
+  const evidenceRevision = uniqueAdditions[0];
+  const parents = (await execFile(
+    'git',
+    ['show', '-s', '--format=%P', evidenceRevision],
+    { cwd: repositoryRoot, encoding: 'utf8' },
+  )).stdout.trim().split(' ').filter(Boolean);
+  if (parents.length !== 1) {
+    throw new EvidenceIntegrityError(
+      'EVIDENCE_G12_TOPOLOGY_INVALID',
+      'G1.2 evidence introduction must have one source parent',
+    );
+  }
+  for (const root of [G12_ROOT, G12_MAINTENANCE_ROOT]) {
+    const parentRoot = await execFile(
+      'git',
+      ['cat-file', '-e', `${parents[0]}:${root}`],
+      { cwd: repositoryRoot, encoding: 'utf8' },
+    ).then(() => true, () => false);
+    if (parentRoot) {
+      throw new EvidenceIntegrityError(
+        'EVIDENCE_G12_TOPOLOGY_INVALID',
+        'G1.2 evidence roots must be absent from the source parent',
+      );
+    }
+  }
+  const changed = (await execFile(
+    'git',
+    ['diff-tree', '--no-commit-id', '--name-status', '-r', evidenceRevision],
+    { cwd: repositoryRoot, encoding: 'utf8' },
+  )).stdout.trim().split('\n').filter(Boolean).map((line) => {
+    const [status, path] = line.split('\t');
+    return { path, status };
+  });
+  if (changed.length === 0 || changed.some(({ path, status }) => (
+    status !== 'A'
+    || ![G12_ROOT, G12_MAINTENANCE_ROOT].some((root) => path?.startsWith(`${root}/`))
+  ))) {
+    throw new EvidenceIntegrityError(
+      'EVIDENCE_G12_TOPOLOGY_INVALID',
+      'G1.2 evidence introduction must add only the two evidence roots',
+    );
+  }
+  for (const root of [G12_ROOT, G12_MAINTENANCE_ROOT]) {
+    const introductionTree = (await execFile(
+      'git',
+      ['rev-parse', `${evidenceRevision}:${root}`],
+      { cwd: repositoryRoot, encoding: 'utf8' },
+    )).stdout.trim();
+    const reviewedTree = (await execFile(
+      'git',
+      ['rev-parse', `${revision}:${root}`],
+      { cwd: repositoryRoot, encoding: 'utf8' },
+    )).stdout.trim();
+    if (reviewedTree !== introductionTree) {
+      throw new EvidenceIntegrityError(
+        'EVIDENCE_G12_TOPOLOGY_INVALID',
+        'G1.2 evidence roots must remain byte-identical to their introduction commit',
+      );
+    }
+  }
+  return {
+    evidenceRevision,
+    evidenceTree: (await execFile(
+      'git',
+      ['rev-parse', `${evidenceRevision}^{tree}`],
+      { cwd: repositoryRoot, encoding: 'utf8' },
+    )).stdout.trim(),
+    sourceRevision: parents[0],
+    sourceTree: (await execFile(
+      'git',
+      ['rev-parse', `${parents[0]}^{tree}`],
+      { cwd: repositoryRoot, encoding: 'utf8' },
+    )).stdout.trim(),
+  };
+}
+
 async function manifestEntries(repositoryRoot, declaredPaths) {
   const entries = [];
 
@@ -131,9 +231,43 @@ async function assertApplicabilityManifest(repositoryRoot, manifest) {
   }
 }
 
-export async function verifyEvidence(repositoryRoot) {
+export async function verifyEvidence(repositoryRoot, { allowTransactionJournal, g12ExpectedIdentity } = {}) {
   const evidenceRoot = join(repositoryRoot, 'tests/evidence');
+  const transactionJournal = join(evidenceRoot, '.g1-2-transaction.json');
+  if (await stat(transactionJournal).then(() => true).catch((error) => {
+    if (error?.code === 'ENOENT') return false;
+    throw error;
+  }) && allowTransactionJournal !== transactionJournal) {
+    throw new EvidenceIntegrityError(
+      'EVIDENCE_TRANSACTION_INCOMPLETE',
+      'G1.2 evidence publication journal is present; recover before reading evidence',
+    );
+  }
   const milestones = await readdir(evidenceRoot, { withFileTypes: true }).catch(() => []);
+  const milestoneNames = new Set(milestones.filter((entry) => entry.isDirectory()).map(({ name }) => name));
+  const hasG12 = milestoneNames.has(G12_ROOT.replace('tests/evidence/', ''));
+  const hasG12Maintenance = milestoneNames.has(G12_MAINTENANCE_ROOT.replace('tests/evidence/', ''));
+  if (hasG12 !== hasG12Maintenance) {
+    throw new EvidenceIntegrityError('EVIDENCE_G12_TOPOLOGY_INVALID', 'both G1.2 roots must exist together');
+  }
+  if (hasG12) {
+    let expected = g12ExpectedIdentity;
+    if (!expected) {
+      expected = await resolveG12EvidenceIdentity(repositoryRoot);
+    }
+    try {
+      const root = await assertG12RootDirectory(repositoryRoot, G12_ROOT, expected);
+      await assertG12MaintenanceRootDirectory(repositoryRoot, G12_MAINTENANCE_ROOT, expected);
+      const validation = JSON.parse(await readFile(join(repositoryRoot, root.validation.path), 'utf8'));
+      const captured = new Date(validation.captureProcedure.split('--timestamp ')[1]);
+      const sourceTime = new Date((await execFile('git', ['show', '-s', '--format=%cI', expected.sourceRevision], { cwd: repositoryRoot, encoding: 'utf8' })).stdout.trim());
+      if (Number.isNaN(captured.valueOf()) || captured < sourceTime || captured > new Date()) {
+        throw new Error('capture timestamp outside source/current bounds');
+      }
+    } catch (error) {
+      throw new EvidenceIntegrityError('EVIDENCE_G12_PROFILE_INVALID', error.message);
+    }
+  }
   const indexes = [];
   const phaseAIndexes = [];
   const phaseBIndexes = [];

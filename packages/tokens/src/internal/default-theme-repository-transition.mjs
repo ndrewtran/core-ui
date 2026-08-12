@@ -57,6 +57,14 @@ const SNAPSHOT_PATHS = Object.freeze([
   'packages/web/src/generate.mjs',
 ]);
 
+const TRANSITION_GENERATORS = Object.freeze([
+  'packages/tokens/src/generate.mjs',
+  'packages/catalog/src/generate.mjs',
+  'packages/tooling/src/generate.mjs',
+  'packages/web/src/generate.mjs',
+  'packages/react/src/generate.mjs',
+]);
+
 async function exists(path) {
   return stat(path).then(() => true).catch((error) => {
     if (error?.code === 'ENOENT') return false;
@@ -231,13 +239,7 @@ export async function assertDefaultThemeRepositoryState(repositoryRoot, stateNam
       throw new Error(`CORE_TOKEN_IDENTITY_REFERENCE_STALE: ${relativePath}`);
     }
   }
-  for (const script of [
-    'packages/tokens/src/generate.mjs',
-    'packages/catalog/src/generate.mjs',
-    'packages/tooling/src/generate.mjs',
-    'packages/web/src/generate.mjs',
-    'packages/react/src/generate.mjs',
-  ]) {
+  for (const script of TRANSITION_GENERATORS) {
     await execFile(process.execPath, [script, '--check'], {
       cwd: repositoryRoot,
       encoding: 'utf8',
@@ -286,10 +288,13 @@ export async function transitionDefaultThemeRepository(repositoryRoot, {
   try {
     await writeSource();
     await setAuthoredState(repositoryRoot, from, to);
-    await execFile(process.execPath, [
-      'tooling/audits/repository-policy/src/run-workspace-task.mjs',
-      'generate',
-    ], { cwd: repositoryRoot, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });
+    for (const generator of TRANSITION_GENERATORS) {
+      await execFile(process.execPath, [generator], {
+        cwd: repositoryRoot,
+        encoding: 'utf8',
+        maxBuffer: 64 * 1024 * 1024,
+      });
+    }
     await assertDefaultThemeRepositoryState(repositoryRoot, toState);
     await validate();
   } catch (error) {
