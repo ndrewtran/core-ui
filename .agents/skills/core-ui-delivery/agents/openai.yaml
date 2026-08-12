@@ -1,0 +1,4 @@
+interface:
+  display_name: "Core UI Delivery"
+  short_description: "Triage Core UI delivery through canonical owners"
+  default_prompt: "Use $core-ui-delivery to triage and execute this Core UI task through the canonical delivery profile, starting with the alignment preflight."
