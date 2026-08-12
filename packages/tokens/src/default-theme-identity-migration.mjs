@@ -15,7 +15,10 @@ const AUTHORITY = Object.freeze({
   decision: Object.freeze({ bytes: 26344, sha256: 'sha256:747eb372d7cb53351d1cc30f4092cd703feb7986d3ea12814da6974616b85262' }),
   applicabilityAcceptance: Object.freeze({ bytes: 495, path: 'decisions/0006-phase-c-applicability-topology-acceptance.json', sha256: 'sha256:f94112578a689735a720ba66c75e695d5a7c3f01dbb88e34d56a1b7492f4e34f' }),
   applicabilityDecision: Object.freeze({ bytes: 48867, path: 'decisions/0006-phase-c-applicability-topology.json', sha256: 'sha256:5451cad5a62d9acf2bf53bfe7cbda6419a982232f062d926130cab7ebba39c6c' }),
-  productScope: Object.freeze({ bytes: 86594, path: 'strategy/product-scope.md', sha256: 'sha256:0346e60bc4e7e448fc50723604f51ae6796bcd77ddb799773a95029db21bd309' }),
+  deliveryAcceptance: Object.freeze({ bytes: 558, path: 'decisions/0007-delivery-workflow-authority-acceptance.json', sha256: 'sha256:282defb18bd1d897c14dc62e3ebc44cabf0d3cdbf4cd8c0419d71b9d1d03ed8d' }),
+  deliveryDecision: Object.freeze({ bytes: 40822, path: 'decisions/0007-delivery-workflow-authority.json', sha256: 'sha256:97aa9d33adb4da0cd9b6bf4d692993b8b8938401d73cb7cb20912c3f6e382c8f' }),
+  phaseCProductScope: Object.freeze({ bytes: 86594, path: 'strategy/product-scope.md', sha256: 'sha256:0346e60bc4e7e448fc50723604f51ae6796bcd77ddb799773a95029db21bd309' }),
+  productScope: Object.freeze({ bytes: 90165, path: 'strategy/product-scope.md', sha256: 'sha256:7c8404e20d01f6a0cc975b17a7893f5594f6f0d313806a6fced9d0c62d886873' }),
 });
 const CURRENT_REFERENCE_SCAN_EXCLUSIONS = new Set([
   'packages/tokens/src/default-theme-identity-migration.mjs',
@@ -381,7 +384,7 @@ async function assertAuthorityStageRoot(repositoryRoot, topologyDecision, accept
     [DEFAULT_THEME_IDENTITY_PATHS.acceptance, AUTHORITY.acceptance],
     [AUTHORITY.applicabilityDecision.path, AUTHORITY.applicabilityDecision],
     [AUTHORITY.applicabilityAcceptance.path, AUTHORITY.applicabilityAcceptance],
-    [AUTHORITY.productScope.path, AUTHORITY.productScope],
+    [AUTHORITY.phaseCProductScope.path, AUTHORITY.phaseCProductScope],
   ]) {
     const committed = await execFile('git', ['show', `${index.sourceRevision}:${path}`], {
       cwd: repositoryRoot,
@@ -678,21 +681,44 @@ async function assertRepositoryFacts(repositoryRoot, decision, sourceState) {
 }
 
 async function acceptedAuthority(repositoryRoot) {
-  const [decisionBytes, , topologyBytes, topologyAcceptanceBytes] = await Promise.all([
+  const [
+    decisionBytes,
+    ,
+    topologyBytes,
+    topologyAcceptanceBytes,
+    deliveryDecisionBytes,
+    deliveryAcceptanceBytes,
+  ] = await Promise.all([
     exactAuthorityFile(repositoryRoot, DEFAULT_THEME_IDENTITY_PATHS.decision, AUTHORITY.decision),
     exactAuthorityFile(repositoryRoot, DEFAULT_THEME_IDENTITY_PATHS.acceptance, AUTHORITY.acceptance),
     exactAuthorityFile(repositoryRoot, AUTHORITY.applicabilityDecision.path, AUTHORITY.applicabilityDecision),
     exactAuthorityFile(repositoryRoot, AUTHORITY.applicabilityAcceptance.path, AUTHORITY.applicabilityAcceptance),
+    exactAuthorityFile(repositoryRoot, AUTHORITY.deliveryDecision.path, AUTHORITY.deliveryDecision),
+    exactAuthorityFile(repositoryRoot, AUTHORITY.deliveryAcceptance.path, AUTHORITY.deliveryAcceptance),
     exactAuthorityFile(repositoryRoot, AUTHORITY.productScope.path, AUTHORITY.productScope),
   ]);
   const decision = strict(decisionBytes, DEFAULT_THEME_IDENTITY_PATHS.decision);
   const topologyDecision = strict(topologyBytes, AUTHORITY.applicabilityDecision.path);
   const topologyAcceptance = strict(topologyAcceptanceBytes, AUTHORITY.applicabilityAcceptance.path);
+  const deliveryDecision = strict(deliveryDecisionBytes, AUTHORITY.deliveryDecision.path);
+  const deliveryAcceptance = strict(deliveryAcceptanceBytes, AUTHORITY.deliveryAcceptance.path);
   if (
     topologyAcceptance.decisionId !== 'core-ui:decision:0006'
     || topologyAcceptance.issueNumber !== 39
     || topologyAcceptance.owner !== 'ndrewtran'
   ) fail('CORE_TOKEN_IDENTITY_AUTHORITY_MISMATCH', 'decision-0006 acceptance identity');
+  if (
+    deliveryDecision.decisionId !== 'core-ui:decision:0007'
+    || deliveryDecision.authorityAmendment?.productScope?.scopeVersion !== '4.0.2'
+    || deliveryDecision.authorityAmendment?.productScope?.sha256 !== AUTHORITY.productScope.sha256
+    || deliveryDecision.acceptanceTopology?.issueNumber !== 54
+    || deliveryDecision.acceptanceTopology?.owner !== 'ndrewtran'
+    || deliveryAcceptance.decisionId !== 'core-ui:decision:0007'
+    || deliveryAcceptance.issueNumber !== 54
+    || deliveryAcceptance.owner !== 'ndrewtran'
+    || deliveryAcceptance.outcome !== 'accepted'
+    || deliveryAcceptance.authorAssociation !== 'OWNER'
+  ) fail('CORE_TOKEN_IDENTITY_AUTHORITY_MISMATCH', 'decision-0007 acceptance identity');
   await assertAuthorityStageRoot(repositoryRoot, topologyDecision, topologyAcceptance);
   return decision;
 }

@@ -20,9 +20,31 @@ const PLANNING_CONTROL_FILES = new Set([
   '.github/scripts/validate-planning-pr.test.cjs',
 ]);
 
+const DELIVERY_CONTROL_FILES = new Set([
+  '.agents/skills/core-ui-delivery/SKILL.md',
+  'tests/AGENTS.md',
+  'tests/evidence/README.md',
+  'tooling/AGENTS.md',
+  'tooling/audits/repository-policy/README.md',
+  'tooling/audits/repository-policy/delivery-workflow-profile.json',
+  'tooling/audits/repository-policy/delivery-workflow-profile.schema.json',
+  'tooling/audits/repository-policy/delivery-workflow.schema.json',
+]);
+
+const DELIVERY_IDENTITY_FIELDS = [
+  'Source identity',
+  'Executed identity',
+  'Proof-tool identity',
+  'Identity correlation owner',
+  'Evidence identity',
+  'Review packet identity',
+  'Invalidation domains',
+];
+
 function isProtectedPlanningFile(file) {
   return AUTHORITY_FILES.has(file)
     || PLANNING_CONTROL_FILES.has(file)
+    || DELIVERY_CONTROL_FILES.has(file)
     || file.startsWith('.github/ISSUE_TEMPLATE/');
 }
 
@@ -40,6 +62,7 @@ function validatePlanningPullRequest({ files = [], labels = [], body = '' }) {
   const errors = [];
   const planningControlChanged = files.some(isProtectedPlanningFile);
   const productScopeChanged = files.includes('strategy/product-scope.md');
+  const deliveryControlChanged = files.some((file) => DELIVERY_CONTROL_FILES.has(file));
 
   if (!planningControlChanged) return errors;
 
@@ -53,6 +76,8 @@ function validatePlanningPullRequest({ files = [], labels = [], body = '' }) {
   if (!/^#\d+\b/.test(changeRecord)) {
     errors.push('Authority-source changes require an Authority change record: #… reference.');
   }
+
+  errors.push(...validateDeliveryIdentities({ files, body }));
 
   if (!productScopeChanged) return errors;
 
@@ -75,9 +100,24 @@ function validatePlanningPullRequest({ files = [], labels = [], body = '' }) {
   return errors;
 }
 
+function validateDeliveryIdentities({ files = [], body = '' }) {
+  if (!files.some((file) => DELIVERY_CONTROL_FILES.has(file))) return [];
+  const errors = [];
+  for (const label of DELIVERY_IDENTITY_FIELDS) {
+    if (!hasSubstantiveValue(fieldValue(body, label))) errors.push(`Delivery workflow changes require a substantive ${label} entry.`);
+  }
+  for (const prohibited of ['Clearance', 'Dispatch', 'Review state', 'Acceptance state', 'Readiness state', 'Merge state']) {
+    if (fieldValue(body, prohibited)) errors.push(`Delivery workflow changes must not submit a local ${prohibited} claim.`);
+  }
+  return errors;
+}
+
 module.exports = {
   AUTHORITY_FILES,
+  DELIVERY_CONTROL_FILES,
+  DELIVERY_IDENTITY_FIELDS,
   PLANNING_CONTROL_FILES,
   isProtectedPlanningFile,
+  validateDeliveryIdentities,
   validatePlanningPullRequest,
 };

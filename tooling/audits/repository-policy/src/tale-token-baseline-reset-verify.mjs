@@ -17,6 +17,8 @@ const ARCHITECTURE_PATH = 'strategy/monorepo-architecture.md';
 const PRODUCT_SCOPE_PATH = 'strategy/product-scope.md';
 const ACCEPTED_PRODUCT_SCOPE_BYTES = 73816;
 const ACCEPTED_PRODUCT_SCOPE_SHA256 = 'sha256:c691b0bf0c3933ac7b91121f99904e911ea6439ad79badea9a491085bfe6f0e8';
+const ACCEPTED_ARCHITECTURE_BYTES = 120566;
+const ACCEPTED_ARCHITECTURE_SHA256 = 'sha256:5ce3f23769daf1a6b51f46ebf83ee38bf3b1c4f622f427b2d68ebf5966eecf04';
 const PARENT_ANNEX_PATH = 'decisions/0003-tale-token-classification-annex.json';
 const PARENT_ACCEPTANCE_PATH = 'decisions/0003-tale-token-classification-acceptance.json';
 const TOKEN_SOURCE_PATH = 'catalog/tokens/default-theme.json';
@@ -398,11 +400,12 @@ export function acceptanceCommentBody({ annexBytes, annexSha256, architectureByt
   ].join('\n');
 }
 
-function verifyAcceptance(record, annexBytes, architectureBytes) {
+function verifyAcceptance(record, annexBytes, architectureBytes, acceptedSuccessor = false) {
   exactKeys(record, ['schema', 'decisionId', 'outcome', 'owner', 'ownerNodeId', 'provider', 'repository', 'issueNumber', 'commentId', 'commentNodeId', 'createdAt', 'url', 'bodySha256'], 'acceptance record');
   const body = acceptanceCommentBody({
     annexBytes: Buffer.byteLength(annexBytes), annexSha256: `sha256:${sha256(annexBytes)}`,
-    architectureBytes: Buffer.byteLength(architectureBytes), architectureSha256: `sha256:${sha256(architectureBytes)}`,
+    architectureBytes: acceptedSuccessor ? ACCEPTED_ARCHITECTURE_BYTES : Buffer.byteLength(architectureBytes),
+    architectureSha256: acceptedSuccessor ? ACCEPTED_ARCHITECTURE_SHA256 : `sha256:${sha256(architectureBytes)}`,
     productScopeBytes: ACCEPTED_PRODUCT_SCOPE_BYTES,
     productScopeSha256: ACCEPTED_PRODUCT_SCOPE_SHA256,
   });
@@ -498,7 +501,7 @@ export async function verifyTaleTokenBaselineReset(repositoryRoot, options = {})
   if (!acceptanceOverrideProvided) {
     try { await access(join(repositoryRoot, ACCEPTANCE_PATH)); acceptance = (await strictFile(join(repositoryRoot, ACCEPTANCE_PATH), ACCEPTANCE_PATH)).value; } catch (error) { if (error?.code !== 'ENOENT') throw error; }
   }
-  if (acceptance !== undefined && acceptance !== null) verifyAcceptance(acceptance, annexDocument.bytes, architectureBytes);
+  if (acceptance !== undefined && acceptance !== null) verifyAcceptance(acceptance, annexDocument.bytes, architectureBytes, !acceptedProductScope);
   if (options.requireAcceptance && (acceptance === undefined || acceptance === null)) fail('TALE_RESET_ACCEPTANCE_REQUIRED', ACCEPTANCE_PATH);
   return { accepted: acceptance !== undefined && acceptance !== null, finalTokenCount: finalIds.length, finalTokenSourceDigest: expectedDigests.finalTokenSource, removed: annex.removals.length, affectedScopeIds: annex.affectedScopeIds.length };
 }

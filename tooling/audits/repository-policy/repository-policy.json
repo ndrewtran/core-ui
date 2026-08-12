@@ -46,6 +46,7 @@
     }
   ],
   "globalTaskInputs": [
+    ".agents/",
     ".github/",
     "decisions/",
     "strategy/",
@@ -56,6 +57,27 @@
     "pnpm-lock.yaml",
     "pnpm-workspace.yaml"
   ],
+  "dependencyPreparation": {
+    "argvTemplate": [
+      "pnpm",
+      "install",
+      "--offline",
+      "--frozen-lockfile",
+      "--ignore-scripts",
+      "--store-dir",
+      "<declared-offline-store>"
+    ],
+    "environmentKeys": [
+      "CI",
+      "HOME",
+      "LANG",
+      "LC_ALL",
+      "PATH",
+      "TMPDIR"
+    ],
+    "profile": "core-ui-dependency-preparation-command-v1",
+    "storePlaceholder": "<declared-offline-store>"
+  },
   "toolchain": {
     "node": "24.19.0",
     "nodeRange": ">=24.19.0 <25",

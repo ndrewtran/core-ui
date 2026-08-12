@@ -20,6 +20,21 @@ State the problem, goal, and why this bounded change is required now.
 - Release additions / removals:
 - Open tracker migration:
 
+## Delivery identities
+
+Allowed profiles, applicability, N/A reasons, and invalidation domains are
+resolved from `tooling/audits/repository-policy/delivery-workflow-profile.json`.
+Do not add local clearance, dispatch, review-state, acceptance, readiness,
+merge, tracker-state, release, or completion claims.
+
+- Source identity: `commit / tree`
+- Executed identity: `commit / tree`
+- Proof-tool identity: `commit / tree`
+- Identity correlation owner: canonical owner reference
+- Evidence identity: `head / tree / index digest`, or owner-declared N/A record
+- Review packet identity: `id / profile / algorithm / digest / byte length`
+- Invalidation domains: profile-owned domain identifiers
+
 ## Change summary
 
 Describe the bounded change, why it is required now, and the exact platforms,

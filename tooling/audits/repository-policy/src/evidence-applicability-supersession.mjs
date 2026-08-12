@@ -84,7 +84,7 @@ export function assertAuthorityDecisionShape(value, fail) {
       'schema',
       'url',
     ],
-    [],
+    ['authorAssociation', 'updatedAt'],
     'authority decision',
     fail,
   );
@@ -103,6 +103,10 @@ export function assertAuthorityDecisionShape(value, fail) {
   }
   string(value?.commentNodeId, 'authority decision.commentNodeId', fail, IDENTIFIER_PATTERN);
   timestamp(value?.createdAt, 'authority decision.createdAt', fail);
+  if (value?.updatedAt !== undefined) timestamp(value.updatedAt, 'authority decision.updatedAt', fail);
+  if (value?.authorAssociation !== undefined && value.authorAssociation !== 'OWNER') {
+    fail('authority decision.authorAssociation must be OWNER when present');
+  }
   string(value?.bodySha256, 'authority decision.bodySha256', fail, SHA256_PATTERN);
   string(value?.url, 'authority decision.url', fail, /^https:\/\/github\.com\//u);
   string(value?.owner, 'authority decision.owner', fail, IDENTIFIER_PATTERN);

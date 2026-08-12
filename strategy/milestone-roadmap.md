@@ -146,6 +146,42 @@ exists. From G2.5 onward, any automated apply must bind explicit approval and
 the operation journal to that exact envelope digest; a changed diff invalidates
 the approval.
 
+
+### Adjacent repository delivery workflow control
+
+The deterministic delivery workflow is a separately tracked, non-milestone
+repository control activated after accepted G1.1. It does not reopen completed
+G0.0, add evidence to G0.0, or satisfy G0.5, G1.9, G2.5, or G2.6. Its immediate
+named consumer is G1.2 and `fixture:platform-safety-native`; it remains
+non-blocking for renderer delivery except for failures already made
+non-waivable by canonical-source, integrity, disclosure, compatibility, or
+required-proof rules.
+
+The exact unchanged plan is applied from merge commit `5a2d9d175dc02b40b619e7f183c7c9b3e18269e0` only because it has reviewed source `3026adc082861cb5f096193b8c2ca384d368aac1` as second parent and the same tree `28a7f6fb70a30eda983c0be3b95f8d9d1da77b97`. No broader tree-equivalence rule exists.
+
+The activation contract is fixed:
+
+| ID | Required assertion |
+| --- | --- |
+| `E-DELIVERY-01` | One private owner, one closed schema/profile, and no public command, package, capability, artifact kind, revision axis, durable product relation, or product commitment is introduced. |
+| `E-DELIVERY-02` | Every terminal schema leaf has one stable field ID and one exact RFC 6901 schema pointer mapped to exactly one invalidation domain; gaps, overlaps, wildcard ownership, and heuristic classification fail. |
+| `E-DELIVERY-03` | The procedure references canonical authority, source, affected-set, proof, review, human-decision, hosted, tracker, and release owners without copying their policy literals or promoting external state. |
+| `E-DELIVERY-04` | `ChangeIntentEnvelope` remains the sole owner of intent and graph-derived affected closure; pre-G1.9 expected paths are explicitly incomplete and post-G1.9 records bind the exact envelope digest. |
+| `E-DELIVERY-05` | Disclosure precedes dispatch, sensitive evidence remains independently reviewed, and local packet rendering cannot manufacture clearance. |
+| `E-DELIVERY-06` | Positive, negative, compound-route, privacy, dispatch-order, hosted-routing, race, interruption, rollback, and recovery fixtures pass. |
+| `E-DELIVERY-07` | Candidate-side checks run through the existing repository-policy task graph; no trusted hosted writer, mutation adapter, proof cache, or replay capability is enabled. |
+| `E-DELIVERY-08` | Full removal disables enforcement first, removes only the recorded write set, preserves historical text/evidence, and restores prior repository-policy behavior with generation identity. |
+
+The accepted authority is recorded before repository writes. Delivery then uses one combined protected PR whose source history contains the exact authority bytes followed by RB-01 and RB-02; one final-source evidence-only child appends all 28 authority-applicability successors after RB-02. A separate earlier successor generation is forbidden because later repository-policy changes would immediately stale it.
+
+The control activates only after exact pre-write authority and schema/catalog
+review, a separately recorded owner decision bound to the accepted plan and
+authority candidate, the two reviewed rollout boundaries, complete
+deterministic proof, post-proof evidence/privacy and release review, protected
+PR checks, and merge. Its workflow status is never roadmap completion.
+Operational duration and false-invalidation counts may be observed, but own no
+Product Scope metric and gate no milestone or release.
+
 ### Non-waivable rules
 
 No operational exception or milestone decision may:
@@ -2339,6 +2375,7 @@ and stays absent until that trigger is proved.
 | Design-tool authority inversion | Tool nodes/variables become canonical or lossy import writes silently. | Reject import; report mapping/loss; produce proposal only against canonical owners. |
 | Promptable semantics becomes vague layer | Terms lack stable owner, meaning, query behavior, or measurable benefit. | Keep editorial/unsupported; close discovery without new ontology. |
 | Component-count pressure | Breadth rises while proof, retrieval quality, or maintainer throughput degrades. | Stop admissions; repair the addition path and metrics before resuming breadth. |
+| Delivery procedure duplicates later owners | A procedural field asserts intent, graph-derived affected closure, human acceptance, hosted truth, tracker truth, or write authority. | Reject the record; bind the canonical owner and exact identity, or defer until that owner exists. |
 
 ## Milestone activation and review packet
 

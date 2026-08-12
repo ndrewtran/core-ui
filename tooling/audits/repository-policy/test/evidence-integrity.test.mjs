@@ -11,6 +11,32 @@ import {
 } from '../src/evidence-verify.mjs';
 import { sha256 } from '../src/policy.mjs';
 import { acceptanceCommentBody } from '../src/tale-token-annex-acceptance.mjs';
+import { assertAuthorityDecisionShape } from '../src/evidence-applicability-supersession.mjs';
+
+test('authority decision receipts admit exact OWNER association and edit timestamp provenance', () => {
+  const value = {
+    authorAssociation: 'OWNER',
+    bodySha256: `sha256:${'0'.repeat(64)}`,
+    commentId: 1,
+    commentNodeId: 'comment-node',
+    createdAt: '2026-08-12T00:00:00Z',
+    decisionId: 'core-ui:decision:0007',
+    issueNumber: 54,
+    outcome: 'accepted',
+    owner: 'ndrewtran',
+    ownerNodeId: 'owner-node',
+    provider: 'github',
+    repository: 'ndrewtran/core-ui',
+    schema: 'core-ui-authority-decision-v1',
+    updatedAt: '2026-08-12T00:00:00Z',
+    url: 'https://github.com/ndrewtran/core-ui/issues/54#issuecomment-1',
+  };
+  assertAuthorityDecisionShape(value, (message) => { throw new Error(message); });
+  assert.throws(
+    () => assertAuthorityDecisionShape({ ...value, authorAssociation: 'CONTRIBUTOR' }, (message) => { throw new Error(message); }),
+    /must be OWNER/,
+  );
+});
 
 test('evidence output privacy recognizes canonical token IDs without accepting credentials', () => {
   const root = '/workspace/core-ui';

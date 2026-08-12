@@ -2,6 +2,7 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import { canonicalJson, parseJsonStrict } from '@core-ui/schema';
+import { verifyDeliveryWorkflowAuthority } from './delivery-workflow-authority-verify.mjs';
 
 const root = path.resolve(import.meta.dirname, '../../../..');
 const parentPath = path.join(root, 'decisions/0005-default-theme-token-source-identity.json');
@@ -52,6 +53,7 @@ const expectedAuthorityBindings = [
 ];
 const expectedDecisionSha256 = 'sha256:5451cad5a62d9acf2bf53bfe7cbda6419a982232f062d926130cab7ebba39c6c';
 const expectedProductScopeSha256 = 'sha256:0346e60bc4e7e448fc50723604f51ae6796bcd77ddb799773a95029db21bd309';
+const expectedAcceptanceBodySha256 = 'sha256:deb022ec1ff847b4621d00eb231aa4b534d4e746accb2bc4748ee274ba50d6fd';
 const expectedPhaseCRootPaths = [
   'tests/evidence/tale-token-phase-c-g0.1/index.json',
   'tests/evidence/tale-token-phase-c-g0.2/index.json',
@@ -123,9 +125,16 @@ const acceptance = parseJsonStrict(acceptanceSource);
 
 if (decisionSource !== canonicalJson(decision)) fail('decision is not Core canonical JSON or has terminal LF');
 if (hash(decisionSource) !== expectedDecisionSha256) fail('decision digest differs from reviewed acceptance candidate');
-if (hash(scopeSource) !== expectedProductScopeSha256) fail('Product Scope digest differs from reviewed 4.0.1 candidate');
+const originalProductScope = hash(scopeSource) === expectedProductScopeSha256
+  && scopeSource.startsWith('---\nscopeVersion: 4.0.1\n');
+if (!originalProductScope) {
+  try {
+    verifyDeliveryWorkflowAuthority(root, { productScopeSource: scopeSource });
+  } catch (error) {
+    fail(`Product Scope authority successor: ${error.message}`);
+  }
+}
 exactKeys(decision, expectedTopLevelKeys, 'decision');
-if (!scopeSource.startsWith('---\nscopeVersion: 4.0.1\n')) fail('Product Scope version');
 if ((scopeSource.match(/### Phase C applicability-chain topology correction \(`4\.0\.1`\)/gu) ?? []).length !== 1) fail('Product Scope correction section');
 if (!scopeSource.includes('The maintenance root is not a seventh Phase C root.')) fail('Product Scope proof boundary');
 if (!scopeSource.includes('A deterministic current-state projection remains deferred.')) fail('Product Scope deferred projection');
@@ -138,7 +147,9 @@ if (decision.parentDecision.decisionSha256 !== hash(parentSource)) fail('parent 
 if (decision.parentDecision.acceptanceSha256 !== hash(fs.readFileSync(path.join(root, decision.parentDecision.acceptancePath)))) fail('parent receipt digest');
 exactKeys(acceptance, acceptanceKeys, 'acceptance');
 if (
-  acceptance.bodySha256 !== hash(acceptanceCommentBody({ decisionSource, productScopeSource: scopeSource }))
+  acceptance.bodySha256 !== (originalProductScope
+    ? hash(acceptanceCommentBody({ decisionSource, productScopeSource: scopeSource }))
+    : expectedAcceptanceBodySha256)
   || acceptance.commentId !== 5240422975
   || acceptance.commentNodeId !== 'IC_kwDOTtLjcM8AAAABOFqCPw'
   || acceptance.createdAt !== '2026-08-10T12:42:16Z'
@@ -261,7 +272,7 @@ const result = {
   parentDecision: { bytes: Buffer.byteLength(parentSource), sha256: hash(parentSource) },
   phaseCRoots: phaseC.rootPaths.length,
   phaseBSuccessors: phaseC.successorTargets.length,
-  productScope: { bytes: Buffer.byteLength(scopeSource), sha256: hash(scopeSource), version: '4.0.1' },
+  productScope: { bytes: Buffer.byteLength(scopeSource), sha256: hash(scopeSource), version: originalProductScope ? '4.0.1' : '4.0.2' },
   terminalPartition: targetNames.length,
 };
 

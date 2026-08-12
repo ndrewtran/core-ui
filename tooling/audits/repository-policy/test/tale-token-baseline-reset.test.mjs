@@ -11,9 +11,10 @@ import {
 
 const repositoryRoot = resolve(import.meta.dirname, '../../../..');
 const annexPath = resolve(repositoryRoot, 'decisions/0004-tale-only-reference-baseline-annex.json');
-const architecturePath = resolve(repositoryRoot, 'strategy/monorepo-architecture.md');
 const acceptedProductScopeBytes = 73816;
 const acceptedProductScopeSha256 = 'sha256:c691b0bf0c3933ac7b91121f99904e911ea6439ad79badea9a491085bfe6f0e8';
+const acceptedArchitectureBytes = 120566;
+const acceptedArchitectureSha256 = 'sha256:5ce3f23769daf1a6b51f46ebf83ee38bf3b1c4f622f427b2d68ebf5966eecf04';
 
 async function annex() {
   return JSON.parse(await readFile(annexPath, 'utf8'));
@@ -30,12 +31,11 @@ async function rejects(code, mutate) {
 
 async function acceptance(overrides = {}) {
   const annexBytes = await readFile(annexPath, 'utf8');
-  const architectureBytes = await readFile(architecturePath, 'utf8');
   const body = acceptanceCommentBody({
     annexBytes: Buffer.byteLength(annexBytes),
     annexSha256: `sha256:${sha256(annexBytes)}`,
-    architectureBytes: Buffer.byteLength(architectureBytes),
-    architectureSha256: `sha256:${sha256(architectureBytes)}`,
+    architectureBytes: acceptedArchitectureBytes,
+    architectureSha256: acceptedArchitectureSha256,
     productScopeBytes: acceptedProductScopeBytes,
     productScopeSha256: acceptedProductScopeSha256,
   });
