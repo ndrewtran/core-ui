@@ -72,3 +72,48 @@ export function classifyDeliveryInvalidation(contract, before, after) {
     invalidatedIdentities: [...new Set(routes.flatMap(({ route }) => route.slice(1)))].sort(),
   };
 }
+
+export function classifyReviewerInvalidation(contract, beforeDependencies, afterDependencies) {
+  const relations = contract.profile.reviewerDependencyRelations;
+  const fallback = (changedPointers) => ({
+    changedPointers,
+    invalidated: ['all-reviews', 'dependent-acceptance', 'packet'],
+    rewind: 'PACKET',
+  });
+  if (!relations || !beforeDependencies || !afterDependencies) return fallback(['/']);
+  const changed = leafChanges(beforeDependencies, afterDependencies).sort();
+  const expectedRoots = Object.keys(relations).sort();
+  const beforeRoots = Object.keys(beforeDependencies).sort();
+  const afterRoots = Object.keys(afterDependencies).sort();
+  if (canonicalJson(beforeRoots) !== canonicalJson(expectedRoots)
+      || canonicalJson(afterRoots) !== canonicalJson(expectedRoots)
+      || Object.values(beforeDependencies).some((identity) => identity === null || identity === undefined)
+      || Object.values(afterDependencies).some((identity) => identity === null || identity === undefined)) {
+    return fallback(changed.length ? changed : ['/']);
+  }
+  const allowedRelations = new Set([
+    'all-reviews', 'authority-review', 'dependent-acceptance', 'evidence-review',
+    'packet', 'release-review', 'schema-catalog-review',
+  ]);
+  for (const route of Object.values(relations)) {
+    if (!Array.isArray(route) || route.length === 0 || new Set(route).size !== route.length
+        || route.some((identity) => identity === '*' || !allowedRelations.has(identity))
+        || (route.includes('all-reviews') && route.some((identity) => identity.endsWith('-review')))) {
+      return fallback(changed.length ? changed : ['/']);
+    }
+  }
+  const affected = new Set();
+  for (const pointer of changed) {
+    const root = pointer.split('/')[1];
+    const route = relations[root];
+    if (!root || !route || route.includes('*')) {
+      return fallback(changed);
+    }
+    route.forEach((identity) => affected.add(identity));
+  }
+  return {
+    changedPointers: changed,
+    invalidated: [...affected].sort(),
+    rewind: changed.length === 0 ? null : 'PACKET',
+  };
+}

@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict';
-import { mkdtemp, mkdir, readFile, writeFile } from 'node:fs/promises';
+import { mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { execFile as execFileCallback } from 'node:child_process';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { join, resolve } from 'node:path';
 import test from 'node:test';
 import { promisify } from 'node:util';
 import { canonicalJson } from '../src/canonical-json.mjs';
@@ -15,8 +15,15 @@ import {
 import { sha256 } from '../src/policy.mjs';
 import { acceptanceCommentBody } from '../src/tale-token-annex-acceptance.mjs';
 import { assertAuthorityDecisionShape } from '../src/evidence-applicability-supersession.mjs';
+import { captureReviewReadiness } from '../../../../tests/evidence/capture-0009-delivery-review-readiness-applicability.mjs';
+import {
+  assertReviewReadinessRoot,
+  REVIEW_READINESS_ROOT,
+  resolveReviewReadinessSourceIdentity,
+} from '../../../../tests/evidence/delivery-review-readiness-applicability-profile.mjs';
 
 const execFile = promisify(execFileCallback);
+const repositoryRoot = resolve(import.meta.dirname, '../../../..');
 
 async function git(root, ...args) {
   return (await execFile('git', args, { cwd: root, encoding: 'utf8' })).stdout.trim();
@@ -84,6 +91,32 @@ test('authority decision receipts admit exact OWNER association and edit timesta
     () => assertAuthorityDecisionShape({ ...value, authorAssociation: 'CONTRIBUTOR' }, (message) => { throw new Error(message); }),
     /must be OWNER/,
   );
+});
+
+test('authority decision receipts admit truthful bounded task provenance without a fabricated human timestamp or comment', () => {
+  const value = {
+    candidate: { byteLength: 1, path: 'decisions/0009-delivery-review-readiness.json', sha256: `sha256:${'0'.repeat(64)}` },
+    decisionId: 'core-ui:decision:0009',
+    issueNumber: 58,
+    manifest: { entryCount: 2, profile: 'core-ui-proposed-source-artifact-manifest-v1', sha256: `sha256:${'1'.repeat(64)}` },
+    outcome: 'accepted',
+    owner: 'ndrewtran',
+    plan: { path: '/tmp/core-ui-review-readiness-proposal-v1.final.md', sha256: 'sha256:43a7b1724b4e107e253703952ac4839f7c99880f4b96e56b8e73e56de1aded7d' },
+    provider: 'codex-task',
+    repository: 'ndrewtran/core-ui',
+    schema: 'core-ui-task-provenance-authority-acceptance-v1',
+    taskProvenance: {
+      approvalInstruction: 'exact-plan-approved-for-bounded-execution',
+      approvalTimestamp: null,
+      githubCommentClaimed: false,
+      taskId: '019ff5d8-5a4b-7252-958d-bab8b0087c34',
+    },
+  };
+  assert.doesNotThrow(() => assertAuthorityDecisionShape(value, (message) => { throw new Error(message); }));
+  assert.throws(() => assertAuthorityDecisionShape({
+    ...value,
+    taskProvenance: { ...value.taskProvenance, githubCommentClaimed: true },
+  }, (message) => { throw new Error(message); }), /truthful approval boundary/);
 });
 
 test('evidence output privacy recognizes canonical token IDs without accepting credentials', () => {
@@ -1052,4 +1085,35 @@ test('a passing recertification cannot extend a superseded chain', async () => {
     verifyEvidence(withoutPriorRecertification.root),
     'EVIDENCE_RECERTIFICATION_AFTER_SUPERSESSION',
   );
+});
+
+test('full delivery rollback preserves historical continuation bytes and fails current applicability closed pending a new accepted rebind', async () => {
+  const { sourceRevision: resolvedSource, sourceTree } = await resolveReviewReadinessSourceIdentity(repositoryRoot);
+  const parent = await mkdtemp(join(tmpdir(), 'core-ui-review-readiness-rollback-'));
+  const root = join(parent, 'repository');
+  try {
+    await execFile('git', ['clone', '--quiet', '--shared', repositoryRoot, root]);
+    await git(root, 'checkout', '--quiet', resolvedSource);
+    await captureReviewReadiness({
+      repositoryRoot: root,
+      sourceRevision: resolvedSource,
+      sourceTree,
+      timestamp: '2026-08-12T12:30:00Z',
+    });
+    const profile = JSON.parse(await readFile(join(root, 'tooling/audits/repository-policy/delivery-workflow-profile.json'), 'utf8'));
+    const historicalBefore = await readFile(join(root, REVIEW_READINESS_ROOT, 'index.json'));
+    for (const path of Object.values(profile.recoveryStepPaths).flat()) {
+      await rm(join(root, path), { force: true, recursive: true });
+    }
+    const retained = await assertReviewReadinessRoot(root);
+    assert.equal(retained.fileCount, 30);
+    assert.deepEqual(await readFile(join(root, REVIEW_READINESS_ROOT, 'index.json')), historicalBefore);
+    await assertEvidenceError(verifyEvidence(root), 'EVIDENCE_APPLICABILITY_MISMATCH');
+    assert.equal(profile.applicabilityRebindContract.diagnosticCode, 'DELIVERY_ROLLBACK_APPLICABILITY_REBIND_REQUIRED');
+    await mkdir(join(root, 'tests/evidence/unaccepted-rebind'), { recursive: true });
+    await writeFile(join(root, 'tests/evidence/unaccepted-rebind/index.json'), canonicalJson({ records: [], schema: 'core-ui-evidence-index-v1', sourceRevision: resolvedSource, sourceTree, supersessions: [] }));
+    await assertEvidenceError(verifyEvidence(root), 'EVIDENCE_APPLICABILITY_MISMATCH');
+  } finally {
+    await rm(parent, { force: true, recursive: true });
+  }
 });

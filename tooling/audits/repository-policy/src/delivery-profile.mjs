@@ -52,6 +52,46 @@ function matchesType(value, type) {
   return typeof value === type;
 }
 
+function parseRfc3339DateTime(value) {
+  const match = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(?:\.(\d+))?(?:Z|([+-])(\d{2}):(\d{2}))$/u.exec(value);
+  if (!match) return null;
+  const [, year, month, day, hour, minute, second, fraction = '', offsetSign, offsetHour = '00', offsetMinute = '00'] = match;
+  const values = [year, month, day, hour, minute, second, offsetHour, offsetMinute].map(Number);
+  const [numericYear, numericMonth, numericDay, numericHour, numericMinute, numericSecond, numericOffsetHour, numericOffsetMinute] = values;
+  if (numericMonth < 1 || numericMonth > 12 || numericHour > 23 || numericMinute > 59 || numericSecond > 59
+      || numericOffsetHour > 23 || numericOffsetMinute > 59) return null;
+  const leapYear = numericYear % 4 === 0 && (numericYear % 100 !== 0 || numericYear % 400 === 0);
+  const lastDay = [31, leapYear ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][numericMonth - 1];
+  if (numericDay < 1 || numericDay > lastDay) return null;
+  const adjustedYear = numericYear - (numericMonth <= 2 ? 1 : 0);
+  const era = Math.floor(adjustedYear / 400);
+  const yearOfEra = adjustedYear - era * 400;
+  const shiftedMonth = numericMonth + (numericMonth > 2 ? -3 : 9);
+  const dayOfYear = Math.floor((153 * shiftedMonth + 2) / 5) + numericDay - 1;
+  const dayOfEra = yearOfEra * 365 + Math.floor(yearOfEra / 4) - Math.floor(yearOfEra / 100) + dayOfYear;
+  const daysSinceEpoch = era * 146097 + dayOfEra - 719468;
+  const localSeconds = BigInt(daysSinceEpoch) * 86400n
+    + BigInt(numericHour * 3600 + numericMinute * 60 + numericSecond);
+  const offsetSeconds = BigInt(numericOffsetHour * 3600 + numericOffsetMinute * 60)
+    * (offsetSign === '-' ? -1n : 1n);
+  return { fraction, seconds: localSeconds - offsetSeconds };
+}
+
+export function isRfc3339DateTime(value) {
+  return typeof value === 'string' && parseRfc3339DateTime(value) !== null;
+}
+
+export function compareRfc3339DateTime(left, right) {
+  const leftInstant = parseRfc3339DateTime(left);
+  const rightInstant = parseRfc3339DateTime(right);
+  if (!leftInstant || !rightInstant) fail('DELIVERY_SCHEMA_INVALID', 'cannot compare invalid RFC 3339 date-time values');
+  if (leftInstant.seconds !== rightInstant.seconds) return leftInstant.seconds < rightInstant.seconds ? -1 : 1;
+  const width = Math.max(leftInstant.fraction.length, rightInstant.fraction.length);
+  const leftFraction = leftInstant.fraction.padEnd(width, '0');
+  const rightFraction = rightInstant.fraction.padEnd(width, '0');
+  return leftFraction === rightFraction ? 0 : leftFraction < rightFraction ? -1 : 1;
+}
+
 export function validateDeliverySchema(contract, value, {
   at = '',
   rootSchema = contract,
@@ -85,7 +125,7 @@ export function validateDeliverySchema(contract, value, {
     if (contract.minLength !== undefined && value.length < contract.minLength) issue(`must have length >= ${contract.minLength}`);
     if (contract.maxLength !== undefined && value.length > contract.maxLength) issue(`must have length <= ${contract.maxLength}`);
     if (contract.pattern && !(new RegExp(contract.pattern, 'u')).test(value)) issue(`must match ${contract.pattern}`);
-    if (contract.format === 'date-time' && Number.isNaN(Date.parse(value))) issue('must be an RFC 3339 date-time');
+    if (contract.format === 'date-time' && !isRfc3339DateTime(value)) issue('must be an RFC 3339 date-time');
   }
   if (typeof value === 'number' && contract.minimum !== undefined && value < contract.minimum) issue(`must be >= ${contract.minimum}`);
   if (typeof value === 'number' && contract.maximum !== undefined && value > contract.maximum) issue(`must be <= ${contract.maximum}`);
@@ -214,6 +254,10 @@ export async function loadDeliveryProfile(repositoryRoot) {
     fail('DELIVERY_PROFILE_INVALID', 'profile diagnostics digest does not match delivery-workflow-diagnostics.json');
   }
   validateDeliverySchema(profileSchema, profile, { rootSchema: profileSchema });
+  if (profile.operationalProofContract?.ownerRef !== 'repository-policy-owner'
+      || Object.keys(profile.reviewerDependencyRelations ?? {}).length !== 8) {
+    fail('DELIVERY_PROFILE_INVALID', 'review-readiness operational and reviewer owners are incomplete');
+  }
   const fields = collectTerminalFields(schema).sort((left, right) => Buffer.from(left.pointer).compare(Buffer.from(right.pointer)));
   const pointers = fields.map(({ pointer }) => pointer);
   if (new Set(pointers).size !== pointers.length || new Set(fields.map(({ id }) => id)).size !== fields.length) {

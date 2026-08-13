@@ -468,7 +468,10 @@ export function registerRollbackTests(repositoryRoot) {
       'code', 'details', 'nextAction', 'ownerRef', 'retryable', 'ruleId',
     ]);
     assert.equal(result.diagnostic.code, contract.profile.applicabilityRebindContract.diagnosticCode);
-    assert.match(result.diagnostic.details.expected, /^a new digest-specific owner decision defining versioned successors for target manifest sha256:30b1b7b06212bb59fe2e69ee12d6897997e6a0e6ba9e3e56e0d009fce3047f32 \(28 terminal nodes\)$/u);
+    assert.equal(
+      result.diagnostic.details.expected,
+      `a new digest-specific owner decision defining versioned successors for target manifest ${contract.profile.applicabilityRebindContract.affectedSuccessorManifestSha256} (${contract.profile.applicabilityRebindContract.affectedSuccessorCount} terminal nodes)`,
+    );
     assert.equal(result.diagnostic.retryable, false);
     const liveReference = rollbackFixture(contract, { completedCount: contract.profile.recoverySteps.length });
     assert.throws(() => validateDeliveryRollback(contract, liveReference.rollback, liveReference.inputs), /did not prove absence/);
@@ -479,16 +482,16 @@ export function registerRollbackTests(repositoryRoot) {
     wrongTargetContract.profile.applicabilityRebindContract.affectedSuccessorCount = 27;
     assert.throws(
       () => validateDeliveryRollback(wrongTargetContract, complete.rollback, complete.inputs),
-      /decision boundary does not match Decision 0007/,
+      /decision boundary does not match Decision 0009/,
     );
     const reusedInitialTopology = {
       ...contract,
       profile: structuredClone(contract.profile),
     };
-    reusedInitialTopology.profile.applicabilityRebindContract.rebindAuthorization = 'reuse-decision-0007-initial-capture';
+    reusedInitialTopology.profile.applicabilityRebindContract.rebindAuthorization = 'reuse-decision-0009-initial-capture';
     assert.throws(
       () => validateDeliveryRollback(reusedInitialTopology, complete.rollback, complete.inputs),
-      /decision boundary does not match Decision 0007/,
+      /decision boundary does not match Decision 0009/,
     );
     const substitutedInitialTopology = {
       ...contract,
@@ -497,21 +500,21 @@ export function registerRollbackTests(repositoryRoot) {
     substitutedInitialTopology.profile.applicabilityRebindContract.initialCaptureTopologySha256 = `sha256:${'0'.repeat(64)}`;
     assert.throws(
       () => validateDeliveryRollback(substitutedInitialTopology, complete.rollback, complete.inputs),
-      /decision boundary does not match Decision 0007/,
+      /decision boundary does not match Decision 0009/,
     );
     const substitutedTargets = {
       ...contract,
       owners: new Map(contract.owners),
     };
-    const impactOwner = structuredClone(substitutedTargets.owners.get('decision-0007'));
+    const impactOwner = structuredClone(substitutedTargets.owners.get('decision-0009'));
     const substitutedDecision = JSON.parse(impactOwner.bytes);
-    substitutedDecision.authorityApplicability.targets.reverse();
+    substitutedDecision.continuationTopology.targets.reverse();
     impactOwner.bytes = canonicalJson(substitutedDecision);
     impactOwner.digest = sha256Digest(impactOwner.bytes);
-    substitutedTargets.owners.set('decision-0007', impactOwner);
+    substitutedTargets.owners.set('decision-0009', impactOwner);
     assert.throws(
       () => validateDeliveryRollback(substitutedTargets, complete.rollback, complete.inputs),
-      /decision boundary does not match Decision 0007/,
+      /decision boundary does not match Decision 0009/,
     );
   });
 
@@ -591,5 +594,23 @@ export function registerRollbackTests(repositoryRoot) {
       stdout: () => {},
     });
     assert.equal(tamperedExit, 1);
+  });
+
+  test('E-DELIVERY-07 preserves every Decision 0009 authority and continuation path outside the reverse patch', async () => {
+    const contract = await loadDeliveryProfile(repositoryRoot);
+    const preserved = new Set(contract.profile.recoveryPreservedPaths);
+    const removable = new Set(Object.values(contract.profile.recoveryStepPaths).flat());
+    for (const path of [
+      'decisions/0009-delivery-review-readiness.json',
+      'decisions/0009-delivery-review-readiness-acceptance.json',
+      'tooling/audits/repository-policy/src/evidence-verify.mjs',
+      'tests/evidence/delivery-review-readiness-applicability-profile.mjs',
+      'tests/evidence/authority-58-delivery-review-readiness-applicability-v1/index.json',
+      ...contract.profile.recoveryPreservedPaths.filter((path) => path.startsWith('tests/evidence/authority-58-delivery-review-readiness-applicability-v1/supersessions/')),
+    ]) {
+      assert.equal(preserved.has(path), true, `missing preserved path ${path}`);
+      assert.equal(removable.has(path), false, `preserved path is removable ${path}`);
+    }
+    assert.equal([...preserved].filter((path) => path.startsWith('tests/evidence/authority-58-delivery-review-readiness-applicability-v1/')).length, 30);
   });
 }

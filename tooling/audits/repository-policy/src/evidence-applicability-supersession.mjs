@@ -67,6 +67,42 @@ function manifest(value, label, fail) {
 }
 
 export function assertAuthorityDecisionShape(value, fail) {
+  if (value?.schema === 'core-ui-task-provenance-authority-acceptance-v1') {
+    exactKeys(
+      value,
+      ['candidate', 'decisionId', 'issueNumber', 'manifest', 'outcome', 'owner', 'plan', 'provider', 'repository', 'schema', 'taskProvenance'],
+      [],
+      'task-provenance authority decision',
+      fail,
+    );
+    if (value.provider !== 'codex-task' || value.outcome !== 'accepted'
+        || value.decisionId !== 'core-ui:decision:0009' || value.owner !== 'ndrewtran'
+        || value.repository !== 'ndrewtran/core-ui' || value.issueNumber !== 58) {
+      fail('task-provenance authority decision identity is invalid');
+    }
+    exactKeys(value.taskProvenance, ['approvalInstruction', 'approvalTimestamp', 'githubCommentClaimed', 'taskId'], [], 'task provenance', fail);
+    if (value.taskProvenance.approvalInstruction !== 'exact-plan-approved-for-bounded-execution'
+        || value.taskProvenance.approvalTimestamp !== null
+        || value.taskProvenance.githubCommentClaimed !== false
+        || value.taskProvenance.taskId !== '019ff5d8-5a4b-7252-958d-bab8b0087c34') {
+      fail('task provenance must preserve the truthful approval boundary');
+    }
+    exactKeys(value.candidate, ['byteLength', 'path', 'sha256'], [], 'task-provenance candidate', fail);
+    if (!Number.isSafeInteger(value.candidate.byteLength) || value.candidate.byteLength < 1
+        || !normalizedPath(value.candidate.path) || !SHA256_PATTERN.test(value.candidate.sha256)) {
+      fail('task-provenance candidate identity is invalid');
+    }
+    exactKeys(value.plan, ['path', 'sha256'], [], 'task-provenance plan', fail);
+    if (value.plan.path !== '/tmp/core-ui-review-readiness-proposal-v1.final.md'
+        || value.plan.sha256 !== 'sha256:43a7b1724b4e107e253703952ac4839f7c99880f4b96e56b8e73e56de1aded7d') {
+      fail('task-provenance plan identity is invalid');
+    }
+    exactKeys(value.manifest, ['entryCount', 'profile', 'sha256'], [], 'task-provenance manifest', fail);
+    if (!Number.isSafeInteger(value.manifest.entryCount) || value.manifest.entryCount < 1
+        || value.manifest.profile !== 'core-ui-proposed-source-artifact-manifest-v1'
+        || !SHA256_PATTERN.test(value.manifest.sha256)) fail('task-provenance manifest identity is invalid');
+    return;
+  }
   exactKeys(
     value,
     [

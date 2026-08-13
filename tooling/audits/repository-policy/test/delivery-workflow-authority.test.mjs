@@ -1,7 +1,10 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { canonicalJson, parseJsonStrict } from '@core-ui/schema';
-import { verifyDeliveryWorkflowAuthority } from '../src/delivery-workflow-authority-verify.mjs';
+import {
+  verifyDeliveryReviewReadinessAuthority,
+  verifyDeliveryWorkflowAuthority,
+} from '../src/delivery-workflow-authority-verify.mjs';
 
 const repositoryRoot = path.resolve(import.meta.dirname, '../../../..');
 const decisionSource = fs.readFileSync(path.join(repositoryRoot, 'decisions/0007-delivery-workflow-authority.json'), 'utf8');
@@ -38,4 +41,46 @@ if (result.activationEvidence !== 8 || result.applicabilityTargets !== 28 || res
   throw new Error('positive result mismatch');
 }
 
-process.stdout.write('[delivery-authority] 4/4 negative mutations rejected; positive candidate accepted\n');
+const reviewDecisionSource = fs.readFileSync(path.join(repositoryRoot, 'decisions/0009-delivery-review-readiness.json'), 'utf8');
+const reviewAcceptanceSource = fs.readFileSync(path.join(repositoryRoot, 'decisions/0009-delivery-review-readiness-acceptance.json'), 'utf8');
+const rejectReview = (options, label) => {
+  try {
+    verifyDeliveryReviewReadinessAuthority(repositoryRoot, options);
+  } catch (error) {
+    if (String(error.message).startsWith('DELIVERY_WORKFLOW_AUTHORITY_INVALID:')) return;
+    throw error;
+  }
+  throw new Error(`Decision 0009 negative accepted: ${label}`);
+};
+const reviewDecision = parseJsonStrict(reviewDecisionSource);
+const mutations = [
+  ['plan', (value) => { value.acceptanceTopology.planSha256 = `sha256:${'0'.repeat(64)}`; }],
+  ['base', (value) => { value.sourceConstruction.acceptedBase = '0'.repeat(40); }],
+  ['future source', (value) => { value.sourceConstruction.futureSourceCommit = '0'.repeat(40); }],
+  ['write authority', (value) => { value.implementationBoundary.guidanceOnly = false; }],
+  ['target omission', (value) => { value.continuationTopology.targets.pop(); }],
+  ['continuation status', (value) => { value.continuationTopology.targets[0].replacementStatus = 'complete'; }],
+  ['artifact digest', (value) => { value.sourceConstruction.artifactEntries[0].sha256 = `sha256:${'f'.repeat(64)}`; }],
+];
+for (const [label, mutate] of mutations) {
+  const value = structuredClone(reviewDecision);
+  mutate(value);
+  rejectReview({ reviewDecisionSource: canonicalJson(value), reviewAcceptanceSource }, label);
+}
+const reviewAcceptance = parseJsonStrict(reviewAcceptanceSource);
+for (const [label, mutate] of [
+  ['receipt owner', (value) => { value.owner = 'someone-else'; }],
+  ['receipt timestamp claim', (value) => { value.taskProvenance.approvalTimestamp = '2026-08-12T00:00:00Z'; }],
+  ['receipt comment claim', (value) => { value.taskProvenance.githubCommentClaimed = true; }],
+  ['receipt manifest', (value) => { value.manifest.sha256 = `sha256:${'f'.repeat(64)}`; }],
+]) {
+  const value = structuredClone(reviewAcceptance);
+  mutate(value);
+  rejectReview({ reviewDecisionSource, reviewAcceptanceSource: canonicalJson(value) }, label);
+}
+const reviewResult = verifyDeliveryReviewReadinessAuthority(repositoryRoot);
+if (!reviewResult.accepted || reviewResult.targets !== 29 || reviewResult.manifest.entries < 20) {
+  throw new Error('Decision 0009 positive result mismatch');
+}
+
+process.stdout.write('[delivery-authority] Decision 0007 preserved; 11 Decision 0009 negative mutations rejected; positive candidates accepted\n');

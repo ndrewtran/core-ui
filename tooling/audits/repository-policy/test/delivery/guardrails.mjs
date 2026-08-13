@@ -10,7 +10,11 @@ export function registerGuardrailTests(repositoryRoot) {
     const policyPackage = JSON.parse(await readFile(join(repositoryRoot, 'tooling/audits/repository-policy/package.json'), 'utf8'));
     assert.equal(policyPackage.scripts.check.includes('test/*.test.mjs'), true);
     assert.equal(policyPackage.scripts.check.includes('delivery-workflow.test.mjs'), false);
+    const continuationTest = '../../../tests/evidence/delivery-review-readiness-applicability-profile.test.mjs';
+    assert.equal(policyPackage.scripts.check.split(continuationTest).length - 1, 1);
+    assert.equal(policyPackage.scripts.check.includes('--invocation'), false);
     const ci = await readFile(join(repositoryRoot, '.github/workflows/ci.yml'), 'utf8');
     assert.equal(ci.includes('delivery-workflow'), false);
+    assert.equal(ci.includes('--invocation'), false);
   });
 }

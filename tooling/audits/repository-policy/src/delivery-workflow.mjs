@@ -19,14 +19,30 @@ function readRecord(records, id) {
   return records instanceof Map ? records.get(id) : records?.[id];
 }
 
-function resolveVersion(contract, rawRecord) {
-  if (rawRecord.schemaVersion === '1.0.0') return rawRecord;
+export function resolveDeliveryVersion(contract, rawRecord) {
+  if (rawRecord.schemaVersion === '1.0.0') {
+    return {
+      record: rawRecord,
+      versionContext: {
+        additiveFields: {},
+        migrationId: contract.profile.versionReaders['1.0.0'].migrationId,
+        sourceSchemaVersion: '1.0.0',
+      },
+    };
+  }
   if (/^1\.(?:[1-9]\d*)\.\d+$/.test(rawRecord.schemaVersion)) {
     validateDeliverySchema(contract.schema.$defs.compatibleMinorRecord, rawRecord, {
       rootSchema: contract.schema,
       schemaAt: '/$defs/compatibleMinorRecord',
     });
-    return rawRecord.baseRecord;
+    return {
+      record: rawRecord.baseRecord,
+      versionContext: {
+        additiveFields: rawRecord.additiveFields,
+        migrationId: contract.profile.versionReaders['>=1.1.0 <2.0.0'].migrationId,
+        sourceSchemaVersion: rawRecord.schemaVersion,
+      },
+    };
   }
   fail('DELIVERY_SCHEMA_VERSION_UNSUPPORTED', `unsupported delivery schema version ${rawRecord.schemaVersion}`);
 }
@@ -82,6 +98,43 @@ function validateApplicability(contract, record) {
   }
 }
 
+function validateReviewAssignments(contract, record, records) {
+  if (record.stage !== 'PACKET_RENDERED') return;
+  const assignments = record.reviews.requiredAssignments;
+  const requiredRoles = contract.profile.reviewerRoutes[record.applicability.workClass];
+  if (!requiredRoles) fail('DELIVERY_REVIEW_ASSIGNMENT_INVALID', 'reviewer route is missing for the work class');
+  if (!equal(assignments.map(({ role }) => role), requiredRoles)) {
+    fail('DELIVERY_REVIEW_ASSIGNMENT_INVALID', 'review assignments do not exactly match the profile-owned reviewer route');
+  }
+  if (record.reviews.results.length !== 0) {
+    fail('DELIVERY_REVIEW_ASSIGNMENT_INVALID', 'PACKET_RENDERED must not contain unverified review results');
+  }
+  for (const key of ['assignmentRecordRef', 'reviewerIdentity', 'role']) {
+    const values = assignments.map((assignment) => assignment[key]);
+    if (new Set(values).size !== values.length) fail('DELIVERY_REVIEW_ASSIGNMENT_INVALID', `review assignments contain duplicate ${key}`);
+  }
+  const assignedRoles = new Set(assignments.map(({ role }) => role));
+  if (requiredRoles.some((role) => !assignedRoles.has(role))) {
+    fail('DELIVERY_REVIEW_ASSIGNMENT_INVALID', 'review assignments omit a profile-required independent reviewer');
+  }
+  for (const assignment of assignments) {
+    const preimage = readRecord(records, assignment.assignmentRecordRef);
+    if (!preimage || canonicalDigest(preimage) !== assignment.assignmentRecordDigest) {
+      fail('DELIVERY_REVIEW_ASSIGNMENT_INVALID', `review assignment ${assignment.assignmentRecordRef} does not resolve`);
+    }
+    const expectedPreimage = {
+      independence: assignment.independence,
+      ownerRef: assignment.assignmentOwnerRef,
+      profile: assignment.assignmentRecordProfile,
+      reviewerIdentity: assignment.reviewerIdentity,
+      role: assignment.role,
+    };
+    if (!equal(preimage, expectedPreimage)) {
+      fail('DELIVERY_REVIEW_ASSIGNMENT_INVALID', `review assignment ${assignment.assignmentRecordRef} contradicts its preimage`);
+    }
+  }
+}
+
 export function validateDeliveryWorkflow(contract, rawRecord, {
   currentIdentity,
   packetContext,
@@ -91,12 +144,13 @@ export function validateDeliveryWorkflow(contract, rawRecord, {
   records = new Map(),
   scanPreimages,
 } = {}) {
-  const record = resolveVersion(contract, rawRecord);
+  const { record, versionContext } = resolveDeliveryVersion(contract, rawRecord);
   assertBounds(rawRecord, contract.profile.limits);
   assertDeliveryRecordShape(contract, record);
   validateStage(contract, record);
   validateApplicability(contract, record);
   validateOwnerInputs(contract, record, records);
+  validateReviewAssignments(contract, record, records);
   if (record.intent.mode !== 'pre-g1.9') {
     fail('DELIVERY_CHANGE_INTENT_NOT_ADMITTED', 'changeIntent is deferred until G1.9');
   }
@@ -113,11 +167,11 @@ export function validateDeliveryWorkflow(contract, rawRecord, {
   if (packetContext && record.stage !== 'PACKET_RENDERED') {
     fail('DELIVERY_PACKET_PHASE_INVALID', 'packet context is admitted only at PACKET_RENDERED');
   }
-  return { record, rollback };
+  return { record, rollback, versionContext };
 }
 
 export function deriveDeliveryOutput(contract, rawRecord, options = {}) {
-  const { record, rollback } = validateDeliveryWorkflow(contract, rawRecord, options);
+  const { record, rollback, versionContext } = validateDeliveryWorkflow(contract, rawRecord, options);
   const invalidation = options.before
     ? classifyDeliveryInvalidation(contract, options.before, record)
     : { changedPointers: [], domains: [], earliestRewind: record.stage, invalidatedIdentities: [] };
@@ -132,6 +186,7 @@ export function deriveDeliveryOutput(contract, rawRecord, options = {}) {
     },
     profile: 'core-ui-delivery-workflow-output-v1',
     remainingRecoverySteps: rollback?.remainingRecoverySteps ?? [],
+    versionContext,
   };
   validateDeliverySchema(contract.schema.$defs.derivedOutput, output, {
     rootSchema: contract.schema,

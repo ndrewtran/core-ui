@@ -135,24 +135,24 @@ function validateRecoveryProfile(contract) {
   const impactOwner = contract.owners.get(rebind?.impactOwnerRef);
   const decisionOwner = contract.owners.get(rebind?.decisionOwnerRef);
   if (!impactOwner || !decisionOwner
-      || rebind.impactSourcePointer !== '/authorityApplicability/targets'
-      || rebind.initialCaptureTopologyPointer !== '/authorityApplicability/captureTopology'
+      || rebind.impactSourcePointer !== '/continuationTopology/targets'
+      || rebind.initialCaptureTopologyPointer !== '/continuationTopology/generatedRootFiles'
       || rebind.decisionOwnerSourcePointer !== '/acceptanceTopology/owner') {
     fail('applicability rebind authority owners are unresolved');
   }
   const decision = parseJsonStrict(impactOwner.bytes);
   const decisionOwnerRecord = parseJsonStrict(decisionOwner.bytes);
-  const applicability = decision.authorityApplicability;
+  const applicability = decision.continuationTopology;
   const decisionOwnerIdentity = decisionOwnerRecord.acceptanceTopology?.owner;
   if (applicability?.targetCount !== rebind.affectedSuccessorCount
       || applicability?.targets?.length !== rebind.affectedSuccessorCount
       || canonicalDigest(applicability?.targets) !== rebind.affectedSuccessorManifestSha256
-      || canonicalDigest(applicability?.captureTopology) !== rebind.initialCaptureTopologySha256
+      || canonicalDigest(applicability?.generatedRootFiles) !== rebind.initialCaptureTopologySha256
       || typeof decisionOwnerIdentity !== 'string'
       || !/^[A-Za-z0-9](?:[A-Za-z0-9-]{0,38})$/u.test(decisionOwnerIdentity)
       || rebind.rebindAuthorization !== 'new-digest-specific-owner-decision-required'
       || rebind.completionBoundary !== 'new-owner-decision-then-versioned-successor-evidence-and-fresh-full-checks') {
-    fail('applicability decision boundary does not match Decision 0007');
+    fail('applicability decision boundary does not match Decision 0009');
   }
   const rule = contract.diagnostics.rules.find(({ code }) => code === rebind.diagnosticCode);
   if (!rule || rule.ruleId !== rebind.diagnosticRuleId
