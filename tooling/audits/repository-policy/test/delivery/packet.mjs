@@ -55,6 +55,9 @@ export function registerPacketTests(repositoryRoot) {
     assert.deepEqual(first, second);
     assert.equal(first.packet.outputClassification, 'advisory-only');
     assert.equal(first.envelope.profile, 'core-ui-review-packet-v1');
+    assert.equal(first.envelope.id, first.packet.id);
+    assert.equal('packetId' in first.envelope, false);
+    assert.equal('conformanceIdentity' in first.packet, false);
     assert.equal('dispatch' in first, false);
     assert.equal('clearance' in first, false);
   });
@@ -79,5 +82,42 @@ export function registerPacketTests(repositoryRoot) {
     const wrongCommand = clone(input);
     wrongCommand.deterministicResults[0].commandRecordDigest = `sha256:${'f'.repeat(64)}`;
     assert.throws(() => renderDeliveryPacket(contract, record, wrongCommand, { records }), /DELIVERY_PACKET_INVALID/);
+    const wrongOwner = clone(input);
+    wrongOwner.deterministicResults[0].ownerRef = 'repository-policy-owner';
+    assert.throws(() => renderDeliveryPacket(contract, record, wrongOwner, { records }), /DELIVERY_PACKET_INVALID/);
+    const wrongProfile = clone(input);
+    wrongProfile.deterministicResults[0].commandRecordProfile = 'core-ui-review-packet-v1';
+    assert.throws(() => renderDeliveryPacket(contract, record, wrongProfile, { records }), /DELIVERY_SCHEMA_INVALID/);
+  });
+
+  test('E-DELIVERY-04 admits every plan-required root command identity', async () => {
+    const contract = await loadDeliveryProfile(repositoryRoot);
+    const { record } = buildAuthoredRecord(contract);
+    const records = new Map();
+    const source = identity(records, 'source', 'core-ui-git-source-identity-v1');
+    const artifactSet = identity(records, 'artifacts', 'core-ui-artifact-manifest-v1', 'present');
+    const body = identity(records, 'body', 'core-ui-pr-body-v1');
+    const deterministicResults = ['check', 'check:all', 'generate:check'].map((commandId) => {
+      const command = contract.commands.get(commandId);
+      const output = identity(records, `${command.id}-output`, 'core-ui-deterministic-result-v1');
+      return {
+        commandId,
+        commandRecordDigest: command.digest,
+        commandRecordId: command.id,
+        commandRecordProfile: command.value.profile,
+        exitState: 0,
+        output,
+        ownerRef: command.value.ownerRef,
+      };
+    });
+    const input = {
+      deterministicResults,
+      profile: 'core-ui-delivery-packet-render-input-v1',
+      renderedPrBody: body,
+      reviewPhase: 'pre-write-decision-review',
+      reviewedObject: { artifactSet, diff: notApplicable(), evidence: notApplicable(), output: notApplicable(), source },
+    };
+    const rendered = renderDeliveryPacket(contract, record, input, { records });
+    assert.deepEqual(rendered.packet.deterministicResultsDigest, canonicalDigest(deterministicResults));
   });
 }

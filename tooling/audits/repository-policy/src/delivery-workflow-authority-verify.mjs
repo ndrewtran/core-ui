@@ -16,6 +16,17 @@ const PRODUCT_SCOPE_BYTES = 90165;
 const PRODUCT_SCOPE_SHA256 = 'sha256:7c8404e20d01f6a0cc975b17a7893f5594f6f0d313806a6fced9d0c62d886873';
 const ARCHITECTURE_SHA256 = 'sha256:bdf8eb132fcdace479a05569020fd91acb0bde02dd1b24b33ce0f96ceaf39371';
 const ROADMAP_SHA256 = 'sha256:808a972cf2d92064aacb0a10560ac512c0ac878b9c960098d9ddc7d84354f4c0';
+const REVIEW_DECISION_PATH = 'decisions/0009-delivery-review-readiness.json';
+const REVIEW_ACCEPTANCE_PATH = 'decisions/0009-delivery-review-readiness-acceptance.json';
+const REVIEW_PLAN_SHA256 = 'sha256:43a7b1724b4e107e253703952ac4839f7c99880f4b96e56b8e73e56de1aded7d';
+const REVIEW_TASK_ID = '019ff5d8-5a4b-7252-958d-bab8b0087c34';
+const REVIEW_SCOPES = [
+  'SCOPE-FOUNDATION-001',
+  'SCOPE-QUALITY-GENERATOR-CONTRACT',
+  'SCOPE-TRUST-DISCLOSURE',
+  'SCOPE-TRUST-EVIDENCE',
+  'SCOPE-TRUST-EVIDENCE-PRIVACY',
+];
 const ACTIVATION_EVIDENCE = [
   'E-DELIVERY-01', 'E-DELIVERY-02', 'E-DELIVERY-03', 'E-DELIVERY-04',
   'E-DELIVERY-05', 'E-DELIVERY-06', 'E-DELIVERY-07', 'E-DELIVERY-08',
@@ -25,6 +36,10 @@ const digest = (source) => `sha256:${sha256(source)}`;
 const fail = (message) => { throw new Error(`DELIVERY_WORKFLOW_AUTHORITY_INVALID: ${message}`); };
 const exact = (actual, expected, label) => {
   if (canonicalJson(actual) !== canonicalJson(expected)) fail(label);
+};
+const exactKeys = (value, keys, label) => {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) fail(label);
+  exact(Object.keys(value).sort(), [...keys].sort(), label);
 };
 
 export function verifyDeliveryWorkflowAuthority(repositoryRoot, options = {}) {
@@ -90,6 +105,138 @@ export function verifyDeliveryWorkflowAuthority(repositoryRoot, options = {}) {
   };
 }
 
+export function proposedReviewReadinessManifest(decisionSource, decision) {
+  return {
+    acceptedBase: decision.sourceConstruction.acceptedBase,
+    decision: {
+      byteLength: Buffer.byteLength(decisionSource),
+      path: REVIEW_DECISION_PATH,
+      sha256: digest(decisionSource),
+    },
+    entries: decision.sourceConstruction.artifactEntries,
+    profile: 'core-ui-proposed-source-artifact-manifest-v1',
+    receipt: {
+      grammar: decision.sourceConstruction.receiptGrammar,
+      path: REVIEW_ACCEPTANCE_PATH,
+    },
+  };
+}
+
+export function verifyDeliveryReviewReadinessAuthority(repositoryRoot, options = {}) {
+  const decisionSource = options.reviewDecisionSource
+    ?? readFileSync(join(repositoryRoot, REVIEW_DECISION_PATH), 'utf8');
+  const acceptanceSource = options.reviewAcceptanceSource
+    ?? readFileSync(join(repositoryRoot, REVIEW_ACCEPTANCE_PATH), 'utf8');
+  const decision = parseJsonStrict(decisionSource);
+  const acceptance = parseJsonStrict(acceptanceSource);
+  if (decisionSource !== canonicalJson(decision) || acceptanceSource !== canonicalJson(acceptance)) {
+    fail('Decision 0009 authority bytes must be canonical JSON without trailing LF');
+  }
+  exactKeys(decision, [
+    'acceptanceTopology', 'affectedScopeIds', 'authority', 'choices', 'classification',
+    'continuationTopology', 'decisionId', 'implementationBoundary', 'nonGoals',
+    'operationalProof', 'rollback', 'schema', 'sourceConstruction', 'state', 'versionModel',
+  ], 'Decision 0009 fields');
+  if (decision.schema !== 'core-ui-delivery-review-readiness-authority-v1'
+      || decision.decisionId !== 'core-ui:decision:0009'
+      || decision.state !== 'accepted-via-bounded-task-provenance'
+      || decision.classification !== 'decision-bearing-amendment-route-b') fail('Decision 0009 identity');
+  exact(decision.affectedScopeIds, REVIEW_SCOPES, 'Decision 0009 Scope IDs');
+  exact(decision.choices, {
+    classification: 'decision-bearing-amendment-route-b',
+    ownership: 'existing-repository-policy-delivery-profile',
+    phaseContinuation: 'guidance-only-no-write-authority',
+    pilot: 'none-selected',
+    reviewerContinuity: 'conservative-byte-identical-complete-dependency-map-only',
+  }, 'Decision 0009 choices');
+  if (decision.acceptanceTopology.owner !== 'ndrewtran'
+      || decision.acceptanceTopology.issueNumber !== 58
+      || decision.acceptanceTopology.provider !== 'codex-task'
+      || decision.acceptanceTopology.taskId !== REVIEW_TASK_ID
+      || decision.acceptanceTopology.planSha256 !== REVIEW_PLAN_SHA256
+      || decision.acceptanceTopology.candidatePath !== REVIEW_DECISION_PATH
+      || decision.acceptanceTopology.receiptPath !== REVIEW_ACCEPTANCE_PATH
+      || decision.acceptanceTopology.approvalTimestamp !== null
+      || decision.acceptanceTopology.githubCommentClaimed !== false) fail('Decision 0009 task provenance');
+  if (decision.sourceConstruction.acceptedBase !== '7ede0cbb758b8306ecab1a7cdcec55a1b3505a64'
+      || decision.sourceConstruction.rule !== 'acceptance-first-single-source-commit-then-sole-parent-evidence-child'
+      || decision.sourceConstruction.receiptGrammar !== 'core-ui-task-provenance-authority-acceptance-v1'
+      || !Array.isArray(decision.sourceConstruction.artifactEntries)
+      || decision.sourceConstruction.artifactEntries.length === 0) fail('Decision 0009 source-construction rule');
+  const paths = decision.sourceConstruction.artifactEntries.map(({ path }) => path);
+  if (new Set(paths).size !== paths.length
+      || paths.includes(REVIEW_DECISION_PATH) || paths.includes(REVIEW_ACCEPTANCE_PATH)) fail('Decision 0009 artifact path manifest');
+  for (const entry of decision.sourceConstruction.artifactEntries) {
+    exactKeys(entry, ['byteLength', 'path', 'sha256'], `artifact entry ${entry.path}`);
+    const bytes = readFileSync(join(repositoryRoot, entry.path));
+    if (bytes.byteLength !== entry.byteLength || digest(bytes) !== entry.sha256) fail(`artifact identity ${entry.path}`);
+  }
+  const targetNames = decision.continuationTopology.targets.map(({ name }) => name);
+  if (decision.continuationTopology.rootPath !== 'tests/evidence/authority-58-delivery-review-readiness-applicability-v1/index.json'
+      || decision.continuationTopology.targetCount !== 29
+      || decision.continuationTopology.targets.length !== 29
+      || new Set(targetNames).size !== 29
+      || decision.continuationTopology.targets.some(({ action, evidenceStatus, replacementStatus }) => (
+        action !== 'supersede' || evidenceStatus !== 'superseded' || replacementStatus !== 'pending'
+      ))) fail('Decision 0009 continuation topology');
+  if (decision.implementationBoundary.guidanceOnly !== true
+      || decision.implementationBoundary.enforcementIngress !== 'deferred-separate-decision'
+      || decision.implementationBoundary.pilot !== 'none-selected'
+      || decision.implementationBoundary.productionMutation !== 'forbidden') fail('Decision 0009 implementation boundary');
+  if (decision.operationalProof.advisoryApplicability !== 'not-applicable'
+      || decision.operationalProof.advisoryReason !== 'NO_RUNTIME_MUTATION'
+      || decision.operationalProof.rollbackReason !== 'HUMAN_RENDER_ONLY_ROLLBACK'
+      || decision.operationalProof.evidenceCapture !== 'required-transactional-owner-proof') fail('Decision 0009 operational applicability');
+  if (decision.versionModel.documentVersion !== '1.1.0'
+      || decision.versionModel.workflowRecordVersion !== '1.0.0'
+      || decision.versionModel.compatibleMinorRange !== '>=1.1.0 <2.0.0') fail('Decision 0009 version model');
+  const partition = [...decision.rollback.preservedPaths, ...Object.values(decision.rollback.removablePaths).flat()];
+  if (new Set(partition).size !== partition.length
+      || decision.rollback.preservedPaths.some((path) => Object.values(decision.rollback.removablePaths).flat().includes(path))) {
+    fail('Decision 0009 rollback partition');
+  }
+  const manifest = proposedReviewReadinessManifest(decisionSource, decision);
+  const manifestSha256 = digest(canonicalJson(manifest));
+  exactKeys(acceptance, [
+    'candidate', 'decisionId', 'issueNumber', 'manifest', 'outcome', 'owner', 'plan',
+    'provider', 'repository', 'schema', 'taskProvenance',
+  ], 'Decision 0009 acceptance fields');
+  if (acceptance.schema !== 'core-ui-task-provenance-authority-acceptance-v1'
+      || acceptance.decisionId !== decision.decisionId
+      || acceptance.issueNumber !== 58
+      || acceptance.outcome !== 'accepted'
+      || acceptance.owner !== 'ndrewtran'
+      || acceptance.provider !== 'codex-task'
+      || acceptance.repository !== 'ndrewtran/core-ui') fail('Decision 0009 acceptance identity');
+  exact(acceptance.candidate, manifest.decision, 'Decision 0009 accepted candidate');
+  exact(acceptance.plan, {
+    path: '/tmp/core-ui-review-readiness-proposal-v1.final.md',
+    sha256: REVIEW_PLAN_SHA256,
+  }, 'Decision 0009 accepted plan');
+  exact(acceptance.taskProvenance, {
+    approvalInstruction: 'exact-plan-approved-for-bounded-execution',
+    approvalTimestamp: null,
+    githubCommentClaimed: false,
+    taskId: REVIEW_TASK_ID,
+  }, 'Decision 0009 acceptance task provenance');
+  exact(acceptance.manifest, {
+    entryCount: decision.sourceConstruction.artifactEntries.length + 2,
+    profile: manifest.profile,
+    sha256: manifestSha256,
+  }, 'Decision 0009 accepted artifact manifest');
+  return {
+    accepted: true,
+    acceptance: { bytes: Buffer.byteLength(acceptanceSource), sha256: digest(acceptanceSource) },
+    decision: manifest.decision,
+    manifest: { entries: acceptance.manifest.entryCount, sha256: manifestSha256 },
+    targets: decision.continuationTopology.targets.length,
+  };
+}
+
 if (process.argv[1] && resolve(process.argv[1]) === resolve(import.meta.filename)) {
-  process.stdout.write(`${canonicalJson(verifyDeliveryWorkflowAuthority(resolve(import.meta.dirname, '../../../..')))}\n`);
+  const repositoryRoot = resolve(import.meta.dirname, '../../../..');
+  process.stdout.write(`${canonicalJson({
+    deliveryReviewReadiness: verifyDeliveryReviewReadinessAuthority(repositoryRoot),
+    deliveryWorkflow: verifyDeliveryWorkflowAuthority(repositoryRoot),
+  })}\n`);
 }

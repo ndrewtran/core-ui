@@ -23,6 +23,9 @@ clearance, dispatch, GitHub writes, or Project writes.
    stage, applicability, N/A reasons, invalidation domains, reviewer routes,
    disclosure owners, and recovery route from the profile. Never copy its enums
    or command strings into prompts, forms, or this skill.
+   When the task has a task-local `core-ui-delivery-advisory-invocation-v1`
+   manifest, run the profile-owned advisory entrypoint. Treat its packet,
+   conformance, and handoff identities as guidance-layer results only.
 4. Read the canonical authority and owner references selected by the profile.
    Classify the task as aligned, a required correction, an adjacent improvement,
    a potential deviation, or unverified before writing.
@@ -42,6 +45,9 @@ clearance, dispatch, GitHub writes, or Project writes.
 3. Freeze the exact commit/tree, diff or complete artifact set, deterministic
    results, and disclosure boundary before constructing a review packet. Do not
    edit the candidate while independent review is active.
+   Render and validate the packet first, then derive conformance and its
+   context-free phase handoff. Never hand-author a substitute packet when the
+   canonical renderer applies.
 4. Dispatch only reviewers selected by the profile and actual risk. Batch
    findings against the same immutable candidate; after a correction, rewind
    only to the earliest invalidated domain and rebuild downstream identities.
@@ -60,6 +66,8 @@ owner records when the active profile requires them. At each handoff, report
 the current stage, satisfied postcondition, invalidated identities, outstanding
 human decision, and one exact next permitted operation. Do not create packets or
 full-proof runs for explanation-only work unless the profile selects them.
+The handoff is guidance-only: it cannot grant repository, Git, provider,
+tracker, publication, evidence, merge, or release writes.
 
 ## Evidence route
 

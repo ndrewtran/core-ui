@@ -7,9 +7,9 @@ import { buildAuthoredRecord, clone } from './fixtures.mjs';
 export function registerOwnershipTests(repositoryRoot) {
   test('E-DELIVERY-01 loads one closed schema/profile/owner graph', async () => {
     const contract = await loadDeliveryProfile(repositoryRoot);
-    assert.equal(contract.fields.length, 383);
+    assert.equal(contract.fields.length, 442);
     assert.equal(new Set(contract.fields.map(({ domain }) => domain)).size, 24);
-    assert.equal(contract.owners.size, 15);
+    assert.equal(contract.owners.size, 18);
     assert.equal(contract.dependencyPreparation.value.profile, 'core-ui-dependency-preparation-command-v1');
     assert.ok(contract.commands.has('check'));
   });
@@ -21,6 +21,21 @@ export function registerOwnershipTests(repositoryRoot) {
     const output = deriveDeliveryOutput(contract, record, { records });
     assert.equal(output.lifecycleState, 'INTAKE');
     assert.equal(output.profile, 'core-ui-delivery-workflow-output-v1');
+    assert.deepEqual(output.versionContext, {
+      additiveFields: {},
+      migrationId: 'delivery-workflow-v1-direct-reader',
+      sourceSchemaVersion: '1.0.0',
+    });
+    const compatible = {
+      additiveFields: { producerVersionNote: 'retained but non-authoritative' },
+      baseRecord: record,
+      migrationProfile: 'core-ui-delivery-v1-additive-envelope',
+      profile: 'core-ui-delivery-workflow-v1-minor',
+      schemaVersion: '1.1.0',
+    };
+    const compatibleOutput = deriveDeliveryOutput(contract, compatible, { records });
+    assert.equal(compatibleOutput.lifecycleState, output.lifecycleState);
+    assert.deepEqual(compatibleOutput.versionContext.additiveFields, compatible.additiveFields);
   });
 
   test('E-DELIVERY-02 rejects unknown, contradictory, unowned, and unavailable facts', async () => {

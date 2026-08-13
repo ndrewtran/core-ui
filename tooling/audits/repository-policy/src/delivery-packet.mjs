@@ -52,7 +52,14 @@ export function renderDeliveryPacket(contract, record, input, { records = new Ma
   Object.values(input.reviewedObject).filter(({ status }) => status !== 'not-applicable').forEach(resolve);
   input.deterministicResults.forEach((result) => {
     const command = contract.commands.get(result.commandId);
-    if (!command || command.digest !== result.commandRecordDigest || command.id !== result.commandRecordId) {
+    if (
+      !command
+      || command.value.commandId !== result.commandId
+      || command.digest !== result.commandRecordDigest
+      || command.id !== result.commandRecordId
+      || command.value.profile !== result.commandRecordProfile
+      || command.value.ownerRef !== result.ownerRef
+    ) {
       fail(`deterministic result uses an unowned command ${result.commandId}`);
     }
     resolve(result.output);
@@ -61,11 +68,12 @@ export function renderDeliveryPacket(contract, record, input, { records = new Ma
   const reviewedObjectDigest = canonicalDigest(input.reviewedObject);
   const deterministicResultsDigest = canonicalDigest(input.deterministicResults);
   const packetId = `delivery-${input.reviewPhase}-${reviewedObjectDigest.slice(-16)}`;
+  const { packet: _derivedPacket, ...recordSeed } = record;
   const payloadSeed = {
     deterministicResults: input.deterministicResults,
     outputClassification: 'advisory-only',
     packetId,
-    recordDigest: canonicalDigest(record),
+    recordDigest: canonicalDigest(recordSeed),
     reviewPhase: input.reviewPhase,
     reviewedObject: input.reviewedObject,
   };
@@ -91,7 +99,7 @@ export function renderDeliveryPacket(contract, record, input, { records = new Ma
       algorithm: 'sha256',
       byteLength: Buffer.byteLength(payload),
       digest: sha256Digest(payload),
-      packetId,
+      id: packetId,
       profile: 'core-ui-review-packet-v1',
     },
     packet,

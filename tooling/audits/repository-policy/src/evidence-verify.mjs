@@ -28,6 +28,11 @@ import {
   assertG12MaintenanceRootDirectory,
   assertG12RootDirectory,
 } from '../../../../tests/evidence/g1.2-profile.mjs';
+import {
+  assertReviewReadinessRoot,
+  hasReviewReadinessResidue,
+  REVIEW_READINESS_ROOT,
+} from '../../../../tests/evidence/delivery-review-readiness-applicability-profile.mjs';
 import { execFile as execFileCallback } from 'node:child_process';
 import { promisify } from 'node:util';
 
@@ -245,6 +250,20 @@ export async function verifyEvidence(repositoryRoot, { allowTransactionJournal, 
   }
   const milestones = await readdir(evidenceRoot, { withFileTypes: true }).catch(() => []);
   const milestoneNames = new Set(milestones.filter((entry) => entry.isDirectory()).map(({ name }) => name));
+  const reviewReadinessResidue = await hasReviewReadinessResidue(repositoryRoot);
+  if (reviewReadinessResidue.length > 0) {
+    throw new EvidenceIntegrityError(
+      'EVIDENCE_TRANSACTION_INCOMPLETE',
+      `delivery review readiness residue remains: ${reviewReadinessResidue.join(', ')}`,
+    );
+  }
+  if (milestoneNames.has(REVIEW_READINESS_ROOT.replace('tests/evidence/', ''))) {
+    try {
+      await assertReviewReadinessRoot(repositoryRoot);
+    } catch (error) {
+      throw new EvidenceIntegrityError('EVIDENCE_REVIEW_READINESS_PROFILE_INVALID', error.message);
+    }
+  }
   const hasG12 = milestoneNames.has(G12_ROOT.replace('tests/evidence/', ''));
   const hasG12Maintenance = milestoneNames.has(G12_MAINTENANCE_ROOT.replace('tests/evidence/', ''));
   if (hasG12 !== hasG12Maintenance) {
@@ -412,6 +431,18 @@ export async function verifyEvidence(repositoryRoot, { allowTransactionJournal, 
     }
   }
 
+  async function historicalApplicability(historical) {
+    if (historical.index.applicabilityManifest) {
+      return { manifest: historical.index.applicabilityManifest, milestone: historical.index.milestone };
+    }
+    if (!Array.isArray(historical.index.records) || historical.index.records.length === 0) return null;
+    const records = await Promise.all(historical.index.records.map((reference) => assertDigest(repositoryRoot, reference)));
+    const manifests = records.map(({ applicabilityManifest }) => canonicalJson(applicabilityManifest));
+    const milestones = records.map(({ milestone }) => milestone);
+    if (new Set(manifests).size !== 1 || new Set(milestones).size !== 1) return null;
+    return { manifest: records[0].applicabilityManifest, milestone: milestones[0] };
+  }
+
   const recertificationLeaves = new Map();
   const nodesByTarget = Map.groupBy(
     recertificationNodes.values(),
@@ -531,25 +562,27 @@ export async function verifyEvidence(repositoryRoot, { allowTransactionJournal, 
       const historicalDigest = historical
         ? `sha256:${sha256(historical.indexBytes)}`
         : null;
+      const historicalIdentity = historical ? await historicalApplicability(historical) : null;
       const affectedAssertions = historical
         ? historical.index.records.map(({ assertionId }) => assertionId).sort()
         : [];
-      if (historical && reference.milestone !== historical.index.milestone) {
+      if (historicalIdentity && reference.milestone !== historicalIdentity.milestone) {
         throw new EvidenceIntegrityError(
           'EVIDENCE_SUPERSESSION_MILESTONE_MISMATCH',
-          `${reference.path} names ${reference.milestone}; expected ${historical.index.milestone}`,
+          `${reference.path} names ${reference.milestone}; expected ${historicalIdentity.milestone}`,
         );
       }
       if (
-        !historical?.index.applicabilityManifest
+        !historicalIdentity?.manifest
         || supersession.historicalIndex.sha256 !== historicalDigest
         || supersession.sourceRevision !== owner.index.sourceRevision
         || supersession.sourceTree !== owner.index.sourceTree
         || supersession.owner !== authorityDecision.owner
-        || supersession.effectiveAt !== authorityDecision.createdAt
+        || (authorityDecision.schema === 'core-ui-authority-decision-v1'
+          && supersession.effectiveAt !== authorityDecision.createdAt)
         || canonicalJson(supersession.affectedAssertions) !== canonicalJson(affectedAssertions)
         || canonicalJson(supersession.currentApplicabilityManifest.paths)
-          !== canonicalJson(historical.index.applicabilityManifest.paths)
+          !== canonicalJson(historicalIdentity.manifest.paths)
         || supersession.currentApplicabilityManifest.sha256
           === supersession.supersededApplicabilityManifest.sha256
       ) {
@@ -585,9 +618,10 @@ export async function verifyEvidence(repositoryRoot, { allowTransactionJournal, 
       const previous = node.supersession.previousSupersession;
       if (previous === undefined) {
         roots.push(node);
+        const historicalIdentity = await historicalApplicability(historical);
         const expectedManifest = recertificationLeaf
           ? recertificationLeaf.recertification.currentApplicabilityManifest
-          : historical.index.applicabilityManifest;
+          : historicalIdentity?.manifest;
         const expectedRecertification = recertificationLeaf
           ? {
               path: recertificationLeaf.reference.path,

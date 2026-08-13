@@ -3,7 +3,7 @@
 const assert = require('node:assert/strict');
 const test = require('node:test');
 
-const { validatePlanningPullRequest } = require('./validate-planning-pr.cjs');
+const { DELIVERY_IDENTITY_FIELDS, validatePlanningPullRequest } = require('./validate-planning-pr.cjs');
 
 const completeBody = `
 - Authority change record: #1
@@ -110,6 +110,34 @@ test('accepts complete delivery workflow identities without local clearance', ()
     labels: ['type:architecture-maintenance'],
     body: deliveryBody,
   }), []);
+});
+
+test('protects the advisory runtime and continuation fault-test route', () => {
+  for (const file of [
+    'tooling/audits/repository-policy/src/delivery-advisory.mjs',
+    'tests/evidence/capture-0009-delivery-review-readiness-applicability.mjs',
+    'tests/evidence/delivery-review-readiness-applicability-profile.test.mjs',
+    'tooling/audits/repository-policy/package.json',
+  ]) {
+    assert.deepEqual(validatePlanningPullRequest({ files: [file], labels: ['type:decision'], body: deliveryBody }), []);
+  }
+});
+
+test('protects every delivery integrity owner and fixture added by Decision 0009', () => {
+  for (const file of [
+    '.github/scripts/validate-planning-pr.cjs',
+    '.github/scripts/validate-planning-pr.test.cjs',
+    'tooling/audits/repository-policy/src/evidence-applicability-supersession.mjs',
+    'tooling/audits/repository-policy/test/delivery/disable.mjs',
+    'tooling/audits/repository-policy/test/evidence-integrity.test.mjs',
+    'tooling/audits/repository-policy/test/fixtures/delivery-workflow/scenarios.json',
+  ]) {
+    assert.deepEqual(validatePlanningPullRequest({ files: [file], labels: [], body: '' }), [
+      'Authority-source changes require the type:architecture-maintenance or type:decision label.',
+      'Authority-source changes require an Authority change record: #… reference.',
+      ...DELIVERY_IDENTITY_FIELDS.map((label) => `Delivery workflow changes require a substantive ${label} entry.`),
+    ]);
+  }
 });
 
 test('rejects omitted and substituted delivery identities', () => {
