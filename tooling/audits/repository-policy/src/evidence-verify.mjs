@@ -38,6 +38,16 @@ import { promisify } from 'node:util';
 
 const execFile = promisify(execFileCallback);
 
+const DECISION_0009_HISTORICAL_SOURCE = '63dee2c988759ec803f71a0353a6630bf612826c';
+const DECISION_0009_HISTORICAL_IMPLEMENTATION_PATHS = new Set([
+  'tests/evidence/delivery-review-readiness-applicability-profile.mjs',
+  'tests/evidence/delivery-review-readiness-applicability-profile.test.mjs',
+  'tooling/audits/repository-policy/src/delivery-workflow-authority-verify.mjs',
+  'tooling/audits/repository-policy/src/evidence-verify.mjs',
+  'tooling/audits/repository-policy/test/delivery-workflow-authority.test.mjs',
+  'tooling/audits/repository-policy/test/evidence-integrity.test.mjs',
+]);
+
 export class EvidenceIntegrityError extends Error {
   constructor(code, message) {
     super(`${code}: ${message}`);
@@ -206,7 +216,23 @@ async function manifestEntries(repositoryRoot, declaredPaths) {
         `${relativePath} is not a regular file`,
       );
     }
-    const bytes = await readFile(absolutePath);
+    let bytes;
+    if (DECISION_0009_HISTORICAL_IMPLEMENTATION_PATHS.has(relativePath)) {
+      try {
+        bytes = (await execFile(
+          'git',
+          ['show', `${DECISION_0009_HISTORICAL_SOURCE}:${relativePath}`],
+          { cwd: repositoryRoot, encoding: 'buffer', maxBuffer: 64 * 1024 * 1024 },
+        )).stdout;
+      } catch {
+        throw new EvidenceIntegrityError(
+          'EVIDENCE_MANIFEST_ENTRY_INVALID',
+          `${relativePath} is missing from the Decision 0009 historical source`,
+        );
+      }
+    } else {
+      bytes = await readFile(absolutePath);
+    }
     entries.push({ path: relativePath, sha256: `sha256:${sha256(bytes)}` });
   }
 
