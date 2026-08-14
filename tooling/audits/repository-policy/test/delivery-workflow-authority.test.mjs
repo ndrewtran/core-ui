@@ -43,6 +43,10 @@ if (result.activationEvidence !== 8 || result.applicabilityTargets !== 28 || res
 
 const reviewDecisionSource = fs.readFileSync(path.join(repositoryRoot, 'decisions/0009-delivery-review-readiness.json'), 'utf8');
 const reviewAcceptanceSource = fs.readFileSync(path.join(repositoryRoot, 'decisions/0009-delivery-review-readiness-acceptance.json'), 'utf8');
+const implementationClarificationSource = fs.readFileSync(
+  path.join(repositoryRoot, 'decisions/0009-amendment-01-implementation-clarification.md'),
+  'utf8',
+);
 const rejectReview = (options, label) => {
   try {
     verifyDeliveryReviewReadinessAuthority(repositoryRoot, options);
@@ -61,12 +65,22 @@ const mutations = [
   ['target omission', (value) => { value.continuationTopology.targets.pop(); }],
   ['continuation status', (value) => { value.continuationTopology.targets[0].replacementStatus = 'complete'; }],
   ['artifact digest', (value) => { value.sourceConstruction.artifactEntries[0].sha256 = `sha256:${'f'.repeat(64)}`; }],
+  ['historical resolver digest', (value) => {
+    value.sourceConstruction.artifactEntries
+      .find(({ path: artifactPath }) => artifactPath === 'tests/evidence/delivery-review-readiness-applicability-profile.mjs')
+      .sha256 = `sha256:${'f'.repeat(64)}`;
+  }],
 ];
 for (const [label, mutate] of mutations) {
   const value = structuredClone(reviewDecision);
   mutate(value);
   rejectReview({ reviewDecisionSource: canonicalJson(value), reviewAcceptanceSource }, label);
 }
+rejectReview({
+  implementationClarificationSource: implementationClarificationSource.replace('Every other', 'Each other'),
+  reviewAcceptanceSource,
+  reviewDecisionSource,
+}, 'implementation clarification');
 const reviewAcceptance = parseJsonStrict(reviewAcceptanceSource);
 for (const [label, mutate] of [
   ['receipt owner', (value) => { value.owner = 'someone-else'; }],
@@ -83,4 +97,4 @@ if (!reviewResult.accepted || reviewResult.targets !== 29 || reviewResult.manife
   throw new Error('Decision 0009 positive result mismatch');
 }
 
-process.stdout.write('[delivery-authority] Decision 0007 preserved; 11 Decision 0009 negative mutations rejected; positive candidates accepted\n');
+process.stdout.write('[delivery-authority] Decision 0007 preserved; 13 Decision 0009 negative mutations rejected; positive candidates accepted\n');

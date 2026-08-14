@@ -1087,7 +1087,8 @@ test('a passing recertification cannot extend a superseded chain', async () => {
   );
 });
 
-test('full delivery rollback preserves historical continuation bytes and fails current applicability closed pending a new accepted rebind', async () => {
+test('Decision 0009 compatibility preserves authorized history while other current applicability remains fail-closed', async () => {
+  assert.ok((await verifyEvidence(repositoryRoot)).supersessionCount > 0);
   const { sourceRevision: resolvedSource, sourceTree } = await resolveReviewReadinessSourceIdentity(repositoryRoot);
   const parent = await mkdtemp(join(tmpdir(), 'core-ui-review-readiness-rollback-'));
   const root = join(parent, 'repository');

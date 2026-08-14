@@ -1,3 +1,4 @@
+import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { canonicalJson, parseJsonStrict } from '@core-ui/schema';
@@ -18,6 +19,18 @@ const ARCHITECTURE_SHA256 = 'sha256:bdf8eb132fcdace479a05569020fd91acb0bde02dd1b
 const ROADMAP_SHA256 = 'sha256:808a972cf2d92064aacb0a10560ac512c0ac878b9c960098d9ddc7d84354f4c0';
 const REVIEW_DECISION_PATH = 'decisions/0009-delivery-review-readiness.json';
 const REVIEW_ACCEPTANCE_PATH = 'decisions/0009-delivery-review-readiness-acceptance.json';
+const REVIEW_IMPLEMENTATION_CLARIFICATION_PATH = 'decisions/0009-amendment-01-implementation-clarification.md';
+const REVIEW_IMPLEMENTATION_CLARIFICATION_BYTES = 2270;
+const REVIEW_IMPLEMENTATION_CLARIFICATION_SHA256 = 'sha256:148c0426a78073776fa5b11598c2c789307c84788eb6c8c1646c585884f32dd1';
+const REVIEW_HISTORICAL_SOURCE = '63dee2c988759ec803f71a0353a6630bf612826c';
+const REVIEW_HISTORICAL_ARTIFACT_PATHS = new Set([
+  'tests/evidence/delivery-review-readiness-applicability-profile.mjs',
+  'tests/evidence/delivery-review-readiness-applicability-profile.test.mjs',
+  'tooling/audits/repository-policy/src/delivery-workflow-authority-verify.mjs',
+  'tooling/audits/repository-policy/src/evidence-verify.mjs',
+  'tooling/audits/repository-policy/test/delivery-workflow-authority.test.mjs',
+  'tooling/audits/repository-policy/test/evidence-integrity.test.mjs',
+]);
 const REVIEW_PLAN_SHA256 = 'sha256:43a7b1724b4e107e253703952ac4839f7c99880f4b96e56b8e73e56de1aded7d';
 const REVIEW_TASK_ID = '019ff5d8-5a4b-7252-958d-bab8b0087c34';
 const REVIEW_SCOPES = [
@@ -127,10 +140,16 @@ export function verifyDeliveryReviewReadinessAuthority(repositoryRoot, options =
     ?? readFileSync(join(repositoryRoot, REVIEW_DECISION_PATH), 'utf8');
   const acceptanceSource = options.reviewAcceptanceSource
     ?? readFileSync(join(repositoryRoot, REVIEW_ACCEPTANCE_PATH), 'utf8');
+  const implementationClarificationSource = options.implementationClarificationSource
+    ?? readFileSync(join(repositoryRoot, REVIEW_IMPLEMENTATION_CLARIFICATION_PATH), 'utf8');
   const decision = parseJsonStrict(decisionSource);
   const acceptance = parseJsonStrict(acceptanceSource);
   if (decisionSource !== canonicalJson(decision) || acceptanceSource !== canonicalJson(acceptance)) {
     fail('Decision 0009 authority bytes must be canonical JSON without trailing LF');
+  }
+  if (Buffer.byteLength(implementationClarificationSource) !== REVIEW_IMPLEMENTATION_CLARIFICATION_BYTES
+      || digest(implementationClarificationSource) !== REVIEW_IMPLEMENTATION_CLARIFICATION_SHA256) {
+    fail('Decision 0009 amendment 01 implementation clarification identity');
   }
   exactKeys(decision, [
     'acceptanceTopology', 'affectedScopeIds', 'authority', 'choices', 'classification',
@@ -168,7 +187,18 @@ export function verifyDeliveryReviewReadinessAuthority(repositoryRoot, options =
       || paths.includes(REVIEW_DECISION_PATH) || paths.includes(REVIEW_ACCEPTANCE_PATH)) fail('Decision 0009 artifact path manifest');
   for (const entry of decision.sourceConstruction.artifactEntries) {
     exactKeys(entry, ['byteLength', 'path', 'sha256'], `artifact entry ${entry.path}`);
-    const bytes = readFileSync(join(repositoryRoot, entry.path));
+    let bytes = readFileSync(join(repositoryRoot, entry.path));
+    if (REVIEW_HISTORICAL_ARTIFACT_PATHS.has(entry.path)) {
+      try {
+        bytes = execFileSync('git', ['show', `${REVIEW_HISTORICAL_SOURCE}:${entry.path}`], {
+          cwd: repositoryRoot,
+          encoding: 'buffer',
+          maxBuffer: 64 * 1024 * 1024,
+        });
+      } catch {
+        fail(`historical artifact identity ${entry.path}`);
+      }
+    }
     if (bytes.byteLength !== entry.byteLength || digest(bytes) !== entry.sha256) fail(`artifact identity ${entry.path}`);
   }
   const targetNames = decision.continuationTopology.targets.map(({ name }) => name);

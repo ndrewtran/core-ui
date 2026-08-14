@@ -14,8 +14,11 @@ import {
   buildReviewReadinessRoot,
   hasReviewReadinessResidue,
   REVIEW_READINESS_ACCEPTANCE,
-  REVIEW_READINESS_ACCEPTED_BASE,
+  REVIEW_READINESS_DECISION,
+  REVIEW_READINESS_EVIDENCE,
+  REVIEW_READINESS_PROTECTED_MERGE,
   REVIEW_READINESS_ROOT,
+  REVIEW_READINESS_SOURCE,
   REVIEW_READINESS_TARGETS,
   resolveReviewReadinessSourceIdentity,
   reviewReadinessTargetManifest,
@@ -30,16 +33,6 @@ async function git(root, args) {
 
 async function sourceIdentity() {
   return resolveReviewReadinessSourceIdentity(repositoryRoot);
-}
-
-async function evidenceRevision(sourceRevision) {
-  const head = await git(repositoryRoot, ['rev-parse', 'HEAD']);
-  const parents = (await git(repositoryRoot, ['show', '-s', '--format=%P', head])).split(' ').filter(Boolean);
-  for (const candidate of [head, ...parents]) {
-    const candidateParents = (await git(repositoryRoot, ['show', '-s', '--format=%P', candidate])).split(' ').filter(Boolean);
-    if (candidateParents.length === 1 && candidateParents[0] === sourceRevision) return candidate;
-  }
-  throw new Error('DELIVERY_REVIEW_READINESS_TEST_EVIDENCE_INVALID: exact evidence child not found');
 }
 
 async function cloneSource(sourceRevision) {
@@ -73,79 +66,44 @@ test('delivery review readiness authority receipt and 29-target topology are clo
   assert.equal(first.size, 30);
 });
 
-test('delivery review readiness source resolution admits only exact protected checkout shapes', async () => {
+test('delivery review readiness source resolution admits accepted history and protected descendants', async () => {
   const source = await sourceIdentity();
-  const evidence = await evidenceRevision(source.sourceRevision);
   const parent = await mkdtemp(join(tmpdir(), 'core-ui-review-readiness-checkout-'));
   const root = join(parent, 'repository');
   try {
     await execFile('git', ['clone', '--quiet', '--shared', repositoryRoot, root]);
     await git(root, ['config', 'user.name', 'Fixture']);
     await git(root, ['config', 'user.email', 'fixture@example.invalid']);
-    await git(root, ['switch', '--quiet', '--detach', REVIEW_READINESS_ACCEPTED_BASE]);
-    await git(root, ['merge', '--quiet', '--no-ff', evidence, '-m', 'protected merge']);
+
+    for (const revision of [REVIEW_READINESS_SOURCE, REVIEW_READINESS_EVIDENCE, REVIEW_READINESS_PROTECTED_MERGE]) {
+      await git(root, ['switch', '--quiet', '--detach', revision]);
+      assert.deepEqual(await resolveReviewReadinessSourceIdentity(root), source);
+    }
+
+    await git(root, ['commit', '--quiet', '--allow-empty', '-m', 'ordinary descendant']);
     assert.deepEqual(await resolveReviewReadinessSourceIdentity(root), source);
 
-    await git(root, ['switch', '--quiet', '--detach', evidence]);
-    await git(root, ['commit', '--quiet', '--allow-empty', '-m', 'linear descendant']);
-    await assert.rejects(() => resolveReviewReadinessSourceIdentity(root), /direct source, exact evidence child, or protected two-parent merge/);
+    await git(root, ['switch', '--quiet', '--detach', REVIEW_READINESS_EVIDENCE]);
+    await git(root, ['commit', '--quiet', '--allow-empty', '-m', 'non-protected descendant']);
+    await assert.rejects(() => resolveReviewReadinessSourceIdentity(root), /must descend from the protected Decision 0009 merge/);
 
-    const wrongBase = await git(root, ['rev-parse', `${REVIEW_READINESS_ACCEPTED_BASE}^1`]);
-    await git(root, ['switch', '--quiet', '--detach', wrongBase]);
-    await git(root, ['merge', '--quiet', '--no-ff', evidence, '-m', 'wrong-base merge']);
-    await assert.rejects(() => resolveReviewReadinessSourceIdentity(root), /direct source, exact evidence child, or protected two-parent merge/);
+    await git(root, ['switch', '--quiet', '--detach', REVIEW_READINESS_PROTECTED_MERGE]);
+    await writeFile(join(root, REVIEW_READINESS_DECISION), '{}\n');
+    await git(root, ['add', REVIEW_READINESS_DECISION]);
+    await git(root, ['commit', '--quiet', '-m', 'decision drift']);
+    await assert.rejects(() => resolveReviewReadinessSourceIdentity(root), /Decision 0009 record identity/);
 
-    await git(root, ['switch', '--quiet', '--detach', source.sourceRevision]);
-    await writeFile(join(root, 'unrelated.txt'), 'not evidence\n');
-    await git(root, ['add', 'unrelated.txt']);
-    await git(root, ['commit', '--quiet', '-m', 'non-evidence child']);
-    await assert.rejects(() => resolveReviewReadinessSourceIdentity(root), /direct source, exact evidence child, or protected two-parent merge/);
+    await git(root, ['switch', '--quiet', '--detach', REVIEW_READINESS_PROTECTED_MERGE]);
+    await writeFile(join(root, REVIEW_READINESS_ACCEPTANCE), '{}\n');
+    await git(root, ['add', REVIEW_READINESS_ACCEPTANCE]);
+    await git(root, ['commit', '--quiet', '-m', 'acceptance drift']);
+    await assert.rejects(() => resolveReviewReadinessSourceIdentity(root), /Decision 0009 acceptance receipt identity/);
 
-    await git(root, ['switch', '--quiet', '--detach', source.sourceRevision]);
-    await git(root, ['checkout', evidence, '--', REVIEW_READINESS_ROOT]);
-    await rm(join(root, REVIEW_READINESS_ROOT, 'supersessions', `${REVIEW_READINESS_TARGETS[0]}.json`));
+    await git(root, ['switch', '--quiet', '--detach', REVIEW_READINESS_PROTECTED_MERGE]);
+    await writeFile(join(root, REVIEW_READINESS_ROOT, 'drift.json'), '{}\n');
     await git(root, ['add', REVIEW_READINESS_ROOT]);
-    await git(root, ['commit', '--quiet', '-m', 'evidence omission']);
-    await assert.rejects(() => resolveReviewReadinessSourceIdentity(root), /direct source, exact evidence child, or protected two-parent merge/);
-
-    await git(root, ['switch', '--quiet', '--detach', source.sourceRevision]);
-    await git(root, ['checkout', evidence, '--', REVIEW_READINESS_ROOT]);
-    await rm(join(root, REVIEW_READINESS_ROOT, 'supersessions', `${REVIEW_READINESS_TARGETS[0]}.json`));
-    await writeFile(join(root, REVIEW_READINESS_ROOT, 'supersessions', 'fabricated.json'), '{}\n');
-    await git(root, ['add', REVIEW_READINESS_ROOT]);
-    await git(root, ['commit', '--quiet', '-m', 'evidence path substitution']);
-    await assert.rejects(() => resolveReviewReadinessSourceIdentity(root), /direct source, exact evidence child, or protected two-parent merge/);
-    const substitutedEvidence = await git(root, ['rev-parse', 'HEAD']);
-
-    await git(root, ['switch', '--quiet', '--detach', REVIEW_READINESS_ACCEPTED_BASE]);
-    await git(root, ['merge', '--quiet', '--no-ff', substitutedEvidence, '-m', 'protected merge over malformed evidence']);
-    await assert.rejects(() => resolveReviewReadinessSourceIdentity(root), /direct source, exact evidence child, or protected two-parent merge/);
-
-    await git(root, ['switch', '--quiet', '--detach', source.sourceRevision]);
-    await mkdir(join(root, REVIEW_READINESS_ROOT), { recursive: true });
-    await Promise.all(Array.from({ length: 30 }, (_, index) => writeFile(
-      join(root, REVIEW_READINESS_ROOT, `fabricated-${String(index).padStart(2, '0')}.json`),
-      '{}\n',
-    )));
-    await git(root, ['add', REVIEW_READINESS_ROOT]);
-    await git(root, ['commit', '--quiet', '-m', 'fabricated evidence root']);
-    await assert.rejects(() => resolveReviewReadinessSourceIdentity(root), /direct source, exact evidence child, or protected two-parent merge/);
-
-    const tree = await git(root, ['rev-parse', `${evidence}^{tree}`]);
-    const octopus = await git(root, ['commit-tree', tree, '-p', REVIEW_READINESS_ACCEPTED_BASE, '-p', evidence, '-p', wrongBase, '-m', 'octopus merge']);
-    await git(root, ['switch', '--quiet', '--detach', octopus]);
-    await assert.rejects(() => resolveReviewReadinessSourceIdentity(root), /direct source, exact evidence child, or protected two-parent merge/);
-
-    const driftTree = await git(root, ['rev-parse', 'HEAD^{tree}']);
-    await git(root, ['switch', '--quiet', '--detach', evidence]);
-    await writeFile(join(root, 'merge-drift.txt'), 'drift\n');
-    await git(root, ['add', 'merge-drift.txt']);
-    const mergeDriftTree = await git(root, ['write-tree']);
-    const mergeDrift = await git(root, ['commit-tree', mergeDriftTree, '-p', REVIEW_READINESS_ACCEPTED_BASE, '-p', evidence, '-m', 'merge tree drift']);
-    assert.notEqual(mergeDriftTree, tree);
-    assert.notEqual(mergeDriftTree, driftTree);
-    await git(root, ['switch', '--quiet', '--detach', mergeDrift]);
-    await assert.rejects(() => resolveReviewReadinessSourceIdentity(root), /direct source, exact evidence child, or protected two-parent merge/);
+    await git(root, ['commit', '--quiet', '-m', 'retained evidence drift']);
+    await assert.rejects(() => resolveReviewReadinessSourceIdentity(root), /authority-58 evidence root/);
   } finally {
     await rm(parent, { force: true, recursive: true });
   }
