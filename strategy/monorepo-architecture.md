@@ -1691,6 +1691,18 @@ recertifications, and certificates remain byte-for-byte historical. Enabling
 the public signed advisory surface still requires the complete G1.9 contract;
 this internal certificate does not satisfy `SCOPE-TRUST-ADVISORY` by itself.
 
+Current proof and historical audit are separate resolution modes. A current
+milestone-readiness, support, promotion, or release evaluation resolves each
+repository source input through the exact source, executed, and proof-tool
+identity relationship declared by its canonical proof owner. An explicitly
+admitted historical resolver may reproduce historical bytes only for audit,
+integrity, compatibility, or exact historical reproduction; those bytes and
+results do not enter or satisfy current proof. Evidence retention remains
+governed by the proof owner and disclosure class. Retained positive,
+negative-path, and failure evidence stays immutable, while task working
+material classified `Transient` and not admitted by a proof owner need not be
+retained in the repository.
+
 Queries resolve evidence with `evidenceStatus: valid | superseded | withdrawn`
 and surface the advisory without exposing restricted detail. Supersession keeps
 the historical result valid for its original release unless the advisory says

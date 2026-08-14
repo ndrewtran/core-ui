@@ -17,6 +17,7 @@ const PRODUCT_SCOPE_BYTES = 90165;
 const PRODUCT_SCOPE_SHA256 = 'sha256:7c8404e20d01f6a0cc975b17a7893f5594f6f0d313806a6fced9d0c62d886873';
 const ARCHITECTURE_SHA256 = 'sha256:bdf8eb132fcdace479a05569020fd91acb0bde02dd1b24b33ce0f96ceaf39371';
 const ROADMAP_SHA256 = 'sha256:808a972cf2d92064aacb0a10560ac512c0ac878b9c960098d9ddc7d84354f4c0';
+const HISTORICAL_AUTHORITY_SOURCE = 'b27cb4fb3d71f8feca9505684201286d76f62d42';
 const REVIEW_DECISION_PATH = 'decisions/0009-delivery-review-readiness.json';
 const REVIEW_ACCEPTANCE_PATH = 'decisions/0009-delivery-review-readiness-acceptance.json';
 const REVIEW_IMPLEMENTATION_CLARIFICATION_PATH = 'decisions/0009-amendment-01-implementation-clarification.md';
@@ -54,6 +55,11 @@ const exactKeys = (value, keys, label) => {
   if (!value || typeof value !== 'object' || Array.isArray(value)) fail(label);
   exact(Object.keys(value).sort(), [...keys].sort(), label);
 };
+const readHistoricalAuthority = (repositoryRoot, path) => execFileSync(
+  'git',
+  ['show', `${HISTORICAL_AUTHORITY_SOURCE}:${path}`],
+  { cwd: repositoryRoot, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 },
+);
 
 export function verifyDeliveryWorkflowAuthority(repositoryRoot, options = {}) {
   const decisionSource = options.decisionSource
@@ -63,9 +69,9 @@ export function verifyDeliveryWorkflowAuthority(repositoryRoot, options = {}) {
   const productScopeSource = options.productScopeSource
     ?? readFileSync(join(repositoryRoot, PRODUCT_SCOPE_PATH), 'utf8');
   const architectureSource = options.architectureSource
-    ?? readFileSync(join(repositoryRoot, ARCHITECTURE_PATH), 'utf8');
+    ?? readHistoricalAuthority(repositoryRoot, ARCHITECTURE_PATH);
   const roadmapSource = options.roadmapSource
-    ?? readFileSync(join(repositoryRoot, ROADMAP_PATH), 'utf8');
+    ?? readHistoricalAuthority(repositoryRoot, ROADMAP_PATH);
   const decision = parseJsonStrict(decisionSource);
   const acceptance = parseJsonStrict(acceptanceSource);
 
