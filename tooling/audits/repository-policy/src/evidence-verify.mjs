@@ -6,7 +6,7 @@ import {
   assertApplicabilitySupersessionShape,
   assertAuthorityDecisionShape,
 } from './evidence-applicability-supersession.mjs';
-import { isIgnoredRepositoryEntry, sha256 } from './policy.mjs';
+import { sha256 } from './policy.mjs';
 import { assertTaleAnnexAcceptanceRecord } from './tale-token-annex-acceptance.mjs';
 import {
   assertTaleTokenPhaseAIndexSet,
@@ -27,6 +27,7 @@ import {
   G12_ROOT,
   assertG12MaintenanceRootDirectory,
   assertG12RootDirectory,
+  pathManifestAtRevision,
 } from '../../../../tests/evidence/g1.2-profile.mjs';
 import {
   assertReviewReadinessRoot,
@@ -37,16 +38,6 @@ import { execFile as execFileCallback } from 'node:child_process';
 import { promisify } from 'node:util';
 
 const execFile = promisify(execFileCallback);
-
-const DECISION_0009_HISTORICAL_SOURCE = '63dee2c988759ec803f71a0353a6630bf612826c';
-const DECISION_0009_HISTORICAL_IMPLEMENTATION_PATHS = new Set([
-  'tests/evidence/delivery-review-readiness-applicability-profile.mjs',
-  'tests/evidence/delivery-review-readiness-applicability-profile.test.mjs',
-  'tooling/audits/repository-policy/src/delivery-workflow-authority-verify.mjs',
-  'tooling/audits/repository-policy/src/evidence-verify.mjs',
-  'tooling/audits/repository-policy/test/delivery-workflow-authority.test.mjs',
-  'tooling/audits/repository-policy/test/evidence-integrity.test.mjs',
-]);
 
 export class EvidenceIntegrityError extends Error {
   constructor(code, message) {
@@ -195,52 +186,11 @@ export async function resolveG12EvidenceIdentity(repositoryRoot, revision = 'HEA
   };
 }
 
-async function manifestEntries(repositoryRoot, declaredPaths) {
-  const entries = [];
-
-  async function visit(relativePath) {
-    const absolutePath = join(repositoryRoot, relativePath);
-    const metadata = await stat(absolutePath);
-    if (metadata.isDirectory()) {
-      const children = await readdir(absolutePath);
-      children.sort((left, right) => left.localeCompare(right));
-      for (const child of children) {
-        if (isIgnoredRepositoryEntry(child)) continue;
-        await visit(join(relativePath, child));
-      }
-      return;
-    }
-    if (!metadata.isFile()) {
-      throw new EvidenceIntegrityError(
-        'EVIDENCE_MANIFEST_ENTRY_INVALID',
-        `${relativePath} is not a regular file`,
-      );
-    }
-    let bytes;
-    if (DECISION_0009_HISTORICAL_IMPLEMENTATION_PATHS.has(relativePath)) {
-      try {
-        bytes = (await execFile(
-          'git',
-          ['show', `${DECISION_0009_HISTORICAL_SOURCE}:${relativePath}`],
-          { cwd: repositoryRoot, encoding: 'buffer', maxBuffer: 64 * 1024 * 1024 },
-        )).stdout;
-      } catch {
-        throw new EvidenceIntegrityError(
-          'EVIDENCE_MANIFEST_ENTRY_INVALID',
-          `${relativePath} is missing from the Decision 0009 historical source`,
-        );
-      }
-    } else {
-      bytes = await readFile(absolutePath);
-    }
-    entries.push({ path: relativePath, sha256: `sha256:${sha256(bytes)}` });
-  }
-
-  for (const relativePath of declaredPaths) await visit(relativePath);
-  return entries.sort((left, right) => left.path.localeCompare(right.path));
-}
-
-async function assertApplicabilityManifest(repositoryRoot, manifest) {
+async function assertApplicabilityManifest(
+  repositoryRoot,
+  manifest,
+  sourceRevision,
+) {
   if (
     manifest?.algorithm !== 'sha256'
     || manifest?.profile !== 'core-ui-path-manifest-v1'
@@ -252,12 +202,29 @@ async function assertApplicabilityManifest(repositoryRoot, manifest) {
       'applicability manifest must use the sha256 core-ui-path-manifest-v1 profile',
     );
   }
-  const entries = await manifestEntries(repositoryRoot, manifest.paths);
-  const actual = `sha256:${sha256(canonicalJson(entries))}`;
-  if (actual !== manifest.sha256) {
+  if (!/^[0-9a-f]{40}$/u.test(sourceRevision ?? '')) {
+    throw new EvidenceIntegrityError(
+      'EVIDENCE_SOURCE_MISMATCH',
+      'applicability manifest requires an exact source revision',
+    );
+  }
+  for (const path of manifest.paths) {
+    try {
+      await execFile('git', ['cat-file', '-e', `${sourceRevision}:${path}`], {
+        cwd: repositoryRoot,
+      });
+    } catch {
+      throw new EvidenceIntegrityError(
+        'EVIDENCE_MANIFEST_ENTRY_INVALID',
+        `${path} is missing from recorded source ${sourceRevision}`,
+      );
+    }
+  }
+  const actual = await pathManifestAtRevision(repositoryRoot, sourceRevision, manifest.paths);
+  if (actual.sha256 !== manifest.sha256) {
     throw new EvidenceIntegrityError(
       'EVIDENCE_APPLICABILITY_MISMATCH',
-      `applicable source paths have ${actual}; expected ${manifest.sha256}`,
+      `applicable source paths at ${sourceRevision} have ${actual.sha256}; expected ${manifest.sha256}`,
     );
   }
 }
@@ -781,6 +748,7 @@ export async function verifyEvidence(repositoryRoot, { allowTransactionJournal, 
       await assertApplicabilityManifest(
         repositoryRoot,
         leaves[0].supersession.currentApplicabilityManifest,
+        leaves[0].supersession.sourceRevision,
       );
     }
     supersessionLeaves.set(target, leaves[0]);
@@ -792,6 +760,7 @@ export async function verifyEvidence(repositoryRoot, { allowTransactionJournal, 
       await assertApplicabilityManifest(
         repositoryRoot,
         leaf.recertification.currentApplicabilityManifest,
+        leaf.recertification.sourceRevision,
       );
     }
   }
@@ -834,7 +803,11 @@ export async function verifyEvidence(repositoryRoot, { allowTransactionJournal, 
     }
     if (index.applicabilityManifest) {
       try {
-        await assertApplicabilityManifest(repositoryRoot, index.applicabilityManifest);
+        await assertApplicabilityManifest(
+          repositoryRoot,
+          index.applicabilityManifest,
+          index.sourceRevision,
+        );
       } catch (error) {
         if (
           !(error instanceof EvidenceIntegrityError)

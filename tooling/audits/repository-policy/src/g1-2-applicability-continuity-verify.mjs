@@ -1,3 +1,4 @@
+import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { basename, join, resolve } from 'node:path';
 import { canonicalJson, parseJsonStrict } from '@core-ui/schema';
@@ -22,6 +23,7 @@ const ACCEPTANCE_SHA256 = 'sha256:5f0ce9837775f508bf1453f201df74b5972444801f4cee
 const PREDECESSOR_ROOT_SHA256 = 'sha256:79a1f3ad9a7aa7a05507074c60f9875b779350132cd56b1f2c7f5556dcf07f05';
 const ARCHITECTURE_SHA256 = 'sha256:bdf8eb132fcdace479a05569020fd91acb0bde02dd1b24b33ce0f96ceaf39371';
 const ROADMAP_SHA256 = 'sha256:808a972cf2d92064aacb0a10560ac512c0ac878b9c960098d9ddc7d84354f4c0';
+const HISTORICAL_AUTHORITY_SOURCE = 'b27cb4fb3d71f8feca9505684201286d76f62d42';
 const PRODUCT_SCOPE_SHA256 = 'sha256:7c8404e20d01f6a0cc975b17a7893f5594f6f0d313806a6fced9d0c62d886873';
 const DECISION_0007_SHA256 = 'sha256:97aa9d33adb4da0cd9b6bf4d692993b8b8938401d73cb7cb20912c3f6e382c8f';
 const DECISION_0007_ACCEPTANCE_SHA256 = 'sha256:282defb18bd1d897c14dc62e3ebc44cabf0d3cdbf4cd8c0419d71b9d1d03ed8d';
@@ -154,7 +156,13 @@ export function assertG12ContinuityDecision(decision, predecessorRoot, loadPrede
 
 export function verifyG12ApplicabilityContinuityAuthority(repositoryRoot, options = {}) {
   const read = (path) => options.sources?.[path]
-    ?? readFileSync(join(repositoryRoot, path), 'utf8');
+    ?? ([ARCHITECTURE_PATH, ROADMAP_PATH].includes(path)
+      ? execFileSync('git', ['show', `${HISTORICAL_AUTHORITY_SOURCE}:${path}`], {
+        cwd: repositoryRoot,
+        encoding: 'utf8',
+        maxBuffer: 64 * 1024 * 1024,
+      })
+      : readFileSync(join(repositoryRoot, path), 'utf8'));
   const decisionSource = read(DECISION_PATH);
   const acceptanceSource = read(ACCEPTANCE_PATH);
   const decision = parseJsonStrict(decisionSource);

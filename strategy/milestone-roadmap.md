@@ -80,6 +80,14 @@ Public evidence exposes only sanitized metadata and digests. Restricted or
 internal payloads remain access-controlled. A transient log cannot satisfy an
 exit condition.
 
+Evidence used for a current milestone entry or exit assertion must follow
+that assertion's existing proof owner and exact source, executed, and
+proof-tool identity relationship. Historical evidence and internal
+applicability-maintenance roots remain retrievable audit records but cannot
+substitute for current proof. G1.0, G1.1, and G1.2 retain their separate
+evidence indexes, assertions, acceptance, and dependency states; each must be
+independently proved ready before G1.3 can enter `ready`.
+
 ### Acceptance cadence
 
 | Cadence | Minimum evidence |

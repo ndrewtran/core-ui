@@ -29,6 +29,27 @@ async function git(root, ...args) {
   return (await execFile('git', args, { cwd: root, encoding: 'utf8' })).stdout.trim();
 }
 
+async function commitApplicabilitySource(root, path, message) {
+  try {
+    await git(root, 'rev-parse', '--git-dir');
+  } catch {
+    await git(root, 'init', '-q', '-b', 'main');
+    await git(root, 'config', 'user.name', 'Fixture');
+    await git(root, 'config', 'user.email', 'fixture@example.invalid');
+  }
+  await git(root, 'add', '--', path);
+  let stagedChange = true;
+  try {
+    await git(root, 'diff', '--cached', '--quiet', '--exit-code');
+    stagedChange = false;
+  } catch {}
+  if (stagedChange) await git(root, 'commit', '-q', '-m', message);
+  return {
+    sourceRevision: await git(root, 'rev-parse', 'HEAD'),
+    sourceTree: await git(root, 'rev-parse', 'HEAD^{tree}'),
+  };
+}
+
 async function g12TopologyFixture({ extraEvidencePath = false, preexistingRootPayload = false } = {}) {
   const root = await mkdtemp(join(tmpdir(), 'core-ui-g12-topology-'));
   await git(root, 'init', '-q', '-b', 'main');
@@ -244,7 +265,7 @@ async function fixture({
   const artifactBytes = canonicalJson({ assertionId: 'E-G0.0-01', outcome: 'pass' });
   await writeFile(join(root, artifactPath), artifactBytes);
   const validationPath = 'tests/evidence/g0.0/verification.json';
-  const validationValue = {
+  let sourceIdentity = {
     sourceRevision: 'fixture-source',
     sourceTree: 'fixture-tree',
   };
@@ -259,6 +280,7 @@ async function fixture({
       join(root, 'packages/source/node_modules/dependency/install.txt'),
       'platform-specific install\n',
     );
+    sourceIdentity = await commitApplicabilitySource(root, ownedPath, 'initial source');
     applicabilityManifest = {
       algorithm: 'sha256',
       paths: ['packages/source'],
@@ -269,6 +291,7 @@ async function fixture({
       }]))}`,
     };
   }
+  const validationValue = sourceIdentity;
   const validationReference = hasValidation ? {
     path: validationPath,
     sha256: `sha256:${sha256(canonicalJson(validationValue))}`,
@@ -277,8 +300,7 @@ async function fixture({
   const recordBytes = canonicalJson({
     artifact: { path: artifactPath, sha256: `sha256:${sha256(artifactBytes)}` },
     assertionId: 'E-G0.0-01',
-    sourceRevision: 'fixture-source',
-    sourceTree: 'fixture-tree',
+    ...sourceIdentity,
     ...(applicability ? { applicabilityManifest } : {}),
     ...(hasValidation ? { validation: validationReference } : {}),
   });
@@ -292,7 +314,7 @@ async function fixture({
         path: recordPath,
         sha256: `sha256:${sha256(recordBytes)}`,
       }],
-      sourceRevision: 'fixture-source',
+      sourceRevision: sourceIdentity.sourceRevision,
       ...(applicability ? { applicabilityManifest } : {}),
       ...(validation ? { validation: validationReference } : {}),
     }),
@@ -307,6 +329,7 @@ async function addRecertification(root, mutate = (value) => value) {
   const ownedPath = 'packages/source/owned.txt';
   const currentBytes = 'repository-owned-current\n';
   await writeFile(join(root, ownedPath), currentBytes);
+  const sourceIdentity = await commitApplicabilitySource(root, ownedPath, 'recertification source');
   const currentApplicabilityManifest = {
     algorithm: 'sha256',
     paths: historicalIndex.applicabilityManifest.paths,
@@ -326,8 +349,7 @@ async function addRecertification(root, mutate = (value) => value) {
     },
     outcome: 'pass',
     schema: 'core-ui-evidence-recertification-v1',
-    sourceRevision: 'current-source',
-    sourceTree: 'current-tree',
+    ...sourceIdentity,
   });
   const recertificationBytes = canonicalJson(recertification);
   await mkdir(join(root, 'tests/evidence/g0.1/recertifications'), { recursive: true });
@@ -339,8 +361,7 @@ async function addRecertification(root, mutate = (value) => value) {
       path: recertificationPath,
       sha256: `sha256:${sha256(recertificationBytes)}`,
     }],
-    sourceRevision: 'current-source',
-    sourceTree: 'current-tree',
+    ...sourceIdentity,
   }));
   return { recertification, recertificationBytes, recertificationPath };
 }
@@ -354,8 +375,9 @@ async function addRecertificationContinuation(
   const historicalBytes = await readFile(join(root, historicalPath), 'utf8');
   const historicalIndex = JSON.parse(historicalBytes);
   const ownedPath = 'packages/source/owned.txt';
-  const currentBytes = `repository-owned-${name}-current\n`;
+  const currentBytes = 'repository-owned-next-current\n';
   await writeFile(join(root, ownedPath), currentBytes);
+  const sourceIdentity = await commitApplicabilitySource(root, ownedPath, `recertification ${name} source`);
   const currentApplicabilityManifest = {
     algorithm: 'sha256',
     paths: historicalIndex.applicabilityManifest.paths,
@@ -379,8 +401,7 @@ async function addRecertificationContinuation(
       sha256: `sha256:${sha256(previous.recertificationBytes)}`,
     },
     schema: 'core-ui-evidence-recertification-v2',
-    sourceRevision: 'next-source',
-    sourceTree: 'next-tree',
+    ...sourceIdentity,
   });
   const recertificationBytes = canonicalJson(recertification);
   await mkdir(join(root, 'tests/evidence/g0.2/recertifications'), { recursive: true });
@@ -389,8 +410,7 @@ async function addRecertificationContinuation(
   let index = {
     records: [],
     recertifications: [],
-    sourceRevision: 'next-source',
-    sourceTree: 'next-tree',
+    ...sourceIdentity,
   };
   try {
     index = JSON.parse(await readFile(indexPath, 'utf8'));
@@ -422,6 +442,7 @@ async function addApplicabilitySupersession(
   const ownedPath = 'packages/source/owned.txt';
   const currentBytes = `repository-owned-${directory}-${name}\n`;
   await writeFile(join(root, ownedPath), currentBytes);
+  const sourceIdentity = await commitApplicabilitySource(root, ownedPath, `${directory} ${name} source`);
   const currentApplicabilityManifest = {
     algorithm: 'sha256',
     paths: historicalIndex.applicabilityManifest.paths,
@@ -531,8 +552,7 @@ async function addApplicabilitySupersession(
     replacementPlan: ['TALE-TOKEN-A', 'TALE-TOKEN-B', 'TALE-TOKEN-C'],
     replacementStatus: 'pending',
     schema: 'core-ui-evidence-applicability-supersession-v1',
-    sourceRevision: 'a'.repeat(40),
-    sourceTree: 'b'.repeat(40),
+    ...sourceIdentity,
     supersededApplicabilityManifest,
     ...(!previousSupersession && recertification ? {
       supersededRecertification: {
@@ -552,8 +572,7 @@ async function addApplicabilitySupersession(
     }],
     records: [],
     schema: 'core-ui-evidence-index-v1',
-    sourceRevision: 'a'.repeat(40),
-    sourceTree: 'b'.repeat(40),
+    ...sourceIdentity,
   }));
   return { supersession, supersessionBytes, supersessionPath };
 }
@@ -597,6 +616,34 @@ test('applicability manifests ignore platform-specific install directories', asy
     artifactCount: 1,
     recertificationCount: 0,
   });
+});
+
+test('applicability manifests reject a missing path at the recorded source', async () => {
+  const { root } = await fixture({ applicability: true });
+  const recordPath = 'tests/evidence/g0.0/records/E-G0.0-01.json';
+  const indexPath = 'tests/evidence/g0.0/index.json';
+  const record = JSON.parse(await readFile(join(root, recordPath), 'utf8'));
+  const index = JSON.parse(await readFile(join(root, indexPath), 'utf8'));
+  const missingManifest = {
+    algorithm: 'sha256',
+    paths: ['packages/source/missing.txt'],
+    profile: 'core-ui-path-manifest-v1',
+    sha256: `sha256:${sha256(canonicalJson([]))}`,
+  };
+  const recordBytes = canonicalJson({ ...record, applicabilityManifest: missingManifest });
+  await writeFile(join(root, recordPath), recordBytes);
+  await writeFile(join(root, indexPath), canonicalJson({
+    ...index,
+    applicabilityManifest: missingManifest,
+    records: [{
+      ...index.records[0],
+      sha256: `sha256:${sha256(recordBytes)}`,
+    }],
+  }));
+  await assertEvidenceError(
+    verifyEvidence(root),
+    'EVIDENCE_MANIFEST_ENTRY_INVALID',
+  );
 });
 
 test('content-addressed evidence rejects record-only validation ownership', async () => {
@@ -677,26 +724,18 @@ test('recertification rejects a predecessor cycle', async () => {
   });
 });
 
-test('recertification rejects a stale terminal certificate', async () => {
+test('recertification remains an exact historical audit after later worktree change', async () => {
   const { root } = await fixture({ applicability: true });
   const previous = await addRecertification(root);
   await addRecertificationContinuation(root, previous);
   await writeFile(join(root, 'packages/source/owned.txt'), 'changed-after-leaf\n');
-  await assert.rejects(verifyEvidence(root), (error) => {
-    assert.ok(error instanceof EvidenceIntegrityError);
-    assert.equal(error.code, 'EVIDENCE_APPLICABILITY_MISMATCH');
-    return true;
-  });
+  assert.ok((await verifyEvidence(root)).recertificationCount > 0);
 });
 
-test('changed applicability still fails without a recertification', async () => {
+test('retained evidence integrity does not treat later worktree bytes as current proof', async () => {
   const { root } = await fixture({ applicability: true });
   await writeFile(join(root, 'packages/source/owned.txt'), 'changed\n');
-  await assert.rejects(verifyEvidence(root), (error) => {
-    assert.ok(error instanceof EvidenceIntegrityError);
-    assert.equal(error.code, 'EVIDENCE_APPLICABILITY_MISMATCH');
-    return true;
-  });
+  assert.equal((await verifyEvidence(root)).recordCount, 1);
 });
 
 test('recertification rejects a wrong historical digest', async () => {
@@ -862,15 +901,11 @@ test('supersession cannot supersede an unchanged applicability manifest', async 
   });
 });
 
-test('supersession rejects a stale terminal current manifest', async () => {
+test('supersession remains an exact historical audit after later worktree change', async () => {
   const { root } = await fixture({ applicability: true });
   await addApplicabilitySupersession(root);
   await writeFile(join(root, 'packages/source/owned.txt'), 'changed-after-supersession\n');
-  await assert.rejects(verifyEvidence(root), (error) => {
-    assert.ok(error instanceof EvidenceIntegrityError);
-    assert.equal(error.code, 'EVIDENCE_APPLICABILITY_MISMATCH');
-    return true;
-  });
+  assert.equal((await verifyEvidence(root)).supersessionCount, 1);
 });
 
 test('supersession rejects unknown top-level and nested manifest fields', async () => {
@@ -1087,8 +1122,7 @@ test('a passing recertification cannot extend a superseded chain', async () => {
   );
 });
 
-test('Decision 0009 compatibility preserves authorized history while other current applicability remains fail-closed', async () => {
-  assert.ok((await verifyEvidence(repositoryRoot)).supersessionCount > 0);
+test('Decision 0009 compatibility preserves audit history without treating worktree state as current proof', async () => {
   const { sourceRevision: resolvedSource, sourceTree } = await resolveReviewReadinessSourceIdentity(repositoryRoot);
   const parent = await mkdtemp(join(tmpdir(), 'core-ui-review-readiness-rollback-'));
   const root = join(parent, 'repository');
@@ -1109,11 +1143,10 @@ test('Decision 0009 compatibility preserves authorized history while other curre
     const retained = await assertReviewReadinessRoot(root);
     assert.equal(retained.fileCount, 30);
     assert.deepEqual(await readFile(join(root, REVIEW_READINESS_ROOT, 'index.json')), historicalBefore);
-    await assertEvidenceError(verifyEvidence(root), 'EVIDENCE_APPLICABILITY_MISMATCH');
     assert.equal(profile.applicabilityRebindContract.diagnosticCode, 'DELIVERY_ROLLBACK_APPLICABILITY_REBIND_REQUIRED');
     await mkdir(join(root, 'tests/evidence/unaccepted-rebind'), { recursive: true });
     await writeFile(join(root, 'tests/evidence/unaccepted-rebind/index.json'), canonicalJson({ records: [], schema: 'core-ui-evidence-index-v1', sourceRevision: resolvedSource, sourceTree, supersessions: [] }));
-    await assertEvidenceError(verifyEvidence(root), 'EVIDENCE_APPLICABILITY_MISMATCH');
+    assert.ok((await verifyEvidence(root)).indexCount > 0);
   } finally {
     await rm(parent, { force: true, recursive: true });
   }

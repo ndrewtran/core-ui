@@ -65,12 +65,14 @@ const wrongAcceptance = parseJsonStrict(acceptanceSource);
 wrongAcceptance.bodySha256 = `sha256:${'0'.repeat(64)}`;
 rejectAuthority({ [acceptancePath]: canonicalJson(wrongAcceptance) }, 'acceptance body');
 rejectAuthority({ 'strategy/product-scope.md': read('strategy/product-scope.md').replace('scopeVersion: 4.0.2', 'scopeVersion: 4.0.3') }, 'Product Scope drift');
+rejectAuthority({ 'strategy/monorepo-architecture.md': 'not the accepted historical architecture' }, 'historical Architecture drift');
+rejectAuthority({ 'strategy/milestone-roadmap.md': 'not the accepted historical roadmap' }, 'historical roadmap drift');
 rejectAuthority({ [decisionPath]: `${decisionSource}\n` }, 'noncanonical decision');
 
 const result = verifyG12ApplicabilityContinuityAuthority(repositoryRoot);
 if (!result.accepted || result.targets !== 28 || result.g12Assertions !== 5 || result.affectedScopeIds !== 12) {
   throw new Error('positive result mismatch');
 }
-if (rejected !== 15) throw new Error(`expected 15 rejections, received ${rejected}`);
+if (rejected !== 17) throw new Error(`expected 17 rejections, received ${rejected}`);
 
-process.stdout.write('[g1.2-continuity] 15/15 negative mutations rejected; accepted authority verified\n');
+process.stdout.write('[g1.2-continuity] 17/17 negative mutations rejected; accepted authority verified\n');
