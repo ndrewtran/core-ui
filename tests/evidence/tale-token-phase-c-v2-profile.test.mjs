@@ -19,6 +19,7 @@ import { pathManifestAtRevision as canonicalPathManifestAtRevision } from './g1.
 import {
   assertTaleTokenPhaseCV2Identity,
   materializeTaleTokenPhaseCV2Atomically,
+  normalizeTaleTokenPhaseCV2Output,
   parseTaleTokenPhaseCV2Arguments,
 } from './capture-tale-token-phase-c-v2.mjs';
 
@@ -113,6 +114,14 @@ test('Phase C v2 arguments are exact', () => {
     ['--source', revision, '--tree', tree, '--timestamp', 'bad'],
     ['--check', '--check', '--source', revision, '--tree', tree, '--timestamp', timestamp],
   ]) assert.throws(() => parseTaleTokenPhaseCV2Arguments(args), /ARGUMENT/u);
+});
+
+test('Phase C v2 output normalization removes transient pnpm progress updates', () => {
+  const stable = 'Packages: +513\n++++++++++++++++++++++++++++++++++++\ndevDependencies:\n';
+  const first = `Packages: +513\nProgress: resolved 1, reused 0, downloaded 0, added 0\nProgress: resolved 513, reused 513, downloaded 0, added 512\n++++++++++++++++++++++++++++++++++++\ndevDependencies:\n`;
+  const second = `Packages: +513\nProgress: resolved 513, reused 513, downloaded 0, added 510\n++++++++++++++++++++++++++++++++++++\ndevDependencies:\n`;
+  assert.equal(normalizeTaleTokenPhaseCV2Output(first, '/repository'), stable);
+  assert.equal(normalizeTaleTokenPhaseCV2Output(second, '/repository'), stable);
 });
 
 test('Phase C v2 source, tree, clean-worktree, and timestamp checks fail closed', () => {
