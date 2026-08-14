@@ -22,6 +22,7 @@ import {
   normalizeTaleTokenPhaseCV2Output,
   parseTaleTokenPhaseCV2Arguments,
 } from './capture-tale-token-phase-c-v2.mjs';
+import { hasUnsanitizedEvidenceOutput } from '../../tooling/audits/repository-policy/src/evidence-verify.mjs';
 
 const execFile = promisify(execFileCallback);
 
@@ -120,8 +121,19 @@ test('Phase C v2 output normalization removes transient pnpm progress updates', 
   const stable = 'Packages: +513\n++++++++++++++++++++++++++++++++++++\ndevDependencies:\n';
   const first = `Packages: +513\nProgress: resolved 1, reused 0, downloaded 0, added 0\nProgress: resolved 513, reused 513, downloaded 0, added 512\n++++++++++++++++++++++++++++++++++++\ndevDependencies:\n`;
   const second = `Packages: +513\nProgress: resolved 513, reused 513, downloaded 0, added 510\n++++++++++++++++++++++++++++++++++++\ndevDependencies:\n`;
-  assert.equal(normalizeTaleTokenPhaseCV2Output(first, '/repository'), stable);
-  assert.equal(normalizeTaleTokenPhaseCV2Output(second, '/repository'), stable);
+  assert.equal(normalizeTaleTokenPhaseCV2Output(first, '/repository', 'pnpm'), stable);
+  assert.equal(normalizeTaleTokenPhaseCV2Output(second, '/repository', 'pnpm'), stable);
+  assert.equal(normalizeTaleTokenPhaseCV2Output(first, '/repository', 'node'), first);
+  for (const observable of [
+    'Progress: resolved 513, reused 513, downloaded 0, added unknown\n',
+    'Progress: authorization=secret-value\n',
+  ]) {
+    assert.equal(normalizeTaleTokenPhaseCV2Output(observable, '/repository', 'pnpm'), observable);
+  }
+  assert.equal(hasUnsanitizedEvidenceOutput(
+    normalizeTaleTokenPhaseCV2Output('Progress: authorization=secret-value\n', '/repository', 'pnpm'),
+    '/repository',
+  ), true);
 });
 
 test('Phase C v2 source, tree, clean-worktree, and timestamp checks fail closed', () => {

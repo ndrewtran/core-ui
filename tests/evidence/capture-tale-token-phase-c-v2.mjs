@@ -35,14 +35,16 @@ function exists(path) {
   });
 }
 
-export function normalizeTaleTokenPhaseCV2Output(value, root) {
-  return value.replaceAll(`/private${root}`, '<repository>').replaceAll(root, '<repository>')
+export function normalizeTaleTokenPhaseCV2Output(value, root, command) {
+  const normalized = value.replaceAll(`/private${root}`, '<repository>').replaceAll(root, '<repository>')
     .replace(/\/private\/var\/folders\/[A-Za-z0-9_./-]+/gu, '<temporary>')
-    .replace(/^Progress: [^\n]*(?:\n|$)/gmu, '')
     .replace(/\((?:\d+\.)?\d+ms\)/gu, '(duration)')
     .replace(/duration_ms (?:\d+\.)?\d+/gu, 'duration_ms <duration>')
     .replace(/Done in [^\n]+/gu, 'Done in <duration>').replace(/Took: [^\n]+/gu, 'Took: <duration>')
     .replace(/Time: +[^\n]+/gu, 'Time: <duration>').replace(/\r\n/gu, '\n');
+  return command === 'pnpm'
+    ? normalized.replace(/^Progress: resolved \d+, reused \d+, downloaded \d+, added \d+(?:, done)?(?:\n|$)/gmu, '')
+    : normalized;
 }
 
 async function run(command, args, cwd) {
@@ -51,12 +53,12 @@ async function run(command, args, cwd) {
       cwd, encoding: 'utf8', maxBuffer: 128 * 1024 * 1024,
       env: { ...process.env, FORCE_COLOR: '0', NO_COLOR: '1' },
     });
-    const output = normalizeTaleTokenPhaseCV2Output(result.stdout + result.stderr, cwd);
+    const output = normalizeTaleTokenPhaseCV2Output(result.stdout + result.stderr, cwd, command);
     if (hasUnsanitizedEvidenceOutput(output, cwd)) throw new Error('TALE_TOKEN_PHASE_C_V2_PRIVATE_OUTPUT');
     return { command: [command, ...args].join(' '), exitState: 0, output };
   } catch (error) {
     if (error.message === 'TALE_TOKEN_PHASE_C_V2_PRIVATE_OUTPUT') throw error;
-    throw new Error(`TALE_TOKEN_PHASE_C_V2_COMMAND_FAILED: ${command} ${args.join(' ')}\n${normalizeTaleTokenPhaseCV2Output(`${error.stdout ?? ''}${error.stderr ?? ''}`, cwd)}`);
+    throw new Error(`TALE_TOKEN_PHASE_C_V2_COMMAND_FAILED: ${command} ${args.join(' ')}\n${normalizeTaleTokenPhaseCV2Output(`${error.stdout ?? ''}${error.stderr ?? ''}`, cwd, command)}`);
   }
 }
 
