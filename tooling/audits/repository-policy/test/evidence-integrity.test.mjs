@@ -159,6 +159,10 @@ test('evidence output privacy recognizes canonical token IDs without accepting c
   assert.equal(hasUnsanitizedEvidenceOutput('api-key=secret-value', root), true);
   assert.equal(hasUnsanitizedEvidenceOutput('/Users/example/private.txt', root), true);
   assert.equal(hasUnsanitizedEvidenceOutput('/private/var/folders/example/private.txt', root), true);
+  assert.equal(hasUnsanitizedEvidenceOutput('/private/tmp/core-ui-evidence/private.txt', root), true);
+  assert.equal(hasUnsanitizedEvidenceOutput('/var/folders/example/private.txt', root), true);
+  assert.equal(hasUnsanitizedEvidenceOutput('/tmp/core-ui-evidence/private.txt', root), true);
+  assert.equal(hasUnsanitizedEvidenceOutput('C:\\Users\\example\\private.txt', root), true);
   assert.equal(hasUnsanitizedEvidenceOutput(`${root}/packages/tokens`, root), true);
 });
 
