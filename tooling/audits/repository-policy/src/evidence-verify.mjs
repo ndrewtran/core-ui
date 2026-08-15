@@ -40,6 +40,11 @@ import {
   assertDefaultThemeG11V2Root,
 } from '../../../../tests/evidence/default-theme-g1.1-v2-profile.mjs';
 import {
+  G12_V2_ROOT,
+  assertG12V2DirectoryNames,
+  assertG12V2Root,
+} from '../../../../tests/evidence/g1.2-v2-profile.mjs';
+import {
   G12_MAINTENANCE_ROOT,
   G12_ROOT,
   assertG12MaintenanceRootDirectory,
@@ -251,6 +256,7 @@ export async function verifyEvidence(repositoryRoot, {
   allowTransactionJournal,
   g10V2ExpectedIdentity,
   g11V2ExpectedIdentity,
+  g12V2ExpectedIdentity,
   g12ExpectedIdentity,
   phaseCV2ExpectedIdentity,
 } = {}) {
@@ -269,6 +275,7 @@ export async function verifyEvidence(repositoryRoot, {
   const milestoneNames = new Set(milestones.filter((entry) => entry.isDirectory()).map(({ name }) => name));
   await verifyDefaultThemeG10V2Route(repositoryRoot, milestoneNames, g10V2ExpectedIdentity);
   await verifyDefaultThemeG11V2Route(repositoryRoot, milestoneNames, g11V2ExpectedIdentity);
+  await verifyG12V2Route(repositoryRoot, milestoneNames, g12V2ExpectedIdentity);
   const hasPhaseCV2 = assertTaleTokenPhaseCV2DirectoryNames([...milestoneNames], (message) => {
     throw new EvidenceIntegrityError('EVIDENCE_PHASE_C_V2_TOPOLOGY_INVALID', message);
   });
@@ -1258,6 +1265,41 @@ export async function verifyDefaultThemeG11V2Route(repositoryRoot, milestoneName
   } catch (error) {
     if (error instanceof EvidenceIntegrityError) throw error;
     throw new EvidenceIntegrityError('EVIDENCE_G11_V2_PROFILE_INVALID', error.message);
+  }
+}
+
+export async function verifyG12V2Route(repositoryRoot, milestoneNames, expectedIdentity) {
+  const present = assertG12V2DirectoryNames([...milestoneNames], (message) => {
+    throw new EvidenceIntegrityError('EVIDENCE_G12_V2_TOPOLOGY_INVALID', message);
+  });
+  if (!present) return false;
+  try {
+    let expected = expectedIdentity;
+    if (!expected) {
+      const index = await readCanonicalJson(join(repositoryRoot, G12_V2_ROOT, 'index.json'));
+      expected = {
+        sourceRevision: index.value.sourceRevision,
+        sourceTree: index.value.sourceTree,
+        executedRevision: index.value.executedRevision,
+        executedTree: index.value.executedTree,
+        timestamp: index.value.captureTimestamp,
+      };
+    }
+    const sourceTime = new Date((await execFile(
+      'git', ['show', '-s', '--format=%cI', expected.executedRevision],
+      { cwd: repositoryRoot, encoding: 'utf8' },
+    )).stdout.trim());
+    const captured = new Date(expected.timestamp);
+    if (Number.isNaN(captured.valueOf()) || captured < sourceTime || captured > new Date()) {
+      throw new Error('capture timestamp outside executed/current bounds');
+    }
+    await assertG12V2Root(repositoryRoot, expected, {
+      allowUncommitted: expectedIdentity !== undefined,
+    });
+    return true;
+  } catch (error) {
+    if (error instanceof EvidenceIntegrityError) throw error;
+    throw new EvidenceIntegrityError('EVIDENCE_G12_V2_PROFILE_INVALID', error.message);
   }
 }
 
