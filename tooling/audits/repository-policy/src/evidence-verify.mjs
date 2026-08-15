@@ -23,6 +23,13 @@ import {
   TALE_TOKEN_PHASE_C_PROFILE_DIGEST,
 } from '../../../../tests/evidence/capture-tale-token-phase-c.mjs';
 import {
+  assertTaleTokenPhaseCV2CommitTopology,
+  assertTaleTokenPhaseCV2DirectoryNames,
+  assertTaleTokenPhaseCV2IndexSet,
+  assertTaleTokenPhaseCV2RootSet,
+  isTaleTokenPhaseCV2Name,
+} from '../../../../tests/evidence/tale-token-phase-c-v2-profile.mjs';
+import {
   G12_MAINTENANCE_ROOT,
   G12_ROOT,
   assertG12MaintenanceRootDirectory,
@@ -54,7 +61,8 @@ export function hasUnsanitizedEvidenceOutput(text, repositoryRoot) {
   );
   return (
     withoutPublicTokenIds.includes(repositoryRoot)
-    || /\/(?:Users|private\/var)\//u.test(withoutPublicTokenIds)
+    || /\/(?:Users|Volumes|home|root|tmp|private(?:\/(?:tmp|var\/folders))?|var\/folders)\//u.test(withoutPublicTokenIds)
+    || /(?:^|[\s"'(=])[A-Za-z]:\\(?:Users|Temp)\\/mu.test(withoutPublicTokenIds)
     || /(?:authorization|api[-_]?key|token)\s*[:=]\s*\S+/iu.test(withoutPublicTokenIds)
   );
 }
@@ -229,7 +237,11 @@ async function assertApplicabilityManifest(
   }
 }
 
-export async function verifyEvidence(repositoryRoot, { allowTransactionJournal, g12ExpectedIdentity } = {}) {
+export async function verifyEvidence(repositoryRoot, {
+  allowTransactionJournal,
+  g12ExpectedIdentity,
+  phaseCV2ExpectedIdentity,
+} = {}) {
   const evidenceRoot = join(repositoryRoot, 'tests/evidence');
   const transactionJournal = join(evidenceRoot, '.g1-2-transaction.json');
   if (await stat(transactionJournal).then(() => true).catch((error) => {
@@ -243,6 +255,41 @@ export async function verifyEvidence(repositoryRoot, { allowTransactionJournal, 
   }
   const milestones = await readdir(evidenceRoot, { withFileTypes: true }).catch(() => []);
   const milestoneNames = new Set(milestones.filter((entry) => entry.isDirectory()).map(({ name }) => name));
+  const hasPhaseCV2 = assertTaleTokenPhaseCV2DirectoryNames([...milestoneNames], (message) => {
+    throw new EvidenceIntegrityError('EVIDENCE_PHASE_C_V2_TOPOLOGY_INVALID', message);
+  });
+  if (hasPhaseCV2) {
+    try {
+      let expected = phaseCV2ExpectedIdentity;
+      if (!expected) {
+        const first = await readCanonicalJson(join(
+          evidenceRoot,
+          'tale-token-phase-c-g0.1-v2/index.json',
+        ));
+        expected = {
+          sourceRevision: first.value.sourceRevision,
+          sourceTree: first.value.sourceTree,
+          timestamp: first.value.captureTimestamp,
+        };
+      }
+      const sourceTime = new Date((await execFile(
+        'git',
+        ['show', '-s', '--format=%cI', expected.sourceRevision],
+        { cwd: repositoryRoot, encoding: 'utf8' },
+      )).stdout.trim());
+      const captured = new Date(expected.timestamp);
+      if (Number.isNaN(captured.valueOf()) || captured < sourceTime || captured > new Date()) {
+        throw new Error('capture timestamp outside source/current bounds');
+      }
+      await assertTaleTokenPhaseCV2RootSet(repositoryRoot, expected);
+      await assertTaleTokenPhaseCV2CommitTopology(repositoryRoot, expected, {
+        allowUncommitted: phaseCV2ExpectedIdentity !== undefined,
+      });
+    } catch (error) {
+      if (error instanceof EvidenceIntegrityError) throw error;
+      throw new EvidenceIntegrityError('EVIDENCE_PHASE_C_V2_PROFILE_INVALID', error.message);
+    }
+  }
   const reviewReadinessResidue = await hasReviewReadinessResidue(repositoryRoot);
   if (reviewReadinessResidue.length > 0) {
     throw new EvidenceIntegrityError(
@@ -284,6 +331,7 @@ export async function verifyEvidence(repositoryRoot, { allowTransactionJournal, 
   const phaseAIndexes = [];
   const phaseBIndexes = [];
   const phaseCIndexes = [];
+  const phaseCV2Indexes = [];
   let indexCount = 0;
   let recordCount = 0;
   let artifactCount = 0;
@@ -311,7 +359,15 @@ export async function verifyEvidence(repositoryRoot, { allowTransactionJournal, 
       });
       phaseBIndexes.push({ name: entry.name, index: result.value });
     }
-    if (entry.name.startsWith('tale-token-phase-c-')) {
+    if (isTaleTokenPhaseCV2Name(entry.name)) {
+      assertTaleTokenPhaseCProfile(result.value.applicabilityProfile, (message) => {
+        throw new EvidenceIntegrityError(
+          'EVIDENCE_APPLICABILITY_PROFILE_INVALID',
+          `tests/evidence/${entry.name}/index.json ${message}`,
+        );
+      });
+      phaseCV2Indexes.push({ name: entry.name, index: result.value });
+    } else if (entry.name.startsWith('tale-token-phase-c-')) {
       assertTaleTokenPhaseCProfile(result.value.applicabilityProfile, (message) => {
         throw new EvidenceIntegrityError(
           'EVIDENCE_APPLICABILITY_PROFILE_INVALID',
@@ -348,6 +404,14 @@ export async function verifyEvidence(repositoryRoot, { allowTransactionJournal, 
       throw new EvidenceIntegrityError(
         'EVIDENCE_APPLICABILITY_PROFILE_INVALID',
         `TALE-TOKEN-C ${message}`,
+      );
+    });
+  }
+  if (phaseCV2Indexes.length > 0) {
+    assertTaleTokenPhaseCV2IndexSet(phaseCV2Indexes, (message) => {
+      throw new EvidenceIntegrityError(
+        'EVIDENCE_APPLICABILITY_PROFILE_INVALID',
+        `TALE-TOKEN-C v2 ${message}`,
       );
     });
   }
