@@ -1,6 +1,27 @@
 # Decision 0010 amendment 02: Tale styling donor and React visual harness
 
-Status: proposed materialization; semantic choice approved by Andrew / `ndrewtran` on 2026-08-16; exact candidate digest acceptance pending
+Status: Accepted.
+
+Acceptance: Andrew / `ndrewtran` accepted Decision 0010 amendment 02 at
+SHA-256
+`c185284dc4665eb2923cd4dc1fd7a5b81c583400d72eb4bdc188b5943ed19d5c`,
+the corrected React-primary/Tale-donor authority materialization diff at
+SHA-256
+`4bbd3fe9c6a432fc1de0a50f670f99bef1badf271fdb46549e031a90e39f6eec`,
+and Project migration candidate v2 at SHA-256
+`f187899174eb4b613328cc6cc5da15a718629b455459d815e3d090f2bcdd2dba`
+with the instruction:
+
+> I approve Decision 0010 amendment 02, SHA-256
+> c185284dc4665eb2923cd4dc1fd7a5b81c583400d72eb4bdc188b5943ed19d5c;
+> the corrected React-primary/Tale-donor authority materialization diff,
+> SHA-256
+> 4bbd3fe9c6a432fc1de0a50f670f99bef1badf271fdb46549e031a90e39f6eec;
+> and the Project migration candidate v2, SHA-256
+> f187899174eb4b613328cc6cc5da15a718629b455459d815e3d090f2bcdd2dba.
+
+This append-only status recording changes none of the accepted human choices.
+No GitHub comment or approval timestamp beyond 2026-08-16 is claimed.
 
 Parent: `core-ui:decision:0010`
 

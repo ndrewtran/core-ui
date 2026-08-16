@@ -1436,8 +1436,10 @@ admitted Core React component starts from the applicable styling in the exact
 pinned Tale UI snapshot, while Core owns every resulting selector, token
 mapping, CSS rule, public hook, package surface, compatibility promise, and
 release claim. Decision 0010 amendment 02 records the exact donor identity,
-private-playground boundary, and deferred Scale disposition. Digest-specific
-acceptance of the materialized candidate remains separate.
+private-playground boundary, deferred Scale disposition, and Andrew /
+`ndrewtran`'s exact acceptance of the precursor amendment, authority-diff, and
+Project-migration identities quoted there. The append-only status recording
+changes no accepted human choice or scope meaning.
 
 R1.0 must classify the pinned Tale license and preserve its applicable notice,
 including stated third-party portions, in every exact package/release artifact
