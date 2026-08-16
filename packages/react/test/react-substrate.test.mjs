@@ -1,10 +1,15 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { createHash } from 'node:crypto';
+import { spawnSync } from 'node:child_process';
 import { readFile, readdir } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { reactCompatibility } from '../generated/index.mjs';
 import { compileTokenGraph, compileTokenRequirementSet, validateThemeForRequirementSet } from '@core-ui/tokens';
+import {
+  assertReactR10GeneratedContracts,
+  assertReactR10SourceContracts,
+} from '../src/r1-contracts.mjs';
 
 test('R1.0 package has an exact standalone substrate identity', async () => {
   assert.equal(reactCompatibility.package, '@core-ui/react');
@@ -12,9 +17,20 @@ test('R1.0 package has an exact standalone substrate identity', async () => {
   assert.equal(reactCompatibility.upstream.version, '1.20.0');
   assert.equal(reactCompatibility.upstream.gitHead, '5ecb3333001313e83898cd07644227897e3bae1f');
   const manifest = JSON.parse(await readFile(resolve(import.meta.dirname, '../package.json'), 'utf8'));
-  assert.equal(manifest.private, undefined);
+  assert.equal(manifest.private, true);
+  assert.equal(manifest.scripts.prepublishOnly, 'node src/publish-guard.mjs');
   assert.equal(manifest.dependencies['react-aria-components'], '1.20.0');
   assert.equal(manifest.dependencies['@core-ui/web'], undefined);
+});
+
+test('R1.0 is packable but direct publication fails closed', () => {
+  const packageRoot = resolve(import.meta.dirname, '..');
+  const result = spawnSync(process.execPath, ['src/publish-guard.mjs'], {
+    cwd: packageRoot,
+    encoding: 'utf8',
+  });
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /CORE_REACT_R10_PUBLISH_FORBIDDEN/u);
 });
 
 test('R1.0 public surface does not export Button or upstream types', async () => {
@@ -30,13 +46,20 @@ test('R1.0 public surface does not export Button or upstream types', async () =>
   assert.equal(release.catalog.status, 'not-applicable');
   assert.equal(release.evidence.status, 'pending');
   assert.equal(release.publication.status, 'disabled');
+  assert.equal(release.packagePrivate, true);
   assert.deepEqual(release.advisories, []);
   assert.deepEqual(release.exceptions, []);
   assert.match(await readFile(resolve(packageRoot, 'NOTICE'), 'utf8'), /Tale UI/);
 });
 
 test('R1.0 upstream inventory is complete, typed, and classified', async () => {
-  const snapshot = JSON.parse(await readFile(resolve(import.meta.dirname, '../../../catalog/react-r1-0/upstream-snapshot.json'), 'utf8'));
+  const repositoryRoot = resolve(import.meta.dirname, '../../..');
+  const snapshot = JSON.parse(await readFile(resolve(repositoryRoot, 'catalog/react-r1-0/upstream-snapshot.json'), 'utf8'));
+  const upstreamExportsBytes = await readFile(resolve(repositoryRoot, 'catalog/react-r1-0/upstream-exports.json'));
+  const upstreamExports = JSON.parse(upstreamExportsBytes);
+  const crosswalk = JSON.parse(await readFile(resolve(repositoryRoot, 'catalog/react-r1-0/donor-crosswalk.json'), 'utf8'));
+  const license = JSON.parse(await readFile(resolve(repositoryRoot, 'catalog/react-r1-0/license.json'), 'utf8'));
+  assertReactR10SourceContracts({ snapshot, upstreamExports, upstreamExportsBytes, crosswalk, license });
   assert.equal(snapshot.items.length, 613);
   assert.deepEqual(snapshot.inputs, [
     { path: 'packages/react-aria-components/package.json', blob: '34aff3e05c02dfed56cc4e416d893331d48d3cc3', bytes: 2770 },
@@ -46,6 +69,7 @@ test('R1.0 upstream inventory is complete, typed, and classified', async () => {
   assert.equal(tupleDigest, snapshot.exportTupleSha256);
   const keys = snapshot.items.map((item) => `${item.value ? 'value' : 'type'}:${item.name}`);
   assert.equal(new Set(keys).size, keys.length);
+  assert.deepEqual(snapshot.items.filter(({ name }) => ['UNSTABLE_ToastQueue', 'ListDataOptions', 'TreeDataOptions'].includes(name)).map(({ name }) => name), ['UNSTABLE_ToastQueue', 'ListDataOptions', 'TreeDataOptions']);
   for (const [name, disposition, tranche] of [['Button', 'candidate', 'R1.1'], ['Autocomplete', 'candidate', 'R1.2'], ['TextField', 'candidate', 'R1.2'], ['Select', 'candidate', 'R1.3'], ['Dialog', 'candidate', 'R1.4'], ['UNSTABLE_Toast', 'candidate', 'R1.4']]) {
     const item = snapshot.items.find((entry) => entry.name === name && entry.value);
     assert.deepEqual({ disposition: item?.disposition, tranche: item?.tranche }, { disposition, tranche });
@@ -55,6 +79,58 @@ test('R1.0 upstream inventory is complete, typed, and classified', async () => {
     assert.equal(item?.disposition, 'not-a-component');
     assert.ok(item?.reason);
   }
+});
+
+test('R1.0 upstream and catalog contracts reject complete-surface and shape drift', async () => {
+  const repositoryRoot = resolve(import.meta.dirname, '../../..');
+  const snapshot = JSON.parse(await readFile(resolve(repositoryRoot, 'catalog/react-r1-0/upstream-snapshot.json'), 'utf8'));
+  const upstreamExportsBytes = await readFile(resolve(repositoryRoot, 'catalog/react-r1-0/upstream-exports.json'));
+  const upstreamExports = JSON.parse(upstreamExportsBytes);
+  const crosswalk = JSON.parse(await readFile(resolve(repositoryRoot, 'catalog/react-r1-0/donor-crosswalk.json'), 'utf8'));
+  const license = JSON.parse(await readFile(resolve(repositoryRoot, 'catalog/react-r1-0/license.json'), 'utf8'));
+  const assertSource = (overrides = {}) => assertReactR10SourceContracts({ snapshot, upstreamExports, upstreamExportsBytes, crosswalk, license, ...overrides });
+  const changedItem = structuredClone(snapshot);
+  changedItem.items[412].source = '../src/Drift';
+  assert.throws(() => assertSource({ snapshot: changedItem }), /CORE_REACT_UPSTREAM_EXPORT_DERIVATION_DRIFT/u);
+  const changedClassification = structuredClone(snapshot);
+  const candidateIndex = changedClassification.items.findIndex(({ disposition, tranche }) => disposition === 'candidate' && tranche === 'R1.3');
+  changedClassification.items[candidateIndex].tranche = 'R1.4';
+  assert.throws(() => assertSource({ snapshot: changedClassification }), /CORE_REACT_UPSTREAM_CLASSIFICATION_DRIFT/u);
+  const changedBlob = structuredClone(snapshot);
+  changedBlob.inputs[1].blob = '0'.repeat(40);
+  assert.throws(() => assertSource({ snapshot: changedBlob }), /CORE_REACT_UPSTREAM_IDENTITY_DRIFT/u);
+  const changedRevision = structuredClone(upstreamExports);
+  changedRevision.commit = '0'.repeat(40);
+  assert.throws(() => assertSource({ upstreamExports: changedRevision }), /CORE_REACT_UPSTREAM_IDENTITY_DRIFT/u);
+  const unknownCrosswalk = structuredClone(crosswalk);
+  unknownCrosswalk.unknown = true;
+  assert.throws(() => assertSource({ crosswalk: unknownCrosswalk }), /CORE_SCHEMA_INVALID/u);
+  const missingLicense = structuredClone(license);
+  delete missingLicense.notice;
+  assert.throws(() => assertSource({ license: missingLicense }), /CORE_SCHEMA_INVALID/u);
+});
+
+test('R1.0 generated contracts reject missing, unknown, and publication drift', async () => {
+  const packageRoot = resolve(import.meta.dirname, '..');
+  const manifest = JSON.parse(await readFile(resolve(packageRoot, 'package.json'), 'utf8'));
+  const descriptor = JSON.parse(await readFile(resolve(packageRoot, 'generated/descriptor.json'), 'utf8'));
+  const release = JSON.parse(await readFile(resolve(packageRoot, 'generated/release.json'), 'utf8'));
+  const donorComparison = JSON.parse(await readFile(resolve(packageRoot, 'generated/button-donor-comparison.json'), 'utf8'));
+  const crosswalk = JSON.parse(await readFile(resolve(packageRoot, '../../catalog/react-r1-0/donor-crosswalk.json'), 'utf8'));
+  const assertGenerated = (overrides = {}) => assertReactR10GeneratedContracts({ descriptor, release, donorComparison, manifest, crosswalk, ...overrides });
+  assertGenerated();
+  const unknownDescriptor = structuredClone(descriptor);
+  unknownDescriptor.unknown = true;
+  assert.throws(() => assertGenerated({ descriptor: unknownDescriptor }), /CORE_SCHEMA_INVALID/u);
+  const missingRelease = structuredClone(release);
+  delete missingRelease.publication;
+  assert.throws(() => assertGenerated({ release: missingRelease }), /CORE_SCHEMA_INVALID/u);
+  const publishableManifest = structuredClone(manifest);
+  publishableManifest.private = false;
+  assert.throws(() => assertGenerated({ manifest: publishableManifest }), /CORE_REACT_R10_PUBLICATION_GUARD_MISSING/u);
+  const changedComparison = structuredClone(donorComparison);
+  changedComparison.donor.commit = '0'.repeat(40);
+  assert.throws(() => assertGenerated({ donorComparison: changedComparison }), /CORE_REACT_DONOR_COMPARISON_DERIVATION_DRIFT/u);
 });
 
 test('R1.0 donor inputs are exact, fully crosswalked, licensed, and dependency-free', async () => {

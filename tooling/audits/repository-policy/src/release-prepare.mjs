@@ -6,19 +6,26 @@ import { discoverWorkspacePackages } from './workspace-packages.mjs';
 
 const repositoryRoot = resolve(import.meta.dirname, '../../../..');
 const packages = await discoverWorkspacePackages(repositoryRoot);
-const publishable = packages.filter(({ manifest }) => manifest.private !== true);
-const allowedCandidate = publishable.filter(({ name, manifest }) => (
+const reactCandidate = packages.filter(({ name, manifest }) => (
   name === '@core-ui/react' && manifest.version === '0.1.0-alpha.0'
 ));
+const publishable = packages.filter(({ manifest }) => manifest.private !== true);
 
-if (publishable.length !== allowedCandidate.length) {
+if (publishable.length !== 0) {
   console.error(
-    `FOUNDATION_RELEASE_FORBIDDEN: packages cannot become publishable before G2.1: ${publishable.map(({ name }) => name).join(', ')}`,
+    `FOUNDATION_RELEASE_FORBIDDEN: packages cannot become publishable before an exact external publish authorization: ${publishable.map(({ name }) => name).join(', ')}`,
   );
   process.exit(1);
 }
 
-if (allowedCandidate.length === 1) {
+if (reactCandidate.length !== 1
+  || reactCandidate[0].manifest.private !== true
+  || reactCandidate[0].manifest.scripts?.prepublishOnly !== 'node src/publish-guard.mjs') {
+  console.error('R1.0_PUBLICATION_GUARD_INVALID: the packable React baseline must remain private with its fail-closed prepublish guard');
+  process.exit(1);
+}
+
+if (reactCandidate.length === 1) {
   const temp = mkdtempSync(join(tmpdir(), 'core-ui-r1-release-'));
   try {
     const packed = spawnSync('pnpm', ['pack', '--pack-destination', temp], {
@@ -37,6 +44,7 @@ if (allowedCandidate.length === 1) {
     }
     const packedManifest = JSON.parse(spawnSync('tar', ['-xOzf', archive, 'package/package.json'], { encoding: 'utf8' }).stdout);
     if (packedManifest.version !== '0.1.0-alpha.0'
+      || packedManifest.private !== true
       || JSON.stringify(packedManifest.dependencies) !== JSON.stringify({ 'react-aria-components': '1.20.0' })
       || packedManifest.peerDependencies?.react !== '>=19.2.0 <20'
       || packedManifest.peerDependencies?.['react-dom'] !== '>=19.2.0 <20'
@@ -69,7 +77,7 @@ if (allowedCandidate.length === 1) {
     `], { cwd: consumer, encoding: 'utf8', stdio: 'pipe' });
     if (consumerCheck.status !== 0) throw new Error(`R1.0_PACK_CONSUMER_IMPORT_FAILED: ${consumerCheck.stderr}`);
   } finally { rmSync(temp, { recursive: true, force: true }); }
-  console.log('R1.0 release boundary passed; @core-ui/react remains an unpublished candidate.');
+  console.log('R1.0 release boundary passed; @core-ui/react remains technically private and unpublished.');
   process.exit(0);
 }
 

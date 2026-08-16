@@ -16,7 +16,7 @@
       "bytes": 20184
     }
   ],
-  "exportTupleSha256": "2ce677c5021bbce3c0cc0bdd4aacada6d94351df0799bbfadaee96193afb0a5c",
+  "exportTupleSha256": "8f4e9dd637585ed98d529624f46960cee80041cd41bfef206e7745be351503d3",
   "dispositionGrammar": [
     "candidate",
     "delivered",
@@ -2360,7 +2360,7 @@
       "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
     },
     {
-      "name": "ToastQueue",
+      "name": "UNSTABLE_ToastQueue",
       "value": true,
       "source": "react-stately/useToastState",
       "kind": "supporting-primitive",
@@ -5258,7 +5258,7 @@
       "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
     },
     {
-      "name": "ListOptions",
+      "name": "ListDataOptions",
       "value": false,
       "source": "react-stately/useListData",
       "kind": "hook-utility-type",
@@ -5276,7 +5276,7 @@
       "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
     },
     {
-      "name": "TreeOptions",
+      "name": "TreeDataOptions",
       "value": false,
       "source": "react-stately/useTreeData",
       "kind": "hook-utility-type",
@@ -5410,5 +5410,11 @@
       "tranche": "R1.5",
       "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
     }
-  ]
+  ],
+  "normalizedExports": {
+    "path": "catalog/react-r1-0/upstream-exports.json",
+    "sha256": "sha256:ee7eee0561052410d25d655d55c988b29f4c5b8d3523537c876a12ab996d563c",
+    "count": 613
+  },
+  "classificationSha256": "sha256:1210b8d3cee9999407c4632672640b0905c5d9fa8d93904a9e80afd70f9166dc"
 }

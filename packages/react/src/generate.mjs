@@ -3,6 +3,10 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { canonicalJson } from '@core-ui/schema';
 import { compileWebTheme } from '@core-ui/tokens';
+import {
+  assertReactR10GeneratedContracts,
+  assertReactR10SourceContracts,
+} from './r1-contracts.mjs';
 
 const packageRoot = resolve(import.meta.dirname, '..');
 const repositoryRoot = resolve(packageRoot, '../..');
@@ -14,7 +18,12 @@ const tokenSha256 = createHash('sha256').update(tokenRaw).digest('hex');
 const expectedTokenSha256 = 'cd4aca7d436ce080bed36f1358924bed0c130dacb94455dfb5eb9cf96eabdb8f';
 if (tokenSha256 !== expectedTokenSha256) throw new Error('CORE_REACT_TOKEN_SOURCE_DRIFT');
 const tokenSource = JSON.parse(tokenRaw);
+const snapshot = JSON.parse(await readFile(resolve(repositoryRoot, 'catalog/react-r1-0/upstream-snapshot.json'), 'utf8'));
+const upstreamExportsRaw = await readFile(resolve(repositoryRoot, 'catalog/react-r1-0/upstream-exports.json'));
+const upstreamExports = JSON.parse(upstreamExportsRaw);
 const crosswalk = JSON.parse(await readFile(resolve(repositoryRoot, 'catalog/react-r1-0/donor-crosswalk.json'), 'utf8'));
+const license = JSON.parse(await readFile(resolve(repositoryRoot, 'catalog/react-r1-0/license.json'), 'utf8'));
+assertReactR10SourceContracts({ snapshot, upstreamExports, upstreamExportsBytes: upstreamExportsRaw, crosswalk, license });
 
 const consumedRules = [
   '--color-60', '--color-60-fg', '--radius-m', '--space-xs', '2.25rem minimum height',
@@ -71,29 +80,34 @@ const indexBody = "export { reactCompatibility } from './compatibility.mjs';\n";
 const typesBody = 'export const reactCompatibility: Readonly<Record<string, unknown>>;\n';
 const testingBody = "export const reactPlatformSafetyFixture = Object.freeze({ componentSupportClaim: 'none', fixture: 'r1.0-button-comparison' });\n";
 const readmeBody = `# @core-ui/react\n\nExperimental, unpublished R1.0 baseline for the standalone Core UI React renderer.\n\n- React Aria Components 1.20.0 is the internal starting point.\n- Core UI owns the public API, tokens, styling, accessibility, lifecycle, and support claims.\n- No component is exported or supported by this baseline.\n- Tale UI is a pinned styling donor, never a dependency.\n\nThe generated stylesheet and private Button fixture exist only to prove the baseline before R1.1. They are not a Button support claim.\n`;
-const descriptor = `${canonicalJson({ schema: 'core-ui-renderer-descriptor-v1', generatedFrom: 'packages/react/src/generate.mjs', package: manifest.name, version: manifest.version, bindings: [], exports: [], support: 'none' })}\n`;
-const release = `${canonicalJson({
+const descriptorRecord = { schema: 'core-ui-renderer-descriptor-v1', generatedFrom: 'packages/react/src/generate.mjs', package: manifest.name, version: manifest.version, bindings: [], exports: [], support: 'none' };
+const releaseRecord = {
   schema: 'core-ui-react-release-candidate-v1', generatedFrom: 'packages/react/src/generate.mjs',
   package: manifest.name, version: manifest.version, lifecycle: 'experimental', componentExports: [], bindings: [], runtimeProfiles: [],
+  packagePrivate: manifest.private,
   catalog: { status: 'not-applicable', reason: 'R1.0 admits no component or catalog record' },
   tokenSource: { path: 'catalog/tokens/default-theme.json', sha256: expectedTokenSha256 },
   evidence: { status: 'pending', ids: ['E-R1.0-01', 'E-R1.0-02', 'E-R1.0-03', 'E-R1.0-04', 'E-R1.0-05'] },
   advisories: [], exceptions: [],
   publication: { status: 'disabled', requires: ['digest-specific human evidence acceptance', 'explicit external publish authorization'] },
   rollback: { status: 'candidate-branch-only-before-merge' },
-})}\n`;
+};
 for (const rule of crosswalk.button.rules) {
   if (rule.core.includes('.') && !cssBody.includes(`--core-${rule.core.replaceAll('.', '-')}`)) throw new Error(`CORE_REACT_DONOR_RESULT_MISSING: ${rule.input}`);
 }
 if (!cssBody.includes('font: inherit') || !cssBody.includes('box-shadow:') || !cssBody.includes('[data-disabled] { opacity:')) {
   throw new Error('CORE_REACT_DONOR_NON_TOKEN_RESULT_MISSING');
 }
-const donorComparison = `${canonicalJson({
+const donorComparisonRecord = {
   schema: 'core-ui-react-button-donor-comparison-v1', generatedFrom: 'packages/react/src/generate.mjs',
   donor: { commit: crosswalk.donor.commit, tree: crosswalk.donor.tree, buttonBlobs: crosswalk.buttonBlobs },
   disposition: crosswalk.button.disposition, consumedRules: crosswalk.button.rules,
   result: { cssSha256: `sha256:${sha256(cssBody)}`, selector: '.core-r1-button', status: 'adapted-for-private-r1.0-fixture' },
-})}\n`;
+};
+assertReactR10GeneratedContracts({ descriptor: descriptorRecord, release: releaseRecord, donorComparison: donorComparisonRecord, manifest, crosswalk });
+const descriptor = `${canonicalJson(descriptorRecord)}\n`;
+const release = `${canonicalJson(releaseRecord)}\n`;
+const donorComparison = `${canonicalJson(donorComparisonRecord)}\n`;
 function provenance(path, bytes) {
   const body = `${canonicalJson({ path: `packages/react/generated/${path}`, sha256: `sha256:${sha256(bytes)}` })}\n`;
   return generatedText('packages/react/src/generate.mjs', body);

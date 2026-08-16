@@ -1,0 +1,189 @@
+{
+  "$id": "core-ui:react-r1-contracts:1.0.0",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$defs": {
+    "digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+    "gitObject": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+    "input": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["blob", "bytes", "path"],
+      "properties": {
+        "blob": { "$ref": "#/$defs/gitObject" },
+        "bytes": { "type": "integer", "minimum": 1 },
+        "path": { "type": "string", "minLength": 1 }
+      }
+    },
+    "upstreamExport": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "source", "value"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "source": { "type": "string", "minLength": 1 },
+        "value": { "type": "boolean" }
+      }
+    },
+    "candidateItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["disposition", "kind", "name", "source", "tranche", "value"],
+      "properties": {
+        "disposition": { "const": "candidate" },
+        "kind": { "enum": ["component", "compositional-pattern"] },
+        "name": { "type": "string", "minLength": 1 },
+        "source": { "type": "string", "minLength": 1 },
+        "tranche": { "enum": ["R1.1", "R1.2", "R1.3", "R1.4", "R1.5"] },
+        "value": { "type": "boolean" }
+      }
+    },
+    "nonComponentItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["disposition", "kind", "name", "reason", "source", "tranche", "value"],
+      "properties": {
+        "disposition": { "const": "not-a-component" },
+        "kind": { "enum": ["supporting-primitive", "hook-utility-type"] },
+        "name": { "type": "string", "minLength": 1 },
+        "reason": { "type": "string", "minLength": 1 },
+        "source": { "type": "string", "minLength": 1 },
+        "tranche": { "const": "R1.5" },
+        "value": { "type": "boolean" }
+      }
+    },
+    "upstreamExports": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["commit", "inputs", "items", "package", "schema", "tree", "version"],
+      "properties": {
+        "commit": { "$ref": "#/$defs/gitObject" },
+        "inputs": { "type": "array", "minItems": 2, "maxItems": 2, "items": { "$ref": "#/$defs/input" } },
+        "items": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "$ref": "#/$defs/upstreamExport" } },
+        "package": { "const": "react-aria-components" },
+        "schema": { "const": "core-ui-react-upstream-exports-v1" },
+        "tree": { "$ref": "#/$defs/gitObject" },
+        "version": { "const": "1.20.0" }
+      }
+    },
+    "upstreamSnapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["classificationSha256", "commit", "dispositionGrammar", "exportTupleSha256", "inputs", "items", "normalizedExports", "package", "schema", "tree", "version"],
+      "properties": {
+        "classificationSha256": { "$ref": "#/$defs/digest" },
+        "commit": { "$ref": "#/$defs/gitObject" },
+        "dispositionGrammar": { "type": "array", "minItems": 5, "maxItems": 5, "uniqueItems": true, "items": { "enum": ["candidate", "delivered", "defer", "exclude", "not-a-component"] } },
+        "exportTupleSha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "inputs": { "type": "array", "minItems": 2, "maxItems": 2, "items": { "$ref": "#/$defs/input" } },
+        "items": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "oneOf": [{ "$ref": "#/$defs/candidateItem" }, { "$ref": "#/$defs/nonComponentItem" }] } },
+        "normalizedExports": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["count", "path", "sha256"],
+          "properties": {
+            "count": { "type": "integer", "minimum": 1 },
+            "path": { "const": "catalog/react-r1-0/upstream-exports.json" },
+            "sha256": { "$ref": "#/$defs/digest" }
+          }
+        },
+        "package": { "const": "react-aria-components" },
+        "schema": { "const": "core-ui-react-upstream-snapshot-v1" },
+        "tree": { "$ref": "#/$defs/gitObject" },
+        "version": { "const": "1.20.0" }
+      }
+    },
+    "donorCrosswalk": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["button", "buttonBlobs", "dispositions", "donor", "schema", "sharedPrimitives", "spinner", "subtrees"],
+      "properties": {
+        "schema": { "const": "core-ui-react-donor-crosswalk-v1" },
+        "donor": {
+          "type": "object", "additionalProperties": false, "required": ["commit", "name", "tree"],
+          "properties": { "commit": { "$ref": "#/$defs/gitObject" }, "name": { "const": "Tale UI" }, "tree": { "$ref": "#/$defs/gitObject" } }
+        },
+        "subtrees": {
+          "type": "object", "additionalProperties": false, "required": ["css", "react", "styles", "themes"],
+          "properties": { "css": { "$ref": "#/$defs/gitObject" }, "react": { "$ref": "#/$defs/gitObject" }, "styles": { "$ref": "#/$defs/gitObject" }, "themes": { "$ref": "#/$defs/gitObject" } }
+        },
+        "buttonBlobs": {
+          "type": "object", "additionalProperties": false, "required": ["css", "dataAttributes", "index", "styled", "test"],
+          "properties": { "css": { "$ref": "#/$defs/gitObject" }, "dataAttributes": { "$ref": "#/$defs/gitObject" }, "index": { "$ref": "#/$defs/gitObject" }, "styled": { "$ref": "#/$defs/gitObject" }, "test": { "$ref": "#/$defs/gitObject" } }
+        },
+        "spinner": {
+          "type": "object", "additionalProperties": false, "required": ["css", "tree"],
+          "properties": { "css": { "$ref": "#/$defs/gitObject" }, "tree": { "$ref": "#/$defs/gitObject" } }
+        },
+        "sharedPrimitives": {
+          "type": "array", "minItems": 1, "uniqueItems": true,
+          "items": {
+            "type": "object", "additionalProperties": false, "required": ["blob", "path", "role"],
+            "properties": { "blob": { "$ref": "#/$defs/gitObject" }, "path": { "type": "string", "minLength": 1 }, "role": { "type": "string", "minLength": 1 } }
+          }
+        },
+        "dispositions": { "type": "array", "minItems": 5, "maxItems": 5, "uniqueItems": true, "items": { "enum": ["adopt", "adapt", "defer", "reject", "no-applicable-donor"] } },
+        "button": {
+          "type": "object", "additionalProperties": false, "required": ["consumedRules", "disposition", "rules"],
+          "properties": {
+            "disposition": { "const": "adapt" },
+            "consumedRules": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+            "rules": {
+              "type": "array", "minItems": 1, "uniqueItems": true,
+              "items": {
+                "type": "object", "additionalProperties": false, "required": ["core", "disposition", "input"],
+                "properties": { "core": { "type": "string", "minLength": 1 }, "disposition": { "enum": ["adapt", "reasoned-non-token-adaptation"] }, "input": { "type": "string", "minLength": 1 } }
+              }
+            }
+          }
+        }
+      }
+    },
+    "donorLicense": {
+      "type": "object", "additionalProperties": false,
+      "required": ["copiedPortion", "dependency", "donor", "license", "licenseBytes", "licenseSha256", "notice", "schema"],
+      "properties": {
+        "copiedPortion": { "type": "string", "minLength": 1 }, "dependency": { "const": false }, "donor": { "const": "Tale UI" }, "license": { "const": "MIT" },
+        "licenseBytes": { "type": "integer", "minimum": 1 }, "licenseSha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }, "notice": { "type": "string", "minLength": 1 }, "schema": { "const": "core-ui-react-donor-license-v1" }
+      }
+    },
+    "descriptor": {
+      "type": "object", "additionalProperties": false, "required": ["bindings", "exports", "generatedFrom", "package", "schema", "support", "version"],
+      "properties": { "bindings": { "type": "array", "maxItems": 0 }, "exports": { "type": "array", "maxItems": 0 }, "generatedFrom": { "const": "packages/react/src/generate.mjs" }, "package": { "const": "@core-ui/react" }, "schema": { "const": "core-ui-renderer-descriptor-v1" }, "support": { "const": "none" }, "version": { "const": "0.1.0-alpha.0" } }
+    },
+    "release": {
+      "type": "object", "additionalProperties": false,
+      "required": ["advisories", "bindings", "catalog", "componentExports", "evidence", "exceptions", "generatedFrom", "lifecycle", "package", "packagePrivate", "publication", "rollback", "runtimeProfiles", "schema", "tokenSource", "version"],
+      "properties": {
+        "advisories": { "type": "array", "maxItems": 0 }, "bindings": { "type": "array", "maxItems": 0 }, "componentExports": { "type": "array", "maxItems": 0 }, "exceptions": { "type": "array", "maxItems": 0 }, "runtimeProfiles": { "type": "array", "maxItems": 0 },
+        "catalog": { "type": "object", "additionalProperties": false, "required": ["reason", "status"], "properties": { "reason": { "type": "string", "minLength": 1 }, "status": { "const": "not-applicable" } } },
+        "evidence": { "type": "object", "additionalProperties": false, "required": ["ids", "status"], "properties": { "ids": { "type": "array", "minItems": 5, "maxItems": 5, "uniqueItems": true, "items": { "pattern": "^E-R1\\.0-0[1-5]$", "type": "string" } }, "status": { "const": "pending" } } },
+        "generatedFrom": { "const": "packages/react/src/generate.mjs" }, "lifecycle": { "const": "experimental" }, "package": { "const": "@core-ui/react" }, "packagePrivate": { "const": true },
+        "publication": { "type": "object", "additionalProperties": false, "required": ["requires", "status"], "properties": { "requires": { "type": "array", "minItems": 2, "maxItems": 2, "uniqueItems": true, "items": { "type": "string", "minLength": 1 } }, "status": { "const": "disabled" } } },
+        "rollback": { "type": "object", "additionalProperties": false, "required": ["status"], "properties": { "status": { "const": "candidate-branch-only-before-merge" } } },
+        "schema": { "const": "core-ui-react-release-candidate-v1" },
+        "tokenSource": { "type": "object", "additionalProperties": false, "required": ["path", "sha256"], "properties": { "path": { "const": "catalog/tokens/default-theme.json" }, "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" } } },
+        "version": { "const": "0.1.0-alpha.0" }
+      }
+    },
+    "donorComparison": {
+      "type": "object", "additionalProperties": false, "required": ["consumedRules", "disposition", "donor", "generatedFrom", "result", "schema"],
+      "properties": {
+        "consumedRules": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "object", "additionalProperties": false, "required": ["core", "disposition", "input"], "properties": { "core": { "type": "string", "minLength": 1 }, "disposition": { "enum": ["adapt", "reasoned-non-token-adaptation"] }, "input": { "type": "string", "minLength": 1 } } } },
+        "disposition": { "const": "adapt" },
+        "donor": { "type": "object", "additionalProperties": false, "required": ["buttonBlobs", "commit", "tree"], "properties": { "buttonBlobs": { "$ref": "#/$defs/donorCrosswalk/properties/buttonBlobs" }, "commit": { "$ref": "#/$defs/gitObject" }, "tree": { "$ref": "#/$defs/gitObject" } } },
+        "generatedFrom": { "const": "packages/react/src/generate.mjs" },
+        "result": { "type": "object", "additionalProperties": false, "required": ["cssSha256", "selector", "status"], "properties": { "cssSha256": { "$ref": "#/$defs/digest" }, "selector": { "const": ".core-r1-button" }, "status": { "const": "adapted-for-private-r1.0-fixture" } } },
+        "schema": { "const": "core-ui-react-button-donor-comparison-v1" }
+      }
+    }
+  },
+  "oneOf": [
+    { "$ref": "#/$defs/upstreamExports" },
+    { "$ref": "#/$defs/upstreamSnapshot" },
+    { "$ref": "#/$defs/donorCrosswalk" },
+    { "$ref": "#/$defs/donorLicense" },
+    { "$ref": "#/$defs/descriptor" },
+    { "$ref": "#/$defs/release" },
+    { "$ref": "#/$defs/donorComparison" }
+  ]
+}
