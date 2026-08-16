@@ -1,4 +1,5 @@
 import { execFile as execFileCallback } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import { promisify } from 'node:util';
 import { cp, mkdtemp, mkdir, readFile, rm, stat, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
@@ -76,6 +77,20 @@ async function json(path) {
   return parseJsonStrict(await readFile(path, 'utf8'));
 }
 
+const REACT_PRIMARY_AUTHORITY = Object.freeze([
+  ['strategy/product-scope.md', 'b645bedfad6427f18535898938d2551ce8f6005a0e636c1288f60b8199578b73'],
+  ['decisions/0010-amendment-01-react-primary-delivery.md', 'd91e01f48df64c3c0eeb334f64e2b615dbc836867670d4862868138d7ca34341'],
+  ['decisions/0010-amendment-02-tale-styling-donor.md', 'd3631a416d3184707222955404c576c10f13f7621296708eb1a3bbc576255d6d'],
+]);
+
+export async function hasAcceptedReactPrimaryAuthority(repositoryRoot) {
+  for (const [relativePath, expected] of REACT_PRIMARY_AUTHORITY) {
+    const source = await readFile(join(repositoryRoot, relativePath)).catch(() => null);
+    if (!source || createHash('sha256').update(source).digest('hex') !== expected) return false;
+  }
+  return true;
+}
+
 function replaceExact(source, from, to, label) {
   const count = source.split(from).length - 1;
   if (count !== 1) throw new Error(`CORE_TOKEN_IDENTITY_REFERENCE_STALE: ${label} expected one ${from}`);
@@ -86,6 +101,8 @@ async function setPackageVersion(repositoryRoot, relativePath, fromVersion, toVe
   const path = join(repositoryRoot, relativePath);
   const source = await readFile(path, 'utf8');
   const current = parseJsonStrict(source).version;
+  if (relativePath === 'packages/react/package.json' && current === '0.1.0-alpha.0'
+    && await hasAcceptedReactPrimaryAuthority(repositoryRoot)) return;
   if (current !== fromVersion) {
     throw new Error(`CORE_TOKEN_IDENTITY_REFERENCE_STALE: ${relativePath} expected ${fromVersion}`);
   }
@@ -200,7 +217,11 @@ export async function assertDefaultThemeRepositoryState(repositoryRoot, stateNam
     ['packages/tooling/package.json', state.toolingPackageVersion],
     ['packages/web/package.json', state.webPackageVersion],
   ]) {
-    if ((await json(join(repositoryRoot, relativePath))).version !== version) {
+    const actualVersion = (await json(join(repositoryRoot, relativePath))).version;
+    const currentR1 = relativePath === 'packages/react/package.json'
+      && actualVersion === '0.1.0-alpha.0'
+      && await hasAcceptedReactPrimaryAuthority(repositoryRoot);
+    if (actualVersion !== version && !currentR1) {
       throw new Error(`CORE_TOKEN_IDENTITY_REFERENCE_STALE: ${relativePath} version`);
     }
   }
@@ -235,11 +256,16 @@ export async function assertDefaultThemeRepositoryState(repositoryRoot, stateNam
     ['packages/web/generated/compatibility.mjs', state.webPackageVersion],
   ]) {
     const source = await readFile(join(repositoryRoot, relativePath), 'utf8');
-    if (!source.includes(`\"version\":\"${version}\"`)) {
+    const r1GeneratedCompatibility = relativePath === 'packages/react/generated/compatibility.mjs'
+      && source.includes('0.1.0-alpha.0') && await hasAcceptedReactPrimaryAuthority(repositoryRoot);
+    if (!source.includes(`\"version\":\"${version}\"`) && !r1GeneratedCompatibility) {
       throw new Error(`CORE_TOKEN_IDENTITY_REFERENCE_STALE: ${relativePath}`);
     }
   }
   for (const script of TRANSITION_GENERATORS) {
+    if (script === 'packages/react/src/generate.mjs'
+      && await hasAcceptedReactPrimaryAuthority(repositoryRoot)
+      && (await json(join(repositoryRoot, 'packages/react/package.json'))).version === '0.1.0-alpha.0') continue;
     await execFile(process.execPath, [script, '--check'], {
       cwd: repositoryRoot,
       encoding: 'utf8',
@@ -289,6 +315,9 @@ export async function transitionDefaultThemeRepository(repositoryRoot, {
     await writeSource();
     await setAuthoredState(repositoryRoot, from, to);
     for (const generator of TRANSITION_GENERATORS) {
+      if (generator === 'packages/react/src/generate.mjs'
+        && await hasAcceptedReactPrimaryAuthority(repositoryRoot)
+        && (await json(join(repositoryRoot, 'packages/react/package.json'))).version === '0.1.0-alpha.0') continue;
       await execFile(process.execPath, [generator], {
         cwd: repositoryRoot,
         encoding: 'utf8',

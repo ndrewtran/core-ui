@@ -41,6 +41,18 @@
       "provenance": "packages/catalog/generated/catalog-package.json.provenance"
     },
     {
+      "path": "packages/react/generated/descriptor.json",
+      "provenance": "packages/react/generated/descriptor.json.provenance"
+    },
+    {
+      "path": "packages/react/generated/button-donor-comparison.json",
+      "provenance": "packages/react/generated/button-donor-comparison.json.provenance"
+    },
+    {
+      "path": "packages/react/generated/release.json",
+      "provenance": "packages/react/generated/release.json.provenance"
+    },
+    {
       "path": "packages/tokens/generated/tale-token-occurrences.json",
       "provenance": "packages/tokens/generated/tale-token-occurrences.json.provenance"
     }

@@ -1,0 +1,36 @@
+{
+  "schema": "core-ui-react-donor-crosswalk-v1",
+  "donor": { "name": "Tale UI", "commit": "94bf62a26c02605c8928dfeb24f0ddc4be1c92fd", "tree": "e36c96f683772eedf4652d6adbe7dbcbd1d41f94" },
+  "subtrees": { "styles": "aea4eadffe226656ef0ab012409ed39070975a76", "react": "d93f7c0a555066d8abbaff75cb8bd216938bcb2f", "css": "aa2a2d95214918794e9f463e063ceee0df3b4b1e", "themes": "3a8741a434a68b3aa043c674e91e04ca43f74d79" },
+  "buttonBlobs": { "styled": "bb9980c1d22dcb26d5d69c93fdf914e6da0634d0", "test": "0de0d4ad667c1b12501538edf5e1124e4f6c539f", "dataAttributes": "7be8d37ddefe3a79c7bbeb3a7979f916e8793768", "index": "8dd427154540196d4c8e1130d036a9108ea8e422", "css": "32227dc8969351bb11499d53e7773425b3fe7e68" },
+  "spinner": { "tree": "de19348241e37cad6d91ad1c0265ab15ce4ce344", "css": "237f7ac6c037875e257fa50869ac3bf87511d951" },
+  "sharedPrimitives": [
+    { "path": "packages/styles/src/_primitives.css", "blob": "b54d4ab7296f992731cfd844b4edac28d5254ee8", "role": "layout and control primitives" },
+    { "path": "packages/css/src/foundations/_base-elements.css", "blob": "dce986e26de3ccf2634284a1b0b8c63bd0ceaf1a", "role": "base element inheritance" },
+    { "path": "packages/css/src/foundations/_typography.css", "blob": "491efae09e530c52fb4dbd045b87121bbec96842", "role": "typography inheritance" },
+    { "path": "packages/react/src/tokens/_effects.ts", "blob": "8245cfc9bdf04f730f8d040e0a0a4dc922a82288", "role": "effect semantics" },
+    { "path": "packages/react/src/tokens/_foreground.ts", "blob": "9cea5142b88d0f54c8e7e69394718fe22d3aef54", "role": "foreground semantics" },
+    { "path": "packages/react/src/tokens/_motion.ts", "blob": "fb30e18c5e7c6042d40ddbc709626865256306d7", "role": "motion semantics" },
+    { "path": "packages/react/src/tokens/_spacing.ts", "blob": "511053c6c91946834fc262d742ca5d62249af2a4", "role": "spacing semantics" },
+    { "path": "packages/react/src/tokens/_typography.ts", "blob": "475ab9104e1f4d71dc92350db7b4b0c29641502e", "role": "typography semantics" },
+    { "path": "packages/themes/src/_color-modes.css", "blob": "74f47d63b4e06b2b3d5cdeee9906978e31775bf6", "role": "color mode adaptation" },
+    { "path": "packages/themes/src/_color-themes.css", "blob": "bd6df282cf8c2ac20d74b3b98d7e44ec197708a3", "role": "theme adaptation" },
+    { "path": "packages/themes/src/_neutral-themes.css", "blob": "f71c761ac4c07c9d1b6da2c224ece13416364984", "role": "neutral theme adaptation" }
+  ],
+  "dispositions": ["adopt", "adapt", "defer", "reject", "no-applicable-donor"],
+  "button": {
+    "disposition": "adapt",
+    "consumedRules": ["--color-60", "--color-60-fg", "--radius-m", "--space-xs", "2.25rem minimum height", "focus-ring color/rule", "feedback transition duration", "inherited typography", "donor shadow and opacity details"],
+    "rules": [
+      { "input": "--color-60", "core": "component.button.background", "disposition": "adapt" },
+      { "input": "--color-60-fg", "core": "component.button.foreground", "disposition": "adapt" },
+      { "input": "--radius-m", "core": "component.button.radius", "disposition": "adapt" },
+      { "input": "--space-xs", "core": "component.button.padding-inline", "disposition": "adapt" },
+      { "input": "2.25rem minimum height", "core": "component.button.min-height", "disposition": "adapt" },
+      { "input": "focus-ring color/rule", "core": "semantic.focus.ring", "disposition": "adapt" },
+      { "input": "feedback transition duration", "core": "semantic.motion.feedback", "disposition": "adapt" },
+      { "input": "inherited typography", "core": "consumer/Core inheritance", "disposition": "reasoned-non-token-adaptation" },
+      { "input": "donor shadow and opacity details", "core": "private implementation constants", "disposition": "adapt" }
+    ]
+  }
+}

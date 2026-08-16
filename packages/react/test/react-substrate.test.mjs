@@ -1,131 +1,109 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import React, { StrictMode, act, createElement, useRef } from 'react';
-import { createRoot, hydrateRoot } from 'react-dom/client';
-import { renderToString } from 'react-dom/server';
-import { JSDOM } from 'jsdom';
-import { connectRoot, webSurfaces } from '@core-ui/web';
-import { inspectRuntime, platformSafetyFixture } from '@core-ui/web/testing';
-import { reactCompatibility, useCoreRootOwnership } from '../src/index.mjs';
-import { reactPlatformSafetyFixture } from '../src/testing.mjs';
+import { createHash } from 'node:crypto';
+import { readFile, readdir } from 'node:fs/promises';
+import { resolve } from 'node:path';
+import { reactCompatibility } from '../generated/index.mjs';
+import { compileTokenGraph, compileTokenRequirementSet, validateThemeForRequirementSet } from '@core-ui/tokens';
 
-function Fixture({ setup, disabled = false }) {
-  const ref = useRef(null);
-  useCoreRootOwnership(ref, setup);
-  const surface = webSurfaces['web.react'].surface;
-  return createElement('button', {
-    ref,
-    type: 'button',
-    className: surface.rootClass.slice(1),
-    ...(disabled ? { disabled: true, [surface.states[0]]: '' } : {}),
-  }, createElement('span', { 'data-core-slot': 'label' }, 'Synthetic action'));
-}
+test('R1.0 package has an exact standalone substrate identity', async () => {
+  assert.equal(reactCompatibility.package, '@core-ui/react');
+  assert.equal(reactCompatibility.version, '0.1.0-alpha.0');
+  assert.equal(reactCompatibility.upstream.version, '1.20.0');
+  assert.equal(reactCompatibility.upstream.gitHead, '5ecb3333001313e83898cd07644227897e3bae1f');
+  const manifest = JSON.parse(await readFile(resolve(import.meta.dirname, '../package.json'), 'utf8'));
+  assert.equal(manifest.private, undefined);
+  assert.equal(manifest.dependencies['react-aria-components'], '1.20.0');
+  assert.equal(manifest.dependencies['@core-ui/web'], undefined);
+});
 
-function installDom(markup = '<!doctype html><html><body><div id="root"></div></body></html>') {
-  const dom = new JSDOM(markup, { url: 'https://core-ui.test/' });
-  const previous = Object.fromEntries(['window', 'document', 'HTMLElement', 'Node', 'Event'].map((key) => [key, globalThis[key]]));
-  Object.assign(globalThis, {
-    window: dom.window,
-    document: dom.window.document,
-    HTMLElement: dom.window.HTMLElement,
-    Node: dom.window.Node,
-    Event: dom.window.Event,
-    IS_REACT_ACT_ENVIRONMENT: true,
+test('R1.0 public surface does not export Button or upstream types', async () => {
+  const packageRoot = resolve(import.meta.dirname, '..');
+  const manifest = JSON.parse(await readFile(resolve(packageRoot, 'package.json'), 'utf8'));
+  assert.deepEqual(Object.keys(manifest.exports).sort(), ['.', './compatibility', './styles.css', './testing']);
+  const entry = await import('../generated/index.mjs');
+  assert.equal('Button' in entry, false);
+  const release = JSON.parse(await readFile(resolve(packageRoot, 'generated/release.json'), 'utf8'));
+  assert.deepEqual(release.componentExports, []);
+  assert.deepEqual(release.bindings, []);
+  assert.deepEqual(release.runtimeProfiles, []);
+  assert.equal(release.catalog.status, 'not-applicable');
+  assert.equal(release.evidence.status, 'pending');
+  assert.equal(release.publication.status, 'disabled');
+  assert.deepEqual(release.advisories, []);
+  assert.deepEqual(release.exceptions, []);
+  assert.match(await readFile(resolve(packageRoot, 'NOTICE'), 'utf8'), /Tale UI/);
+});
+
+test('R1.0 upstream inventory is complete, typed, and classified', async () => {
+  const snapshot = JSON.parse(await readFile(resolve(import.meta.dirname, '../../../catalog/react-r1-0/upstream-snapshot.json'), 'utf8'));
+  assert.equal(snapshot.items.length, 613);
+  assert.deepEqual(snapshot.inputs, [
+    { path: 'packages/react-aria-components/package.json', blob: '34aff3e05c02dfed56cc4e416d893331d48d3cc3', bytes: 2770 },
+    { path: 'packages/react-aria-components/exports/index.ts', blob: 'e72133c7b1d1d0fe2d65031f100e3f92d61add9a', bytes: 20184 },
+  ]);
+  const tupleDigest = createHash('sha256').update(JSON.stringify(snapshot.items.map(({ name, value, source }) => ({ name, source, value })))).digest('hex');
+  assert.equal(tupleDigest, snapshot.exportTupleSha256);
+  const keys = snapshot.items.map((item) => `${item.value ? 'value' : 'type'}:${item.name}`);
+  assert.equal(new Set(keys).size, keys.length);
+  for (const [name, disposition, tranche] of [['Button', 'candidate', 'R1.1'], ['Autocomplete', 'candidate', 'R1.2'], ['TextField', 'candidate', 'R1.2'], ['Select', 'candidate', 'R1.3'], ['Dialog', 'candidate', 'R1.4'], ['UNSTABLE_Toast', 'candidate', 'R1.4']]) {
+    const item = snapshot.items.find((entry) => entry.name === name && entry.value);
+    assert.deepEqual({ disposition: item?.disposition, tranche: item?.tranche }, { disposition, tranche });
+  }
+  for (const name of ['ButtonContext', 'useDrag', 'ButtonProps']) {
+    const item = snapshot.items.find((entry) => entry.name === name);
+    assert.equal(item?.disposition, 'not-a-component');
+    assert.ok(item?.reason);
+  }
+});
+
+test('R1.0 donor inputs are exact, fully crosswalked, licensed, and dependency-free', async () => {
+  const repositoryRoot = resolve(import.meta.dirname, '../../..');
+  const crosswalk = JSON.parse(await readFile(resolve(repositoryRoot, 'catalog/react-r1-0/donor-crosswalk.json'), 'utf8'));
+  assert.equal(crosswalk.donor.commit, '94bf62a26c02605c8928dfeb24f0ddc4be1c92fd');
+  assert.equal(crosswalk.donor.tree, 'e36c96f683772eedf4652d6adbe7dbcbd1d41f94');
+  assert.equal(crosswalk.button.rules.length, crosswalk.button.consumedRules.length);
+  assert.deepEqual(crosswalk.button.rules.map(({ input }) => input), crosswalk.button.consumedRules);
+  assert.equal(new Set(crosswalk.sharedPrimitives.map(({ path }) => path)).size, crosswalk.sharedPrimitives.length);
+  assert.ok(crosswalk.sharedPrimitives.every(({ blob }) => /^[0-9a-f]{40}$/u.test(blob)));
+  const notice = await readFile(resolve(repositoryRoot, 'packages/react/NOTICE'), 'utf8');
+  assert.match(notice, /Copyright \(c\) 2025 Tale UI contributors/);
+  assert.match(notice, /Portions Copyright \(c\) 2019 Material-UI SAS/);
+  const manifests = [];
+  for (const parent of ['apps', 'packages']) {
+    for (const entry of await readdir(resolve(repositoryRoot, parent), { withFileTypes: true })) {
+      if (!entry.isDirectory()) continue;
+      const path = resolve(repositoryRoot, parent, entry.name, 'package.json');
+      const raw = await readFile(path, 'utf8').catch(() => null);
+      if (raw) manifests.push(raw);
+    }
+  }
+  assert.doesNotMatch(`${manifests.join('\n')}\n${await readFile(resolve(repositoryRoot, 'pnpm-lock.yaml'), 'utf8')}`, /(?:@|\/)tale-ui|tale-ui@/iu);
+});
+
+test('R1.0 lockfile binds the accepted React Aria package integrity', async () => {
+  const lockfile = await readFile(resolve(import.meta.dirname, '../../../pnpm-lock.yaml'), 'utf8');
+  assert.match(lockfile, /react-aria-components@1\.20\.0:\n\s+resolution: \{integrity: sha512-BMbpIgoV9aELeBrB0Y120NgoigHb5OdcJwc\+4e7uSnbTbamea6lo\+gqcc4LAxzMaK3Jf\+7LI1oCDE6yANsmxIQ==\}/u);
+});
+
+test('R1.0 binds current reusable token facts and keeps historical proof provenance-only', async () => {
+  const repositoryRoot = resolve(import.meta.dirname, '../../..');
+  const source = JSON.parse(await readFile(resolve(repositoryRoot, 'catalog/tokens/default-theme.json'), 'utf8'));
+  assert.equal(source.schemaVersion, '2.1.0');
+  assert.equal(source.tokenContractVersion, '2.0.0');
+  assert.equal(Object.keys(source.tokens).length, 312);
+  assert.deepEqual(Object.values(source.tokens).reduce((counts, token) => ({ ...counts, [token.layer]: (counts[token.layer] ?? 0) + 1 }), {}), { reference: 296, semantic: 11, component: 5 });
+  assert.deepEqual(source.theme.modeAxes, {
+    colorScheme: ['light', 'dark'], contrast: ['standard', 'more'], motion: ['full', 'reduced'], density: ['comfortable', 'compact'], direction: ['ltr', 'rtl'],
   });
-  return () => {
-    for (const [key, value] of Object.entries(previous)) {
-      if (value === undefined) delete globalThis[key]; else globalThis[key] = value;
-    }
-    delete globalThis.IS_REACT_ACT_ENVIRONMENT;
-    dom.window.close();
-  };
-}
-
-test('E-G1.1-04 imports and server renders without browser globals', () => {
-  assert.equal(Object.hasOwn(globalThis, 'window'), false);
-  const markup = renderToString(createElement(Fixture, { disabled: true }));
-  assert.match(markup, /class="core-button"/);
-  assert.match(markup, /data-core-state-disabled=""/);
-  assert.match(markup, /data-core-slot="label"/);
-  assert.match(markup, /disabled=""/);
-});
-
-test('E-G1.1-04 hydration claims after commit without changing public markup', async () => {
-  const serverMarkup = renderToString(createElement(Fixture, {}));
-  const cleanupDom = installDom(`<!doctype html><html><body><div id="root">${serverMarkup}</div></body></html>`);
-  try {
-    const container = document.querySelector('#root');
-    const before = container.innerHTML;
-    let root;
-    await act(async () => { root = hydrateRoot(container, createElement(Fixture, {})); });
-    const button = container.querySelector('button');
-    assert.equal(container.innerHTML, before);
-    assert.equal(inspectRuntime(button).owner, 'react');
-    await act(async () => root.unmount());
-    assert.equal(inspectRuntime(button).owner, 'unclaimed');
-  } finally { cleanupDom(); }
-});
-
-test('E-G1.1-03 StrictMode replay and concurrent roots share effects and fully clean up', async () => {
-  const cleanupDom = installDom('<!doctype html><html><body><div id="one"></div><div id="two"></div></body></html>');
-  try {
-    const setup = (resources) => {
-      resources.addDocumentListener('keydown', () => {});
-      resources.acquireScrollLock();
-    };
-    const first = createRoot(document.querySelector('#one'));
-    const second = createRoot(document.querySelector('#two'));
-    await act(async () => {
-      first.render(createElement(StrictMode, null, createElement(Fixture, { setup })));
-      second.render(createElement(Fixture, { setup }));
-    });
-    const firstButton = document.querySelector('#one button');
-    const secondButton = document.querySelector('#two button');
-    assert.equal(inspectRuntime(firstButton).owner, 'react');
-    assert.deepEqual(inspectRuntime(secondButton), {
-      owner: 'react', physicalDocumentListeners: 1, logicalDocumentListeners: 2,
-      scrollLocks: 2, inertTargets: 0,
-    });
-    await act(async () => { first.unmount(); second.unmount(); });
-    assert.deepEqual(inspectRuntime(secondButton), {
-      owner: 'unclaimed', physicalDocumentListeners: 0, logicalDocumentListeners: 0,
-      scrollLocks: 0, inertTargets: 0,
-    });
-  } finally { cleanupDom(); }
-});
-
-test('E-G1.1-03 React cannot claim a vanilla-owned root', async () => {
-  const serverMarkup = renderToString(createElement(Fixture, {}));
-  const cleanupDom = installDom(`<!doctype html><html><body><div id="root">${serverMarkup}</div></body></html>`);
-  try {
-    const container = document.querySelector('#root');
-    const button = container.querySelector('button');
-    const vanilla = connectRoot(button, { token: {} });
-    let reactRoot;
-    let failure;
-    try {
-      await act(async () => { reactRoot = hydrateRoot(container, createElement(Fixture, {})); });
-    } catch (error) {
-      failure = error;
-    }
-    assert.match(String(failure), /CORE_WEB_ROOT_OWNED/);
-    assert.equal(inspectRuntime(button).owner, 'vanilla');
-    vanilla.destroy();
-    if (reactRoot) await act(async () => reactRoot.unmount());
-  } finally { cleanupDom(); }
-});
-
-test('E-G1.1-05 React preserves the web surface and exact web stylesheet identity', () => {
-  const html = webSurfaces['web.html'].surface;
-  const react = webSurfaces['web.react'].surface;
-  assert.deepEqual(
-    { ...html, bindingRef: null, bindingSpecRevision: null },
-    { ...react, bindingRef: null, bindingSpecRevision: null },
-  );
-  assert.equal(reactPlatformSafetyFixture.stylesheet, platformSafetyFixture.stylesheet);
-  assert.equal(reactPlatformSafetyFixture.stylesheetDigest, platformSafetyFixture.stylesheetDigest);
-  assert.equal(reactPlatformSafetyFixture.requirementSet.digest, platformSafetyFixture.profiles['web.react'].requirementSet.digest);
-  assert.equal(reactPlatformSafetyFixture.componentSupportClaim, 'none');
-  assert.equal(reactCompatibility.styleSource, '@core-ui/web/button.css');
-  assert.equal(reactCompatibility.bindings['web.react'].specRevision, react.bindingSpecRevision);
+  assert.equal(source.theme.runtimeSwitching, 'unavailable');
+  const requiredTokens = ['component.button.background', 'component.button.foreground', 'component.button.min-height', 'component.button.padding-inline', 'component.button.radius', 'semantic.focus.ring', 'semantic.motion.feedback'];
+  const recipe = { source: source.id, requirements: requiredTokens.map((token) => ({ token, requirement: 'required' })) };
+  const requirementSet = compileTokenRequirementSet({ source, recipe, bindingId: 'r1.0-button-comparison', profile: 'web.react' });
+  assert.deepEqual(requirementSet.requirements.map(({ token }) => token), [...requiredTokens].sort());
+  assert.throws(() => validateThemeForRequirementSet({ requirementSet, values: {} }), (error) => error?.code === 'CORE_TOKEN_REQUIRED_MISSING');
+  assert.throws(() => compileTokenGraph(source, { overrides: { 'semantic.focus.ring': { type: 'color', unit: 'hex', value: '#000000' } } }), (error) => error?.code === 'CORE_TOKEN_OVERRIDE_UNAUTHORIZED');
+  assert.equal(compileTokenGraph(source, { overrides: { 'semantic.motion.feedback': { type: 'duration', unit: 'ms', value: 80 } } }).tokens['semantic.motion.feedback'].value, 80);
+  const historicalIndex = await readFile(resolve(repositoryRoot, 'tests/evidence/default-theme-g1.0-v2/index.json'));
+  assert.equal(createHash('sha256').update(historicalIndex).digest('hex'), '38ff3a1e20bc3215737b9e6e4043d394cac0f2a2dbf324b6faae371b832aceba');
 });
