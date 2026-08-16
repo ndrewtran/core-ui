@@ -92,6 +92,18 @@ test('R1.0 upstream and catalog contracts reject complete-surface and shape drif
   const changedItem = structuredClone(snapshot);
   changedItem.items[412].source = '../src/Drift';
   assert.throws(() => assertSource({ snapshot: changedItem }), /CORE_REACT_UPSTREAM_EXPORT_DERIVATION_DRIFT/u);
+  const synchronizedExports = structuredClone(upstreamExports);
+  const synchronizedSnapshot = structuredClone(snapshot);
+  synchronizedExports.items[412].source = '../src/SynchronizedDrift';
+  synchronizedSnapshot.items[412].source = '../src/SynchronizedDrift';
+  const synchronizedBytes = Buffer.from(JSON.stringify(synchronizedExports));
+  synchronizedSnapshot.exportTupleSha256 = createHash('sha256').update(JSON.stringify(synchronizedExports.items)).digest('hex');
+  synchronizedSnapshot.normalizedExports.sha256 = `sha256:${createHash('sha256').update(synchronizedBytes).digest('hex')}`;
+  assert.throws(() => assertSource({
+    snapshot: synchronizedSnapshot,
+    upstreamExports: synchronizedExports,
+    upstreamExportsBytes: synchronizedBytes,
+  }), /CORE_REACT_UPSTREAM_EXPORT_TUPLE_DRIFT/u);
   const changedClassification = structuredClone(snapshot);
   const candidateIndex = changedClassification.items.findIndex(({ disposition, tranche }) => disposition === 'candidate' && tranche === 'R1.3');
   changedClassification.items[candidateIndex].tranche = 'R1.4';

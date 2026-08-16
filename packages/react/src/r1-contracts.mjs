@@ -13,6 +13,9 @@ const EXPECTED_UPSTREAM = Object.freeze({
 });
 
 const EXPECTED_CLASSIFICATION_SHA256 = 'sha256:1210b8d3cee9999407c4632672640b0905c5d9fa8d93904a9e80afd70f9166dc';
+// Generated once from the two exact React Spectrum blobs in EXPECTED_UPSTREAM.
+// This is deliberately independent of both mutable local catalog projections.
+const EXPECTED_NORMALIZED_EXPORTS_SHA256 = 'sha256:8f4e9dd637585ed98d529624f46960cee80041cd41bfef206e7745be351503d3';
 const EXPECTED_DONOR = Object.freeze({
   commit: '94bf62a26c02605c8928dfeb24f0ddc4be1c92fd',
   name: 'Tale UI',
@@ -75,7 +78,9 @@ export function assertReactR10SourceContracts({
   if (!same(snapshotTuples(snapshot.items), upstreamExports.items)) {
     fail('CORE_REACT_UPSTREAM_EXPORT_DERIVATION_DRIFT');
   }
-  if (snapshot.exportTupleSha256 !== sha256(JSON.stringify(upstreamExports.items)).slice(7)) {
+  const normalizedExportsSha256 = sha256(JSON.stringify(upstreamExports.items));
+  if (normalizedExportsSha256 !== EXPECTED_NORMALIZED_EXPORTS_SHA256
+    || snapshot.exportTupleSha256 !== EXPECTED_NORMALIZED_EXPORTS_SHA256.slice(7)) {
     fail('CORE_REACT_UPSTREAM_EXPORT_TUPLE_DRIFT');
   }
   if (snapshot.normalizedExports.path !== 'catalog/react-r1-0/upstream-exports.json'
