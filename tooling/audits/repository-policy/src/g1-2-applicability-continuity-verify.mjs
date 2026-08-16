@@ -156,7 +156,7 @@ export function assertG12ContinuityDecision(decision, predecessorRoot, loadPrede
 
 export function verifyG12ApplicabilityContinuityAuthority(repositoryRoot, options = {}) {
   const read = (path) => options.sources?.[path]
-    ?? ([ARCHITECTURE_PATH, ROADMAP_PATH].includes(path)
+    ?? ([ARCHITECTURE_PATH, ROADMAP_PATH, PRODUCT_SCOPE_PATH].includes(path)
       ? execFileSync('git', ['show', `${HISTORICAL_AUTHORITY_SOURCE}:${path}`], {
         cwd: repositoryRoot,
         encoding: 'utf8',

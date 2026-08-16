@@ -10,6 +10,7 @@ import {
 } from './internal/default-theme-repository-transition.mjs';
 
 const execFile = promisify(execFileCallback);
+const HISTORICAL_PRODUCT_SCOPE_SOURCE = 'b27cb4fb3d71f8feca9505684201286d76f62d42';
 const AUTHORITY = Object.freeze({
   acceptance: Object.freeze({ bytes: 495, sha256: 'sha256:48ac9f5af1990743224ab8fbdf093d08c092268842714a7d238a7d21b03c5c57' }),
   decision: Object.freeze({ bytes: 26344, sha256: 'sha256:747eb372d7cb53351d1cc30f4092cd703feb7986d3ea12814da6974616b85262' }),
@@ -131,6 +132,21 @@ function assertCanonicalReference(actual, expected, label) {
 
 async function exactAuthorityFile(repositoryRoot, path, expected) {
   const bytes = await readFile(join(repositoryRoot, path), 'utf8').catch(() => null);
+  if (
+    bytes === null
+    || Buffer.byteLength(bytes) !== expected.bytes
+    || sha256(bytes) !== expected.sha256
+  ) fail('CORE_TOKEN_IDENTITY_AUTHORITY_MISMATCH', path);
+  return bytes;
+}
+
+async function exactHistoricalAuthorityFile(repositoryRoot, revision, path, expected) {
+  const result = await execFile('git', ['show', `${revision}:${path}`], {
+    cwd: repositoryRoot,
+    encoding: 'utf8',
+    maxBuffer: 16 * 1024 * 1024,
+  }).catch(() => null);
+  const bytes = result?.stdout ?? null;
   if (
     bytes === null
     || Buffer.byteLength(bytes) !== expected.bytes
@@ -695,7 +711,12 @@ async function acceptedAuthority(repositoryRoot) {
     exactAuthorityFile(repositoryRoot, AUTHORITY.applicabilityAcceptance.path, AUTHORITY.applicabilityAcceptance),
     exactAuthorityFile(repositoryRoot, AUTHORITY.deliveryDecision.path, AUTHORITY.deliveryDecision),
     exactAuthorityFile(repositoryRoot, AUTHORITY.deliveryAcceptance.path, AUTHORITY.deliveryAcceptance),
-    exactAuthorityFile(repositoryRoot, AUTHORITY.productScope.path, AUTHORITY.productScope),
+    exactHistoricalAuthorityFile(
+      repositoryRoot,
+      HISTORICAL_PRODUCT_SCOPE_SOURCE,
+      AUTHORITY.productScope.path,
+      AUTHORITY.productScope,
+    ),
   ]);
   const decision = strict(decisionBytes, DEFAULT_THEME_IDENTITY_PATHS.decision);
   const topologyDecision = strict(topologyBytes, AUTHORITY.applicabilityDecision.path);
