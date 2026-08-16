@@ -34,7 +34,7 @@ const acceptance = parseJsonStrict(acceptanceSource);
 acceptance.bodySha256 = `sha256:${'0'.repeat(64)}`;
 reject({ acceptanceSource: canonicalJson(acceptance) }, 'acceptance receipt');
 
-reject({ productScopeSource: productScopeSource.replace('scopeVersion: 4.0.2', 'scopeVersion: 4.0.3') }, 'Product Scope');
+reject({ productScopeSource: productScopeSource.replace('scopeVersion: 5.0.1', 'scopeVersion: 5.0.2') }, 'Product Scope');
 reject({ architectureSource: 'not the accepted historical architecture' }, 'historical Architecture');
 reject({ roadmapSource: 'not the accepted historical roadmap' }, 'historical roadmap');
 

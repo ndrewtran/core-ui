@@ -15,6 +15,8 @@ const ACCEPTANCE_BYTES = 558;
 const ACCEPTANCE_SHA256 = 'sha256:282defb18bd1d897c14dc62e3ebc44cabf0d3cdbf4cd8c0419d71b9d1d03ed8d';
 const PRODUCT_SCOPE_BYTES = 90165;
 const PRODUCT_SCOPE_SHA256 = 'sha256:7c8404e20d01f6a0cc975b17a7893f5594f6f0d313806a6fced9d0c62d886873';
+const CURRENT_PRODUCT_SCOPE_BYTES = 114420;
+const CURRENT_PRODUCT_SCOPE_SHA256 = 'sha256:b645bedfad6427f18535898938d2551ce8f6005a0e636c1288f60b8199578b73';
 const ARCHITECTURE_SHA256 = 'sha256:bdf8eb132fcdace479a05569020fd91acb0bde02dd1b24b33ce0f96ceaf39371';
 const ROADMAP_SHA256 = 'sha256:808a972cf2d92064aacb0a10560ac512c0ac878b9c960098d9ddc7d84354f4c0';
 const HISTORICAL_AUTHORITY_SOURCE = 'b27cb4fb3d71f8feca9505684201286d76f62d42';
@@ -67,7 +69,7 @@ export function verifyDeliveryWorkflowAuthority(repositoryRoot, options = {}) {
   const acceptanceSource = options.acceptanceSource
     ?? readFileSync(join(repositoryRoot, ACCEPTANCE_PATH), 'utf8');
   const productScopeSource = options.productScopeSource
-    ?? readFileSync(join(repositoryRoot, PRODUCT_SCOPE_PATH), 'utf8');
+    ?? readHistoricalAuthority(repositoryRoot, PRODUCT_SCOPE_PATH);
   const architectureSource = options.architectureSource
     ?? readHistoricalAuthority(repositoryRoot, ARCHITECTURE_PATH);
   const roadmapSource = options.roadmapSource
@@ -79,8 +81,16 @@ export function verifyDeliveryWorkflowAuthority(repositoryRoot, options = {}) {
   if (acceptanceSource !== canonicalJson(acceptance)) fail('acceptance must be canonical JSON');
   if (Buffer.byteLength(decisionSource) !== DECISION_BYTES || digest(decisionSource) !== DECISION_SHA256) fail('decision identity');
   if (Buffer.byteLength(acceptanceSource) !== ACCEPTANCE_BYTES || digest(acceptanceSource) !== ACCEPTANCE_SHA256) fail('acceptance identity');
-  if (Buffer.byteLength(productScopeSource) !== PRODUCT_SCOPE_BYTES || digest(productScopeSource) !== PRODUCT_SCOPE_SHA256) fail('Product Scope 4.0.2 identity');
-  if (!productScopeSource.startsWith('---\nscopeVersion: 4.0.2\n')) fail('Product Scope version');
+  const productScopeVersion = (
+    Buffer.byteLength(productScopeSource) === PRODUCT_SCOPE_BYTES
+    && digest(productScopeSource) === PRODUCT_SCOPE_SHA256
+    && productScopeSource.startsWith('---\nscopeVersion: 4.0.2\n')
+  ) ? '4.0.2' : (
+    Buffer.byteLength(productScopeSource) === CURRENT_PRODUCT_SCOPE_BYTES
+    && digest(productScopeSource) === CURRENT_PRODUCT_SCOPE_SHA256
+    && productScopeSource.startsWith('---\nscopeVersion: 5.0.1\n')
+  ) ? '5.0.1' : null;
+  if (productScopeVersion === null) fail('Product Scope accepted identity');
   if (digest(architectureSource) !== ARCHITECTURE_SHA256 || digest(roadmapSource) !== ROADMAP_SHA256) fail('Architecture or roadmap identity');
 
   if (decision.decisionId !== 'core-ui:decision:0007' || decision.state !== 'acceptance-candidate') fail('decision identity or state');
@@ -120,7 +130,7 @@ export function verifyDeliveryWorkflowAuthority(repositoryRoot, options = {}) {
     activationEvidence: ACTIVATION_EVIDENCE.length,
     applicabilityTargets: decision.authorityApplicability.targets.length,
     decision: { bytes: Buffer.byteLength(decisionSource), sha256: digest(decisionSource) },
-    productScope: { bytes: Buffer.byteLength(productScopeSource), sha256: digest(productScopeSource), version: '4.0.2' },
+    productScope: { bytes: Buffer.byteLength(productScopeSource), sha256: digest(productScopeSource), version: productScopeVersion },
   };
 }
 

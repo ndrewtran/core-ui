@@ -8,34 +8,41 @@
 
 Core UI is built as:
 
-> Core UI is a versioned design-system knowledge graph with first-class web,
-> React, and React Native renderers. The CLI is its primary documentation
-> interface; MCP, the docs site, packages, and agent context are projections of
-> the same canonical sources.
+> Core UI is a versioned design-system knowledge graph whose primary component
+> product is React. Framework-free web and React Native are separately
+> activated secondary renderers. Package guidance, and later the CLI, MCP,
+> docs site, and agent context, are projections of the same canonical sources.
 
 The architecture has one central rule:
 
 > Author a public fact once, expose it everywhere, and prove every renderer
 > still agrees with it.
 
-At the product boundary, **the CLI is the documentation**. Humans receive a
-readable rendering, agents can request `--dense`, and software receives typed
-JSON. Internally, the CLI is not a second authoring system: it reads an
-immutable catalog compiled from the canonical artifact sources. The docs site
-and MCP server use the same query library and the same responses.
+At the first public component boundary, the published `@core-ui/react`
+prerelease contains deterministic, version-bound package guidance generated
+from canonical component records and `web.react` binding specs. The CLI becomes
+the primary exact-version documentation and discovery interface at the later
+Productization boundary. It is never a second authoring system: it reads an
+immutable catalog compiled from canonical artifact sources, and the docs site
+and MCP server use the same query library and responses.
 
-Core UI is multi-platform from its first component:
+Core UI delivers React first:
 
-- **Web, without a framework:** an HTML binding spec, CSS, and optional
-  vanilla JavaScript controllers.
-- **Web, with React:** typed React bindings that preserve the shared web
-  semantics, styling hooks, and externally observable DOM surface.
-- **Mobile:** React Native bindings built from native primitives and a shared
-  concept record, never by parsing or emulating CSS.
+- **Primary React track:** typed React bindings, DOM/CSS behavior, styling
+  hooks, SSR/hydration, and accessibility fulfillment owned by `web.react`
+  binding specs and `@core-ui/react` source.
+- **Later framework-free web track:** separately activated `web.html` binding
+  specs and `@core-ui/web` HTML/CSS/controller implementation.
+- **Later native track:** separately activated `native.react-native` binding
+  specs and `@core-ui/react-native` implementations built from native
+  primitives and renderer-neutral component records, never from React source,
+  React Aria, DOM behavior, or React types.
 
-Other web frameworks are intentionally deferred. The web binding spec leaves
-room for later adapters without paying a multi-framework abstraction cost in
-v1.
+React Aria Components is the default internal substrate for the React track.
+It does not own Core UI identity, inventory, semantics, API, types, lifecycle,
+accessibility requirements, styling hooks, compatibility, support, guidance,
+or platform claims. Other renderers and frameworks remain deferred until their
+own activation and proof boundaries pass.
 
 Core UI is a product system first. The catalog and tooling exist to make the
 renderer system understandable, operable, and provable; they do not compete
@@ -152,9 +159,9 @@ flowchart TD
 
   tokens["Token compiler"]
   foundation["Renderer-neutral foundation\nsemantics, pure logic, optional portable interaction"]
-  web["Web renderer\nHTML binding spec, CSS, vanilla JS"]
-  react["React binding\nconforms to web binding spec"]
-  native["React Native renderer\nnative primitives"]
+  react["Primary React renderer\nweb.react contract, React + CSS"]
+  web["Later framework-free renderer\nweb.html contract, HTML/CSS/controllers"]
+  native["Later React Native renderer\nnative contract and primitives"]
 
   cli["CLI\nhuman, dense, JSON"]
   mcp["MCP\nlocal and hosted profiles"]
@@ -164,10 +171,9 @@ flowchart TD
 
   sources --> compiler --> catalog --> query
   sources --> tokens --> foundation
-  foundation --> web
   foundation --> react
-  foundation --> native
-  web --> react
+  foundation -. later activation .-> web
+  foundation -. later activation .-> native
 
   query --> cli
   query --> mcp
@@ -176,9 +182,9 @@ flowchart TD
 
   proof -. verifies .-> sources
   proof -. verifies .-> catalog
-  proof -. verifies .-> web
   proof -. verifies .-> react
-  proof -. verifies .-> native
+  proof -. later verifies .-> web
+  proof -. later verifies .-> native
   proof -. verifies parity .-> cli
   proof -. verifies parity .-> mcp
   proof -. verifies parity .-> site
@@ -391,13 +397,14 @@ coverage and cannot downgrade it.
 
 The source hierarchy is explicit:
 
-1. Concept records own product semantics, lifecycle, guidance, relations, and
-   platform dispositions.
-2. Platform binding specs own Core UI-defined API fields, lifecycle,
-   strategy, deviations, validation profiles, and example relations.
+1. Concept records own product semantics, artifact lifecycle, guidance,
+   relations, renderer-neutral risk, and renderer-neutral alternatives.
+2. Platform binding specs own Core UI-defined API fields, binding and
+   supported-profile lifecycle, strategy, deviations, validation profiles,
+   platform dispositions, and canonical-example relations.
 3. Token sources own design values and semantic aliases.
-4. Renderer source owns runtime implementation and platform-native passthrough
-   types.
+4. Renderer source owns implementation, effects, runtime/effect lifecycle,
+   host-language refinements, and platform-native passthrough types.
 5. Executable example files own example code.
 6. Tests encode expected behavior.
 7. The proof system produces and retains evidence against those expectations.
@@ -410,7 +417,7 @@ fact.
 
 | Field class | Examples | Owner | Treatment |
 | --- | --- | --- | --- |
-| Product semantics | Intent, use/avoid guidance, decision context, lifecycle | Artifact source | Author once. |
+| Product semantics | Intent, use/avoid guidance, decision context, artifact lifecycle | Artifact source | Author once. |
 | Portable semantics | Semantic parts, conceptual states, accessibility obligations | Concept record or foundation semantic source | Author once. |
 | Binding API | Core-owned props, attributes, events, slots, defaults, deviations | Binding spec | Author the stable semantic surface; generate serializable types and reference output. |
 | Host type ergonomics | Passthrough props, generic constraints, refs, narrowed platform events, JSX inference | Renderer TypeScript | Hand-author and validate; never introduce undocumented Core UI semantics. |
@@ -537,11 +544,17 @@ stable before its scaffold, semantic diff, diagnostics, and affected-closure
 explanation exist. This makes ontology cost visible and prevents the knowledge
 system from growing independently of renderer or maintainer needs.
 
-## CLI is the documentation
+## CLI is the Productization documentation interface
 
-The CLI is the primary documentation interface for people and agents. The site
-consumes the same documentation, every command supports JSON, a capability
-manifest describes the command surface, and `--dense` reduces token cost.
+The first React package-only prerelease is documented by generated,
+version-bound README, API, export/component, styling, and compatibility files
+inside its tarball. Those package files are projections, not canonical facts,
+a query API, or a second registry.
+
+At Productization, the CLI becomes the primary documentation interface for
+people and agents. The site consumes the same documentation, every command
+supports JSON, a capability manifest describes the command surface, and
+`--dense` reduces token cost.
 
 Core UI enforces this through a strict internal separation:
 
@@ -890,13 +903,16 @@ over the same implementation.
 
 ### `@core-ui/web`
 
-The web package is the framework-free web product. It owns:
+The web package is the later, separately activated framework-free web product.
+It does not block React admission, implementation, merge, prerelease
+publication, or React breadth closure. When its `W1` track activates, it owns:
 
 - compiled token and theme CSS;
-- cascade layers and stable customization hooks;
+- cascade-layer, customization-hook, DOM, role, class, slot, and state-
+  attribute implementation conforming to the `web.html` binding spec;
 - per-component CSS entry points;
-- canonical semantic HTML examples;
-- DOM anatomy, roles, stable classes, slots, and state data attributes; and
+- semantic HTML rendering for canonical examples whose code remains owned by
+  the canonical example source; and
 - optional per-component vanilla JavaScript controllers.
 
 Vanilla controllers are imported explicitly and have bounded lifecycle:
@@ -934,13 +950,70 @@ commitment.
 
 ### `@core-ui/react`
 
-React implements the applicable web semantics, styling hooks, and externally
-observable DOM surface declared by the web binding spec. It owns typed composition,
-controlled and uncontrolled state, deferred rendering, transitions, portals,
-refs, and accessible React integration while consuming `@core-ui/web` styles.
-Those ergonomics may differ from vanilla controllers, but they must not
-silently change the concept semantics, documented DOM hooks, or observable
-web behavior.
+React is the primary component implementation and first public component
+package. Each `web.react` binding spec owns the Core React DOM, public API and
+types, observable behavior, accessibility fulfillment and deviations, events,
+slots, styling hooks, defaults, lifecycle, strategy, validation profile,
+canonical-example relations, platform-safety declarations, and compatibility
+promises. `@core-ui/react` source owns React rendering, controlled and
+uncontrolled state, runtime and effect lifecycle, portals, refs, host
+passthrough refinements, DOM implementation, compiled CSS implementation,
+SSR, hydration, and cleanup.
+
+`@core-ui/react` does not consume `@core-ui/web` at runtime. Canonical tokens,
+component records, binding specs, compatibility data, descriptors, and package
+guidance may be deterministically compiled into its tarball by private build
+authorities without becoming runtime workspace dependencies or duplicate
+owners.
+
+#### Tale styling donor boundary
+
+The initial React visual implementation uses the matching component styling
+from Tale UI commit `94bf62a26c02605c8928dfeb24f0ddc4be1c92fd` as a pinned,
+one-time donor whenever an admitted Core React component has an applicable Tale
+counterpart. The donor snapshot includes `packages/styles/src` tree
+`aea4eadffe226656ef0ab012409ed39070975a76`, the related React source tree
+`d93f7c0a555066d8abbaff75cb8bd216938bcb2f`, and the CSS foundation tree
+`aa2a2d95214918794e9f463e063ceee0df3b4b1e`.
+
+Tale supplies visual and structural input only. It is not a runtime, build,
+development, generated-source, or synchronization dependency; Tale package
+names, `.tale-*` selectors, custom-property names, component APIs, registry
+records, and story files do not become Core public contracts by copying. Each
+R1 scope lock maps the applicable donor CSS and shared primitive rules to the
+Core-owned `web.react` styling-hook contract and token requirements, then
+records `adopt`, `adapt`, `defer`, `reject`, or `no-applicable-donor` with a
+reason. The resulting CSS is owned solely by `@core-ui/react` source.
+
+For an applicable donor, routine delivered/exportable closure is limited to
+`adopt` or `adapt`. `defer` and `reject` are fail-closed candidate states: the
+component remains unexported and unreleasable until a separately accepted,
+decision-bearing exception supplies the alternate visual direction and
+reconciles the tranche contract. `no-applicable-donor` is valid only when the
+pinned snapshot has no applicable counterpart.
+
+Every consumed donor custom property resolves through an exact crosswalk to an
+existing Core token, a separately admitted Core semantic/component token, or a
+reasoned non-token adaptation. A permanent Tale compatibility-token layer,
+ambient donor checkout, or second style registry is forbidden. Visual donor
+comparison proves the intended starting point; the Core binding contract,
+accessibility obligations, platform-safety rules, and responsible fixes take
+precedence when exact copying would violate Core authority.
+
+A private R1 React playground may render generated adapters over canonical
+Core examples for component development, state/theme/mode coverage, automated
+accessibility checks, and visual donor comparison. It owns no example,
+component, token, styling-hook, lifecycle, support, or release fact and is not a
+public documentation surface. Public React documentation and explorer delivery
+remain P2.3. Tale's Scale application is only a deferred donor candidate for a
+later admitted theme-authoring capability; R1 may preserve compatible token and
+theme outputs but does not port, publish, or depend on Scale.
+
+R1.0 also owns a license and attribution audit for every copied or adapted
+donor input. Any distributed substantial portion must preserve the applicable
+Tale MIT notice, including its stated third-party portions, in the exact
+`@core-ui/react` package and release artifacts. Provenance and notice files are
+Core-owned release inputs; they do not create a Tale dependency or live owner.
 
 Exactly one integration owns a mounted component root at runtime. A React
 binding does not attach the lifecycle-bearing vanilla controller to DOM it
@@ -962,30 +1035,47 @@ lifecycle rather than attaching competing effects. A React-safe adapter is
 therefore either pure, or explicitly constructed and disposed by React—it does
 not start autonomous global lifecycle work on import.
 
-The package may use an upstream accessibility primitive library internally,
-but Core UI owns its public API. Upstream types are not silently exported as
-the design-system public API.
+React Aria Components is the default internal React substrate and is pinned as
+an exact runtime dependency for each accepted baseline. Core UI owns its public
+contract. React Aria types and exports are not re-exported as Core UI API, and
+an upstream export does not become a Core UI component without a canonical
+component mapping or an accepted `defer`, `exclude`, or `not-a-component`
+disposition.
 
 React must not become the source for:
 
 - the component inventory;
 - shared intent and lifecycle;
-- web CSS semantics;
+- another renderer's API or implementation;
 - React Native parity; or
 - documentation content.
 
 ### `@core-ui/react-native`
 
-React Native depends on the renderer-neutral foundation and token outputs,
-never on `@core-ui/web`, React DOM, CSS, browser globals, Expo, or Storybook.
+React Native is a later, separately activated secondary product. It implements
+or adapts renderer-neutral component contracts through each component's
+`native.react-native` binding spec and depends on renderer-neutral foundation
+and token outputs, never on `@core-ui/web`, `@core-ui/react`, React Aria,
+React DOM, CSS, browser globals, Expo, or Storybook.
 
 It owns:
 
 - native primitive composition;
-- native roles, state, values, actions, announcements, and focus behavior;
-- gesture and responder behavior;
-- explicit iOS, Android, and React Native Web files when needed; and
-- platform-specific deviations and alternatives.
+- implementation of binding-owned native roles, state, values, actions,
+  announcements, and focus behavior;
+- gesture, responder, effects, and runtime/effect lifecycle implementation;
+  and
+- explicit iOS, Android, and React Native Web implementation files when
+  needed.
+
+The binding spec, rather than React source, owns the native Core API,
+observable platform behavior, accessibility fulfillment and deviations,
+binding and supported-profile lifecycle, strategy, validation profiles,
+canonical-example relations, platform-safety declarations, and compatibility
+promises. The renderer source owns primitive/runtime implementation,
+host-language refinements, effects, and runtime/effect lifecycle. Native may
+contain fewer components than React and may use `direct`, `adapted`,
+`native-alternative`, or `unsupported` dispositions per binding/profile.
 
 Expo and native Storybook belong to a host application. They are not runtime
 dependencies of the package.
@@ -1012,41 +1102,44 @@ framework bindings demonstrate the repeated shape.
 
 ```mermaid
 flowchart TD
-  schema["@core-ui/schema\nschemas, types, authoring helpers"]
-  tokens["@core-ui/tokens\ncanonical design tokens and transforms"]
-  foundation["@core-ui/foundation\nsemantics, pure logic, optional interaction"]
-  web["@core-ui/web\nHTML, CSS, vanilla JS"]
-  react["@core-ui/react\nReact web binding"]
-  native["@core-ui/react-native\nnative renderer"]
-  catalog["@core-ui/catalog\ncompiled knowledge and query API"]
-  tooling["@core-ui/tooling\nCLI, MCP, validation, authoring and project operations"]
+  canonical["private canonical/build authorities\nschema, tokens, foundation, catalog, tooling"]
+  react["@core-ui/react@0.1.0-alpha.N\nfirst public component package"]
+  aria["react-aria-components@1.20.0\nexact internal runtime dependency"]
+  peers["react + react-dom\n>=19.2.0 <20 peers"]
+  web["@core-ui/web\nlater W1 track"]
+  native["@core-ui/react-native\nlater N1 track"]
 
-  schema --> foundation
-  schema --> catalog
-  schema --> tokens
-  tokens --> foundation
-  tokens --> web
-  foundation --> web
-  foundation --> react
-  foundation --> native
-  web --> react
-  catalog --> tooling
+  canonical -. deterministic compilation .-> react
+  aria --> react
+  peers --> react
+  canonical -. later activation .-> web
+  canonical -. later activation .-> native
 ```
+
+The React-primary prerelease publishes exactly `@core-ui/react`. It has no
+runtime dependency on another Core UI workspace package or `@core-ui/web`.
+React and React DOM are peers at `>=19.2.0 <20`; React Aria Components is the
+exact `1.20.0` runtime dependency for the accepted baseline. The packed tarball
+must contain no unresolved `workspace:` dependency, repository-only or source-
+tree import, undeclared file dependency, or `@core-ui/web` import.
 
 | Package | Responsibility | Must not own |
 | --- | --- | --- |
 | `@core-ui/schema` | Versioned source and response schemas, generated types, platform IDs, and authoring helpers. | Product semantics, components, renderers, or site code. |
 | `@core-ui/tokens` | Canonical tokens and deterministic web/native/design-tool transforms. | Component behavior or docs rendering. |
 | `@core-ui/foundation` | Enforced `semantic`, pure `logic`, and optional portable `interaction` sub-boundaries. | Selectors, React hooks, browser globals, native views, or mandatory cross-platform transitions. |
-| `@core-ui/web` | HTML binding specs, CSS, themes, vanilla controllers, web entry points. | React or native implementation. |
-| `@core-ui/react` | React bindings that preserve applicable web semantics, styling hooks, and observable DOM output while owning React ergonomics. | Canonical component metadata or copied CSS sources. |
-| `@core-ui/react-native` | Native components and explicit platform files. | CSS parsing, DOM, Expo, Storybook hosts. |
+| `@core-ui/web` | Later W1 HTML/CSS/controller implementation for `web.html` binding specs. | React or native implementation; a React prerequisite, shared React runtime, or shared React CSS owner. |
+| `@core-ui/react` | React rendering, CSS, SSR/hydration, effects, host refinements, package guidance, and exports for `web.react` contracts. | Canonical component metadata, React Aria public API, or another renderer's contract. |
+| `@core-ui/react-native` | Later N1 native primitive/runtime implementation and explicit platform files for native binding specs. | React/React Aria authority, CSS parsing, DOM, Expo, or Storybook hosts. |
 | `@core-ui/catalog` | Compiled catalog assets and pure discovery/query/planning API. | CLI parsing, MCP transport, project mutation. |
 | `@core-ui/tooling` | Self-describing CLI, MCP adapters, local validation, maintainer scaffolds and semantic diffs, change-intent previews, and safe project operations. | A second artifact index, product decisions, or renderer implementation. |
 
-The catalog and tooling versions may move independently from renderer
-packages, but every response correlates all relevant versions and the catalog
-digest.
+At the React package-only boundary, schema, tokens, foundation, catalog, and
+tooling remain private authoring/build/proof authorities. Productization later
+publishes the compatible catalog/tooling portfolio and CLI-as-documentation.
+Their versions may move independently from renderer packages, but every
+enabled response and release manifest correlates all relevant versions and the
+catalog digest.
 
 ### Catalog distribution and resolution
 
@@ -1223,7 +1316,8 @@ core-ui/
 │   └── tooling/
 ├── apps/
 │   ├── docs/                         # catalog client
-│   ├── explorer-web/                 # HTML and React examples
+│   ├── react-playground/             # private R1 generated example/donor-comparison host
+│   ├── explorer-web/                 # later P2.3 React, then W1 HTML examples
 │   └── explorer-native/              # Expo/native example host
 ├── tooling/
 │   ├── catalog/                      # compiler and query build
@@ -1304,7 +1398,13 @@ package that owns them or to a declarative task graph.
 
 - Components consume semantic and component tokens, not raw palette values.
 - Stable web classes, slots, states, and cascade layers are public contracts.
-- React does not maintain separate component styles.
+- `@core-ui/react` owns its component CSS implementation, compiled from the
+  canonical `web.react` styling-hook contract and token requirements. It does
+  not duplicate or become the owner of framework-free or native styles.
+- The pinned Tale styling snapshot is a donor input with an exact per-component
+  disposition and token/style crosswalk; Core selectors, tokens, CSS, and
+  compatibility remain Core-owned outputs with no Tale dependency or live
+  synchronization.
 - Native resolves the same semantic recipe to native values at build or
   runtime without parsing CSS.
 - Arbitrary styling is an explicit escape hatch, not the primary component API.
@@ -2153,14 +2253,28 @@ hidden by bypassing the writer.
 
 ### Adding a component
 
-1. Add `catalog/components/<slug>/artifact.json` and platform binding specs.
-2. Add canonical executable examples for every supported binding.
-3. Implement the renderer bindings or declare an explicit disposition.
-4. Add behavior, accessibility, visual, and package evidence proportional to
-   complexity.
-5. Compile the catalog and generated binding-spec/export surfaces.
-6. Run deterministic checks.
-7. Run focused cold-start and generation evaluations.
+1. Select the component through an accepted Roadmap-owned React tranche scope
+   lock bound to the exact shared baseline.
+2. Add or update `catalog/components/<slug>/artifact.json` as the sole owner of
+   identity, renderer-neutral semantics, artifact lifecycle, risk, and
+   alternatives.
+3. Add the `web.react` binding spec and canonical executable examples for its
+   exact React contract.
+4. Resolve the component's exact pinned Tale styling donor disposition and
+   token/style crosswalk, then implement Core-owned `@core-ui/react` CSS without
+   carrying Tale selectors, package dependencies, or a live donor input.
+5. Implement `@core-ui/react` without creating a web or native counterpart
+   unless a later track separately admits one.
+6. Add deterministic and risk-proportionate behavior, accessibility, visual
+   donor-comparison, descriptor, generation, and packed-package proof.
+7. Compile the catalog and generated binding-spec/export/package-guidance
+   surfaces and run the tranche closure.
+8. Run focused agent evaluation only as informational evidence.
+
+Routine components inside an accepted tranche need no per-component authority
+or human acceptance. A new public-contract or ontology decision, dependency,
+security/privacy boundary, support expansion, stable promotion, or declared
+exception remains a decision-bearing delta before implementation.
 
 No component index, prop table, website page, Storybook story, MCP tool, or
 agent snippet is updated manually.
@@ -2238,67 +2352,51 @@ and incompatible or missing local catalog resolution fails with a typed error.
 The same fixture can be authored and repaired through owner-linked diagnostics
 without touching generated output.
 
-### Gate 1: representative vertical slices
+### React-primary component delivery and prerelease
 
-The first pre-release acceptance boundary, `0.1`, is fixed rather than an
-open-ended “first catalog”:
+The first public component boundary is a standalone React package, delivered
+through accepted tranches rather than a simultaneous renderer matrix:
 
-| Slice | Architectural question it must prove |
-| --- | --- |
-| Button | Action semantics, variants, disabled/pending behavior, and direct bindings. |
-| TextField | Naming, validation, controlled/uncontrolled ergonomics, and form relations. |
-| Switch | Boolean state, group relationships, and native-control semantics. |
-| Dialog | Overlay ownership, focus/dismissal, and an adapted or native-alternative mobile strategy. |
-| Select | Popup/listbox behavior on web and a deliberately native-alternative picker strategy. |
-| Form pattern | Deterministic multi-component composition, validation, submission, and `plan` prerequisites without enabling public `plan` yet. |
+1. `R1.0` freezes the React Aria Components `1.20.0` substrate, standalone
+   package graph, shared CSS/SSR/hydration/accessibility/compatibility and
+   packed-consumer baseline, and the Button tranche lock.
+2. `R1.1` delivers Button first and then accepted foundation/simple controls.
+3. `R1.2` delivers accepted forms and field controls.
+4. `R1.3` delivers accepted collections and composites.
+5. `R1.4` delivers accepted overlays and temporal interactions.
+6. `R1.5` closes the exact pinned upstream surface with one Core mapping or an
+   accepted `defer`, `exclude`, or `not-a-component` disposition for every
+   documented item.
+7. `R1 exit` may publish only `@core-ui/react@0.1.0-rc.1` under `next` after
+   exact tarball, provenance, registry, rollback, checks, and human publish
+   authorization pass.
 
-`Tabs` and `Toast` follow only after this gate passes. They extend the proof to
-keyboard/layout state and host/provider transactions, timers, and
-announcements without expanding the initial acceptance boundary.
+Each tranche has one exact scope lock, baseline identity, implementation
+sequence, deterministic proof closure, risk-selected independent review set,
+and post-proof human release acceptance. Components may run in parallel inside
+the accepted tranche while consuming the same baseline and creating no
+decision-bearing exception.
 
-The per-slice target matrix is normative:
+Proof is proportional to the exported React contract. Static and low-
+interaction components use deterministic schema/type/render/CSS/accessibility/
+generation/descriptor/packed checks. Interactive controls add focused browser
+keyboard, focus, state, form, and input proof. Composite, collection, overlay,
+temporal, announcement, or destructive behavior adds the manual and assistive-
+technology evidence named by its binding risk profile. Missing required proof
+keeps the binding unexported or explicitly unavailable with support unproved;
+it does not manufacture `unsupported` or alter lifecycle.
 
-| Slice | `web.html` | `web.react` | iOS | Android | React Native Web |
-| --- | --- | --- | --- | --- | --- |
-| Button | Implemented `direct` | Implemented `direct` | Implemented `direct` or `adapted` | Implemented `direct` or `adapted` | Explicit strategy; evidence if implemented |
-| TextField | Implemented `direct` | Implemented `direct` | Implemented `direct` or `adapted` | Implemented `direct` or `adapted` | Explicit strategy; evidence if implemented |
-| Switch | Implemented `direct` | Implemented `direct` | Implemented `direct` or `adapted` | Implemented `direct` or `adapted` | Explicit strategy; evidence if implemented |
-| Dialog | Implemented `direct` or `adapted` | Implemented `direct` or `adapted` | Proved `adapted` or `native-alternative` | Proved `adapted` or `native-alternative` | Explicit strategy; evidence if implemented |
-| Select | Implemented `direct` or `adapted` | Implemented `direct` or `adapted` | Proved `native-alternative` | Proved `native-alternative` | Explicit strategy; evidence if implemented |
-| Form pattern | Applicable composition and example | Applicable composition and example | Applicable composition and example | Applicable composition and example | Explicit applicability/disposition |
+Framework-free web and native components are later W1/N1 work. They neither
+block nor inherit React evidence. Cross-platform semantic comparison and
+feature equivalence require a later X1 claim. No `latest` tag or stable `0.1.0`
+release is authorized by this boundary.
 
-In addition, every `0.1` slice requires:
-
-- one canonical executable example per supported target and a referenced
-  alternative example where the strategy is `native-alternative`;
-- deterministic purpose/profile example selection with an explicit preferred
-  generation path;
-- schema, relation, spec-to-code, type, behavior, and token validation;
-- packed-consumer proof for every publishable binding package;
-- accessibility evidence appropriate to each supported interaction; and
-- normalized API/CLI retrieval parity for the same record revision;
-- semantic-diff and change-intent closure for representative concept, binding,
-  example, token, and renderer changes.
-
-An `unsupported` declaration remains valid architecture data but cannot be used
-to satisfy a cell marked `Implemented` or `Proved`; it can satisfy only a cell
-that asks for an explicit strategy/applicability disposition. This preserves
-honest platform variance without weakening the cross-platform proof goal. The
-docs website is not an acceptance dependency: CLI human, JSON, and dense
-projections are the documentation proof at this stage.
-
-The gate is already the finite precondition for expanding component breadth;
-the later gate list does not authorize bypassing it.
-
-Foundation `semantic`, `logic`, and `interaction` code is added only when one
-of these real slices needs it. Catalog/example validation ships here. A minimal
-local MCP adapter tests query parity but is not yet a public product. Focused
-agent evaluations are informational and diagnostic, not release
-gates.
-
-**Exit condition:** every required cell in the `0.1` target matrix and every
-shared acceptance item passes against the same release manifest. No partial
-component family, unsupported substitution, or later-gate prototype counts.
+**Exit condition:** the exact pinned React Aria surface is disposition-complete,
+every exported React binding passes its exact contract and risk profile, the
+standalone packed package and generated package guidance agree with canonical
+owners, and the accepted React prerelease release manifest correlates all
+package, binding, CSS/token, compatibility, evidence, provenance, advisory,
+exception, and registry identities.
 
 ### Gate 2: productization
 
@@ -2306,8 +2404,11 @@ component family, unsupported substitution, or later-gate prototype counts.
   local resolver, and discovery CLI compatibility policy
 - Consumer-project validation with bounded packed fixtures
 - Docs site as a catalog client
-- Web and native explorers generated from canonical examples
-- Packed consumer matrices
+- React documentation and explorer projections generated from canonical
+  examples; framework-free and native projections remain explicitly
+  unavailable until W1/N1 activation
+- Packed consumer matrices for the enabled React package and surfaces;
+  secondary renderer fixtures remain unavailable until their own tracks
 - Release manifests, versioned catalogs, and compatibility profiles
 - `plan` only after the pattern set supports grounded composition
 - `doctor`, then `init`, only after project detection, dry-run, atomic merge,
@@ -2315,11 +2416,12 @@ component family, unsupported substitution, or later-gate prototype counts.
 - Exception diagnostics and release-metadata projection before any exception
   can affect a published prerelease or support restriction
 
-**Exit condition:** a clean consumer can install the declared packages and
-resolve exact local guidance offline; packed web/React/native fixtures pass on
-supported profiles; docs/explorers reproduce catalog results; and every enabled
-validation, planning, doctor, or initialization capability meets its manifest
-and safety gate.
+**Exit condition:** a clean consumer can install the declared React
+Productization packages and resolve exact local guidance offline; packed React
+fixtures pass on supported profiles; enabled React docs/explorers reproduce
+catalog results; unavailable secondary projections are reported honestly; and
+every enabled validation, planning, doctor, or initialization capability meets
+its manifest and safety gate.
 
 ### Gate 3: operational scale, breadth, and integrations
 

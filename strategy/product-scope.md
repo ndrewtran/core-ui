@@ -1,5 +1,5 @@
 ---
-scopeVersion: 4.0.2
+scopeVersion: 5.0.1
 status: execution-baseline
 product: Core UI
 architecture: ./monorepo-architecture.md
@@ -55,8 +55,9 @@ binding lifecycle remains `experimental` until promotion evidence passes.
 | Boundary | Meaning |
 | --- | --- |
 | Foundation | Internal Gate 0 operability spine; no public product-completeness claim. |
-| `0.1` | Fixed Gate 1 prerelease acceptance matrix proving real multi-platform renderer slices. |
-| Productization | Gate 2 packages, local authority, consumer validation, documentation surfaces, and enabled safe operations. |
+| React `0.1` | Package-only `@core-ui/react` prereleases under `next`, with generated version-bound tarball guidance and no secondary-renderer or stable claim. |
+| Productization | Compatible public catalog/tooling, CLI-as-documentation, local authority, consumer validation, React documentation surfaces, and enabled safe operations. |
+| Secondary renderer | Separately activated framework-free web or native package/profile delivery after the React prerelease boundary. |
 | Capability release | Independently admitted Gate 3 breadth or integration; there is no global “all Gate 3 complete” state. |
 
 ### Scope-item contract
@@ -78,18 +79,21 @@ the change that updates this document.
 
 ## Product definition
 
-Core UI is an AI-ready, multi-platform design system and component library for:
+Core UI is an AI-ready design system and component library whose primary
+component product and first public component-package boundary is React.
+`@core-ui/react` uses React Aria Components internally while Core UI owns every
+public identity, semantic, API, type, behavior, accessibility, styling,
+lifecycle, compatibility, support, documentation, and inventory contract.
 
-- framework-free web using HTML, CSS, and optional vanilla JavaScript;
-- React web using Core UI's shared web styles and externally observable web
-  semantics;
-- React Native on iOS and Android using native primitives; and
-- React Native Web as an explicit runtime profile with an honest per-binding
-  strategy rather than assumed React-web parity.
+Framework-free web and React Native are later secondary tracks. React Native
+implements renderer-neutral Core UI semantic contracts through its own binding
+specs and native primitives; it does not distill React APIs or React Aria.
 
-The CLI is the primary documentation interface. Human output, dense output,
-typed JSON, MCP, the documentation site, explorers, and generated agent context
-are projections of the same canonical artifact graph and query engine.
+The first package-only React prerelease contains generated, version-bound
+README/API/export/compatibility guidance. At Productization, the CLI becomes the
+primary exact-version documentation interface. Human, dense, typed JSON, MCP,
+site, explorer, and agent-context views remain projections of the same
+canonical graph and query engine.
 
 Core UI is AI-ready only when agents can discover capabilities, retrieve exact
 installed-version guidance, select deterministic examples, compose bounded
@@ -100,7 +104,9 @@ scraping prose or guessing unsupported APIs.
 
 | Scope ID | Commitment | Outcome |
 | --- | --- | --- |
-| `SCOPE-OUTCOME-001` | `committed` | A consumer can implement supported UI on web, React, iOS, and Android from one shared semantic system with explicit platform binding differences. |
+| `SCOPE-OUTCOME-001` | `deferred` | A consumer can implement supported UI on web, React, iOS, and Android from one shared semantic system with explicit platform binding differences after the relevant secondary tracks complete. |
+| `SCOPE-OUTCOME-REACT-PRIMARY` | `committed` | A consumer can install the published React prerelease and use Core-owned experimental React bindings with generated version-bound package guidance. |
+| `SCOPE-OUTCOME-MULTIPLATFORM-SECONDARY` | `deferred` | Framework-free and native consumers later receive platform-correct adaptations from the renderer-neutral semantic system. |
 | `SCOPE-OUTCOME-002` | `committed` | A human, agent, or tool can discover and retrieve exact locally compatible Core UI guidance through a self-describing CLI without repository crawling. |
 | `SCOPE-OUTCOME-003` | `committed` | Every public fact has one canonical owner and every package, documentation surface, example, and proof projection can be regenerated and verified against it. |
 | `SCOPE-OUTCOME-004` | `committed` | Maintainers can add and evolve components through owner-linked scaffolds, semantic diffs, revision explanations, affected closures, and structured proof. |
@@ -128,7 +134,8 @@ scraping prose or guessing unsupported APIs.
 
 - Canonical component, pattern, token, foundation, guide, example, pitfall,
   migration, and capability knowledge.
-- First-party framework-free web, React web, and React Native renderer products.
+- A first-party React renderer product, followed by separately activated
+  framework-free web and React Native renderer products.
 - A first-party default theme with deterministic web and native transforms.
 - A compiled catalog and pure query engine.
 - CLI-as-documentation with human, dense, and JSON output.
@@ -176,19 +183,49 @@ Foundation completion does not advertise component breadth, public MCP, a
 documentation application, consumer mutation, composition planning, migration,
 hosted services, design-tool integration, or another framework.
 
-### `0.1` prerelease boundary
+### React `0.1` prerelease boundary
 
-The `0.1` product commitment is the complete fixed Gate 1 matrix. No later
-component or integration can substitute for a missing cell.
+The current `0.1` product commitment is a package-only React prerelease. Each
+accepted tranche may publish `@core-ui/react@0.1.0-alpha.N` under `next`; R1
+breadth closure may propose `0.1.0-rc.1`. No `latest` tag, stable `0.1.0`,
+framework-free package, native package/profile, public catalog/tooling/CLI,
+cross-platform equivalence, or secondary-renderer support claim belongs to this
+boundary.
+
+| Scope ID | Commitment | Product deliverable | Roadmap |
+| --- | --- | --- | --- |
+| `SCOPE-OUTCOME-REACT-PRIMARY` | `committed` | Installable React prerelease using Core-owned experimental bindings and generated package guidance. | R1.0–R1 exit |
+| `SCOPE-SYSTEM-REACT` | `committed` | Standalone React substrate, CSS/runtime ownership, exact React Aria baseline, pinned one-time Tale styling donor with Core-owned crosswalk, and tranche delivery. | R1.0–R1.5 |
+| `SCOPE-REACT-BREADTH-001` | `committed` | Disposition-complete Core UI coverage of the applicable pinned React Aria component surface. | R1.1–R1.5 |
+| `SCOPE-PRODUCT-REACT-PRERELEASE` | `committed` | Exact `@core-ui/react@0.1.0-alpha.N`/`rc.1` tarball and release manifest under `next`. | R1 tranche exits and R1 exit |
+| `SCOPE-SURFACE-REACT-PACKAGE-GUIDANCE` | `committed` | Generated version-bound install, API, export/component, styling, and compatibility guidance in the tarball. | R1.0 and every tranche |
+
+The React-specific component and pattern commitments are
+`SCOPE-COMP-BUTTON-REACT`, `SCOPE-COMP-TEXTFIELD-REACT`,
+`SCOPE-COMP-SWITCH-REACT`, `SCOPE-PATTERN-FORM-REACT`,
+`SCOPE-COMP-SELECT-REACT`, `SCOPE-COMP-TABS-REACT`,
+`SCOPE-COMP-DIALOG-REACT`, and `SCOPE-COMP-TOAST-REACT`. Their complete
+contracts appear in the accepted `5.0.0` amendment below.
+
+Every exported binding remains `experimental` until independently promoted.
+Missing binding-required manual or assistive-technology proof keeps it
+unexported or explicitly unavailable with support unproved; it does not alter
+authored lifecycle/strategy or create an `unsupported` disposition.
+
+### Historical cross-platform `0.1` boundary
+
+The former fixed Gate 1 matrix and the rows below are retained as historical
+scope. Their cross-platform meanings are deferred to secondary-track
+completion and do not block or satisfy the React `0.1` boundary.
 
 | Scope ID | Commitment | Item | Product outcome | Roadmap |
 | --- | --- | --- | --- | --- |
-| `SCOPE-COMP-BUTTON` | `committed` | Button | Immediate-action semantics, pending/disabled behavior, naming, direct bindings, and complete addition workflow. | G1.3 |
-| `SCOPE-COMP-TEXTFIELD` | `committed` | TextField | Value ownership, controlled/uncontrolled behavior, validation, labels, descriptions, errors, and form relations. | G1.4 |
-| `SCOPE-COMP-SWITCH` | `committed` | Switch | Boolean state, groups, native-control semantics, and distinction from Checkbox and Button. | G1.5 |
-| `SCOPE-COMP-DIALOG` | `committed` | Dialog | Composite overlay ownership, focus/dismissal, global-effect cleanup, native adaptation, and retained manual accessibility evidence. | G1.6 |
-| `SCOPE-COMP-SELECT` | `committed` | Select | Complex web selection behavior and explicit native-alternative picker strategy. | G1.7 |
-| `SCOPE-PATTERN-FORM` | `committed` | Form pattern | Bounded composition, validation, submission, deterministic examples, and grounded planning inputs without a public planner. | G1.8 |
+| `SCOPE-COMP-BUTTON` | `deferred` | Button | Historical cross-platform action semantics and complete multi-renderer addition workflow. | W1/N1/X1 successors |
+| `SCOPE-COMP-TEXTFIELD` | `deferred` | TextField | Historical cross-platform field and form relations. | W1/N1/X1 successors |
+| `SCOPE-COMP-SWITCH` | `deferred` | Switch | Historical cross-platform control semantics. | W1/N1/X1 successors |
+| `SCOPE-COMP-DIALOG` | `deferred` | Dialog | Historical cross-platform overlay/native adaptation outcome. | W1/N1/X1 successors |
+| `SCOPE-COMP-SELECT` | `deferred` | Select | Historical cross-platform selection/native-alternative outcome. | W1/N1/X1 successors |
+| `SCOPE-PATTERN-FORM` | `deferred` | Form pattern | Historical cross-platform composition outcome. | W1/N1/X1 successors |
 
 #### `0.1` platform matrix
 
@@ -206,7 +243,7 @@ strategy. It cannot satisfy an `Implemented` or `Proved` cell.
 
 #### Shared `0.1` deliverable contract
 
-Every committed component supplies:
+The historical cross-platform boundary required every component to supply:
 
 - one concept record with intent, anatomy, states, accessibility obligations,
   lifecycle, risk class, alternatives, and bounded decision context where
@@ -229,28 +266,29 @@ The `0.1` boundary also commits:
 | Scope ID | Commitment | Deliverable | Roadmap |
 | --- | --- | --- | --- |
 | `SCOPE-SYSTEM-TOKENS` | `committed` | Pinned Tale-derived non-semantic reference baseline plus the semantic/component recipes, default theme, target transforms, fallbacks, requirement sets, and override system needed by the fixed slices. | G1.0 after the three-phase Gate 0 correction |
-| `SCOPE-SYSTEM-WEB` | `committed` | Framework-free CSS/HTML/JS substrate and React binding substrate with explicit runtime ownership. | G1.1 |
-| `SCOPE-SYSTEM-NATIVE` | `committed` | Native substrate, iOS/Android behavior, native token output, and explicit React Native Web profile semantics. | G1.2 |
-| `SCOPE-SYSTEM-CURRICULUM` | `committed` | Deterministic example selection by compatibility, binding/profile, purpose, prerequisites, preference, and complexity. | G1.3–G1.8 |
-| `SCOPE-SYSTEM-PROOF` | `committed` | One reproducible `0.1` release manifest and complete fixed-matrix proof/evidence view. | G1.9 |
-| `SCOPE-SYSTEM-VALIDATE-SOURCE` | `committed` | `core validate` for Core UI-owned catalog and canonical example sources only. | G1.9 |
-| `SCOPE-SYSTEM-MCP-PROBE` | `committed` | Internal local MCP parity probe; not yet a public product. | G1.9 |
-| `SCOPE-SYSTEM-AGENT-BASELINE` | `committed` | Informational cold-start and generation evaluations tied to canonical IDs. | G1.9 |
+| `SCOPE-SYSTEM-WEB` | `deferred` | Historical combined framework-free/React substrate; split into active React and deferred framework-free successor IDs. | R1 plus later W1 |
+| `SCOPE-SYSTEM-NATIVE` | `deferred` | Native substrate, iOS/Android behavior, native token output, and explicit React Native Web profile semantics. | N1 |
+| `SCOPE-SYSTEM-CURRICULUM` | `committed` | Deterministic example selection by compatibility, binding/profile, purpose, prerequisites, preference, and complexity. | R1.1–R1.5 for React; later tracks extend it |
+| `SCOPE-SYSTEM-PROOF` | `committed` | Reproducible release manifests and complete proof/evidence views for the exact enabled boundary. | R1.5/R1 exit for React; later tracks extend it |
+| `SCOPE-SYSTEM-VALIDATE-SOURCE` | `committed` | `core validate` for Core UI-owned catalog and canonical example sources only. | R1.5 for React-enabled sources |
+| `SCOPE-SYSTEM-MCP-PROBE` | `committed` | Internal local MCP parity probe; not yet a public product and not an R1 blocker. | P2.3 |
+| `SCOPE-SYSTEM-AGENT-BASELINE` | `committed` | Informational cold-start and generation evaluations tied to canonical IDs. | R1.5; later tracks extend it |
 
-### Post-`0.1` renderer proof extension
+### Historical post-`0.1` renderer proof extension
 
-Tabs and Toast are committed after Gate 1 and before broad component-family
-expansion. They do not block unrelated package, resolver, or documentation
-productization.
+The historical authority committed cross-platform Tabs and Toast after Gate 1.
+Product Scope `5.0.0` defers those cross-platform outcomes while admitting
+their React-specific successors to R1.3 and R1.4. They do not block unrelated
+package, resolver, or documentation productization.
 
 | Scope ID | Commitment | Item | Product outcome | Roadmap |
 | --- | --- | --- | --- | --- |
-| `SCOPE-COMP-TABS` | `committed` | Tabs | Keyboard/orientation/layout state, focus versus selection ownership, panels, direction, and honest native disposition. | G2.0 |
-| `SCOPE-COMP-TOAST` | `committed` | Toast | Provider/host ownership, transactions, ordering, timers, interruption, announcements, teardown, and concurrent producers. | G2.0 |
+| `SCOPE-COMP-TABS` | `deferred` | Tabs | Historical cross-platform keyboard/orientation/layout/focus/selection/native-disposition outcome. | R1.3 React successor; later W1/N1/X1 |
+| `SCOPE-COMP-TOAST` | `deferred` | Toast | Historical cross-platform host/transaction/timing/announcement/concurrency outcome. | R1.4 React successor; later W1/N1/X1 |
 
 ### Productization boundary
 
-The minimum Gate 2 productization release commits G2.1, G2.2, G2.3, and G2.7.
+The minimum React Productization release commits P2.1, P2.2, P2.3, and P2 exit.
 G2.4 through G2.6 are admitted product capabilities but may remain disabled in
 a particular release when their own exit evidence is incomplete. Disabled
 capabilities must be absent or explicitly unavailable in every manifest and
@@ -258,29 +296,30 @@ surface.
 
 | Scope ID | Commitment | Product deliverable | Roadmap |
 | --- | --- | --- | --- |
-| `SCOPE-PRODUCT-001` | `committed` | Publishable public packages, packed compatibility descriptors, version policy, historical catalogs, and verifiable release manifests. | G2.1 |
-| `SCOPE-PRODUCT-002` | `committed` | Official install profiles, real packed project-local resolution, offline guidance, and bounded consumer validation. | G2.2 |
-| `SCOPE-PRODUCT-003` | `committed` | Documentation site, web/native explorers, small agent bootstrap files, and public installed-local MCP projections. | G2.3 |
+| `SCOPE-PRODUCT-001` | `committed` | Publishable public packages, packed compatibility descriptors, version policy, historical catalogs, and verifiable release manifests. | P2.1 |
+| `SCOPE-PRODUCT-002` | `committed` | Official install profiles, real packed project-local resolution, offline guidance, and bounded consumer validation. | P2.2 |
+| `SCOPE-PRODUCT-003` | `committed` | React documentation site/explorer, small agent bootstrap files, and public installed-local MCP; secondary projections wait for W1/N1. | P2.3 |
 | `SCOPE-PRODUCT-004` | `admitted` | Grounded read-only `core plan` over stable bounded patterns. | G2.4 |
 | `SCOPE-PRODUCT-005` | `admitted` | Read-only `core doctor` and safe, previewed, confirmed, journalled `core init`. | G2.5 |
 | `SCOPE-PRODUCT-006` | `admitted` | Four allowlisted agent-safe canonical proposal operations. | G2.6 |
-| `SCOPE-PRODUCT-007` | `committed` | Productization release manifest, capability manifest, evidence index, install/rollback proof, and honest disabled-capability reporting. | G2.7 |
+| `SCOPE-PRODUCT-007` | `committed` | Productization release manifest, capability manifest, evidence index, install/rollback proof, and honest disabled-capability reporting. | P2 exit |
 
 ## Platform scope
 
 | Scope ID | Commitment | Platform/binding | Product commitment |
 | --- | --- | --- | --- |
-| `SCOPE-PLATFORM-WEB-HTML` | `committed` | `web.html` | First-class HTML binding spec, CSS, semantic markup, progressive enhancement, and optional explicitly imported vanilla controllers. |
-| `SCOPE-PLATFORM-WEB-REACT` | `committed` | `web.react` | First-class typed React bindings using the Core web styling source and preserving applicable observable web semantics. |
-| `SCOPE-PLATFORM-NATIVE-RN` | `committed` | `native.react-native` | First-class React Native renderer using native primitives and platform-appropriate bindings. |
-| `SCOPE-PROFILE-IOS` | `committed` | iOS | Explicit validation profile, lifecycle/strategy, native evidence, and adaptations. |
-| `SCOPE-PROFILE-ANDROID` | `committed` | Android | Explicit validation profile, lifecycle/strategy, native evidence, and adaptations. |
-| `SCOPE-PROFILE-RNW` | `committed` | React Native Web | Every native binding declares a strategy; implementation is required only where a scope matrix says so. It is never assumed equivalent to `web.react`. |
+| `SCOPE-PLATFORM-WEB-HTML` | `deferred` | `web.html` | Later W1 HTML binding spec, CSS, semantic markup, progressive enhancement, and optional controllers. |
+| `SCOPE-PLATFORM-WEB-REACT` | `committed` | `web.react` | Primary typed React bindings with Core-owned DOM, behavior, accessibility, styling-hook, and compatibility contracts. |
+| `SCOPE-PLATFORM-NATIVE-RN` | `deferred` | `native.react-native` | Later N1 React Native renderer using native primitives and platform-appropriate bindings. |
+| `SCOPE-PROFILE-IOS` | `deferred` | iOS | N1 validation profile, lifecycle/strategy, native evidence, and adaptations. |
+| `SCOPE-PROFILE-ANDROID` | `deferred` | Android | N1 validation profile, lifecycle/strategy, native evidence, and adaptations. |
+| `SCOPE-PROFILE-RNW` | `deferred` | React Native Web | N1 binding strategy/profile; never assumed equivalent to `web.react`. |
 | `SCOPE-PLATFORM-FUTURE-WEB` | `deferred` | One additional web framework | Added only after demonstrated demand against stable web binding and styling contracts. |
 
-Semantic parity means shared intent, applicable states, tokens, and
-accessibility obligations. It does not promise identical props, anatomy,
-transitions, events, focus behavior, or implementation across platforms.
+When a later X1 candidate explicitly claims semantic parity, that claim means
+shared intent, applicable states, tokens, and accessibility obligations. It
+does not promise identical props, anatomy, transitions, events, focus
+behavior, or implementation across platforms. No parity claim exists at R1.
 
 ## Component and public API scope
 
@@ -291,8 +330,8 @@ transitions, events, focus behavior, or implementation across platforms.
 | `SCOPE-API-BINDING` | `committed` | Each binding owns its exact Core UI props/attributes, events, slots/parts, defaults, behavior, deviations, validation profile, and example relations. |
 | `SCOPE-API-COMPOSITION` | `committed` | Compound components expose explicit named parts, allowed parent/child relations, required labels/providers, and mutually exclusive structures without magical child inspection. |
 | `SCOPE-API-WEB-HOOKS` | `committed` | Public web root classes, semantic slots, state attributes, events, custom properties, and cascade layers are enumerated; undocumented topology stays internal. |
-| `SCOPE-API-REACT-ERGONOMICS` | `committed` | React owns typed composition, refs, state, effects, portals, and host-type refinements while preserving applicable web styles and observable semantics. |
-| `SCOPE-API-NATIVE-ERGONOMICS` | `committed` | Native bindings may use platform-appropriate APIs and alternatives while preserving shared intent, tokens, applicable states, and accessibility obligations. |
+| `SCOPE-API-REACT-ERGONOMICS` | `committed` | The `web.react` binding owns typed Core composition, public ref semantics, controlled/uncontrolled observable state, and the public React contract. `@core-ui/react` source owns host-type refinements, runtime state, effects, portals, and implementation while preserving those binding-owned semantics and styles. |
+| `SCOPE-API-NATIVE-ERGONOMICS` | `deferred` | When N1 activates, native bindings may use platform-appropriate APIs and alternatives while preserving shared intent, tokens, applicable states, and accessibility obligations. |
 | `SCOPE-API-PASSTHROUGH` | `committed` | Renderer host passthrough uses named supported profiles and hand-authored type refinements; it cannot introduce undocumented Core UI semantics. |
 | `SCOPE-API-ESCAPE-HATCH` | `committed` | Every styling, validation, suppression, or composition escape hatch is named, typed, bounded, documented, and excluded from canonical defaults. |
 | `SCOPE-API-RUNTIME-OWNERSHIP` | `committed` | Controllers, adapters, providers, focus restoration, dismissal, portals, global listeners, inert/background state, and scroll locks have one explicit lifecycle owner. |
@@ -324,9 +363,10 @@ records and relations cannot represent.
 
 ## Guidance and documentation scope
 
-The CLI remains the primary documentation API. Narrative guides supplement
-structured records; they do not duplicate API, variant, default, token,
-example, compatibility, or lifecycle facts.
+The package-only React prerelease uses generated tarball-local guidance. At
+Productization, the CLI becomes the primary documentation API. Narrative
+guides supplement structured records; they do not duplicate API, variant,
+default, token, example, compatibility, or lifecycle facts.
 
 | Scope ID | Commitment | Guidance family | Boundary |
 | --- | --- | --- | --- |
@@ -350,15 +390,16 @@ the site.
 | `SCOPE-PKG-SCHEMA` | `committed` | `@core-ui/schema` | Versioned source/response schemas, generated types, platform IDs, authoring helpers, token-source `sourceCrosswalk` grammar, and bounded sectional query shapes. | Product semantics, renderer implementation, or site content. |
 | `SCOPE-PKG-TOKENS` | `committed` | `@core-ui/tokens` | Canonical Core-owned token data, Tale-source classification validation, and deterministic web/native/design-tool transforms. | Component behavior, documentation rendering, or Tale UI as a live owner. |
 | `SCOPE-PKG-FOUNDATION` | `committed` | `@core-ui/foundation` | Enforced semantic, pure-logic, and optional portable-interaction boundaries. | Selectors, React hooks, browser globals, native views, or mandatory transitions. |
-| `SCOPE-PKG-WEB` | `committed` | `@core-ui/web` | HTML binding specs, CSS, themes, optional vanilla controllers, and web entry points. | React or native implementation. |
-| `SCOPE-PKG-REACT` | `committed` | `@core-ui/react` | React bindings preserving applicable web semantics, styles, and observable hooks while owning React ergonomics. | Canonical component metadata or copied CSS. |
-| `SCOPE-PKG-REACT-NATIVE` | `committed` | `@core-ui/react-native` | Native components, explicit platform files, native accessibility, gestures, and responder behavior. | CSS parsing, DOM, Expo, or explorer hosts. |
+| `SCOPE-PKG-WEB` | `deferred` | `@core-ui/web` | Later W1 HTML/CSS/controller implementation for `web.html` binding specs. | React or native implementation; a React prerequisite, shared React runtime, or shared React CSS owner. |
+| `SCOPE-PKG-REACT` | `committed` | `@core-ui/react` | Standalone React rendering, Core-owned CSS adapted from the pinned Tale donor where applicable, required donor license/notice material, SSR/hydration, effects, exports, descriptors, and generated package guidance for `web.react` contracts. | Canonical component metadata, React Aria public API, Tale UI or another Core workspace runtime/build dependency, or a second style registry. |
+| `SCOPE-PKG-REACT-NATIVE` | `deferred` | `@core-ui/react-native` | Later N1 native primitive/runtime implementation and explicit platform files. | React/React Aria authority, CSS parsing, DOM, Expo, or explorer hosts. |
 | `SCOPE-PKG-CATALOG` | `committed` | `@core-ui/catalog` | Immutable compiled catalog, search index, pure discovery/query/planning API, canonical page-budget profiles/page selection, response-version negotiation/historical semantics, bounded token/crosswalk sections, and package-level catalog identity. | CLI parsing, MCP transport, renderer runtime, or project mutation. |
 | `SCOPE-PKG-TOOLING` | `committed` | `@core-ui/tooling` | CLI, adapters, installed catalog/version selection, explicit query-version forwarding, response rendering, local validation, maintainer authoring, change-intent previews, and enabled safe operations. | A second artifact index, product/query-response decisions, page-boundary selection, or renderer implementation. |
 
-Renderer packages do not depend on the catalog at runtime. Official consumer
-profiles install compatible renderer packages plus project-local catalog and
-tooling development dependencies.
+At R1, only `@core-ui/react` is publishable; schema, tokens, foundation,
+catalog, and tooling remain private build/proof authorities and are not runtime
+edges. Productization later publishes the compatible portfolio. Renderer
+packages do not depend on the catalog at runtime.
 
 ## Product surfaces and command scope
 
@@ -370,7 +411,7 @@ tooling development dependencies.
 | `SCOPE-SURFACE-CLI` | `committed` | CLI human/JSON/dense | Foundation | Primary documentation interface over the same bounded, versioned response object. |
 | `SCOPE-SURFACE-SITE` | `committed` | Documentation site | Productization | Catalog client rendering canonical records and guide sources. |
 | `SCOPE-SURFACE-EXPLORER-WEB` | `committed` | Web/React explorer | Productization | Generated adapters over canonical executable examples. |
-| `SCOPE-SURFACE-EXPLORER-NATIVE` | `committed` | Native explorer host | Productization | Expo/native host used outside runtime packages. |
+| `SCOPE-SURFACE-EXPLORER-NATIVE` | `deferred` | Native explorer host | Native Productization after N1 | Expo/native host used outside runtime packages. |
 | `SCOPE-SURFACE-BOOTSTRAP` | `committed` | Small static agent context | Productization | Route map and discovery loop, never a manually maintained catalog dump. |
 | `SCOPE-SURFACE-MCP-LOCAL` | `committed` | Installed local MCP | Productization | Search/get and only enabled read-only capabilities over the shared query engine. |
 | `SCOPE-SURFACE-MCP-HOSTED` | `deferred` | Hosted MCP | Capability release | Read-only advisory/target-tuple-aware discovery with failure isolation. |
@@ -428,11 +469,11 @@ without truncation.
 | `SCOPE-THEME-DEFAULT` | `committed` | First-party brand-agnostic default theme whose Core-owned reference baseline is classified from the pinned Tale UI source | `0.1` |
 | `SCOPE-TOKEN-LAYERS` | `committed` | Reference, semantic, and component token layers with acyclic allowed alias direction | `0.1` |
 | `SCOPE-TOKEN-MODES` | `committed` | Applicable typed color-scheme, contrast, motion, density, and direction axes | `0.1` |
-| `SCOPE-TOKEN-TRANSFORMS` | `committed` | Static web CSS and native theme-object transforms from canonical token sources | `0.1` |
+| `SCOPE-TOKEN-TRANSFORMS` | `committed` | Static React CSS output at R1; native theme-object transforms remain retained historical/later N1 input and become current only when N1 activates | R1 now; N1 later |
 | `SCOPE-TOKEN-REQUIREMENTS` | `committed` | Binding-specific required/optional/deprecated token requirement sets and digests | `0.1` |
 | `SCOPE-TOKEN-FALLBACKS` | `committed` | Explicit typed fallback value/token policy with profile proof and structured diagnostics | `0.1` |
 | `SCOPE-TOKEN-OVERRIDES` | `committed` | `fixed`, `theme`, and `instance` override policies with consumer-theme validation | `0.1` |
-| `SCOPE-THEME-ACCESSIBILITY` | `committed` | Observable forced-colors/high-contrast web behavior and native dynamic-color/accessibility mappings, fulfilled and evidenced by the owning bindings against `SCOPE-THEME-PLATFORM-SAFETY`; this item does not own requirement identity or the non-disable rule | `0.1` |
+| `SCOPE-THEME-ACCESSIBILITY` | `committed` | Observable forced-colors/high-contrast React behavior at R1; native dynamic-color/accessibility mappings activate and are independently fulfilled/evidenced only at N1. Owning bindings satisfy `SCOPE-THEME-PLATFORM-SAFETY`; this item does not own requirement identity or the non-disable rule. | R1 now; N1 later |
 | `SCOPE-THEME-RUNTIME` | `admitted` | Runtime theme switching per explicitly supported/proved profile; complete static output remains mandatory | Productization or capability release |
 | `SCOPE-THEME-ADDITIONAL` | `deferred` | Additional first-party or consumer themes | Capability release after stable token contract |
 | `SCOPE-DESIGN-TOOL` | `admitted` | One named design-tool interchange profile and proposal-only round-trip | Capability release through G3.5 |
@@ -453,6 +494,18 @@ types/units, meanings, modes, override policies, platform dispositions, and
 pinned provenance in the existing `reference` layer. Tale names and CSS are
 inputs only: Tale UI is not a runtime dependency, ongoing synchronization
 source, fourth token layer, or second canonical owner.
+
+The same pinned commit is the one-time React styling donor. Its
+`packages/styles/src` tree
+`aea4eadffe226656ef0ab012409ed39070975a76`, related React source tree
+`d93f7c0a555066d8abbaff75cb8bd216938bcb2f`, and CSS foundation tree
+`aa2a2d95214918794e9f463e063ceee0df3b4b1e` provide visual and structural
+inputs for admitted R1 components. Every consumed rule and custom property is
+classified through a Core-owned per-component disposition/crosswalk; Tale
+selectors, package/API identities, token aliases, registries, and stories do
+not become Core contracts. There is no Tale dependency, ambient-checkout build
+input, automatic synchronization, or requirement to ship a component that Core
+has not admitted.
 
 The existing token source under `catalog/tokens/` owns that classification and
 all authored Tale provenance through the optional stable token-source schema
@@ -534,7 +587,7 @@ proposal but is not proved merely because canonical changes were approved.
 | `SCOPE-PROOF-CONFORMANCE` | `committed` | Spec/code/export/token conformance | Generated types, renderer refinements, exports, CSS hooks, examples, and declarations match canonical specs. |
 | `SCOPE-PROOF-BEHAVIOR` | `committed` | Unit, state, browser, and native behavior | Implementations satisfy binding transitions, runtime ownership, SSR/hydration, input, focus, and platform behavior. |
 | `SCOPE-PROOF-A11Y` | `committed` | Accessibility | Automated and risk-proportionate retained manual evidence supports every stable interaction/profile claim. |
-| `SCOPE-PROOF-VISUAL` | `committed` | Visual | Canonical examples are checked across applicable themes, modes, density, direction, and platforms. |
+| `SCOPE-PROOF-VISUAL` | `committed` | Visual | Canonical examples are checked across applicable themes, modes, density, direction, and platforms; R1 additionally proves the applicable pinned Tale donor comparison and every intentional visual adaptation. |
 | `SCOPE-PROOF-PACKAGE` | `committed` | Packed consumers | Published artifacts resolve declared exports, types, styles, assets, descriptors, and engines. |
 | `SCOPE-PROOF-PARITY` | `committed` | Surface parity | API, CLI, dense, MCP, site, explorer, and static projections agree where enabled. |
 | `SCOPE-PROOF-GENERATION` | `committed` | Generation identity | Clean repeated builds produce the same catalog and release digests. |
@@ -549,7 +602,7 @@ roadmap evidence ownership before the affected milestone becomes `ready`.
 
 | Scope ID | Commitment | Requirement | Earliest proof boundary |
 | --- | --- | --- | --- |
-| `SCOPE-QUALITY-COMPAT-PROFILE` | `committed` | One versioned compatibility/evidence artifact covering exact browser, React/React Native, OS, device, assistive-technology, input, locale, direction, zoom, contrast, and motion support. | `0.1` claims, complete for stable productization |
+| `SCOPE-QUALITY-COMPAT-PROFILE` | `committed` | At R1, one versioned React compatibility/evidence artifact covers exact browser, React, assistive-technology, input, locale, direction, zoom, contrast, and motion claims. React Native, OS, and device profiles are added independently only when N1 activates. | R1 claims now; N1 profiles later; complete for each stable boundary |
 | `SCOPE-QUALITY-GENERATOR-CONTRACT` | `committed` | Every generator supports `--check`, stable ordering, no wall-clock canonical-preimage fields, and owner-linked drift diagnostics. | Foundation and every later generator activation |
 | `SCOPE-QUALITY-PERFORMANCE` | `committed` | Versioned performance policy, representative renderer/query/package baselines, predeclared regression budgets, and scheduled retained evidence. | Baseline by `0.1`; stable policy before stable productization |
 | `SCOPE-TRUST-CACHE-PROVENANCE` | `committed` | Explicitly downloaded catalogs are content-addressed, signature or provenance verified, digest-isolated, and rejected when verification fails. | Foundation synthetic proof; real packed proof at productization |
@@ -593,9 +646,21 @@ explicit no-activation decision without making Core UI incomplete.
 
 ### Component and pattern breadth admission
 
-`SCOPE-CAP-BREADTH` does not commit an unnamed component inventory. Each future
-item must enter this document with its own scope ID before implementation and
-record:
+Tale's Scale application at pinned tree
+`85d594c05b32e473af4734ec18447a1d8df8ebdd` is a deferred donor candidate for
+the existing additional-theme/design-tool capability, not an R1 deliverable or
+dependency. Reuse requires a later admission that names the Core theme schema,
+public surface, package/application boundary, import/export loss policy,
+consumer validation, accessibility, privacy, security, lifecycle, and release
+evidence. R1 may preserve compatible static theme outputs but does not port or
+publish Scale.
+
+`SCOPE-CAP-BREADTH` remains the later cross-platform breadth capability and
+does not commit an unnamed inventory. React-primary breadth is instead owned by
+`SCOPE-REACT-BREADTH-001`: each accepted tranche lock names the exact upstream
+snapshot items, proposed Core IDs, and dispositions, and its Product Scope
+amendment admits the exact new component IDs before implementation. Each such
+admission records:
 
 - the user workflow and unmet intent;
 - component versus pattern ownership;
@@ -615,16 +680,17 @@ Raw component count is never a scope objective.
 | Product-scope family | Roadmap realization |
 | --- | --- |
 | Foundation, canonical knowledge, CLI baseline, local resolver, and maintainer authoring | G0.0–G0.5 and the Gate 0 integration exit; the Tale-token correction adds independently accepted Phase A, Phase B, and Phase C generations |
-| Default tokens/theme and web/React/native substrates | Corrected G1.0 after Phase B and Phase C correlation, then fresh G1.1 and G1.2 entry evaluation |
-| `0.1` components, Form pattern, examples, proof, source validation, and internal MCP | G1.3–G1.9 and the Gate 1 integration exit |
-| Tabs and Toast proof extension | G2.0 |
-| Public packages, descriptors, compatibility, releases, and historical catalogs | G2.1 |
-| Consumer installation, local authority, and bounded validation | G2.2 |
-| Site, explorers, static bootstrap, guides, and public installed-local MCP | G2.3 |
+| React package/substrate baseline and React component tranches | R1.0–R1.5; historical G1.0–G1.2 facts require exact reusable-proof binding |
+| React package-only prerelease publication | R1 tranche exits and R1 exit |
+| Public catalog/tooling packages, descriptors, CLI, compatibility, releases, and historical catalogs for React | P2.1 |
+| React consumer installation, local authority, and bounded validation | P2.2 |
+| React site, explorer, static bootstrap, guides, and public installed-local MCP | P2.3 |
+| Framework-free web and native products | W1 and N1 only after separate activation |
+| Cross-platform comparison/equivalence and stable React promotion | X1 and S1 only after separate activation |
 | Grounded composition planning | G2.4 when enabled |
 | Project health and initialization | G2.5 when enabled |
 | Allowlisted canonical proposals | G2.6 when enabled |
-| Productization release and capability honesty | G2.7 |
+| Productization release and capability honesty | P2 exit |
 | Conditional breadth, migration, hosted MCP, model-evaluation gates, themes/design-tool interchange, promptable semantics, extensions, higher-order artifacts, frameworks, agent-to-UI, and consumer-pattern tooling | G3.1–G3.11 independently |
 
 Before the affected milestone becomes `ready`, the roadmap must assign explicit
@@ -634,13 +700,13 @@ rules:
 
 | Scope item | Required roadmap placement |
 | --- | --- |
-| Compatibility/evidence profile (`SCOPE-QUALITY-COMPAT-PROFILE`) | G1.9 creates the tested profile; G2.1/G2.7 publish and enforce the stable compatibility artifact. |
+| Compatibility/evidence profile (`SCOPE-QUALITY-COMPAT-PROFILE`) | R1.5 creates the tested React profile; R1 exit binds the prerelease artifact; P2.1/P2 exit publish and enforce the Productization profile. |
 | Generator contract (`SCOPE-QUALITY-GENERATOR-CONTRACT`) | G0.0/G0.2 establish the contract; every later generator-owning milestone inherits a release-blocking fixture. |
-| Performance policy (`SCOPE-QUALITY-PERFORMANCE`) | G1.9 captures representative baselines; G2.7 owns stable policy; G3.1 guards breadth regressions. |
-| Cached-catalog provenance (`SCOPE-TRUST-CACHE-PROVENANCE`) | G0.4 proves synthetic verification and rejection; G2.1/G2.2 prove real packed/cached catalogs. |
-| Evidence-capture privacy (`SCOPE-TRUST-EVIDENCE-PRIVACY`) | G1.9 evidence policy and every evaluation/integration capture milestone enforce default-off collection and consent/redaction. |
-| Platform theme-safety contract (`SCOPE-THEME-PLATFORM-SAFETY`) | G1.0 defines and enforces the closed requirement identities, per-binding/profile applicability, revision closure, and consumer non-disable rule without claiming renderer behavior; G1.9 verifies the complete Gate 1 contract/evidence correlation. G3.5 extends the same rule to additional themes. |
-| Platform theme-accessibility behavior (`SCOPE-THEME-ACCESSIBILITY`) | G1.1 proves forced-colors/system-high-contrast web behavior, G1.2 proves native dynamic-color and applicable accessibility mappings plus the contract's font-metric/direction obligations, each implemented React Native Web slice carries its own profile evidence, and G1.9 verifies the complete Gate 1 profile view. |
+| Performance policy (`SCOPE-QUALITY-PERFORMANCE`) | R1.5 captures representative React baselines; P2 exit owns the Productization policy; later breadth guards its own regressions. |
+| Cached-catalog provenance (`SCOPE-TRUST-CACHE-PROVENANCE`) | G0.4 proves synthetic verification and rejection; P2.1/P2.2 prove real packed/cached catalogs. |
+| Evidence-capture privacy (`SCOPE-TRUST-EVIDENCE-PRIVACY`) | R1 evidence policy and every later evaluation/integration capture milestone enforce default-off collection and consent/redaction. |
+| Platform theme-safety contract (`SCOPE-THEME-PLATFORM-SAFETY`) | Historical G1.0 defines the closed requirement identities. R1.0 explicitly rebinds reusable React facts, and R1.5 verifies the complete React profile view. Later W1/N1 profiles prove their own applicability; G3.5 extends the rule to additional themes. |
+| Platform theme-accessibility behavior (`SCOPE-THEME-ACCESSIBILITY`) | Historical G1.1/G1.2 proof remains audit input. R1.0 and each React tranche prove applicable forced-colors, high-contrast, font-metric and direction obligations; later native profiles prove native dynamic-color and accessibility mappings independently. |
 
 No tracker issue can substitute for this roadmap reconciliation because the
 roadmap, not the tracker, owns milestone proof.
@@ -681,34 +747,41 @@ accessibility, package, compatibility, integrity, or generation failures.
 
 ## Release acceptance scope
 
-### `0.1` is product-complete only when
+### React `0.1` is product-complete only when
 
-- every fixed matrix cell has the required implementation, proof, or explicitly
-  permitted disposition;
-- Button, TextField, Switch, Dialog, Select, and Form exist under their
-  canonical owners with required examples, pitfalls, renderers, descriptors,
-  and evidence;
-- the pinned Tale baseline is occurrence-complete, every source occurrence has
-  a reviewed disposition, and every admitted value has one Core-owned reference
-  identity with explicit web/native handling and provenance;
-- the first-party default token/theme system satisfies every binding/profile
-  requirement and platform accessibility adaptation;
-- framework-free web, React, and native runtime ownership is explicit and
-  leak-free;
-- human, JSON, dense, API, and internal MCP views agree on exact records and
-  applicability;
+- the exact pinned React Aria Components surface is disposition-complete and
+  every applicable item maps to a delivered Core component or an accepted
+  `defer`, `exclude`, or `not-a-component` disposition;
+- every exported `web.react` binding has one Core-owned canonical component,
+  binding contract, implementation, CSS, canonical example, descriptor,
+  generated package guidance, and risk-proportionate proof closure;
+- every exported binding with an applicable Tale counterpart has an exact
+  pinned donor-style disposition, complete donor-to-Core token/style crosswalk,
+  Core-owned CSS, and visual comparison; routine export permits only `adopt` or
+  `adapt`, while `defer`/`reject` requires a separately accepted exception and
+  remains unexported until reconciled; absence of a donor is explicit and never
+  blocks a responsible Core implementation;
+- the standalone `@core-ui/react` tarball has exact React/React DOM peers and
+  React Aria dependency, with no Core workspace runtime edge or React Aria
+  public API leak;
+- the first-party default token/theme system satisfies every applicable React
+  requirement and accessibility adaptation;
+- package exports, types, CSS, guidance, descriptors, compatibility metadata,
+  and release manifest agree on exact revisions;
 - packed artifacts, not source-tree assumptions, prove exports and
   compatibility;
-- required manual accessibility evidence exists for every supported high-risk
-  interaction/profile;
+- required manual/assistive-technology evidence exists before export for every
+  React binding whose exact risk contract requires it;
 - the compatibility/evidence profile states the exact tested environment;
 - generator, privacy, provenance, exception, advisory, performance-baseline,
   and change-intent requirements pass; and
-- the same release manifest correlates all catalog, package, binding, token,
-  evidence, profile, provenance, and exception identity.
+- the same release manifest correlates all package, source-catalog, binding,
+  token/CSS, evidence, profile, provenance, exception, registry, and rollback
+  identity.
 
-Later productization or Gate 3 capability work cannot compensate for a missing
-`0.1` requirement.
+Framework-free web, React Native, React Native Web, cross-platform equivalence,
+public catalog/tooling/CLI, Productization, stable lifecycle, and `latest` are
+not required and cannot be inferred from React `0.1` completion.
 
 ### Productization is product-complete only when
 
@@ -722,9 +795,10 @@ Later productization or Gate 3 capability work cannot compensate for a missing
   the same enabled catalog/query sources;
 - historical catalogs and compatibility negotiation answer for supported
   installed versions;
-- stable support has current risk/profile evidence, performance policy,
-  compatibility review, retention, privacy, provenance, and no expired
-  exception;
+- every enabled prerelease and support claim has current risk/profile evidence,
+  performance policy, compatibility review, retention, privacy, provenance,
+  and no expired exception; stable-support evidence and promotion remain
+  exclusively S1 work;
 - disabled optional capabilities are absent or explicitly unavailable;
 - every enabled plan, doctor, init, or canonical proposal operation passes its
   own manifest, confirmation, confinement, idempotency, and recovery rules; and
@@ -1218,6 +1292,193 @@ state. Authority acceptance remains a pre-write human boundary. The accepted aut
 successors are appended for every terminal manifest made stale by this
 authority change.
 
+### React-primary delivery authority (`5.0.0`)
+
+Andrew / `ndrewtran` accepted the exact 42,624-byte React-primary authority
+candidate at SHA-256
+`8d927788d085c7d2406dd3bfbb6aa1a92dfdaafbbe17c6048eb607f2297b8633`.
+The observed workflow was that simultaneous multi-platform component delivery
+and repeated per-component proof/authorization consumed more time than
+implementation and prevented React breadth. The accepted outcome is a coherent
+React-first public library while preserving Core ownership, platform honesty,
+claim-proportionate proof, and separately activated secondary renderers.
+
+#### Exact transition ledger
+
+| Existing Scope ID(s) | `5.0.0` disposition |
+| --- | --- |
+| `SCOPE-OUTCOME-001` | `committed` → `deferred`; its multi-platform meaning is unchanged and moves to secondary-track completion. |
+| `SCOPE-OUTCOME-002` | Remains `committed`; first public satisfaction moves to P2.1/P2.2 and package-only guidance does not satisfy it. |
+| `SCOPE-OUTCOME-003`–`005` | Remain `committed`; enabled-surface assertions remain, and `005` binds the React prerelease manifest. |
+| `SCOPE-OUTCOME-006`–`008` | Remain `admitted` and later. |
+| `SCOPE-USER-001`, `003`, `008` | Jobs remain in scope but move to secondary-track activation. |
+| `SCOPE-USER-002`, `004`–`007` | Remain in scope; React is primary. |
+| `SCOPE-COMP-BUTTON`, `SCOPE-COMP-TEXTFIELD`, `SCOPE-COMP-SWITCH`, `SCOPE-COMP-DIALOG`, `SCOPE-COMP-SELECT`, `SCOPE-PATTERN-FORM` | `committed` → `deferred` with their cross-platform meanings unchanged; React-specific successor IDs commit the same canonical identities at R1. |
+| `SCOPE-COMP-TABS`, `SCOPE-COMP-TOAST` | `committed` → `deferred` with cross-platform meanings unchanged; React-specific successors belong to R1.3/R1.4. |
+| `SCOPE-SYSTEM-TOKENS` | Remains `committed` for React; native transform proof waits for N1. |
+| `SCOPE-SYSTEM-WEB` | `committed` → `deferred`; its combined meaning remains for audit/later completion and is split into React and framework-free successor IDs. |
+| `SCOPE-SYSTEM-NATIVE` | `committed` → `deferred`; existing evidence remains audit history. |
+| `SCOPE-SYSTEM-CURRICULUM`, `SCOPE-SYSTEM-PROOF`, `SCOPE-SYSTEM-VALIDATE-SOURCE`, `SCOPE-SYSTEM-AGENT-BASELINE` | Remain `committed`, applying at R1 to React-enabled records/surfaces; later tracks extend them. |
+| `SCOPE-SYSTEM-MCP-PROBE` | Remains `committed` but moves to Productization and does not block R1 publication. |
+| `SCOPE-PLATFORM-WEB-REACT` | Remains `committed`, becomes primary, and no longer depends on shared `@core-ui/web` styles. |
+| `SCOPE-PLATFORM-WEB-HTML`, `SCOPE-PLATFORM-NATIVE-RN`, `SCOPE-PROFILE-IOS`, `SCOPE-PROFILE-ANDROID`, `SCOPE-PROFILE-RNW` | `committed` → `deferred` secondary activation; this product state does not rewrite binding strategy, lifecycle, or availability. |
+| `SCOPE-API-NAMING`, `SCOPE-API-DEFAULTS`, `SCOPE-API-BINDING`, `SCOPE-API-COMPOSITION`, `SCOPE-API-WEB-HOOKS`, `SCOPE-API-REACT-ERGONOMICS`, `SCOPE-API-PASSTHROUGH`, `SCOPE-API-ESCAPE-HATCH`, `SCOPE-API-RUNTIME-OWNERSHIP`, `SCOPE-API-A11Y`, `SCOPE-API-DEPRECATION` | Remain `committed` at R1 under concept/`web.react`/React-source ownership. |
+| `SCOPE-API-NATIVE-ERGONOMICS` | `committed` → `deferred` until N1. |
+| All committed `SCOPE-KIND-*` records | Unchanged; no artifact kind or registry is added. |
+| `SCOPE-PKG-REACT` | Remains `committed` and becomes the only R1-publishable package with the standalone graph. |
+| `SCOPE-PKG-WEB`, `SCOPE-PKG-REACT-NATIVE` | `committed` → `deferred` secondary release boundaries. |
+| `SCOPE-PKG-SCHEMA`, `SCOPE-PKG-TOKENS`, `SCOPE-PKG-FOUNDATION`, `SCOPE-PKG-CATALOG`, `SCOPE-PKG-TOOLING` | Remain `committed` for Productization but private build/proof authorities at R1, never runtime dependencies of the React tarball. |
+| `SCOPE-PRODUCT-001` | Remains `committed`; realization rewires to P2.1. |
+| `SCOPE-PRODUCT-002`, `SCOPE-PRODUCT-003`, `SCOPE-PRODUCT-007` | Remain `committed`; React realization rewires to P2.2, P2.3, and P2 exit, with secondary portions waiting for W1/N1. |
+| `SCOPE-PRODUCT-004`–`006` | Remain `admitted`, optional, and unavailable until their own triggers pass. |
+| `SCOPE-THEME-DEFAULT`, `SCOPE-TOKEN-LAYERS`, `SCOPE-TOKEN-MODES`, `SCOPE-TOKEN-REQUIREMENTS`, `SCOPE-TOKEN-FALLBACKS`, `SCOPE-TOKEN-OVERRIDES`, `SCOPE-THEME-PLATFORM-SAFETY`, `SCOPE-THEME-ACCESSIBILITY` | Remain `committed` for applicable React profiles; native-specific obligations activate at N1. |
+| `SCOPE-TOKEN-TRANSFORMS` | Remains `committed`; React CSS is current and native output is historical/later input, not a React claim. |
+| `SCOPE-PROOF-SCHEMA`, `SCOPE-PROOF-CONFORMANCE`, `SCOPE-PROOF-BEHAVIOR`, `SCOPE-PROOF-A11Y`, `SCOPE-PROOF-VISUAL`, `SCOPE-PROOF-PACKAGE`, `SCOPE-PROOF-PARITY`, `SCOPE-PROOF-GENERATION` | Remain `committed` for exported React bindings/enabled surfaces; manual proof is binding-risk and release-claim proportionate. |
+| `SCOPE-PROOF-AGENT-INFO` | Remains informational and batched, never a deterministic waiver or per-component approval. |
+| `SCOPE-QUALITY-COMPAT-PROFILE`, `SCOPE-QUALITY-GENERATOR-CONTRACT`, `SCOPE-QUALITY-PERFORMANCE` | Remain `committed` for the exact React release tuple; secondary tracks extend rather than inherit them. |
+| All committed `SCOPE-TRUST-*` records | Unchanged and required at each applicable React publication boundary. |
+| `SCOPE-CAP-BREADTH` | Remains `admitted` cross-platform breadth; it is not repurposed for R1. |
+| `SCOPE-SURFACE-API`, `SCOPE-SURFACE-CLI`, `SCOPE-GUIDE-DISCOVERY` | Remain `committed` at P2.1/P2.2, not R1. |
+| `SCOPE-SURFACE-SITE`, `SCOPE-SURFACE-EXPLORER-WEB`, `SCOPE-SURFACE-BOOTSTRAP`, `SCOPE-SURFACE-MCP-LOCAL` | Remain `committed` for React at P2.3; later bindings extend them. |
+| `SCOPE-SURFACE-EXPLORER-NATIVE` | `committed` → `deferred` until N1/native Productization. |
+| All committed `SCOPE-GUIDE-*` families except deferred migration guidance | Remain `committed` at Productization; R1 package guidance projects applicable facts but does not satisfy CLI guide delivery. |
+| `SCOPE-METRIC-001` | Retained for later multi-platform completion; it no longer measures R1. |
+| `SCOPE-METRIC-002`–`006` | Remain; thresholds and applicable surfaces are frozen before the relevant R1/P2/secondary candidate. |
+| `SCOPE-NONGOAL-001`–`012` | Unchanged; React, React Aria, tranche locks, and generated projections never become canonical inventory, and count never substitutes for quality or proof. |
+
+#### New immutable Scope IDs
+
+Every record below is owned by Core UI Product Scope. Removal or replacement
+requires a major scope amendment that preserves this ID and historical
+releases. Existing evidence/privacy/integrity rules apply, with no consumer
+context captured by default.
+
+| Scope ID | State | Outcome and boundary | Platform/package | Roadmap/evidence | Activation and exclusions |
+| --- | --- | --- | --- | --- | --- |
+| `SCOPE-OUTCOME-REACT-PRIMARY` | `committed` | Consumer installs the React prerelease and uses Core-owned experimental React bindings with generated package guidance; R1 exit. | `web.react`; `@core-ui/react` | R1.0–R1 exit; `E-R1.*` | Accepted 5.0.0, exact baselines/tranches, npm authorization; no CLI/catalog product, stable, secondary renderer, or equivalence. |
+| `SCOPE-OUTCOME-MULTIPLATFORM-SECONDARY` | `deferred` | Framework-free/native consumers later receive platform-correct adaptations from the renderer-neutral semantic system. | `web.html`, native RN/iOS/Android/RNW | W1/N1/X1 | R1 exit, demand, accepted lock, explicit activation; never blocks or inherits React. |
+| `SCOPE-SYSTEM-REACT` | `committed` | Standalone React substrate, CSS/runtime ownership, React Aria baseline, and tranche delivery. | `web.react`; `@core-ui/react` | R1.0 and every R1 tranche | Exact baseline; no secondary implementation or canonical inventory ownership. |
+| `SCOPE-SYSTEM-WEB-HTML-SECONDARY` | `deferred` | Future framework-free binding/package system. | `web.html`; `@core-ui/web` | W1.0 and W1 tranches | R1 exit, demand, accepted lock/activation; no React dependency or automatic API equivalence. |
+| `SCOPE-REACT-BREADTH-001` | `committed` | Disposition-complete Core React coverage of the applicable documented pinned React Aria component surface. | `web.react`; `@core-ui/react` | R1.1–R1.5; `E-R1.5-01…06` | Accepted tranche locks/baseline; not a raw count/export target and explicit exclusions are allowed. |
+| `SCOPE-COMP-BUTTON-REACT` | `committed` | React Button action, pending, disabled, name, and first complete React addition path. | `web.react`; `@core-ui/react` | R1.0/R1.1 | Accepted Button lock; no secondary counterpart or stable claim. |
+| `SCOPE-COMP-TEXTFIELD-REACT` | `committed` | React TextField value, validation, label, description, error, and form relations. | `web.react`; `@core-ui/react` | R1.2 `E-R1.2-01…04` | Accepted R1.2 lock/baseline; no secondary binding claim. |
+| `SCOPE-COMP-SWITCH-REACT` | `committed` | React Switch state, group, and control semantics. | `web.react`; `@core-ui/react` | R1.2 `E-R1.2-01…04` | Accepted R1.2 lock/baseline; no secondary binding claim. |
+| `SCOPE-PATTERN-FORM-REACT` | `committed` | React Form composition, validation, submission, and deterministic examples. | `web.react`; React package/examples | R1.2 `E-R1.2-01…04` | Accepted lock/component prerequisites; no planner or native composition claim. |
+| `SCOPE-COMP-SELECT-REACT` | `committed` | React Select selection, focus, keyboard, and form contract. | `web.react`; `@core-ui/react` | R1.3 `E-R1.3-01…05` | Accepted lock/baseline and required manual proof; no native picker/equivalence claim. |
+| `SCOPE-COMP-TABS-REACT` | `committed` | React Tabs orientation, focus/selection, and panel relations. | `web.react`; `@core-ui/react` | R1.3 `E-R1.3-01…05` | Accepted lock/baseline/risk proof; no native disposition claim. |
+| `SCOPE-COMP-DIALOG-REACT` | `committed` | React Dialog overlay, focus, dismissal, effects, and accessibility. | `web.react`; `@core-ui/react` | R1.4 `E-R1.4-01…06` | Accepted lock/baseline and required manual/AT proof before export; no native equivalence. |
+| `SCOPE-COMP-TOAST-REACT` | `committed` | React Toast host, ordering, timing, announcements, teardown, and concurrency. | `web.react`; `@core-ui/react` | R1.4 `E-R1.4-01…06` | Accepted lock/baseline and required manual/AT proof before export; no native equivalence. |
+| `SCOPE-PRODUCT-REACT-PRERELEASE` | `committed` | Publish exact React alpha/RC tarball and manifest under `next`. | Public npm `@core-ui/react` | R1 tranche releases; `E-R1-EXIT-01…04` | Namespace control, tarball/provenance/checks, explicit publish authorization; no stable/catalog/tooling/secondary package. |
+| `SCOPE-SURFACE-REACT-PACKAGE-GUIDANCE` | `committed` | Generated version-bound README, API, export/component, styling, and compatibility guidance inside the tarball. | `@core-ui/react` | R1.0 package fixture and every tranche | Exact canonical/binding/package identities; no query/history/dense/MCP/authoring and never canonical. |
+| `SCOPE-METRIC-REACT-COVERAGE` | `committed` | Pinned-upstream disposition coverage plus exported React contract/proof coverage by risk. | R1 | R1.5 evidence policy | Snapshot/threshold fixed before measurement; raw count alone cannot pass. |
+
+#### Ownership, package, proof, and release effect
+
+The canonical component record owns renderer-neutral identity, intent, states,
+anatomy, portable obligations, tokens, artifact lifecycle, risk, and
+alternatives. The `web.react` binding spec owns the Core React DOM/API/types,
+observable behavior, accessibility, events, slots, styling hooks, defaults,
+binding lifecycle/strategy, validation profile, canonical-example relations,
+platform-safety declarations, and compatibility promises. `@core-ui/react`
+source owns React/CSS implementation, SSR/hydration, effects, host refinements,
+and runtime/effect lifecycle. Executable example code remains owned by its
+canonical example source.
+
+The R1 public graph is exactly `@core-ui/react@0.1.0-alpha.N` with
+`react-aria-components@1.20.0`, React peer `>=19.2.0 <20`, and React DOM peer
+`>=19.2.0 <20`. There is no Core workspace runtime edge or `@core-ui/web`
+dependency. Private Core packages may generate tarball contents but do not
+become runtime dependencies.
+
+Every R1 tranche uses one accepted scope lock and baseline, one deterministic
+closure, risk-selected independent review, and one post-proof human release
+acceptance. Routine locked components need no per-component authority loop.
+Shared proof is reusable only while the exact React Aria identity, package
+graph, styling/runtime ownership, SSR/hydration, catalog/compiler,
+accessibility harness, compatibility profile, and packed-consumer contracts
+remain bound to the accepted baseline digest.
+
+React prerelease eligibility adds only exact `@core-ui/react` alpha/RC versions
+under `next` and tarball-local generated guidance. It removes framework-free
+web, native/RNW, cross-platform comparison/equivalence, public catalog/tooling/
+CLI/search/history/MCP, stable lifecycle, and `latest` from the R1 boundary.
+Productization retains those public discovery/guidance commitments for React;
+later W1/N1 boundaries add secondary renderer products independently.
+
+No publication follows from this amendment. Each publish remains a separate
+external mutation. A published version is never rewritten; rollback uses a
+corrected prerelease and restores the prior verified `next` tuple, or removes
+the tag only through separately authorized and auditable registry action.
+
+#### Historical, tracker, and reversal effect
+
+Existing authority, decision, and evidence bytes are not rewritten. G1.0–G1.2
+remain historical inputs; G1.3–G1.9 and the old G2 React sequence are
+superseded locators. Reuse requires exact applicability binding under R1.
+
+The GitHub Project migration is decision-bearing and separate. It may occur
+only from an exact packet bound to then-current Project identity, fields,
+views, workflows, item IDs, and proposed values. No new `superseded` Status is
+introduced.
+
+Before implementation, this authority may be superseded without runtime
+migration. After implementation begins, changing substrate, standalone package
+graph, release boundary, canonical ownership, or the secondary-track relation
+requires a new accepted decision and affected authority reconciliation.
+Removing an upstream item from breadth requires a reasoned scope-lock
+disposition; adding another React dependency requires a decision-bearing
+tranche delta; native dependencies remain later per-component N1 decisions.
+
+### Tale React styling donor clarification (`5.0.1`)
+
+Andrew / `ndrewtran` approved the semantic choice on 2026-08-16 that every
+admitted Core React component starts from the applicable styling in the exact
+pinned Tale UI snapshot, while Core owns every resulting selector, token
+mapping, CSS rule, public hook, package surface, compatibility promise, and
+release claim. Decision 0010 amendment 02 records the exact donor identity,
+private-playground boundary, deferred Scale disposition, and Andrew /
+`ndrewtran`'s exact acceptance of the precursor amendment, authority-diff, and
+Project-migration identities quoted there. The append-only status recording
+changes no accepted human choice or scope meaning.
+
+R1.0 must classify the pinned Tale license and preserve its applicable notice,
+including stated third-party portions, in every exact package/release artifact
+that distributes copied or adapted substantial portions. This is compliance
+for the existing React package boundary, not a dependency or new public API.
+
+This is a patch clarification from `5.0.0` to `5.0.1`. It changes no Scope ID,
+commitment, product outcome, platform, package, public surface, release
+boundary, non-goal, artifact kind, durable relation, or compatibility promise.
+It adds no Tale or Core runtime/build dependency and no automatic donor sync.
+
+Affected IDs retain their exact states: `SCOPE-SYSTEM-REACT`,
+`SCOPE-REACT-BREADTH-001`, `SCOPE-PKG-REACT`,
+`SCOPE-SURFACE-REACT-PACKAGE-GUIDANCE`, all eight React-specific
+component/pattern IDs introduced by `5.0.0`, `SCOPE-THEME-DEFAULT`,
+`SCOPE-TOKEN-LAYERS`, `SCOPE-TOKEN-REQUIREMENTS`,
+`SCOPE-TOKEN-OVERRIDES`, `SCOPE-GUIDE-THEMING`, `SCOPE-PROOF-VISUAL`,
+`SCOPE-SURFACE-EXPLORER-WEB`, `SCOPE-THEME-ADDITIONAL`, and
+`SCOPE-CAP-DESIGN-TOOL`. The public explorer remains P2.3; additional themes
+and design-tool work remain unavailable under their existing activation rules.
+
+R1.0 gains the pinned donor/style-crosswalk/private-playground baseline.
+R1.1–R1.4 apply it per locked component, and R1.5 closes donor dispositions and
+visual adaptations across the delivered React surface. No evidence result is
+accepted by this clarification; the new R1 baseline and tranche proof remain
+future work. There are no release additions or removals, no consumer migration,
+and no Project write until the separately reviewed migration candidate is
+accepted after authority merge.
+
+For an applicable donor, `adopt` and `adapt` are the only routine exportable
+outcomes. `defer` or `reject` blocks export and release until a separately
+accepted decision-bearing exception supplies the alternate visual direction
+and reconciles the tranche. `no-applicable-donor` applies only when the pinned
+snapshot has no applicable counterpart.
+
+Rollback before implementation is append-only supersession. After styling
+migration begins, donor identity, ownership, or crosswalk changes invalidate
+the affected R1 baseline/tranche proof and require a new accepted decision.
+
 ## Tracker reference contract
 
 Every implementation issue must reference:
@@ -1247,8 +1508,8 @@ This product scope remains valid only while:
 - every `admitted` or `deferred` item remains unavailable until its own trigger
   passes;
 - every public surface reports capability availability honestly;
-- the fixed `0.1` matrix remains unchanged unless product scope and architecture
-  are explicitly revised;
+- the React `0.1` tranche and release boundaries remain unchanged unless
+  Product Scope and Architecture are explicitly revised;
 - future component breadth receives stable scope IDs before implementation;
 - platform divergence is expressed through binding strategy and evidence rather
   than hidden substitutions;

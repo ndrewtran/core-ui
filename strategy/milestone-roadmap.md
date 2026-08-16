@@ -21,8 +21,9 @@ completion, a demonstration, elapsed time, or agreement that a milestone is
 The governing delivery rule is:
 
 > Build the smallest operability spine that a real renderer slice needs, prove
-> the slice across web, React, and React Native, and admit broader tooling only
-> when an observed workflow and an earlier gate justify it.
+> the primary React slice against its exact `web.react` contract, and admit
+> broader tooling or a secondary renderer only when an observed workflow and
+> the applicable R1/P2/W1/N1 entry authority justify it.
 
 ## How to use this roadmap
 
@@ -84,9 +85,11 @@ Evidence used for a current milestone entry or exit assertion must follow
 that assertion's existing proof owner and exact source, executed, and
 proof-tool identity relationship. Historical evidence and internal
 applicability-maintenance roots remain retrievable audit records but cannot
-substitute for current proof. G1.0, G1.1, and G1.2 retain their separate
-evidence indexes, assertions, acceptance, and dependency states; each must be
-independently proved ready before G1.3 can enter `ready`.
+substitute for current proof. In the superseded historical sequence, G1.0,
+G1.1, and G1.2 retained separate evidence indexes, assertions, acceptance, and
+dependency states and each had to be independently proved ready before G1.3
+could enter `ready`. That past dependency cannot route or satisfy current R1
+entry; R1 uses only an explicit reusable-proof binding or bounded reproof.
 
 ### Acceptance cadence
 
@@ -101,7 +104,7 @@ independently proved ready before G1.3 can enter `ready`.
 
 ### Renderer-first priority
 
-- Gate 1 renderer slices are the critical path after Gate 0.
+- R1 React renderer tranches are the critical path after Gate 0.
 - An enabling-system milestone must name the renderer or acceptance fixture it
   unblocks. Unattached infrastructure returns to `not-ready`.
 - A later capability cannot block an earlier renderer milestone unless the
@@ -109,8 +112,9 @@ independently proved ready before G1.3 can enter `ready`.
   or required-proof rule without it.
 - Shared foundation code is added only after a real slice demonstrates the
   repeated semantic, logic, or interaction shape.
-- Broad component expansion waits for the fixed Gate 1 matrix; broad tooling
-  expansion waits for the capability’s own entry evidence.
+- React breadth proceeds only inside accepted tranche locks against the exact
+  shared baseline. Framework-free/native breadth and broad tooling wait for
+  their own activation and entry evidence.
 
 ### Scope admission
 
@@ -216,30 +220,24 @@ flowchart TD
   g05["G0.5 Maintainer authoring baseline"]
   gate0["Gate 0 exit"]
 
-  g10["G1.0 Tokens and foundation boundaries"]
-  g11["G1.1 Web and React substrate"]
-  g12["G1.2 React Native substrate"]
-  slices["G1.3-G1.7 Component slices"]
-  pattern["G1.8 Form pattern and curriculum"]
-  g19["G1.9 Cross-slice proof and 0.1"]
-  gate1["Gate 1 exit"]
+  r10["R1.0 React package/substrate baseline"]
+  r11["R1.1 Foundation and simple controls"]
+  r12["R1.2 Forms and field controls"]
+  r13["R1.3 Collections and composites"]
+  r14["R1.4 Overlays and temporal interactions"]
+  r15["R1.5 React breadth closure"]
+  r1exit["R1 exit React prerelease"]
 
-  proofExt["G2.0 Tabs and Toast proof extension"]
-  packages["G2.1 Packages, compatibility and releases"]
-  consumers["G2.2 Consumer validation and resolver"]
-  docs["G2.3 Documentation, explorers and local MCP"]
-  plan["G2.4 Grounded composition planning"]
-  projectOps["G2.5 Doctor and init"]
-  authorOps["G2.6 Allowlisted canonical proposals"]
-  gate2["Gate 2 exit"]
+  p21["P2.1 React packages, catalog and CLI"]
+  p22["P2.2 Consumer validation"]
+  p23["P2.3 React docs and explorer"]
+  p2exit["P2 exit React Productization"]
 
-  scale["G3.1 Breadth and patterns"]
-  migrations["G3.2 Migrations"]
-  hosted["G3.3 Hosted MCP"]
-  evals["G3.4 Agent-eval promotion"]
-  design["G3.5 Themes and design-tool interchange"]
-  semantics["G3.6 Promptable-semantics discovery"]
-  optional["G3.7-G3.11 Optional capabilities"]
+  w1["W1 framework-free web, later"]
+  n1["N1 React Native, later"]
+  x1["X1 cross-platform claims, later"]
+  s1["S1 stable React promotion, later"]
+  optional["Other independently admitted capabilities"]
 
   g00 --> g01 --> g02 --> g03
   g02 --> g04
@@ -248,50 +246,38 @@ flowchart TD
   g04 --> gate0
   g05 --> gate0
 
-  gate0 --> g10
-  gate0 --> g11
-  gate0 --> g12
-  g10 --> slices
-  g11 --> slices
-  g12 --> slices
-  slices --> pattern --> g19 --> gate1
+  gate0 --> r10
+  r10 --> r11
+  r10 --> r12
+  r10 --> r13
+  r10 --> r14
+  r11 --> r15
+  r12 --> r15
+  r13 --> r15
+  r14 --> r15
+  r15 --> r1exit
 
-  gate1 --> proofExt
-  gate1 --> packages --> consumers --> gate2
-  packages --> docs --> gate2
-  pattern --> plan
-  plan -.->|if enabled| gate2
-  consumers --> projectOps
-  projectOps -.->|if enabled| gate2
-  g19 --> authorOps
-  projectOps --> authorOps
-  authorOps -.->|if enabled| gate2
-
-  gate2 --> scale
-  proofExt --> scale
-  gate2 --> migrations
-  projectOps --> migrations
-  authorOps --> migrations
-  gate2 --> hosted
-  gate2 --> evals
-  gate2 --> design
-  gate1 --> semantics
-  semantics -.->|if activated| design
-  authorOps --> design
-  gate2 --> optional
+  r1exit --> p21 --> p22 --> p23 --> p2exit
+  r1exit -. explicit activation .-> w1
+  r1exit -. explicit activation .-> n1
+  w1 -. relevant exits .-> x1
+  n1 -. relevant exits .-> x1
+  r1exit -. stabilization demand .-> s1
+  p2exit --> optional
 ```
 
-The promptable-semantics discovery milestone may begin after Gate 1 because it
-is read-only research over observed tasks. It cannot change stable schemas or
-block Gate 2. Any resulting capability follows its own later-gate admission.
+Completed G1.0–G1.2 and their evidence remain immutable historical inputs.
+G1.3–G1.9, the old Gate 1 exit, and the old G2 sequence no longer own current
+React delivery. A historical result satisfies a new entry only when the new
+milestone explicitly binds the exact reusable fact and its applicability.
 
 ## Roadmap overview
 
 | Gate | Outcome | Release boundary | Gate must not include |
 | --- | --- | --- | --- |
 | Gate 0 | One canonical artifact compiles and is retrieved locally through deterministic API, human, JSON, and dense CLI surfaces. | Internal foundation; no public product claim. | Broad catalog, public MCP, docs application, planner, project mutation, migration, semantic search. |
-| Gate 1 | The fixed `0.1` matrix proves real web, React, and React Native components plus one bounded pattern against one release manifest. | `0.1` prerelease acceptance boundary. | Broad component families, public planner, public MCP, consumer mutation, design-tool round-trip, extra frameworks. |
-| Gate 2 | Packages, local compatibility, consumer validation, docs/explorers/local MCP, and any enabled planning or safe-operation capabilities are productized. | Productization release candidate; stable only if stable-release evidence is complete. | Hosted write access, arbitrary agent patches, unproved extensions, speculative higher-order kinds. |
+| R1 | A standalone React package delivers accepted component tranches and disposition-complete coverage of the applicable pinned React Aria surface. | Package-only `@core-ui/react` prereleases under `next`; no stable or secondary-renderer claim. | Framework-free/native counterparts, public CLI/catalog product, stable lifecycle, cross-platform equivalence. |
+| P2 | Compatible catalog/tooling, exact installed-local guidance, consumer validation, React docs/explorer/local MCP, and enabled safe operations are productized. | React Productization release candidate; stable only through S1. | Secondary renderer completion, hosted write access, arbitrary agent patches, unproved extensions. |
 | Gate 3 | Operational scale and independently justified integrations are enabled without changing kernel authority. | Capability-specific releases. | Any capability lacking observed demand, owner, bounded protocol, proof, and lifecycle. |
 
 ## Gate 0 — schema and query kernel
@@ -724,7 +710,213 @@ after that annex is accepted. Phase B, corrected G1.0, and G1.1 remain
 `not-ready` until their documentary entry conditions are proved; mutable
 Project workflow status does not change those roadmap states.
 
-## Gate 1 — representative vertical slices
+## R1 — React-primary component delivery
+
+R1 is the current first public component-library sequence. Every milestone is
+React-only unless it explicitly says otherwise. Framework-free web, React
+Native, React Native Web, cross-platform comparison, and stable promotion are
+separate later tracks and cannot block or inherit R1 proof.
+
+### R1 shared tranche contract
+
+Every R1 tranche binds one exact React Aria Components baseline, standalone
+package graph, reusable-proof baseline digest, accepted scope-lock digest,
+canonical component/binding/example revisions, deterministic closure,
+risk-selected independent review, and post-proof human release acceptance.
+
+The shared baseline also pins Tale UI commit
+`94bf62a26c02605c8928dfeb24f0ddc4be1c92fd` and its component-style,
+React-source, and CSS-foundation trees as one-time donor inputs. Each locked
+component records an exact styling disposition and complete donor-to-Core
+token/style crosswalk. Tale is never a dependency or live source. Components
+without an applicable donor record `no-applicable-donor`; Core contracts and
+responsible accessibility/platform corrections override byte copying.
+
+An applicable donor closes routinely only as `adopt` or `adapt`. `defer` or
+`reject` keeps the component unexported and unreleasable until a separately
+accepted decision-bearing exception supplies an alternate visual direction and
+reconciles the exact tranche lock. `no-applicable-donor` is only an absence
+disposition, not a shortcut around an applicable donor.
+
+The designated human accepts the exact scope-lock digest before implementation.
+Routine components inside it require no separate authority decision or human
+approval. Any new public-contract or ontology decision, dependency,
+security/privacy boundary, support expansion, stable promotion, or exception is
+a decision-bearing delta accepted before implementation.
+
+Missing required proof keeps a binding unexported or explicitly unavailable
+with support unproved. It does not alter lifecycle or strategy and does not
+manufacture an `unsupported` disposition. Every concrete npm publication is a
+separate external mutation with exact version, tarball, integrity, provenance,
+registry, checks, release manifest, rollback, and human authorization.
+
+### R1.0 React package and substrate baseline
+
+**Entry**
+
+- Product Scope `5.0.1`, Decision 0010 amendment 01, and Decision 0010
+  amendment 02 are accepted and materialized.
+- Exact reusable G1.0 token/theme facts are selected and rebound; no historical
+  result is accepted by ancestry or name alone.
+- `core:component:button#web.react` is the named first renderer slice.
+
+**Deliverables**
+
+- standalone `@core-ui/react` package graph with React Aria Components `1.20.0`,
+  React/React DOM peer ranges, compiled CSS/assets, generated package guidance,
+  and no Core workspace runtime dependency;
+- exact upstream evaluation snapshot and disposition grammar;
+- exact Tale styling donor snapshot, shared-primitive inventory, per-component
+  disposition grammar, and closed donor-to-Core token/style crosswalk;
+- exact donor license/attribution classification and the package notice
+  required for every copied or adapted substantial portion;
+- shared styling, SSR/hydration, accessibility-test, compatibility,
+  descriptor, release-manifest, and packed-consumer baseline digest;
+- private generated React playground baseline for canonical examples,
+  theme/mode/state coverage, and visual donor comparison; it is not the P2.3
+  public explorer;
+- accepted Button tranche lock and a complete React-only Button fixture.
+
+**Evidence:** `E-R1.0-01` package/substrate and pinned donor identity;
+`E-R1.0-02` Core-owned contract/export/donor-crosswalk/license-notice boundary;
+`E-R1.0-03` CSS/SSR/hydration/private-playground baseline plus Button donor
+comparison;
+`E-R1.0-04` accessibility/compatibility baseline; `E-R1.0-05` packed clean-
+consumer and generated-guidance proof, including negative runtime-edge cases.
+
+**Exit:** the exact reusable baseline is accepted and Button implementation may
+begin. No component publication or support claim follows.
+
+### R1.1 Foundation and simple controls
+
+**Entry:** accepted R1.0 plus an accepted exact R1.1 scope lock.
+
+**Deliverables:** Button first, then accepted low/medium-risk foundation,
+action, and disclosure components; one tranche implementation sequence,
+exception ledger, exact donor-style dispositions/crosswalks, Core-owned CSS,
+generated package surfaces, and packed proof.
+
+**Evidence:** `E-R1.1-01` canonical/binding/donor-disposition closure;
+`E-R1.1-02` React behavior, types, Core-owned CSS, donor visual comparison,
+SSR/hydration, and automated accessibility; `E-R1.1-03` generated
+descriptor/guidance/export parity and packed consumer; `E-R1.1-04` risk-
+selected browser/manual results, advisories, exceptions, and release manifest.
+
+**Exit:** every locked component is export-ready or explicitly unavailable;
+an exact accepted `0.1.0-alpha.N` publication may be proposed.
+
+### R1.2 Forms and field controls
+
+**Entry:** accepted baseline plus an accepted exact R1.2 scope lock.
+
+**Deliverables:** TextField, Switch, Form, and other accepted form/field
+components with value, state, label, description, error, validation,
+submission, and composition contracts, including migrated Tale field-family
+primitives under Core-owned hooks and tokens.
+
+**Evidence:** `E-R1.2-01` canonical/binding closure; `E-R1.2-02` form/input/
+label/error behavior and types; `E-R1.2-03` browser and required accessibility
+proof; `E-R1.2-04` generated/packed/release correlation.
+
+**Exit:** the locked tranche's exact export and prerelease conditions pass.
+
+### R1.3 Collections and composites
+
+**Entry:** accepted baseline plus an accepted exact R1.3 scope lock.
+
+**Deliverables:** Select, Tabs, and accepted collection/composite components
+with explicit focus, keyboard, selection, composition, and state ownership,
+plus exact donor-style dispositions and visual comparisons.
+
+**Evidence:** `E-R1.3-01` canonical/binding closure; `E-R1.3-02` keyboard/focus
+behavior; `E-R1.3-03` selection/form/composition behavior; `E-R1.3-04` required
+accessibility evidence; `E-R1.3-05` generated/packed/release correlation.
+
+**Exit:** the locked tranche's exact export and prerelease conditions pass.
+
+### R1.4 Overlays and temporal interactions
+
+**Entry:** accepted baseline plus an accepted exact R1.4 scope lock.
+
+**Deliverables:** Dialog, Toast, and accepted overlay/temporal components with
+focus, dismissal, portal/global-effect, ordering, timing, announcement,
+concurrency, and teardown ownership, plus exact donor-style dispositions and
+visual comparisons that never override responsible focus/accessibility fixes.
+
+**Evidence:** `E-R1.4-01` canonical/binding closure; `E-R1.4-02` overlay/focus/
+dismissal behavior; `E-R1.4-03` temporal/announcement/concurrency behavior;
+`E-R1.4-04` manual and assistive-technology proof required by the exact risk
+profiles; `E-R1.4-05` teardown/advisory/exception proof; `E-R1.4-06`
+generated/packed/release correlation.
+
+**Exit:** only adequately evidenced bindings are exportable; an exact accepted
+alpha publication may be proposed.
+
+### R1.5 React breadth closure
+
+**Entry:** R1.1–R1.4 complete and the remaining-surface scope lock accepted.
+
+**Deliverables:** every documented item in the exact pinned React Aria snapshot
+maps to a delivered Core component or an accepted `defer`, `exclude`, or
+`not-a-component` disposition; package, export, descriptor, compatibility,
+performance, generated-guidance, and agent-discovery closure. Every delivered
+component also maps the pinned Tale style to exportable `adopt`/`adapt`, valid
+absence `no-applicable-donor`, or a fail-closed `defer`/`reject` that remains
+unexported until its separately accepted exception is reconciled, with complete
+Core token/style ownership.
+
+**Evidence:** `E-R1.5-01` upstream and donor-style disposition completeness;
+`E-R1.5-02` canonical/binding/export/CSS-crosswalk coverage; `E-R1.5-03`
+risk-profile and visual-donor proof coverage;
+`E-R1.5-04` package/guidance/descriptor parity; `E-R1.5-05` compatibility and
+performance; `E-R1.5-06` informational agent discovery and final exception/
+advisory closure.
+
+**Exit:** the applicable upstream surface is disposition-complete and
+`@core-ui/react@0.1.0-rc.1` may be proposed.
+
+### R1 exit — React prerelease publication
+
+**Entry:** R1.5 complete plus exact tarball, release manifest, provenance,
+registry control, checks, rollback plan, and human publish authorization.
+
+**Evidence:** `E-R1-EXIT-01` exact tarball/export/install tuple;
+`E-R1-EXIT-02` registry/provenance/integrity; `E-R1-EXIT-03` published clean-
+consumer verification; `E-R1-EXIT-04` dist-tag and rollback verification.
+
+**Exit:** only `@core-ui/react@0.1.0-rc.1` is published to `next`. No `latest`,
+stable, framework-free, native, React Native Web, parity, or equivalence claim
+is made.
+
+### Later tracks and Productization
+
+- `P2.1` publishes compatible catalog/tooling packages, historical negotiation,
+  public release descriptors, and CLI-as-documentation for the React tuple
+  after R1 exit. Evidence: `E-P2.1-01…06`.
+- `P2.2` proves packed React installation, offline installed-local authority,
+  and bounded validation. Evidence: `E-P2.2-01…05`.
+- `P2.3` proves React docs, explorer, bootstrap, and public local MCP against
+  installed-local authority. The private R1 playground may supply generated
+  adapters and fixtures but never satisfies this public surface. Evidence:
+  `E-P2.3-01…05`.
+- `P2 exit` completes React Productization without claiming another renderer.
+  Evidence: `E-P2-EXIT-01…05`.
+- `W1.0` activates framework-free web only after R1 exit, observed demand, an
+  accepted exact lock, and explicit human activation. `W1.1…W1 exit` own its
+  independent component/release proof.
+- `N1.0` activates native only after R1 exit, observed demand, an accepted
+  platform/profile/component lock, and explicit human activation. `N1.1…N1
+  exit` own independent per-profile proof and native dependency decisions.
+- `X1.0` owns any cross-platform semantic-comparison or feature-equivalence
+  claim after the relevant renderer exits.
+- `S1.0` owns stable React promotion after a published R1 prerelease, observed
+  stabilization demand, and an accepted lifecycle/compatibility lock.
+
+## Historical Gate 1 — superseded cross-platform sequence
+
+The following G1 bodies and their retained evidence remain immutable audit
+history. G1.0–G1.2 facts are reusable only through an explicit R1 binding;
+G1.3–G1.9 and the old Gate 1 exit are superseded as current delivery authority.
 
 Gate 1 proves the architecture through a fixed, difficult `0.1` acceptance
 matrix. A later prototype cannot substitute for a missing cell, and an
@@ -1325,7 +1517,12 @@ Gate 1 completes when G1.0 through G1.9 pass and:
 - later productization or integration work remains unnecessary for renderer
   correctness.
 
-## Gate 2 — productization
+## Historical Gate 2 — superseded productization sequence
+
+The following G2 bodies are retained as historical planning context. Their
+current React successors are P2.1–P2 exit above; framework-free and native
+portions wait for W1/N1. Optional capabilities retain their independent
+activation conditions.
 
 Gate 2 turns the proved renderer/catalog system into installable, locally
 authoritative products. Its workstreams may run in parallel after Gate 1, but
@@ -2133,7 +2330,9 @@ general multi-framework abstraction.
 
 **Entry conditions**
 
-- Gate 2 web HTML/CSS/controller and compatibility contracts are stable.
+- W1 framework-free `web.html` binding, CSS/controller, and compatibility
+  contracts are stable, and the applicable Productization surfaces are
+  enabled.
 - Demonstrated consumer demand selects one framework.
 - The framework can bind to `web.html` and `@core-ui/web` without forking
   component identity, guidance, or styles.
@@ -2253,9 +2452,33 @@ with its own manifest declaration, version policy, evidence packet, support
 matrix, and rollback/disable path. Unstarted or rejected Gate 3 milestones are
 valid outcomes and do not make the core product incomplete.
 
-## Milestone register
+## Current milestone register
 
 | ID | Milestone | Hard dependencies | Blocks |
+| --- | --- | --- | --- |
+| R1.0 | React package/substrate and Tale styling-donor baseline | Gate 0; accepted Product Scope 5.0.1 and Decision 0010 amendments 01–02 | R1.1–R1.5 |
+| R1.1 | Foundation and simple controls | Accepted R1.0 and exact R1.1 tranche lock | R1.5, eligible alpha |
+| R1.2 | Forms and field controls | Accepted R1.0 and exact R1.2 tranche lock | R1.5, eligible alpha |
+| R1.3 | Collections and composites | Accepted R1.0 and exact R1.3 tranche lock | R1.5, eligible alpha |
+| R1.4 | Overlays and temporal interactions | Accepted R1.0 and exact R1.4 tranche lock | R1.5, eligible alpha |
+| R1.5 | React breadth closure | R1.1–R1.4 and accepted remaining-surface lock | R1 exit |
+| R1 exit | React prerelease publication | R1.5 and exact publish authorization | P2.1; optional W1/N1/S1 activation reviews |
+| P2.1 | React packages, catalog, CLI, compatibility | R1 exit and accepted public package graph | P2.2, P2.3, P2 exit |
+| P2.2 | React consumer validation/local authority | P2.1 | P2.3, P2 exit |
+| P2.3 | React docs, explorer, bootstrap, local MCP | P2.2 | P2 exit |
+| P2 exit | React Productization | P2.1–P2.3 plus each enabled optional P2 capability | Later capabilities |
+| W1.0 | Framework-free web activation | R1 exit, demand, accepted lock, explicit activation | W1 tranches |
+| N1.0 | React Native activation | R1 exit, demand, accepted platform/profile lock, explicit activation | N1 tranches |
+| X1.0 | Cross-platform comparison/equivalence | Relevant R1/W1/N1 exits | Exact claimed matrix only |
+| S1.0 | Stable React promotion | Published R1 prerelease, demand, accepted stable lock | Stable React release only |
+
+### Historical milestone register
+
+Completed and superseded G-series rows remain audit locators. They are not
+current successors and do not satisfy R/P/W/N/X/S entry without an exact
+reusable-proof binding.
+
+| ID | Historical milestone | Historical hard dependencies | Historical blocks |
 | --- | --- | --- | --- |
 | G0.0 | Repository, ownership, and task graph | Architecture authority | G0.1, all repository work |
 | G0.1 | Schema, identity, and revision kernel | G0.0 | G0.2, G0.5, Gate 1 records |
@@ -2297,17 +2520,24 @@ valid outcomes and do not make the core product incomplete.
 
 | Architecture fixture | First release-blocking milestone | Evidence IDs |
 | --- | --- | --- |
+| Standalone React package/substrate baseline | R1.0 | `E-R1.0-01` through `E-R1.0-05` |
+| Foundation/simple-control tranche | R1.1 | `E-R1.1-01` through `E-R1.1-04` |
+| Forms/field-control tranche | R1.2 | `E-R1.2-01` through `E-R1.2-04` |
+| Collection/composite tranche | R1.3 | `E-R1.3-01` through `E-R1.3-05` |
+| Overlay/temporal tranche | R1.4 | `E-R1.4-01` through `E-R1.4-06` |
+| Pinned-upstream disposition and React breadth closure | R1.5 | `E-R1.5-01` through `E-R1.5-06` |
+| React prerelease publication/rollback | R1 exit | `E-R1-EXIT-01` through `E-R1-EXIT-04` |
 | Authoring round trip | G0.5 | `E-G0.5-01` through `E-G0.5-04` |
 | Workspace catalog resolution | G0.4 | `E-G0.4-01` through `E-G0.4-05` |
-| Normative example closure | G1.8 and G1.9 | `E-G1.8-02`, `E-G1.9-07` |
-| Example curriculum selection | G1.8 | `E-G1.8-03` |
-| Change-intent closure | G1.9 | `E-G1.9-03` |
-| Packed descriptor derivation | G1.9, then real release at G2.1 | `E-G1.9-02`, `E-G2.1-02` |
-| Token fallback denial | G1.0 | `E-G1.0-03` |
-| Tale-to-Core token crosswalk | G1.0 after Phase C Gate 0 correlation | `E-G1.0-08` |
-| Platform theme safety and accessibility | G1.0 contract; G1.1/G1.2 test-only substrate behavior; G1.3–G1.7 per-slice binding/profile fulfillment; G1.9 exact contract/evidence correlation | `E-G1.0-07`, `E-G1.1-06`, `E-G1.2-05`, `E-G1.3-01`, `E-G1.3-02`, `E-G1.4-02`, `E-G1.4-03`, `E-G1.5-01` through `E-G1.5-03`, `E-G1.6-01`, `E-G1.6-03`, `E-G1.6-04`, `E-G1.7-01` through `E-G1.7-03`, `E-G1.9-01` |
-| Evidence advisory propagation | G1.9 | `E-G1.9-04` |
-| Operational exception enforcement | G1.9 | `E-G1.9-05` |
+| Normative example closure | Every R1 component tranche; integrated at R1.5 | Applicable `E-R1.1-*` through `E-R1.5-*` |
+| Example curriculum selection | Every R1 component tranche; integrated at R1.5 | Applicable `E-R1.1-*` through `E-R1.5-*` |
+| Change-intent closure | R1.5, then enabled Productization operations | `E-R1.5-04`; later operation evidence |
+| Packed descriptor derivation | R1.0 baseline, every tranche, R1 exit, then P2.1 | `E-R1.0-05`, tranche packed proof, `E-R1-EXIT-01`, P2.1 release proof |
+| Token fallback denial | Historical G1.0 facts explicitly rebound at R1.0 | `E-G1.0-03` plus `E-R1.0-01` reusable-proof binding |
+| Tale-to-Core token crosswalk | Historical G1.0 fact explicitly rebound at R1.0 | `E-G1.0-08` plus `E-R1.0-01` reusable-proof binding |
+| Platform theme safety and accessibility | R1.0 React baseline; each tranche's exact binding/profile risk proof; R1.5 correlation; later W1/N1 profiles independently | Applicable `E-R1.0-*` through `E-R1.5-*` |
+| Evidence advisory propagation | R1.5 and every publication candidate | `E-R1.5-05`; `E-R1-EXIT-01` |
+| Operational exception enforcement | Every R1 tranche and publication candidate | Tranche exception ledger; `E-R1-EXIT-01` |
 | Inert extension isolation | G3.7 or earlier extension enablement | `E-G3.7-01`, `E-G3.7-02` |
 
 The listed IDs are minimum coverage. A milestone may add evidence but cannot
@@ -2317,29 +2547,29 @@ remove or weaken these assertions without changing the architecture.
 
 | Architecture target | Roadmap realization |
 | --- | --- |
-| AI-first system/tooling properties | G0.2–G0.5 establish deterministic manifest/query/CLI/authoring; G1.9 starts agent smoke evidence; G3.4 promotes stable evals. |
-| AI-operable component/API rules | G1.0–G1.8 apply naming, defaults, composition, styling, accessibility, and bounded escape hatches to real slices. |
+| AI-first system/tooling properties | G0.2–G0.5 establish deterministic manifest/query/CLI/authoring; R1.5 runs informational React agent evidence; G3.4 promotes stable evals. |
+| AI-operable component/API rules | R1.0–R1.5 apply naming, defaults, composition, styling, accessibility, and bounded escape hatches to real React components. |
 | Canonical artifact graph and one owner per fact | G0.1 schemas/ownership, G0.2 graph/compiler, G0.5 authoring, all slice deliverables. |
-| Content versus binding-spec revision | G0.1 closure proof, G0.5 explainers, G1.8 normative examples, G2.1 release/version effects. |
-| Deterministic example curriculum | G1.3–G1.8 examples and preference, G1.9 parity, G2.4 planning. |
-| Bounded patterns and portable guides | G1.8 Form pattern, G2.4 planner, G2.3 guide/site projection, G3.8 admission boundary. |
+| Content versus binding-spec revision | G0.1 closure proof, G0.5 explainers, R1 tranche examples, P2.1 release/version effects. |
+| Deterministic example curriculum | R1 tranche examples and preferences, R1.5 enabled-surface parity, G2.4 planning. |
+| Bounded patterns and portable guides | R1.2 Form pattern, G2.4 planner, P2.3 guide/site projection, G3.8 admission boundary. |
 | Ontology growth budget | Global scope admission, G3.6 discovery, G3.7–G3.11 per-capability entry controls. |
-| CLI as documentation | G0.3 baseline, G1.9 parity, G2.3 site/bootstrap projection. |
-| One query engine and thin adapters | G0.2 kernel, G0.3 CLI, G1.9 internal MCP, G2.3 site, G3.3 hosted MCP. |
-| Multi-platform semantic parity/binding conformance | G1.0–G1.8 fixed matrix, G2.0 extended risks, G3.9 future framework. |
-| Foundation/web/React/native ownership | G1.0, G1.1, and G1.2 substrates plus per-slice evidence. |
-| Public package graph and compatibility descriptors | G0.0 boundaries, G1.9 packed derivation, G2.1 releases. |
-| Project-local catalog resolution and typed taxonomy | G0.4 synthetic proof, G2.2 production packed proof. |
+| CLI as documentation | G0.3 private baseline, P2.1/P2.2 public installed-local guidance, P2.3 site/bootstrap projection. R1 tarball guidance is narrower and generated. |
+| One query engine and thin adapters | G0.2 kernel, G0.3 private CLI, P2.1/P2.2 public query/CLI, P2.3 site/MCP, G3.3 hosted MCP. |
+| React binding conformance and later cross-platform comparison | R1 proves `web.react`; W1/N1 prove their own bindings/profiles; X1 alone may compare or claim equivalence. |
+| Foundation/React/later web/native ownership | R1.0 binds renderer-neutral foundation to standalone React; W1/N1 activate separate binding and renderer owners later. |
+| Public package graph and compatibility descriptors | G0.0 boundaries, R1.0 standalone React graph, every R1 tranche packed derivation, R1 exit publication, P2.1 portfolio release. |
+| Project-local catalog resolution and typed taxonomy | G0.4 synthetic proof, P2.2 production packed proof. |
 | Predictable repository navigation/orchestration | G0.0 task graph/routes and G0.5 source-linked authoring. |
-| Maintainer ergonomics and change-intent protocol | G0.5 baseline, G1.9 complete read-only closure, G2.5 project writes, G2.6 canonical proposals. |
+| Maintainer ergonomics and change-intent protocol | G0.5 baseline, R1.5 React read-only closure, G2.5 project writes, G2.6 canonical proposals. |
 | Generation hygiene | G0.0 path policy, G0.2 deterministic compiler, every milestone’s no-projection-patch rule. |
-| Proof/evidence/disclosure/advisories | G1.9 evidence system, G2.1/G2.7 release manifests, G3.4 eval promotion. |
-| Lifecycle, SemVer, historical retrieval, trust | G0.1 schema rules, G2.1 version/release, G2.2 installed authority, G3.2 migrations. |
-| Token/theme/fallback/override policy | Three-generation G0.1–G0.5/Gate 0 query/schema correction; G1.0 pinned Tale crosswalk, Core-owned default system, and cross-platform safety contract; G1.1/G1.2 binding-owned platform proof; per-slice requirement sets; G1.9 integrated profile view; and G3.5 additional themes/interchange. |
-| V1 product boundaries | Global guardrails, Gate 1 fixed matrix, Gate 2 capability enablement, independent Gate 3 admission. |
+| Proof/evidence/disclosure/advisories | R1 risk-proportionate tranche proof and release manifests, P2 portfolio release manifests, G3.4 eval promotion. |
+| Lifecycle, SemVer, historical retrieval, trust | G0.1 schema rules, R1 experimental prerelease lifecycle/history, P2.1 portfolio version/release, P2.2 installed authority, G3.2 migrations. |
+| Token/theme/fallback/override policy | Three-generation G0.1–G0.5/Gate 0 correction; exact historical G1 token/theme facts rebound at R1.0; React tranche requirement sets and R1.5 profile view; later W1/N1 profile proof; G3.5 additional themes/interchange. |
+| React-primary product boundaries | Global guardrails, R1 package-only React prereleases, P2 capability/productization enablement, separately activated W1/N1/X1/S1, independent Gate 3 admission. |
 | Design-tool interoperability | G3.5 export/import-proposal and round-trip proof. |
 | Promptable semantics | G3.6 observed-task discovery and bounded activation only. |
-| Agent-safe write paths | G1.9 previews, G2.5 safe consumer operations, G2.6 allowlisted canonical proposals, G3.2 migrations. |
+| Agent-safe write paths | R1.5 previews, G2.5 safe consumer operations, G2.6 allowlisted canonical proposals, G3.2 migrations. |
 | Deferred extensions, frameworks, higher-order artifacts, and protocols | G3.7–G3.11 independent milestones. |
 
 ## Deferred-capability registry
@@ -2350,9 +2580,9 @@ and stays absent until that trigger is proved.
 
 | Capability | Earliest activation | Required trigger |
 | --- | --- | --- |
-| Public local MCP | G2.3 | G1.9 parity plus stable Gate 2 schemas/query responses and product support/readiness evidence; otherwise internal only. |
+| Public local MCP | P2.3 | R1.5 enabled-surface parity plus stable P2 schemas/query responses and product support/readiness evidence; otherwise internal only. |
 | Read-only hosted MCP | G3.3 | Stable target-tuple compatibility, hosted privacy/security/availability, and failure isolation. |
-| Consumer-project validation | G2.2 | Packed fixtures, maintained parsers, bounded syntax/version support, false-positive policy. |
+| Consumer-project validation | P2.2 | Packed fixtures, maintained parsers, bounded syntax/version support, false-positive policy. |
 | Public composition planning | G2.4 | Stable bounded patterns with deterministic unsupported behavior. |
 | Consumer templates/scaffolds and pattern validation | G3.11 | Stable planner, observed demand, parser precision/recall evidence, safe write preview. |
 | Doctor and init | G2.5 | Project detection, dry-run/apply parity, confinement, journaling, confirmation, recovery. |
@@ -2364,14 +2594,14 @@ and stays absent until that trigger is proved.
 | Model evaluations as release gates | G3.4 | Repeated baseline, predeclared threshold, variance policy, failure owner. |
 | Executable extensions or consumer overlays | G3.7 separately | Threat model, demand, namespace/integrity/permission/revocation proof. |
 | Higher-order artifact kind | G3.8 | Patterns/guides proven insufficient for repeated design-system-owned workflows. |
-| Additional framework | G3.9 | Demonstrated demand and conformance to stable web binding/CSS runtime. |
+| Additional framework | G3.9 | Demonstrated demand and conformance to an activated, stable W1 `web.html` binding/CSS runtime. |
 | Agent-to-UI protocol | G3.10 | Named protocol/workflow and proof it remains an optional compatible binding. |
 
 ## Risk and enforcement register
 
 | Pressure point | Leading signal | Enforced response |
 | --- | --- | --- |
-| Infrastructure overtakes renderer work | Enabling work cannot name the active slice/fixture it unblocks. | Return it to `not-ready`; protect Gate 1 critical path. |
+| Infrastructure overtakes renderer work | Enabling work cannot name the active React slice/fixture it unblocks. | Return it to `not-ready`; protect the R1 critical path. |
 | Ontology inflation | New kind/revision/package appears before observed workflow and authoring/proof support. | Fail scope admission; use an existing projection/relation/field or defer. |
 | Canonical/projection drift | Generated diff is fixed directly or site/MCP output diverges. | Reject change; repair canonical input/compiler; rerun parity and generation identity. |
 | False cross-platform parity | Shared props/structure are treated as proof of native conformance. | Require explicit strategy, profile, binding deviations, and platform evidence. |
@@ -2408,27 +2638,28 @@ tracking, not this long-lived roadmap.
 
 ## Recommended first execution sequence
 
-1. Activate G0.0 and establish the route map, owners, task graph, and generated
-   boundaries.
-2. Complete G0.1 before creating a broad catalog or renderer inventory.
-3. Complete G0.2, then run G0.3, G0.4, and G0.5 in parallel over the same
-   minimal artifact.
-4. Close Gate 0 with the uninterrupted scaffold-to-query-to-repair evidence
-   path.
-5. For the accepted Tale-token correction, complete and accept Phase A, then
-   Phase B; implement the G1.0 crosswalk/inventory; complete Phase C at that
-   exact source; then re-accept G1.0 and G1.1 before downstream activation.
-6. Activate G1.2 and the fixed slices only against the corrected accepted
-   dependencies.
-7. Complete Button first, then TextField and Switch; use their proved substrate
-   for Dialog and Select without forcing false shared behavior.
-8. Complete the Form pattern/curriculum, then close the entire `0.1` matrix and
-   change-intent/evidence fixtures in G1.9.
-9. After Gate 1, productize packages/resolution first. Run docs, planning, and
-   safe-operation milestones only when their own entries are ready.
-10. Admit Gate 3 capabilities independently. Design-tool interchange,
-   promptable-semantics activation, extensions, frameworks, and protocols never
-   become implicit core prerequisites.
+1. Materialize Product Scope `5.0.1`, Decision 0010 amendments 01–02, and the
+   React-primary/Tale-donor Architecture/Roadmap authority before
+   implementation.
+2. Reconcile the live Project through a separately accepted exact migration;
+   do not interpret superseded G-series status as R1 readiness.
+3. Activate R1.0 against exact reusable token/theme facts, the pinned Tale
+   styling donor/crosswalk, and the accepted Button tranche lock.
+4. Prove the standalone React Aria/package/CSS/donor-comparison/private-
+   playground/SSR/hydration/accessibility/compatibility/packed baseline before
+   Button implementation begins.
+5. Deliver R1.1–R1.4 through accepted tranche locks, allowing routine
+   components to run in parallel against the same frozen baseline.
+6. Close the pinned React Aria surface in R1.5 through delivered Core mappings
+   or explicit accepted dispositions, then propose the exact R1 exit package.
+7. Publish no npm artifact without a separate exact external-mutation
+   authorization and verified rollback tuple.
+8. Productize catalog/tooling, installed-local guidance, and React docs through
+   P2.1–P2 exit.
+9. Activate W1, N1, X1, or S1 only through their own demand, scope-lock,
+   platform/profile, evidence, and human-decision boundaries.
+10. Admit other capabilities independently. They never become implicit R1
+   prerequisites.
 
 ## Roadmap completion checklist
 

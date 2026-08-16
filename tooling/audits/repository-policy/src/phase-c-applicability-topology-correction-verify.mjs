@@ -127,9 +127,10 @@ if (decisionSource !== canonicalJson(decision)) fail('decision is not Core canon
 if (hash(decisionSource) !== expectedDecisionSha256) fail('decision digest differs from reviewed acceptance candidate');
 const originalProductScope = hash(scopeSource) === expectedProductScopeSha256
   && scopeSource.startsWith('---\nscopeVersion: 4.0.1\n');
+let successorProductScope = null;
 if (!originalProductScope) {
   try {
-    verifyDeliveryWorkflowAuthority(root, { productScopeSource: scopeSource });
+    successorProductScope = verifyDeliveryWorkflowAuthority(root, { productScopeSource: scopeSource }).productScope;
   } catch (error) {
     fail(`Product Scope authority successor: ${error.message}`);
   }
@@ -272,7 +273,11 @@ const result = {
   parentDecision: { bytes: Buffer.byteLength(parentSource), sha256: hash(parentSource) },
   phaseCRoots: phaseC.rootPaths.length,
   phaseBSuccessors: phaseC.successorTargets.length,
-  productScope: { bytes: Buffer.byteLength(scopeSource), sha256: hash(scopeSource), version: originalProductScope ? '4.0.1' : '4.0.2' },
+  productScope: {
+    bytes: Buffer.byteLength(scopeSource),
+    sha256: hash(scopeSource),
+    version: originalProductScope ? '4.0.1' : successorProductScope.version,
+  },
   terminalPartition: targetNames.length,
 };
 
