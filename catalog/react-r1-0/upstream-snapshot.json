@@ -1,0 +1,5420 @@
+{
+  "schema": "core-ui-react-upstream-snapshot-v1",
+  "package": "react-aria-components",
+  "version": "1.20.0",
+  "commit": "5ecb3333001313e83898cd07644227897e3bae1f",
+  "tree": "eb6f6e25b83b2095536c4ab7671a0d977726738c",
+  "inputs": [
+    {
+      "path": "packages/react-aria-components/package.json",
+      "blob": "34aff3e05c02dfed56cc4e416d893331d48d3cc3",
+      "bytes": 2770
+    },
+    {
+      "path": "packages/react-aria-components/exports/index.ts",
+      "blob": "e72133c7b1d1d0fe2d65031f100e3f92d61add9a",
+      "bytes": 20184
+    }
+  ],
+  "exportTupleSha256": "8f4e9dd637585ed98d529624f46960cee80041cd41bfef206e7745be351503d3",
+  "dispositionGrammar": [
+    "candidate",
+    "delivered",
+    "defer",
+    "exclude",
+    "not-a-component"
+  ],
+  "items": [
+    {
+      "name": "Autocomplete",
+      "value": true,
+      "source": "../src/Autocomplete",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.2"
+    },
+    {
+      "name": "AutocompleteContext",
+      "value": true,
+      "source": "../src/Autocomplete",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "AutocompleteStateContext",
+      "value": true,
+      "source": "../src/Autocomplete",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "SelectableCollectionContext",
+      "value": true,
+      "source": "../src/Autocomplete",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "FieldInputContext",
+      "value": true,
+      "source": "../src/Autocomplete",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "Breadcrumbs",
+      "value": true,
+      "source": "../src/Breadcrumbs",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.5"
+    },
+    {
+      "name": "BreadcrumbsContext",
+      "value": true,
+      "source": "../src/Breadcrumbs",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "Breadcrumb",
+      "value": true,
+      "source": "../src/Breadcrumbs",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.5"
+    },
+    {
+      "name": "Button",
+      "value": true,
+      "source": "../src/Button",
+      "kind": "component",
+      "disposition": "candidate",
+      "tranche": "R1.1"
+    },
+    {
+      "name": "ButtonContext",
+      "value": true,
+      "source": "../src/Button",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "Calendar",
+      "value": true,
+      "source": "../src/Calendar",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.3"
+    },
+    {
+      "name": "CalendarGrid",
+      "value": true,
+      "source": "../src/Calendar",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.3"
+    },
+    {
+      "name": "CalendarGridHeader",
+      "value": true,
+      "source": "../src/Calendar",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.3"
+    },
+    {
+      "name": "CalendarGridBody",
+      "value": true,
+      "source": "../src/Calendar",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.3"
+    },
+    {
+      "name": "CalendarHeaderCell",
+      "value": true,
+      "source": "../src/Calendar",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.3"
+    },
+    {
+      "name": "CalendarCell",
+      "value": true,
+      "source": "../src/Calendar",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.3"
+    },
+    {
+      "name": "RangeCalendar",
+      "value": true,
+      "source": "../src/Calendar",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.3"
+    },
+    {
+      "name": "CalendarContext",
+      "value": true,
+      "source": "../src/Calendar",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "RangeCalendarContext",
+      "value": true,
+      "source": "../src/Calendar",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "CalendarStateContext",
+      "value": true,
+      "source": "../src/Calendar",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "RangeCalendarStateContext",
+      "value": true,
+      "source": "../src/Calendar",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "CalendarMonthPicker",
+      "value": true,
+      "source": "../src/Calendar",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.3"
+    },
+    {
+      "name": "CalendarYearPicker",
+      "value": true,
+      "source": "../src/Calendar",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.3"
+    },
+    {
+      "name": "CalendarHeading",
+      "value": true,
+      "source": "../src/Calendar",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.3"
+    },
+    {
+      "name": "Checkbox",
+      "value": true,
+      "source": "../src/Checkbox",
+      "kind": "component",
+      "disposition": "candidate",
+      "tranche": "R1.2"
+    },
+    {
+      "name": "CheckboxGroup",
+      "value": true,
+      "source": "../src/Checkbox",
+      "kind": "component",
+      "disposition": "candidate",
+      "tranche": "R1.2"
+    },
+    {
+      "name": "CheckboxField",
+      "value": true,
+      "source": "../src/Checkbox",
+      "kind": "component",
+      "disposition": "candidate",
+      "tranche": "R1.2"
+    },
+    {
+      "name": "CheckboxButton",
+      "value": true,
+      "source": "../src/Checkbox",
+      "kind": "component",
+      "disposition": "candidate",
+      "tranche": "R1.2"
+    },
+    {
+      "name": "CheckboxContext",
+      "value": true,
+      "source": "../src/Checkbox",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "CheckboxFieldContext",
+      "value": true,
+      "source": "../src/Checkbox",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "CheckboxGroupContext",
+      "value": true,
+      "source": "../src/Checkbox",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "CheckboxGroupStateContext",
+      "value": true,
+      "source": "../src/Checkbox",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "ColorArea",
+      "value": true,
+      "source": "../src/ColorArea",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.3"
+    },
+    {
+      "name": "ColorAreaContext",
+      "value": true,
+      "source": "../src/ColorArea",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "ColorAreaStateContext",
+      "value": true,
+      "source": "../src/ColorArea",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "ColorField",
+      "value": true,
+      "source": "../src/ColorField",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.3"
+    },
+    {
+      "name": "ColorFieldContext",
+      "value": true,
+      "source": "../src/ColorField",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "ColorFieldStateContext",
+      "value": true,
+      "source": "../src/ColorField",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "ColorPicker",
+      "value": true,
+      "source": "../src/ColorPicker",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.3"
+    },
+    {
+      "name": "ColorPickerContext",
+      "value": true,
+      "source": "../src/ColorPicker",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "ColorPickerStateContext",
+      "value": true,
+      "source": "../src/ColorPicker",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "ColorSlider",
+      "value": true,
+      "source": "../src/ColorSlider",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.3"
+    },
+    {
+      "name": "ColorSliderContext",
+      "value": true,
+      "source": "../src/ColorSlider",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "ColorSliderStateContext",
+      "value": true,
+      "source": "../src/ColorSlider",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "ColorSwatch",
+      "value": true,
+      "source": "../src/ColorSwatch",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.3"
+    },
+    {
+      "name": "ColorSwatchContext",
+      "value": true,
+      "source": "../src/ColorSwatch",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "ColorSwatchPicker",
+      "value": true,
+      "source": "../src/ColorSwatchPicker",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.3"
+    },
+    {
+      "name": "ColorSwatchPickerItem",
+      "value": true,
+      "source": "../src/ColorSwatchPicker",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.3"
+    },
+    {
+      "name": "ColorSwatchPickerContext",
+      "value": true,
+      "source": "../src/ColorSwatchPicker",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "ColorThumb",
+      "value": true,
+      "source": "../src/ColorThumb",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.3"
+    },
+    {
+      "name": "ColorWheel",
+      "value": true,
+      "source": "../src/ColorWheel",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.3"
+    },
+    {
+      "name": "ColorWheelContext",
+      "value": true,
+      "source": "../src/ColorWheel",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "ColorWheelTrack",
+      "value": true,
+      "source": "../src/ColorWheel",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.3"
+    },
+    {
+      "name": "ColorWheelTrackContext",
+      "value": true,
+      "source": "../src/ColorWheel",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "ColorWheelStateContext",
+      "value": true,
+      "source": "../src/ColorWheel",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "ComboBox",
+      "value": true,
+      "source": "../src/ComboBox",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.3"
+    },
+    {
+      "name": "ComboBoxValue",
+      "value": true,
+      "source": "../src/ComboBox",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.3"
+    },
+    {
+      "name": "ComboBoxContext",
+      "value": true,
+      "source": "../src/ComboBox",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "ComboBoxStateContext",
+      "value": true,
+      "source": "../src/ComboBox",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "ComboBoxValueContext",
+      "value": true,
+      "source": "../src/ComboBox",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "composeRenderProps",
+      "value": true,
+      "source": "../src/utils",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.5"
+    },
+    {
+      "name": "DEFAULT_SLOT",
+      "value": true,
+      "source": "../src/utils",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "Provider",
+      "value": true,
+      "source": "../src/utils",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "useContextProps",
+      "value": true,
+      "source": "../src/utils",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "useRenderProps",
+      "value": true,
+      "source": "../src/utils",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "useSlottedContext",
+      "value": true,
+      "source": "../src/utils",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "DateField",
+      "value": true,
+      "source": "../src/DateField",
+      "kind": "component",
+      "disposition": "candidate",
+      "tranche": "R1.2"
+    },
+    {
+      "name": "DateInput",
+      "value": true,
+      "source": "../src/DateField",
+      "kind": "component",
+      "disposition": "candidate",
+      "tranche": "R1.2"
+    },
+    {
+      "name": "DateSegment",
+      "value": true,
+      "source": "../src/DateField",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.5"
+    },
+    {
+      "name": "TimeField",
+      "value": true,
+      "source": "../src/DateField",
+      "kind": "component",
+      "disposition": "candidate",
+      "tranche": "R1.2"
+    },
+    {
+      "name": "DateFieldContext",
+      "value": true,
+      "source": "../src/DateField",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "TimeFieldContext",
+      "value": true,
+      "source": "../src/DateField",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "DateFieldStateContext",
+      "value": true,
+      "source": "../src/DateField",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "TimeFieldStateContext",
+      "value": true,
+      "source": "../src/DateField",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "DatePicker",
+      "value": true,
+      "source": "../src/DatePicker",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.5"
+    },
+    {
+      "name": "DateRangePicker",
+      "value": true,
+      "source": "../src/DatePicker",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.5"
+    },
+    {
+      "name": "DatePickerContext",
+      "value": true,
+      "source": "../src/DatePicker",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "DateRangePickerContext",
+      "value": true,
+      "source": "../src/DatePicker",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "DatePickerStateContext",
+      "value": true,
+      "source": "../src/DatePicker",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "DateRangePickerStateContext",
+      "value": true,
+      "source": "../src/DatePicker",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "DialogTrigger",
+      "value": true,
+      "source": "../src/Dialog",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.4"
+    },
+    {
+      "name": "Dialog",
+      "value": true,
+      "source": "../src/Dialog",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.4"
+    },
+    {
+      "name": "DialogContext",
+      "value": true,
+      "source": "../src/Dialog",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "OverlayTriggerStateContext",
+      "value": true,
+      "source": "../src/Dialog",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "Disclosure",
+      "value": true,
+      "source": "../src/Disclosure",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.4"
+    },
+    {
+      "name": "DisclosureGroup",
+      "value": true,
+      "source": "../src/Disclosure",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.4"
+    },
+    {
+      "name": "DisclosureGroupStateContext",
+      "value": true,
+      "source": "../src/Disclosure",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "DisclosurePanel",
+      "value": true,
+      "source": "../src/Disclosure",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.4"
+    },
+    {
+      "name": "DisclosureStateContext",
+      "value": true,
+      "source": "../src/Disclosure",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "DisclosureContext",
+      "value": true,
+      "source": "../src/Disclosure",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "DropZone",
+      "value": true,
+      "source": "../src/DropZone",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.4"
+    },
+    {
+      "name": "DropZoneContext",
+      "value": true,
+      "source": "../src/DropZone",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "FieldError",
+      "value": true,
+      "source": "../src/FieldError",
+      "kind": "component",
+      "disposition": "candidate",
+      "tranche": "R1.2"
+    },
+    {
+      "name": "FieldErrorContext",
+      "value": true,
+      "source": "../src/FieldError",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "FileTrigger",
+      "value": true,
+      "source": "../src/FileTrigger",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.4"
+    },
+    {
+      "name": "Form",
+      "value": true,
+      "source": "../src/Form",
+      "kind": "component",
+      "disposition": "candidate",
+      "tranche": "R1.2"
+    },
+    {
+      "name": "FormContext",
+      "value": true,
+      "source": "../src/Form",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "GridListLoadMoreItem",
+      "value": true,
+      "source": "../src/GridList",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.3"
+    },
+    {
+      "name": "GridList",
+      "value": true,
+      "source": "../src/GridList",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.3"
+    },
+    {
+      "name": "GridListItem",
+      "value": true,
+      "source": "../src/GridList",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.3"
+    },
+    {
+      "name": "GridListContext",
+      "value": true,
+      "source": "../src/GridList",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "GridListHeader",
+      "value": true,
+      "source": "../src/GridList",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.3"
+    },
+    {
+      "name": "GridListHeaderContext",
+      "value": true,
+      "source": "../src/GridList",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "GridListSection",
+      "value": true,
+      "source": "../src/GridList",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.3"
+    },
+    {
+      "name": "Group",
+      "value": true,
+      "source": "../src/Group",
+      "kind": "component",
+      "disposition": "candidate",
+      "tranche": "R1.2"
+    },
+    {
+      "name": "GroupContext",
+      "value": true,
+      "source": "../src/Group",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "Header",
+      "value": true,
+      "source": "../src/Header",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.5"
+    },
+    {
+      "name": "HeaderContext",
+      "value": true,
+      "source": "../src/Header",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "Heading",
+      "value": true,
+      "source": "../src/Heading",
+      "kind": "component",
+      "disposition": "candidate",
+      "tranche": "R1.2"
+    },
+    {
+      "name": "HeadingContext",
+      "value": true,
+      "source": "../src/Heading",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "Input",
+      "value": true,
+      "source": "../src/Input",
+      "kind": "component",
+      "disposition": "candidate",
+      "tranche": "R1.2"
+    },
+    {
+      "name": "InputContext",
+      "value": true,
+      "source": "../src/Input",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "Section",
+      "value": true,
+      "source": "../src/Collection",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.5"
+    },
+    {
+      "name": "CollectionRendererContext",
+      "value": true,
+      "source": "../src/Collection",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "DefaultCollectionRenderer",
+      "value": true,
+      "source": "../src/Collection",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "Collection",
+      "value": true,
+      "source": "react-aria/Collection",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "createLeafComponent",
+      "value": true,
+      "source": "react-aria/CollectionBuilder",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "createBranchComponent",
+      "value": true,
+      "source": "react-aria/CollectionBuilder",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "CollectionBuilder",
+      "value": true,
+      "source": "react-aria/CollectionBuilder",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "Keyboard",
+      "value": true,
+      "source": "../src/Keyboard",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "KeyboardContext",
+      "value": true,
+      "source": "../src/Keyboard",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "Label",
+      "value": true,
+      "source": "../src/Label",
+      "kind": "component",
+      "disposition": "candidate",
+      "tranche": "R1.2"
+    },
+    {
+      "name": "LabelContext",
+      "value": true,
+      "source": "../src/Label",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "Link",
+      "value": true,
+      "source": "../src/Link",
+      "kind": "component",
+      "disposition": "candidate",
+      "tranche": "R1.2"
+    },
+    {
+      "name": "LinkContext",
+      "value": true,
+      "source": "../src/Link",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "PreviewTrigger",
+      "value": true,
+      "source": "../src/PreviewTrigger",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.4"
+    },
+    {
+      "name": "ListBoxLoadMoreItem",
+      "value": true,
+      "source": "../src/ListBox",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.3"
+    },
+    {
+      "name": "ListBox",
+      "value": true,
+      "source": "../src/ListBox",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.3"
+    },
+    {
+      "name": "ListBoxItem",
+      "value": true,
+      "source": "../src/ListBox",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.3"
+    },
+    {
+      "name": "ListBoxSection",
+      "value": true,
+      "source": "../src/ListBox",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.3"
+    },
+    {
+      "name": "ListBoxContext",
+      "value": true,
+      "source": "../src/ListBox",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "ListStateContext",
+      "value": true,
+      "source": "../src/ListBox",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "Menu",
+      "value": true,
+      "source": "../src/Menu",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.4"
+    },
+    {
+      "name": "MenuItem",
+      "value": true,
+      "source": "../src/Menu",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.4"
+    },
+    {
+      "name": "MenuTrigger",
+      "value": true,
+      "source": "../src/Menu",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.4"
+    },
+    {
+      "name": "MenuSection",
+      "value": true,
+      "source": "../src/Menu",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.4"
+    },
+    {
+      "name": "MenuContext",
+      "value": true,
+      "source": "../src/Menu",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "MenuStateContext",
+      "value": true,
+      "source": "../src/Menu",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "RootMenuTriggerStateContext",
+      "value": true,
+      "source": "../src/Menu",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "SubmenuTrigger",
+      "value": true,
+      "source": "../src/Menu",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.5"
+    },
+    {
+      "name": "Meter",
+      "value": true,
+      "source": "../src/Meter",
+      "kind": "component",
+      "disposition": "candidate",
+      "tranche": "R1.2"
+    },
+    {
+      "name": "MeterContext",
+      "value": true,
+      "source": "../src/Meter",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "Modal",
+      "value": true,
+      "source": "../src/Modal",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.4"
+    },
+    {
+      "name": "ModalOverlay",
+      "value": true,
+      "source": "../src/Modal",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.4"
+    },
+    {
+      "name": "ModalContext",
+      "value": true,
+      "source": "../src/Modal",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "NumberField",
+      "value": true,
+      "source": "../src/NumberField",
+      "kind": "component",
+      "disposition": "candidate",
+      "tranche": "R1.2"
+    },
+    {
+      "name": "NumberFieldContext",
+      "value": true,
+      "source": "../src/NumberField",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "NumberFieldStateContext",
+      "value": true,
+      "source": "../src/NumberField",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "OverlayArrow",
+      "value": true,
+      "source": "../src/OverlayArrow",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.4"
+    },
+    {
+      "name": "Popover",
+      "value": true,
+      "source": "../src/Popover",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.4"
+    },
+    {
+      "name": "PopoverContext",
+      "value": true,
+      "source": "../src/Popover",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "ProgressBar",
+      "value": true,
+      "source": "../src/ProgressBar",
+      "kind": "component",
+      "disposition": "candidate",
+      "tranche": "R1.2"
+    },
+    {
+      "name": "ProgressBarContext",
+      "value": true,
+      "source": "../src/ProgressBar",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "RadioGroup",
+      "value": true,
+      "source": "../src/RadioGroup",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.3"
+    },
+    {
+      "name": "Radio",
+      "value": true,
+      "source": "../src/RadioGroup",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.3"
+    },
+    {
+      "name": "RadioField",
+      "value": true,
+      "source": "../src/RadioGroup",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.3"
+    },
+    {
+      "name": "RadioButton",
+      "value": true,
+      "source": "../src/RadioGroup",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.3"
+    },
+    {
+      "name": "RadioGroupContext",
+      "value": true,
+      "source": "../src/RadioGroup",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "RadioContext",
+      "value": true,
+      "source": "../src/RadioGroup",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "RadioFieldContext",
+      "value": true,
+      "source": "../src/RadioGroup",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "RadioGroupStateContext",
+      "value": true,
+      "source": "../src/RadioGroup",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "SearchField",
+      "value": true,
+      "source": "../src/SearchField",
+      "kind": "component",
+      "disposition": "candidate",
+      "tranche": "R1.2"
+    },
+    {
+      "name": "SearchFieldContext",
+      "value": true,
+      "source": "../src/SearchField",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "Select",
+      "value": true,
+      "source": "../src/Select",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.3"
+    },
+    {
+      "name": "SelectValue",
+      "value": true,
+      "source": "../src/Select",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.3"
+    },
+    {
+      "name": "SelectContext",
+      "value": true,
+      "source": "../src/Select",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "SelectValueContext",
+      "value": true,
+      "source": "../src/Select",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "SelectStateContext",
+      "value": true,
+      "source": "../src/Select",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "SelectionIndicator",
+      "value": true,
+      "source": "../src/SelectionIndicator",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.3"
+    },
+    {
+      "name": "SelectionIndicatorContext",
+      "value": true,
+      "source": "../src/SelectionIndicator",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "Separator",
+      "value": true,
+      "source": "../src/Separator",
+      "kind": "component",
+      "disposition": "candidate",
+      "tranche": "R1.2"
+    },
+    {
+      "name": "SeparatorContext",
+      "value": true,
+      "source": "../src/Separator",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "SharedElementTransition",
+      "value": true,
+      "source": "../src/SharedElementTransition",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.5"
+    },
+    {
+      "name": "SharedElement",
+      "value": true,
+      "source": "../src/SharedElementTransition",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.5"
+    },
+    {
+      "name": "Slider",
+      "value": true,
+      "source": "../src/Slider",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.3"
+    },
+    {
+      "name": "SliderOutput",
+      "value": true,
+      "source": "../src/Slider",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.3"
+    },
+    {
+      "name": "SliderTrack",
+      "value": true,
+      "source": "../src/Slider",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.3"
+    },
+    {
+      "name": "SliderThumb",
+      "value": true,
+      "source": "../src/Slider",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.3"
+    },
+    {
+      "name": "SliderFill",
+      "value": true,
+      "source": "../src/Slider",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.3"
+    },
+    {
+      "name": "SliderContext",
+      "value": true,
+      "source": "../src/Slider",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "SliderOutputContext",
+      "value": true,
+      "source": "../src/Slider",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "SliderTrackContext",
+      "value": true,
+      "source": "../src/Slider",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "SliderFillContext",
+      "value": true,
+      "source": "../src/Slider",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "SliderStateContext",
+      "value": true,
+      "source": "../src/Slider",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "Switch",
+      "value": true,
+      "source": "../src/Switch",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.3"
+    },
+    {
+      "name": "SwitchField",
+      "value": true,
+      "source": "../src/Switch",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.3"
+    },
+    {
+      "name": "SwitchButton",
+      "value": true,
+      "source": "../src/Switch",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.3"
+    },
+    {
+      "name": "SwitchContext",
+      "value": true,
+      "source": "../src/Switch",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "SwitchFieldContext",
+      "value": true,
+      "source": "../src/Switch",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "TableLoadMoreItem",
+      "value": true,
+      "source": "../src/Table",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.3"
+    },
+    {
+      "name": "Table",
+      "value": true,
+      "source": "../src/Table",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.3"
+    },
+    {
+      "name": "Row",
+      "value": true,
+      "source": "../src/Table",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.5"
+    },
+    {
+      "name": "Cell",
+      "value": true,
+      "source": "../src/Table",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.5"
+    },
+    {
+      "name": "Column",
+      "value": true,
+      "source": "../src/Table",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.5"
+    },
+    {
+      "name": "ColumnResizer",
+      "value": true,
+      "source": "../src/Table",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.5"
+    },
+    {
+      "name": "TableHeader",
+      "value": true,
+      "source": "../src/Table",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.3"
+    },
+    {
+      "name": "TableBody",
+      "value": true,
+      "source": "../src/Table",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.3"
+    },
+    {
+      "name": "TableContext",
+      "value": true,
+      "source": "../src/Table",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "ResizableTableContainer",
+      "value": true,
+      "source": "../src/Table",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.3"
+    },
+    {
+      "name": "useTableOptions",
+      "value": true,
+      "source": "../src/Table",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "TableStateContext",
+      "value": true,
+      "source": "../src/Table",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "TableColumnResizeStateContext",
+      "value": true,
+      "source": "../src/Table",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "TableFooter",
+      "value": true,
+      "source": "../src/Table",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.3"
+    },
+    {
+      "name": "TableLayout",
+      "value": true,
+      "source": "../src/TableLayout",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "Tabs",
+      "value": true,
+      "source": "../src/Tabs",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.3"
+    },
+    {
+      "name": "TabList",
+      "value": true,
+      "source": "../src/Tabs",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.3"
+    },
+    {
+      "name": "TabPanels",
+      "value": true,
+      "source": "../src/Tabs",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.5"
+    },
+    {
+      "name": "TabPanel",
+      "value": true,
+      "source": "../src/Tabs",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.5"
+    },
+    {
+      "name": "Tab",
+      "value": true,
+      "source": "../src/Tabs",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.5"
+    },
+    {
+      "name": "TabsContext",
+      "value": true,
+      "source": "../src/Tabs",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "TabListStateContext",
+      "value": true,
+      "source": "../src/Tabs",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "TagGroup",
+      "value": true,
+      "source": "../src/TagGroup",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.3"
+    },
+    {
+      "name": "TagGroupContext",
+      "value": true,
+      "source": "../src/TagGroup",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "TagList",
+      "value": true,
+      "source": "../src/TagGroup",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.3"
+    },
+    {
+      "name": "TagListContext",
+      "value": true,
+      "source": "../src/TagGroup",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "Tag",
+      "value": true,
+      "source": "../src/TagGroup",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.5"
+    },
+    {
+      "name": "Text",
+      "value": true,
+      "source": "../src/Text",
+      "kind": "component",
+      "disposition": "candidate",
+      "tranche": "R1.2"
+    },
+    {
+      "name": "TextContext",
+      "value": true,
+      "source": "../src/Text",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "TextArea",
+      "value": true,
+      "source": "../src/TextArea",
+      "kind": "component",
+      "disposition": "candidate",
+      "tranche": "R1.2"
+    },
+    {
+      "name": "TextAreaContext",
+      "value": true,
+      "source": "../src/TextArea",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "TextField",
+      "value": true,
+      "source": "../src/TextField",
+      "kind": "component",
+      "disposition": "candidate",
+      "tranche": "R1.2"
+    },
+    {
+      "name": "TextFieldContext",
+      "value": true,
+      "source": "../src/TextField",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "TokenField",
+      "value": true,
+      "source": "../src/TokenField",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.3"
+    },
+    {
+      "name": "TokenInput",
+      "value": true,
+      "source": "../src/TokenField",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.3"
+    },
+    {
+      "name": "Token",
+      "value": true,
+      "source": "../src/TokenField",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.3"
+    },
+    {
+      "name": "TokenFieldContext",
+      "value": true,
+      "source": "../src/TokenField",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "TokenFieldValue",
+      "value": true,
+      "source": "react-stately/useTokenFieldState",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "UNSTABLE_Toast",
+      "value": true,
+      "source": "../src/Toast",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.4"
+    },
+    {
+      "name": "UNSTABLE_ToastList",
+      "value": true,
+      "source": "../src/Toast",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "UNSTABLE_ToastRegion",
+      "value": true,
+      "source": "../src/Toast",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "UNSTABLE_ToastContent",
+      "value": true,
+      "source": "../src/Toast",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "UNSTABLE_ToastStateContext",
+      "value": true,
+      "source": "../src/Toast",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "ToggleButton",
+      "value": true,
+      "source": "../src/ToggleButton",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.3"
+    },
+    {
+      "name": "ToggleButtonContext",
+      "value": true,
+      "source": "../src/ToggleButton",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "ToggleButtonGroup",
+      "value": true,
+      "source": "../src/ToggleButtonGroup",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.3"
+    },
+    {
+      "name": "ToggleButtonGroupContext",
+      "value": true,
+      "source": "../src/ToggleButtonGroup",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "ToggleGroupStateContext",
+      "value": true,
+      "source": "../src/ToggleButtonGroup",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "Toolbar",
+      "value": true,
+      "source": "../src/Toolbar",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.5"
+    },
+    {
+      "name": "ToolbarContext",
+      "value": true,
+      "source": "../src/Toolbar",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "TooltipTrigger",
+      "value": true,
+      "source": "../src/Tooltip",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.4"
+    },
+    {
+      "name": "Tooltip",
+      "value": true,
+      "source": "../src/Tooltip",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.4"
+    },
+    {
+      "name": "TooltipTriggerStateContext",
+      "value": true,
+      "source": "../src/Tooltip",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "TooltipContext",
+      "value": true,
+      "source": "../src/Tooltip",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "TreeLoadMoreItem",
+      "value": true,
+      "source": "../src/Tree",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.3"
+    },
+    {
+      "name": "Tree",
+      "value": true,
+      "source": "../src/Tree",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.3"
+    },
+    {
+      "name": "TreeItem",
+      "value": true,
+      "source": "../src/Tree",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.3"
+    },
+    {
+      "name": "TreeContext",
+      "value": true,
+      "source": "../src/Tree",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "TreeItemContent",
+      "value": true,
+      "source": "../src/Tree",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.3"
+    },
+    {
+      "name": "TreeHeader",
+      "value": true,
+      "source": "../src/Tree",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.3"
+    },
+    {
+      "name": "TreeSection",
+      "value": true,
+      "source": "../src/Tree",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.3"
+    },
+    {
+      "name": "TreeStateContext",
+      "value": true,
+      "source": "../src/Tree",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "useDrag",
+      "value": true,
+      "source": "react-aria/useDrag",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "useDrop",
+      "value": true,
+      "source": "react-aria/useDrop",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "DIRECTORY_DRAG_TYPE",
+      "value": true,
+      "source": "react-aria/useDrop",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "isDirectoryDropItem",
+      "value": true,
+      "source": "react-aria/useDrop",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "isFileDropItem",
+      "value": true,
+      "source": "react-aria/useDrop",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "isTextDropItem",
+      "value": true,
+      "source": "react-aria/useDrop",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "useDragAndDrop",
+      "value": true,
+      "source": "../src/useDragAndDrop",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "DropIndicator",
+      "value": true,
+      "source": "../src/useDragAndDrop",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.5"
+    },
+    {
+      "name": "DropIndicatorContext",
+      "value": true,
+      "source": "../src/useDragAndDrop",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "DragAndDropContext",
+      "value": true,
+      "source": "../src/useDragAndDrop",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "Virtualizer",
+      "value": true,
+      "source": "../src/Virtualizer",
+      "kind": "compositional-pattern",
+      "disposition": "candidate",
+      "tranche": "R1.5"
+    },
+    {
+      "name": "SSRProvider",
+      "value": true,
+      "source": "react-aria/SSRProvider",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "RouterProvider",
+      "value": true,
+      "source": "react-aria/private/utils/openLink",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "I18nProvider",
+      "value": true,
+      "source": "react-aria/I18nProvider",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "useLocale",
+      "value": true,
+      "source": "react-aria/I18nProvider",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "isRTL",
+      "value": true,
+      "source": "react-aria/I18nProvider",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "useFilter",
+      "value": true,
+      "source": "react-aria/useFilter",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "Pressable",
+      "value": true,
+      "source": "react-aria/Pressable",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "Focusable",
+      "value": true,
+      "source": "react-aria/Focusable",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "VisuallyHidden",
+      "value": true,
+      "source": "react-aria/VisuallyHidden",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "FormValidationContext",
+      "value": true,
+      "source": "react-stately/private/form/useFormValidationState",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "parseColor",
+      "value": true,
+      "source": "react-stately/Color",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "getColorChannels",
+      "value": true,
+      "source": "react-stately/Color",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "UNSTABLE_ToastQueue",
+      "value": true,
+      "source": "react-stately/useToastState",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "useListData",
+      "value": true,
+      "source": "react-stately/useListData",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "useTreeData",
+      "value": true,
+      "source": "react-stately/useTreeData",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "useAsyncList",
+      "value": true,
+      "source": "react-stately/useAsyncList",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "ListLayout",
+      "value": true,
+      "source": "react-stately/useVirtualizerState",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "WaterfallLayout",
+      "value": true,
+      "source": "react-stately/useVirtualizerState",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "Layout",
+      "value": true,
+      "source": "react-stately/useVirtualizerState",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "LayoutInfo",
+      "value": true,
+      "source": "react-stately/useVirtualizerState",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "Size",
+      "value": true,
+      "source": "react-stately/useVirtualizerState",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "Rect",
+      "value": true,
+      "source": "react-stately/useVirtualizerState",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "Point",
+      "value": true,
+      "source": "react-stately/useVirtualizerState",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "GridLayout",
+      "value": true,
+      "source": "../src/GridLayout",
+      "kind": "supporting-primitive",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "I18nProviderProps",
+      "value": false,
+      "source": "react-aria/I18nProvider",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "Locale",
+      "value": false,
+      "source": "react-aria/I18nProvider",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "Filter",
+      "value": false,
+      "source": "react-aria/useFilter",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "CollectionProps",
+      "value": false,
+      "source": "react-aria/Collection",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "Placement",
+      "value": false,
+      "source": "react-aria/useOverlayPosition",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "VisuallyHiddenProps",
+      "value": false,
+      "source": "react-aria/VisuallyHidden",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "AutocompleteProps",
+      "value": false,
+      "source": "../src/Autocomplete",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "SelectableCollectionContextValue",
+      "value": false,
+      "source": "../src/Autocomplete",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "BreadcrumbsProps",
+      "value": false,
+      "source": "../src/Breadcrumbs",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "BreadcrumbProps",
+      "value": false,
+      "source": "../src/Breadcrumbs",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "BreadcrumbRenderProps",
+      "value": false,
+      "source": "../src/Breadcrumbs",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "ButtonProps",
+      "value": false,
+      "source": "../src/Button",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "ButtonRenderProps",
+      "value": false,
+      "source": "../src/Button",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "CalendarCellProps",
+      "value": false,
+      "source": "../src/Calendar",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "CalendarProps",
+      "value": false,
+      "source": "../src/Calendar",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "CalendarRenderProps",
+      "value": false,
+      "source": "../src/Calendar",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "CalendarGridProps",
+      "value": false,
+      "source": "../src/Calendar",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "CalendarGridHeaderProps",
+      "value": false,
+      "source": "../src/Calendar",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "CalendarGridBodyProps",
+      "value": false,
+      "source": "../src/Calendar",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "CalendarHeaderCellProps",
+      "value": false,
+      "source": "../src/Calendar",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "CalendarCellRenderProps",
+      "value": false,
+      "source": "../src/Calendar",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "RangeCalendarProps",
+      "value": false,
+      "source": "../src/Calendar",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "RangeCalendarRenderProps",
+      "value": false,
+      "source": "../src/Calendar",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "CalendarMonthPickerProps",
+      "value": false,
+      "source": "../src/Calendar",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "CalendarYearPickerProps",
+      "value": false,
+      "source": "../src/Calendar",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "CalendarHeadingProps",
+      "value": false,
+      "source": "../src/Calendar",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "CheckboxGroupProps",
+      "value": false,
+      "source": "../src/Checkbox",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "CheckboxGroupRenderProps",
+      "value": false,
+      "source": "../src/Checkbox",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "CheckboxRenderProps",
+      "value": false,
+      "source": "../src/Checkbox",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "CheckboxProps",
+      "value": false,
+      "source": "../src/Checkbox",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "CheckboxFieldProps",
+      "value": false,
+      "source": "../src/Checkbox",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "CheckboxFieldRenderProps",
+      "value": false,
+      "source": "../src/Checkbox",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "CheckboxButtonProps",
+      "value": false,
+      "source": "../src/Checkbox",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "CheckboxButtonRenderProps",
+      "value": false,
+      "source": "../src/Checkbox",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "ColorAreaProps",
+      "value": false,
+      "source": "../src/ColorArea",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "ColorAreaRenderProps",
+      "value": false,
+      "source": "../src/ColorArea",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "ColorFieldProps",
+      "value": false,
+      "source": "../src/ColorField",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "ColorFieldRenderProps",
+      "value": false,
+      "source": "../src/ColorField",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "ColorSliderProps",
+      "value": false,
+      "source": "../src/ColorSlider",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "ColorSliderRenderProps",
+      "value": false,
+      "source": "../src/ColorSlider",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "ColorSwatchProps",
+      "value": false,
+      "source": "../src/ColorSwatch",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "ColorSwatchRenderProps",
+      "value": false,
+      "source": "../src/ColorSwatch",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "ColorSwatchPickerProps",
+      "value": false,
+      "source": "../src/ColorSwatchPicker",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "ColorSwatchPickerRenderProps",
+      "value": false,
+      "source": "../src/ColorSwatchPicker",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "ColorSwatchPickerItemProps",
+      "value": false,
+      "source": "../src/ColorSwatchPicker",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "ColorSwatchPickerItemRenderProps",
+      "value": false,
+      "source": "../src/ColorSwatchPicker",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "ColorThumbProps",
+      "value": false,
+      "source": "../src/ColorThumb",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "ColorThumbRenderProps",
+      "value": false,
+      "source": "../src/ColorThumb",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "ColorPickerProps",
+      "value": false,
+      "source": "../src/ColorPicker",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "ColorPickerRenderProps",
+      "value": false,
+      "source": "../src/ColorPicker",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "ColorWheelProps",
+      "value": false,
+      "source": "../src/ColorWheel",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "ColorWheelRenderProps",
+      "value": false,
+      "source": "../src/ColorWheel",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "ColorWheelTrackProps",
+      "value": false,
+      "source": "../src/ColorWheel",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "ColorWheelTrackRenderProps",
+      "value": false,
+      "source": "../src/ColorWheel",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "ComboBoxProps",
+      "value": false,
+      "source": "../src/ComboBox",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "ComboBoxRenderProps",
+      "value": false,
+      "source": "../src/ComboBox",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "ComboBoxValueProps",
+      "value": false,
+      "source": "../src/ComboBox",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "ComboBoxValueRenderProps",
+      "value": false,
+      "source": "../src/ComboBox",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "DateFieldProps",
+      "value": false,
+      "source": "../src/DateField",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "DateFieldRenderProps",
+      "value": false,
+      "source": "../src/DateField",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "DateInputProps",
+      "value": false,
+      "source": "../src/DateField",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "DateInputRenderProps",
+      "value": false,
+      "source": "../src/DateField",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "DateSegmentProps",
+      "value": false,
+      "source": "../src/DateField",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "DateSegmentRenderProps",
+      "value": false,
+      "source": "../src/DateField",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "TimeFieldProps",
+      "value": false,
+      "source": "../src/DateField",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "DatePickerProps",
+      "value": false,
+      "source": "../src/DatePicker",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "DatePickerRenderProps",
+      "value": false,
+      "source": "../src/DatePicker",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "DateRangePickerProps",
+      "value": false,
+      "source": "../src/DatePicker",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "DateRangePickerRenderProps",
+      "value": false,
+      "source": "../src/DatePicker",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "DialogProps",
+      "value": false,
+      "source": "../src/Dialog",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "DialogTriggerProps",
+      "value": false,
+      "source": "../src/Dialog",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "DialogRenderProps",
+      "value": false,
+      "source": "../src/Dialog",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "DisclosureProps",
+      "value": false,
+      "source": "../src/Disclosure",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "DisclosureRenderProps",
+      "value": false,
+      "source": "../src/Disclosure",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "DisclosurePanelProps",
+      "value": false,
+      "source": "../src/Disclosure",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "DisclosurePanelRenderProps",
+      "value": false,
+      "source": "../src/Disclosure",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "DisclosureGroupProps",
+      "value": false,
+      "source": "../src/Disclosure",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "DisclosureGroupRenderProps",
+      "value": false,
+      "source": "../src/Disclosure",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "DropZoneProps",
+      "value": false,
+      "source": "../src/DropZone",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "DropZoneRenderProps",
+      "value": false,
+      "source": "../src/DropZone",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "FieldErrorProps",
+      "value": false,
+      "source": "../src/FieldError",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "FieldErrorRenderProps",
+      "value": false,
+      "source": "../src/FieldError",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "FileTriggerProps",
+      "value": false,
+      "source": "../src/FileTrigger",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "FormProps",
+      "value": false,
+      "source": "../src/Form",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "GridListHeaderProps",
+      "value": false,
+      "source": "../src/GridList",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "GridListProps",
+      "value": false,
+      "source": "../src/GridList",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "GridListRenderProps",
+      "value": false,
+      "source": "../src/GridList",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "GridListItemProps",
+      "value": false,
+      "source": "../src/GridList",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "GridListItemRenderProps",
+      "value": false,
+      "source": "../src/GridList",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "GridListLoadMoreItemProps",
+      "value": false,
+      "source": "../src/GridList",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "GridListSectionProps",
+      "value": false,
+      "source": "../src/GridList",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "GroupProps",
+      "value": false,
+      "source": "../src/Group",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "GroupRenderProps",
+      "value": false,
+      "source": "../src/Group",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "HeaderProps",
+      "value": false,
+      "source": "../src/Header",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "HeadingProps",
+      "value": false,
+      "source": "../src/Heading",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "InputProps",
+      "value": false,
+      "source": "../src/Input",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "InputRenderProps",
+      "value": false,
+      "source": "../src/Input",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "SectionProps",
+      "value": false,
+      "source": "../src/Collection",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "CollectionRenderer",
+      "value": false,
+      "source": "../src/Collection",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "LabelProps",
+      "value": false,
+      "source": "../src/Label",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "LinkProps",
+      "value": false,
+      "source": "../src/Link",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "LinkRenderProps",
+      "value": false,
+      "source": "../src/Link",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "PreviewTriggerProps",
+      "value": false,
+      "source": "../src/PreviewTrigger",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "ListBoxProps",
+      "value": false,
+      "source": "../src/ListBox",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "ListBoxRenderProps",
+      "value": false,
+      "source": "../src/ListBox",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "ListBoxItemProps",
+      "value": false,
+      "source": "../src/ListBox",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "ListBoxItemRenderProps",
+      "value": false,
+      "source": "../src/ListBox",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "ListBoxSectionProps",
+      "value": false,
+      "source": "../src/ListBox",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "ListBoxLoadMoreItemProps",
+      "value": false,
+      "source": "../src/ListBox",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "MenuProps",
+      "value": false,
+      "source": "../src/Menu",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "MenuItemProps",
+      "value": false,
+      "source": "../src/Menu",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "MenuItemRenderProps",
+      "value": false,
+      "source": "../src/Menu",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "MenuTriggerProps",
+      "value": false,
+      "source": "../src/Menu",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "SubmenuTriggerProps",
+      "value": false,
+      "source": "../src/Menu",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "MenuSectionProps",
+      "value": false,
+      "source": "../src/Menu",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "MeterProps",
+      "value": false,
+      "source": "../src/Meter",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "MeterRenderProps",
+      "value": false,
+      "source": "../src/Meter",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "ModalOverlayProps",
+      "value": false,
+      "source": "../src/Modal",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "ModalRenderProps",
+      "value": false,
+      "source": "../src/Modal",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "NumberFieldProps",
+      "value": false,
+      "source": "../src/NumberField",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "NumberFieldRenderProps",
+      "value": false,
+      "source": "../src/NumberField",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "OverlayArrowProps",
+      "value": false,
+      "source": "../src/OverlayArrow",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "OverlayArrowRenderProps",
+      "value": false,
+      "source": "../src/OverlayArrow",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "PopoverProps",
+      "value": false,
+      "source": "../src/Popover",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "PopoverRenderProps",
+      "value": false,
+      "source": "../src/Popover",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "ProgressBarProps",
+      "value": false,
+      "source": "../src/ProgressBar",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "ProgressBarRenderProps",
+      "value": false,
+      "source": "../src/ProgressBar",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "RadioGroupProps",
+      "value": false,
+      "source": "../src/RadioGroup",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "RadioGroupRenderProps",
+      "value": false,
+      "source": "../src/RadioGroup",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "RadioProps",
+      "value": false,
+      "source": "../src/RadioGroup",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "RadioRenderProps",
+      "value": false,
+      "source": "../src/RadioGroup",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "RadioFieldProps",
+      "value": false,
+      "source": "../src/RadioGroup",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "RadioFieldRenderProps",
+      "value": false,
+      "source": "../src/RadioGroup",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "RadioButtonProps",
+      "value": false,
+      "source": "../src/RadioGroup",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "RadioButtonRenderProps",
+      "value": false,
+      "source": "../src/RadioGroup",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "SearchFieldProps",
+      "value": false,
+      "source": "../src/SearchField",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "SearchFieldRenderProps",
+      "value": false,
+      "source": "../src/SearchField",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "SelectProps",
+      "value": false,
+      "source": "../src/Select",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "SelectValueProps",
+      "value": false,
+      "source": "../src/Select",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "SelectValueRenderProps",
+      "value": false,
+      "source": "../src/Select",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "SelectRenderProps",
+      "value": false,
+      "source": "../src/Select",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "SelectionIndicatorProps",
+      "value": false,
+      "source": "../src/SelectionIndicator",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "SharedElementTransitionProps",
+      "value": false,
+      "source": "../src/SharedElementTransition",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "SharedElementProps",
+      "value": false,
+      "source": "../src/SharedElementTransition",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "SharedElementRenderProps",
+      "value": false,
+      "source": "../src/SharedElementTransition",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "SeparatorProps",
+      "value": false,
+      "source": "../src/Separator",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "SliderOutputProps",
+      "value": false,
+      "source": "../src/Slider",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "SliderProps",
+      "value": false,
+      "source": "../src/Slider",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "SliderRenderProps",
+      "value": false,
+      "source": "../src/Slider",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "SliderThumbProps",
+      "value": false,
+      "source": "../src/Slider",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "SliderTrackProps",
+      "value": false,
+      "source": "../src/Slider",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "SliderTrackRenderProps",
+      "value": false,
+      "source": "../src/Slider",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "SliderFillProps",
+      "value": false,
+      "source": "../src/Slider",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "SliderFillRenderProps",
+      "value": false,
+      "source": "../src/Slider",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "SliderThumbRenderProps",
+      "value": false,
+      "source": "../src/Slider",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "SwitchProps",
+      "value": false,
+      "source": "../src/Switch",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "SwitchRenderProps",
+      "value": false,
+      "source": "../src/Switch",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "SwitchFieldProps",
+      "value": false,
+      "source": "../src/Switch",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "SwitchFieldRenderProps",
+      "value": false,
+      "source": "../src/Switch",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "SwitchButtonProps",
+      "value": false,
+      "source": "../src/Switch",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "SwitchButtonRenderProps",
+      "value": false,
+      "source": "../src/Switch",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "TableProps",
+      "value": false,
+      "source": "../src/Table",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "TableRenderProps",
+      "value": false,
+      "source": "../src/Table",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "TableHeaderProps",
+      "value": false,
+      "source": "../src/Table",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "TableBodyProps",
+      "value": false,
+      "source": "../src/Table",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "TableBodyRenderProps",
+      "value": false,
+      "source": "../src/Table",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "ResizableTableContainerProps",
+      "value": false,
+      "source": "../src/Table",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "ColumnProps",
+      "value": false,
+      "source": "../src/Table",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "ColumnRenderProps",
+      "value": false,
+      "source": "../src/Table",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "ColumnResizerProps",
+      "value": false,
+      "source": "../src/Table",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "ColumnResizerRenderProps",
+      "value": false,
+      "source": "../src/Table",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "RowProps",
+      "value": false,
+      "source": "../src/Table",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "RowRenderProps",
+      "value": false,
+      "source": "../src/Table",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "CellProps",
+      "value": false,
+      "source": "../src/Table",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "CellRenderProps",
+      "value": false,
+      "source": "../src/Table",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "TableLoadMoreItemProps",
+      "value": false,
+      "source": "../src/Table",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "TableFooterProps",
+      "value": false,
+      "source": "../src/Table",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "TabListProps",
+      "value": false,
+      "source": "../src/Tabs",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "TabListRenderProps",
+      "value": false,
+      "source": "../src/Tabs",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "TabPanelsProps",
+      "value": false,
+      "source": "../src/Tabs",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "TabPanelProps",
+      "value": false,
+      "source": "../src/Tabs",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "TabPanelRenderProps",
+      "value": false,
+      "source": "../src/Tabs",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "TabProps",
+      "value": false,
+      "source": "../src/Tabs",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "TabsProps",
+      "value": false,
+      "source": "../src/Tabs",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "TabRenderProps",
+      "value": false,
+      "source": "../src/Tabs",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "TabsRenderProps",
+      "value": false,
+      "source": "../src/Tabs",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "TagGroupProps",
+      "value": false,
+      "source": "../src/TagGroup",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "TagListProps",
+      "value": false,
+      "source": "../src/TagGroup",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "TagListRenderProps",
+      "value": false,
+      "source": "../src/TagGroup",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "TagProps",
+      "value": false,
+      "source": "../src/TagGroup",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "TagRenderProps",
+      "value": false,
+      "source": "../src/TagGroup",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "TextAreaProps",
+      "value": false,
+      "source": "../src/TextArea",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "TextFieldProps",
+      "value": false,
+      "source": "../src/TextField",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "TextFieldRenderProps",
+      "value": false,
+      "source": "../src/TextField",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "TokenFieldProps",
+      "value": false,
+      "source": "../src/TokenField",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "TokenFieldRenderProps",
+      "value": false,
+      "source": "../src/TokenField",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "TokenInputProps",
+      "value": false,
+      "source": "../src/TokenField",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "TokenInputRenderProps",
+      "value": false,
+      "source": "../src/TokenField",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "TokenProps",
+      "value": false,
+      "source": "../src/TokenField",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "TokenRenderProps",
+      "value": false,
+      "source": "../src/TokenField",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "TextProps",
+      "value": false,
+      "source": "../src/Text",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "ToastRegionProps",
+      "value": false,
+      "source": "../src/Toast",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "ToastListProps",
+      "value": false,
+      "source": "../src/Toast",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "ToastRegionRenderProps",
+      "value": false,
+      "source": "../src/Toast",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "ToastProps",
+      "value": false,
+      "source": "../src/Toast",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "ToastRenderProps",
+      "value": false,
+      "source": "../src/Toast",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "ToggleButtonProps",
+      "value": false,
+      "source": "../src/ToggleButton",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "ToggleButtonRenderProps",
+      "value": false,
+      "source": "../src/ToggleButton",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "ToggleButtonGroupProps",
+      "value": false,
+      "source": "../src/ToggleButtonGroup",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "ToggleButtonGroupRenderProps",
+      "value": false,
+      "source": "../src/ToggleButtonGroup",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "ToolbarProps",
+      "value": false,
+      "source": "../src/Toolbar",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "ToolbarRenderProps",
+      "value": false,
+      "source": "../src/Toolbar",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "TooltipProps",
+      "value": false,
+      "source": "../src/Tooltip",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "TooltipRenderProps",
+      "value": false,
+      "source": "../src/Tooltip",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "TooltipTriggerComponentProps",
+      "value": false,
+      "source": "../src/Tooltip",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "TreeProps",
+      "value": false,
+      "source": "../src/Tree",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "TreeRenderProps",
+      "value": false,
+      "source": "../src/Tree",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "TreeEmptyStateRenderProps",
+      "value": false,
+      "source": "../src/Tree",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "TreeItemProps",
+      "value": false,
+      "source": "../src/Tree",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "TreeItemRenderProps",
+      "value": false,
+      "source": "../src/Tree",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "TreeItemContentProps",
+      "value": false,
+      "source": "../src/Tree",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "TreeItemContentRenderProps",
+      "value": false,
+      "source": "../src/Tree",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "TreeLoadMoreItemProps",
+      "value": false,
+      "source": "../src/Tree",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "TreeLoadMoreItemRenderProps",
+      "value": false,
+      "source": "../src/Tree",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "DragOptions",
+      "value": false,
+      "source": "react-aria/useDrag",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "DragResult",
+      "value": false,
+      "source": "react-aria/useDrag",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "DragAndDropHooks",
+      "value": false,
+      "source": "../src/useDragAndDrop",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "DragAndDropOptions",
+      "value": false,
+      "source": "../src/useDragAndDrop",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "DropIndicatorProps",
+      "value": false,
+      "source": "../src/useDragAndDrop",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "DropIndicatorRenderProps",
+      "value": false,
+      "source": "../src/useDragAndDrop",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "ContextValue",
+      "value": false,
+      "source": "../src/utils",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "RenderProps",
+      "value": false,
+      "source": "../src/utils",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "SlotProps",
+      "value": false,
+      "source": "../src/utils",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "StyleRenderProps",
+      "value": false,
+      "source": "../src/utils",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "DOMRenderProps",
+      "value": false,
+      "source": "../src/utils",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "PossibleLinkDOMRenderProps",
+      "value": false,
+      "source": "../src/utils",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "DOMRenderFunction",
+      "value": false,
+      "source": "../src/utils",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "ClassNameOrFunction",
+      "value": false,
+      "source": "../src/utils",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "StyleOrFunction",
+      "value": false,
+      "source": "../src/utils",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "ChildrenOrFunction",
+      "value": false,
+      "source": "../src/utils",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "VirtualizerProps",
+      "value": false,
+      "source": "../src/Virtualizer",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "DateValue",
+      "value": false,
+      "source": "react-stately/useDateFieldState",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "DateRange",
+      "value": false,
+      "source": "react-stately/useDateRangePickerState",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "TimeValue",
+      "value": false,
+      "source": "react-stately/useTimeFieldState",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "Key",
+      "value": false,
+      "source": "@react-types/shared",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "Selection",
+      "value": false,
+      "source": "@react-types/shared",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "SortDescriptor",
+      "value": false,
+      "source": "@react-types/shared",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "SortDirection",
+      "value": false,
+      "source": "@react-types/shared",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "SelectionMode",
+      "value": false,
+      "source": "@react-types/shared",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "DirectoryDropItem",
+      "value": false,
+      "source": "@react-types/shared",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "DraggableCollectionEndEvent",
+      "value": false,
+      "source": "@react-types/shared",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "DraggableCollectionMoveEvent",
+      "value": false,
+      "source": "@react-types/shared",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "DraggableCollectionStartEvent",
+      "value": false,
+      "source": "@react-types/shared",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "DragPreviewRenderer",
+      "value": false,
+      "source": "@react-types/shared",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "DragTypes",
+      "value": false,
+      "source": "@react-types/shared",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "DropItem",
+      "value": false,
+      "source": "@react-types/shared",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "DropOperation",
+      "value": false,
+      "source": "@react-types/shared",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "DroppableCollectionDropEvent",
+      "value": false,
+      "source": "@react-types/shared",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "DroppableCollectionEnterEvent",
+      "value": false,
+      "source": "@react-types/shared",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "DroppableCollectionExitEvent",
+      "value": false,
+      "source": "@react-types/shared",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "DroppableCollectionInsertDropEvent",
+      "value": false,
+      "source": "@react-types/shared",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "DroppableCollectionMoveEvent",
+      "value": false,
+      "source": "@react-types/shared",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "DroppableCollectionOnItemDropEvent",
+      "value": false,
+      "source": "@react-types/shared",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "DroppableCollectionReorderEvent",
+      "value": false,
+      "source": "@react-types/shared",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "DroppableCollectionRootDropEvent",
+      "value": false,
+      "source": "@react-types/shared",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "DropPosition",
+      "value": false,
+      "source": "@react-types/shared",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "DropTarget",
+      "value": false,
+      "source": "@react-types/shared",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "FileDropItem",
+      "value": false,
+      "source": "@react-types/shared",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "ItemDropTarget",
+      "value": false,
+      "source": "@react-types/shared",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "RootDropTarget",
+      "value": false,
+      "source": "@react-types/shared",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "TextDropItem",
+      "value": false,
+      "source": "@react-types/shared",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "PressEvent",
+      "value": false,
+      "source": "@react-types/shared",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "CalendarState",
+      "value": false,
+      "source": "react-stately/useCalendarState",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "RangeCalendarState",
+      "value": false,
+      "source": "react-stately/useRangeCalendarState",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "CheckboxGroupState",
+      "value": false,
+      "source": "react-stately/useCheckboxGroupState",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "ColorSpace",
+      "value": false,
+      "source": "react-stately/Color",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "ColorChannel",
+      "value": false,
+      "source": "react-stately/Color",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "Color",
+      "value": false,
+      "source": "react-stately/Color",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "ColorFormat",
+      "value": false,
+      "source": "react-stately/Color",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "ColorAxes",
+      "value": false,
+      "source": "react-stately/Color",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "ColorChannelRange",
+      "value": false,
+      "source": "react-stately/Color",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "ColorAreaState",
+      "value": false,
+      "source": "react-stately/useColorAreaState",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "ColorFieldState",
+      "value": false,
+      "source": "react-stately/useColorFieldState",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "ColorPickerState",
+      "value": false,
+      "source": "react-stately/useColorPickerState",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "ColorSliderState",
+      "value": false,
+      "source": "react-stately/useColorSliderState",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "ColorWheelState",
+      "value": false,
+      "source": "react-stately/useColorWheelState",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "ComboBoxState",
+      "value": false,
+      "source": "react-stately/useComboBoxState",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "DateFieldState",
+      "value": false,
+      "source": "react-stately/useDateFieldState",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "DatePickerState",
+      "value": false,
+      "source": "react-stately/useDatePickerState",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "DateRangePickerState",
+      "value": false,
+      "source": "react-stately/useDateRangePickerState",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "DisclosureState",
+      "value": false,
+      "source": "react-stately/useDisclosureState",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "DisclosureGroupState",
+      "value": false,
+      "source": "react-stately/useDisclosureGroupState",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "ListState",
+      "value": false,
+      "source": "react-stately/useListState",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "NumberFieldState",
+      "value": false,
+      "source": "react-stately/useNumberFieldState",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "OverlayTriggerState",
+      "value": false,
+      "source": "react-stately/useOverlayTriggerState",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "QueuedToast",
+      "value": false,
+      "source": "react-stately/useToastState",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "ToastOptions",
+      "value": false,
+      "source": "react-stately/useToastState",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "ToastState",
+      "value": false,
+      "source": "react-stately/useToastState",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "RadioGroupState",
+      "value": false,
+      "source": "react-stately/useRadioGroupState",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "RootMenuTriggerState",
+      "value": false,
+      "source": "react-stately/useMenuTriggerState",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "SearchFieldState",
+      "value": false,
+      "source": "react-stately/useSearchFieldState",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "SelectState",
+      "value": false,
+      "source": "react-stately/useSelectState",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "SliderState",
+      "value": false,
+      "source": "react-stately/useSliderState",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "TableState",
+      "value": false,
+      "source": "react-stately/useTableState",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "TabListState",
+      "value": false,
+      "source": "react-stately/useTabListState",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "TimeFieldState",
+      "value": false,
+      "source": "react-stately/useTimeFieldState",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "ToggleGroupState",
+      "value": false,
+      "source": "react-stately/useToggleGroupState",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "ToggleState",
+      "value": false,
+      "source": "react-stately/useToggleState",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "TooltipTriggerState",
+      "value": false,
+      "source": "react-stately/useTooltipTriggerState",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "TreeState",
+      "value": false,
+      "source": "react-stately/useTreeState",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "ListDataOptions",
+      "value": false,
+      "source": "react-stately/useListData",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "ListData",
+      "value": false,
+      "source": "react-stately/useListData",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "TreeDataOptions",
+      "value": false,
+      "source": "react-stately/useTreeData",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "TreeData",
+      "value": false,
+      "source": "react-stately/useTreeData",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "AsyncListOptions",
+      "value": false,
+      "source": "react-stately/useAsyncList",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "AsyncListData",
+      "value": false,
+      "source": "react-stately/useAsyncList",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "AsyncListLoadFunction",
+      "value": false,
+      "source": "react-stately/useAsyncList",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "AsyncListLoadOptions",
+      "value": false,
+      "source": "react-stately/useAsyncList",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "AsyncListStateUpdate",
+      "value": false,
+      "source": "react-stately/useAsyncList",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "AutocompleteState",
+      "value": false,
+      "source": "react-stately/private/autocomplete/useAutocompleteState",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "ListLayoutOptions",
+      "value": false,
+      "source": "react-stately/useVirtualizerState",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "GridLayoutOptions",
+      "value": false,
+      "source": "react-stately/useVirtualizerState",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "TableLayoutProps",
+      "value": false,
+      "source": "react-stately/useVirtualizerState",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "WaterfallLayoutOptions",
+      "value": false,
+      "source": "react-stately/useVirtualizerState",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "RangeValue",
+      "value": false,
+      "source": "@react-types/shared",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "ValidationResult",
+      "value": false,
+      "source": "@react-types/shared",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    },
+    {
+      "name": "RouterConfig",
+      "value": false,
+      "source": "@react-types/shared",
+      "kind": "hook-utility-type",
+      "disposition": "not-a-component",
+      "tranche": "R1.5",
+      "reason": "Core R1.0 inventory records this upstream symbol without admitting it as a Core component."
+    }
+  ],
+  "normalizedExports": {
+    "path": "catalog/react-r1-0/upstream-exports.json",
+    "sha256": "sha256:ee7eee0561052410d25d655d55c988b29f4c5b8d3523537c876a12ab996d563c",
+    "count": 613
+  },
+  "classificationSha256": "sha256:1210b8d3cee9999407c4632672640b0905c5d9fa8d93904a9e80afd70f9166dc"
+}

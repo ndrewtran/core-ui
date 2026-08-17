@@ -1,23 +1,29 @@
 {
   "name": "@core-ui/react",
-  "version": "1.0.1",
+  "version": "0.1.0-alpha.0",
   "private": true,
   "type": "module",
   "engines": { "node": ">=24.19.0 <25" },
+  "files": ["generated", "README.md", "LICENSE", "NOTICE", "package.json"],
   "exports": {
-    ".": { "types": "./src/index.d.ts", "default": "./src/index.mjs" },
+    ".": { "types": "./generated/index.d.ts", "default": "./generated/index.mjs" },
     "./compatibility": "./generated/compatibility.mjs",
-    "./testing": "./src/testing.mjs"
+    "./styles.css": "./generated/styles.css",
+    "./testing": "./generated/testing.mjs"
   },
   "scripts": {
+    "prepack": "node src/generate.mjs",
+    "prepublishOnly": "node src/publish-guard.mjs",
     "check": "node src/generate.mjs --check && node --test test/*.test.mjs && tsc --noEmit -p test/tsconfig.json",
     "generate": "node src/generate.mjs",
     "generate:check": "node src/generate.mjs --check"
   },
-  "dependencies": { "@core-ui/web": "workspace:*" },
+  "dependencies": { "react-aria-components": "1.20.0" },
   "peerDependencies": { "react": ">=19.2.0 <20", "react-dom": ">=19.2.0 <20" },
   "devDependencies": {
+    "@core-ui/catalog": "workspace:*",
     "@core-ui/schema": "workspace:*",
+    "@core-ui/tokens": "workspace:*",
     "@types/jsdom": "30.0.0",
     "@types/react": "19.2.18",
     "@types/react-dom": "19.2.4",

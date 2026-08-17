@@ -6,6 +6,7 @@ import { dirname, join, resolve } from 'node:path';
 import { canonicalDigest, canonicalJson, parseJsonStrict, validateFamily } from '@core-ui/schema';
 import {
   assertDefaultThemeRepositoryState,
+  hasAcceptedReactPrimaryAuthority,
   transitionDefaultThemeRepository,
 } from './internal/default-theme-repository-transition.mjs';
 
@@ -687,7 +688,9 @@ async function assertRepositoryFacts(repositoryRoot, decision, sourceState) {
   if (generatedCatalog.includes(forbiddenId)) {
     fail('CORE_TOKEN_IDENTITY_ALIAS_UNAUTHORIZED', `current generated catalog exposes ${forbiddenId}`);
   }
+  const reactPrimary = await hasAcceptedReactPrimaryAuthority(repositoryRoot);
   for (const path of [...new Set(files)]) {
+    if (reactPrimary && path.startsWith('packages/react/')) continue;
     const bytes = await readFile(join(repositoryRoot, path));
     if (
       bytes.includes(forbiddenId)

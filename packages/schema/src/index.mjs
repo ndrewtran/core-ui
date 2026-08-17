@@ -74,6 +74,7 @@ export {
   assertAppendOnlyErrorCodes,
   relationEdges,
   validateCatalogRecords,
+  validateContractDocument,
   validateFamily,
   validateFieldOwnershipRegistry,
   validateRelationRegistry,

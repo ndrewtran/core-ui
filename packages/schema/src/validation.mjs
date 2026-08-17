@@ -711,6 +711,15 @@ export function validateFamily(family, value, { schemas, ownership } = {}) {
   return value;
 }
 
+/** Validates an internal closed contract without admitting a public catalog family. */
+export function validateContractDocument(fileName, value, { schemas } = {}) {
+  const schema = schemas?.[fileName] ?? loadJsonDocument(fileName);
+  const issues = [];
+  evaluate(schema, value, '$', fileName, issues, schemas);
+  if (issues.length > 0) throw new SchemaValidationError('CORE_SCHEMA_INVALID', issues);
+  return value;
+}
+
 function escapeJsonPointer(segment) {
   return segment.replaceAll('~', '~0').replaceAll('/', '~1');
 }

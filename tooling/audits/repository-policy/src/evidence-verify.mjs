@@ -56,6 +56,11 @@ import {
   hasReviewReadinessResidue,
   REVIEW_READINESS_ROOT,
 } from '../../../../tests/evidence/delivery-review-readiness-applicability-profile.mjs';
+import {
+  REACT_R10_ROOT,
+  assertReactR10DirectoryNames,
+  assertReactR10Root,
+} from '../../../../tests/evidence/react-r1.0-profile.mjs';
 import { execFile as execFileCallback } from 'node:child_process';
 import { promisify } from 'node:util';
 
@@ -259,6 +264,7 @@ export async function verifyEvidence(repositoryRoot, {
   g12V2ExpectedIdentity,
   g12ExpectedIdentity,
   phaseCV2ExpectedIdentity,
+  reactR10ExpectedIdentity,
 } = {}) {
   const evidenceRoot = join(repositoryRoot, 'tests/evidence');
   const transactionJournal = join(evidenceRoot, '.g1-2-transaction.json');
@@ -273,6 +279,7 @@ export async function verifyEvidence(repositoryRoot, {
   }
   const milestones = await readdir(evidenceRoot, { withFileTypes: true }).catch(() => []);
   const milestoneNames = new Set(milestones.filter((entry) => entry.isDirectory()).map(({ name }) => name));
+  await verifyReactR10Route(repositoryRoot, milestoneNames, reactR10ExpectedIdentity);
   await verifyDefaultThemeG10V2Route(repositoryRoot, milestoneNames, g10V2ExpectedIdentity);
   await verifyDefaultThemeG11V2Route(repositoryRoot, milestoneNames, g11V2ExpectedIdentity);
   await verifyG12V2Route(repositoryRoot, milestoneNames, g12V2ExpectedIdentity);
@@ -1196,6 +1203,35 @@ export async function verifyEvidence(repositoryRoot, {
     recertificationCount,
     supersessionCount,
   };
+}
+
+export async function verifyReactR10Route(repositoryRoot, milestoneNames, expectedIdentity) {
+  const present = assertReactR10DirectoryNames([...milestoneNames], (message) => {
+    throw new EvidenceIntegrityError('EVIDENCE_REACT_R10_TOPOLOGY_INVALID', message);
+  });
+  if (!present) return false;
+  try {
+    let expected = expectedIdentity;
+    if (!expected) {
+      const { value } = await readCanonicalJson(join(repositoryRoot, REACT_R10_ROOT, 'index.json'));
+      expected = {
+        sourceRevision: value.sourceRevision,
+        sourceTree: value.sourceTree,
+        toolRevision: value.executedRevision,
+        toolTree: value.executedTree,
+        timestamp: value.captureTimestamp,
+      };
+    }
+    await assertReactR10Root(repositoryRoot, expected, {
+      allowUncommitted: expected.toolRevision === await execFile('git', ['rev-parse', 'HEAD'], {
+        cwd: repositoryRoot, encoding: 'utf8',
+      }).then(({ stdout }) => stdout.trim()),
+    });
+    return true;
+  } catch (error) {
+    if (error instanceof EvidenceIntegrityError && error.code === 'EVIDENCE_REACT_R10_PROFILE_INVALID') throw error;
+    throw new EvidenceIntegrityError('EVIDENCE_REACT_R10_PROFILE_INVALID', error.message);
+  }
 }
 
 export async function verifyDefaultThemeG10V2Route(repositoryRoot, milestoneNames, expectedIdentity) {
