@@ -1,4 +1,4 @@
 interface:
   display_name: "Core UI Delivery"
   short_description: "Triage Core UI delivery through canonical owners"
-  default_prompt: "Use $core-ui-delivery to triage and execute this Core UI task through the canonical delivery profile, starting with the alignment preflight."
+  default_prompt: "Use $core-ui-delivery to triage this Core UI task through the canonical delivery profile, then normally route one approved end-to-end implementation, research, focused testing, routine debugging, and verification lane to coder; use researcher or browser_debugger only as optional specialists, and dispatch reviewer only through profile-selected canonical reviewer routes; keep the root accountable and use fork_turns=none for every spawn."

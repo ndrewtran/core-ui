@@ -8,7 +8,36 @@ description: Triage and route Core UI repository work through its canonical deli
 Use this repository skill after the global `core-ui-delivery-guard` for every
 Core UI delivery task. It is the activation and triage scaffold for the private
 delivery procedure. It owns no commands, mutable state, reviewer decisions,
-clearance, dispatch, GitHub writes, or Project writes.
+clearance, dispatch, GitHub writes, or Project writes. The root agent remains
+the accountable delivery lead; task decomposition, difficult reasoning,
+escalated blocker resolution, delegation, and final synthesis and decisions
+are root-only responsibilities. Root implementation and routine repository
+research or test/debug loops are exceptional, not normal.
+
+## Named team routing
+
+When delegation is useful, only root delegates to the named reusable agents
+below. Every spawn uses `fork_turns="none"` and the minimum task-local context;
+subagents never spawn or delegate, and never inherit the root turn.
+
+- `coder`: normally owns the complete approved, authority-aligned bounded
+  execution after preflight: repository research, implementation, routine
+  debugging, focused tests, and final verification. It has explicit file
+  ownership and makes no architecture decisions or external mutations.
+- `researcher`: optional, bounded, read-only authority, repository, or tracker
+  investigation when implementation is not requested or an independent lane
+  materially improves confidence. The root verifies facts and owns conclusions.
+- `reviewer`: inspects the frozen actual diff under the triggered canonical
+  reviewer contract. Preserve profile-owned role labels such as
+  `core-ui-authority-reviewer`; this identity does not replace the role owner.
+- `browser_debugger`: reproduces or verifies relevant browser UI behavior and
+  collects screenshot, console, DOM, or network evidence without editing app
+  code or local files. It is optional and advisory. Return evidence through
+  MCP/tool output only. Treat its result as advisory, not deterministic proof
+  or renderer review.
+
+Do not create a standing panel. Route only the smallest set required by the
+profile and task risk, and freeze the reviewed diff while `reviewer` runs.
 
 ## Start every task
 
@@ -29,7 +58,7 @@ clearance, dispatch, GitHub writes, or Project writes.
 4. Read the canonical authority and owner references selected by the profile.
    Classify the task as aligned, a required correction, an adjacent improvement,
    a potential deviation, or unverified before writing.
-5. Report a compact task route: primary owner and milestone relationship;
+5. Report a compact task route: primary coder owner and milestone relationship;
    Project item and workflow status source; active profile stage and
    applicability; required owner checks; triggered reviewers and independence;
    freeze boundary; human decision state; and exact next permitted operation.
@@ -48,7 +77,11 @@ clearance, dispatch, GitHub writes, or Project writes.
    Render and validate the packet first, then derive conformance and its
    context-free phase handoff. Never hand-author a substitute packet when the
    canonical renderer applies.
-4. Dispatch only reviewers selected by the profile and actual risk. Batch
+4. After preflight, normally route one coder to own the complete implementation,
+   repository research, focused checks, routine debugging, and verification.
+   Dispatch optional researcher or browser_debugger specialists only when they
+   materially help. Dispatch reviewers only when selected by the profile and
+   actual risk. Batch
    findings against the same immutable candidate; after a correction, rewind
    only to the earliest invalidated domain and rebuild downstream identities.
 5. Treat hosted checks as candidate conformance only. Before every external
