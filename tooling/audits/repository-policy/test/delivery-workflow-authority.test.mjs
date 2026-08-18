@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { canonicalJson, parseJsonStrict } from '@core-ui/schema';
 import {
+  verifyDecision0009Amendment02SkillSuccessor,
   verifyDeliveryReviewReadinessAuthority,
   verifyDeliveryWorkflowAuthority,
 } from '../src/delivery-workflow-authority-verify.mjs';
@@ -49,6 +50,54 @@ const implementationClarificationSource = fs.readFileSync(
   path.join(repositoryRoot, 'decisions/0009-amendment-01-implementation-clarification.md'),
   'utf8',
 );
+const amendment02Source = fs.readFileSync(
+  path.join(repositoryRoot, 'decisions/0009-amendment-02-skill-routing.md'),
+  'utf8',
+);
+const amendment02AcceptanceSource = fs.readFileSync(
+  path.join(repositoryRoot, 'decisions/0009-amendment-02-skill-routing-acceptance.md'),
+  'utf8',
+);
+const successorSkillSource = fs.readFileSync(
+  path.join(repositoryRoot, '.agents/skills/core-ui-delivery/SKILL.md'),
+  'utf8',
+);
+const successorYamlSource = fs.readFileSync(
+  path.join(repositoryRoot, '.agents/skills/core-ui-delivery/agents/openai.yaml'),
+  'utf8',
+);
+const rejectAmendment02 = (options, label) => {
+  try {
+    verifyDecision0009Amendment02SkillSuccessor(repositoryRoot, options);
+  } catch (error) {
+    if (String(error.message).startsWith('DELIVERY_WORKFLOW_AUTHORITY_INVALID:')) return;
+    throw error;
+  }
+  throw new Error(`Decision 0009 amendment 02 negative accepted: ${label}`);
+};
+const amendment02Result = verifyDecision0009Amendment02SkillSuccessor(repositoryRoot);
+if (!amendment02Result.accepted
+    || amendment02Result.amendment.bytes !== 6976
+    || amendment02Result.skill.bytes !== 7839
+    || amendment02Result.interfaceMetadata.bytes !== 577) {
+  throw new Error('Decision 0009 amendment 02 positive result mismatch');
+}
+rejectAmendment02({
+  reviewAmendment02Source: amendment02Source.replace('Status: Candidate;', 'Status: Candidate changed;'),
+}, 'candidate identity');
+rejectAmendment02({
+  reviewAmendment02AcceptanceSource: amendment02AcceptanceSource.replace(
+    'Approval timestamp: Not recorded',
+    'Approval timestamp: 2026-08-18T00:00:00Z',
+  ),
+}, 'acceptance identity');
+rejectAmendment02({
+  reviewSuccessorSkillSource: successorSkillSource.replace('Root implementation and routine', 'Root implementation and routine drift'),
+}, 'successor SKILL identity');
+rejectAmendment02({
+  reviewSuccessorYamlSource: successorYamlSource.replace('Core UI Delivery', 'Core UI Delivery drift'),
+}, 'successor interface metadata identity');
+rejectAmendment02({ reviewSuccessorYamlSource: '' }, 'missing successor binding');
 const rejectReview = (options, label) => {
   try {
     verifyDeliveryReviewReadinessAuthority(repositoryRoot, options);
@@ -99,4 +148,4 @@ if (!reviewResult.accepted || reviewResult.targets !== 29 || reviewResult.manife
   throw new Error('Decision 0009 positive result mismatch');
 }
 
-process.stdout.write('[delivery-authority] Decision 0007 preserved; 13 Decision 0009 negative mutations rejected; positive candidates accepted\n');
+process.stdout.write('[delivery-authority] Decision 0007 preserved; Decision 0009 amendment 02 successor negatives rejected; positive candidates accepted\n');

@@ -26,6 +26,20 @@ const REVIEW_IMPLEMENTATION_CLARIFICATION_PATH = 'decisions/0009-amendment-01-im
 const REVIEW_IMPLEMENTATION_CLARIFICATION_BYTES = 2270;
 const REVIEW_IMPLEMENTATION_CLARIFICATION_SHA256 = 'sha256:148c0426a78073776fa5b11598c2c789307c84788eb6c8c1646c585884f32dd1';
 const REVIEW_HISTORICAL_SOURCE = '63dee2c988759ec803f71a0353a6630bf612826c';
+const REVIEW_AMENDMENT02_PATH = 'decisions/0009-amendment-02-skill-routing.md';
+const REVIEW_AMENDMENT02_ACCEPTANCE_PATH = 'decisions/0009-amendment-02-skill-routing-acceptance.md';
+const REVIEW_AMENDMENT02_BYTES = 6976;
+const REVIEW_AMENDMENT02_SHA256 = 'sha256:eb9c906ba9fb72e58f596f876175c402909dab4998f12c2f14cbd26e5667d8b2';
+const REVIEW_AMENDMENT02_ACCEPTANCE_BYTES = 984;
+const REVIEW_AMENDMENT02_ACCEPTANCE_SHA256 = 'sha256:4f0b1f054497986cd1ac708aa3b94738b22bd26f9b8590065f7ec8e8488dfcd1';
+const REVIEW_SUCCESSOR_SKILL_PATH = '.agents/skills/core-ui-delivery/SKILL.md';
+const REVIEW_SUCCESSOR_SKILL_BYTES = 7839;
+const REVIEW_SUCCESSOR_SKILL_SHA256 = 'sha256:34007a84eb46ef979a663357bdca641ac3661e9276b5944de03143b7b7216db9';
+const REVIEW_SUCCESSOR_YAML_PATH = '.agents/skills/core-ui-delivery/agents/openai.yaml';
+const REVIEW_SUCCESSOR_YAML_BYTES = 577;
+const REVIEW_SUCCESSOR_YAML_SHA256 = 'sha256:0cad2dfe963cdbca6b698415d0d9fe045d8e968bc198b505e7c83d24cc33869a';
+const REVIEW_PREDECESSOR_SKILL_BYTES = 5789;
+const REVIEW_PREDECESSOR_SKILL_SHA256 = 'sha256:5695b79539fd4cfe15e379cca448c6c35d59d3fa46c62044383e9381455cbae5';
 const REVIEW_HISTORICAL_ARTIFACT_PATHS = new Set([
   'tests/evidence/delivery-review-readiness-applicability-profile.mjs',
   'tests/evidence/delivery-review-readiness-applicability-profile.test.mjs',
@@ -134,6 +148,57 @@ export function verifyDeliveryWorkflowAuthority(repositoryRoot, options = {}) {
   };
 }
 
+export function verifyDecision0009Amendment02SkillSuccessor(repositoryRoot, options = {}) {
+  const amendmentSource = options.reviewAmendment02Source
+    ?? readFileSync(join(repositoryRoot, REVIEW_AMENDMENT02_PATH), 'utf8');
+  const acceptanceSource = options.reviewAmendment02AcceptanceSource
+    ?? readFileSync(join(repositoryRoot, REVIEW_AMENDMENT02_ACCEPTANCE_PATH), 'utf8');
+  const skillSource = options.reviewSuccessorSkillSource
+    ?? readFileSync(join(repositoryRoot, REVIEW_SUCCESSOR_SKILL_PATH), 'utf8');
+  const yamlSource = options.reviewSuccessorYamlSource
+    ?? readFileSync(join(repositoryRoot, REVIEW_SUCCESSOR_YAML_PATH), 'utf8');
+
+  if (Buffer.byteLength(amendmentSource) !== REVIEW_AMENDMENT02_BYTES
+      || digest(amendmentSource) !== REVIEW_AMENDMENT02_SHA256) {
+    fail('Decision 0009 amendment 02 candidate identity');
+  }
+  if (Buffer.byteLength(acceptanceSource) !== REVIEW_AMENDMENT02_ACCEPTANCE_BYTES
+      || digest(acceptanceSource) !== REVIEW_AMENDMENT02_ACCEPTANCE_SHA256) {
+    fail('Decision 0009 amendment 02 acceptance identity');
+  }
+  const requiredAcceptanceLines = [
+    '# Acceptance: Decision 0009 amendment 02',
+    '- Decision: `core-ui:decision:0009:amendment:02`',
+    '- Parent decision: `core-ui:decision:0009`',
+    '- Repository: `ndrewtran/core-ui`',
+    '- Owner: Andrew / `ndrewtran`',
+    '- Outcome: Accepted',
+    '- Candidate: 6,976 bytes, SHA-256 `eb9c906ba9fb72e58f596f876175c402909dab4998f12c2f14cbd26e5667d8b2`',
+    '- Approval instruction: `I approve Decision 0009 amendment 02, SHA-256 eb9c906ba9fb72e58f596f876175c402909dab4998f12c2f14cbd26e5667d8b2`',
+    '- Approval timestamp: Not recorded',
+    '- GitHub comment claimed: No',
+    "The candidate's `Status: Candidate; pending the designated human owner's digest-specific acceptance.` line is frozen candidate-phase text; this separate receipt records the current accepted state.",
+  ];
+  if (requiredAcceptanceLines.some((line) => !acceptanceSource.includes(line))) {
+    fail('Decision 0009 amendment 02 acceptance binding');
+  }
+  if (Buffer.byteLength(skillSource) !== REVIEW_SUCCESSOR_SKILL_BYTES
+      || digest(skillSource) !== REVIEW_SUCCESSOR_SKILL_SHA256) {
+    fail('Decision 0009 amendment 02 successor SKILL identity');
+  }
+  if (Buffer.byteLength(yamlSource) !== REVIEW_SUCCESSOR_YAML_BYTES
+      || digest(yamlSource) !== REVIEW_SUCCESSOR_YAML_SHA256) {
+    fail('Decision 0009 amendment 02 successor interface metadata identity');
+  }
+  return {
+    accepted: true,
+    amendment: { bytes: Buffer.byteLength(amendmentSource), sha256: digest(amendmentSource) },
+    acceptance: { bytes: Buffer.byteLength(acceptanceSource), sha256: digest(acceptanceSource) },
+    skill: { bytes: Buffer.byteLength(skillSource), sha256: digest(skillSource) },
+    interfaceMetadata: { bytes: Buffer.byteLength(yamlSource), sha256: digest(yamlSource) },
+  };
+}
+
 export function proposedReviewReadinessManifest(decisionSource, decision) {
   return {
     acceptedBase: decision.sourceConstruction.acceptedBase,
@@ -167,6 +232,7 @@ export function verifyDeliveryReviewReadinessAuthority(repositoryRoot, options =
       || digest(implementationClarificationSource) !== REVIEW_IMPLEMENTATION_CLARIFICATION_SHA256) {
     fail('Decision 0009 amendment 01 implementation clarification identity');
   }
+  const amendment02 = verifyDecision0009Amendment02SkillSuccessor(repositoryRoot, options);
   exactKeys(decision, [
     'acceptanceTopology', 'affectedScopeIds', 'authority', 'choices', 'classification',
     'continuationTopology', 'decisionId', 'implementationBoundary', 'nonGoals',
@@ -203,6 +269,13 @@ export function verifyDeliveryReviewReadinessAuthority(repositoryRoot, options =
       || paths.includes(REVIEW_DECISION_PATH) || paths.includes(REVIEW_ACCEPTANCE_PATH)) fail('Decision 0009 artifact path manifest');
   for (const entry of decision.sourceConstruction.artifactEntries) {
     exactKeys(entry, ['byteLength', 'path', 'sha256'], `artifact entry ${entry.path}`);
+    if (entry.path === REVIEW_SUCCESSOR_SKILL_PATH) {
+      if (entry.byteLength !== REVIEW_PREDECESSOR_SKILL_BYTES
+          || entry.sha256 !== REVIEW_PREDECESSOR_SKILL_SHA256) {
+        fail('Decision 0009 predecessor SKILL identity');
+      }
+      continue;
+    }
     let bytes = readFileSync(join(repositoryRoot, entry.path));
     if (REVIEW_HISTORICAL_ARTIFACT_PATHS.has(entry.path)) {
       try {
@@ -275,6 +348,7 @@ export function verifyDeliveryReviewReadinessAuthority(repositoryRoot, options =
     acceptance: { bytes: Buffer.byteLength(acceptanceSource), sha256: digest(acceptanceSource) },
     decision: manifest.decision,
     manifest: { entries: acceptance.manifest.entryCount, sha256: manifestSha256 },
+    successor: amendment02,
     targets: decision.continuationTopology.targets.length,
   };
 }
