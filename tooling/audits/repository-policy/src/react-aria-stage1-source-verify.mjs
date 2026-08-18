@@ -39,9 +39,9 @@ export const R1_ENTRY_BINDING = Object.freeze({
     version: '6.0.0',
   }),
   roadmap: Object.freeze({
-    bytes: 155570,
+    bytes: 155544,
     path: 'strategy/milestone-roadmap.md',
-    sha256: '006bd9a9b9141c10440fffd9d8f2dcadf77a47e1175a072a0e52acd784795ca0',
+    sha256: '8006803d050713b104bf485c6c610c2339a65f3e30eb6bf4e1a9222f3a3bdf2b',
   }),
 });
 

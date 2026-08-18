@@ -815,7 +815,7 @@ SSR/hydration, and automated accessibility; `E-R1.1-03` generated
 descriptor/guidance/export parity and packed consumer; `E-R1.1-04` risk-
 selected browser/manual results, advisories, exceptions, and release manifest.
 
-**Exit:** every locked component is export-ready or explicitly unavailable;
+**Exit:** every locked component is export-ready;
 an exact accepted `0.1.0-alpha.N` publication may be proposed.
 
 ### R1.2 Forms and field controls
