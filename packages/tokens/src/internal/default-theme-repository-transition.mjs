@@ -4,7 +4,7 @@ import { promisify } from 'node:util';
 import { cp, mkdtemp, mkdir, readFile, rm, stat, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { tmpdir } from 'node:os';
-import { parseJsonStrict } from '@core-ui/schema';
+import { canonicalJson, parseJsonStrict } from '@core-ui/schema';
 
 const execFile = promisify(execFileCallback);
 
@@ -93,6 +93,157 @@ const REACT_PRIMARY_AUTHORITIES = Object.freeze([
   REACT_COMPREHENSIVE_AUTHORITY,
 ]);
 
+const R1_CONTINUOUS_AUTHORITY = Object.freeze({
+  acceptancePath: 'decisions/0010-amendment-04-r1-continuous-execution-acceptance.md',
+  candidatePath: 'decisions/0010-amendment-04-r1-continuous-execution-envelope.md',
+  decisionPath: 'decisions/0010-amendment-04-r1-continuous-execution.md',
+  decisionSha256: '321fefef4e723ee2d636a4ea6917436bf0babb5c6c7da2a5450e1ffc5c37871f',
+  manifestPath: 'decisions/0010-amendment-04-r1-continuous-execution-materialization.json',
+  productScopePath: 'strategy/product-scope.md',
+  productScopeSha256: 'add747d5986c9039029a99b558ae719969fd18ac113051bbec478bd291da8632',
+});
+
+const R1_OWNER_COMMENT_URL = /^https:\/\/github\.com\/ndrewtran\/core-ui\/pull\/[1-9]\d*#issuecomment-[1-9]\d*$/u;
+
+function sha256(source) {
+  return createHash('sha256').update(source).digest('hex');
+}
+
+function renderTemplate(template, substitutions) {
+  return Object.entries(substitutions).reduce(
+    (output, [name, value]) => output.replaceAll(`{${name}}`, value),
+    template,
+  );
+}
+
+async function hasAcceptedR1ContinuousAuthority(repositoryRoot) {
+  let acceptanceBytes;
+  try {
+    const { stdout: stageOutput } = await execFile('git', [
+      '-C',
+      repositoryRoot,
+      'ls-files',
+      '--stage',
+      '-z',
+      '--',
+      R1_CONTINUOUS_AUTHORITY.acceptancePath,
+    ], { encoding: 'buffer' });
+    const records = stageOutput.toString('utf8').split('\0').filter(Boolean);
+    if (records.length !== 1) return false;
+    const separator = records[0].indexOf('\t');
+    if (separator < 0 || records[0].slice(separator + 1) !== R1_CONTINUOUS_AUTHORITY.acceptancePath) return false;
+    const [mode, blob, stage] = records[0].slice(0, separator).split(' ');
+    if (mode !== '100644' || stage !== '0' || !/^[0-9a-f]{40}$/u.test(blob) || /^0{40}$/u.test(blob)) return false;
+    const [{ stdout: indexedBytes }, worktreeBytes] = await Promise.all([
+      execFile('git', ['-C', repositoryRoot, 'cat-file', 'blob', blob], { encoding: 'buffer' }),
+      readFile(join(repositoryRoot, R1_CONTINUOUS_AUTHORITY.acceptancePath)),
+    ]);
+    if (!indexedBytes.equals(worktreeBytes)) return false;
+    acceptanceBytes = worktreeBytes;
+  } catch {
+    return false;
+  }
+  const paths = Object.values(R1_CONTINUOUS_AUTHORITY).filter((value) => (
+    typeof value === 'string' && value.includes('/')
+  ));
+  const sources = Object.fromEntries(await Promise.all(paths.map(async (relativePath) => [
+    relativePath,
+    relativePath === R1_CONTINUOUS_AUTHORITY.acceptancePath
+      ? acceptanceBytes
+      : await readFile(join(repositoryRoot, relativePath)).catch(() => null),
+  ])));
+  if (Object.values(sources).some((source) => source === null)) return false;
+
+  const productScope = sources[R1_CONTINUOUS_AUTHORITY.productScopePath];
+  const decision = sources[R1_CONTINUOUS_AUTHORITY.decisionPath];
+  const candidate = sources[R1_CONTINUOUS_AUTHORITY.candidatePath];
+  const manifestBytes = sources[R1_CONTINUOUS_AUTHORITY.manifestPath];
+  const acceptance = sources[R1_CONTINUOUS_AUTHORITY.acceptancePath].toString('utf8');
+  if (
+    sha256(productScope) !== R1_CONTINUOUS_AUTHORITY.productScopeSha256
+    || sha256(decision) !== R1_CONTINUOUS_AUTHORITY.decisionSha256
+  ) return false;
+  for (const [relativePath, expected] of REACT_COMPREHENSIVE_AUTHORITY.slice(1)) {
+    const source = await readFile(join(repositoryRoot, relativePath)).catch(() => null);
+    if (!source || sha256(source) !== expected) return false;
+  }
+
+  let manifest;
+  try {
+    manifest = parseJsonStrict(manifestBytes.toString('utf8'));
+  } catch {
+    return false;
+  }
+  if (canonicalJson(manifest) !== manifestBytes.toString('utf8')) return false;
+  const renderer = manifest.acceptanceRecordRenderer;
+  if (
+    manifest.profile !== 'core-ui-r1-continuous-execution-materialization-manifest-v1'
+    || manifest.selfPath !== R1_CONTINUOUS_AUTHORITY.manifestPath
+    || manifest.candidate?.path !== R1_CONTINUOUS_AUTHORITY.candidatePath
+    || manifest.candidate?.algorithm !== 'sha256'
+    || manifest.candidate?.byteLength !== candidate.byteLength
+    || manifest.candidate?.digest !== sha256(candidate)
+    || renderer?.outputPath !== R1_CONTINUOUS_AUTHORITY.acceptancePath
+    || renderer?.owner !== 'Andrew / ndrewtran'
+    || renderer?.ownerComment?.author !== 'ndrewtran'
+    || renderer?.ownerComment?.repository !== 'ndrewtran/core-ui'
+    || renderer?.ownerComment?.body !== 'exact-rendered-owner-statement'
+    || renderer?.ownerComment?.urlPattern !== 'https://github.com/ndrewtran/core-ui/pull/{authorityPrNumber}#issuecomment-{commentId}'
+    || typeof renderer?.ownerStatementTemplate !== 'string'
+    || typeof renderer?.outputTemplate !== 'string'
+    || !Array.isArray(renderer?.substitutions)
+    || canonicalJson(renderer?.substitutions) !== canonicalJson([
+      'candidateSha256',
+      'manifestSha256',
+      'ownerCommentUrl',
+      'ownerStatement',
+      'ownerStatementSha256',
+    ])
+  ) return false;
+
+  if (!Array.isArray(manifest.staticAfterImages)) return false;
+  const imagePaths = new Set();
+  for (const image of manifest.staticAfterImages) {
+    if (
+      image.algorithm !== 'sha256'
+      || typeof image.path !== 'string'
+      || image.path.startsWith('/')
+      || image.path.split('/').includes('..')
+      || imagePaths.has(image.path)
+    ) return false;
+    imagePaths.add(image.path);
+    const source = await readFile(join(repositoryRoot, image.path)).catch(() => null);
+    if (!source || image.byteLength !== source.byteLength || image.digest !== sha256(source)) return false;
+  }
+  const expectedWriteSet = new Set([
+    R1_CONTINUOUS_AUTHORITY.acceptancePath,
+    R1_CONTINUOUS_AUTHORITY.manifestPath,
+    ...manifest.staticAfterImages.map(({ path }) => path),
+  ]);
+  if (
+    !Array.isArray(manifest.writeSet)
+    || manifest.writeSet.length !== expectedWriteSet.size
+    || manifest.writeSet.some((path) => !expectedWriteSet.has(path))
+  ) return false;
+
+  const ownerCommentMatch = acceptance.match(/^Owner record: `(https:\/\/github\.com\/ndrewtran\/core-ui\/pull\/[1-9]\d*#issuecomment-[1-9]\d*)`$/mu);
+  const ownerCommentUrl = ownerCommentMatch?.[1];
+  if (!ownerCommentUrl || !R1_OWNER_COMMENT_URL.test(ownerCommentUrl)) return false;
+  const manifestSha256 = sha256(manifestBytes);
+  const ownerStatement = renderTemplate(renderer.ownerStatementTemplate, {
+    candidateSha256: manifest.candidate.digest,
+    manifestSha256,
+  });
+  const expectedAcceptance = renderTemplate(renderer.outputTemplate, {
+    candidateSha256: manifest.candidate.digest,
+    manifestSha256,
+    ownerCommentUrl,
+    ownerStatement,
+    ownerStatementSha256: sha256(ownerStatement),
+  });
+  return acceptance === expectedAcceptance;
+}
+
 export async function hasAcceptedReactPrimaryAuthority(repositoryRoot) {
   for (const authority of REACT_PRIMARY_AUTHORITIES) {
     let matches = true;
@@ -105,7 +256,7 @@ export async function hasAcceptedReactPrimaryAuthority(repositoryRoot) {
     }
     if (matches) return true;
   }
-  return false;
+  return hasAcceptedR1ContinuousAuthority(repositoryRoot);
 }
 
 function replaceExact(source, from, to, label) {

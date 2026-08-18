@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { canonicalJson, parseJsonStrict } from '@core-ui/schema';
 import { sha256 } from './policy.mjs';
+import { hasAcceptedR1ContinuousAuthority } from './r1-continuous-authority-compatibility.mjs';
 import { verifyReactR1Entry } from './react-aria-stage1-source-verify.mjs';
 
 const DECISION_PATH = 'decisions/0007-delivery-workflow-authority.json';
@@ -20,8 +21,12 @@ const CURRENT_PRODUCT_SCOPE_BYTES = 114420;
 const CURRENT_PRODUCT_SCOPE_SHA256 = 'sha256:b645bedfad6427f18535898938d2551ce8f6005a0e636c1288f60b8199578b73';
 const COMPREHENSIVE_PRODUCT_SCOPE_BYTES = 122969;
 const COMPREHENSIVE_PRODUCT_SCOPE_SHA256 = 'sha256:0cafc0218f0e6795a5d600acb424b4bf514972295c89b48e9042d7faa69a261f';
+const CONTINUOUS_PRODUCT_SCOPE_BYTES = 124602;
+const CONTINUOUS_PRODUCT_SCOPE_SHA256 = 'sha256:add747d5986c9039029a99b558ae719969fd18ac113051bbec478bd291da8632';
 const COMPREHENSIVE_ARCHITECTURE_SHA256 = 'sha256:c33f829298748e0c776c63a29449cd27d3cc9519d63d1c3c2b7f0c83d794ec02';
 const COMPREHENSIVE_ROADMAP_SHA256 = 'sha256:8006803d050713b104bf485c6c610c2339a65f3e30eb6bf4e1a9222f3a3bdf2b';
+const CONTINUOUS_ARCHITECTURE_SHA256 = 'sha256:fa94c95f08c659f977af43a4438ffdb8d1774a06332786fae61f03f0799c085b';
+const CONTINUOUS_ROADMAP_SHA256 = 'sha256:9f321f93a537f69c5604de35f85053d8bf4748e937d6797c9262691e301247a1';
 const ARCHITECTURE_SHA256 = 'sha256:bdf8eb132fcdace479a05569020fd91acb0bde02dd1b24b33ce0f96ceaf39371';
 const ROADMAP_SHA256 = 'sha256:808a972cf2d92064aacb0a10560ac512c0ac878b9c960098d9ddc7d84354f4c0';
 const HISTORICAL_AUTHORITY_SOURCE = 'b27cb4fb3d71f8feca9505684201286d76f62d42';
@@ -115,10 +120,15 @@ export function verifyDeliveryWorkflowAuthority(repositoryRoot, options = {}) {
     Buffer.byteLength(productScopeSource) === COMPREHENSIVE_PRODUCT_SCOPE_BYTES
     && digest(productScopeSource) === COMPREHENSIVE_PRODUCT_SCOPE_SHA256
     && productScopeSource.startsWith('---\nscopeVersion: 6.0.0\n')
-  ) ? '6.0.0' : null;
+  ) ? '6.0.0' : (
+    Buffer.byteLength(productScopeSource) === CONTINUOUS_PRODUCT_SCOPE_BYTES
+    && digest(productScopeSource) === CONTINUOUS_PRODUCT_SCOPE_SHA256
+    && productScopeSource.startsWith('---\nscopeVersion: 6.0.1\n')
+    && hasAcceptedR1ContinuousAuthority(repositoryRoot, { productScopeSource })
+  ) ? '6.0.1' : null;
   if (productScopeVersion === null) fail('Product Scope accepted identity');
-  if (!historicalSource && productScopeVersion !== '6.0.0') {
-    fail('current source mode requires Product Scope 6.0.0');
+  if (!historicalSource && productScopeVersion !== '6.0.0' && productScopeVersion !== '6.0.1') {
+    fail('current source mode requires accepted Product Scope 6.0.x');
   }
   const architectureSource = options.architectureSource
     ?? (historicalSource
@@ -128,8 +138,16 @@ export function verifyDeliveryWorkflowAuthority(repositoryRoot, options = {}) {
     ?? (historicalSource
       ? readHistoricalAuthority(repositoryRoot, ROADMAP_PATH)
       : readFileSync(join(repositoryRoot, ROADMAP_PATH), 'utf8'));
-  const expectedArchitectureSha256 = historicalSource ? ARCHITECTURE_SHA256 : COMPREHENSIVE_ARCHITECTURE_SHA256;
-  const expectedRoadmapSha256 = historicalSource ? ROADMAP_SHA256 : COMPREHENSIVE_ROADMAP_SHA256;
+  const expectedArchitectureSha256 = historicalSource
+    ? ARCHITECTURE_SHA256
+    : productScopeVersion === '6.0.1'
+      ? CONTINUOUS_ARCHITECTURE_SHA256
+      : COMPREHENSIVE_ARCHITECTURE_SHA256;
+  const expectedRoadmapSha256 = historicalSource
+    ? ROADMAP_SHA256
+    : productScopeVersion === '6.0.1'
+      ? CONTINUOUS_ROADMAP_SHA256
+      : COMPREHENSIVE_ROADMAP_SHA256;
   if (digest(architectureSource) !== expectedArchitectureSha256 || digest(roadmapSource) !== expectedRoadmapSha256) fail('Architecture or roadmap identity');
 
   if (decision.decisionId !== 'core-ui:decision:0007' || decision.state !== 'acceptance-candidate') fail('decision identity or state');
@@ -173,7 +191,10 @@ export function verifyDeliveryWorkflowAuthority(repositoryRoot, options = {}) {
     sourceMode,
   };
   if (!historicalSource) {
-    result.r1Entry = verifyReactR1Entry(repositoryRoot, { productScopeSource, roadmapSource });
+    result.r1Entry = verifyReactR1Entry(repositoryRoot, {
+      productScopeSource,
+      roadmapSource,
+    });
   }
   return result;
 }

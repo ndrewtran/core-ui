@@ -720,9 +720,22 @@ separate later tracks and cannot block or inherit R1 proof.
 ### R1 shared tranche contract
 
 Every R1 tranche binds one exact React Aria Components baseline, standalone
-package graph, reusable-proof baseline digest, accepted scope-lock digest,
-canonical component/binding/example revisions, deterministic closure,
-risk-selected independent review, and post-proof human release acceptance.
+package graph, reusable-proof baseline digest, conforming scope-lock digest,
+canonical component/binding/example revisions, deterministic closure, and
+risk-selected independent review. Under accepted Decision 0009 amendment 03
+and Decision 0010 amendment 04, the R1 continuous-execution envelope is the
+designated human decision for a mechanically derived lock and retained evidence
+only when every exact derivation, deterministic, negative-path, risk-selected
+manual/AT, disclosure, immutable-relation, and independent-review predicate
+passes. This conditional admission does not claim that the human inspected
+future bytes.
+
+After exact authority materialization, the private R1 continuous-execution
+verifier is the mandatory entry gate for every Project migration, tranche
+lock, component stage, retained-evidence acceptance, and routine Git/PR/merge
+operation. Its one path-bounded bootstrap PR is directly authorized by the
+accepted envelope; no other operation may precede its verified merge. Every
+later operation binds a passing canonical verifier result or remains blocked.
 
 The shared baseline also pins Tale UI commit
 `94bf62a26c02605c8928dfeb24f0ddc4be1c92fd` and its component-style,
@@ -738,11 +751,13 @@ accepted decision-bearing exception supplies an alternate visual direction and
 reconciles the exact tranche lock. `no-applicable-donor` is only an absence
 disposition, not a shortcut around an applicable donor.
 
-The designated human accepts the exact scope-lock digest before implementation.
-Routine components inside it require no separate authority decision or human
-approval. Any new public-contract or ontology decision, dependency,
-security/privacy boundary, support expansion, stable promotion, or exception is
-a decision-bearing delta accepted before implementation.
+An exact conforming scope lock is required before implementation. Routine
+components inside it require no separate authority decision or human approval.
+The delivery lead may freeze the initial Core `0.1` family contract within the
+delegated Decision 0010 amendment-04 boundary. A contract outside that boundary,
+another ontology decision or runtime graph node, security/privacy boundary,
+support expansion, stable promotion, or exception is a decision-bearing delta
+accepted before implementation.
 
 Missing required proof keeps a binding unexported or explicitly unavailable
 with support unproved. It does not alter lifecycle or strategy and does not
@@ -802,7 +817,8 @@ begin. No component publication or support claim follows.
 
 ### R1.1 Foundation and simple controls
 
-**Entry:** accepted R1.0 plus an accepted exact R1.1 scope lock.
+**Entry:** accepted R1.0 plus an exact R1.1 scope lock proved conforming to the
+accepted R1 continuous-execution envelope.
 
 **Deliverables:** Button first, then accepted low/medium-risk foundation,
 action, and disclosure components; one tranche implementation sequence,
@@ -820,7 +836,8 @@ an exact accepted `0.1.0-alpha.N` publication may be proposed.
 
 ### R1.2 Forms and field controls
 
-**Entry:** accepted baseline plus an accepted exact R1.2 scope lock.
+**Entry:** accepted baseline plus an exact R1.2 scope lock proved conforming to
+the accepted R1 continuous-execution envelope.
 
 **Deliverables:** TextField, Switch, Form, and other accepted form/field
 components with value, state, label, description, error, validation,
@@ -835,7 +852,8 @@ proof; `E-R1.2-04` generated/packed/release correlation.
 
 ### R1.3 Collections and composites
 
-**Entry:** accepted baseline plus an accepted exact R1.3 scope lock.
+**Entry:** accepted baseline plus an exact R1.3 scope lock proved conforming to
+the accepted R1 continuous-execution envelope.
 
 **Deliverables:** Select, Tabs, and accepted collection/composite components
 with explicit focus, keyboard, selection, composition, and state ownership,
@@ -849,7 +867,8 @@ accessibility evidence; `E-R1.3-05` generated/packed/release correlation.
 
 ### R1.4 Overlays and temporal interactions
 
-**Entry:** accepted baseline plus an accepted exact R1.4 scope lock.
+**Entry:** accepted baseline plus an exact R1.4 scope lock proved conforming to
+the accepted R1 continuous-execution envelope.
 
 **Deliverables:** Dialog, Toast, and accepted overlay/temporal components with
 focus, dismissal, portal/global-effect, ordering, timing, announcement,
@@ -862,13 +881,17 @@ dismissal behavior; `E-R1.4-03` temporal/announcement/concurrency behavior;
 profiles; `E-R1.4-05` teardown/advisory/exception proof; `E-R1.4-06`
 generated/packed/release correlation.
 
-**Exit:** only adequately evidenced bindings are exportable; an exact accepted
-alpha publication may be proposed.
+**Exit:** every component named by the exact R1.4 lock is export-ready and has
+complete evidence for its exact contract and risk profile. Missing required
+proof keeps the component unexported and blocks R1.4 completion. An exact alpha
+publication candidate may be prepared only after all seven R1.4 families
+satisfy this exit. No publication, secondary-renderer, stable, `latest`, or
+equivalence claim follows.
 
 ### R1.5 React breadth closure
 
-**Entry:** R1.1–R1.4 complete, the remaining-surface scope lock accepted, and
-the exact 53-family reconciliation lock accepted.
+**Entry:** R1.1–R1.4 complete and the exact mechanically derived R1.5 closure
+lock is proved conforming to the accepted R1 continuous-execution envelope.
 
 **Deliverables:** an exact `53/53` committed-family reconciliation: every
 documented family in the pinned React Aria snapshot maps to a committed Core
@@ -2477,7 +2500,7 @@ valid outcomes and do not make the core product incomplete.
 | R1.2 | Forms and field controls | Accepted R1.0 and exact R1.2 tranche lock | R1.5, eligible alpha |
 | R1.3 | Collections and composites | Accepted R1.0 and exact R1.3 tranche lock | R1.5, eligible alpha |
 | R1.4 | Overlays and temporal interactions | Accepted R1.0 and exact R1.4 tranche lock | R1.5, eligible alpha |
-| R1.5 | React breadth closure | R1.1–R1.4 and accepted exact 53/53 committed-family reconciliation lock | R1 exit |
+| R1.5 | React breadth closure | R1.1–R1.4 and exact 53/53 closure lock proved conforming to the accepted continuous-execution envelope | R1 exit |
 | R1 exit | React prerelease publication | R1.5 and exact publish authorization | P2.1; optional W1/N1/S1 activation reviews |
 | P2.1 | React packages, catalog, CLI, compatibility | R1 exit and accepted public package graph | P2.2, P2.3, P2 exit |
 | P2.2 | React consumer validation/local authority | P2.1 | P2.3, P2 exit |
@@ -2658,15 +2681,18 @@ tracking, not this long-lived roadmap.
    accepted Stage 1 snapshot, and the React-primary/Tale-donor
    Architecture/Roadmap authority before implementation. Run the evaluator
    against its exact committed source selector and reject moving references.
-2. Reconcile the live Project through a separately accepted exact migration;
+2. Materialize the continuous-execution authority and merge its one bounded
+   private conformance-verifier bootstrap. Then reconcile the live Project
+   through an exact verifier-approved migration under the standing decision;
    do not interpret superseded G-series status as R1 readiness.
 3. Activate R1.0 against exact reusable token/theme facts, the pinned Tale
    styling donor/crosswalk, and the accepted Button tranche lock.
 4. Prove the standalone React Aria/package/CSS/donor-comparison/private-
    playground/SSR/hydration/accessibility/compatibility/packed baseline before
    Button implementation begins.
-5. Deliver R1.1–R1.4 through accepted tranche locks, allowing routine
-   components to run in parallel against the same frozen baseline.
+5. Deliver R1.1–R1.4 through exact locks proved conforming to the accepted
+   continuous-execution envelope, allowing routine components to run in
+   parallel against the same frozen baseline.
 6. Close the pinned React Aria surface in R1.5 through the exact `53/53`
    committed-family reconciliation; defer, exclude, and not-a-component are
    not completion outcomes. Then propose the exact R1 exit package.
@@ -2714,13 +2740,14 @@ existing accepted R1.0 evidence predates this major amendment and is historical
 input only until exact applicability to this scope and snapshot is proved; it
 cannot silently satisfy the new all-53 baseline.
 
-The current R1.0 authority route is singular: Product Scope 6.0.0, Decision
-0010 amendments 01–03, the accepted Stage 1 snapshot and envelope, and the
-immutable committed-source selector enforced by
+The retained R1.0 evidence remains historically bound to Product Scope 6.0.0,
+Decision 0010 amendments 01–03, the accepted Stage 1 snapshot and envelope,
+and the immutable committed-source selector enforced by
 `react-aria-stage1-source-verify.mjs` as the fail-closed entry/applicability
-gate. A successful gate result is required before current R1.0 applicability;
-its current evidence locator remains pending, so it cannot activate from
-historical proof. Earlier Product Scope 5.0.1 or
+gate. Product Scope 6.0.1 and Decision 0010 amendment 04 change only the
+conditional execution process; a passing R1 continuous-execution verifier
+must prove the retained baseline remains applicable before a tranche lock may
+use it. Earlier Product Scope 5.0.1 or
 Decision 0010 amendment 01–02 wording retained elsewhere in this roadmap is a
 historical audit locator only; it is not a current R1 entry or completion rule.
 
@@ -2744,14 +2771,15 @@ The immutable tranche family sets are:
   ledger, styling-donor disposition, evidence and support matrix, packed
   prerelease graph, generated guidance, and React `0.1` release candidate.
 
-After the common R1.0 baseline and each exact lock are accepted, R1.1 through
-R1.4 may proceed independently; none may change another tranche or the 53-set.
+After the common R1.0 baseline and each exact lock are proved conforming to the
+accepted R1 continuous-execution envelope, R1.1 through R1.4 may proceed
+independently; none may change another tranche or the 53-set.
 Each tranche freezes its Core-owned public contracts and uses shared proof only
 while the exact baseline identity and invalidation set remain unchanged. Each
 retains focused deterministic proof, risk-selected independent review,
-applicable manual browser/AT proof before export, post-proof human evidence
-acceptance, packed-consumer validation, and failure evidence. R1.5 begins only
-after R1.1 through R1.4 are complete.
+applicable manual browser/AT proof before export, conditional evidence
+acceptance under the exact envelope predicates, packed-consumer validation,
+and failure evidence. R1.5 begins only after R1.1 through R1.4 are complete.
 
 No per-family implementation loop may replace tranche proof with a broad
 untested assertion. Conversely, unchanged shared baseline facts need not be

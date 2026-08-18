@@ -2492,6 +2492,51 @@ And:
   package proof.
 - Multi-framework work does not begin by inventing an abstraction without a
   second real framework.
+
+## R1 continuous-execution envelope
+
+For the exact comprehensive React `0.1` program, a designated human may accept
+one closed execution envelope whose authority source, exact materialized
+successor tree, immutable 53-family snapshot, current R1.0 baseline,
+derivation rules, allowed operations, proof predicates, invalidation
+conditions, and terminal stop boundary are all frozen before execution.
+
+Within that accepted envelope, mechanically derived tranche locks and retained
+evidence are conditionally admitted only after every declared deterministic,
+negative-path, disclosure, immutable-relation, risk-selected manual/AT, and
+profile-selected independent-review predicate passes. This is standing human
+authority over closed predicates; it is not a claim that the human inspected
+future bytes. Drift, ambiguity, a missing result, an inaccessible required
+environment, or a decision-bearing delta fails closed before affected work.
+
+The envelope may authorize goal-owned branches and worktrees, bounded source
+and evidence work, generation and checks, protected intermediate PR delivery,
+verified Project reconciliation, and successful cleanup. It cannot waive
+canonical ownership, accessibility, privacy, integrity, evidence immutability,
+protected-branch rules, support or lifecycle boundaries, or release controls.
+It never authorizes npm publication, dist-tag mutation, deployment, direct
+default-branch writes, or the final R1-exit PR merge.
+
+Decision 0009 amendment 03 owns the repository, Git, Project, evidence, and
+stop-boundary execution grant. Decision 0010 amendment 04 owns the unchanged
+53-family product semantics, conditional lock/evidence admission, bounded
+initial-contract delegation, and R1.4 exit correction.
+
+The complete accepted envelope, canonical materialization manifest, and
+deterministically rendered owner-acceptance record are immutable repository
+inputs. Every later operation resolves them through the private
+`r1-continuous-execution-verify.mjs` owner. That verifier consumes the current
+authority, snapshot, R1.0 baseline, exact operation descriptor, applicable
+lock/evidence, Project preimage/preview/result, and Git/PR/check/merge
+observation; it emits one canonical pass/fail result with all input identities,
+permitted write set, invalidation causes, and next permitted operation.
+Unknown, missing, mismatched, incomplete, or out-of-envelope input fails
+closed.
+
+The verifier and its repository-policy integration may be bootstrapped once
+through the exact path-bounded grant in the accepted envelope. No Project,
+component, retained-evidence, or routine Git operation may precede its verified
+merge, and no later bootstrap exception exists.
 ## Minimum Architecture wording
 
 Architecture must record only these additional durable rules:

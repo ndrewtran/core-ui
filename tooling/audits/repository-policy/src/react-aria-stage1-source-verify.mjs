@@ -2,6 +2,7 @@ import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
+import { hasAcceptedR1ContinuousAuthority } from './r1-continuous-authority-compatibility.mjs';
 
 export const STAGE1_SOURCE = Object.freeze({
   commit: 'dea987aca51cde9da67fe3cac16c5e69a8c46016',
@@ -42,6 +43,19 @@ export const R1_ENTRY_BINDING = Object.freeze({
     bytes: 155544,
     path: 'strategy/milestone-roadmap.md',
     sha256: '8006803d050713b104bf485c6c610c2339a65f3e30eb6bf4e1a9222f3a3bdf2b',
+  }),
+  continuous: Object.freeze({
+    productScope: Object.freeze({
+      bytes: 124602,
+      path: 'strategy/product-scope.md',
+      sha256: 'add747d5986c9039029a99b558ae719969fd18ac113051bbec478bd291da8632',
+      version: '6.0.1',
+    }),
+    roadmap: Object.freeze({
+      bytes: 157501,
+      path: 'strategy/milestone-roadmap.md',
+      sha256: '9f321f93a537f69c5604de35f85053d8bf4748e937d6797c9262691e301247a1',
+    }),
   }),
 });
 
@@ -134,17 +148,28 @@ export function verifyReactAriaStage1Source(repositoryRoot, options = {}) {
 
 export function verifyReactR1Entry(repositoryRoot, options = {}) {
   const productScopeSource = options.productScopeSource
-    ?? readTextArtifact(repositoryRoot, R1_ENTRY_BINDING.productScope);
+    ?? readFileSync(join(repositoryRoot, R1_ENTRY_BINDING.productScope.path), 'utf8');
+  const continuousAuthorityAccepted = (
+    Buffer.byteLength(productScopeSource) === R1_ENTRY_BINDING.continuous.productScope.bytes
+    && digest(productScopeSource) === R1_ENTRY_BINDING.continuous.productScope.sha256
+    && hasAcceptedR1ContinuousAuthority(repositoryRoot, { productScopeSource })
+  );
+  const productScopeBinding = continuousAuthorityAccepted
+    ? R1_ENTRY_BINDING.continuous.productScope
+    : R1_ENTRY_BINDING.productScope;
+  const roadmapBinding = continuousAuthorityAccepted
+    ? R1_ENTRY_BINDING.continuous.roadmap
+    : R1_ENTRY_BINDING.roadmap;
   const decisionSource = options.decisionSource
     ?? readTextArtifact(repositoryRoot, R1_ENTRY_BINDING.decision);
-  const roadmapSource = options.roadmapSource
-    ?? readTextArtifact(repositoryRoot, R1_ENTRY_BINDING.roadmap);
 
-  if (Buffer.byteLength(productScopeSource) !== R1_ENTRY_BINDING.productScope.bytes
-      || digest(productScopeSource) !== R1_ENTRY_BINDING.productScope.sha256
-      || !productScopeSource.startsWith('---\nscopeVersion: 6.0.0\n')) {
-    fail('R1.0 Product Scope 6.0.0 applicability binding');
+  if (Buffer.byteLength(productScopeSource) !== productScopeBinding.bytes
+      || digest(productScopeSource) !== productScopeBinding.sha256
+      || !productScopeSource.startsWith(`---\nscopeVersion: ${productScopeBinding.version}\n`)) {
+    fail(`R1.0 Product Scope ${productScopeBinding.version} applicability binding`);
   }
+  const roadmapSource = options.roadmapSource
+    ?? readTextArtifact(repositoryRoot, roadmapBinding);
   if (Buffer.byteLength(decisionSource) !== R1_ENTRY_BINDING.decision.bytes
       || digest(decisionSource) !== R1_ENTRY_BINDING.decision.sha256
       || !decisionSource.includes('Human acceptance: Andrew / ndrewtran: “I accept Core UI comprehensive React 0.1 authority candidate v1')) {
@@ -159,8 +184,8 @@ export function verifyReactR1Entry(repositoryRoot, options = {}) {
   ]) {
     if (!decisionSource.includes(binding)) fail('R1.0 Decision Stage 1 binding');
   }
-  if (Buffer.byteLength(roadmapSource) !== R1_ENTRY_BINDING.roadmap.bytes
-      || digest(roadmapSource) !== R1_ENTRY_BINDING.roadmap.sha256
+  if (Buffer.byteLength(roadmapSource) !== roadmapBinding.bytes
+      || digest(roadmapSource) !== roadmapBinding.sha256
       || !roadmapSource.includes('Current R1.0 evidence locator: pending; no current R1.0 evidence acceptance')
       || !roadmapSource.includes('is recorded. Existing pre-amendment R1.0 evidence is historical-only')
       || !roadmapSource.includes('historical audit locator only; it is not a current R1 entry or completion rule')) {
@@ -190,7 +215,7 @@ export function verifyReactR1Entry(repositoryRoot, options = {}) {
       status: 'pending-current-evidence',
     },
     decision: { bytes: R1_ENTRY_BINDING.decision.bytes, sha256: R1_ENTRY_BINDING.decision.sha256 },
-    productScope: { bytes: R1_ENTRY_BINDING.productScope.bytes, sha256: R1_ENTRY_BINDING.productScope.sha256, version: R1_ENTRY_BINDING.productScope.version },
+    productScope: { bytes: productScopeBinding.bytes, sha256: productScopeBinding.sha256, version: productScopeBinding.version },
     stage1,
   };
 }
