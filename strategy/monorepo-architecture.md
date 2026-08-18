@@ -2492,3 +2492,22 @@ And:
   package proof.
 - Multi-framework work does not begin by inventing an abstraction without a
   second real framework.
+## Minimum Architecture wording
+
+Architecture must record only these additional durable rules:
+
+1. The React `0.1` committed inventory is the 53 Core-owned family outcomes in
+   the accepted immutable Stage 1 snapshot and Product Scope 6.0.0, not the
+   React Aria export list.
+2. React Aria remains an internal replaceable implementation input; raw
+   upstream exports, names, parts, helpers, hooks, utilities, and types are not
+   public merely because the dependency exports them.
+3. Existing canonical component/pattern, `web.react` binding, React source,
+   example, Tale styling donor, evidence, and release owners do not change.
+4. Accepted R1.1-R1.4 locks are independently executable after the common R1.0
+   baseline; R1.5 is a breadth/release closure, not a fifth implementation
+   inventory.
+5. The exact snapshot identity is a fail-closed authority and release input.
+   Drift returns to authority acceptance.
+6. RSC/client-boundary support and all secondary renderer work remain absent
+   until separate authority admission.

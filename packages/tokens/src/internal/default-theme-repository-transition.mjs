@@ -82,13 +82,30 @@ const REACT_PRIMARY_AUTHORITY = Object.freeze([
   ['decisions/0010-amendment-01-react-primary-delivery.md', 'd91e01f48df64c3c0eeb334f64e2b615dbc836867670d4862868138d7ca34341'],
   ['decisions/0010-amendment-02-tale-styling-donor.md', 'd3631a416d3184707222955404c576c10f13f7621296708eb1a3bbc576255d6d'],
 ]);
+const REACT_COMPREHENSIVE_AUTHORITY = Object.freeze([
+  ['strategy/product-scope.md', '0cafc0218f0e6795a5d600acb424b4bf514972295c89b48e9042d7faa69a261f'],
+  ['decisions/0010-amendment-01-react-primary-delivery.md', 'd91e01f48df64c3c0eeb334f64e2b615dbc836867670d4862868138d7ca34341'],
+  ['decisions/0010-amendment-02-tale-styling-donor.md', 'd3631a416d3184707222955404c576c10f13f7621296708eb1a3bbc576255d6d'],
+  ['decisions/0010-amendment-03-comprehensive-react-0-1.md', '8ad4be538ad7a35a8c03e01af573cad27a06225e4c91eba61bb7e693e498544a'],
+]);
+const REACT_PRIMARY_AUTHORITIES = Object.freeze([
+  REACT_PRIMARY_AUTHORITY,
+  REACT_COMPREHENSIVE_AUTHORITY,
+]);
 
 export async function hasAcceptedReactPrimaryAuthority(repositoryRoot) {
-  for (const [relativePath, expected] of REACT_PRIMARY_AUTHORITY) {
-    const source = await readFile(join(repositoryRoot, relativePath)).catch(() => null);
-    if (!source || createHash('sha256').update(source).digest('hex') !== expected) return false;
+  for (const authority of REACT_PRIMARY_AUTHORITIES) {
+    let matches = true;
+    for (const [relativePath, expected] of authority) {
+      const source = await readFile(join(repositoryRoot, relativePath)).catch(() => null);
+      if (!source || createHash('sha256').update(source).digest('hex') !== expected) {
+        matches = false;
+        break;
+      }
+    }
+    if (matches) return true;
   }
-  return true;
+  return false;
 }
 
 function replaceExact(source, from, to, label) {

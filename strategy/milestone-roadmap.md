@@ -754,8 +754,21 @@ registry, checks, release manifest, rollback, and human authorization.
 
 **Entry**
 
-- Product Scope `5.0.1`, Decision 0010 amendment 01, and Decision 0010
-  amendment 02 are accepted and materialized.
+- Product Scope `6.0.0`, Decision 0010 amendments 01–03, and the accepted
+  immutable Stage 1 snapshot are accepted and materialized. The separate
+  `tooling/audits/repository-policy/src/react-aria-stage1-source-verify.mjs`
+  verifier is the fail-closed R1.0 entry/applicability gate. It receives the explicit immutable selector
+  `CORE_UI_STAGE1_SOURCE_REF=dea987aca51cde9da67fe3cac16c5e69a8c46016` and
+  compares that committed source to tree
+  `af0f923abaf8cdf55acb3c402fa929cfb439335d`. Moving refs such as
+  `origin/main`, branches, and `HEAD` are not valid selectors. The gate also
+  binds Product Scope `6.0.0`, Decision 0010 amendment 03, the exact snapshot
+  and envelope, and a successful verifier result. The accepted Stage 1
+  evaluator, snapshot, and envelope remain byte-immutable inputs. Missing,
+  replaced, or mismatched Stage 1 binding fails closed.
+- Current R1.0 evidence locator: pending; no current R1.0 evidence acceptance
+  is recorded. Existing pre-amendment R1.0 evidence is historical-only and is
+  not sufficient for this entry or activation.
 - Exact reusable G1.0 token/theme facts are selected and rebound; no historical
   result is accepted by ancestry or name alone.
 - `core:component:button#web.react` is the named first renderer slice.
@@ -854,16 +867,18 @@ alpha publication may be proposed.
 
 ### R1.5 React breadth closure
 
-**Entry:** R1.1–R1.4 complete and the remaining-surface scope lock accepted.
+**Entry:** R1.1–R1.4 complete, the remaining-surface scope lock accepted, and
+the exact 53-family reconciliation lock accepted.
 
-**Deliverables:** every documented item in the exact pinned React Aria snapshot
-maps to a delivered Core component or an accepted `defer`, `exclude`, or
-`not-a-component` disposition; package, export, descriptor, compatibility,
-performance, generated-guidance, and agent-discovery closure. Every delivered
-component also maps the pinned Tale style to exportable `adopt`/`adapt`, valid
-absence `no-applicable-donor`, or a fail-closed `defer`/`reject` that remains
-unexported until its separately accepted exception is reconciled, with complete
-Core token/style ownership.
+**Deliverables:** an exact `53/53` committed-family reconciliation: every
+documented family in the pinned React Aria snapshot maps to a committed Core
+family root, contract, export, lifecycle ledger, evidence/support record, and
+packed prerelease graph. A `defer`, `exclude`, or `not-a-component` disposition
+cannot satisfy an R1.5 family outcome or R1 exit; any unresolved family blocks
+closure. Every committed component also maps the pinned Tale style to
+exportable `adopt`/`adapt`, valid absence `no-applicable-donor`, or a fail-closed
+`defer`/`reject` that remains unexported until its separately accepted exception
+is reconciled, with complete Core token/style ownership.
 
 **Evidence:** `E-R1.5-01` upstream and donor-style disposition completeness;
 `E-R1.5-02` canonical/binding/export/CSS-crosswalk coverage; `E-R1.5-03`
@@ -872,7 +887,8 @@ risk-profile and visual-donor proof coverage;
 performance; `E-R1.5-06` informational agent discovery and final exception/
 advisory closure.
 
-**Exit:** the applicable upstream surface is disposition-complete and
+**Exit:** the exact committed-family reconciliation is `53/53`; no defer,
+exclude, or not-a-component completion path remains; and
 `@core-ui/react@0.1.0-rc.1` may be proposed.
 
 ### R1 exit — React prerelease publication
@@ -2456,12 +2472,12 @@ valid outcomes and do not make the core product incomplete.
 
 | ID | Milestone | Hard dependencies | Blocks |
 | --- | --- | --- | --- |
-| R1.0 | React package/substrate and Tale styling-donor baseline | Gate 0; accepted Product Scope 5.0.1 and Decision 0010 amendments 01–02 | R1.1–R1.5 |
+| R1.0 | React package/substrate and Tale styling-donor baseline | Gate 0; accepted Product Scope 6.0.0, Decision 0010 amendments 01–03, and the accepted Stage 1 snapshot through the immutable committed-source route | R1.1–R1.5 |
 | R1.1 | Foundation and simple controls | Accepted R1.0 and exact R1.1 tranche lock | R1.5, eligible alpha |
 | R1.2 | Forms and field controls | Accepted R1.0 and exact R1.2 tranche lock | R1.5, eligible alpha |
 | R1.3 | Collections and composites | Accepted R1.0 and exact R1.3 tranche lock | R1.5, eligible alpha |
 | R1.4 | Overlays and temporal interactions | Accepted R1.0 and exact R1.4 tranche lock | R1.5, eligible alpha |
-| R1.5 | React breadth closure | R1.1–R1.4 and accepted remaining-surface lock | R1 exit |
+| R1.5 | React breadth closure | R1.1–R1.4 and accepted exact 53/53 committed-family reconciliation lock | R1 exit |
 | R1 exit | React prerelease publication | R1.5 and exact publish authorization | P2.1; optional W1/N1/S1 activation reviews |
 | P2.1 | React packages, catalog, CLI, compatibility | R1 exit and accepted public package graph | P2.2, P2.3, P2 exit |
 | P2.2 | React consumer validation/local authority | P2.1 | P2.3, P2 exit |
@@ -2638,9 +2654,10 @@ tracking, not this long-lived roadmap.
 
 ## Recommended first execution sequence
 
-1. Materialize Product Scope `5.0.1`, Decision 0010 amendments 01–02, and the
-   React-primary/Tale-donor Architecture/Roadmap authority before
-   implementation.
+1. Materialize Product Scope `6.0.0`, Decision 0010 amendments 01–03, the
+   accepted Stage 1 snapshot, and the React-primary/Tale-donor
+   Architecture/Roadmap authority before implementation. Run the evaluator
+   against its exact committed source selector and reject moving references.
 2. Reconcile the live Project through a separately accepted exact migration;
    do not interpret superseded G-series status as R1 readiness.
 3. Activate R1.0 against exact reusable token/theme facts, the pinned Tale
@@ -2650,8 +2667,9 @@ tracking, not this long-lived roadmap.
    Button implementation begins.
 5. Deliver R1.1–R1.4 through accepted tranche locks, allowing routine
    components to run in parallel against the same frozen baseline.
-6. Close the pinned React Aria surface in R1.5 through delivered Core mappings
-   or explicit accepted dispositions, then propose the exact R1 exit package.
+6. Close the pinned React Aria surface in R1.5 through the exact `53/53`
+   committed-family reconciliation; defer, exclude, and not-a-component are
+   not completion outcomes. Then propose the exact R1 exit package.
 7. Publish no npm artifact without a separate exact external-mutation
    authorization and verified rollback tuple.
 8. Productize catalog/tooling, installed-local guidance, and React docs through
@@ -2687,3 +2705,62 @@ If any answer is “no,” stop the affected capability at its current gate, ret
 the failure evidence, and repair the earliest authoritative owner. Do not patch
 a projection, lower the evidence claim, or expand the milestone to hide the
 failure.
+## Roadmap reconciliation and tranche locks
+
+R1.0 remains the baseline milestone. Before any family implementation under
+Product Scope 6.0.0, R1.0 must reproduce the exact Stage 1 snapshot and bind the
+same identity into its reusable proof baseline and every tranche lock. The
+existing accepted R1.0 evidence predates this major amendment and is historical
+input only until exact applicability to this scope and snapshot is proved; it
+cannot silently satisfy the new all-53 baseline.
+
+The current R1.0 authority route is singular: Product Scope 6.0.0, Decision
+0010 amendments 01–03, the accepted Stage 1 snapshot and envelope, and the
+immutable committed-source selector enforced by
+`react-aria-stage1-source-verify.mjs` as the fail-closed entry/applicability
+gate. A successful gate result is required before current R1.0 applicability;
+its current evidence locator remains pending, so it cannot activate from
+historical proof. Earlier Product Scope 5.0.1 or
+Decision 0010 amendment 01–02 wording retained elsewhere in this roadmap is a
+historical audit locator only; it is not a current R1 entry or completion rule.
+
+The immutable tranche family sets are:
+
+- R1.1, 11 families: `Breadcrumbs`, `Button`, `Checkbox`, `Disclosure`,
+  `DisclosureGroup`, `Group`, `Link`, `Meter`, `ProgressBar`, `Separator`,
+  `ToggleButton`. Button is implemented first.
+- R1.2, 11 families: `Autocomplete`, `CheckboxGroup`, `DateField`,
+  `DatePicker`, `DateRangePicker`, `Form`, `NumberField`, `SearchField`,
+  `Switch`, `TextField`, `TimeField`.
+- R1.3, 24 families: `Calendar`, `ColorArea`, `ColorField`, `ColorPicker`,
+  `ColorSlider`, `ColorSwatch`, `ColorSwatchPicker`, `ColorWheel`, `ComboBox`,
+  `GridList`, `ListBox`, `Menu`, `RadioGroup`, `RangeCalendar`, `Select`,
+  `Slider`, `Table`, `Tabs`, `TagGroup`, `ToggleButtonGroup`, `TokenField`,
+  `Toolbar`, `Tree`, `Virtualizer`.
+- R1.4, 7 families: `DropZone`, `FileTrigger`, `Modal`/Core `Dialog`,
+  `Popover`, `PreviewTrigger`, `Toast`, `Tooltip`.
+- R1.5 adds no family implementation. It closes the exact `53/53` committed
+  family reconciliation, public export manifest, Core contract and lifecycle
+  ledger, styling-donor disposition, evidence and support matrix, packed
+  prerelease graph, generated guidance, and React `0.1` release candidate.
+
+After the common R1.0 baseline and each exact lock are accepted, R1.1 through
+R1.4 may proceed independently; none may change another tranche or the 53-set.
+Each tranche freezes its Core-owned public contracts and uses shared proof only
+while the exact baseline identity and invalidation set remain unchanged. Each
+retains focused deterministic proof, risk-selected independent review,
+applicable manual browser/AT proof before export, post-proof human evidence
+acceptance, packed-consumer validation, and failure evidence. R1.5 begins only
+after R1.1 through R1.4 are complete.
+
+No per-family implementation loop may replace tranche proof with a broad
+untested assertion. Conversely, unchanged shared baseline facts need not be
+reproved per family. A failed family blocks only its tranche until a shared
+baseline failure is established; a shared baseline failure invalidates every
+affected tranche.
+
+R1 exit remains an exact prerelease of only `@core-ui/react` under `next`, with
+the already-authorized React/React DOM peer boundary and internal
+`react-aria-components@1.20.0` dependency. Every registry mutation requires a
+separate exact publication authorization and a final registry/version/dist-tag
+collision and authorization-drift check. This authority publishes nothing.

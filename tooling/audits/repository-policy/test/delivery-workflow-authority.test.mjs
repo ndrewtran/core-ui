@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import { canonicalJson, parseJsonStrict } from '@core-ui/schema';
 import {
@@ -35,14 +36,79 @@ const acceptance = parseJsonStrict(acceptanceSource);
 acceptance.bodySha256 = `sha256:${'0'.repeat(64)}`;
 reject({ acceptanceSource: canonicalJson(acceptance) }, 'acceptance receipt');
 
-reject({ productScopeSource: productScopeSource.replace('scopeVersion: 5.0.1', 'scopeVersion: 5.0.2') }, 'Product Scope');
+reject({ productScopeSource: productScopeSource.replace('scopeVersion: 6.0.0', 'scopeVersion: 6.0.1') }, 'Product Scope');
 reject({ architectureSource: 'not the accepted historical architecture' }, 'historical Architecture');
 reject({ roadmapSource: 'not the accepted historical roadmap' }, 'historical roadmap');
 
-const result = verifyDeliveryWorkflowAuthority(repositoryRoot);
-if (result.activationEvidence !== 8 || result.applicabilityTargets !== 28 || result.productScope.version !== '4.0.2') {
+const currentResult = verifyDeliveryWorkflowAuthority(repositoryRoot);
+if (currentResult.activationEvidence !== 8
+    || currentResult.applicabilityTargets !== 28
+    || currentResult.productScope.version !== '6.0.0'
+    || currentResult.sourceMode !== 'current'
+    || currentResult.r1Entry?.accepted !== true
+    || currentResult.r1Entry?.activation?.permitted !== false) {
+  throw new Error('canonical current R1.0 entry mismatch');
+}
+const result = verifyDeliveryWorkflowAuthority(repositoryRoot, { sourceMode: 'historical' });
+if (result.activationEvidence !== 8
+    || result.applicabilityTargets !== 28
+    || result.productScope.version !== '4.0.2'
+    || result.sourceMode !== 'historical'
+    || result.r1Entry !== undefined) {
   throw new Error('positive result mismatch');
 }
+const comprehensiveResult = verifyDeliveryWorkflowAuthority(repositoryRoot, { productScopeSource });
+if (comprehensiveResult.productScope.version !== '6.0.0'
+    || comprehensiveResult.productScope.bytes !== Buffer.byteLength(productScopeSource)
+    || comprehensiveResult.r1Entry?.accepted !== true
+    || comprehensiveResult.r1Entry?.stage1?.accepted !== true
+    || comprehensiveResult.r1Entry?.applicability?.historicalEvidence?.sufficient !== false
+    || comprehensiveResult.r1Entry?.applicability?.status !== 'pending-current-evidence'
+    || comprehensiveResult.r1Entry?.activation?.permitted !== false) {
+  throw new Error('current Product Scope positive result mismatch');
+}
+
+const oldOnlyProof = productScopeSource.replace('scopeVersion: 6.0.0', 'scopeVersion: 5.0.1');
+reject({ productScopeSource: oldOnlyProof }, 'old-only current R1.0 proof');
+const missingStage1Route = fs.readFileSync(path.join(repositoryRoot, 'strategy/milestone-roadmap.md'), 'utf8')
+  .replace('react-aria-stage1-source-verify.mjs', 'react-aria-stage1-source-verify-replaced.mjs');
+reject({ productScopeSource, roadmapSource: missingStage1Route }, 'missing current Stage 1 route');
+
+const rejectCurrentWorkingTree = (mutate, label) => {
+  const temporaryRepository = fs.mkdtempSync(path.join(os.tmpdir(), 'core-ui-r1-entry-'));
+  fs.cpSync(repositoryRoot, temporaryRepository, {
+    recursive: true,
+    filter: (entry) => !entry.includes(`${path.sep}node_modules${path.sep}`),
+  });
+  try {
+    mutate(temporaryRepository);
+    try {
+      verifyDeliveryWorkflowAuthority(temporaryRepository);
+    } catch (error) {
+      if (String(error.message).startsWith('DELIVERY_WORKFLOW_AUTHORITY_INVALID:')
+          || String(error.message).startsWith('REACT_ARIA_STAGE1_SOURCE_INVALID:')) return;
+      throw error;
+    }
+    throw new Error(`canonical current entry accepted: ${label}`);
+  } finally {
+    fs.rmSync(temporaryRepository, { recursive: true, force: true });
+  }
+};
+
+rejectCurrentWorkingTree((temporaryRepository) => {
+  const currentPath = path.join(temporaryRepository, 'strategy/product-scope.md');
+  fs.writeFileSync(currentPath, fs.readFileSync(currentPath, 'utf8').replace('scopeVersion: 6.0.0', 'scopeVersion: 5.0.1'));
+}, 'replaced current Product Scope');
+rejectCurrentWorkingTree((temporaryRepository) => {
+  const currentPath = path.join(temporaryRepository, 'strategy/milestone-roadmap.md');
+  fs.writeFileSync(currentPath, fs.readFileSync(currentPath, 'utf8').replace('react-aria-stage1-source-verify.mjs', 'react-aria-stage1-source-verify-replaced.mjs'));
+}, 'missing current Stage 1 route');
+rejectCurrentWorkingTree((temporaryRepository) => {
+  const currentPath = path.join(temporaryRepository, 'catalog/react-r1-0/react-aria-1.20.0-family-evaluation.snapshot.json');
+  const currentBytes = fs.readFileSync(currentPath);
+  currentBytes[0] ^= 1;
+  fs.writeFileSync(currentPath, currentBytes);
+}, 'replaced current Stage 1 snapshot');
 
 const reviewDecisionSource = fs.readFileSync(path.join(repositoryRoot, 'decisions/0009-delivery-review-readiness.json'), 'utf8');
 const reviewAcceptanceSource = fs.readFileSync(path.join(repositoryRoot, 'decisions/0009-delivery-review-readiness-acceptance.json'), 'utf8');

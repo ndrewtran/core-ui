@@ -1,5 +1,5 @@
 ---
-scopeVersion: 5.0.1
+scopeVersion: 6.0.0
 status: execution-baseline
 product: Core UI
 architecture: ./monorepo-architecture.md
@@ -1522,3 +1522,142 @@ This product scope remains valid only while:
 
 If any statement becomes false, stop the affected scope item, retain the
 failure evidence, and correct the earliest authoritative document or source.
+## Product Scope 6.0.0
+
+Product Scope advances from `5.0.1` to `6.0.0` because this amendment changes
+the committed React breadth from disposition-complete coverage with permitted
+exclusions to all 53 exact family outcomes by React `0.1`.
+
+All historical Scope IDs and their prior bytes remain immutable. The eight
+existing exact outcome IDs are reused without renaming or repurposing:
+
+- `Button` -> `SCOPE-COMP-BUTTON-REACT`;
+- `TextField` -> `SCOPE-COMP-TEXTFIELD-REACT`;
+- `Switch` -> `SCOPE-COMP-SWITCH-REACT`;
+- `Form` -> `SCOPE-PATTERN-FORM-REACT`;
+- `Select` -> `SCOPE-COMP-SELECT-REACT`;
+- `Tabs` -> `SCOPE-COMP-TABS-REACT`;
+- upstream `Modal`, whose Core public family is `Dialog`, ->
+  `SCOPE-COMP-DIALOG-REACT`; and
+- `Toast` -> `SCOPE-COMP-TOAST-REACT`.
+
+The following table is the complete immutable 53-family Scope registry for
+this decision. `new` means Product Scope 6.0.0 adds the ID; `existing` means
+the exact previously committed ID is retained.
+
+| Upstream family | Core public family | Immutable Scope ID | ID treatment | Tranche |
+| --- | --- | --- | --- | --- |
+| `Autocomplete` | `Autocomplete` | `SCOPE-COMP-AUTOCOMPLETE-REACT` | new | R1.2 |
+| `Breadcrumbs` | `Breadcrumbs` | `SCOPE-COMP-BREADCRUMBS-REACT` | new | R1.1 |
+| `Button` | `Button` | `SCOPE-COMP-BUTTON-REACT` | existing | R1.1 |
+| `Calendar` | `Calendar` | `SCOPE-COMP-CALENDAR-REACT` | new | R1.3 |
+| `Checkbox` | `Checkbox` | `SCOPE-COMP-CHECKBOX-REACT` | new | R1.1 |
+| `CheckboxGroup` | `CheckboxGroup` | `SCOPE-COMP-CHECKBOXGROUP-REACT` | new | R1.2 |
+| `ColorArea` | `ColorArea` | `SCOPE-COMP-COLORAREA-REACT` | new | R1.3 |
+| `ColorField` | `ColorField` | `SCOPE-COMP-COLORFIELD-REACT` | new | R1.3 |
+| `ColorPicker` | `ColorPicker` | `SCOPE-COMP-COLORPICKER-REACT` | new | R1.3 |
+| `ColorSlider` | `ColorSlider` | `SCOPE-COMP-COLORSLIDER-REACT` | new | R1.3 |
+| `ColorSwatch` | `ColorSwatch` | `SCOPE-COMP-COLORSWATCH-REACT` | new | R1.3 |
+| `ColorSwatchPicker` | `ColorSwatchPicker` | `SCOPE-COMP-COLORSWATCHPICKER-REACT` | new | R1.3 |
+| `ColorWheel` | `ColorWheel` | `SCOPE-COMP-COLORWHEEL-REACT` | new | R1.3 |
+| `ComboBox` | `ComboBox` | `SCOPE-COMP-COMBOBOX-REACT` | new | R1.3 |
+| `DateField` | `DateField` | `SCOPE-COMP-DATEFIELD-REACT` | new | R1.2 |
+| `DatePicker` | `DatePicker` | `SCOPE-COMP-DATEPICKER-REACT` | new | R1.2 |
+| `DateRangePicker` | `DateRangePicker` | `SCOPE-COMP-DATERANGEPICKER-REACT` | new | R1.2 |
+| `Disclosure` | `Disclosure` | `SCOPE-COMP-DISCLOSURE-REACT` | new | R1.1 |
+| `DisclosureGroup` | `DisclosureGroup` | `SCOPE-COMP-DISCLOSUREGROUP-REACT` | new | R1.1 |
+| `DropZone` | `DropZone` | `SCOPE-COMP-DROPZONE-REACT` | new | R1.4 |
+| `FileTrigger` | `FileTrigger` | `SCOPE-COMP-FILETRIGGER-REACT` | new | R1.4 |
+| `Form` | `Form` | `SCOPE-PATTERN-FORM-REACT` | existing | R1.2 |
+| `GridList` | `GridList` | `SCOPE-COMP-GRIDLIST-REACT` | new | R1.3 |
+| `Group` | `Group` | `SCOPE-COMP-GROUP-REACT` | new | R1.1 |
+| `Link` | `Link` | `SCOPE-COMP-LINK-REACT` | new | R1.1 |
+| `ListBox` | `ListBox` | `SCOPE-COMP-LISTBOX-REACT` | new | R1.3 |
+| `Menu` | `Menu` | `SCOPE-COMP-MENU-REACT` | new | R1.3 |
+| `Meter` | `Meter` | `SCOPE-COMP-METER-REACT` | new | R1.1 |
+| `Modal` | `Dialog` | `SCOPE-COMP-DIALOG-REACT` | existing | R1.4 |
+| `NumberField` | `NumberField` | `SCOPE-COMP-NUMBERFIELD-REACT` | new | R1.2 |
+| `Popover` | `Popover` | `SCOPE-COMP-POPOVER-REACT` | new | R1.4 |
+| `PreviewTrigger` | `PreviewTrigger` | `SCOPE-COMP-PREVIEWTRIGGER-REACT` | new | R1.4 |
+| `ProgressBar` | `ProgressBar` | `SCOPE-COMP-PROGRESSBAR-REACT` | new | R1.1 |
+| `RadioGroup` | `RadioGroup` | `SCOPE-COMP-RADIOGROUP-REACT` | new | R1.3 |
+| `RangeCalendar` | `RangeCalendar` | `SCOPE-COMP-RANGECALENDAR-REACT` | new | R1.3 |
+| `SearchField` | `SearchField` | `SCOPE-COMP-SEARCHFIELD-REACT` | new | R1.2 |
+| `Select` | `Select` | `SCOPE-COMP-SELECT-REACT` | existing | R1.3 |
+| `Separator` | `Separator` | `SCOPE-COMP-SEPARATOR-REACT` | new | R1.1 |
+| `Slider` | `Slider` | `SCOPE-COMP-SLIDER-REACT` | new | R1.3 |
+| `Switch` | `Switch` | `SCOPE-COMP-SWITCH-REACT` | existing | R1.2 |
+| `Table` | `Table` | `SCOPE-COMP-TABLE-REACT` | new | R1.3 |
+| `Tabs` | `Tabs` | `SCOPE-COMP-TABS-REACT` | existing | R1.3 |
+| `TagGroup` | `TagGroup` | `SCOPE-COMP-TAGGROUP-REACT` | new | R1.3 |
+| `TextField` | `TextField` | `SCOPE-COMP-TEXTFIELD-REACT` | existing | R1.2 |
+| `TimeField` | `TimeField` | `SCOPE-COMP-TIMEFIELD-REACT` | new | R1.2 |
+| `Toast` | `Toast` | `SCOPE-COMP-TOAST-REACT` | existing | R1.4 |
+| `ToggleButton` | `ToggleButton` | `SCOPE-COMP-TOGGLEBUTTON-REACT` | new | R1.1 |
+| `ToggleButtonGroup` | `ToggleButtonGroup` | `SCOPE-COMP-TOGGLEBUTTONGROUP-REACT` | new | R1.3 |
+| `TokenField` | `TokenField` | `SCOPE-COMP-TOKENFIELD-REACT` | new | R1.3 |
+| `Toolbar` | `Toolbar` | `SCOPE-COMP-TOOLBAR-REACT` | new | R1.3 |
+| `Tooltip` | `Tooltip` | `SCOPE-COMP-TOOLTIP-REACT` | new | R1.4 |
+| `Tree` | `Tree` | `SCOPE-COMP-TREE-REACT` | new | R1.3 |
+| `Virtualizer` | `Virtualizer` | `SCOPE-COMP-VIRTUALIZER-REACT` | new | R1.3 |
+
+Each row is `committed`; its package/platform is `@core-ui/react` / `web.react`;
+its activation requires this authority, the exact Stage 1/R1.0 snapshot,
+accepted tranche lock, Core-owned contract, applicable Tale donor disposition,
+risk-selected deterministic and manual proof, post-proof human evidence
+acceptance, and the unchanged React prerelease release boundary. No row commits
+a React Aria public name, raw helper/type export, secondary renderer,
+cross-platform counterpart, stable lifecycle, or independent release.
+
+The existing `SCOPE-REACT-BREADTH-001` outcome is changed in 6.0.0 from
+disposition-complete applicable coverage with permitted exclusions to complete
+delivery of all 53 exact snapshot families. `SCOPE-METRIC-REACT-COVERAGE`
+measures exact 53-of-53 Core contract/export/proof closure plus complete raw
+disposition and cannot be satisfied by upstream name or raw export count.
+Other existing Product Scope commitments, deferred items, admitted items,
+packages, platforms, surfaces, release boundaries, and non-goals retain their
+5.0.1 states unless explicitly changed above.
+## Evidence, reversal, and historical boundary
+
+Historical authority, Scope IDs, Decision 0010 and amendments 01-02, Project
+records, PRs, releases, and retained evidence remain immutable. This amendment
+does not recertify or rewrite them. Their facts may be reused only through an
+explicit current applicability binding.
+
+Before implementation, rejection or reversal is append-only supersession and
+requires no runtime migration. After implementation begins, changing the
+53-family commitment, family boundary, ID mapping, tranche allocation, React
+Aria identity, public ownership model, package graph, Tale donor rule, support
+boundary, or release boundary requires a new accepted decision, Product Scope
+major amendment when applicable, affected lock reconciliation, and bounded
+reproof. Removal of a committed family is a major scope change.
+
+## Project boundary
+
+This authority does not update the GitHub Project. After accepted authority is
+materialized and verified on the default branch, a fresh Project migration
+packet may reconcile #74-#81 and any required successor items to Product Scope
+6.0.0, the exact snapshot, and the revised R1 tranches. That packet, human
+acceptance, and authorized mutation or no-op are independent of R1.0
+implementation entry. Tracker status never changes Product Scope or evidence.
+
+## Explicit non-goals
+
+This candidate authorizes no repository edit, branch, commit, push, PR,
+Project update, dependency installation, component implementation, CSS copy,
+playground work, evidence capture, package publication, release, deployment,
+support claim, stable promotion, React Aria public re-export, raw-export
+breadth target, RSC/client-boundary support, framework-free implementation,
+React Native implementation, RNW support, equivalence claim, public catalog or
+tooling product, Scale port, new theme system, or production change.
+
+It does not rewrite historical evidence or reuse historical Scope IDs for new
+outcomes. It does not allow a count-only completion claim. It does not permit
+an upstream or Tale contract to replace a Core-owned public contract.
+
+## Acceptance effect
+
+Digest-specific human acceptance authorizes only preparation of the exact
+materialization diff. Repository authoring, commit, push, PR creation, Project
+mutation, merge, implementation, evidence acceptance, publication, and release
+remain separate authorization boundaries.

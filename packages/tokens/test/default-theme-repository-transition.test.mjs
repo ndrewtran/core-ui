@@ -8,6 +8,7 @@ import { tmpdir } from 'node:os';
 import { pathToFileURL } from 'node:url';
 import test from 'node:test';
 import { canonicalJson } from '@core-ui/schema';
+import { hasAcceptedReactPrimaryAuthority } from '../src/internal/default-theme-repository-transition.mjs';
 
 const execFile = promisify(execFileCallback);
 const repositoryRoot = resolve(import.meta.dirname, '../../..');
@@ -108,6 +109,47 @@ async function overlayCandidate(target) {
     await cp(source, destination, { recursive: true, force: true });
   }
 }
+
+test('R1 authority accepts current and historical Product Scope identities only', async () => {
+  const parent = await mkdtemp(join(tmpdir(), 'core-ui-react-authority-proof-'));
+  const worktree = join(parent, 'authority');
+  try {
+    await mkdir(join(worktree, 'strategy'), { recursive: true });
+    await mkdir(join(worktree, 'decisions'), { recursive: true });
+    for (const relativePath of [
+      'strategy/product-scope.md',
+      'decisions/0010-amendment-01-react-primary-delivery.md',
+      'decisions/0010-amendment-02-tale-styling-donor.md',
+      'decisions/0010-amendment-03-comprehensive-react-0-1.md',
+    ]) {
+      await cp(join(repositoryRoot, relativePath), join(worktree, relativePath));
+    }
+    assert.equal(await hasAcceptedReactPrimaryAuthority(worktree), true);
+
+    await writeFile(
+      join(worktree, 'decisions/0010-amendment-03-comprehensive-react-0-1.md'),
+      `${await readFile(join(worktree, 'decisions/0010-amendment-03-comprehensive-react-0-1.md'), 'utf8')}\nmutated`,
+    );
+    assert.equal(await hasAcceptedReactPrimaryAuthority(worktree), false);
+    await cp(
+      join(repositoryRoot, 'decisions/0010-amendment-03-comprehensive-react-0-1.md'),
+      join(worktree, 'decisions/0010-amendment-03-comprehensive-react-0-1.md'),
+    );
+
+    const historicalScope = (await execFile(
+      'git',
+      ['show', 'HEAD:strategy/product-scope.md'],
+      { cwd: repositoryRoot, encoding: 'utf8' },
+    )).stdout;
+    await writeFile(join(worktree, 'strategy/product-scope.md'), historicalScope);
+    assert.equal(await hasAcceptedReactPrimaryAuthority(worktree), true);
+
+    await writeFile(join(worktree, 'strategy/product-scope.md'), `${historicalScope}\nmutated`);
+    assert.equal(await hasAcceptedReactPrimaryAuthority(worktree), false);
+  } finally {
+    await rm(parent, { recursive: true, force: true });
+  }
+});
 
 test('TALE-TOKEN-C repository transition is reversible and idempotent across generated consumers', { timeout: 240_000 }, async () => {
   const parent = await mkdtemp(join(tmpdir(), 'core-ui-transition-proof-'));
