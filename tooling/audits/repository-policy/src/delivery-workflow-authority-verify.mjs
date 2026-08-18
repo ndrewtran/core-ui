@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { canonicalJson, parseJsonStrict } from '@core-ui/schema';
 import { sha256 } from './policy.mjs';
+import { verifyReactR1Entry } from './react-aria-stage1-source-verify.mjs';
 
 const DECISION_PATH = 'decisions/0007-delivery-workflow-authority.json';
 const ACCEPTANCE_PATH = 'decisions/0007-delivery-workflow-authority-acceptance.json';
@@ -17,6 +18,10 @@ const PRODUCT_SCOPE_BYTES = 90165;
 const PRODUCT_SCOPE_SHA256 = 'sha256:7c8404e20d01f6a0cc975b17a7893f5594f6f0d313806a6fced9d0c62d886873';
 const CURRENT_PRODUCT_SCOPE_BYTES = 114420;
 const CURRENT_PRODUCT_SCOPE_SHA256 = 'sha256:b645bedfad6427f18535898938d2551ce8f6005a0e636c1288f60b8199578b73';
+const COMPREHENSIVE_PRODUCT_SCOPE_BYTES = 122969;
+const COMPREHENSIVE_PRODUCT_SCOPE_SHA256 = 'sha256:0cafc0218f0e6795a5d600acb424b4bf514972295c89b48e9042d7faa69a261f';
+const COMPREHENSIVE_ARCHITECTURE_SHA256 = 'sha256:c33f829298748e0c776c63a29449cd27d3cc9519d63d1c3c2b7f0c83d794ec02';
+const COMPREHENSIVE_ROADMAP_SHA256 = 'sha256:8006803d050713b104bf485c6c610c2339a65f3e30eb6bf4e1a9222f3a3bdf2b';
 const ARCHITECTURE_SHA256 = 'sha256:bdf8eb132fcdace479a05569020fd91acb0bde02dd1b24b33ce0f96ceaf39371';
 const ROADMAP_SHA256 = 'sha256:808a972cf2d92064aacb0a10560ac512c0ac878b9c960098d9ddc7d84354f4c0';
 const HISTORICAL_AUTHORITY_SOURCE = 'b27cb4fb3d71f8feca9505684201286d76f62d42';
@@ -78,16 +83,19 @@ const readHistoricalAuthority = (repositoryRoot, path) => execFileSync(
 );
 
 export function verifyDeliveryWorkflowAuthority(repositoryRoot, options = {}) {
+  const sourceMode = options.sourceMode ?? 'current';
+  if (sourceMode !== 'current' && sourceMode !== 'historical') {
+    fail('source mode must be current or explicit historical');
+  }
+  const historicalSource = sourceMode === 'historical';
   const decisionSource = options.decisionSource
     ?? readFileSync(join(repositoryRoot, DECISION_PATH), 'utf8');
   const acceptanceSource = options.acceptanceSource
     ?? readFileSync(join(repositoryRoot, ACCEPTANCE_PATH), 'utf8');
   const productScopeSource = options.productScopeSource
-    ?? readHistoricalAuthority(repositoryRoot, PRODUCT_SCOPE_PATH);
-  const architectureSource = options.architectureSource
-    ?? readHistoricalAuthority(repositoryRoot, ARCHITECTURE_PATH);
-  const roadmapSource = options.roadmapSource
-    ?? readHistoricalAuthority(repositoryRoot, ROADMAP_PATH);
+    ?? (historicalSource
+      ? readHistoricalAuthority(repositoryRoot, PRODUCT_SCOPE_PATH)
+      : readFileSync(join(repositoryRoot, PRODUCT_SCOPE_PATH), 'utf8'));
   const decision = parseJsonStrict(decisionSource);
   const acceptance = parseJsonStrict(acceptanceSource);
 
@@ -103,9 +111,26 @@ export function verifyDeliveryWorkflowAuthority(repositoryRoot, options = {}) {
     Buffer.byteLength(productScopeSource) === CURRENT_PRODUCT_SCOPE_BYTES
     && digest(productScopeSource) === CURRENT_PRODUCT_SCOPE_SHA256
     && productScopeSource.startsWith('---\nscopeVersion: 5.0.1\n')
-  ) ? '5.0.1' : null;
+  ) ? '5.0.1' : (
+    Buffer.byteLength(productScopeSource) === COMPREHENSIVE_PRODUCT_SCOPE_BYTES
+    && digest(productScopeSource) === COMPREHENSIVE_PRODUCT_SCOPE_SHA256
+    && productScopeSource.startsWith('---\nscopeVersion: 6.0.0\n')
+  ) ? '6.0.0' : null;
   if (productScopeVersion === null) fail('Product Scope accepted identity');
-  if (digest(architectureSource) !== ARCHITECTURE_SHA256 || digest(roadmapSource) !== ROADMAP_SHA256) fail('Architecture or roadmap identity');
+  if (!historicalSource && productScopeVersion !== '6.0.0') {
+    fail('current source mode requires Product Scope 6.0.0');
+  }
+  const architectureSource = options.architectureSource
+    ?? (historicalSource
+      ? readHistoricalAuthority(repositoryRoot, ARCHITECTURE_PATH)
+      : readFileSync(join(repositoryRoot, ARCHITECTURE_PATH), 'utf8'));
+  const roadmapSource = options.roadmapSource
+    ?? (historicalSource
+      ? readHistoricalAuthority(repositoryRoot, ROADMAP_PATH)
+      : readFileSync(join(repositoryRoot, ROADMAP_PATH), 'utf8'));
+  const expectedArchitectureSha256 = historicalSource ? ARCHITECTURE_SHA256 : COMPREHENSIVE_ARCHITECTURE_SHA256;
+  const expectedRoadmapSha256 = historicalSource ? ROADMAP_SHA256 : COMPREHENSIVE_ROADMAP_SHA256;
+  if (digest(architectureSource) !== expectedArchitectureSha256 || digest(roadmapSource) !== expectedRoadmapSha256) fail('Architecture or roadmap identity');
 
   if (decision.decisionId !== 'core-ui:decision:0007' || decision.state !== 'acceptance-candidate') fail('decision identity or state');
   if (decision.acceptanceTopology.owner !== 'ndrewtran' || decision.acceptanceTopology.issueNumber !== 54) fail('decision owner or issue');
@@ -139,13 +164,18 @@ export function verifyDeliveryWorkflowAuthority(repositoryRoot, options = {}) {
   };
   exact(acceptance, expectedAcceptance, 'acceptance receipt');
 
-  return {
+  const result = {
     accepted: true,
     activationEvidence: ACTIVATION_EVIDENCE.length,
     applicabilityTargets: decision.authorityApplicability.targets.length,
     decision: { bytes: Buffer.byteLength(decisionSource), sha256: digest(decisionSource) },
     productScope: { bytes: Buffer.byteLength(productScopeSource), sha256: digest(productScopeSource), version: productScopeVersion },
+    sourceMode,
   };
+  if (!historicalSource) {
+    result.r1Entry = verifyReactR1Entry(repositoryRoot, { productScopeSource, roadmapSource });
+  }
+  return result;
 }
 
 export function verifyDecision0009Amendment02SkillSuccessor(repositoryRoot, options = {}) {
