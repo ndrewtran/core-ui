@@ -78,8 +78,8 @@ merge and pass fresh deterministic checks and independent review.
 
 “I accept Core UI R1 policy-entrypoint authority correction candidate v1, SHA-256 cd67bbff022ffb0cc34c530dba2bfc3a9fddfca79a21c0f4220129357b309430. I authorize its minimum append-only Decision 0010 amendment materialization and acceptance record; its protected authority PR and merge after required checks and independent reviews pass; and continuation of the corrected five-path verifier bootstrap under the previously accepted continuous-execution envelope. The npm-publication and final R1-exit merge boundaries remain unchanged.”
 
-This decision does not claim that the protected PR exists, that its review or
-checks passed, or that it merged.
+This decision records only the exact owner statement on protected PR `#89`.
+It does not claim that review or checks passed or that the PR merged.
 
 ## Non-goals and stop boundary
 
