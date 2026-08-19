@@ -1125,14 +1125,14 @@ tree import, undeclared file dependency, or `@core-ui/web` import.
 
 | Package | Responsibility | Must not own |
 | --- | --- | --- |
-| `@core-ui/schema` | Versioned source and response schemas, generated types, platform IDs, and authoring helpers. | Product semantics, components, renderers, or site code. |
+| `@core-ui/schema` | Versioned source and response schemas, generated types, platform IDs, authoring helpers, and the closed internal `ChangeIntentEnvelope` grammar. | Product semantics, components, renderers, or site code. |
 | `@core-ui/tokens` | Canonical tokens and deterministic web/native/design-tool transforms. | Component behavior or docs rendering. |
 | `@core-ui/foundation` | Enforced `semantic`, pure `logic`, and optional portable `interaction` sub-boundaries. | Selectors, React hooks, browser globals, native views, or mandatory cross-platform transitions. |
 | `@core-ui/web` | Later W1 HTML/CSS/controller implementation for `web.html` binding specs. | React or native implementation; a React prerequisite, shared React runtime, or shared React CSS owner. |
 | `@core-ui/react` | React rendering, CSS, SSR/hydration, effects, host refinements, package guidance, and exports for `web.react` contracts. | Canonical component metadata, React Aria public API, or another renderer's contract. |
 | `@core-ui/react-native` | Later N1 native primitive/runtime implementation and explicit platform files for native binding specs. | React/React Aria authority, CSS parsing, DOM, Expo, or Storybook hosts. |
 | `@core-ui/catalog` | Compiled catalog assets and pure discovery/query/planning API. | CLI parsing, MCP transport, project mutation. |
-| `@core-ui/tooling` | Self-describing CLI, MCP adapters, local validation, maintainer scaffolds and semantic diffs, change-intent previews, and safe project operations. | A second artifact index, product decisions, or renderer implementation. |
+| `@core-ui/tooling` | Self-describing CLI, MCP adapters, local validation, maintainer scaffolds and semantic diffs, the private read-only `ChangeIntentEnvelope` producer and validator, and safe project operations. | A second artifact index, product decisions, or renderer implementation. |
 
 At the React package-only boundary, schema, tokens, foundation, catalog, and
 tooling remain private authoring/build/proof authorities. Productization later
@@ -1474,6 +1474,12 @@ Every automated write-capable workflow emits a versioned
 `core plan` remains a read-only composition operation over `PatternRecord`; it
 is not a repository mutation planner and does not authorize writes.
 
+`@core-ui/schema` owns the closed internal envelope grammar. `@core-ui/tooling`
+owns the private read-only producer and validator. The private
+`tooling/audits/repository-policy/` workflow is a consumer of exact envelopes
+and results; it never reconstructs or re-authors their objective, write set,
+affected/stale closure, version effects, or confirmation policy.
+
 The envelope contains:
 
 - a deterministic intent ID and the applicable source, catalog, lockfile, and
@@ -1487,8 +1493,9 @@ The envelope contains:
 - required validation rule IDs, compatibility/version effects, and rollback or
   recovery requirements;
 - an effect class for each operation: `explanation-only`,
-  `canonical-source-write`, `renderer-source-write`, `project-write`, or
-  `dependency-install`;
+  `canonical-source-write`, `renderer-source-write`, `project-write`,
+  `dependency-install`, or the internal evidence-only `evidence-retention-write`
+  for an atomic evidence-root addition derived from its proof owner;
 - readiness for retrieval, generation, and migration as
   `not-applicable`, `unknown`, `blocked`, or `proved`, with evidence references
   for every `proved` claim; and
@@ -1566,7 +1573,7 @@ true:
 - timing and false-invalidation observations remain non-authoritative
   operational telemetry, never product or milestone acceptance.
 
-Authority acceptance precedes every repository write, but publication uses one combined protected PR. That PR contains the exact accepted authority bytes, the RB-01 and RB-02 implementation boundaries, and one evidence-only child that appends the 28 applicability successors against the frozen final source after RB-02. No earlier authority-stage successor generation is authored, so the accepted successors remain terminal through the combined merge.
+Authority acceptance precedes every repository write. The exact accepted authority bytes are published first in their own protected PR and must pass postmerge verification on the default branch. Only then may the exact separate ten-path ChangeIntent prerequisite PR carry the RB-01 and RB-02 implementation boundaries and its evidence-only child appending the 28 applicability successors against the frozen final source after RB-02. No earlier authority-stage successor generation is authored, so the accepted successors remain terminal through the prerequisite merge.
 
 The repository-local skill is operator guidance for this private procedure. It
 is not the G2.3 public bootstrap, does not enter the Core UI capability

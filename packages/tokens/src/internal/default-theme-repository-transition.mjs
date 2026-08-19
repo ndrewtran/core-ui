@@ -94,13 +94,51 @@ const REACT_PRIMARY_AUTHORITIES = Object.freeze([
 ]);
 
 const R1_CONTINUOUS_AUTHORITY = Object.freeze({
+  historicalCommit: '9a7cf99b0e74b2813998775138f0bc340e82c962',
+  historicalTree: '470d0f7bc6751b7f66d49fbf4fdc2d62f6cc89f0',
+  historicalParents: [
+    'd4bba1a5f004d638936b79b673f0b1c4f9691426',
+    '374db5debff52c64929ad3255a6824ce42af756c',
+  ],
   acceptancePath: 'decisions/0010-amendment-04-r1-continuous-execution-acceptance.md',
   candidatePath: 'decisions/0010-amendment-04-r1-continuous-execution-envelope.md',
   decisionPath: 'decisions/0010-amendment-04-r1-continuous-execution.md',
   decisionSha256: '321fefef4e723ee2d636a4ea6917436bf0babb5c6c7da2a5450e1ffc5c37871f',
+  acceptanceSha256: '71134f9a3d30e1d98b55f07e3456f787593ebd8eefd3c6ee5257ac61aea83248',
+  candidateSha256: '9c74a3227fb35a0ae6f6ab97eed4209014cb258408c3b78ce77947ca74b9fa5f',
   manifestPath: 'decisions/0010-amendment-04-r1-continuous-execution-materialization.json',
+  manifestSha256: '73cb2919c26985315557215ba8735139f8ace8ce31526b38a878982a16450111',
   productScopePath: 'strategy/product-scope.md',
   productScopeSha256: 'add747d5986c9039029a99b558ae719969fd18ac113051bbec478bd291da8632',
+  currentAcceptancePath: 'decisions/0010-amendment-06-r1-change-intent-owner-acceptance.md',
+  currentDecisionPath: 'decisions/0010-amendment-06-r1-change-intent-owner.md',
+  currentArchitecturePath: 'strategy/monorepo-architecture.md',
+  currentArchitectureSha256: '7fb12cb12cc512279a16169d309607213c0361d2708a04967682e9380bba8032',
+  currentRoadmapPath: 'strategy/milestone-roadmap.md',
+  currentRoadmapSha256: 'ff51b84497612ed59ffcaea71036894e74e4a461e21434f3d3d02dd1deeb2bb1',
+  currentDecisionSha256: 'faa0fec0c62f67ece11b0db4f4dd73e4c5577405fb9594ee1f8b5a658fb3a91d',
+  currentAcceptanceSha256: '4eab442c35b5a946ca8f977d7b9262024fdaf97f71e5c98261b0cb1fccfa6571',
+});
+const HISTORICAL_ANCESTRY_ERROR_CODE = 'R1_CONTINUOUS_AUTHORITY_LINEAGE_INVALID';
+
+const R1_IMMUTABLE_PATHS = Object.freeze([
+  R1_CONTINUOUS_AUTHORITY.productScopePath,
+  R1_CONTINUOUS_AUTHORITY.candidatePath,
+  R1_CONTINUOUS_AUTHORITY.manifestPath,
+  R1_CONTINUOUS_AUTHORITY.decisionPath,
+  R1_CONTINUOUS_AUTHORITY.acceptancePath,
+  'decisions/0010-amendment-05-r1-policy-entrypoint.md',
+  'decisions/0010-amendment-05-r1-policy-entrypoint-acceptance.md',
+]);
+
+const R1_IMMUTABLE_SHA256 = Object.freeze({
+  [R1_CONTINUOUS_AUTHORITY.productScopePath]: R1_CONTINUOUS_AUTHORITY.productScopeSha256,
+  [R1_CONTINUOUS_AUTHORITY.candidatePath]: R1_CONTINUOUS_AUTHORITY.candidateSha256,
+  [R1_CONTINUOUS_AUTHORITY.manifestPath]: R1_CONTINUOUS_AUTHORITY.manifestSha256,
+  [R1_CONTINUOUS_AUTHORITY.decisionPath]: R1_CONTINUOUS_AUTHORITY.decisionSha256,
+  [R1_CONTINUOUS_AUTHORITY.acceptancePath]: R1_CONTINUOUS_AUTHORITY.acceptanceSha256,
+  'decisions/0010-amendment-05-r1-policy-entrypoint.md': 'fae4d66e8040d5579cbb9a5883f56db38859ddd54b03d621080e131b3766ecb2',
+  'decisions/0010-amendment-05-r1-policy-entrypoint-acceptance.md': '5f8ccd7b041011ab3645028d01fea49b4f50a84f6d98e61bc6fcabddeab9ff34',
 });
 
 const R1_OWNER_COMMENT_URL = /^https:\/\/github\.com\/ndrewtran\/core-ui\/pull\/[1-9]\d*#issuecomment-[1-9]\d*$/u;
@@ -116,132 +154,154 @@ function renderTemplate(template, substitutions) {
   );
 }
 
-async function hasAcceptedR1ContinuousAuthority(repositoryRoot) {
-  let acceptanceBytes;
-  try {
-    const { stdout: stageOutput } = await execFile('git', [
-      '-C',
-      repositoryRoot,
-      'ls-files',
-      '--stage',
-      '-z',
-      '--',
-      R1_CONTINUOUS_AUTHORITY.acceptancePath,
-    ], { encoding: 'buffer' });
-    const records = stageOutput.toString('utf8').split('\0').filter(Boolean);
-    if (records.length !== 1) return false;
-    const separator = records[0].indexOf('\t');
-    if (separator < 0 || records[0].slice(separator + 1) !== R1_CONTINUOUS_AUTHORITY.acceptancePath) return false;
-    const [mode, blob, stage] = records[0].slice(0, separator).split(' ');
-    if (mode !== '100644' || stage !== '0' || !/^[0-9a-f]{40}$/u.test(blob) || /^0{40}$/u.test(blob)) return false;
-    const [{ stdout: indexedBytes }, worktreeBytes] = await Promise.all([
-      execFile('git', ['-C', repositoryRoot, 'cat-file', 'blob', blob], { encoding: 'buffer' }),
-      readFile(join(repositoryRoot, R1_CONTINUOUS_AUTHORITY.acceptancePath)),
-    ]);
-    if (!indexedBytes.equals(worktreeBytes)) return false;
-    acceptanceBytes = worktreeBytes;
-  } catch {
-    return false;
-  }
-  const paths = Object.values(R1_CONTINUOUS_AUTHORITY).filter((value) => (
-    typeof value === 'string' && value.includes('/')
-  ));
-  const sources = Object.fromEntries(await Promise.all(paths.map(async (relativePath) => [
-    relativePath,
-    relativePath === R1_CONTINUOUS_AUTHORITY.acceptancePath
-      ? acceptanceBytes
-      : await readFile(join(repositoryRoot, relativePath)).catch(() => null),
-  ])));
-  if (Object.values(sources).some((source) => source === null)) return false;
+async function gitBytes(repositoryRoot, args) {
+  return (await execFile('git', ['-C', repositoryRoot, ...args], {encoding: 'buffer'})).stdout;
+}
 
-  const productScope = sources[R1_CONTINUOUS_AUTHORITY.productScopePath];
-  const decision = sources[R1_CONTINUOUS_AUTHORITY.decisionPath];
-  const candidate = sources[R1_CONTINUOUS_AUTHORITY.candidatePath];
-  const manifestBytes = sources[R1_CONTINUOUS_AUTHORITY.manifestPath];
-  const acceptance = sources[R1_CONTINUOUS_AUTHORITY.acceptancePath].toString('utf8');
-  if (
-    sha256(productScope) !== R1_CONTINUOUS_AUTHORITY.productScopeSha256
-    || sha256(decision) !== R1_CONTINUOUS_AUTHORITY.decisionSha256
-  ) return false;
-  for (const [relativePath, expected] of REACT_COMPREHENSIVE_AUTHORITY.slice(1)) {
-    const source = await readFile(join(repositoryRoot, relativePath)).catch(() => null);
-    if (!source || sha256(source) !== expected) return false;
+async function stageZeroBytes(repositoryRoot, relativePath) {
+  const records = (await gitBytes(repositoryRoot, ['ls-files', '--stage', '-z', '--', relativePath]))
+    .toString('utf8').split('\0').filter(Boolean);
+  if (records.length !== 1) throw new Error('stage relationship');
+  const separator = records[0].indexOf('\t');
+  const [mode, blob, stage] = records[0].slice(0, separator).split(' ');
+  if (records[0].slice(separator + 1) !== relativePath || mode !== '100644' || stage !== '0') {
+    throw new Error('stage relationship');
   }
-
-  let manifest;
-  try {
-    manifest = parseJsonStrict(manifestBytes.toString('utf8'));
-  } catch {
-    return false;
-  }
-  if (canonicalJson(manifest) !== manifestBytes.toString('utf8')) return false;
-  const renderer = manifest.acceptanceRecordRenderer;
-  if (
-    manifest.profile !== 'core-ui-r1-continuous-execution-materialization-manifest-v1'
-    || manifest.selfPath !== R1_CONTINUOUS_AUTHORITY.manifestPath
-    || manifest.candidate?.path !== R1_CONTINUOUS_AUTHORITY.candidatePath
-    || manifest.candidate?.algorithm !== 'sha256'
-    || manifest.candidate?.byteLength !== candidate.byteLength
-    || manifest.candidate?.digest !== sha256(candidate)
-    || renderer?.outputPath !== R1_CONTINUOUS_AUTHORITY.acceptancePath
-    || renderer?.owner !== 'Andrew / ndrewtran'
-    || renderer?.ownerComment?.author !== 'ndrewtran'
-    || renderer?.ownerComment?.repository !== 'ndrewtran/core-ui'
-    || renderer?.ownerComment?.body !== 'exact-rendered-owner-statement'
-    || renderer?.ownerComment?.urlPattern !== 'https://github.com/ndrewtran/core-ui/pull/{authorityPrNumber}#issuecomment-{commentId}'
-    || typeof renderer?.ownerStatementTemplate !== 'string'
-    || typeof renderer?.outputTemplate !== 'string'
-    || !Array.isArray(renderer?.substitutions)
-    || canonicalJson(renderer?.substitutions) !== canonicalJson([
-      'candidateSha256',
-      'manifestSha256',
-      'ownerCommentUrl',
-      'ownerStatement',
-      'ownerStatementSha256',
-    ])
-  ) return false;
-
-  if (!Array.isArray(manifest.staticAfterImages)) return false;
-  const imagePaths = new Set();
-  for (const image of manifest.staticAfterImages) {
-    if (
-      image.algorithm !== 'sha256'
-      || typeof image.path !== 'string'
-      || image.path.startsWith('/')
-      || image.path.split('/').includes('..')
-      || imagePaths.has(image.path)
-    ) return false;
-    imagePaths.add(image.path);
-    const source = await readFile(join(repositoryRoot, image.path)).catch(() => null);
-    if (!source || image.byteLength !== source.byteLength || image.digest !== sha256(source)) return false;
-  }
-  const expectedWriteSet = new Set([
-    R1_CONTINUOUS_AUTHORITY.acceptancePath,
-    R1_CONTINUOUS_AUTHORITY.manifestPath,
-    ...manifest.staticAfterImages.map(({ path }) => path),
+  const [indexed, index, worktree] = await Promise.all([
+    gitBytes(repositoryRoot, ['cat-file', 'blob', blob]),
+    gitBytes(repositoryRoot, ['show', `:0:${relativePath}`]),
+    readFile(join(repositoryRoot, relativePath)),
   ]);
-  if (
-    !Array.isArray(manifest.writeSet)
-    || manifest.writeSet.length !== expectedWriteSet.size
-    || manifest.writeSet.some((path) => !expectedWriteSet.has(path))
-  ) return false;
+  if (!indexed.equals(index) || !indexed.equals(worktree)) throw new Error('source/index/worktree mismatch');
+  return worktree;
+}
 
-  const ownerCommentMatch = acceptance.match(/^Owner record: `(https:\/\/github\.com\/ndrewtran\/core-ui\/pull\/[1-9]\d*#issuecomment-[1-9]\d*)`$/mu);
-  const ownerCommentUrl = ownerCommentMatch?.[1];
-  if (!ownerCommentUrl || !R1_OWNER_COMMENT_URL.test(ownerCommentUrl)) return false;
-  const manifestSha256 = sha256(manifestBytes);
-  const ownerStatement = renderTemplate(renderer.ownerStatementTemplate, {
-    candidateSha256: manifest.candidate.digest,
-    manifestSha256,
-  });
-  const expectedAcceptance = renderTemplate(renderer.outputTemplate, {
-    candidateSha256: manifest.candidate.digest,
-    manifestSha256,
-    ownerCommentUrl,
-    ownerStatement,
-    ownerStatementSha256: sha256(ownerStatement),
-  });
-  return acceptance === expectedAcceptance;
+async function verifyHistoricalR1Authority(repositoryRoot) {
+  try {
+    await gitBytes(repositoryRoot, [
+      'merge-base', '--is-ancestor', R1_CONTINUOUS_AUTHORITY.historicalCommit, 'HEAD',
+    ]);
+  } catch {
+    const error = new Error(
+      'R1_CONTINUOUS_AUTHORITY_INVALID: historical protected merge must be an ancestor of current HEAD',
+    );
+    error.code = HISTORICAL_ANCESTRY_ERROR_CODE;
+    throw error;
+  }
+  const details = (await gitBytes(repositoryRoot, [
+    'show', '-s', '--format=%H%n%T%n%P', R1_CONTINUOUS_AUTHORITY.historicalCommit,
+  ])).toString('utf8').trim().split('\n');
+  if (details[0] !== R1_CONTINUOUS_AUTHORITY.historicalCommit
+      || details[1] !== R1_CONTINUOUS_AUTHORITY.historicalTree
+      || canonicalJson(details[2]?.split(' ') ?? []) !== canonicalJson(R1_CONTINUOUS_AUTHORITY.historicalParents)) {
+    throw new Error('historical topology');
+  }
+  const manifestBytes = await gitBytes(repositoryRoot, [
+    'show', `${R1_CONTINUOUS_AUTHORITY.historicalCommit}:${R1_CONTINUOUS_AUTHORITY.manifestPath}`,
+  ]);
+  if (sha256(manifestBytes) !== '73cb2919c26985315557215ba8735139f8ace8ce31526b38a878982a16450111') {
+    throw new Error('historical manifest');
+  }
+  const manifest = parseJsonStrict(manifestBytes.toString('utf8'));
+  if (canonicalJson(manifest) !== manifestBytes.toString('utf8') || !Array.isArray(manifest.staticAfterImages)) {
+    throw new Error('historical manifest shape');
+  }
+  for (const image of manifest.staticAfterImages) {
+    const bytes = await gitBytes(repositoryRoot, [
+      'show', `${R1_CONTINUOUS_AUTHORITY.historicalCommit}:${image.path}`,
+    ]);
+    if (bytes.byteLength !== image.byteLength || sha256(bytes) !== image.digest) throw new Error('historical after-image');
+  }
+  const acceptance = await gitBytes(repositoryRoot, [
+    'show', `${R1_CONTINUOUS_AUTHORITY.historicalCommit}:${R1_CONTINUOUS_AUTHORITY.acceptancePath}`,
+  ]);
+  if (sha256(acceptance) !== '71134f9a3d30e1d98b55f07e3456f787593ebd8eefd3c6ee5257ac61aea83248') {
+    throw new Error('historical acceptance');
+  }
+}
+
+async function rejectExtraSuccessorPaths(repositoryRoot) {
+  const paths = (await gitBytes(repositoryRoot, ['ls-files', '--cached', '--others', '--exclude-standard', '-z']))
+    .toString('utf8').split('\0').filter(Boolean)
+    .filter((path) => path.startsWith('decisions/0010-amendment-06-')).sort();
+  const expected = [
+    R1_CONTINUOUS_AUTHORITY.currentAcceptancePath,
+    R1_CONTINUOUS_AUTHORITY.currentDecisionPath,
+  ].sort();
+  if (paths.length > 0 && canonicalJson(paths) !== canonicalJson(expected)) {
+    throw new Error('successor path set');
+  }
+}
+
+async function assertSuccessorPathsAbsent(repositoryRoot) {
+  const present = [];
+  for (const relativePath of [
+    R1_CONTINUOUS_AUTHORITY.currentAcceptancePath,
+    R1_CONTINUOUS_AUTHORITY.currentDecisionPath,
+  ]) {
+    const indexedOrUntracked = (await gitBytes(repositoryRoot, [
+      'ls-files', '--cached', '--others', '--exclude-standard', '-z', '--', relativePath,
+    ])).toString('utf8').split('\0').filter(Boolean).length > 0;
+    if (indexedOrUntracked || await exists(join(repositoryRoot, relativePath))) present.push(relativePath);
+  }
+  if (present.length > 0) {
+    throw new Error(`CORE_TOKEN_IDENTITY_AUTHORITY_MISMATCH: current successor paths must be absent for baseline: ${present.join(', ')}`);
+  }
+}
+
+async function hasAcceptedR1ContinuousAuthority(repositoryRoot) {
+  try {
+    await verifyHistoricalR1Authority(repositoryRoot);
+    await rejectExtraSuccessorPaths(repositoryRoot);
+    const immutable = Object.fromEntries(await Promise.all(R1_IMMUTABLE_PATHS.map(async (path) => [
+      path,
+      await stageZeroBytes(repositoryRoot, path),
+    ])));
+    for (const path of R1_IMMUTABLE_PATHS) {
+      if (sha256(immutable[path]) !== R1_IMMUTABLE_SHA256[path]) throw new Error('immutable authority');
+    }
+    const architecture = await stageZeroBytes(repositoryRoot, R1_CONTINUOUS_AUTHORITY.currentArchitecturePath);
+    const roadmap = await stageZeroBytes(repositoryRoot, R1_CONTINUOUS_AUTHORITY.currentRoadmapPath);
+    const architectureSha256 = sha256(architecture);
+    const roadmapSha256 = sha256(roadmap);
+    const hasCurrent = await Promise.all([
+      stageZeroBytes(repositoryRoot, R1_CONTINUOUS_AUTHORITY.currentDecisionPath),
+      stageZeroBytes(repositoryRoot, R1_CONTINUOUS_AUTHORITY.currentAcceptancePath),
+    ]).then(() => true).catch(() => false);
+    if (!hasCurrent) {
+      if (architectureSha256 === 'fa94c95f08c659f977af43a4438ffdb8d1774a06332786fae61f03f0799c085b'
+          && roadmapSha256 === '9f321f93a537f69c5604de35f85053d8bf4748e937d6797c9262691e301247a1') {
+        await assertSuccessorPathsAbsent(repositoryRoot);
+        return true;
+      }
+      throw new Error('missing current successor');
+    }
+    const currentPaths = [
+      R1_CONTINUOUS_AUTHORITY.currentDecisionPath,
+      R1_CONTINUOUS_AUTHORITY.currentAcceptancePath,
+      R1_CONTINUOUS_AUTHORITY.currentArchitecturePath,
+      R1_CONTINUOUS_AUTHORITY.currentRoadmapPath,
+    ];
+    const current = Object.fromEntries(await Promise.all(currentPaths.map(async (path) => [
+      path,
+      await stageZeroBytes(repositoryRoot, path),
+    ])));
+    const statement = 'I accept Core UI R1 ChangeIntent authority compatibility recovery candidate v2, SHA-256 b79aee6b4ff9167495ef2aec28055b73254865bd9f70ca2676e9bb679fc8299b. I authorize its exact eleven-path combined amendment 06 authority and private compatibility materialization, acceptance record, required authority issue, protected non-draft PR, and merge after all named deterministic checks and independent reviews pass; and continuation with the separate exact ten-path ChangeIntent prerequisite and post-prerequisite Project README reconciliation under the previously accepted continuous-execution envelope. The npm-publication and final R1-exit merge boundaries remain unchanged.';
+    if (sha256(current[R1_CONTINUOUS_AUTHORITY.currentDecisionPath]) !== R1_CONTINUOUS_AUTHORITY.currentDecisionSha256
+        || sha256(current[R1_CONTINUOUS_AUTHORITY.currentAcceptancePath]) !== R1_CONTINUOUS_AUTHORITY.currentAcceptanceSha256
+        || sha256(current[R1_CONTINUOUS_AUTHORITY.currentArchitecturePath]) !== R1_CONTINUOUS_AUTHORITY.currentArchitectureSha256
+        || sha256(current[R1_CONTINUOUS_AUTHORITY.currentRoadmapPath]) !== R1_CONTINUOUS_AUTHORITY.currentRoadmapSha256
+        || !current[R1_CONTINUOUS_AUTHORITY.currentDecisionPath].toString('utf8').includes(statement)
+        || !current[R1_CONTINUOUS_AUTHORITY.currentAcceptancePath].toString('utf8').includes(statement)
+        || !current[R1_CONTINUOUS_AUTHORITY.currentDecisionPath].toString('utf8').includes('a700be0ac22c627fbc09c6378136b95d982d05c898a51bd126e5609f9bd8e8b9')
+        || !current[R1_CONTINUOUS_AUTHORITY.currentAcceptancePath].toString('utf8').includes('a700be0ac22c627fbc09c6378136b95d982d05c898a51bd126e5609f9bd8e8b9')) {
+      throw new Error('current successor authority');
+    }
+    return true;
+  } catch (error) {
+    if (error?.code === HISTORICAL_ANCESTRY_ERROR_CODE) throw error;
+    return false;
+  }
 }
 
 export async function hasAcceptedReactPrimaryAuthority(repositoryRoot) {

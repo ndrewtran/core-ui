@@ -2,7 +2,7 @@ import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
-import { hasAcceptedR1ContinuousAuthority } from './r1-continuous-authority-compatibility.mjs';
+import { verifyCurrentR1ContinuousAuthority } from './r1-continuous-authority-compatibility.mjs';
 
 export const STAGE1_SOURCE = Object.freeze({
   commit: 'dea987aca51cde9da67fe3cac16c5e69a8c46016',
@@ -57,6 +57,12 @@ export const R1_ENTRY_BINDING = Object.freeze({
       sha256: '9f321f93a537f69c5604de35f85053d8bf4748e937d6797c9262691e301247a1',
     }),
   }),
+});
+
+const CURRENT_SUCCESSOR_ROADMAP = Object.freeze({
+  bytes: 158129,
+  path: 'strategy/milestone-roadmap.md',
+  sha256: 'ff51b84497612ed59ffcaea71036894e74e4a461e21434f3d3d02dd1deeb2bb1',
 });
 
 const digest = (value) => createHash('sha256').update(value).digest('hex');
@@ -147,19 +153,24 @@ export function verifyReactAriaStage1Source(repositoryRoot, options = {}) {
 }
 
 export function verifyReactR1Entry(repositoryRoot, options = {}) {
+  let authority;
+  try {
+    authority = verifyCurrentR1ContinuousAuthority(repositoryRoot, {
+      productScopeSource: options.productScopeSource,
+      authorityArchitectureSource: options.architectureSource,
+      authorityRoadmapSource: options.roadmapSource,
+      authorityDecisionSource: options.authorityDecisionSource,
+      authorityAcceptanceSource: options.authorityAcceptanceSource,
+    });
+  } catch {
+    fail('R1.0 Product Scope current authority compatibility binding');
+  }
   const productScopeSource = options.productScopeSource
     ?? readFileSync(join(repositoryRoot, R1_ENTRY_BINDING.productScope.path), 'utf8');
-  const continuousAuthorityAccepted = (
-    Buffer.byteLength(productScopeSource) === R1_ENTRY_BINDING.continuous.productScope.bytes
-    && digest(productScopeSource) === R1_ENTRY_BINDING.continuous.productScope.sha256
-    && hasAcceptedR1ContinuousAuthority(repositoryRoot, { productScopeSource })
-  );
-  const productScopeBinding = continuousAuthorityAccepted
-    ? R1_ENTRY_BINDING.continuous.productScope
-    : R1_ENTRY_BINDING.productScope;
-  const roadmapBinding = continuousAuthorityAccepted
+  const productScopeBinding = R1_ENTRY_BINDING.continuous.productScope;
+  const roadmapBinding = authority.successor === null
     ? R1_ENTRY_BINDING.continuous.roadmap
-    : R1_ENTRY_BINDING.roadmap;
+    : CURRENT_SUCCESSOR_ROADMAP;
   const decisionSource = options.decisionSource
     ?? readTextArtifact(repositoryRoot, R1_ENTRY_BINDING.decision);
 
@@ -214,6 +225,7 @@ export function verifyReactR1Entry(repositoryRoot, options = {}) {
       historicalEvidence: { sufficient: false, status: 'historical-only' },
       status: 'pending-current-evidence',
     },
+    authority,
     decision: { bytes: R1_ENTRY_BINDING.decision.bytes, sha256: R1_ENTRY_BINDING.decision.sha256 },
     productScope: { bytes: productScopeBinding.bytes, sha256: productScopeBinding.sha256, version: productScopeBinding.version },
     stage1,

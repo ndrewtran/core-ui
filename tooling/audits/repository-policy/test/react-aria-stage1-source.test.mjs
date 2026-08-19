@@ -18,29 +18,21 @@ const repositoryRoot = join(import.meta.dirname, '../../../..');
 const r1AcceptancePath = 'decisions/0010-amendment-04-r1-continuous-execution-acceptance.md';
 const r1ManifestPath = 'decisions/0010-amendment-04-r1-continuous-execution-materialization.json';
 const sha256 = (source) => createHash('sha256').update(source).digest('hex');
+const pinnedCurrentAuthority = Object.freeze({
+  authorityDecisionSource: fs.readFileSync(join(repositoryRoot, 'decisions/0010-amendment-06-r1-change-intent-owner.md'), 'utf8'),
+  authorityAcceptanceSource: fs.readFileSync(join(repositoryRoot, 'decisions/0010-amendment-06-r1-change-intent-owner-acceptance.md'), 'utf8'),
+  architectureSource: fs.readFileSync(join(repositoryRoot, 'strategy/monorepo-architecture.md'), 'utf8'),
+  roadmapSource: fs.readFileSync(join(repositoryRoot, 'strategy/milestone-roadmap.md'), 'utf8'),
+  productScopeSource: fs.readFileSync(join(repositoryRoot, 'strategy/product-scope.md'), 'utf8'),
+});
 const renderTemplate = (template, substitutions) => Object.entries(substitutions).reduce(
   (output, [name, value]) => output.replaceAll(`{${name}}`, value),
   template,
 );
 
 const writeR1Acceptance = (fixtureRoot) => {
-  const manifestBytes = fs.readFileSync(join(fixtureRoot, r1ManifestPath));
-  const manifest = JSON.parse(manifestBytes.toString('utf8'));
-  const manifestSha256 = sha256(manifestBytes);
-  const ownerCommentUrl = 'https://github.com/ndrewtran/core-ui/pull/87#issuecomment-1';
-  const ownerStatement = renderTemplate(manifest.acceptanceRecordRenderer.ownerStatementTemplate, {
-    candidateSha256: manifest.candidate.digest,
-    manifestSha256,
-  });
-  fs.writeFileSync(join(fixtureRoot, r1AcceptancePath), renderTemplate(
-    manifest.acceptanceRecordRenderer.outputTemplate,
-    {
-      candidateSha256: manifest.candidate.digest,
-      manifestSha256,
-      ownerCommentUrl,
-      ownerStatement,
-      ownerStatementSha256: sha256(ownerStatement),
-    },
+  fs.writeFileSync(join(fixtureRoot, r1AcceptancePath), execFileSync(
+    'git', ['show', `9a7cf99b0e74b2813998775138f0bc340e82c962:${r1AcceptancePath}`], {encoding: 'buffer'},
   ));
 };
 
@@ -59,6 +51,9 @@ const makeR1Fixture = (receiptState = 'staged') => {
     fs.mkdirSync(join(destination, '..'), {recursive: true});
     fs.copyFileSync(join(repositoryRoot, relativePath), destination);
   }
+  if (stagedPaths.length > 0) {
+    execFileSync('git', ['add', '--', ...stagedPaths], {cwd: fixtureRoot, stdio: 'ignore'});
+  }
   execFileSync('git', ['rm', '--ignore-unmatch', '--', r1AcceptancePath], {
     cwd: fixtureRoot,
     stdio: 'ignore',
@@ -68,6 +63,50 @@ const makeR1Fixture = (receiptState = 'staged') => {
     execFileSync('git', ['add', '--', r1AcceptancePath], {cwd: fixtureRoot, stdio: 'ignore'});
   } else if (receiptState === 'intent-to-add') {
     execFileSync('git', ['add', '-N', '--', r1AcceptancePath], {cwd: fixtureRoot, stdio: 'ignore'});
+  }
+  return fixtureRoot;
+};
+
+const makeNonAncestorR1Fixture = () => {
+  const fixtureRoot = makeR1Fixture();
+  const tree = execFileSync('git', ['write-tree'], {cwd: fixtureRoot, encoding: 'utf8'}).trim();
+  const commit = execFileSync('git', ['commit-tree', tree, '-m', 'non-ancestor authority fixture'], {
+    cwd: fixtureRoot,
+    encoding: 'utf8',
+    env: {
+      ...process.env,
+      GIT_AUTHOR_EMAIL: 'fixture@example.invalid',
+      GIT_AUTHOR_NAME: 'Core UI fixture',
+      GIT_COMMITTER_EMAIL: 'fixture@example.invalid',
+      GIT_COMMITTER_NAME: 'Core UI fixture',
+    },
+  }).trim();
+  execFileSync('git', ['reset', '--hard', commit], {cwd: fixtureRoot, stdio: 'ignore'});
+  return fixtureRoot;
+};
+
+const makeBaselineFixture = () => {
+  const fixtureRoot = fs.mkdtempSync(join(tmpdir(), 'core-ui-r1-baseline-fixture-'));
+  execFileSync('git', ['clone', '--no-local', '--no-tags', '--no-checkout', repositoryRoot, fixtureRoot], {
+    stdio: 'ignore',
+  });
+  execFileSync('git', ['checkout', '--quiet', '--detach', 'HEAD'], {cwd: fixtureRoot, stdio: 'ignore'});
+  return fixtureRoot;
+};
+
+const makeBaselineSuccessorFixture = (state) => {
+  const fixtureRoot = makeBaselineFixture();
+  const successorPaths = [
+    'decisions/0010-amendment-06-r1-change-intent-owner-acceptance.md',
+    'decisions/0010-amendment-06-r1-change-intent-owner.md',
+  ];
+  for (const relativePath of successorPaths) {
+    const destination = join(fixtureRoot, relativePath);
+    fs.mkdirSync(join(destination, '..'), {recursive: true});
+    fs.copyFileSync(join(repositoryRoot, relativePath), destination);
+  }
+  if (state === 'intent-to-add') {
+    execFileSync('git', ['add', '-N', '--', ...successorPaths], {cwd: fixtureRoot, stdio: 'ignore'});
   }
   return fixtureRoot;
 };
@@ -128,6 +167,98 @@ test('R1.0 entry gate accepts only current authority and remains closed pending 
     status: 'pending-current-evidence',
   });
   assert.equal(result.activation.permitted, false);
+
+  const cleanBaselineFixture = makeBaselineFixture();
+  try {
+    const baselineResult = verifyReactR1Entry(cleanBaselineFixture);
+    assert.equal(baselineResult.accepted, true);
+    assert.equal(baselineResult.authority.baseline, true);
+    assert.equal(baselineResult.authority.successor, null);
+  } finally {
+    fs.rmSync(cleanBaselineFixture, {recursive: true, force: true});
+  }
+
+  const nonAncestorFixture = makeNonAncestorR1Fixture();
+  try {
+    assert.equal(execFileSync('git', [
+      'cat-file', '-e', '9a7cf99b0e74b2813998775138f0bc340e82c962^{commit}',
+    ], {cwd: nonAncestorFixture, encoding: 'utf8'}), '');
+    assert.equal(
+      (() => {
+        try {
+          execFileSync('git', [
+            'merge-base', '--is-ancestor', '9a7cf99b0e74b2813998775138f0bc340e82c962', 'HEAD',
+          ], {cwd: nonAncestorFixture, encoding: 'utf8'});
+          return true;
+        } catch {
+          return false;
+        }
+      })(),
+      false,
+    );
+    assert.throws(
+      () => verifyReactR1Entry(nonAncestorFixture),
+      /REACT_ARIA_STAGE1_SOURCE_INVALID: R1\.0 Product Scope/u,
+    );
+  } finally {
+    fs.rmSync(nonAncestorFixture, {recursive: true, force: true});
+  }
+
+  for (const successorState of ['untracked', 'intent-to-add']) {
+    const successorFixture = makeBaselineSuccessorFixture(successorState);
+    try {
+      assert.throws(
+        () => verifyReactR1Entry(successorFixture),
+        /REACT_ARIA_STAGE1_SOURCE_INVALID: R1\.0 Product Scope/u,
+      );
+    } finally {
+      fs.rmSync(successorFixture, {recursive: true, force: true});
+    }
+  }
+
+  const rejectStagedSubstitution = (relativePath, mutate, optionName, label) => {
+    const currentPath = join(fixtureRoot, relativePath);
+    const original = fs.readFileSync(currentPath, 'utf8');
+    fs.writeFileSync(currentPath, mutate(original));
+    execFileSync('git', ['add', '--', relativePath], {cwd: fixtureRoot, stdio: 'ignore'});
+    assert.throws(
+      () => verifyReactR1Entry(fixtureRoot, {[optionName]: pinnedCurrentAuthority[optionName]}),
+      /REACT_ARIA_STAGE1_SOURCE_INVALID: R1\.0 Product Scope/u,
+      label,
+    );
+    fs.writeFileSync(currentPath, original);
+    execFileSync('git', ['add', '--', relativePath], {cwd: fixtureRoot, stdio: 'ignore'});
+  };
+  rejectStagedSubstitution(
+    'decisions/0010-amendment-06-r1-change-intent-owner.md',
+    (source) => source.replace('b79aee6b4ff9167495ef2aec28055b73254865bd9f70ca2676e9bb679fc8299b', '0'.repeat(64)),
+    'authorityDecisionSource',
+    'changed staged amendment-06 decision must reject valid pinned override',
+  );
+  rejectStagedSubstitution(
+    'decisions/0010-amendment-06-r1-change-intent-owner-acceptance.md',
+    (source) => source.replace('b79aee6b4ff9167495ef2aec28055b73254865bd9f70ca2676e9bb679fc8299b', '0'.repeat(64)),
+    'authorityAcceptanceSource',
+    'changed staged amendment-06 acceptance must reject valid pinned override',
+  );
+  rejectStagedSubstitution(
+    'strategy/monorepo-architecture.md',
+    (source) => `${source}\nsubstituted Architecture`,
+    'architectureSource',
+    'changed staged Architecture must reject valid pinned override',
+  );
+  rejectStagedSubstitution(
+    'strategy/milestone-roadmap.md',
+    (source) => `${source}\nsubstituted Roadmap`,
+    'roadmapSource',
+    'changed staged Roadmap must reject valid pinned override',
+  );
+  rejectStagedSubstitution(
+    'strategy/product-scope.md',
+    (source) => source.replace('scopeVersion: 6.0.1', 'scopeVersion: 6.0.2'),
+    'productScopeSource',
+    'changed staged Product Scope must reject valid pinned override',
+  );
 
   const historicalProductScope = execFileSync(
     'git', ['show', `${STAGE1_SOURCE.commit}:strategy/product-scope.md`], {cwd: fixtureRoot, encoding: 'utf8'},

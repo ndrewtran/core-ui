@@ -97,7 +97,8 @@ async function candidatePaths() {
 }
 
 async function overlayCandidate(target) {
-  for (const relativePath of await candidatePaths()) {
+  const paths = await candidatePaths();
+  for (const relativePath of paths) {
     const source = join(repositoryRoot, relativePath);
     const destination = join(target, relativePath);
     const metadata = await lstat(source).catch((error) => (error?.code === 'ENOENT' ? null : Promise.reject(error)));
@@ -107,6 +108,77 @@ async function overlayCandidate(target) {
     }
     await mkdir(dirname(destination), { recursive: true });
     await cp(source, destination, { recursive: true, force: true });
+  }
+  const present = [];
+  for (const relativePath of paths) {
+    if (await lstat(join(target, relativePath)).then(() => true).catch((error) => error?.code === 'ENOENT' ? false : Promise.reject(error))) {
+      present.push(relativePath);
+    }
+  }
+  if (present.length > 0) await execFile('git', ['add', '--', ...present], {cwd: target, encoding: 'utf8'});
+}
+
+async function makeNonAncestorAuthorityFixture() {
+  const parent = await mkdtemp(join(tmpdir(), 'core-ui-r1-lineage-fixture-'));
+  const worktree = join(parent, 'repository');
+  try {
+    await execFile('git', ['clone', '--no-local', '--no-tags', repositoryRoot, worktree], {
+      cwd: repositoryRoot,
+      encoding: 'utf8',
+    });
+    const stagedPaths = (await execFile('git', ['diff', '--cached', '--name-only'], {
+      cwd: repositoryRoot,
+      encoding: 'utf8',
+    })).stdout.trim().split('\n').filter(Boolean);
+    for (const relativePath of stagedPaths) {
+      await mkdir(dirname(join(worktree, relativePath)), {recursive: true});
+      await cp(join(repositoryRoot, relativePath), join(worktree, relativePath), {force: true});
+    }
+    await execFile('git', ['add', '--', ...stagedPaths], {cwd: worktree, encoding: 'utf8'});
+    const tree = (await execFile('git', ['write-tree'], {cwd: worktree, encoding: 'utf8'})).stdout.trim();
+    const commit = (await execFile('git', ['commit-tree', tree, '-m', 'non-ancestor authority fixture'], {
+      cwd: worktree,
+      encoding: 'utf8',
+      env: {
+        ...process.env,
+        GIT_AUTHOR_EMAIL: 'fixture@example.invalid',
+        GIT_AUTHOR_NAME: 'Core UI fixture',
+        GIT_COMMITTER_EMAIL: 'fixture@example.invalid',
+        GIT_COMMITTER_NAME: 'Core UI fixture',
+      },
+    })).stdout.trim();
+    await execFile('git', ['reset', '--hard', commit], {cwd: worktree, encoding: 'utf8'});
+    return {parent, worktree};
+  } catch (error) {
+    await rm(parent, {recursive: true, force: true});
+    throw error;
+  }
+}
+
+async function makeBaselineSuccessorFixture(state) {
+  const parent = await mkdtemp(join(tmpdir(), 'core-ui-r1-baseline-successor-fixture-'));
+  const worktree = join(parent, 'repository');
+  try {
+    await execFile('git', ['clone', '--no-local', '--no-tags', '--no-checkout', repositoryRoot, worktree], {
+      cwd: repositoryRoot,
+      encoding: 'utf8',
+    });
+    await execFile('git', ['checkout', '--quiet', '--detach', 'HEAD'], {cwd: worktree, encoding: 'utf8'});
+    const successorPaths = [
+      'decisions/0010-amendment-06-r1-change-intent-owner-acceptance.md',
+      'decisions/0010-amendment-06-r1-change-intent-owner.md',
+    ];
+    for (const relativePath of successorPaths) {
+      await mkdir(dirname(join(worktree, relativePath)), {recursive: true});
+      await cp(join(repositoryRoot, relativePath), join(worktree, relativePath), {force: true});
+    }
+    if (state === 'intent-to-add') {
+      await execFile('git', ['add', '-N', '--', ...successorPaths], {cwd: worktree, encoding: 'utf8'});
+    }
+    return {parent, worktree};
+  } catch (error) {
+    await rm(parent, {recursive: true, force: true});
+    throw error;
   }
 }
 
@@ -122,107 +194,148 @@ function renderTemplate(template, substitutions) {
 }
 
 async function writeContinuousAcceptance(root, ownerCommentUrl = 'https://github.com/ndrewtran/core-ui/pull/87#issuecomment-1') {
-  const manifestPath = join(root, 'decisions/0010-amendment-04-r1-continuous-execution-materialization.json');
-  const manifestBytes = await readFile(manifestPath);
-  const manifest = JSON.parse(manifestBytes);
-  const manifestSha256 = sha256(manifestBytes);
-  const ownerStatement = renderTemplate(manifest.acceptanceRecordRenderer.ownerStatementTemplate, {
-    candidateSha256: manifest.candidate.digest,
-    manifestSha256,
-  });
-  const acceptance = renderTemplate(manifest.acceptanceRecordRenderer.outputTemplate, {
-    candidateSha256: manifest.candidate.digest,
-    manifestSha256,
-    ownerCommentUrl,
-    ownerStatement,
-    ownerStatementSha256: sha256(ownerStatement),
-  });
-  await writeFile(
-    join(root, manifest.acceptanceRecordRenderer.outputPath),
-    acceptance,
-  );
+  const acceptancePath = 'decisions/0010-amendment-04-r1-continuous-execution-acceptance.md';
+  const acceptance = await new Promise((resolve, reject) => execFile(
+    'git', ['show', `9a7cf99b0e74b2813998775138f0bc340e82c962:${acceptancePath}`],
+    {cwd: root, encoding: 'utf8'},
+    (error, stdout) => (error ? reject(error) : resolve(stdout)),
+  ));
+  await writeFile(join(root, acceptancePath), acceptance);
   return acceptance;
 }
 
-test('R1 authority accepts current and historical Product Scope identities only', async () => {
+test('R1 authority accepts the fixed current baseline and exact amendment-06 successor only', async () => {
   const parent = await mkdtemp(join(tmpdir(), 'core-ui-react-authority-proof-'));
+  const baseline = join(parent, 'baseline');
   const worktree = join(parent, 'authority');
   try {
-    await mkdir(join(worktree, 'strategy'), { recursive: true });
-    await mkdir(join(worktree, 'decisions'), { recursive: true });
-    const manifestPath = 'decisions/0010-amendment-04-r1-continuous-execution-materialization.json';
-    const manifest = JSON.parse(await readFile(join(repositoryRoot, manifestPath), 'utf8'));
-    for (const relativePath of new Set([
-      'strategy/product-scope.md',
-      'decisions/0010-amendment-01-react-primary-delivery.md',
-      'decisions/0010-amendment-02-tale-styling-donor.md',
-      'decisions/0010-amendment-03-comprehensive-react-0-1.md',
-      manifestPath,
-      ...manifest.staticAfterImages.map(({ path }) => path),
-    ])) {
-      await mkdir(dirname(join(worktree, relativePath)), { recursive: true });
-      await cp(join(repositoryRoot, relativePath), join(worktree, relativePath));
+    for (const root of [baseline, worktree]) {
+      await execFile('git', ['clone', '--no-local', '--no-tags', repositoryRoot, root], {
+        cwd: repositoryRoot,
+        encoding: 'utf8',
+      });
     }
-    const accepted = await writeContinuousAcceptance(worktree);
-    assert.equal(await hasAcceptedReactPrimaryAuthority(worktree), false);
-    await execFile('git', ['init'], { cwd: worktree, encoding: 'utf8' });
-    await execFile('git', ['add', '.'], { cwd: worktree, encoding: 'utf8' });
+    assert.equal(await hasAcceptedReactPrimaryAuthority(baseline), true);
+    const stagedPaths = (await execFile('git', ['diff', '--cached', '--name-only'], {
+      cwd: repositoryRoot,
+      encoding: 'utf8',
+    })).stdout.trim().split('\n').filter(Boolean);
+    for (const relativePath of stagedPaths) {
+      await mkdir(dirname(join(worktree, relativePath)), {recursive: true});
+      await cp(join(repositoryRoot, relativePath), join(worktree, relativePath), {force: true});
+    }
+    await execFile('git', ['add', '--', ...stagedPaths], {cwd: worktree, encoding: 'utf8'});
     assert.equal(await hasAcceptedReactPrimaryAuthority(worktree), true);
 
-    await execFile('git', [
-      'rm', '--cached', '--', 'decisions/0010-amendment-04-r1-continuous-execution-acceptance.md',
-    ], { cwd: worktree, encoding: 'utf8' });
-    assert.equal(await hasAcceptedReactPrimaryAuthority(worktree), false);
-    await execFile('git', [
-      'add', '-N', '--', 'decisions/0010-amendment-04-r1-continuous-execution-acceptance.md',
-    ], { cwd: worktree, encoding: 'utf8' });
-    assert.equal(await hasAcceptedReactPrimaryAuthority(worktree), false);
-    await execFile('git', [
-      'add', '--', 'decisions/0010-amendment-04-r1-continuous-execution-acceptance.md',
-    ], { cwd: worktree, encoding: 'utf8' });
-    assert.equal(await hasAcceptedReactPrimaryAuthority(worktree), true);
+    const nonAncestorFixture = await makeNonAncestorAuthorityFixture();
+    try {
+      assert.equal(await execFile('git', [
+        'cat-file', '-e', '9a7cf99b0e74b2813998775138f0bc340e82c962^{commit}',
+      ], {cwd: nonAncestorFixture.worktree, encoding: 'utf8'}).then(() => true), true);
+      assert.equal(
+        await execFile('git', [
+          'merge-base', '--is-ancestor', '9a7cf99b0e74b2813998775138f0bc340e82c962', 'HEAD',
+        ], {cwd: nonAncestorFixture.worktree, encoding: 'utf8'}).then(() => true).catch(() => false),
+        false,
+      );
+      await assert.rejects(
+        hasAcceptedReactPrimaryAuthority(nonAncestorFixture.worktree),
+        (error) => error?.code === 'R1_CONTINUOUS_AUTHORITY_LINEAGE_INVALID'
+          && /historical protected merge must be an ancestor/u.test(error.message),
+      );
+    } finally {
+      await rm(nonAncestorFixture.parent, {recursive: true, force: true});
+    }
 
-    await rm(join(worktree, 'decisions/0010-amendment-04-r1-continuous-execution-acceptance.md'));
-    assert.equal(await hasAcceptedReactPrimaryAuthority(worktree), false);
-    await writeContinuousAcceptance(worktree);
+    for (const successorState of ['untracked', 'intent-to-add']) {
+      const successorFixture = await makeBaselineSuccessorFixture(successorState);
+      try {
+        assert.equal(await hasAcceptedReactPrimaryAuthority(successorFixture.worktree), false);
+      } finally {
+        await rm(successorFixture.parent, {recursive: true, force: true});
+      }
+    }
 
-    await writeFile(
-      join(worktree, 'decisions/0010-amendment-04-r1-continuous-execution-acceptance.md'),
-      accepted.replace('issuecomment-1', 'issuecomment-0'),
-    );
+    await execFile('git', ['rm', '--cached', '--', 'decisions/0010-amendment-06-r1-change-intent-owner-acceptance.md'], {
+      cwd: worktree,
+      encoding: 'utf8',
+    });
     assert.equal(await hasAcceptedReactPrimaryAuthority(worktree), false);
-    await writeContinuousAcceptance(worktree);
-
-    await writeFile(
-      join(worktree, 'decisions/0010-amendment-03-comprehensive-react-0-1.md'),
-      `${await readFile(join(worktree, 'decisions/0010-amendment-03-comprehensive-react-0-1.md'), 'utf8')}\nmutated`,
-    );
+    await execFile('git', ['add', '--', 'decisions/0010-amendment-06-r1-change-intent-owner-acceptance.md'], {
+      cwd: worktree,
+      encoding: 'utf8',
+    });
+    await writeFile(join(worktree, 'strategy/product-scope.md'), `${await readFile(join(worktree, 'strategy/product-scope.md'), 'utf8')}\ndrift`);
     assert.equal(await hasAcceptedReactPrimaryAuthority(worktree), false);
-    await cp(
-      join(repositoryRoot, 'decisions/0010-amendment-03-comprehensive-react-0-1.md'),
-      join(worktree, 'decisions/0010-amendment-03-comprehensive-react-0-1.md'),
-    );
-
-    const comprehensiveScope = (await execFile(
-      'git',
-      ['show', 'HEAD:strategy/product-scope.md'],
-      { cwd: repositoryRoot, encoding: 'utf8' },
+    await execFile('git', ['checkout', '--', 'strategy/product-scope.md'], {cwd: worktree, encoding: 'utf8'});
+    const historicalArchitecture = (await execFile(
+      'git', ['show', '9a7cf99b0e74b2813998775138f0bc340e82c962:strategy/monorepo-architecture.md'],
+      {cwd: worktree, encoding: 'utf8'},
     )).stdout;
-    await writeFile(join(worktree, 'strategy/product-scope.md'), comprehensiveScope);
-    assert.equal(await hasAcceptedReactPrimaryAuthority(worktree), true);
-
-    await writeFile(join(worktree, 'strategy/product-scope.md'), `${comprehensiveScope}\nmutated`);
+    await writeFile(join(worktree, 'strategy/monorepo-architecture.md'), historicalArchitecture);
+    await execFile('git', ['add', '--', 'strategy/monorepo-architecture.md'], {cwd: worktree, encoding: 'utf8'});
     assert.equal(await hasAcceptedReactPrimaryAuthority(worktree), false);
 
-    const reactPrimaryScope = (await execFile(
-      'git',
-      ['show', '592cd7f9895dd979f74234eb9bac8ea71fbff99b:strategy/product-scope.md'],
-      { cwd: repositoryRoot, encoding: 'utf8' },
-    )).stdout;
-    await writeFile(join(worktree, 'strategy/product-scope.md'), reactPrimaryScope);
-    assert.equal(await hasAcceptedReactPrimaryAuthority(worktree), true);
+    await execFile('git', ['checkout', '--', 'strategy/monorepo-architecture.md'], {cwd: worktree, encoding: 'utf8'});
+    const currentDecisionPath = join(
+      worktree,
+      'decisions/0010-amendment-06-r1-change-intent-owner.md',
+    );
+    const currentDecision = await readFile(currentDecisionPath, 'utf8');
+    await writeFile(currentDecisionPath, currentDecision.replace(
+      'b79aee6b4ff9167495ef2aec28055b73254865bd9f70ca2676e9bb679fc8299b',
+      '0'.repeat(64),
+    ));
+    await execFile('git', ['add', '--', 'decisions/0010-amendment-06-r1-change-intent-owner.md'], {
+      cwd: worktree,
+      encoding: 'utf8',
+    });
+    assert.equal(await hasAcceptedReactPrimaryAuthority(worktree), false);
+    await writeFile(currentDecisionPath, currentDecision);
+    await execFile('git', ['add', '--', 'decisions/0010-amendment-06-r1-change-intent-owner.md'], {
+      cwd: worktree,
+      encoding: 'utf8',
+    });
 
-    await writeFile(join(worktree, 'strategy/product-scope.md'), `${reactPrimaryScope}\nmutated`);
+    const currentAcceptancePath = join(
+      worktree,
+      'decisions/0010-amendment-06-r1-change-intent-owner-acceptance.md',
+    );
+    const currentAcceptance = await readFile(currentAcceptancePath, 'utf8');
+    await writeFile(currentAcceptancePath, currentAcceptance.replace(
+      'b79aee6b4ff9167495ef2aec28055b73254865bd9f70ca2676e9bb679fc8299b',
+      '0'.repeat(64),
+    ));
+    await execFile('git', ['add', '--', 'decisions/0010-amendment-06-r1-change-intent-owner-acceptance.md'], {
+      cwd: worktree,
+      encoding: 'utf8',
+    });
+    assert.equal(await hasAcceptedReactPrimaryAuthority(worktree), false);
+    await writeFile(currentAcceptancePath, currentAcceptance);
+    await execFile('git', ['add', '--', 'decisions/0010-amendment-06-r1-change-intent-owner-acceptance.md'], {
+      cwd: worktree,
+      encoding: 'utf8',
+    });
+
+    const currentRoadmapPath = join(worktree, 'strategy/milestone-roadmap.md');
+    const currentRoadmap = await readFile(currentRoadmapPath, 'utf8');
+    await writeFile(currentRoadmapPath, `${currentRoadmap}\nstrategy drift`);
+    await execFile('git', ['add', '--', 'strategy/milestone-roadmap.md'], {cwd: worktree, encoding: 'utf8'});
+    assert.equal(await hasAcceptedReactPrimaryAuthority(worktree), false);
+    await writeFile(currentRoadmapPath, currentRoadmap);
+    await execFile('git', ['add', '--', 'strategy/milestone-roadmap.md'], {cwd: worktree, encoding: 'utf8'});
+
+    const extraSuccessorPath = join(worktree, 'decisions/0010-amendment-06-extra.md');
+    await writeFile(extraSuccessorPath, 'unexpected successor');
+    await execFile('git', ['add', '--', 'decisions/0010-amendment-06-extra.md'], {cwd: worktree, encoding: 'utf8'});
+    assert.equal(await hasAcceptedReactPrimaryAuthority(worktree), false);
+    await execFile('git', ['rm', '--cached', '--', 'decisions/0010-amendment-06-extra.md'], {
+      cwd: worktree,
+      encoding: 'utf8',
+    });
+    await unlink(extraSuccessorPath);
+
+    await writeFile(join(worktree, 'strategy/milestone-roadmap.md'), `${currentRoadmap}\nworktree drift`);
     assert.equal(await hasAcceptedReactPrimaryAuthority(worktree), false);
   } finally {
     await rm(parent, { recursive: true, force: true });
