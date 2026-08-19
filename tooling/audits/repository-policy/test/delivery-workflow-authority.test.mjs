@@ -56,7 +56,7 @@ const makeR1Fixture = (receiptState = 'staged') => {
     fs.mkdirSync(path.dirname(destination), {recursive: true});
     fs.copyFileSync(path.join(repositoryRoot, relativePath), destination);
   }
-  writeR1Acceptance(fixtureRoot);
+  if (receiptState !== 'absent') writeR1Acceptance(fixtureRoot);
   if (receiptState === 'staged') {
     execFileSync('git', ['add', '--', r1AcceptancePath], {cwd: fixtureRoot, stdio: 'ignore'});
   } else if (receiptState === 'intent-to-add') {
@@ -93,8 +93,7 @@ reject({ productScopeSource: productScopeSource.replace('scopeVersion: 6.0.1', '
 reject({ architectureSource: 'not the accepted historical architecture' }, 'historical Architecture');
 reject({ roadmapSource: 'not the accepted historical roadmap' }, 'historical roadmap');
 
-reject({}, 'untracked continuous-authority receipt');
-for (const receiptState of ['worktree-only', 'intent-to-add']) {
+for (const receiptState of ['absent', 'worktree-only', 'intent-to-add']) {
   const fixtureRoot = makeR1Fixture(receiptState);
   try {
     rejectAt(fixtureRoot, {}, `${receiptState} continuous-authority receipt`);

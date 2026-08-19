@@ -59,7 +59,7 @@ const makeR1Fixture = (receiptState = 'staged') => {
     fs.mkdirSync(join(destination, '..'), {recursive: true});
     fs.copyFileSync(join(repositoryRoot, relativePath), destination);
   }
-  writeR1Acceptance(fixtureRoot);
+  if (receiptState !== 'absent') writeR1Acceptance(fixtureRoot);
   if (receiptState === 'staged') {
     execFileSync('git', ['add', '--', r1AcceptancePath], {cwd: fixtureRoot, stdio: 'ignore'});
   } else if (receiptState === 'intent-to-add') {
@@ -100,11 +100,7 @@ test('Stage 1 verifier rejects moving and drifting source selectors', () => {
 });
 
 test('R1.0 entry gate accepts only current authority and remains closed pending current evidence', async () => {
-  assert.throws(
-    () => verifyReactR1Entry(repositoryRoot),
-    /REACT_ARIA_STAGE1_SOURCE_INVALID: R1\.0 Product Scope/u,
-  );
-  for (const receiptState of ['worktree-only', 'intent-to-add']) {
+  for (const receiptState of ['absent', 'worktree-only', 'intent-to-add']) {
     const fixtureRoot = makeR1Fixture(receiptState);
     try {
       assert.throws(
