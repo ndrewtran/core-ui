@@ -163,7 +163,9 @@ async function makeBaselineSuccessorFixture(state) {
       cwd: repositoryRoot,
       encoding: 'utf8',
     });
-    await execFile('git', ['checkout', '--quiet', '--detach', 'HEAD'], {cwd: worktree, encoding: 'utf8'});
+    await execFile('git', [
+      'checkout', '--quiet', '--detach', 'c0b7056b53d250251e703eabb0b37963cc99a013',
+    ], {cwd: worktree, encoding: 'utf8'});
     const successorPaths = [
       'decisions/0010-amendment-06-r1-change-intent-owner-acceptance.md',
       'decisions/0010-amendment-06-r1-change-intent-owner.md',

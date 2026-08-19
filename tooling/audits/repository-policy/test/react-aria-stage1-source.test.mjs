@@ -90,7 +90,9 @@ const makeBaselineFixture = () => {
   execFileSync('git', ['clone', '--no-local', '--no-tags', '--no-checkout', repositoryRoot, fixtureRoot], {
     stdio: 'ignore',
   });
-  execFileSync('git', ['checkout', '--quiet', '--detach', 'HEAD'], {cwd: fixtureRoot, stdio: 'ignore'});
+  execFileSync('git', [
+    'checkout', '--quiet', '--detach', 'c0b7056b53d250251e703eabb0b37963cc99a013',
+  ], {cwd: fixtureRoot, stdio: 'ignore'});
   return fixtureRoot;
 };
 
