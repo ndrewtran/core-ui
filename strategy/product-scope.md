@@ -1,5 +1,5 @@
 ---
-scopeVersion: 6.0.0
+scopeVersion: 6.0.1
 status: execution-baseline
 product: Core UI
 architecture: ./monorepo-architecture.md
@@ -1390,9 +1390,26 @@ The R1 public graph is exactly `@core-ui/react@0.1.0-alpha.N` with
 dependency. Private Core packages may generate tarball contents but do not
 become runtime dependencies.
 
-Every R1 tranche uses one accepted scope lock and baseline, one deterministic
-closure, risk-selected independent review, and one post-proof human release
-acceptance. Routine locked components need no per-component authority loop.
+Every R1 tranche uses one exact scope lock and baseline, one deterministic
+closure, and risk-selected independent review. Under accepted Decision 0009
+amendment 03 and Decision 0010 amendment 04, the R1 continuous-execution
+envelope is the standing human decision for a mechanically derived lock and
+exact retained evidence only when every closed derivation, deterministic,
+negative-path, risk-selected manual/AT, disclosure, immutable-identity, and
+profile-selected independent-review predicate passes. This is conditional
+admission, not a claim that the human inspected future bytes. Routine locked
+components need no per-component authority loop.
+
+The complete accepted envelope, canonical materialization manifest, and
+deterministically rendered owner-acceptance record are immutable repository
+inputs. After their exact authority merge, the private R1 continuous-execution
+verifier and repository-policy integration must be bootstrapped through the
+accepted path-bounded exception. Until that bootstrap is merged and verified,
+no Project migration, tranche activation, component implementation, retained
+evidence acceptance, or routine Git operation is admitted. Every later
+operation requires one passing canonical verifier result bound to all required
+authority, scope, baseline, proof, review, Project, and Git inputs.
+
 Shared proof is reusable only while the exact React Aria identity, package
 graph, styling/runtime ownership, SSR/hydration, catalog/compiler,
 accessibility harness, compatibility profile, and packed-consumer contracts
@@ -1602,10 +1619,11 @@ the exact previously committed ID is retained.
 | `Virtualizer` | `Virtualizer` | `SCOPE-COMP-VIRTUALIZER-REACT` | new | R1.3 |
 
 Each row is `committed`; its package/platform is `@core-ui/react` / `web.react`;
-its activation requires this authority, the exact Stage 1/R1.0 snapshot,
-accepted tranche lock, Core-owned contract, applicable Tale donor disposition,
-risk-selected deterministic and manual proof, post-proof human evidence
-acceptance, and the unchanged React prerelease release boundary. No row commits
+its activation requires this authority, the exact Stage 1/R1.0 snapshot, an
+exact lock proved conforming to the accepted continuous-execution envelope,
+Core-owned contract, applicable Tale donor disposition, risk-selected
+deterministic and manual proof, conditional evidence acceptance under every
+envelope predicate, and the unchanged React prerelease release boundary. No row commits
 a React Aria public name, raw helper/type export, secondary renderer,
 cross-platform counterpart, stable lifecycle, or independent release.
 
@@ -1634,22 +1652,27 @@ reproof. Removal of a committed family is a major scope change.
 
 ## Project boundary
 
-This authority does not update the GitHub Project. After accepted authority is
-materialized and verified on the default branch, a fresh Project migration
-packet may reconcile #74-#81 and any required successor items to Product Scope
-6.0.0, the exact snapshot, and the revised R1 tranches. That packet, human
-acceptance, and authorized mutation or no-op are independent of R1.0
-implementation entry. Tracker status never changes Product Scope or evidence.
+This authority does not itself update the GitHub Project. After accepted
+authority is materialized and verified on the default branch, a fresh exact
+Project migration may reconcile #74-#81 and any required successor item to
+Product Scope 6.0.1, the exact snapshot, Decisions 0009 amendment 03 and 0010
+amendment 04, and the revised R1 tranches. The accepted continuous-execution
+candidate, materialization manifest, and acceptance record are its standing
+human authorization; no second migration approval is required when the private
+conformance verifier binds a current live preimage, exact preview, write set,
+and verified result. Tracker status never changes Product Scope or evidence.
 
 ## Explicit non-goals
 
-This candidate authorizes no repository edit, branch, commit, push, PR,
-Project update, dependency installation, component implementation, CSS copy,
-playground work, evidence capture, package publication, release, deployment,
-support claim, stable promotion, React Aria public re-export, raw-export
-breadth target, RSC/client-boundary support, framework-free implementation,
-React Native implementation, RNW support, equivalence claim, public catalog or
-tooling product, Scale port, new theme system, or production change.
+Product Scope 6.0.1 itself performs no repository implementation, dependency
+installation, component work, CSS copy, playground work, evidence capture,
+Project mutation, package publication, release, deployment, support claim,
+stable promotion, React Aria public re-export, raw-export breadth target,
+RSC/client-boundary support, framework-free implementation, React Native
+implementation, RNW support, equivalence claim, public catalog or tooling
+product, Scale port, new theme system, or production change. The separately
+accepted continuous-execution candidate authorizes only its bounded authority,
+verifier-bootstrap, and in-envelope delivery operations.
 
 It does not rewrite historical evidence or reuse historical Scope IDs for new
 outcomes. It does not allow a count-only completion claim. It does not permit
@@ -1657,7 +1680,8 @@ an upstream or Tale contract to replace a Core-owned public contract.
 
 ## Acceptance effect
 
-Digest-specific human acceptance authorizes only preparation of the exact
-materialization diff. Repository authoring, commit, push, PR creation, Project
-mutation, merge, implementation, evidence acceptance, publication, and release
+Digest-specific acceptance of the exact R1 continuous-execution candidate and
+materialization manifest authorizes its exact authority PR and, after verified
+merge, the in-envelope repository, Git, Project, implementation, evidence, and
+intermediate-merge operations. Npm publication and the final R1-exit PR merge
 remain separate authorization boundaries.
