@@ -59,6 +59,10 @@ const makeR1Fixture = (receiptState = 'staged') => {
     fs.mkdirSync(join(destination, '..'), {recursive: true});
     fs.copyFileSync(join(repositoryRoot, relativePath), destination);
   }
+  execFileSync('git', ['rm', '--ignore-unmatch', '--', r1AcceptancePath], {
+    cwd: fixtureRoot,
+    stdio: 'ignore',
+  });
   if (receiptState !== 'absent') writeR1Acceptance(fixtureRoot);
   if (receiptState === 'staged') {
     execFileSync('git', ['add', '--', r1AcceptancePath], {cwd: fixtureRoot, stdio: 'ignore'});
