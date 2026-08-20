@@ -158,6 +158,13 @@ exists. From G2.5 onward, any automated apply must bind explicit approval and
 the operation journal to that exact envelope digest; a changed diff invalidates
 the approval.
 
+For current R1, the private ChangeIntent owner (`@core-ui/schema`'s closed
+internal grammar and `@core-ui/tooling`'s private read-only producer/validator)
+and its consumption by the private R1 verifier must be materialized and passing
+before any component or retained-evidence write. This is current R1
+prerequisite sequencing only; it does not revive superseded G1.9 or its
+historical evidence.
+
 
 ### Adjacent repository delivery workflow control
 
@@ -184,7 +191,7 @@ The activation contract is fixed:
 | `E-DELIVERY-07` | Candidate-side checks run through the existing repository-policy task graph; no trusted hosted writer, mutation adapter, proof cache, or replay capability is enabled. |
 | `E-DELIVERY-08` | Full removal disables enforcement first, removes only the recorded write set, preserves historical text/evidence, and restores prior repository-policy behavior with generation identity. |
 
-The accepted authority is recorded before repository writes. Delivery then uses one combined protected PR whose source history contains the exact authority bytes followed by RB-01 and RB-02; one final-source evidence-only child appends all 28 authority-applicability successors after RB-02. A separate earlier successor generation is forbidden because later repository-policy changes would immediately stale it.
+The accepted authority is recorded before repository writes. The exact authority bytes are published first in their own protected PR and must pass postmerge verification on the default branch. Only then may the exact separate ten-path ChangeIntent prerequisite PR carry RB-01 and RB-02; its final-source evidence-only child appends all 28 authority-applicability successors after RB-02. A separate earlier successor generation is forbidden because later repository-policy changes would immediately stale it.
 
 The control activates only after exact pre-write authority and schema/catalog
 review, a separately recorded owner decision bound to the accepted plan and
@@ -730,12 +737,13 @@ manual/AT, disclosure, immutable-relation, and independent-review predicate
 passes. This conditional admission does not claim that the human inspected
 future bytes.
 
-After exact authority materialization, the private R1 continuous-execution
-verifier is the mandatory entry gate for every Project migration, tranche
-lock, component stage, retained-evidence acceptance, and routine Git/PR/merge
-operation. Its one path-bounded bootstrap PR is directly authorized by the
-accepted envelope; no other operation may precede its verified merge. Every
-later operation binds a passing canonical verifier result or remains blocked.
+After exact authority materialization and the private ChangeIntent owner, the
+private R1 continuous-execution verifier is the mandatory entry gate for every
+Project migration, tranche lock, component stage, retained-evidence
+acceptance, and routine Git/PR/merge operation. Its one path-bounded bootstrap
+PR is directly authorized by the accepted envelope; no other operation may
+precede its verified merge. Every later operation binds a passing canonical
+verifier result or remains blocked.
 
 The shared baseline also pins Tale UI commit
 `94bf62a26c02605c8928dfeb24f0ddc4be1c92fd` and its component-style,
@@ -2681,10 +2689,12 @@ tracking, not this long-lived roadmap.
    accepted Stage 1 snapshot, and the React-primary/Tale-donor
    Architecture/Roadmap authority before implementation. Run the evaluator
    against its exact committed source selector and reject moving references.
-2. Materialize the continuous-execution authority and merge its one bounded
-   private conformance-verifier bootstrap. Then reconcile the live Project
-   through an exact verifier-approved migration under the standing decision;
-   do not interpret superseded G-series status as R1 readiness.
+2. Materialize the continuous-execution authority, then the private ChangeIntent
+   owner and its verifier consumption, and merge the one bounded private
+   conformance-verifier bootstrap. Then reconcile the live Project through an
+   exact verifier-approved migration under the standing decision; do not
+   interpret superseded G-series status or its historical evidence as R1
+   readiness.
 3. Activate R1.0 against exact reusable token/theme facts, the pinned Tale
    styling donor/crosswalk, and the accepted Button tranche lock.
 4. Prove the standalone React Aria/package/CSS/donor-comparison/private-

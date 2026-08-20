@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import os from 'node:os';
@@ -9,11 +10,26 @@ import {
   verifyDeliveryReviewReadinessAuthority,
   verifyDeliveryWorkflowAuthority,
 } from '../src/delivery-workflow-authority-verify.mjs';
+import {
+  verifyCurrentR1ContinuousAuthority,
+  verifyHistoricalR1ContinuousAuthority,
+} from '../src/r1-continuous-authority-compatibility.mjs';
 
 const repositoryRoot = path.resolve(import.meta.dirname, '../../../..');
 const decisionSource = fs.readFileSync(path.join(repositoryRoot, 'decisions/0007-delivery-workflow-authority.json'), 'utf8');
 const acceptanceSource = fs.readFileSync(path.join(repositoryRoot, 'decisions/0007-delivery-workflow-authority-acceptance.json'), 'utf8');
 const productScopeSource = fs.readFileSync(path.join(repositoryRoot, 'strategy/product-scope.md'), 'utf8');
+const pinnedCurrentAuthority = Object.freeze({
+  authorityDecisionSource: fs.readFileSync(
+    path.join(repositoryRoot, 'decisions/0010-amendment-06-r1-change-intent-owner.md'), 'utf8',
+  ),
+  authorityAcceptanceSource: fs.readFileSync(
+    path.join(repositoryRoot, 'decisions/0010-amendment-06-r1-change-intent-owner-acceptance.md'), 'utf8',
+  ),
+  architectureSource: fs.readFileSync(path.join(repositoryRoot, 'strategy/monorepo-architecture.md'), 'utf8'),
+  roadmapSource: fs.readFileSync(path.join(repositoryRoot, 'strategy/milestone-roadmap.md'), 'utf8'),
+  productScopeSource,
+});
 const r1AcceptancePath = 'decisions/0010-amendment-04-r1-continuous-execution-acceptance.md';
 const r1ManifestPath = 'decisions/0010-amendment-04-r1-continuous-execution-materialization.json';
 const sha256 = (source) => createHash('sha256').update(source).digest('hex');
@@ -23,22 +39,9 @@ const renderTemplate = (template, substitutions) => Object.entries(substitutions
 );
 
 const writeR1Acceptance = (fixtureRoot) => {
-  const manifestBytes = fs.readFileSync(path.join(fixtureRoot, r1ManifestPath));
-  const manifest = parseJsonStrict(manifestBytes.toString('utf8'));
-  const manifestSha256 = sha256(manifestBytes);
-  const ownerCommentUrl = 'https://github.com/ndrewtran/core-ui/pull/87#issuecomment-1';
-  const ownerStatement = renderTemplate(manifest.acceptanceRecordRenderer.ownerStatementTemplate, {
-    candidateSha256: manifest.candidate.digest,
-    manifestSha256,
-  });
-  const acceptance = renderTemplate(manifest.acceptanceRecordRenderer.outputTemplate, {
-    candidateSha256: manifest.candidate.digest,
-    manifestSha256,
-    ownerCommentUrl,
-    ownerStatement,
-    ownerStatementSha256: sha256(ownerStatement),
-  });
-  fs.writeFileSync(path.join(fixtureRoot, r1AcceptancePath), acceptance);
+  fs.writeFileSync(path.join(fixtureRoot, r1AcceptancePath), execFileSync(
+    'git', ['show', `9a7cf99b0e74b2813998775138f0bc340e82c962:${r1AcceptancePath}`], {encoding: 'buffer'},
+  ));
 };
 
 const makeR1Fixture = (receiptState = 'staged') => {
@@ -56,6 +59,9 @@ const makeR1Fixture = (receiptState = 'staged') => {
     fs.mkdirSync(path.dirname(destination), {recursive: true});
     fs.copyFileSync(path.join(repositoryRoot, relativePath), destination);
   }
+  if (stagedPaths.length > 0) {
+    execFileSync('git', ['add', '--', ...stagedPaths], {cwd: fixtureRoot, stdio: 'ignore'});
+  }
   execFileSync('git', ['rm', '--ignore-unmatch', '--', r1AcceptancePath], {
     cwd: fixtureRoot,
     stdio: 'ignore',
@@ -65,6 +71,52 @@ const makeR1Fixture = (receiptState = 'staged') => {
     execFileSync('git', ['add', '--', r1AcceptancePath], {cwd: fixtureRoot, stdio: 'ignore'});
   } else if (receiptState === 'intent-to-add') {
     execFileSync('git', ['add', '-N', '--', r1AcceptancePath], {cwd: fixtureRoot, stdio: 'ignore'});
+  }
+  return fixtureRoot;
+};
+
+const makeNonAncestorR1Fixture = () => {
+  const fixtureRoot = makeR1Fixture();
+  const tree = execFileSync('git', ['write-tree'], {cwd: fixtureRoot, encoding: 'utf8'}).trim();
+  const commit = execFileSync('git', ['commit-tree', tree, '-m', 'non-ancestor authority fixture'], {
+    cwd: fixtureRoot,
+    encoding: 'utf8',
+    env: {
+      ...process.env,
+      GIT_AUTHOR_EMAIL: 'fixture@example.invalid',
+      GIT_AUTHOR_NAME: 'Core UI fixture',
+      GIT_COMMITTER_EMAIL: 'fixture@example.invalid',
+      GIT_COMMITTER_NAME: 'Core UI fixture',
+    },
+  }).trim();
+  execFileSync('git', ['reset', '--hard', commit], {cwd: fixtureRoot, stdio: 'ignore'});
+  return fixtureRoot;
+};
+
+const makeBaselineFixture = () => {
+  const fixtureRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'core-ui-r1-baseline-fixture-'));
+  execFileSync('git', ['clone', '--no-local', '--no-tags', '--no-checkout', repositoryRoot, fixtureRoot], {
+    stdio: 'ignore',
+  });
+  execFileSync('git', [
+    'checkout', '--quiet', '--detach', 'c0b7056b53d250251e703eabb0b37963cc99a013',
+  ], {cwd: fixtureRoot, stdio: 'ignore'});
+  return fixtureRoot;
+};
+
+const makeBaselineSuccessorFixture = (state) => {
+  const fixtureRoot = makeBaselineFixture();
+  const successorPaths = [
+    'decisions/0010-amendment-06-r1-change-intent-owner-acceptance.md',
+    'decisions/0010-amendment-06-r1-change-intent-owner.md',
+  ];
+  for (const relativePath of successorPaths) {
+    const destination = path.join(fixtureRoot, relativePath);
+    fs.mkdirSync(path.dirname(destination), {recursive: true});
+    fs.copyFileSync(path.join(repositoryRoot, relativePath), destination);
+  }
+  if (state === 'intent-to-add') {
+    execFileSync('git', ['add', '-N', '--', ...successorPaths], {cwd: fixtureRoot, stdio: 'ignore'});
   }
   return fixtureRoot;
 };
@@ -131,6 +183,88 @@ if (result.activationEvidence !== 8
     || result.r1Entry !== undefined) {
   throw new Error('positive result mismatch');
 }
+const historical = verifyHistoricalR1ContinuousAuthority(repositoryRoot);
+if (historical.commit !== '9a7cf99b0e74b2813998775138f0bc340e82c962'
+    || historical.tree !== '470d0f7bc6751b7f66d49fbf4fdc2d62f6cc89f0'
+    || historical.parents.join(',') !== 'd4bba1a5f004d638936b79b673f0b1c4f9691426,374db5debff52c64929ad3255a6824ce42af756c') {
+  throw new Error('historical R1 authority topology mismatch');
+}
+
+const cleanBaselineFixture = makeBaselineFixture();
+try {
+  const baselineResult = verifyCurrentR1ContinuousAuthority(cleanBaselineFixture);
+  if (baselineResult.baseline !== true || baselineResult.successor !== null) {
+    throw new Error('clean baseline compatibility result mismatch');
+  }
+  const baselineDeliveryResult = verifyDeliveryWorkflowAuthority(cleanBaselineFixture);
+  if (baselineDeliveryResult.r1Entry?.accepted !== true
+      || baselineDeliveryResult.sourceMode !== 'current') {
+    throw new Error('clean baseline delivery result mismatch');
+  }
+} finally {
+  fs.rmSync(cleanBaselineFixture, {recursive: true, force: true});
+}
+
+const nonAncestorFixture = makeNonAncestorR1Fixture();
+try {
+  assert.equal(execFileSync('git', [
+    'cat-file', '-e', '9a7cf99b0e74b2813998775138f0bc340e82c962^{commit}',
+  ], {cwd: nonAncestorFixture, encoding: 'utf8'}), '');
+  assert.equal(
+    (() => {
+      try {
+        execFileSync('git', [
+          'merge-base', '--is-ancestor', '9a7cf99b0e74b2813998775138f0bc340e82c962', 'HEAD',
+        ], {cwd: nonAncestorFixture, encoding: 'utf8'});
+        return true;
+      } catch {
+        return false;
+      }
+    })(),
+    false,
+  );
+  assert.throws(
+    () => verifyCurrentR1ContinuousAuthority(nonAncestorFixture),
+    (error) => error?.code === 'R1_CONTINUOUS_AUTHORITY_LINEAGE_INVALID'
+      && /historical protected merge must be an ancestor/u.test(error.message),
+  );
+  rejectAt(nonAncestorFixture, {}, 'historical protected merge outside current ancestry');
+} finally {
+  fs.rmSync(nonAncestorFixture, {recursive: true, force: true});
+}
+
+for (const relativePath of ['strategy/monorepo-architecture.md', 'strategy/milestone-roadmap.md']) {
+  const baselineFixture = makeBaselineFixture();
+  try {
+    const baselineBytes = execFileSync('git', ['show', `HEAD:${relativePath}`], {
+      cwd: baselineFixture,
+      encoding: 'buffer',
+    });
+    fs.writeFileSync(path.join(baselineFixture, relativePath), Buffer.concat([
+      baselineBytes,
+      Buffer.from('\nstaged baseline substitution\n'),
+    ]));
+    execFileSync('git', ['add', '--', relativePath], {cwd: baselineFixture, stdio: 'ignore'});
+    fs.writeFileSync(path.join(baselineFixture, relativePath), baselineBytes);
+    rejectAt(baselineFixture, {}, `baseline staged ${relativePath} masked by restored worktree`);
+  } finally {
+    fs.rmSync(baselineFixture, {recursive: true, force: true});
+  }
+}
+
+for (const successorState of ['untracked', 'intent-to-add']) {
+  const successorFixture = makeBaselineSuccessorFixture(successorState);
+  try {
+    assert.throws(
+      () => verifyCurrentR1ContinuousAuthority(successorFixture),
+      /R1_CONTINUOUS_AUTHORITY_INVALID: current successor paths must be absent for baseline/u,
+    );
+    rejectAt(successorFixture, {}, `baseline with amendment-06 paths ${successorState}`);
+  } finally {
+    fs.rmSync(successorFixture, {recursive: true, force: true});
+  }
+}
+
 if (comprehensiveResult.productScope.version !== '6.0.1'
     || comprehensiveResult.productScope.bytes !== Buffer.byteLength(productScopeSource)
     || comprehensiveResult.r1Entry?.accepted !== true
@@ -147,12 +281,12 @@ const missingStage1Route = fs.readFileSync(path.join(repositoryRoot, 'strategy/m
   .replace('react-aria-stage1-source-verify.mjs', 'react-aria-stage1-source-verify-replaced.mjs');
 reject({ productScopeSource, roadmapSource: missingStage1Route }, 'missing current Stage 1 route');
 
-const rejectCurrentWorkingTree = (mutate, label) => {
+const rejectCurrentWorkingTree = (mutate, label, options = {}) => {
   const temporaryRepository = makeR1Fixture();
   try {
     mutate(temporaryRepository);
     try {
-      verifyDeliveryWorkflowAuthority(temporaryRepository);
+      verifyDeliveryWorkflowAuthority(temporaryRepository, options);
     } catch (error) {
       if (String(error.message).startsWith('DELIVERY_WORKFLOW_AUTHORITY_INVALID:')
           || String(error.message).startsWith('REACT_ARIA_STAGE1_SOURCE_INVALID:')) return;
@@ -167,13 +301,15 @@ const rejectCurrentWorkingTree = (mutate, label) => {
 rejectCurrentWorkingTree((temporaryRepository) => {
   const currentPath = path.join(temporaryRepository, 'strategy/product-scope.md');
   fs.writeFileSync(currentPath, fs.readFileSync(currentPath, 'utf8').replace('scopeVersion: 6.0.1', 'scopeVersion: 5.0.1'));
-}, 'replaced current Product Scope');
+}, 'replaced current Product Scope with valid pinned override', {
+  productScopeSource: pinnedCurrentAuthority.productScopeSource,
+});
 rejectCurrentWorkingTree((temporaryRepository) => {
   const currentPath = path.join(
     temporaryRepository,
     'decisions/0010-amendment-04-r1-continuous-execution-acceptance.md',
   );
-  fs.writeFileSync(currentPath, fs.readFileSync(currentPath, 'utf8').replace('issuecomment-1', 'issuecomment-0'));
+  fs.writeFileSync(currentPath, fs.readFileSync(currentPath, 'utf8').replace('issuecomment-5336305421', 'issuecomment-0'));
 }, 'invalid continuous-authority owner record');
 rejectCurrentWorkingTree((temporaryRepository) => {
   const currentPath = path.join(
@@ -190,6 +326,76 @@ rejectCurrentWorkingTree((temporaryRepository) => {
   const currentPath = path.join(temporaryRepository, 'strategy/milestone-roadmap.md');
   fs.writeFileSync(currentPath, fs.readFileSync(currentPath, 'utf8').replace('react-aria-stage1-source-verify.mjs', 'react-aria-stage1-source-verify-replaced.mjs'));
 }, 'missing current Stage 1 route');
+rejectCurrentWorkingTree((temporaryRepository) => {
+  const currentPath = path.join(
+    temporaryRepository,
+    'decisions/0010-amendment-06-r1-change-intent-owner.md',
+  );
+  fs.writeFileSync(currentPath, fs.readFileSync(currentPath, 'utf8').replace(
+    'b79aee6b4ff9167495ef2aec28055b73254865bd9f70ca2676e9bb679fc8299b',
+    '0'.repeat(64),
+  ));
+  execFileSync('git', ['add', '--', 'decisions/0010-amendment-06-r1-change-intent-owner.md'], {
+    cwd: temporaryRepository,
+    stdio: 'ignore',
+  });
+}, 'changed amendment-06 decision with valid pinned override', {
+  authorityDecisionSource: pinnedCurrentAuthority.authorityDecisionSource,
+});
+rejectCurrentWorkingTree((temporaryRepository) => {
+  const currentPath = path.join(
+    temporaryRepository,
+    'decisions/0010-amendment-06-r1-change-intent-owner-acceptance.md',
+  );
+  fs.writeFileSync(currentPath, fs.readFileSync(currentPath, 'utf8').replace(
+    'b79aee6b4ff9167495ef2aec28055b73254865bd9f70ca2676e9bb679fc8299b',
+    '0'.repeat(64),
+  ));
+  execFileSync('git', ['add', '--', 'decisions/0010-amendment-06-r1-change-intent-owner-acceptance.md'], {
+    cwd: temporaryRepository,
+    stdio: 'ignore',
+  });
+}, 'changed amendment-06 acceptance with valid pinned override', {
+  authorityAcceptanceSource: pinnedCurrentAuthority.authorityAcceptanceSource,
+});
+rejectCurrentWorkingTree((temporaryRepository) => {
+  const currentPath = path.join(temporaryRepository, 'strategy/monorepo-architecture.md');
+  const historicalBytes = execFileSync(
+    'git', ['show', '9a7cf99b0e74b2813998775138f0bc340e82c962:strategy/monorepo-architecture.md'],
+    {cwd: temporaryRepository, encoding: 'buffer'},
+  );
+  fs.writeFileSync(currentPath, historicalBytes);
+  execFileSync('git', ['add', '--', 'strategy/monorepo-architecture.md'], {
+    cwd: temporaryRepository,
+    stdio: 'ignore',
+  });
+}, 'historical Architecture bytes on current ancestry with valid pinned override', {
+  architectureSource: pinnedCurrentAuthority.architectureSource,
+});
+rejectCurrentWorkingTree((temporaryRepository) => {
+  const currentPath = path.join(temporaryRepository, 'strategy/milestone-roadmap.md');
+  fs.writeFileSync(currentPath, `${fs.readFileSync(currentPath, 'utf8')}\nwrong successor`);
+  execFileSync('git', ['add', '--', 'strategy/milestone-roadmap.md'], {
+    cwd: temporaryRepository,
+    stdio: 'ignore',
+  });
+}, 'substituted Roadmap with valid pinned override', {
+  roadmapSource: pinnedCurrentAuthority.roadmapSource,
+});
+rejectCurrentWorkingTree((temporaryRepository) => {
+  const currentPath = path.join(temporaryRepository, 'strategy/monorepo-architecture.md');
+  fs.writeFileSync(currentPath, `${fs.readFileSync(currentPath, 'utf8')}\nworktree drift`);
+}, 'current source/index/worktree mismatch with valid pinned override', {
+  architectureSource: pinnedCurrentAuthority.architectureSource,
+});
+rejectCurrentWorkingTree((temporaryRepository) => {
+  const extraPath = path.join(temporaryRepository, 'decisions/0010-amendment-06-extra.md');
+  fs.writeFileSync(extraPath, 'unexpected successor');
+  execFileSync('git', ['add', '--', 'decisions/0010-amendment-06-extra.md'], {
+    cwd: temporaryRepository,
+    stdio: 'ignore',
+  });
+}, 'extra amendment-06 successor path');
 rejectCurrentWorkingTree((temporaryRepository) => {
   const currentPath = path.join(temporaryRepository, 'catalog/react-r1-0/react-aria-1.20.0-family-evaluation.snapshot.json');
   const currentBytes = fs.readFileSync(currentPath);

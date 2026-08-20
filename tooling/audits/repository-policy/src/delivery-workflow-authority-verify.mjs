@@ -3,7 +3,10 @@ import { readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { canonicalJson, parseJsonStrict } from '@core-ui/schema';
 import { sha256 } from './policy.mjs';
-import { hasAcceptedR1ContinuousAuthority } from './r1-continuous-authority-compatibility.mjs';
+import {
+  verifyCurrentR1ContinuousAuthority,
+  verifyHistoricalR1ContinuousAuthority,
+} from './r1-continuous-authority-compatibility.mjs';
 import { verifyReactR1Entry } from './react-aria-stage1-source-verify.mjs';
 
 const DECISION_PATH = 'decisions/0007-delivery-workflow-authority.json';
@@ -93,6 +96,20 @@ export function verifyDeliveryWorkflowAuthority(repositoryRoot, options = {}) {
     fail('source mode must be current or explicit historical');
   }
   const historicalSource = sourceMode === 'historical';
+  let r1Authority;
+  try {
+    r1Authority = historicalSource
+      ? verifyHistoricalR1ContinuousAuthority(repositoryRoot)
+      : verifyCurrentR1ContinuousAuthority(repositoryRoot, {
+        productScopeSource: options.productScopeSource,
+        authorityArchitectureSource: options.architectureSource,
+        authorityRoadmapSource: options.roadmapSource,
+        authorityDecisionSource: options.authorityDecisionSource,
+        authorityAcceptanceSource: options.authorityAcceptanceSource,
+      });
+  } catch {
+    fail('R1 continuous authority compatibility');
+  }
   const decisionSource = options.decisionSource
     ?? readFileSync(join(repositoryRoot, DECISION_PATH), 'utf8');
   const acceptanceSource = options.acceptanceSource
@@ -124,7 +141,7 @@ export function verifyDeliveryWorkflowAuthority(repositoryRoot, options = {}) {
     Buffer.byteLength(productScopeSource) === CONTINUOUS_PRODUCT_SCOPE_BYTES
     && digest(productScopeSource) === CONTINUOUS_PRODUCT_SCOPE_SHA256
     && productScopeSource.startsWith('---\nscopeVersion: 6.0.1\n')
-    && hasAcceptedR1ContinuousAuthority(repositoryRoot, { productScopeSource })
+    && !historicalSource
   ) ? '6.0.1' : null;
   if (productScopeVersion === null) fail('Product Scope accepted identity');
   if (!historicalSource && productScopeVersion !== '6.0.0' && productScopeVersion !== '6.0.1') {
@@ -140,11 +157,15 @@ export function verifyDeliveryWorkflowAuthority(repositoryRoot, options = {}) {
       : readFileSync(join(repositoryRoot, ROADMAP_PATH), 'utf8'));
   const expectedArchitectureSha256 = historicalSource
     ? ARCHITECTURE_SHA256
+    : r1Authority.successor
+      ? `sha256:${r1Authority.successor.architecture.sha256}`
     : productScopeVersion === '6.0.1'
       ? CONTINUOUS_ARCHITECTURE_SHA256
       : COMPREHENSIVE_ARCHITECTURE_SHA256;
   const expectedRoadmapSha256 = historicalSource
     ? ROADMAP_SHA256
+    : r1Authority.successor
+      ? `sha256:${r1Authority.successor.roadmap.sha256}`
     : productScopeVersion === '6.0.1'
       ? CONTINUOUS_ROADMAP_SHA256
       : COMPREHENSIVE_ROADMAP_SHA256;
@@ -196,6 +217,7 @@ export function verifyDeliveryWorkflowAuthority(repositoryRoot, options = {}) {
       roadmapSource,
     });
   }
+  result.r1Authority = r1Authority;
   return result;
 }
 
