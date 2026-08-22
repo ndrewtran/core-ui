@@ -32,6 +32,8 @@ const pinnedCurrentAuthority = Object.freeze({
 });
 const r1AcceptancePath = 'decisions/0010-amendment-04-r1-continuous-execution-acceptance.md';
 const r1ManifestPath = 'decisions/0010-amendment-04-r1-continuous-execution-materialization.json';
+const amendment07DecisionPath = 'decisions/0010-amendment-07-r1-external-review-ci-recovery.md';
+const amendment07AcceptancePath = 'decisions/0010-amendment-07-r1-external-review-ci-recovery-acceptance.md';
 const sha256 = (source) => createHash('sha256').update(source).digest('hex');
 const renderTemplate = (template, substitutions) => Object.entries(substitutions).reduce(
   (output, [name, value]) => output.replaceAll(`{${name}}`, value),
@@ -174,6 +176,11 @@ if (currentResult.activationEvidence !== 8
     || currentResult.r1Entry?.accepted !== true
     || currentResult.r1Entry?.activation?.permitted !== false) {
   throw new Error('canonical current R1.0 entry mismatch');
+}
+if (canonicalJson(currentResult.r1Authority?.successor?.paths?.filter((relativePath) => (
+  relativePath === amendment07DecisionPath || relativePath === amendment07AcceptancePath
+)).sort()) !== canonicalJson([amendment07AcceptancePath, amendment07DecisionPath].sort())) {
+  throw new Error('canonical amendment-07 successor path mismatch');
 }
 const result = verifyDeliveryWorkflowAuthority(repositoryRoot, { sourceMode: 'historical' });
 if (result.activationEvidence !== 8
@@ -358,6 +365,47 @@ rejectCurrentWorkingTree((temporaryRepository) => {
 }, 'changed amendment-06 acceptance with valid pinned override', {
   authorityAcceptanceSource: pinnedCurrentAuthority.authorityAcceptanceSource,
 });
+rejectCurrentWorkingTree((temporaryRepository) => {
+  const currentPath = path.join(temporaryRepository, amendment07DecisionPath);
+  fs.writeFileSync(currentPath, `${fs.readFileSync(currentPath, 'utf8')}\nmutated amendment-07 decision\n`);
+  execFileSync('git', ['add', '--', amendment07DecisionPath], {
+    cwd: temporaryRepository,
+    stdio: 'ignore',
+  });
+}, 'changed amendment-07 decision successor binding');
+rejectCurrentWorkingTree((temporaryRepository) => {
+  const currentPath = path.join(temporaryRepository, amendment07AcceptancePath);
+  fs.writeFileSync(currentPath, fs.readFileSync(currentPath, 'utf8').replace(
+    /^(- Candidate: [\d,]+ bytes, SHA-256 `)[0-9a-f]{64}`$/mu,
+    `$1${'0'.repeat(64)}\``,
+  ));
+  execFileSync('git', ['add', '--', amendment07AcceptancePath], {
+    cwd: temporaryRepository,
+    stdio: 'ignore',
+  });
+}, 'changed amendment-07 candidate digest successor binding');
+rejectCurrentWorkingTree((temporaryRepository) => {
+  const currentPath = path.join(temporaryRepository, amendment07AcceptancePath);
+  fs.writeFileSync(currentPath, fs.readFileSync(currentPath, 'utf8').replace(
+    /^- Pre-acceptance materialization diff: .*$/mu,
+    '- Pre-acceptance materialization diff: malformed bytes, SHA-256 `not-a-digest`',
+  ));
+  execFileSync('git', ['add', '--', amendment07AcceptancePath], {
+    cwd: temporaryRepository,
+    stdio: 'ignore',
+  });
+}, 'malformed amendment-07 materialization diff identity');
+rejectCurrentWorkingTree((temporaryRepository) => {
+  const currentPath = path.join(temporaryRepository, amendment07AcceptancePath);
+  fs.writeFileSync(currentPath, fs.readFileSync(currentPath, 'utf8').replace(
+    /^- Execution manifest: .*$/mu,
+    '- Execution manifest: malformed bytes, SHA-256 `not-a-digest`',
+  ));
+  execFileSync('git', ['add', '--', amendment07AcceptancePath], {
+    cwd: temporaryRepository,
+    stdio: 'ignore',
+  });
+}, 'malformed amendment-07 execution manifest identity');
 rejectCurrentWorkingTree((temporaryRepository) => {
   const currentPath = path.join(temporaryRepository, 'strategy/monorepo-architecture.md');
   const historicalBytes = execFileSync(

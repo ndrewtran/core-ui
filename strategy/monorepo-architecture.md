@@ -2544,6 +2544,27 @@ The verifier and its repository-policy integration may be bootstrapped once
 through the exact path-bounded grant in the accepted envelope. No Project,
 component, retained-evidence, or routine Git operation may precede its verified
 merge, and no later bootstrap exception exists.
+
+The private verifier has two deterministic modes. Descriptor-free
+`source-inspection` is read-only and may run over an ordinary protected-CI
+pull-request diff; it validates current authority, prerequisite lineage,
+repository policy, source, generation identity, and deterministic checks but
+authorizes no operation or clearance. Apart from the exact accepted authority
+recovery that necessarily precedes the corrected prerequisite, every
+authorized R1 repository/evidence write or Git, PR, protected-merge, Project,
+cleanup, or other external transition requires an explicit task-local `ChangeIntentEnvelope`
+verification against its exact current preimage immediately before the
+transition. The recovery exception is path- and digest-bound and cannot be
+reused after its protected merge.
+
+Post-proof and ready-merge review clearance is a separate external
+orchestration responsibility. ChangeIntent may derive required reviewer roles,
+but repository code cannot author or authenticate reviewer assignment,
+dispatch, work, outcome, or clearance. The root orchestrator binds fresh
+profile-selected reviewer inputs to the frozen packet, source, deterministic
+outputs, disclosure boundary, and, for ready-merge, current hosted state. A
+deterministic verifier pass cannot manufacture review clearance, and review
+cannot waive a deterministic failure.
 ## Minimum Architecture wording
 
 Architecture must record only these additional durable rules:
