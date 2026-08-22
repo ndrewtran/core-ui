@@ -1,5 +1,5 @@
 import { execFileSync } from 'node:child_process';
-import { readFileSync } from 'node:fs';
+import { lstatSync, readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { canonicalJson, parseJsonStrict } from '@core-ui/schema';
 import { sha256 } from './policy.mjs';
@@ -45,6 +45,19 @@ const REVIEW_AMENDMENT02_BYTES = 6976;
 const REVIEW_AMENDMENT02_SHA256 = 'sha256:eb9c906ba9fb72e58f596f876175c402909dab4998f12c2f14cbd26e5667d8b2';
 const REVIEW_AMENDMENT02_ACCEPTANCE_BYTES = 984;
 const REVIEW_AMENDMENT02_ACCEPTANCE_SHA256 = 'sha256:4f0b1f054497986cd1ac708aa3b94738b22bd26f9b8590065f7ec8e8488dfcd1';
+const REVIEW_AMENDMENT04_PATH = 'decisions/0009-amendment-04-repository-policy-readme-historical-compatibility.md';
+const REVIEW_AMENDMENT04_ACCEPTANCE_PATH = 'decisions/0009-amendment-04-repository-policy-readme-historical-compatibility-acceptance.md';
+const REVIEW_AMENDMENT04_BYTES = 2948;
+const REVIEW_AMENDMENT04_SHA256 = 'sha256:4269d3c8f43e00328c85e353ec0d08fb6e37dae9a72abc55c5918f600e3d089f';
+const R1_README_RECOVERY_PATH = 'decisions/0010-amendment-08-r1-readme-historical-compatibility-recovery.md';
+const R1_README_RECOVERY_ACCEPTANCE_PATH = 'decisions/0010-amendment-08-r1-readme-historical-compatibility-recovery-acceptance.md';
+const R1_README_RECOVERY_BYTES = 3050;
+const R1_README_RECOVERY_SHA256 = 'sha256:a8d9ea091430ca7b10f1ac9e05f98411b597207e4ae564a4f9e9a754d1c2235f';
+const R1_README_RECOVERY_CANDIDATE_BYTES = 12193;
+const R1_README_RECOVERY_CANDIDATE_SHA256 = '23fbb5acb55416a4079fe012b2f9c67b3df6e18ecdd8bbed2da1a1caa311d81a';
+const REVIEW_README_PATH = 'tooling/audits/repository-policy/README.md';
+const REVIEW_README_HISTORICAL_BYTES = 1429;
+const REVIEW_README_HISTORICAL_SHA256 = 'sha256:d3a55d931f9e29e26fa76d0b38c139d1da28b0d73575d42d1457cd27b20f523b';
 const REVIEW_SUCCESSOR_SKILL_PATH = '.agents/skills/core-ui-delivery/SKILL.md';
 const REVIEW_SUCCESSOR_SKILL_BYTES = 7839;
 const REVIEW_SUCCESSOR_SKILL_SHA256 = 'sha256:34007a84eb46ef979a663357bdca641ac3661e9276b5944de03143b7b7216db9';
@@ -60,6 +73,7 @@ const REVIEW_HISTORICAL_ARTIFACT_PATHS = new Set([
   'tooling/audits/repository-policy/src/evidence-verify.mjs',
   'tooling/audits/repository-policy/test/delivery-workflow-authority.test.mjs',
   'tooling/audits/repository-policy/test/evidence-integrity.test.mjs',
+  REVIEW_README_PATH,
 ]);
 const REVIEW_PLAN_SHA256 = 'sha256:43a7b1724b4e107e253703952ac4839f7c99880f4b96e56b8e73e56de1aded7d';
 const REVIEW_TASK_ID = '019ff5d8-5a4b-7252-958d-bab8b0087c34';
@@ -272,6 +286,131 @@ export function verifyDecision0009Amendment02SkillSuccessor(repositoryRoot, opti
   };
 }
 
+const parseRecoveryAcceptance = (source, expected) => {
+  const text = source.toString('utf8');
+  const nonclaims = 'This record claims acceptance only; no issue, PR, checks, review, merge, implementation, Project, publication, or release outcome is claimed.';
+  const expectedFieldOrder = [
+    'Decision',
+    'Parent decision',
+    'Repository',
+    'Owner',
+    'Outcome',
+    'Candidate',
+    'Pre-acceptance materialization diff',
+    'Execution manifest',
+    'Decision path',
+    'Acceptance path',
+    'Approval instruction',
+    'Human acceptance',
+    'Approval timestamp',
+    'Protected authority PR/merge',
+  ];
+  if (!text.endsWith('\n')) fail(`${expected.label} acceptance final newline`);
+  const lines = text.slice(0, -1).split('\n');
+  if (lines.length !== 18
+      || lines[0] !== `# Acceptance: ${expected.title}`
+      || lines[1] !== ''
+      || lines[16] !== ''
+      || lines[17] !== nonclaims) {
+    fail(`${expected.label} acceptance document shape`);
+  }
+  const fields = new Map();
+  for (const [index, line] of lines.slice(2, 16).entries()) {
+    const match = line.match(/^- ([^:\n]+):[ \t]*(.*)$/u);
+    if (!match || match[1] !== expectedFieldOrder[index]) {
+      fail(`${expected.label} acceptance field order`);
+    }
+    const [, name, value] = match;
+    fields.set(name, value);
+  }
+  if (fields.get('Decision') !== `\`${expected.decisionId}\``
+      || fields.get('Parent decision') !== `\`${expected.parentId}\``
+      || fields.get('Repository') !== '`ndrewtran/core-ui`'
+      || fields.get('Owner') !== 'Andrew / `ndrewtran`'
+      || fields.get('Outcome') !== 'Accepted'
+      || fields.get('Decision path') !== `\`${expected.decisionPath}\``
+      || fields.get('Acceptance path') !== `\`${expected.acceptancePath}\``
+      || fields.get('Protected authority PR/merge') !== 'Pending; not claimed by this record') {
+    fail(`${expected.label} acceptance authority binding`);
+  }
+  const identity = (name) => fields.get(name)?.match(/^([\d,]+) bytes, SHA-256 `([0-9a-f]{64})`$/u);
+  const candidate = identity('Candidate');
+  const diff = identity('Pre-acceptance materialization diff');
+  const manifest = identity('Execution manifest');
+  if (!candidate || Number(candidate[1].replaceAll(',', '')) !== R1_README_RECOVERY_CANDIDATE_BYTES
+      || candidate[2] !== R1_README_RECOVERY_CANDIDATE_SHA256
+      || !diff || !manifest
+      || !Number.isSafeInteger(Number(diff[1].replaceAll(',', '')))
+      || !Number.isSafeInteger(Number(manifest[1].replaceAll(',', '')))) {
+    fail(`${expected.label} acceptance candidate/diff/manifest binding`);
+  }
+  const approval = text.match(/^- Approval instruction: “([^”\n]+)”$/mu)?.[1];
+  const human = text.match(/^- Human acceptance: Andrew \/ `ndrewtran`: “([^”\n]+)”$/mu)?.[1];
+  const expectedStatement = `I accept Core UI R1 README historical compatibility recovery candidate v4, SHA-256 ${candidate[2]}; pre-acceptance materialization diff, SHA-256 ${diff[2]}; and execution manifest v4, SHA-256 ${manifest[2]}. I authorize the exact six-path authority materialization and owner acceptance records; its authority issue, protected non-draft PR, and merge after all named deterministic checks and external authority review pass; the exact ten-path PR #92 recovery, protected intermediate merge, postmerge verification, bounded Project README reconciliation, and continuation under the existing R1 continuous-execution envelope. Npm publication and the final R1-exit PR merge remain separate stops.`;
+  if (!approval || !human || approval !== human || approval !== expectedStatement
+      || text.split(approval).length - 1 !== 2) {
+    fail(`${expected.label} acceptance statement binding`);
+  }
+  const timestamp = fields.get('Approval timestamp');
+  if (timestamp !== 'Not recorded' && !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z$/u.test(timestamp)) {
+    fail(`${expected.label} acceptance timestamp`);
+  }
+  return {
+    candidate: candidate.slice(1),
+    diff: diff.slice(1),
+    manifest: manifest.slice(1),
+    statement: approval,
+  };
+};
+
+export function verifyDecision0009ReadmeHistoricalCompatibility(repositoryRoot, options = {}) {
+  const decision0009Source = options.reviewAmendment04Source
+    ?? readFileSync(join(repositoryRoot, REVIEW_AMENDMENT04_PATH), 'utf8');
+  const decision0010Source = options.r1ReadmeRecoverySource
+    ?? readFileSync(join(repositoryRoot, R1_README_RECOVERY_PATH), 'utf8');
+  if (Buffer.byteLength(decision0009Source) !== REVIEW_AMENDMENT04_BYTES
+      || digest(decision0009Source) !== REVIEW_AMENDMENT04_SHA256) {
+    fail('Decision 0009 amendment 04 identity');
+  }
+  if (Buffer.byteLength(decision0010Source) !== R1_README_RECOVERY_BYTES
+      || digest(decision0010Source) !== R1_README_RECOVERY_SHA256) {
+    fail('Decision 0010 amendment 08 identity');
+  }
+  const acceptance0009 = parseRecoveryAcceptance(
+    options.reviewAmendment04AcceptanceSource
+      ?? readFileSync(join(repositoryRoot, REVIEW_AMENDMENT04_ACCEPTANCE_PATH), 'utf8'),
+    {
+      acceptancePath: REVIEW_AMENDMENT04_ACCEPTANCE_PATH,
+      decisionId: 'core-ui:decision:0009:amendment:04',
+      decisionPath: REVIEW_AMENDMENT04_PATH,
+      label: 'Decision 0009 amendment 04',
+      parentId: 'core-ui:decision:0009',
+      title: 'Decision 0009 amendment 04',
+    },
+  );
+  const acceptance0010 = parseRecoveryAcceptance(
+    options.r1ReadmeRecoveryAcceptanceSource
+      ?? readFileSync(join(repositoryRoot, R1_README_RECOVERY_ACCEPTANCE_PATH), 'utf8'),
+    {
+      acceptancePath: R1_README_RECOVERY_ACCEPTANCE_PATH,
+      decisionId: 'core-ui:decision:0010:amendment:08',
+      decisionPath: R1_README_RECOVERY_PATH,
+      label: 'Decision 0010 amendment 08',
+      parentId: 'core-ui:decision:0010',
+      title: 'Decision 0010 amendment 08',
+    },
+  );
+  if (canonicalJson(acceptance0009) !== canonicalJson(acceptance0010)) {
+    fail('recovery acceptance records must bind one human statement and artifact set');
+  }
+  return {
+    accepted: true,
+    amendment0009: { bytes: Buffer.byteLength(decision0009Source), sha256: digest(decision0009Source) },
+    amendment0010: { bytes: Buffer.byteLength(decision0010Source), sha256: digest(decision0010Source) },
+    acceptance: acceptance0009,
+  };
+}
+
 export function proposedReviewReadinessManifest(decisionSource, decision) {
   return {
     acceptedBase: decision.sourceConstruction.acceptedBase,
@@ -306,6 +445,7 @@ export function verifyDeliveryReviewReadinessAuthority(repositoryRoot, options =
     fail('Decision 0009 amendment 01 implementation clarification identity');
   }
   const amendment02 = verifyDecision0009Amendment02SkillSuccessor(repositoryRoot, options);
+  const readmeCompatibility = verifyDecision0009ReadmeHistoricalCompatibility(repositoryRoot, options);
   exactKeys(decision, [
     'acceptanceTopology', 'affectedScopeIds', 'authority', 'choices', 'classification',
     'continuationTopology', 'decisionId', 'implementationBoundary', 'nonGoals',
@@ -349,6 +489,52 @@ export function verifyDeliveryReviewReadinessAuthority(repositoryRoot, options =
       }
       continue;
     }
+    if (entry.path === REVIEW_README_PATH) {
+      let indexEntry;
+      try {
+        indexEntry = execFileSync('git', ['ls-files', '--stage', '--error-unmatch', '--', entry.path], {
+          cwd: repositoryRoot,
+          encoding: 'utf8',
+        });
+      } catch {
+        fail(`current artifact index identity ${entry.path}`);
+      }
+      const indexLines = indexEntry.trimEnd().split('\n');
+      if (indexLines.length !== 1
+          || !new RegExp(`^100644 [0-9a-f]{40} 0\\t${entry.path.replaceAll('.', '\\.')}$`, 'u').test(indexLines[0])) {
+        fail(`current artifact index identity ${entry.path}`);
+      }
+      let indexStatus;
+      try {
+        indexStatus = execFileSync('git', [
+          'status', '--porcelain=v2', '--untracked-files=all', '--', entry.path,
+        ], {
+          cwd: repositoryRoot,
+          encoding: 'utf8',
+        });
+      } catch {
+        fail(`current artifact index status ${entry.path}`);
+      }
+      const statusLines = indexStatus.trimEnd() === '' ? [] : indexStatus.trimEnd().split('\n');
+      if (statusLines.some((line) => {
+        if (!line.startsWith('1 ') || line.length < 4) return true;
+        // Porcelain-v2's X column is the index status. After `git rm --cached`,
+        // `git add -N` reports DA: reject that intent-to-add entry while
+        // retaining ordinary tracked entries with mutable worktree bytes (.M).
+        return line[2] === 'D';
+      })) {
+        fail(`current artifact index intent-to-add ${entry.path}`);
+      }
+      let current;
+      try {
+        current = lstatSync(join(repositoryRoot, entry.path));
+      } catch {
+        fail(`current artifact identity ${entry.path}`);
+      }
+      if (!current.isFile() || current.isSymbolicLink()) {
+        fail(`current artifact identity ${entry.path}`);
+      }
+    }
     let bytes = readFileSync(join(repositoryRoot, entry.path));
     if (REVIEW_HISTORICAL_ARTIFACT_PATHS.has(entry.path)) {
       try {
@@ -358,6 +544,11 @@ export function verifyDeliveryReviewReadinessAuthority(repositoryRoot, options =
           maxBuffer: 64 * 1024 * 1024,
         });
       } catch {
+        fail(`historical artifact identity ${entry.path}`);
+      }
+      if (entry.path === REVIEW_README_PATH
+          && (bytes.byteLength !== REVIEW_README_HISTORICAL_BYTES
+            || digest(bytes) !== REVIEW_README_HISTORICAL_SHA256)) {
         fail(`historical artifact identity ${entry.path}`);
       }
     }
@@ -421,6 +612,7 @@ export function verifyDeliveryReviewReadinessAuthority(repositoryRoot, options =
     acceptance: { bytes: Buffer.byteLength(acceptanceSource), sha256: digest(acceptanceSource) },
     decision: manifest.decision,
     manifest: { entries: acceptance.manifest.entryCount, sha256: manifestSha256 },
+    readmeCompatibility,
     successor: amendment02,
     targets: decision.continuationTopology.targets.length,
   };
