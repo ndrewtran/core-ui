@@ -7,6 +7,7 @@ import path from 'node:path';
 import { canonicalJson, parseJsonStrict } from '@core-ui/schema';
 import {
   verifyDecision0009Amendment02SkillSuccessor,
+  verifyDecision0009ReadmeHistoricalCompatibility,
   verifyDeliveryReviewReadinessAuthority,
   verifyDeliveryWorkflowAuthority,
 } from '../src/delivery-workflow-authority-verify.mjs';
@@ -34,11 +35,58 @@ const r1AcceptancePath = 'decisions/0010-amendment-04-r1-continuous-execution-ac
 const r1ManifestPath = 'decisions/0010-amendment-04-r1-continuous-execution-materialization.json';
 const amendment07DecisionPath = 'decisions/0010-amendment-07-r1-external-review-ci-recovery.md';
 const amendment07AcceptancePath = 'decisions/0010-amendment-07-r1-external-review-ci-recovery-acceptance.md';
+const amendment04DecisionPath = 'decisions/0009-amendment-04-repository-policy-readme-historical-compatibility.md';
+const amendment04AcceptancePath = 'decisions/0009-amendment-04-repository-policy-readme-historical-compatibility-acceptance.md';
+const amendment08DecisionPath = 'decisions/0010-amendment-08-r1-readme-historical-compatibility-recovery.md';
+const amendment08AcceptancePath = 'decisions/0010-amendment-08-r1-readme-historical-compatibility-recovery-acceptance.md';
+const recoveryCandidateSha256 = '23fbb5acb55416a4079fe012b2f9c67b3df6e18ecdd8bbed2da1a1caa311d81a';
+const readmePath = 'tooling/audits/repository-policy/README.md';
 const sha256 = (source) => createHash('sha256').update(source).digest('hex');
 const renderTemplate = (template, substitutions) => Object.entries(substitutions).reduce(
   (output, [name, value]) => output.replaceAll(`{${name}}`, value),
   template,
 );
+
+const recoveryStatement = `I accept Core UI R1 README historical compatibility recovery candidate v4, SHA-256 ${recoveryCandidateSha256}; pre-acceptance materialization diff, SHA-256 ${'1'.repeat(64)}; and execution manifest v4, SHA-256 ${'2'.repeat(64)}. I authorize the exact six-path authority materialization and owner acceptance records; its authority issue, protected non-draft PR, and merge after all named deterministic checks and external authority review pass; the exact ten-path PR #92 recovery, protected intermediate merge, postmerge verification, bounded Project README reconciliation, and continuation under the existing R1 continuous-execution envelope. Npm publication and the final R1-exit PR merge remain separate stops.`;
+const recoveryAcceptance = ({ acceptancePath, decisionId, decisionPath, parentId, title }) => [
+  `# Acceptance: ${title}`,
+  '',
+  `- Decision: \`${decisionId}\``,
+  `- Parent decision: \`${parentId}\``,
+  '- Repository: `ndrewtran/core-ui`',
+  '- Owner: Andrew / `ndrewtran`',
+  '- Outcome: Accepted',
+  `- Candidate: 12,193 bytes, SHA-256 \`${recoveryCandidateSha256}\``,
+  `- Pre-acceptance materialization diff: 1 bytes, SHA-256 \`${'1'.repeat(64)}\``,
+  `- Execution manifest: 1 bytes, SHA-256 \`${'2'.repeat(64)}\``,
+  `- Decision path: \`${decisionPath}\``,
+  `- Acceptance path: \`${acceptancePath}\``,
+  `- Approval instruction: “${recoveryStatement}”`,
+  `- Human acceptance: Andrew / \`ndrewtran\`: “${recoveryStatement}”`,
+  '- Approval timestamp: Not recorded',
+  '- Protected authority PR/merge: Pending; not claimed by this record',
+  '',
+  'This record claims acceptance only; no issue, PR, checks, review, merge, implementation, Project, publication, or release outcome is claimed.',
+  '',
+].join('\n');
+const recoveryOptions = Object.freeze({
+  reviewAmendment04Source: fs.readFileSync(path.join(repositoryRoot, amendment04DecisionPath), 'utf8'),
+  reviewAmendment04AcceptanceSource: recoveryAcceptance({
+    acceptancePath: amendment04AcceptancePath,
+    decisionId: 'core-ui:decision:0009:amendment:04',
+    decisionPath: amendment04DecisionPath,
+    parentId: 'core-ui:decision:0009',
+    title: 'Decision 0009 amendment 04',
+  }),
+  r1ReadmeRecoverySource: fs.readFileSync(path.join(repositoryRoot, amendment08DecisionPath), 'utf8'),
+  r1ReadmeRecoveryAcceptanceSource: recoveryAcceptance({
+    acceptancePath: amendment08AcceptancePath,
+    decisionId: 'core-ui:decision:0010:amendment:08',
+    decisionPath: amendment08DecisionPath,
+    parentId: 'core-ui:decision:0010',
+    title: 'Decision 0010 amendment 08',
+  }),
+});
 
 const writeR1Acceptance = (fixtureRoot) => {
   fs.writeFileSync(path.join(fixtureRoot, r1AcceptancePath), execFileSync(
@@ -507,13 +555,139 @@ rejectAmendment02({
 rejectAmendment02({ reviewSuccessorYamlSource: '' }, 'missing successor binding');
 const rejectReview = (options, label) => {
   try {
-    verifyDeliveryReviewReadinessAuthority(repositoryRoot, options);
+    verifyDeliveryReviewReadinessAuthority(repositoryRoot, { ...recoveryOptions, ...options });
   } catch (error) {
     if (String(error.message).startsWith('DELIVERY_WORKFLOW_AUTHORITY_INVALID:')) return;
     throw error;
   }
   throw new Error(`Decision 0009 negative accepted: ${label}`);
 };
+const rejectReadmeCompatibility = (options, label) => {
+  try {
+    verifyDecision0009ReadmeHistoricalCompatibility(repositoryRoot, { ...recoveryOptions, ...options });
+  } catch (error) {
+    if (String(error.message).startsWith('DELIVERY_WORKFLOW_AUTHORITY_INVALID:')) return;
+    throw error;
+  }
+  throw new Error(`Decision 0009 amendment 04 negative accepted: ${label}`);
+};
+const rejectReadinessWorkingTree = (mutate, label) => {
+  const temporaryRepository = makeR1Fixture();
+  try {
+    mutate(temporaryRepository);
+    try {
+      verifyDeliveryReviewReadinessAuthority(temporaryRepository, recoveryOptions);
+    } catch (error) {
+      if (String(error.message).startsWith('DELIVERY_WORKFLOW_AUTHORITY_INVALID:')) return;
+      throw error;
+    }
+    throw new Error(`README compatibility accepted: ${label}`);
+  } finally {
+    fs.rmSync(temporaryRepository, { recursive: true, force: true });
+  }
+};
+const recoveryResult = verifyDecision0009ReadmeHistoricalCompatibility(repositoryRoot, recoveryOptions);
+if (!recoveryResult.accepted
+    || recoveryResult.amendment0009.bytes !== 2948
+    || recoveryResult.amendment0010.bytes !== 3050
+    || recoveryResult.acceptance.statement !== recoveryStatement) {
+  throw new Error('Decision 0009 amendment 04 positive result mismatch');
+}
+const mutableReadmeFixture = makeR1Fixture();
+try {
+  const currentReadmePath = path.join(mutableReadmeFixture, readmePath);
+  fs.appendFileSync(currentReadmePath, '\nmutable current README bytes\n');
+  const mutableReadmeResult = verifyDeliveryReviewReadinessAuthority(mutableReadmeFixture, recoveryOptions);
+  if (mutableReadmeResult.readmeCompatibility?.accepted !== true) {
+    throw new Error('mutable current README worktree bytes were rejected');
+  }
+} finally {
+  fs.rmSync(mutableReadmeFixture, { recursive: true, force: true });
+}
+const emptyReadmeFixture = makeR1Fixture();
+try {
+  const currentReadmePath = path.join(emptyReadmeFixture, readmePath);
+  fs.writeFileSync(currentReadmePath, '');
+  execFileSync('git', ['add', '--', readmePath], {
+    cwd: emptyReadmeFixture,
+    stdio: 'ignore',
+  });
+  const emptyReadmeResult = verifyDeliveryReviewReadinessAuthority(emptyReadmeFixture, recoveryOptions);
+  if (emptyReadmeResult.readmeCompatibility?.accepted !== true) {
+    throw new Error('tracked empty current README was rejected');
+  }
+} finally {
+  fs.rmSync(emptyReadmeFixture, { recursive: true, force: true });
+}
+rejectReadinessWorkingTree((temporaryRepository) => {
+  execFileSync('git', ['rm', '--cached', '--', readmePath], {
+    cwd: temporaryRepository,
+    stdio: 'ignore',
+  });
+}, 'staged README index deletion');
+rejectReadinessWorkingTree((temporaryRepository) => {
+  const currentReadmePath = path.join(temporaryRepository, readmePath);
+  execFileSync('git', ['rm', '--cached', '--', readmePath], {
+    cwd: temporaryRepository,
+    stdio: 'ignore',
+  });
+  fs.writeFileSync(currentReadmePath, 'untracked regular-file replacement\n');
+}, 'untracked regular-file README replacement');
+rejectReadinessWorkingTree((temporaryRepository) => {
+  const currentReadmePath = path.join(temporaryRepository, readmePath);
+  execFileSync('git', ['rm', '--cached', '--', readmePath], {
+    cwd: temporaryRepository,
+    stdio: 'ignore',
+  });
+  fs.writeFileSync(currentReadmePath, 'intent-to-add regular-file replacement\n');
+  execFileSync('git', ['add', '-N', '--', readmePath], {
+    cwd: temporaryRepository,
+    stdio: 'ignore',
+  });
+}, 'README intent-to-add regular-file replacement');
+rejectReadinessWorkingTree((temporaryRepository) => {
+  execFileSync('git', ['update-index', '--chmod=+x', '--', readmePath], {
+    cwd: temporaryRepository,
+    stdio: 'ignore',
+  });
+}, 'README stage-0 mode 100755');
+rejectReadmeCompatibility({
+  reviewAmendment04Source: `${recoveryOptions.reviewAmendment04Source}\ndrift`,
+}, 'Decision 0009 amendment 04 identity');
+rejectReadmeCompatibility({
+  r1ReadmeRecoverySource: `${recoveryOptions.r1ReadmeRecoverySource}\ndrift`,
+}, 'Decision 0010 amendment 08 identity');
+rejectReadmeCompatibility({
+  reviewAmendment04AcceptanceSource: recoveryOptions.reviewAmendment04AcceptanceSource.replace(
+    recoveryStatement,
+    `${recoveryStatement} drift`,
+  ),
+}, 'acceptance statement mismatch');
+rejectReadmeCompatibility({
+  r1ReadmeRecoveryAcceptanceSource: recoveryOptions.r1ReadmeRecoveryAcceptanceSource.replace(
+    `SHA-256 \`${'2'.repeat(64)}\``,
+    `SHA-256 \`${'3'.repeat(64)}\``,
+  ),
+}, 'acceptance manifest mismatch');
+rejectReadmeCompatibility({
+  reviewAmendment04AcceptanceSource: recoveryOptions.reviewAmendment04AcceptanceSource.replaceAll(
+    recoveryStatement,
+    'I accept an unrelated recovery without artifact identities.',
+  ),
+  r1ReadmeRecoveryAcceptanceSource: recoveryOptions.r1ReadmeRecoveryAcceptanceSource.replaceAll(
+    recoveryStatement,
+    'I accept an unrelated recovery without artifact identities.',
+  ),
+}, 'acceptance statement without artifact identities');
+rejectReadmeCompatibility({
+  reviewAmendment04AcceptanceSource: recoveryOptions.reviewAmendment04AcceptanceSource.replace(
+    `SHA-256 \`${recoveryCandidateSha256}\``,
+    `SHA-256 \`${recoveryCandidateSha256}\` with suffix`,
+  ),
+}, 'acceptance identity suffix');
+rejectReadmeCompatibility({
+  reviewAmendment04AcceptanceSource: `${recoveryOptions.reviewAmendment04AcceptanceSource}Publication completed.\n`,
+}, 'acceptance appended outcome claim');
 const reviewDecision = parseJsonStrict(reviewDecisionSource);
 const mutations = [
   ['plan', (value) => { value.acceptanceTopology.planSha256 = `sha256:${'0'.repeat(64)}`; }],
@@ -550,9 +724,33 @@ for (const [label, mutate] of [
   mutate(value);
   rejectReview({ reviewDecisionSource, reviewAcceptanceSource: canonicalJson(value) }, label);
 }
-const reviewResult = verifyDeliveryReviewReadinessAuthority(repositoryRoot);
+const reviewResult = verifyDeliveryReviewReadinessAuthority(repositoryRoot, recoveryOptions);
 if (!reviewResult.accepted || reviewResult.targets !== 29 || reviewResult.manifest.entries < 20) {
   throw new Error('Decision 0009 positive result mismatch');
 }
 
-process.stdout.write('[delivery-authority] Decision 0007 preserved; Decision 0009 amendment 02 successor negatives rejected; positive candidates accepted\n');
+for (const currentReadmeState of ['changed', 'missing', 'symlink']) {
+  const fixtureRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'core-ui-review-readme-fixture-'));
+  execFileSync('git', ['clone', '--no-local', '--no-tags', repositoryRoot, fixtureRoot], { stdio: 'ignore' });
+  const readmePath = path.join(fixtureRoot, 'tooling/audits/repository-policy/README.md');
+  try {
+    if (currentReadmeState === 'changed') {
+      fs.writeFileSync(readmePath, `${fs.readFileSync(readmePath, 'utf8')}\naccepted successor runbook\n`);
+      const changedResult = verifyDeliveryReviewReadinessAuthority(fixtureRoot, recoveryOptions);
+      if (!changedResult.readmeCompatibility?.accepted) {
+        throw new Error('changed current README did not preserve historical compatibility');
+      }
+    } else {
+      fs.rmSync(readmePath);
+      if (currentReadmeState === 'symlink') fs.symlinkSync('delivery-workflow-authority-verify.mjs', readmePath);
+      assert.throws(
+        () => verifyDeliveryReviewReadinessAuthority(fixtureRoot, recoveryOptions),
+        /DELIVERY_WORKFLOW_AUTHORITY_INVALID: current artifact identity tooling\/audits\/repository-policy\/README\.md/u,
+      );
+    }
+  } finally {
+    fs.rmSync(fixtureRoot, { recursive: true, force: true });
+  }
+}
+
+process.stdout.write('[delivery-authority] Decision 0007 preserved; Decision 0009 amendments 02 and 04 successor negatives rejected; positive candidates accepted\n');
