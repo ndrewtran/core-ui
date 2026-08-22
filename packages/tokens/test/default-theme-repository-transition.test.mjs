@@ -12,6 +12,8 @@ import { hasAcceptedReactPrimaryAuthority } from '../src/internal/default-theme-
 
 const execFile = promisify(execFileCallback);
 const repositoryRoot = resolve(import.meta.dirname, '../../..');
+const amendment07DecisionPath = 'decisions/0010-amendment-07-r1-external-review-ci-recovery.md';
+const amendment07AcceptancePath = 'decisions/0010-amendment-07-r1-external-review-ci-recovery-acceptance.md';
 const transitionPaths = [
   'catalog/components/button/artifact.json',
   'catalog/tokens',
@@ -206,7 +208,7 @@ async function writeContinuousAcceptance(root, ownerCommentUrl = 'https://github
   return acceptance;
 }
 
-test('R1 authority accepts the fixed current baseline and exact amendment-06 successor only', async () => {
+test('R1 authority accepts the fixed current baseline and exact amendment-06/amendment-07 successors', async () => {
   const parent = await mkdtemp(join(tmpdir(), 'core-ui-react-authority-proof-'));
   const baseline = join(parent, 'baseline');
   const worktree = join(parent, 'authority');
@@ -318,6 +320,39 @@ test('R1 authority accepts the fixed current baseline and exact amendment-06 suc
       cwd: worktree,
       encoding: 'utf8',
     });
+
+    const currentAmendment07DecisionPath = join(worktree, amendment07DecisionPath);
+    const currentAmendment07Decision = await readFile(currentAmendment07DecisionPath, 'utf8');
+    await writeFile(currentAmendment07DecisionPath, `${currentAmendment07Decision}\nmutated amendment-07 decision\n`);
+    await execFile('git', ['add', '--', amendment07DecisionPath], {cwd: worktree, encoding: 'utf8'});
+    assert.equal(await hasAcceptedReactPrimaryAuthority(worktree), false);
+    await writeFile(currentAmendment07DecisionPath, currentAmendment07Decision);
+    await execFile('git', ['add', '--', amendment07DecisionPath], {cwd: worktree, encoding: 'utf8'});
+
+    const currentAmendment07AcceptancePath = join(worktree, amendment07AcceptancePath);
+    const currentAmendment07Acceptance = await readFile(currentAmendment07AcceptancePath, 'utf8');
+    await writeFile(currentAmendment07AcceptancePath, currentAmendment07Acceptance.replace(
+      /^(- Candidate: [\d,]+ bytes, SHA-256 `)[0-9a-f]{64}`$/mu,
+      `$1${'0'.repeat(64)}\``,
+    ));
+    await execFile('git', ['add', '--', amendment07AcceptancePath], {cwd: worktree, encoding: 'utf8'});
+    assert.equal(await hasAcceptedReactPrimaryAuthority(worktree), false);
+    await writeFile(currentAmendment07AcceptancePath, currentAmendment07Acceptance);
+    await execFile('git', ['add', '--', amendment07AcceptancePath], {cwd: worktree, encoding: 'utf8'});
+
+    for (const [label, field, value] of [
+      ['materialization diff', 'Pre-acceptance materialization diff', 'malformed bytes, SHA-256 `not-a-digest`'],
+      ['execution manifest', 'Execution manifest', 'malformed bytes, SHA-256 `not-a-digest`'],
+    ]) {
+      await writeFile(currentAmendment07AcceptancePath, currentAmendment07Acceptance.replace(
+        new RegExp(`^- ${field}: .*$`, 'mu'),
+        `- ${field}: ${value}`,
+      ));
+      await execFile('git', ['add', '--', amendment07AcceptancePath], {cwd: worktree, encoding: 'utf8'});
+      assert.equal(await hasAcceptedReactPrimaryAuthority(worktree), false, `malformed ${label} identity`);
+      await writeFile(currentAmendment07AcceptancePath, currentAmendment07Acceptance);
+      await execFile('git', ['add', '--', amendment07AcceptancePath], {cwd: worktree, encoding: 'utf8'});
+    }
 
     const currentRoadmapPath = join(worktree, 'strategy/milestone-roadmap.md');
     const currentRoadmap = await readFile(currentRoadmapPath, 'utf8');

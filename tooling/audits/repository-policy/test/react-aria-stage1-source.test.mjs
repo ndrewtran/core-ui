@@ -17,6 +17,8 @@ import {
 const repositoryRoot = join(import.meta.dirname, '../../../..');
 const r1AcceptancePath = 'decisions/0010-amendment-04-r1-continuous-execution-acceptance.md';
 const r1ManifestPath = 'decisions/0010-amendment-04-r1-continuous-execution-materialization.json';
+const amendment07DecisionPath = 'decisions/0010-amendment-07-r1-external-review-ci-recovery.md';
+const amendment07AcceptancePath = 'decisions/0010-amendment-07-r1-external-review-ci-recovery-acceptance.md';
 const sha256 = (source) => createHash('sha256').update(source).digest('hex');
 const pinnedCurrentAuthority = Object.freeze({
   authorityDecisionSource: fs.readFileSync(join(repositoryRoot, 'decisions/0010-amendment-06-r1-change-intent-owner.md'), 'utf8'),
@@ -163,6 +165,10 @@ test('R1.0 entry gate accepts only current authority and remains closed pending 
   assert.equal(result.productScope.version, '6.0.1');
   assert.equal(result.decision.sha256, R1_ENTRY_BINDING.decision.sha256);
   assert.equal(result.stage1.accepted, true);
+  assert.deepEqual(
+    result.authority.successor?.paths.filter((path) => path.startsWith('decisions/0010-amendment-07-')).sort(),
+    [amendment07AcceptancePath, amendment07DecisionPath].sort(),
+  );
   assert.deepEqual(result.applicability, {
     currentEvidenceLocator: null,
     historicalEvidence: {sufficient: false, status: 'historical-only'},
@@ -260,6 +266,49 @@ test('R1.0 entry gate accepts only current authority and remains closed pending 
     (source) => source.replace('scopeVersion: 6.0.1', 'scopeVersion: 6.0.2'),
     'productScopeSource',
     'changed staged Product Scope must reject valid pinned override',
+  );
+
+  const rejectAmendment07Mutation = (relativePath, mutate, label) => {
+    const currentPath = join(fixtureRoot, relativePath);
+    const original = fs.readFileSync(currentPath, 'utf8');
+    fs.writeFileSync(currentPath, mutate(original));
+    execFileSync('git', ['add', '--', relativePath], {cwd: fixtureRoot, stdio: 'ignore'});
+    assert.throws(
+      () => verifyReactR1Entry(fixtureRoot),
+      /REACT_ARIA_STAGE1_SOURCE_INVALID: R1\.0 Product Scope/u,
+      label,
+    );
+    fs.writeFileSync(currentPath, original);
+    execFileSync('git', ['add', '--', relativePath], {cwd: fixtureRoot, stdio: 'ignore'});
+  };
+  rejectAmendment07Mutation(
+    amendment07DecisionPath,
+    (source) => `${source}\nmutated amendment-07 decision\n`,
+    'changed amendment-07 decision must reject the exact successor binding',
+  );
+  rejectAmendment07Mutation(
+    amendment07AcceptancePath,
+    (source) => source.replace(
+      /^(- Candidate: [\d,]+ bytes, SHA-256 `)[0-9a-f]{64}`$/mu,
+      `$1${'0'.repeat(64)}\``,
+    ),
+    'changed amendment-07 candidate digest must reject the successor binding',
+  );
+  rejectAmendment07Mutation(
+    amendment07AcceptancePath,
+    (source) => source.replace(
+      /^- Pre-acceptance materialization diff: .*$/mu,
+      '- Pre-acceptance materialization diff: malformed bytes, SHA-256 `not-a-digest`',
+    ),
+    'malformed amendment-07 materialization diff identity must reject',
+  );
+  rejectAmendment07Mutation(
+    amendment07AcceptancePath,
+    (source) => source.replace(
+      /^- Execution manifest: .*$/mu,
+      '- Execution manifest: malformed bytes, SHA-256 `not-a-digest`',
+    ),
+    'malformed amendment-07 execution manifest identity must reject',
   );
 
   const historicalProductScope = execFileSync(

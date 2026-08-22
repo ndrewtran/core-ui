@@ -745,6 +745,25 @@ PR is directly authorized by the accepted envelope; no other operation may
 precede its verified merge. Every later operation binds a passing canonical
 verifier result or remains blocked.
 
+Ordinary protected CI runs the same repository-policy entrypoint without a
+task-local operation descriptor in read-only `source-inspection` mode. That
+mode validates authority, prerequisite lineage, source, policy, generation,
+and deterministic checks but grants no write, transition, review, merge,
+evidence, publication, release, or completion authority. The exact accepted
+amendment-07 authority recovery is the sole path- and digest-bound
+pre-prerequisite exception. After its protected merge, immediately before
+every authorized R1 write or external transition, the exact task-local
+ChangeIntent must be reverified against the current preimage; the exception
+cannot be reused.
+
+Post-proof and ready-merge review clearance remains external to deterministic
+source and operation verification. The root orchestrator dispatches the fresh
+profile-selected reviewers and binds their external assignments and outcomes
+to the frozen source, packet, outputs, disclosure boundary, and applicable
+hosted state. Repository tooling may derive required review roles but cannot
+manufacture reviewer dispatch, result, or clearance. Drift or a finding
+rewinds the earliest affected gate.
+
 The shared baseline also pins Tale UI commit
 `94bf62a26c02605c8928dfeb24f0ddc4be1c92fd` and its component-style,
 React-source, and CSS-foundation trees as one-time donor inputs. Each locked

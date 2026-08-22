@@ -59,12 +59,6 @@ export const R1_ENTRY_BINDING = Object.freeze({
   }),
 });
 
-const CURRENT_SUCCESSOR_ROADMAP = Object.freeze({
-  bytes: 158129,
-  path: 'strategy/milestone-roadmap.md',
-  sha256: 'ff51b84497612ed59ffcaea71036894e74e4a461e21434f3d3d02dd1deeb2bb1',
-});
-
 const digest = (value) => createHash('sha256').update(value).digest('hex');
 const fail = (message) => { throw new Error(`REACT_ARIA_STAGE1_SOURCE_INVALID: ${message}`); };
 const git = (repositoryRoot, args) => execFileSync('git', ['-C', repositoryRoot, ...args], {encoding: 'utf8'}).trim();
@@ -170,7 +164,7 @@ export function verifyReactR1Entry(repositoryRoot, options = {}) {
   const productScopeBinding = R1_ENTRY_BINDING.continuous.productScope;
   const roadmapBinding = authority.successor === null
     ? R1_ENTRY_BINDING.continuous.roadmap
-    : CURRENT_SUCCESSOR_ROADMAP;
+    : authority.successor.roadmap;
   const decisionSource = options.decisionSource
     ?? readTextArtifact(repositoryRoot, R1_ENTRY_BINDING.decision);
 

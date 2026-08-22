@@ -34,6 +34,20 @@ const CURRENT_AUTHORITY = Object.freeze({
   productScopeSha256: 'add747d5986c9039029a99b558ae719969fd18ac113051bbec478bd291da8632',
 });
 
+const AMENDMENT_07_AUTHORITY = Object.freeze({
+  acceptancePath: 'decisions/0010-amendment-07-r1-external-review-ci-recovery-acceptance.md',
+  decisionPath: 'decisions/0010-amendment-07-r1-external-review-ci-recovery.md',
+  decisionSha256: 'c827da6fcb13b5b56e9c09ad9e6eb447f2c44588530b81ab1e243ff22bf2f011',
+  architecturePath: CURRENT_AUTHORITY.architecturePath,
+  architectureSha256: 'a5d3c3545521fc4a9f16ee69ae8c09733d34d7e104bcee33ce12331218b1f94b',
+  roadmapPath: CURRENT_AUTHORITY.roadmapPath,
+  roadmapSha256: 'f044c3b3b5849f4567a819c54f667eaa6a6ecf4f3e538ada91cf1b74db1b60f6',
+  productScopePath: CURRENT_AUTHORITY.productScopePath,
+  productScopeSha256: CURRENT_AUTHORITY.productScopeSha256,
+  candidateBytes: 20915,
+  candidateSha256: '2a830bde833fa1fc2cd5b8343a045d76e1c590c92931a34ab37bf78491e3d13e',
+});
+
 const BASELINE_CURRENT_AUTHORITY = Object.freeze({
   architectureSha256: 'fa94c95f08c659f977af43a4438ffdb8d1774a06332786fae61f03f0799c085b',
   roadmapSha256: '9f321f93a537f69c5604de35f85053d8bf4748e937d6797c9262691e301247a1',
@@ -52,15 +66,19 @@ const IMMUTABLE_CURRENT_PATHS = Object.freeze([
   'decisions/0010-amendment-05-r1-policy-entrypoint-acceptance.md',
 ]);
 
-const CURRENT_SUCCESSOR_PATHS = Object.freeze([
-  CURRENT_AUTHORITY.acceptancePath,
-  CURRENT_AUTHORITY.decisionPath,
-  CURRENT_AUTHORITY.architecturePath,
-  CURRENT_AUTHORITY.roadmapPath,
+const currentSuccessorPaths = (authority) => Object.freeze([
+  authority.acceptancePath,
+  authority.decisionPath,
+  authority.architecturePath,
+  authority.roadmapPath,
 ]);
 const CURRENT_SUCCESSOR_ADDITION_PATHS = Object.freeze([
   CURRENT_AUTHORITY.acceptancePath,
   CURRENT_AUTHORITY.decisionPath,
+]);
+const AMENDMENT_07_PATHS = Object.freeze([
+  AMENDMENT_07_AUTHORITY.acceptancePath,
+  AMENDMENT_07_AUTHORITY.decisionPath,
 ]);
 
 const IMMUTABLE_CURRENT_SHA256 = Object.freeze({
@@ -248,18 +266,22 @@ function assertNoExtraSuccessorPaths(repositoryRoot) {
   } catch {
     fail('current successor path inventory');
   }
-  const amendment06Paths = paths.filter((path) => path.startsWith('decisions/0010-amendment-06-'));
-  if (amendment06Paths.length !== 0
-      && canonicalJson([...amendment06Paths].sort()) !== canonicalJson([
-        CURRENT_AUTHORITY.acceptancePath,
-        CURRENT_AUTHORITY.decisionPath,
-      ].sort())) {
+  const successorPaths = paths.filter((path) => (
+    path.startsWith('decisions/0010-amendment-06-')
+      || path.startsWith('decisions/0010-amendment-07-')
+  ));
+  const allowedPathSets = [
+    [],
+    [...CURRENT_SUCCESSOR_ADDITION_PATHS],
+    [...CURRENT_SUCCESSOR_ADDITION_PATHS, ...AMENDMENT_07_PATHS],
+  ].map((set) => canonicalJson([...set].sort()));
+  if (!allowedPathSets.includes(canonicalJson([...successorPaths].sort()))) {
     fail('current successor path set');
   }
 }
 
 function assertSuccessorPathsAbsent(repositoryRoot) {
-  const present = CURRENT_SUCCESSOR_ADDITION_PATHS.filter((relativePath) => {
+  const present = [...CURRENT_SUCCESSOR_ADDITION_PATHS, ...AMENDMENT_07_PATHS].filter((relativePath) => {
     let indexedOrUntracked;
     try {
       indexedOrUntracked = git(repositoryRoot, [
@@ -281,7 +303,85 @@ function assertSuccessorPathsAbsent(repositoryRoot) {
   if (present.length > 0) fail(`current successor paths must be absent for baseline: ${present.join(', ')}`);
 }
 
-function expectedCurrentSources(options, verifiedSources) {
+function assertAmendment07Acceptance(bytes) {
+  // Orchestration owns approval, diff, and manifest identity validation; this
+  // consumer checks only their strict record shape and internal statement binding.
+  const text = bytes.toString('utf8');
+  if (!text.startsWith('# Acceptance: Decision 0010 amendment 07\n')) {
+    fail('amendment 07 acceptance title');
+  }
+  const fields = new Map();
+  for (const match of text.matchAll(/^- ([^:\n]+):[ \t]*(.*)$/gmu)) {
+    const [, name, value] = match;
+    if (fields.has(name)) fail(`amendment 07 acceptance duplicate field ${name}`);
+    fields.set(name, value);
+  }
+  const expectedFields = new Set([
+    'Decision',
+    'Parent decision',
+    'Repository',
+    'Owner',
+    'Outcome',
+    'Candidate',
+    'Pre-acceptance materialization diff',
+    'Execution manifest',
+    'Decision path',
+    'Acceptance path',
+    'Approval instruction',
+    'Human acceptance',
+    'Approval timestamp',
+    'Protected authority PR/merge',
+  ]);
+  if (canonicalJson([...fields.keys()].sort()) !== canonicalJson([...expectedFields].sort())) {
+    fail('amendment 07 acceptance field shape');
+  }
+  if (fields.get('Decision') !== '`core-ui:decision:0010:amendment:07`'
+      || fields.get('Parent decision') !== '`core-ui:decision:0010`'
+      || fields.get('Repository') !== '`ndrewtran/core-ui`'
+      || fields.get('Owner') !== 'Andrew / `ndrewtran`'
+      || fields.get('Outcome') !== 'Accepted'
+      || fields.get('Decision path') !== `\`${AMENDMENT_07_AUTHORITY.decisionPath}\``
+      || fields.get('Acceptance path') !== `\`${AMENDMENT_07_AUTHORITY.acceptancePath}\``
+      || fields.get('Protected authority PR/merge') !== 'Pending; not claimed by this record') {
+    fail('amendment 07 acceptance authority binding');
+  }
+  const candidate = fields.get('Candidate')?.match(/^([\d,]+) bytes, SHA-256 `([0-9a-f]{64})`$/u);
+  const diff = fields.get('Pre-acceptance materialization diff')?.match(/^((?:\d+|[1-9]\d{0,2}(?:,\d{3})+)) bytes, SHA-256 `([0-9a-f]{64})`$/u);
+  const manifest = fields.get('Execution manifest')?.match(/^((?:\d+|[1-9]\d{0,2}(?:,\d{3})+)) bytes, SHA-256 `([0-9a-f]{64})`$/u);
+  if (!candidate || Number(candidate[1].replaceAll(',', '')) !== AMENDMENT_07_AUTHORITY.candidateBytes
+      || candidate[2] !== AMENDMENT_07_AUTHORITY.candidateSha256
+      || !diff || !manifest
+      || !Number.isSafeInteger(Number(diff[1].replaceAll(',', '')))
+      || !Number.isSafeInteger(Number(manifest[1].replaceAll(',', '')))) {
+    fail('amendment 07 acceptance candidate/diff/manifest binding');
+  }
+  const approval = text.match(/^- Approval instruction: “([^”\n]+)”$/mu)?.[1];
+  const human = text.match(/^- Human acceptance: Andrew \/ `ndrewtran`: “([^”\n]+)”$/mu)?.[1];
+  if (!approval || !human || approval !== human || text.split(approval).length - 1 !== 2) {
+    fail('amendment 07 acceptance statement binding');
+  }
+  const timestamp = fields.get('Approval timestamp');
+  if (timestamp !== 'Not recorded' && !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z$/u.test(timestamp)) {
+    fail('amendment 07 acceptance timestamp');
+  }
+  if (!/\bno (?:PR|checks|review|merge|implementation|Project|publication|release)\b/iu.test(text)
+      || !/not claimed|has not occurred|has not yet occurred/iu.test(text)) {
+    fail('amendment 07 acceptance nonclaims');
+  }
+}
+
+function assertAmendment06Predecessor(repositoryRoot) {
+  for (const [relativePath, expected] of [
+    [CURRENT_AUTHORITY.decisionPath, CURRENT_AUTHORITY.decisionSha256],
+    [CURRENT_AUTHORITY.acceptancePath, CURRENT_AUTHORITY.acceptanceSha256],
+  ]) {
+    if (sha256(stageZeroBytes(repositoryRoot, relativePath)) !== expected) {
+      fail(`immutable amendment 06 predecessor ${relativePath}`);
+    }
+  }
+}
+
+function expectedCurrentSources(options, verifiedSources, authority = CURRENT_AUTHORITY) {
   const sources = {...verifiedSources};
   const overrides = {
     decision: options.authorityDecisionSource,
@@ -296,20 +396,24 @@ function expectedCurrentSources(options, verifiedSources) {
     }
   }
   for (const [name, bytes] of Object.entries(sources)) {
-    const expected = CURRENT_AUTHORITY[`${name}Sha256`];
-    if (!expected || sha256(bytes) !== expected) fail(`current successor ${name} identity`);
+    const expected = authority[`${name}Sha256`];
+    if (expected && sha256(bytes) !== expected) fail(`current successor ${name} identity`);
   }
   if (!sources.productScope.toString('utf8').startsWith('---\nscopeVersion: 6.0.1\n')) {
     fail('current Product Scope version');
   }
-  const decisionText = sources.decision.toString('utf8');
-  const acceptanceText = sources.acceptance.toString('utf8');
-  const v2Statement = 'I accept Core UI R1 ChangeIntent authority compatibility recovery candidate v2, SHA-256 b79aee6b4ff9167495ef2aec28055b73254865bd9f70ca2676e9bb679fc8299b. I authorize its exact eleven-path combined amendment 06 authority and private compatibility materialization, acceptance record, required authority issue, protected non-draft PR, and merge after all named deterministic checks and independent reviews pass; and continuation with the separate exact ten-path ChangeIntent prerequisite and post-prerequisite Project README reconciliation under the previously accepted continuous-execution envelope. The npm-publication and final R1-exit merge boundaries remain unchanged.';
-  if (!decisionText.includes('a700be0ac22c627fbc09c6378136b95d982d05c898a51bd126e5609f9bd8e8b9')
-      || !decisionText.includes('b79aee6b4ff9167495ef2aec28055b73254865bd9f70ca2676e9bb679fc8299b')
-      || !decisionText.includes(v2Statement)
-      || !acceptanceText.includes(v2Statement)) {
-    fail('current amendment 06 decision and acceptance binding');
+  if (authority === CURRENT_AUTHORITY) {
+    const decisionText = sources.decision.toString('utf8');
+    const acceptanceText = sources.acceptance.toString('utf8');
+    const v2Statement = 'I accept Core UI R1 ChangeIntent authority compatibility recovery candidate v2, SHA-256 b79aee6b4ff9167495ef2aec28055b73254865bd9f70ca2676e9bb679fc8299b. I authorize its exact eleven-path combined amendment 06 authority and private compatibility materialization, acceptance record, required authority issue, protected non-draft PR, and merge after all named deterministic checks and independent reviews pass; and continuation with the separate exact ten-path ChangeIntent prerequisite and post-prerequisite Project README reconciliation under the previously accepted continuous-execution envelope. The npm-publication and final R1-exit merge boundaries remain unchanged.';
+    if (!decisionText.includes('a700be0ac22c627fbc09c6378136b95d982d05c898a51bd126e5609f9bd8e8b9')
+        || !decisionText.includes('b79aee6b4ff9167495ef2aec28055b73254865bd9f70ca2676e9bb679fc8299b')
+        || !decisionText.includes(v2Statement)
+        || !acceptanceText.includes(v2Statement)) {
+      fail('current amendment 06 decision and acceptance binding');
+    }
+  } else {
+    assertAmendment07Acceptance(sources.acceptance);
   }
   return sources;
 }
@@ -333,8 +437,16 @@ export function verifyCurrentR1ContinuousAuthority(repositoryRoot, options = {})
         return false;
       }
     });
+  const amendment07Present = AMENDMENT_07_PATHS.every((relativePath) => {
+    try {
+      stageZeroBytes(repositoryRoot, relativePath);
+      return true;
+    } catch {
+      return false;
+    }
+  });
   if (!amendment06Present && baselineArchitecture === BASELINE_CURRENT_AUTHORITY.architectureSha256
-      && baselineRoadmap === BASELINE_CURRENT_AUTHORITY.roadmapSha256) {
+      && baselineRoadmap === BASELINE_CURRENT_AUTHORITY.roadmapSha256 && !amendment07Present) {
     assertSuccessorPathsAbsent(repositoryRoot);
     return {
       sourceMode: 'current',
@@ -343,30 +455,32 @@ export function verifyCurrentR1ContinuousAuthority(repositoryRoot, options = {})
       successor: null,
     };
   }
+  const authority = amendment07Present ? AMENDMENT_07_AUTHORITY : CURRENT_AUTHORITY;
+  if (amendment07Present) assertAmendment06Predecessor(repositoryRoot);
   const verifiedSources = {
-    decision: stageZeroBytes(repositoryRoot, CURRENT_AUTHORITY.decisionPath),
-    acceptance: stageZeroBytes(repositoryRoot, CURRENT_AUTHORITY.acceptancePath),
-    architecture: stageZeroBytes(repositoryRoot, CURRENT_AUTHORITY.architecturePath),
-    roadmap: stageZeroBytes(repositoryRoot, CURRENT_AUTHORITY.roadmapPath),
-    productScope: stageZeroBytes(repositoryRoot, CURRENT_AUTHORITY.productScopePath),
+    decision: stageZeroBytes(repositoryRoot, authority.decisionPath),
+    acceptance: stageZeroBytes(repositoryRoot, authority.acceptancePath),
+    architecture: stageZeroBytes(repositoryRoot, authority.architecturePath),
+    roadmap: stageZeroBytes(repositoryRoot, authority.roadmapPath),
+    productScope: stageZeroBytes(repositoryRoot, authority.productScopePath),
   };
-  const sources = expectedCurrentSources(options, verifiedSources);
+  const sources = expectedCurrentSources(options, verifiedSources, authority);
   return {
     sourceMode: 'current',
     historical,
     successor: {
-      paths: [...CURRENT_SUCCESSOR_PATHS],
-      decision: {bytes: sources.decision.byteLength, sha256: sha256(sources.decision)},
-      acceptance: {bytes: sources.acceptance.byteLength, sha256: sha256(sources.acceptance)},
-      architecture: {bytes: sources.architecture.byteLength, sha256: sha256(sources.architecture)},
-      roadmap: {bytes: sources.roadmap.byteLength, sha256: sha256(sources.roadmap)},
-      productScope: {bytes: sources.productScope.byteLength, sha256: sha256(sources.productScope), version: '6.0.1'},
+      paths: [...currentSuccessorPaths(authority)],
+      decision: {path: authority.decisionPath, bytes: sources.decision.byteLength, sha256: sha256(sources.decision)},
+      acceptance: {path: authority.acceptancePath, bytes: sources.acceptance.byteLength, sha256: sha256(sources.acceptance)},
+      architecture: {path: authority.architecturePath, bytes: sources.architecture.byteLength, sha256: sha256(sources.architecture)},
+      roadmap: {path: authority.roadmapPath, bytes: sources.roadmap.byteLength, sha256: sha256(sources.roadmap)},
+      productScope: {path: authority.productScopePath, bytes: sources.productScope.byteLength, sha256: sha256(sources.productScope), version: '6.0.1'},
     },
   };
 }
 
-// Consumers select only the fixed historical audit state or the fixed current
-// amendment-06 successor. There is deliberately no ref/path override.
+// Consumers select only the fixed historical audit state or fixed accepted
+// successor after-images. There is deliberately no ref/path override.
 export function hasAcceptedR1ContinuousAuthority(repositoryRoot, options = {}) {
   try {
     if (options.sourceMode === 'historical') {
