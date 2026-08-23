@@ -39,6 +39,8 @@ const amendment04DecisionPath = 'decisions/0009-amendment-04-repository-policy-r
 const amendment04AcceptancePath = 'decisions/0009-amendment-04-repository-policy-readme-historical-compatibility-acceptance.md';
 const amendment08DecisionPath = 'decisions/0010-amendment-08-r1-readme-historical-compatibility-recovery.md';
 const amendment08AcceptancePath = 'decisions/0010-amendment-08-r1-readme-historical-compatibility-recovery-acceptance.md';
+const amendment09DecisionPath = 'decisions/0010-amendment-09-r1-bootstrap-delivery-recovery.md';
+const amendment09AcceptancePath = 'decisions/0010-amendment-09-r1-bootstrap-delivery-recovery-acceptance.md';
 const recoveryCandidateSha256 = '23fbb5acb55416a4079fe012b2f9c67b3df6e18ecdd8bbed2da1a1caa311d81a';
 const readmePath = 'tooling/audits/repository-policy/README.md';
 const sha256 = (source) => createHash('sha256').update(source).digest('hex');
@@ -113,6 +115,10 @@ const makeR1Fixture = (receiptState = 'staged') => {
     execFileSync('git', ['add', '--', ...stagedPaths], {cwd: fixtureRoot, stdio: 'ignore'});
   }
   execFileSync('git', ['rm', '--ignore-unmatch', '--', r1AcceptancePath], {
+    cwd: fixtureRoot,
+    stdio: 'ignore',
+  });
+  execFileSync('git', ['rm', '-f', '--ignore-unmatch', '--', amendment09AcceptancePath], {
     cwd: fixtureRoot,
     stdio: 'ignore',
   });
@@ -221,14 +227,18 @@ if (currentResult.activationEvidence !== 8
     || currentResult.applicabilityTargets !== 28
     || currentResult.productScope.version !== '6.0.1'
     || currentResult.sourceMode !== 'current'
-    || currentResult.r1Entry?.accepted !== true
+    || currentResult.r1Entry?.accepted !== false
+    || currentResult.r1Entry?.stage1?.accepted !== true
     || currentResult.r1Entry?.activation?.permitted !== false) {
   throw new Error('canonical current R1.0 entry mismatch');
 }
 if (canonicalJson(currentResult.r1Authority?.successor?.paths?.filter((relativePath) => (
-  relativePath === amendment07DecisionPath || relativePath === amendment07AcceptancePath
-)).sort()) !== canonicalJson([amendment07AcceptancePath, amendment07DecisionPath].sort())) {
-  throw new Error('canonical amendment-07 successor path mismatch');
+  relativePath === amendment09DecisionPath
+)).sort()) !== canonicalJson([amendment09DecisionPath])) {
+  throw new Error('canonical amendment-09 successor path mismatch');
+}
+if (currentResult.r1Authority?.successor?.accepted !== false) {
+  throw new Error('pre-acceptance amendment-09 authority must remain non-authorizing');
 }
 const result = verifyDeliveryWorkflowAuthority(repositoryRoot, { sourceMode: 'historical' });
 if (result.activationEvidence !== 8
@@ -322,7 +332,7 @@ for (const successorState of ['untracked', 'intent-to-add']) {
 
 if (comprehensiveResult.productScope.version !== '6.0.1'
     || comprehensiveResult.productScope.bytes !== Buffer.byteLength(productScopeSource)
-    || comprehensiveResult.r1Entry?.accepted !== true
+    || comprehensiveResult.r1Entry?.accepted !== false
     || comprehensiveResult.r1Entry?.stage1?.accepted !== true
     || comprehensiveResult.r1Entry?.applicability?.historicalEvidence?.sufficient !== false
     || comprehensiveResult.r1Entry?.applicability?.status !== 'pending-current-evidence'
@@ -454,6 +464,14 @@ rejectCurrentWorkingTree((temporaryRepository) => {
     stdio: 'ignore',
   });
 }, 'malformed amendment-07 execution manifest identity');
+rejectCurrentWorkingTree((temporaryRepository) => {
+  const currentPath = path.join(temporaryRepository, amendment09DecisionPath);
+  fs.writeFileSync(currentPath, `${fs.readFileSync(currentPath, 'utf8')}\nmutated amendment-09 decision\n`);
+  execFileSync('git', ['add', '--', amendment09DecisionPath], {
+    cwd: temporaryRepository,
+    stdio: 'ignore',
+  });
+}, 'changed amendment-09 decision successor binding');
 rejectCurrentWorkingTree((temporaryRepository) => {
   const currentPath = path.join(temporaryRepository, 'strategy/monorepo-architecture.md');
   const historicalBytes = execFileSync(

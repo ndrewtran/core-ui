@@ -61,6 +61,8 @@ export const R1_ENTRY_BINDING = Object.freeze({
 
 const digest = (value) => createHash('sha256').update(value).digest('hex');
 const fail = (message) => { throw new Error(`REACT_ARIA_STAGE1_SOURCE_INVALID: ${message}`); };
+const AMENDMENT_09_DECISION_PATH = 'decisions/0010-amendment-09-r1-bootstrap-delivery-recovery.md';
+const AMENDMENT_09_ACCEPTANCE_PATH = 'decisions/0010-amendment-09-r1-bootstrap-delivery-recovery-acceptance.md';
 const git = (repositoryRoot, args) => execFileSync('git', ['-C', repositoryRoot, ...args], {encoding: 'utf8'}).trim();
 const gitBytes = (repositoryRoot, commit, path) => execFileSync(
   'git',
@@ -165,6 +167,16 @@ export function verifyReactR1Entry(repositoryRoot, options = {}) {
   const roadmapBinding = authority.successor === null
     ? R1_ENTRY_BINDING.continuous.roadmap
     : authority.successor.roadmap;
+  if (authority.successor !== null && authority.successor.paths.includes(AMENDMENT_09_DECISION_PATH)) {
+    const amendment09Paths = authority.successor.paths.filter((path) => (
+      path === AMENDMENT_09_DECISION_PATH || path === AMENDMENT_09_ACCEPTANCE_PATH
+    ));
+    if (amendment09Paths.length !== 1 && amendment09Paths.length !== 2
+        || !amendment09Paths.includes(AMENDMENT_09_DECISION_PATH)
+        || amendment09Paths.length === 2 && !amendment09Paths.includes(AMENDMENT_09_ACCEPTANCE_PATH)) {
+      fail('R1 amendment-09 authority successor path set');
+    }
+  }
   const decisionSource = options.decisionSource
     ?? readTextArtifact(repositoryRoot, R1_ENTRY_BINDING.decision);
 
@@ -208,7 +220,7 @@ export function verifyReactR1Entry(repositoryRoot, options = {}) {
   }
 
   return {
-    accepted: true,
+    accepted: authority.successor?.accepted !== false,
     activation: {
       permitted: false,
       reason: 'current R1.0 evidence locator is pending; historical evidence cannot activate this entry',

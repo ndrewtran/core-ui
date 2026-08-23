@@ -740,21 +740,26 @@ future bytes.
 After exact authority materialization and the private ChangeIntent owner, the
 private R1 continuous-execution verifier is the mandatory entry gate for every
 Project migration, tranche lock, component stage, retained-evidence
-acceptance, and routine Git/PR/merge operation. Its one path-bounded bootstrap
-PR is directly authorized by the accepted envelope; no other operation may
-precede its verified merge. Every later operation binds a passing canonical
-verifier result or remains blocked.
+acceptance, and routine Git/PR/merge operation. Amendment 09 is the sole
+authority self-delivery correction and, after its protected merge is verified,
+admits only the exact ten-path PR #92 bootstrap-delivery sequence through the
+authenticated postmerge `verifier-bootstrap` receipt. Those exceptions are
+one-time, path- and digest-bound, and do not add a ChangeIntent operation kind.
+Every operation after that receipt binds the exact current task-local
+ChangeIntent, passing substantive verifier result, and bootstrap receipt, or
+remains blocked.
 
 Ordinary protected CI runs the same repository-policy entrypoint without a
 task-local operation descriptor in read-only `source-inspection` mode. That
 mode validates authority, prerequisite lineage, source, policy, generation,
 and deterministic checks but grants no write, transition, review, merge,
 evidence, publication, release, or completion authority. The exact accepted
-amendment-07 authority recovery is the sole path- and digest-bound
-pre-prerequisite exception. After its protected merge, immediately before
-every authorized R1 write or external transition, the exact task-local
-ChangeIntent must be reverified against the current preimage; the exception
-cannot be reused.
+amendment-09 authority self-delivery and exact PR #92 bootstrap-delivery
+sequence are the only path- and digest-bound pre-receipt exceptions. After the
+authenticated postmerge bootstrap receipt, immediately before every
+authorized R1 write or external transition, the exact current task-local
+ChangeIntent must be reverified against the current preimage; no bootstrap or
+recovery exception can be reused.
 
 Post-proof and ready-merge review clearance remains external to deterministic
 source and operation verification. The root orchestrator dispatches the fresh
