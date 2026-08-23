@@ -20,10 +20,10 @@ const amendment09AcceptancePath = 'decisions/0010-amendment-09-r1-bootstrap-deli
 const amendment09FixtureIdentity = Object.freeze({
   candidateBytes: '16,596',
   candidateSha256: '30189a4aabc58e2628856eb1a7f75e34f8549e08291ea71e89ae672ccc46472d',
-  diffBytes: '1',
-  diffSha256: '1'.repeat(64),
-  manifestBytes: '1',
-  manifestSha256: '2'.repeat(64),
+  diffBytes: '70,841',
+  diffSha256: '5920807d882e2d8d637cc03d25030df2bf79e7089a9d7f246d6ac8035b8172f6',
+  manifestBytes: '12,040',
+  manifestSha256: '161042eb0b707b6e9102becf2750545bebc92823a1b4f98bd125f0d2bdd07c62',
 });
 const renderAmendment09Acceptance = (identity = amendment09FixtureIdentity) => {
   const statement = renderAmendment09AcceptanceStatement({
@@ -274,6 +274,42 @@ test('R1 authority accepts the fixed current baseline and exact amendment-06 thr
     await writeFile(join(worktree, amendment09AcceptancePath), renderAmendment09Acceptance());
     await execFile('git', ['add', '--', amendment09AcceptancePath], {cwd: worktree, encoding: 'utf8'});
     assert.equal(await hasAcceptedReactPrimaryAuthority(worktree), true, 'A09 exact acceptance enables authority');
+
+    const rejectAmendment09AcceptanceMutation = async (mutate, label) => {
+      const acceptancePath = join(worktree, amendment09AcceptancePath);
+      const original = await readFile(acceptancePath, 'utf8');
+      await writeFile(acceptancePath, mutate(original));
+      await execFile('git', ['add', '--', amendment09AcceptancePath], {cwd: worktree, encoding: 'utf8'});
+      assert.equal(await hasAcceptedReactPrimaryAuthority(worktree), false, label);
+      await writeFile(acceptancePath, original);
+      await execFile('git', ['add', '--', amendment09AcceptancePath], {cwd: worktree, encoding: 'utf8'});
+    };
+    const changedDiffSha256 = '0'.repeat(64);
+    await rejectAmendment09AcceptanceMutation(
+      (source) => source
+        .replace(
+          `- Pre-acceptance materialization diff: ${amendment09FixtureIdentity.diffBytes} bytes, SHA-256 \`${amendment09FixtureIdentity.diffSha256}\``,
+          `- Pre-acceptance materialization diff: 70,842 bytes, SHA-256 \`${changedDiffSha256}\``,
+        )
+        .replaceAll(
+          `pre-acceptance materialization diff, SHA-256 ${amendment09FixtureIdentity.diffSha256}`,
+          `pre-acceptance materialization diff, SHA-256 ${changedDiffSha256}`,
+        ),
+      'coherently changed materialization diff identity must reject',
+    );
+    const changedManifestSha256 = 'f'.repeat(64);
+    await rejectAmendment09AcceptanceMutation(
+      (source) => source
+        .replace(
+          `- Execution manifest: ${amendment09FixtureIdentity.manifestBytes} bytes, SHA-256 \`${amendment09FixtureIdentity.manifestSha256}\``,
+          `- Execution manifest: 12,041 bytes, SHA-256 \`${changedManifestSha256}\``,
+        )
+        .replaceAll(
+          `execution manifest v1, SHA-256 ${amendment09FixtureIdentity.manifestSha256}`,
+          `execution manifest v1, SHA-256 ${changedManifestSha256}`,
+        ),
+      'coherently changed execution manifest identity must reject',
+    );
 
     const nonAncestorFixture = await makeNonAncestorAuthorityFixture();
     try {

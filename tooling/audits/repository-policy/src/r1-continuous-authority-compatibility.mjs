@@ -71,6 +71,10 @@ const AMENDMENT_09_AUTHORITY = Object.freeze({
   productScopeSha256: CURRENT_AUTHORITY.productScopeSha256,
   candidateBytes: 16596,
   candidateSha256: '30189a4aabc58e2628856eb1a7f75e34f8549e08291ea71e89ae672ccc46472d',
+  diffBytes: 70841,
+  diffSha256: '5920807d882e2d8d637cc03d25030df2bf79e7089a9d7f246d6ac8035b8172f6',
+  manifestBytes: 12040,
+  manifestSha256: '161042eb0b707b6e9102becf2750545bebc92823a1b4f98bd125f0d2bdd07c62',
 });
 const AMENDMENT_09_ACCEPTANCE_NONCLAIM = 'This record claims acceptance only; it records no PR, checks, review, merge, implementation, Project, publication, or release outcome.';
 const AMENDMENT_09_ACCEPTANCE_AUTHORIZED_ACTION = 'I authorize the exact ten-path authority materialization including the owner acceptance record; its authority issue, protected non-draft PR, and merge after all named deterministic checks and external authority review pass; the exact ten-path PR #92 recovery, protected intermediate merge, postmerge verification, bounded Project README reconciliation, and continuation under the existing R1 continuous-execution envelope. Npm publication and the final R1-exit PR merge remain separate stops.';
@@ -494,8 +498,12 @@ function assertAmendment09Acceptance(bytes) {
   const candidate = parseIdentity('Candidate');
   const diff = parseIdentity('Pre-acceptance materialization diff');
   const manifest = parseIdentity('Execution manifest');
-  if (candidate.bytes !== '16,596' || candidate.sha256 !== AMENDMENT_09_AUTHORITY.candidateSha256) {
-    fail('amendment 09 acceptance candidate identity');
+  if (candidate.bytes !== '16,596' || candidate.sha256 !== AMENDMENT_09_AUTHORITY.candidateSha256
+      || Number(diff.bytes.replaceAll(',', '')) !== AMENDMENT_09_AUTHORITY.diffBytes
+      || diff.sha256 !== AMENDMENT_09_AUTHORITY.diffSha256
+      || Number(manifest.bytes.replaceAll(',', '')) !== AMENDMENT_09_AUTHORITY.manifestBytes
+      || manifest.sha256 !== AMENDMENT_09_AUTHORITY.manifestSha256) {
+    fail('amendment 09 acceptance candidate/diff/manifest identity');
   }
   const approval = text.match(/^- Approval instruction: “([^”\n]+)”$/mu)?.[1];
   const human = text.match(/^- Human acceptance: Andrew \/ `ndrewtran`: “([^”\n]+)”$/mu)?.[1];

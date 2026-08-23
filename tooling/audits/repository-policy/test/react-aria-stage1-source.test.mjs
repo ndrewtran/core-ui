@@ -28,10 +28,10 @@ const amendment09AcceptancePath = 'decisions/0010-amendment-09-r1-bootstrap-deli
 const amendment09FixtureIdentity = Object.freeze({
   candidateBytes: '16,596',
   candidateSha256: '30189a4aabc58e2628856eb1a7f75e34f8549e08291ea71e89ae672ccc46472d',
-  diffBytes: '1',
-  diffSha256: '1'.repeat(64),
-  manifestBytes: '1',
-  manifestSha256: '2'.repeat(64),
+  diffBytes: '70,841',
+  diffSha256: '5920807d882e2d8d637cc03d25030df2bf79e7089a9d7f246d6ac8035b8172f6',
+  manifestBytes: '12,040',
+  manifestSha256: '161042eb0b707b6e9102becf2750545bebc92823a1b4f98bd125f0d2bdd07c62',
 });
 const renderAmendment09Acceptance = (identity = amendment09FixtureIdentity) => {
   const statement = renderAmendment09AcceptanceStatement({
@@ -252,7 +252,7 @@ test('R1.0 entry gate accepts only current authority and remains closed pending 
     'candidate digest identity must remain fixed',
   );
   rejectAmendment09AcceptanceMutation(
-    (source) => source.replace('- Pre-acceptance materialization diff: 1 bytes', '- Pre-acceptance materialization diff: 0 bytes'),
+    (source) => source.replace('- Pre-acceptance materialization diff: 70,841 bytes', '- Pre-acceptance materialization diff: 0 bytes'),
     'materialization diff bytes must be positive',
   );
   rejectAmendment09AcceptanceMutation(
@@ -260,12 +260,38 @@ test('R1.0 entry gate accepts only current authority and remains closed pending 
     'materialization diff digest must bind the statement',
   );
   rejectAmendment09AcceptanceMutation(
-    (source) => source.replace('- Execution manifest: 1 bytes', '- Execution manifest: 0 bytes'),
+    (source) => source.replace('- Execution manifest: 12,040 bytes', '- Execution manifest: 0 bytes'),
     'execution manifest bytes must be positive',
   );
   rejectAmendment09AcceptanceMutation(
     (source) => source.replace(amendment09FixtureIdentity.manifestSha256, '4'.repeat(64)),
     'execution manifest digest must bind the statement',
+  );
+  const changedDiffSha256 = '0'.repeat(64);
+  rejectAmendment09AcceptanceMutation(
+    (source) => source
+      .replace(
+        `- Pre-acceptance materialization diff: ${amendment09FixtureIdentity.diffBytes} bytes, SHA-256 \`${amendment09FixtureIdentity.diffSha256}\``,
+        `- Pre-acceptance materialization diff: 70,842 bytes, SHA-256 \`${changedDiffSha256}\``,
+      )
+      .replaceAll(
+        `pre-acceptance materialization diff, SHA-256 ${amendment09FixtureIdentity.diffSha256}`,
+        `pre-acceptance materialization diff, SHA-256 ${changedDiffSha256}`,
+      ),
+    'coherently changed materialization diff identity must reject',
+  );
+  const changedManifestSha256 = 'f'.repeat(64);
+  rejectAmendment09AcceptanceMutation(
+    (source) => source
+      .replace(
+        `- Execution manifest: ${amendment09FixtureIdentity.manifestBytes} bytes, SHA-256 \`${amendment09FixtureIdentity.manifestSha256}\``,
+        `- Execution manifest: 12,041 bytes, SHA-256 \`${changedManifestSha256}\``,
+      )
+      .replaceAll(
+        `execution manifest v1, SHA-256 ${amendment09FixtureIdentity.manifestSha256}`,
+        `execution manifest v1, SHA-256 ${changedManifestSha256}`,
+      ),
+    'coherently changed execution manifest identity must reject',
   );
   rejectAmendment09AcceptanceMutation(
     (source) => source.replace('I authorize the exact ten-path', 'I authorize an arbitrary extra path and the exact ten-path'),
