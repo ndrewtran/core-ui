@@ -26,3 +26,20 @@ export {
   renderJson,
   tokenBudgetFor,
 } from './renderers.mjs';
+export {
+  CHANGE_INTENT_BINDINGS,
+  CHANGE_INTENT_LOCK_PROFILE,
+  CHANGE_INTENT_PROFILE,
+  CHANGE_INTENT_SCHEMA_PATH,
+  ChangeIntentError,
+  canonicalChangeIntentBytes,
+  changeIntentIdentity,
+  createChangeIntent,
+  createChangeIntentEnvelope,
+  deriveChangeIntentEnvelope,
+  parseChangeIntentBytes,
+  previewChangeIntentEnvelope,
+  readChangeIntentRecord,
+  recordDescriptor,
+  validateChangeIntentEnvelope,
+} from './change-intent.mjs';

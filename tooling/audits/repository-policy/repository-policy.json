@@ -57,11 +57,33 @@
       "provenance": "packages/tokens/generated/tale-token-occurrences.json.provenance"
     }
   ],
+  "generatorProjectionGroups": [
+    {
+      "id": "core-ui-catalog-generation-v1",
+      "whenCanonicalSourcePrefixes": ["catalog/"],
+      "whenProjectionsInclude": [
+        "packages/catalog/generated/catalog.json",
+        "packages/catalog/generated/catalog-package.json"
+      ],
+      "outputs": [
+        "packages/catalog/generated/catalog-package.json",
+        "packages/catalog/generated/catalog-package.json.provenance",
+        "packages/catalog/generated/catalog.json",
+        "packages/catalog/generated/catalog.json.provenance",
+        "packages/catalog/generated/catalog.mjs"
+      ]
+    }
+  ],
   "globalTaskInputs": [
     ".agents/",
     ".github/",
+    "catalog/",
     "decisions/",
+    "packages/",
     "strategy/",
+    "apps/",
+    "tooling/",
+    "tests/",
     ".node-version",
     ".npmrc",
     "AGENTS.md",
@@ -89,6 +111,41 @@
     ],
     "profile": "core-ui-dependency-preparation-command-v1",
     "storePlaceholder": "<declared-offline-store>"
+  },
+  "r1ContinuousExecution": {
+    "failClosed": true,
+    "profile": "core-ui-r1-continuous-execution-verifier-v1",
+    "verifierPath": "tooling/audits/repository-policy/src/r1-continuous-execution-verify.mjs",
+    "testPath": "tooling/audits/repository-policy/test/r1-continuous-execution.test.mjs",
+    "manifestPath": "decisions/0010-amendment-09-r1-bootstrap-delivery-recovery-acceptance.md",
+    "authorityMerge": {
+      "commit": "8979f2d0e4438529638da8269d951b0537d6970e",
+      "tree": "cbcdd2ad1ff87b9a28177ada72744b8018b208f8"
+    },
+    "bootstrapWriteSet": [
+      "packages/schema/schemas/change-intent-envelope.schema.json",
+      "packages/schema/test/change-intent-envelope.test.mjs",
+      "packages/tooling/src/change-intent.mjs",
+      "packages/tooling/src/index.mjs",
+      "packages/tooling/test/change-intent.test.mjs",
+      "tooling/audits/repository-policy/README.md",
+      "tooling/audits/repository-policy/repository-policy.json",
+      "tooling/audits/repository-policy/src/cli.mjs",
+      "tooling/audits/repository-policy/src/r1-continuous-execution-verify.mjs",
+      "tooling/audits/repository-policy/test/r1-continuous-execution.test.mjs"
+    ],
+    "policyGate": {
+      "requiredEnv": "CORE_UI_R1_OPERATION_REQUIRED",
+      "descriptorEnv": "CORE_UI_R1_OPERATION_PATH",
+      "recordRoot": ".git/core-ui-r1/",
+      "noOpPrefixes": ["notes/"]
+    },
+    "hosted": {
+      "provider": "github",
+      "repository": "ndrewtran/core-ui",
+      "defaultBranch": "main",
+      "protectedRef": "refs/heads/main"
+    }
   },
   "toolchain": {
     "node": "24.19.0",
