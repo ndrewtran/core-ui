@@ -7,6 +7,10 @@ import { tmpdir } from 'node:os';
 import test from 'node:test';
 import { join } from 'node:path';
 import {
+  hasAcceptedR1ContinuousAuthority,
+  renderAmendment09AcceptanceStatement,
+} from '../src/r1-continuous-authority-compatibility.mjs';
+import {
   R1_ENTRY_BINDING,
   STAGE1_ARTIFACTS,
   STAGE1_SOURCE,
@@ -19,6 +23,45 @@ const r1AcceptancePath = 'decisions/0010-amendment-04-r1-continuous-execution-ac
 const r1ManifestPath = 'decisions/0010-amendment-04-r1-continuous-execution-materialization.json';
 const amendment07DecisionPath = 'decisions/0010-amendment-07-r1-external-review-ci-recovery.md';
 const amendment07AcceptancePath = 'decisions/0010-amendment-07-r1-external-review-ci-recovery-acceptance.md';
+const amendment09DecisionPath = 'decisions/0010-amendment-09-r1-bootstrap-delivery-recovery.md';
+const amendment09AcceptancePath = 'decisions/0010-amendment-09-r1-bootstrap-delivery-recovery-acceptance.md';
+const amendment09FixtureIdentity = Object.freeze({
+  candidateBytes: '16,596',
+  candidateSha256: '30189a4aabc58e2628856eb1a7f75e34f8549e08291ea71e89ae672ccc46472d',
+  diffBytes: '1',
+  diffSha256: '1'.repeat(64),
+  manifestBytes: '1',
+  manifestSha256: '2'.repeat(64),
+});
+const renderAmendment09Acceptance = (identity = amendment09FixtureIdentity) => {
+  const statement = renderAmendment09AcceptanceStatement({
+    candidateSha256: identity.candidateSha256,
+    diffSha256: identity.diffSha256,
+    manifestSha256: identity.manifestSha256,
+  });
+  return [
+    '# Acceptance: Decision 0010 amendment 09',
+    '',
+    '- Decision: `core-ui:decision:0010:amendment:09`',
+    '- Parent decision: `core-ui:decision:0010`',
+    '- Repository: `ndrewtran/core-ui`',
+    '- Owner: Andrew / `ndrewtran`',
+    '- Outcome: Accepted',
+    `- Candidate: ${identity.candidateBytes} bytes, SHA-256 \`${identity.candidateSha256}\``,
+    `- Pre-acceptance materialization diff: ${identity.diffBytes} bytes, SHA-256 \`${identity.diffSha256}\``,
+    `- Execution manifest: ${identity.manifestBytes} bytes, SHA-256 \`${identity.manifestSha256}\``,
+    `- Decision path: \`${amendment09DecisionPath}\``,
+    `- Acceptance path: \`${amendment09AcceptancePath}\``,
+    `- Approval instruction: “${statement}”`,
+    `- Human acceptance: Andrew / \`ndrewtran\`: “${statement}”`,
+    '- Approval timestamp: Not recorded',
+    '- Protected authority PR/merge: Pending; not claimed by this record',
+    '',
+    'This record claims acceptance only; it records no PR, checks, review, merge, implementation, Project, publication, or release outcome.',
+    '',
+  ].join('\n');
+};
+const amendment09Acceptance = renderAmendment09Acceptance();
 const sha256 = (source) => createHash('sha256').update(source).digest('hex');
 const pinnedCurrentAuthority = Object.freeze({
   authorityDecisionSource: fs.readFileSync(join(repositoryRoot, 'decisions/0010-amendment-06-r1-change-intent-owner.md'), 'utf8'),
@@ -57,6 +100,10 @@ const makeR1Fixture = (receiptState = 'staged') => {
     execFileSync('git', ['add', '--', ...stagedPaths], {cwd: fixtureRoot, stdio: 'ignore'});
   }
   execFileSync('git', ['rm', '--ignore-unmatch', '--', r1AcceptancePath], {
+    cwd: fixtureRoot,
+    stdio: 'ignore',
+  });
+  execFileSync('git', ['rm', '-f', '--ignore-unmatch', '--', amendment09AcceptancePath], {
     cwd: fixtureRoot,
     stdio: 'ignore',
   });
@@ -161,13 +208,83 @@ test('R1.0 entry gate accepts only current authority and remains closed pending 
   const fixtureRoot = makeR1Fixture();
   try {
   const result = verifyReactR1Entry(fixtureRoot);
-  assert.equal(result.accepted, true);
+  assert.equal(result.accepted, false);
+  assert.equal(result.authority.successor?.accepted, false);
+  assert.equal(hasAcceptedR1ContinuousAuthority(fixtureRoot), false);
   assert.equal(result.productScope.version, '6.0.1');
   assert.equal(result.decision.sha256, R1_ENTRY_BINDING.decision.sha256);
   assert.equal(result.stage1.accepted, true);
   assert.deepEqual(
-    result.authority.successor?.paths.filter((path) => path.startsWith('decisions/0010-amendment-07-')).sort(),
-    [amendment07AcceptancePath, amendment07DecisionPath].sort(),
+    result.authority.successor?.paths.filter((path) => path === amendment09DecisionPath).sort(),
+    [amendment09DecisionPath],
+  );
+  fs.writeFileSync(join(fixtureRoot, amendment09AcceptancePath), amendment09Acceptance);
+  execFileSync('git', ['add', '--', amendment09AcceptancePath], {cwd: fixtureRoot, stdio: 'ignore'});
+  const acceptedResult = verifyReactR1Entry(fixtureRoot);
+  assert.equal(acceptedResult.accepted, true);
+  assert.equal(acceptedResult.authority.successor?.accepted, true);
+  assert.equal(hasAcceptedR1ContinuousAuthority(fixtureRoot), true);
+  assert.deepEqual(
+    acceptedResult.authority.successor?.paths.filter((path) => (
+      path === amendment09DecisionPath || path === amendment09AcceptancePath
+    )).sort(),
+    [amendment09AcceptancePath, amendment09DecisionPath].sort(),
+  );
+  const rejectAmendment09AcceptanceMutation = (mutate, label) => {
+    const acceptancePath = join(fixtureRoot, amendment09AcceptancePath);
+    const original = fs.readFileSync(acceptancePath, 'utf8');
+    fs.writeFileSync(acceptancePath, mutate(original));
+    execFileSync('git', ['add', '--', amendment09AcceptancePath], {cwd: fixtureRoot, stdio: 'ignore'});
+    assert.throws(
+      () => verifyReactR1Entry(fixtureRoot),
+      /REACT_ARIA_STAGE1_SOURCE_INVALID: R1\.0 Product Scope/u,
+      label,
+    );
+    fs.writeFileSync(acceptancePath, original);
+    execFileSync('git', ['add', '--', amendment09AcceptancePath], {cwd: fixtureRoot, stdio: 'ignore'});
+  };
+  rejectAmendment09AcceptanceMutation(
+    (source) => source.replace('16,596 bytes', '16,597 bytes'),
+    'candidate byte identity must remain fixed',
+  );
+  rejectAmendment09AcceptanceMutation(
+    (source) => source.replace(amendment09FixtureIdentity.candidateSha256, '0'.repeat(64)),
+    'candidate digest identity must remain fixed',
+  );
+  rejectAmendment09AcceptanceMutation(
+    (source) => source.replace('- Pre-acceptance materialization diff: 1 bytes', '- Pre-acceptance materialization diff: 0 bytes'),
+    'materialization diff bytes must be positive',
+  );
+  rejectAmendment09AcceptanceMutation(
+    (source) => source.replace(amendment09FixtureIdentity.diffSha256, '3'.repeat(64)),
+    'materialization diff digest must bind the statement',
+  );
+  rejectAmendment09AcceptanceMutation(
+    (source) => source.replace('- Execution manifest: 1 bytes', '- Execution manifest: 0 bytes'),
+    'execution manifest bytes must be positive',
+  );
+  rejectAmendment09AcceptanceMutation(
+    (source) => source.replace(amendment09FixtureIdentity.manifestSha256, '4'.repeat(64)),
+    'execution manifest digest must bind the statement',
+  );
+  rejectAmendment09AcceptanceMutation(
+    (source) => source.replace('I authorize the exact ten-path', 'I authorize an arbitrary extra path and the exact ten-path'),
+    'approval wording must remain exact and duplicated',
+  );
+  rejectAmendment09AcceptanceMutation(
+    (source) => source.replace(
+      /^- Human acceptance:.*$/mu,
+      (line) => line.replace('Npm publication and the final R1-exit PR merge remain separate stops.', 'Npm publication and an arbitrary release action remain separate stops.'),
+    ),
+    'human acceptance wording must remain exact and duplicated',
+  );
+  rejectAmendment09AcceptanceMutation(
+    (source) => source.replaceAll('Npm publication and the final R1-exit PR merge remain separate stops.', 'Npm publication and an arbitrary release action remain separate stops.'),
+    'arbitrary authorization tail must reject',
+  );
+  rejectAmendment09AcceptanceMutation(
+    (source) => `${source}arbitrary authorization tail\n`,
+    'appended authorization tail must reject',
   );
   assert.deepEqual(result.applicability, {
     currentEvidenceLocator: null,
@@ -309,6 +426,23 @@ test('R1.0 entry gate accepts only current authority and remains closed pending 
       '- Execution manifest: malformed bytes, SHA-256 `not-a-digest`',
     ),
     'malformed amendment-07 execution manifest identity must reject',
+  );
+  const rejectAmendment09Mutation = (mutate, label) => {
+    const currentPath = join(fixtureRoot, amendment09DecisionPath);
+    const original = fs.readFileSync(currentPath, 'utf8');
+    fs.writeFileSync(currentPath, mutate(original));
+    execFileSync('git', ['add', '--', amendment09DecisionPath], {cwd: fixtureRoot, stdio: 'ignore'});
+    assert.throws(
+      () => verifyReactR1Entry(fixtureRoot),
+      /REACT_ARIA_STAGE1_SOURCE_INVALID: R1\.0 Product Scope/u,
+      label,
+    );
+    fs.writeFileSync(currentPath, original);
+    execFileSync('git', ['add', '--', amendment09DecisionPath], {cwd: fixtureRoot, stdio: 'ignore'});
+  };
+  rejectAmendment09Mutation(
+    (source) => `${source}\nmutated amendment-09 decision\n`,
+    'changed amendment-09 decision must reject the exact successor binding',
   );
 
   const historicalProductScope = execFileSync(

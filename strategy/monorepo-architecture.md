@@ -2541,9 +2541,18 @@ Unknown, missing, mismatched, incomplete, or out-of-envelope input fails
 closed.
 
 The verifier and its repository-policy integration may be bootstrapped once
-through the exact path-bounded grant in the accepted envelope. No Project,
-component, retained-evidence, or routine Git operation may precede its verified
-merge, and no later bootstrap exception exists.
+through the exact path-bounded grant in the accepted envelope. Amendment 09
+admits only the exact amendment-09 authority self-delivery and, after that
+authority is protectively merged and verified, the exact ten-path PR #92
+bootstrap-delivery sequence through its authenticated postmerge
+`verifier-bootstrap` receipt. These are one-time, path- and digest-bound
+exceptions; no ordinary ChangeIntent, prior substantive verifier result, or
+bootstrap receipt is required only for those exact transitions because PR #92
+installs the sole verifier owner. After the authenticated receipt exists,
+every Project, component, retained-evidence, or routine Git/PR/merge/cleanup
+operation again requires the exact current task-local `ChangeIntentEnvelope`,
+passing substantive verifier result, and bootstrap receipt. No later bootstrap
+or recovery exception exists.
 
 The private verifier has two deterministic modes. Descriptor-free
 `source-inspection` is read-only and may run over an ordinary protected-CI
