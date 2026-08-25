@@ -2,16 +2,17 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { createHash } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
-import { readFile, readdir } from 'node:fs/promises';
-import { resolve } from 'node:path';
+import { mkdir, mkdtemp, readFile, readdir, rename, rm, symlink } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join, resolve } from 'node:path';
 import { reactCompatibility } from '../generated/index.mjs';
 import { compileTokenGraph, compileTokenRequirementSet, validateThemeForRequirementSet } from '@core-ui/tokens';
 import {
-  assertReactR10GeneratedContracts,
+  assertReactR11GeneratedContracts,
   assertReactR10SourceContracts,
 } from '../src/r1-contracts.mjs';
 
-test('R1.0 package has an exact standalone substrate identity', async () => {
+test('R1.1 package has an exact standalone substrate identity', async () => {
   assert.equal(reactCompatibility.package, '@core-ui/react');
   assert.equal(reactCompatibility.upstream.version, '1.20.0');
   assert.equal(reactCompatibility.upstream.gitHead, '5ecb3333001313e83898cd07644227897e3bae1f');
@@ -24,27 +25,72 @@ test('R1.0 package has an exact standalone substrate identity', async () => {
   assert.equal(manifest.dependencies['@core-ui/web'], undefined);
 });
 
-test('R1.0 is packable but direct publication fails closed', () => {
+test('R1.1 is packable but direct publication fails closed', () => {
   const packageRoot = resolve(import.meta.dirname, '..');
   const result = spawnSync(process.execPath, ['src/publish-guard.mjs'], {
     cwd: packageRoot,
     encoding: 'utf8',
   });
   assert.notEqual(result.status, 0);
-  assert.match(result.stderr, /CORE_REACT_R10_PUBLISH_FORBIDDEN/u);
+  assert.match(result.stderr, /CORE_REACT_R11_PUBLISH_FORBIDDEN/u);
 });
 
-test('R1.0 public surface does not export Button or upstream types', async () => {
+test('R1.1 packed package exposes only the clean Core Button surface', async () => {
+  const packageRoot = resolve(import.meta.dirname, '..');
+  const packRoot = await mkdtemp(join(tmpdir(), 'core-ui-react-pack-'));
+  const consumerRoot = await mkdtemp(join(tmpdir(), 'core-ui-react-consumer-'));
+  try {
+    const packed = spawnSync('pnpm', ['pack', '--pack-destination', packRoot], {
+      cwd: packageRoot,
+      encoding: 'utf8',
+    });
+    assert.equal(packed.status, 0, packed.stderr);
+    const archiveName = (await readdir(packRoot)).find((name) => name.endsWith('.tgz'));
+    assert.ok(archiveName);
+    const archive = join(packRoot, archiveName);
+    const listing = spawnSync('tar', ['-tzf', archive], { encoding: 'utf8' });
+    assert.equal(listing.status, 0, listing.stderr);
+    for (const entry of ['package/generated/button.mjs', 'package/generated/index.d.ts', 'package/generated/styles.css', 'package/NOTICE']) {
+      assert.match(listing.stdout, new RegExp(`^${entry.replaceAll('.', '\\.')}$`, 'mu'));
+    }
+
+    const packageParent = join(consumerRoot, 'node_modules', '@core-ui');
+    await mkdir(packageParent, { recursive: true });
+    const extracted = spawnSync('tar', ['-xzf', archive, '-C', packageParent], { encoding: 'utf8' });
+    assert.equal(extracted.status, 0, extracted.stderr);
+    const extractedPackage = join(packageParent, 'package');
+    const consumerPackage = join(packageParent, 'react');
+    await rename(extractedPackage, consumerPackage);
+    await symlink(resolve(packageRoot, 'node_modules'), join(consumerPackage, 'node_modules'), 'dir');
+
+    const imported = spawnSync(process.execPath, [
+      '--input-type=module',
+      '-e',
+      "import('@core-ui/react').then(({ Button }) => { if (!Button) throw new Error('Button export missing'); })",
+    ], { cwd: consumerRoot, encoding: 'utf8' });
+    assert.equal(imported.status, 0, imported.stderr);
+    const publicTypes = await readFile(join(consumerPackage, 'generated/index.d.ts'), 'utf8');
+    assert.doesNotMatch(publicTypes, /react-aria-components|isPending|isDisabled|onPress/u);
+  } finally {
+    await Promise.all([
+      rm(packRoot, { recursive: true, force: true }),
+      rm(consumerRoot, { recursive: true, force: true }),
+    ]);
+  }
+});
+
+test('R1.1 public surface exports Core Button without upstream types', async () => {
   const packageRoot = resolve(import.meta.dirname, '..');
   const manifest = JSON.parse(await readFile(resolve(packageRoot, 'package.json'), 'utf8'));
   assert.deepEqual(Object.keys(manifest.exports).sort(), ['.', './compatibility', './styles.css', './testing']);
   const entry = await import('../generated/index.mjs');
-  assert.equal('Button' in entry, false);
+  assert.equal('Button' in entry, true);
+  assert.equal('ButtonProps' in entry, false);
   const release = JSON.parse(await readFile(resolve(packageRoot, 'generated/release.json'), 'utf8'));
-  assert.deepEqual(release.componentExports, []);
-  assert.deepEqual(release.bindings, []);
-  assert.deepEqual(release.runtimeProfiles, []);
-  assert.equal(release.catalog.status, 'not-applicable');
+  assert.deepEqual(release.componentExports.map(({ name }) => name), ['Button']);
+  assert.deepEqual(release.bindings.map(({ binding }) => binding), ['core:component:button#web.react']);
+  assert.deepEqual(release.runtimeProfiles, ['web.react']);
+  assert.equal(release.catalog.status, 'bound');
   assert.equal(release.evidence.status, 'pending');
   assert.equal(release.publication.status, 'disabled');
   assert.deepEqual(release.publication.requires, ['explicit external publish authorization']);
@@ -125,27 +171,27 @@ test('R1.0 upstream and catalog contracts reject complete-surface and shape drif
   assert.throws(() => assertSource({ license: missingLicense }), /CORE_SCHEMA_INVALID/u);
 });
 
-test('R1.0 generated contracts reject missing, unknown, and publication drift', async () => {
+test('R1.1 generated contracts reject missing, unknown, and publication drift', async () => {
   const packageRoot = resolve(import.meta.dirname, '..');
   const manifest = JSON.parse(await readFile(resolve(packageRoot, 'package.json'), 'utf8'));
   const descriptor = JSON.parse(await readFile(resolve(packageRoot, 'generated/descriptor.json'), 'utf8'));
   const release = JSON.parse(await readFile(resolve(packageRoot, 'generated/release.json'), 'utf8'));
   const donorComparison = JSON.parse(await readFile(resolve(packageRoot, 'generated/button-donor-comparison.json'), 'utf8'));
   const crosswalk = JSON.parse(await readFile(resolve(packageRoot, '../../catalog/react-r1-0/donor-crosswalk.json'), 'utf8'));
-  const assertGenerated = (overrides = {}) => assertReactR10GeneratedContracts({ descriptor, release, donorComparison, manifest, crosswalk, ...overrides });
+  const assertGenerated = (overrides = {}) => assertReactR11GeneratedContracts({ descriptor, release, donorComparison, manifest, crosswalk, ...overrides });
   assertGenerated();
   const unknownDescriptor = structuredClone(descriptor);
   unknownDescriptor.unknown = true;
-  assert.throws(() => assertGenerated({ descriptor: unknownDescriptor }), /CORE_SCHEMA_INVALID/u);
+  assert.throws(() => assertGenerated({ descriptor: unknownDescriptor }), /CORE_REACT_R11_DESCRIPTOR_INVALID/u);
   const missingRelease = structuredClone(release);
   delete missingRelease.publication;
-  assert.throws(() => assertGenerated({ release: missingRelease }), /CORE_SCHEMA_INVALID/u);
+  assert.throws(() => assertGenerated({ release: missingRelease }), /CORE_REACT_R11_RELEASE_INVALID/u);
   const publishableManifest = structuredClone(manifest);
   publishableManifest.private = false;
-  assert.throws(() => assertGenerated({ manifest: publishableManifest }), /CORE_REACT_R10_PUBLICATION_GUARD_MISSING/u);
+  assert.throws(() => assertGenerated({ manifest: publishableManifest }), /CORE_REACT_R11_PUBLICATION_GUARD_MISSING/u);
   const changedComparison = structuredClone(donorComparison);
   changedComparison.donor.commit = '0'.repeat(40);
-  assert.throws(() => assertGenerated({ donorComparison: changedComparison }), /CORE_REACT_DONOR_COMPARISON_DERIVATION_DRIFT/u);
+  assert.throws(() => assertGenerated({ donorComparison: changedComparison }), /CORE_REACT_R11_DONOR_COMPARISON_DRIFT/u);
 });
 
 test('R1.0 donor inputs are exact, fully crosswalked, licensed, and dependency-free', async () => {

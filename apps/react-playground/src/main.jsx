@@ -13,7 +13,7 @@ const profiles = [
 ];
 
 createRoot(document.querySelector('#root')).render(React.createElement('main', null,
-  React.createElement('h1', null, 'Core UI React R1.0 baseline'),
+  React.createElement('h1', null, 'Core UI React R1.1 Button'),
   profiles.map(([colorScheme, contrast, motion, density, direction]) => React.createElement('section', {
     key: [colorScheme, contrast, motion, density, direction].join('-'),
     'data-profile': [colorScheme, contrast, motion, density, direction].join('/'),

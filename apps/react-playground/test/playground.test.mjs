@@ -3,7 +3,7 @@ import test from 'node:test';
 import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 
-test('private playground is the bounded R1.0 theme and comparison host', async () => {
+test('private playground is the bounded R1.1 Button theme and comparison host', async () => {
   const manifest = JSON.parse(await readFile(resolve(import.meta.dirname, '../package.json'), 'utf8'));
   assert.equal(manifest.private, true);
   assert.equal(manifest.devDependencies.vite, '8.2.1');

@@ -26,7 +26,7 @@ async function waitForServer(url) {
   throw new Error('playground preview did not become ready');
 }
 
-test('R1.0 browser and axe matrix', async () => {
+test('R1.1 Button browser and axe matrix', async () => {
   if (!executablePath) throw new Error('R1_BROWSER_REQUIRED: Chrome or Chromium was not found');
   const appRoot = resolve(import.meta.dirname, '..');
   const server = await createServer({ root: appRoot, server: { host: '127.0.0.1', port: 4173, strictPort: true } });

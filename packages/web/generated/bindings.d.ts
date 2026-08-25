@@ -1,5 +1,5 @@
 // @generated-from: packages/catalog/catalog-sources.json
-// @generated-content-sha256: sha256:636e5d1e8b3929b5d97bc5cf82b6c6f60a3211d89bc126501be5293c9456fed7
+// @generated-content-sha256: sha256:2a93665cf8512274de5d182db5ddb406a6de82bf15b6241e4be7ee3dc7c28e49
 export interface ButtonWebHtmlBinding {
   readonly bindingRef: "core:component:button#web.html";
   readonly props: {
@@ -15,6 +15,7 @@ export interface ButtonWebReactBinding {
   readonly bindingRef: "core:component:button#web.react";
   readonly props: {
     readonly "disabled"?: boolean;
+    readonly "pending"?: boolean;
   };
   readonly events: {
     readonly "activate": CustomEvent<void>;

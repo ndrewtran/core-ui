@@ -1,5 +1,5 @@
 /* @generated-from: packages/react/src/generate.mjs
- * @generated-content-sha256: sha256:52fcdae7762b37bfc1b3a9d5b1d6313ac717800a287db2270accedc8e896d938
+ * @generated-content-sha256: sha256:b138983f8ac0d0dc1d8250df839d42885edd652c2e446e2cf04012ced3838f71
  */
 :root {
   --core-component-button-background: #2b2826;
@@ -338,6 +338,56 @@
 }
 
 [data-core-direction='rtl'] { direction: rtl; }
+
+.core-button {
+  --core-button-background: var(--core-component-button-background);
+  --core-button-foreground: var(--core-component-button-foreground);
+  --core-button-focus-ring: var(--core-semantic-focus-ring);
+  --core-button-feedback-duration: var(--core-semantic-motion-feedback);
+  display: inline-flex;
+  position: relative;
+  align-items: center;
+  justify-content: center;
+  gap: var(--core-reference-dimension-space-2xs);
+  box-sizing: border-box;
+  min-height: var(--core-component-button-min-height);
+  padding: var(--core-reference-dimension-space-2xs) var(--core-component-button-padding-inline);
+  border: 1px solid transparent;
+  border-radius: var(--core-component-button-radius);
+  font: inherit;
+  line-height: 1;
+  white-space: nowrap;
+  user-select: none;
+  cursor: pointer;
+  background: var(--core-button-background);
+  color: var(--core-button-foreground);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 20%);
+  transition: opacity var(--core-button-feedback-duration) ease, background-color var(--core-button-feedback-duration) ease;
+}
+
+.core-button[data-hovered]:not([data-disabled], [data-pending]) { opacity: 0.9; }
+.core-button[data-pressed]:not([data-disabled], [data-pending]) { opacity: 0.8; }
+.core-button[data-focus-visible] {
+  outline: 2px solid var(--core-button-focus-ring);
+  outline-offset: 2px;
+}
+.core-button[data-disabled] { cursor: not-allowed; opacity: 0.5; }
+.core-button[data-pending] { cursor: progress; }
+
+@media (forced-colors: active) {
+  .core-button {
+    border-color: ButtonText;
+    background: ButtonFace;
+    color: ButtonText;
+    box-shadow: none;
+  }
+  .core-button[data-disabled] { border-color: GrayText; color: GrayText; }
+  .core-button[data-focus-visible] { outline-color: Highlight; }
+}
+
+@media (prefers-contrast: more) {
+  .core-button { border-color: currentColor; }
+}
 
 .core-r1-button {
   display: inline-flex;

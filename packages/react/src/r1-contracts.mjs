@@ -129,3 +129,63 @@ export function assertReactR10GeneratedContracts({
   }
   return { descriptor, release, donorComparison };
 }
+
+/** Validates the first Core-owned component projection without exposing RAC types. */
+export function assertReactR11GeneratedContracts({
+  descriptor,
+  release,
+  donorComparison,
+  manifest,
+  crosswalk,
+}) {
+  if (manifest.private !== true || release.packagePrivate !== true) {
+    fail('CORE_REACT_R11_PUBLICATION_GUARD_MISSING');
+  }
+  if (!same(Object.keys(descriptor).sort(), ['bindings', 'exports', 'generatedFrom', 'package', 'schema', 'support', 'version'])
+    || descriptor.schema !== 'core-ui-renderer-descriptor-v1'
+    || descriptor.generatedFrom !== 'packages/react/src/generate.mjs'
+    || descriptor.package !== '@core-ui/react'
+    || descriptor.support !== 'unproved; Button export only'
+    || descriptor.bindings.length !== 1
+    || descriptor.exports.length !== 1) {
+    fail('CORE_REACT_R11_DESCRIPTOR_INVALID');
+  }
+  const [binding] = descriptor.bindings;
+  const [componentExport] = descriptor.exports;
+  if (binding.binding !== 'core:component:button#web.react'
+    || binding.export !== 'Button'
+    || binding.strategy !== 'direct'
+    || binding.runtimeProfile !== 'web.react'
+    || binding.selector !== '.core-button'
+    || !same(binding.states, ['idle', 'pending', 'disabled'])
+    || !same(binding.api.props, ['disabled', 'pending'])
+    || !same(binding.api.defaults, { disabled: false, pending: false })
+    || componentExport.name !== 'Button'
+    || componentExport.binding !== binding.binding) {
+    fail('CORE_REACT_R11_BUTTON_DESCRIPTOR_DRIFT');
+  }
+  if (!release.publication
+    || release.schema !== 'core-ui-react-release-candidate-v1'
+    || release.lifecycle !== 'experimental'
+    || release.componentExports.length !== 1
+    || release.bindings.length !== 1
+    || !same(release.runtimeProfiles, ['web.react'])
+    || release.catalog.status !== 'bound'
+    || !same(release.catalog.states, ['idle', 'pending', 'disabled'])
+    || release.evidence.status !== 'pending'
+    || !same(release.evidence.ids, ['E-R1.1-01', 'E-R1.1-02', 'E-R1.1-03', 'E-R1.1-04'])
+    || release.publication.status !== 'disabled') {
+    fail('CORE_REACT_R11_RELEASE_INVALID');
+  }
+  if (!same(donorComparison.donor, {
+    commit: crosswalk.donor.commit,
+    tree: crosswalk.donor.tree,
+    buttonBlobs: crosswalk.buttonBlobs,
+  }) || !same(donorComparison.consumedRules, crosswalk.button.rules)
+    || donorComparison.disposition !== 'adapt'
+    || donorComparison.result.selector !== '.core-button'
+    || donorComparison.result.status !== 'adapted-for-r1.1-button') {
+    fail('CORE_REACT_R11_DONOR_COMPARISON_DRIFT');
+  }
+  return { descriptor, release, donorComparison };
+}
