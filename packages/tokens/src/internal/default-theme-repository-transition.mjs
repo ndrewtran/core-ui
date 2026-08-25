@@ -1,10 +1,9 @@
 import { execFile as execFileCallback } from 'node:child_process';
-import { createHash } from 'node:crypto';
 import { promisify } from 'node:util';
 import { cp, mkdtemp, mkdir, readFile, rm, stat, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { tmpdir } from 'node:os';
-import { canonicalJson, parseJsonStrict } from '@core-ui/schema';
+import { parseJsonStrict } from '@core-ui/schema';
 
 const execFile = promisify(execFileCallback);
 
@@ -77,529 +76,23 @@ async function json(path) {
   return parseJsonStrict(await readFile(path, 'utf8'));
 }
 
-const REACT_PRIMARY_AUTHORITY = Object.freeze([
-  ['strategy/product-scope.md', 'b645bedfad6427f18535898938d2551ce8f6005a0e636c1288f60b8199578b73'],
-  ['decisions/0010-amendment-01-react-primary-delivery.md', 'd91e01f48df64c3c0eeb334f64e2b615dbc836867670d4862868138d7ca34341'],
-  ['decisions/0010-amendment-02-tale-styling-donor.md', 'd3631a416d3184707222955404c576c10f13f7621296708eb1a3bbc576255d6d'],
-]);
-const REACT_COMPREHENSIVE_AUTHORITY = Object.freeze([
-  ['strategy/product-scope.md', '0cafc0218f0e6795a5d600acb424b4bf514972295c89b48e9042d7faa69a261f'],
-  ['decisions/0010-amendment-01-react-primary-delivery.md', 'd91e01f48df64c3c0eeb334f64e2b615dbc836867670d4862868138d7ca34341'],
-  ['decisions/0010-amendment-02-tale-styling-donor.md', 'd3631a416d3184707222955404c576c10f13f7621296708eb1a3bbc576255d6d'],
-  ['decisions/0010-amendment-03-comprehensive-react-0-1.md', '8ad4be538ad7a35a8c03e01af573cad27a06225e4c91eba61bb7e693e498544a'],
-]);
-const REACT_PRIMARY_AUTHORITIES = Object.freeze([
-  REACT_PRIMARY_AUTHORITY,
-  REACT_COMPREHENSIVE_AUTHORITY,
-]);
+const REACT_R1_PACKAGE_VERSION = /^(?:0\.1\.0-alpha\.(?:0|[1-9]\d*)|0\.1\.0-rc\.1)$/u;
 
-const R1_CONTINUOUS_AUTHORITY = Object.freeze({
-  historicalCommit: '9a7cf99b0e74b2813998775138f0bc340e82c962',
-  historicalTree: '470d0f7bc6751b7f66d49fbf4fdc2d62f6cc89f0',
-  historicalParents: [
-    'd4bba1a5f004d638936b79b673f0b1c4f9691426',
-    '374db5debff52c64929ad3255a6824ce42af756c',
-  ],
-  acceptancePath: 'decisions/0010-amendment-04-r1-continuous-execution-acceptance.md',
-  candidatePath: 'decisions/0010-amendment-04-r1-continuous-execution-envelope.md',
-  decisionPath: 'decisions/0010-amendment-04-r1-continuous-execution.md',
-  decisionSha256: '321fefef4e723ee2d636a4ea6917436bf0babb5c6c7da2a5450e1ffc5c37871f',
-  acceptanceSha256: '71134f9a3d30e1d98b55f07e3456f787593ebd8eefd3c6ee5257ac61aea83248',
-  candidateSha256: '9c74a3227fb35a0ae6f6ab97eed4209014cb258408c3b78ce77947ca74b9fa5f',
-  manifestPath: 'decisions/0010-amendment-04-r1-continuous-execution-materialization.json',
-  manifestSha256: '73cb2919c26985315557215ba8735139f8ace8ce31526b38a878982a16450111',
-  productScopePath: 'strategy/product-scope.md',
-  productScopeSha256: 'add747d5986c9039029a99b558ae719969fd18ac113051bbec478bd291da8632',
-  currentAcceptancePath: 'decisions/0010-amendment-06-r1-change-intent-owner-acceptance.md',
-  currentDecisionPath: 'decisions/0010-amendment-06-r1-change-intent-owner.md',
-  currentArchitecturePath: 'strategy/monorepo-architecture.md',
-  currentArchitectureSha256: '7fb12cb12cc512279a16169d309607213c0361d2708a04967682e9380bba8032',
-  currentRoadmapPath: 'strategy/milestone-roadmap.md',
-  currentRoadmapSha256: 'ff51b84497612ed59ffcaea71036894e74e4a461e21434f3d3d02dd1deeb2bb1',
-  currentDecisionSha256: 'faa0fec0c62f67ece11b0db4f4dd73e4c5577405fb9594ee1f8b5a658fb3a91d',
-  currentAcceptanceSha256: '4eab442c35b5a946ca8f977d7b9262024fdaf97f71e5c98261b0cb1fccfa6571',
-});
-const R1_AMENDMENT_07_AUTHORITY = Object.freeze({
-  acceptancePath: 'decisions/0010-amendment-07-r1-external-review-ci-recovery-acceptance.md',
-  decisionPath: 'decisions/0010-amendment-07-r1-external-review-ci-recovery.md',
-  decisionSha256: 'c827da6fcb13b5b56e9c09ad9e6eb447f2c44588530b81ab1e243ff22bf2f011',
-  architecturePath: R1_CONTINUOUS_AUTHORITY.currentArchitecturePath,
-  architectureSha256: 'a5d3c3545521fc4a9f16ee69ae8c09733d34d7e104bcee33ce12331218b1f94b',
-  roadmapPath: R1_CONTINUOUS_AUTHORITY.currentRoadmapPath,
-  roadmapSha256: 'f044c3b3b5849f4567a819c54f667eaa6a6ecf4f3e538ada91cf1b74db1b60f6',
-  candidateBytes: 20915,
-  candidateSha256: '2a830bde833fa1fc2cd5b8343a045d76e1c590c92931a34ab37bf78491e3d13e',
-});
-const R1_AMENDMENT_08_AUTHORITY = Object.freeze({
-  acceptancePath: 'decisions/0010-amendment-08-r1-readme-historical-compatibility-recovery-acceptance.md',
-  acceptanceSha256: '2c22b2fdeaf9c09758ec095f237b0e2eb72ea1799988e365f66e176cc1a9d36b',
-  decisionPath: 'decisions/0010-amendment-08-r1-readme-historical-compatibility-recovery.md',
-  decisionSha256: 'a8d9ea091430ca7b10f1ac9e05f98411b597207e4ae564a4f9e9a754d1c2235f',
-  architecturePath: R1_CONTINUOUS_AUTHORITY.currentArchitecturePath,
-  architectureSha256: R1_AMENDMENT_07_AUTHORITY.architectureSha256,
-  roadmapPath: R1_CONTINUOUS_AUTHORITY.currentRoadmapPath,
-  roadmapSha256: R1_AMENDMENT_07_AUTHORITY.roadmapSha256,
-});
-const R1_AMENDMENT_09_AUTHORITY = Object.freeze({
-  acceptancePath: 'decisions/0010-amendment-09-r1-bootstrap-delivery-recovery-acceptance.md',
-  decisionPath: 'decisions/0010-amendment-09-r1-bootstrap-delivery-recovery.md',
-  decisionSha256: 'b5df5ccf7841dbefc6c0a0f9fe8ff5b24c1693bd495182f4ad1552d640ed29e6',
-  architecturePath: R1_CONTINUOUS_AUTHORITY.currentArchitecturePath,
-  architectureSha256: '0f71afb246a12da877402f5e3617de06cd772c1961f4c03971b78cda8f713d0c',
-  roadmapPath: R1_CONTINUOUS_AUTHORITY.currentRoadmapPath,
-  roadmapSha256: '73b10ee7c5d15811a732a0f925abb856d1e0fc212b2f48a72ae61cacb376ccd5',
-  candidateBytes: 16596,
-  candidateSha256: '30189a4aabc58e2628856eb1a7f75e34f8549e08291ea71e89ae672ccc46472d',
-  diffBytes: 70841,
-  diffSha256: '5920807d882e2d8d637cc03d25030df2bf79e7089a9d7f246d6ac8035b8172f6',
-  manifestBytes: 12040,
-  manifestSha256: '161042eb0b707b6e9102becf2750545bebc92823a1b4f98bd125f0d2bdd07c62',
-});
-const R1_AMENDMENT_09_ACCEPTANCE_NONCLAIM = 'This record claims acceptance only; it records no PR, checks, review, merge, implementation, Project, publication, or release outcome.';
-const R1_AMENDMENT_09_ACCEPTANCE_AUTHORIZED_ACTION = 'I authorize the exact ten-path authority materialization including the owner acceptance record; its authority issue, protected non-draft PR, and merge after all named deterministic checks and external authority review pass; the exact ten-path PR #92 recovery, protected intermediate merge, postmerge verification, bounded Project README reconciliation, and continuation under the existing R1 continuous-execution envelope. Npm publication and the final R1-exit PR merge remain separate stops.';
-const HISTORICAL_ANCESTRY_ERROR_CODE = 'R1_CONTINUOUS_AUTHORITY_LINEAGE_INVALID';
-
-const R1_IMMUTABLE_PATHS = Object.freeze([
-  R1_CONTINUOUS_AUTHORITY.productScopePath,
-  R1_CONTINUOUS_AUTHORITY.candidatePath,
-  R1_CONTINUOUS_AUTHORITY.manifestPath,
-  R1_CONTINUOUS_AUTHORITY.decisionPath,
-  R1_CONTINUOUS_AUTHORITY.acceptancePath,
-  'decisions/0010-amendment-05-r1-policy-entrypoint.md',
-  'decisions/0010-amendment-05-r1-policy-entrypoint-acceptance.md',
-]);
-
-const R1_IMMUTABLE_SHA256 = Object.freeze({
-  [R1_CONTINUOUS_AUTHORITY.productScopePath]: R1_CONTINUOUS_AUTHORITY.productScopeSha256,
-  [R1_CONTINUOUS_AUTHORITY.candidatePath]: R1_CONTINUOUS_AUTHORITY.candidateSha256,
-  [R1_CONTINUOUS_AUTHORITY.manifestPath]: R1_CONTINUOUS_AUTHORITY.manifestSha256,
-  [R1_CONTINUOUS_AUTHORITY.decisionPath]: R1_CONTINUOUS_AUTHORITY.decisionSha256,
-  [R1_CONTINUOUS_AUTHORITY.acceptancePath]: R1_CONTINUOUS_AUTHORITY.acceptanceSha256,
-  'decisions/0010-amendment-05-r1-policy-entrypoint.md': 'fae4d66e8040d5579cbb9a5883f56db38859ddd54b03d621080e131b3766ecb2',
-  'decisions/0010-amendment-05-r1-policy-entrypoint-acceptance.md': '5f8ccd7b041011ab3645028d01fea49b4f50a84f6d98e61bc6fcabddeab9ff34',
-});
-
-const R1_OWNER_COMMENT_URL = /^https:\/\/github\.com\/ndrewtran\/core-ui\/pull\/[1-9]\d*#issuecomment-[1-9]\d*$/u;
-
-function sha256(source) {
-  return createHash('sha256').update(source).digest('hex');
+function isReactR1PackageVersion(version) {
+  return typeof version === 'string' && REACT_R1_PACKAGE_VERSION.test(version);
 }
 
-function renderTemplate(template, substitutions) {
-  return Object.entries(substitutions).reduce(
-    (output, [name, value]) => output.replaceAll(`{${name}}`, value),
-    template,
-  );
+async function isReactR1PackageBaseline(repositoryRoot) {
+  const packageSource = await readFile(join(repositoryRoot, 'packages/react/package.json')).catch(() => null);
+  if (!packageSource) return false;
+  const packageJson = parseJsonStrict(packageSource.toString('utf8'));
+  return isReactR1PackageVersion(packageJson.version)
+    && packageJson.dependencies?.['react-aria-components'] === '1.20.0';
 }
 
-async function gitBytes(repositoryRoot, args) {
-  return (await execFile('git', ['-C', repositoryRoot, ...args], {encoding: 'buffer'})).stdout;
-}
-
-async function stageZeroBytes(repositoryRoot, relativePath) {
-  const records = (await gitBytes(repositoryRoot, ['ls-files', '--stage', '-z', '--', relativePath]))
-    .toString('utf8').split('\0').filter(Boolean);
-  if (records.length !== 1) throw new Error('stage relationship');
-  const separator = records[0].indexOf('\t');
-  const [mode, blob, stage] = records[0].slice(0, separator).split(' ');
-  if (records[0].slice(separator + 1) !== relativePath || mode !== '100644' || stage !== '0') {
-    throw new Error('stage relationship');
-  }
-  const [indexed, index, worktree] = await Promise.all([
-    gitBytes(repositoryRoot, ['cat-file', 'blob', blob]),
-    gitBytes(repositoryRoot, ['show', `:0:${relativePath}`]),
-    readFile(join(repositoryRoot, relativePath)),
-  ]);
-  if (!indexed.equals(index) || !indexed.equals(worktree)) throw new Error('source/index/worktree mismatch');
-  return worktree;
-}
-
-async function verifyHistoricalR1Authority(repositoryRoot) {
-  try {
-    await gitBytes(repositoryRoot, [
-      'merge-base', '--is-ancestor', R1_CONTINUOUS_AUTHORITY.historicalCommit, 'HEAD',
-    ]);
-  } catch {
-    const error = new Error(
-      'R1_CONTINUOUS_AUTHORITY_INVALID: historical protected merge must be an ancestor of current HEAD',
-    );
-    error.code = HISTORICAL_ANCESTRY_ERROR_CODE;
-    throw error;
-  }
-  const details = (await gitBytes(repositoryRoot, [
-    'show', '-s', '--format=%H%n%T%n%P', R1_CONTINUOUS_AUTHORITY.historicalCommit,
-  ])).toString('utf8').trim().split('\n');
-  if (details[0] !== R1_CONTINUOUS_AUTHORITY.historicalCommit
-      || details[1] !== R1_CONTINUOUS_AUTHORITY.historicalTree
-      || canonicalJson(details[2]?.split(' ') ?? []) !== canonicalJson(R1_CONTINUOUS_AUTHORITY.historicalParents)) {
-    throw new Error('historical topology');
-  }
-  const manifestBytes = await gitBytes(repositoryRoot, [
-    'show', `${R1_CONTINUOUS_AUTHORITY.historicalCommit}:${R1_CONTINUOUS_AUTHORITY.manifestPath}`,
-  ]);
-  if (sha256(manifestBytes) !== '73cb2919c26985315557215ba8735139f8ace8ce31526b38a878982a16450111') {
-    throw new Error('historical manifest');
-  }
-  const manifest = parseJsonStrict(manifestBytes.toString('utf8'));
-  if (canonicalJson(manifest) !== manifestBytes.toString('utf8') || !Array.isArray(manifest.staticAfterImages)) {
-    throw new Error('historical manifest shape');
-  }
-  for (const image of manifest.staticAfterImages) {
-    const bytes = await gitBytes(repositoryRoot, [
-      'show', `${R1_CONTINUOUS_AUTHORITY.historicalCommit}:${image.path}`,
-    ]);
-    if (bytes.byteLength !== image.byteLength || sha256(bytes) !== image.digest) throw new Error('historical after-image');
-  }
-  const acceptance = await gitBytes(repositoryRoot, [
-    'show', `${R1_CONTINUOUS_AUTHORITY.historicalCommit}:${R1_CONTINUOUS_AUTHORITY.acceptancePath}`,
-  ]);
-  if (sha256(acceptance) !== '71134f9a3d30e1d98b55f07e3456f787593ebd8eefd3c6ee5257ac61aea83248') {
-    throw new Error('historical acceptance');
-  }
-}
-
-async function rejectExtraSuccessorPaths(repositoryRoot) {
-  const paths = (await gitBytes(repositoryRoot, ['ls-files', '--cached', '--others', '--exclude-standard', '-z']))
-    .toString('utf8').split('\0').filter(Boolean)
-    .filter((path) => (
-      path.startsWith('decisions/0010-amendment-06-')
-        || path.startsWith('decisions/0010-amendment-07-')
-        || path.startsWith('decisions/0010-amendment-08-')
-        || path.startsWith('decisions/0010-amendment-09-')
-    )).sort();
-  const acceptedPathSets = [
-    [],
-    [R1_CONTINUOUS_AUTHORITY.currentAcceptancePath, R1_CONTINUOUS_AUTHORITY.currentDecisionPath],
-    [
-      R1_CONTINUOUS_AUTHORITY.currentAcceptancePath,
-      R1_CONTINUOUS_AUTHORITY.currentDecisionPath,
-      R1_AMENDMENT_07_AUTHORITY.acceptancePath,
-      R1_AMENDMENT_07_AUTHORITY.decisionPath,
-    ],
-    [
-      R1_CONTINUOUS_AUTHORITY.currentAcceptancePath,
-      R1_CONTINUOUS_AUTHORITY.currentDecisionPath,
-      R1_AMENDMENT_07_AUTHORITY.acceptancePath,
-      R1_AMENDMENT_07_AUTHORITY.decisionPath,
-      R1_AMENDMENT_08_AUTHORITY.acceptancePath,
-      R1_AMENDMENT_08_AUTHORITY.decisionPath,
-    ],
-    [
-      R1_CONTINUOUS_AUTHORITY.currentAcceptancePath,
-      R1_CONTINUOUS_AUTHORITY.currentDecisionPath,
-      R1_AMENDMENT_07_AUTHORITY.acceptancePath,
-      R1_AMENDMENT_07_AUTHORITY.decisionPath,
-      R1_AMENDMENT_08_AUTHORITY.acceptancePath,
-      R1_AMENDMENT_08_AUTHORITY.decisionPath,
-      R1_AMENDMENT_09_AUTHORITY.decisionPath,
-    ],
-    [
-      R1_CONTINUOUS_AUTHORITY.currentAcceptancePath,
-      R1_CONTINUOUS_AUTHORITY.currentDecisionPath,
-      R1_AMENDMENT_07_AUTHORITY.acceptancePath,
-      R1_AMENDMENT_07_AUTHORITY.decisionPath,
-      R1_AMENDMENT_08_AUTHORITY.acceptancePath,
-      R1_AMENDMENT_08_AUTHORITY.decisionPath,
-      R1_AMENDMENT_09_AUTHORITY.acceptancePath,
-      R1_AMENDMENT_09_AUTHORITY.decisionPath,
-    ],
-  ].map((set) => canonicalJson([...set].sort()));
-  if (!acceptedPathSets.includes(canonicalJson(paths))) {
-    throw new Error('successor path set');
-  }
-}
-
-async function assertSuccessorPathsAbsent(repositoryRoot) {
-  const present = [];
-  for (const relativePath of [
-    R1_CONTINUOUS_AUTHORITY.currentAcceptancePath,
-    R1_CONTINUOUS_AUTHORITY.currentDecisionPath,
-    R1_AMENDMENT_07_AUTHORITY.acceptancePath,
-    R1_AMENDMENT_07_AUTHORITY.decisionPath,
-    R1_AMENDMENT_08_AUTHORITY.acceptancePath,
-    R1_AMENDMENT_08_AUTHORITY.decisionPath,
-    R1_AMENDMENT_09_AUTHORITY.acceptancePath,
-    R1_AMENDMENT_09_AUTHORITY.decisionPath,
-  ]) {
-    const indexedOrUntracked = (await gitBytes(repositoryRoot, [
-      'ls-files', '--cached', '--others', '--exclude-standard', '-z', '--', relativePath,
-    ])).toString('utf8').split('\0').filter(Boolean).length > 0;
-    if (indexedOrUntracked || await exists(join(repositoryRoot, relativePath))) present.push(relativePath);
-  }
-  if (present.length > 0) {
-    throw new Error(`CORE_TOKEN_IDENTITY_AUTHORITY_MISMATCH: current successor paths must be absent for baseline: ${present.join(', ')}`);
-  }
-}
-
-function validateAmendment07Acceptance(bytes) {
-  // Orchestration owns approval, diff, and manifest identity validation; this
-  // consumer checks only their strict record shape and internal statement binding.
-  const text = bytes.toString('utf8');
-  if (!text.startsWith('# Acceptance: Decision 0010 amendment 07\n')) throw new Error('acceptance title');
-  const fields = new Map();
-  for (const match of text.matchAll(/^- ([^:\n]+):[ \t]*(.*)$/gmu)) {
-    if (fields.has(match[1])) throw new Error('acceptance duplicate field');
-    fields.set(match[1], match[2]);
-  }
-  const expected = new Set([
-    'Decision', 'Parent decision', 'Repository', 'Owner', 'Outcome', 'Candidate',
-    'Pre-acceptance materialization diff', 'Execution manifest', 'Decision path',
-    'Acceptance path', 'Approval instruction', 'Human acceptance', 'Approval timestamp',
-    'Protected authority PR/merge',
-  ]);
-  if (canonicalJson([...fields.keys()].sort()) !== canonicalJson([...expected].sort())) throw new Error('acceptance shape');
-  if (fields.get('Decision') !== '`core-ui:decision:0010:amendment:07`'
-      || fields.get('Parent decision') !== '`core-ui:decision:0010`'
-      || fields.get('Repository') !== '`ndrewtran/core-ui`'
-      || fields.get('Owner') !== 'Andrew / `ndrewtran`'
-      || fields.get('Outcome') !== 'Accepted'
-      || fields.get('Decision path') !== `\`${R1_AMENDMENT_07_AUTHORITY.decisionPath}\``
-      || fields.get('Acceptance path') !== `\`${R1_AMENDMENT_07_AUTHORITY.acceptancePath}\``
-      || fields.get('Protected authority PR/merge') !== 'Pending; not claimed by this record') throw new Error('acceptance authority');
-  const binding = (name, bytesExpected, digestExpected) => {
-    const match = fields.get(name)?.match(/^([\d,]+) bytes, SHA-256 `([0-9a-f]{64})`$/u);
-    return match && Number(match[1].replaceAll(',', '')) === bytesExpected && match[2] === digestExpected;
-  };
-  const diff = fields.get('Pre-acceptance materialization diff')?.match(/^((?:\d+|[1-9]\d{0,2}(?:,\d{3})+)) bytes, SHA-256 `([0-9a-f]{64})`$/u);
-  const manifest = fields.get('Execution manifest')?.match(/^((?:\d+|[1-9]\d{0,2}(?:,\d{3})+)) bytes, SHA-256 `([0-9a-f]{64})`$/u);
-  if (!binding('Candidate', R1_AMENDMENT_07_AUTHORITY.candidateBytes, R1_AMENDMENT_07_AUTHORITY.candidateSha256)
-      || !diff || !manifest
-      || !Number.isSafeInteger(Number(diff[1].replaceAll(',', '')))
-      || !Number.isSafeInteger(Number(manifest[1].replaceAll(',', '')))) throw new Error('acceptance identity');
-  const approval = text.match(/^- Approval instruction: “([^”\n]+)”$/mu)?.[1];
-  const human = text.match(/^- Human acceptance: Andrew \/ `ndrewtran`: “([^”\n]+)”$/mu)?.[1];
-  if (!approval || approval !== human || text.split(approval).length - 1 !== 2) throw new Error('acceptance statement');
-  const timestamp = fields.get('Approval timestamp');
-  if (timestamp !== 'Not recorded' && !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z$/u.test(timestamp)) throw new Error('acceptance timestamp');
-  if (!/\bno (?:PR|checks|review|merge|implementation|Project|publication|release)\b/iu.test(text)
-      || !/not claimed|has not occurred|has not yet occurred/iu.test(text)) throw new Error('acceptance nonclaims');
-}
-
-function validateAmendment08Successor(decision, acceptance) {
-  if (sha256(decision) !== R1_AMENDMENT_08_AUTHORITY.decisionSha256
-      || sha256(acceptance) !== R1_AMENDMENT_08_AUTHORITY.acceptanceSha256
-      || !decision.toString('utf8').startsWith('# Decision 0010 amendment 08: R1 README historical compatibility recovery\n')
-      || !acceptance.toString('utf8').startsWith('# Acceptance: Decision 0010 amendment 08\n')) {
-    throw new Error('amendment 08 authority');
-  }
-}
-
-function validateAmendment09Decision(bytes) {
-  if (sha256(bytes) !== R1_AMENDMENT_09_AUTHORITY.decisionSha256) throw new Error('amendment 09 decision identity');
-  const text = bytes.toString('utf8');
-  if (!text.startsWith('# Decision 0010 amendment 09: R1 bootstrap-delivery recovery\n')
-      || !text.includes('`core-ui:decision:0010:amendment:09`')
-      || !text.includes('exact recovered PR #92 ten-path ChangeIntent prerequisite')
-      || !/No later bootstrap\s+or recovery exception is\s+implied\./u.test(text)) {
-    throw new Error('amendment 09 decision binding');
-  }
-}
-
-function validateAmendment09Acceptance(bytes) {
-  const text = bytes.toString('utf8');
-  const fields = new Map();
-  for (const match of text.matchAll(/^- ([^:\n]+):[ \t]*(.*)$/gmu)) {
-    if (fields.has(match[1])) throw new Error('amendment 09 acceptance duplicate field');
-    fields.set(match[1], match[2]);
-  }
-  const expectedFields = new Set([
-    'Decision', 'Parent decision', 'Repository', 'Owner', 'Outcome', 'Candidate',
-    'Pre-acceptance materialization diff', 'Execution manifest', 'Decision path',
-    'Acceptance path', 'Approval instruction', 'Human acceptance',
-    'Approval timestamp', 'Protected authority PR/merge',
-  ]);
-  if (text.startsWith('# Acceptance: Decision 0010 amendment 09\n') === false
-      || canonicalJson([...fields.keys()].sort()) !== canonicalJson([...expectedFields].sort())
-      || fields.get('Decision') !== '`core-ui:decision:0010:amendment:09`'
-      || fields.get('Parent decision') !== '`core-ui:decision:0010`'
-      || fields.get('Repository') !== '`ndrewtran/core-ui`'
-      || fields.get('Owner') !== 'Andrew / `ndrewtran`'
-      || fields.get('Outcome') !== 'Accepted'
-      || fields.get('Decision path') !== `\`${R1_AMENDMENT_09_AUTHORITY.decisionPath}\``
-      || fields.get('Acceptance path') !== `\`${R1_AMENDMENT_09_AUTHORITY.acceptancePath}\``
-      || fields.get('Approval timestamp') !== 'Not recorded'
-      || fields.get('Protected authority PR/merge') !== 'Pending; not claimed by this record') {
-    throw new Error('amendment 09 acceptance authority binding');
-  }
-  const parseIdentity = (fieldName) => {
-    const match = fields.get(fieldName)?.match(/^((?:[1-9]\d{0,2}(?:,\d{3})+)|(?:[1-9]\d*)) bytes, SHA-256 `([0-9a-f]{64})`$/u);
-    if (!match || !Number.isSafeInteger(Number(match[1].replaceAll(',', ''))) || Number(match[1].replaceAll(',', '')) <= 0) {
-      throw new Error(`amendment 09 acceptance ${fieldName.toLowerCase()} identity`);
-    }
-    return {bytes: match[1], sha256: match[2]};
-  };
-  const candidate = parseIdentity('Candidate');
-  const diff = parseIdentity('Pre-acceptance materialization diff');
-  const manifest = parseIdentity('Execution manifest');
-  if (candidate.bytes !== '16,596' || candidate.sha256 !== R1_AMENDMENT_09_AUTHORITY.candidateSha256
-      || Number(diff.bytes.replaceAll(',', '')) !== R1_AMENDMENT_09_AUTHORITY.diffBytes
-      || diff.sha256 !== R1_AMENDMENT_09_AUTHORITY.diffSha256
-      || Number(manifest.bytes.replaceAll(',', '')) !== R1_AMENDMENT_09_AUTHORITY.manifestBytes
-      || manifest.sha256 !== R1_AMENDMENT_09_AUTHORITY.manifestSha256) {
-    throw new Error('amendment 09 acceptance candidate/diff/manifest identity');
-  }
-  const expectedStatement = `I accept Core UI R1 Decision 0010 amendment 09 bootstrap-delivery recovery candidate v1, SHA-256 ${candidate.sha256}; pre-acceptance materialization diff, SHA-256 ${diff.sha256}; and execution manifest v1, SHA-256 ${manifest.sha256}. ${R1_AMENDMENT_09_ACCEPTANCE_AUTHORIZED_ACTION}`;
-  const approval = text.match(/^- Approval instruction: “([^”\n]+)”$/mu)?.[1];
-  const human = text.match(/^- Human acceptance: Andrew \/ `ndrewtran`: “([^”\n]+)”$/mu)?.[1];
-  if (!approval || !human || approval !== human || approval !== expectedStatement || text.split(approval).length - 1 !== 2) {
-    throw new Error('amendment 09 acceptance statement');
-  }
-  const expectedRecord = [
-    '# Acceptance: Decision 0010 amendment 09', '',
-    '- Decision: `core-ui:decision:0010:amendment:09`',
-    '- Parent decision: `core-ui:decision:0010`',
-    '- Repository: `ndrewtran/core-ui`',
-    '- Owner: Andrew / `ndrewtran`', '- Outcome: Accepted',
-    `- Candidate: ${candidate.bytes} bytes, SHA-256 \`${candidate.sha256}\``,
-    `- Pre-acceptance materialization diff: ${diff.bytes} bytes, SHA-256 \`${diff.sha256}\``,
-    `- Execution manifest: ${manifest.bytes} bytes, SHA-256 \`${manifest.sha256}\``,
-    `- Decision path: \`${R1_AMENDMENT_09_AUTHORITY.decisionPath}\``,
-    `- Acceptance path: \`${R1_AMENDMENT_09_AUTHORITY.acceptancePath}\``,
-    `- Approval instruction: “${expectedStatement}”`,
-    `- Human acceptance: Andrew / \`ndrewtran\`: “${expectedStatement}”`,
-    '- Approval timestamp: Not recorded',
-    '- Protected authority PR/merge: Pending; not claimed by this record', '',
-    R1_AMENDMENT_09_ACCEPTANCE_NONCLAIM, '',
-  ].join('\n');
-  if (text !== expectedRecord) throw new Error('amendment 09 acceptance record rendering');
-}
-
-async function hasAcceptedR1ContinuousAuthority(repositoryRoot, options = {}) {
-  try {
-    await verifyHistoricalR1Authority(repositoryRoot);
-    await rejectExtraSuccessorPaths(repositoryRoot);
-    const immutable = Object.fromEntries(await Promise.all(R1_IMMUTABLE_PATHS.map(async (path) => [
-      path,
-      await stageZeroBytes(repositoryRoot, path),
-    ])));
-    for (const path of R1_IMMUTABLE_PATHS) {
-      if (sha256(immutable[path]) !== R1_IMMUTABLE_SHA256[path]) throw new Error('immutable authority');
-    }
-    const architecture = await stageZeroBytes(repositoryRoot, R1_CONTINUOUS_AUTHORITY.currentArchitecturePath);
-    const roadmap = await stageZeroBytes(repositoryRoot, R1_CONTINUOUS_AUTHORITY.currentRoadmapPath);
-    const architectureSha256 = sha256(architecture);
-    const roadmapSha256 = sha256(roadmap);
-    const hasCurrent = await Promise.all([
-      stageZeroBytes(repositoryRoot, R1_CONTINUOUS_AUTHORITY.currentDecisionPath),
-      stageZeroBytes(repositoryRoot, R1_CONTINUOUS_AUTHORITY.currentAcceptancePath),
-    ]).then(() => true).catch(() => false);
-    const hasAmendment07 = await Promise.all([
-      stageZeroBytes(repositoryRoot, R1_AMENDMENT_07_AUTHORITY.decisionPath),
-      stageZeroBytes(repositoryRoot, R1_AMENDMENT_07_AUTHORITY.acceptancePath),
-    ]).then(() => true).catch(() => false);
-    const hasAmendment08 = await Promise.all([
-      stageZeroBytes(repositoryRoot, R1_AMENDMENT_08_AUTHORITY.decisionPath),
-      stageZeroBytes(repositoryRoot, R1_AMENDMENT_08_AUTHORITY.acceptancePath),
-    ]).then(() => true).catch(() => false);
-    const hasAmendment09 = await Promise.all([
-      stageZeroBytes(repositoryRoot, R1_AMENDMENT_09_AUTHORITY.decisionPath),
-    ]).then(() => true).catch(() => false);
-    const hasAmendment09Acceptance = await Promise.all([
-      stageZeroBytes(repositoryRoot, R1_AMENDMENT_09_AUTHORITY.acceptancePath),
-    ]).then(() => true).catch(() => false);
-    if (!hasCurrent && !hasAmendment07 && !hasAmendment08 && !hasAmendment09) {
-      if (architectureSha256 === 'fa94c95f08c659f977af43a4438ffdb8d1774a06332786fae61f03f0799c085b'
-          && roadmapSha256 === '9f321f93a537f69c5604de35f85053d8bf4748e937d6797c9262691e301247a1') {
-        await assertSuccessorPathsAbsent(repositoryRoot);
-        return true;
-      }
-      throw new Error('missing current successor');
-    }
-    if (hasAmendment09 || hasAmendment08 || hasAmendment07) {
-      const predecessor = await Promise.all([
-        stageZeroBytes(repositoryRoot, R1_CONTINUOUS_AUTHORITY.currentDecisionPath),
-        stageZeroBytes(repositoryRoot, R1_CONTINUOUS_AUTHORITY.currentAcceptancePath),
-      ]);
-      if (sha256(predecessor[0]) !== R1_CONTINUOUS_AUTHORITY.currentDecisionSha256
-          || sha256(predecessor[1]) !== R1_CONTINUOUS_AUTHORITY.currentAcceptanceSha256
-          || !hasAmendment07) throw new Error('amendment 07 authority');
-      const [decision, acceptance] = await Promise.all([
-        stageZeroBytes(repositoryRoot, R1_AMENDMENT_07_AUTHORITY.decisionPath),
-        stageZeroBytes(repositoryRoot, R1_AMENDMENT_07_AUTHORITY.acceptancePath),
-      ]);
-      if (sha256(decision) !== R1_AMENDMENT_07_AUTHORITY.decisionSha256) throw new Error('amendment 07 decision');
-      validateAmendment07Acceptance(acceptance);
-      if (hasAmendment08 || hasAmendment09) {
-        if (!hasAmendment08) throw new Error('amendment 08 authority');
-        const [amendment08Decision, amendment08Acceptance] = await Promise.all([
-          stageZeroBytes(repositoryRoot, R1_AMENDMENT_08_AUTHORITY.decisionPath),
-          stageZeroBytes(repositoryRoot, R1_AMENDMENT_08_AUTHORITY.acceptancePath),
-        ]);
-        validateAmendment08Successor(amendment08Decision, amendment08Acceptance);
-      }
-      if (hasAmendment09) {
-        if (architectureSha256 !== R1_AMENDMENT_09_AUTHORITY.architectureSha256
-            || roadmapSha256 !== R1_AMENDMENT_09_AUTHORITY.roadmapSha256) throw new Error('amendment 09 authority');
-        validateAmendment09Decision(await stageZeroBytes(repositoryRoot, R1_AMENDMENT_09_AUTHORITY.decisionPath));
-        if (!hasAmendment09Acceptance) return options.allowPending === true;
-        validateAmendment09Acceptance(await stageZeroBytes(repositoryRoot, R1_AMENDMENT_09_AUTHORITY.acceptancePath));
-      } else if (architectureSha256 !== R1_AMENDMENT_07_AUTHORITY.architectureSha256
-          || roadmapSha256 !== R1_AMENDMENT_07_AUTHORITY.roadmapSha256) {
-        throw new Error('amendment 08 authority');
-      }
-      return true;
-    }
-    const currentPaths = [
-      R1_CONTINUOUS_AUTHORITY.currentDecisionPath,
-      R1_CONTINUOUS_AUTHORITY.currentAcceptancePath,
-      R1_CONTINUOUS_AUTHORITY.currentArchitecturePath,
-      R1_CONTINUOUS_AUTHORITY.currentRoadmapPath,
-    ];
-    const current = Object.fromEntries(await Promise.all(currentPaths.map(async (path) => [
-      path,
-      await stageZeroBytes(repositoryRoot, path),
-    ])));
-    const statement = 'I accept Core UI R1 ChangeIntent authority compatibility recovery candidate v2, SHA-256 b79aee6b4ff9167495ef2aec28055b73254865bd9f70ca2676e9bb679fc8299b. I authorize its exact eleven-path combined amendment 06 authority and private compatibility materialization, acceptance record, required authority issue, protected non-draft PR, and merge after all named deterministic checks and independent reviews pass; and continuation with the separate exact ten-path ChangeIntent prerequisite and post-prerequisite Project README reconciliation under the previously accepted continuous-execution envelope. The npm-publication and final R1-exit merge boundaries remain unchanged.';
-    if (sha256(current[R1_CONTINUOUS_AUTHORITY.currentDecisionPath]) !== R1_CONTINUOUS_AUTHORITY.currentDecisionSha256
-        || sha256(current[R1_CONTINUOUS_AUTHORITY.currentAcceptancePath]) !== R1_CONTINUOUS_AUTHORITY.currentAcceptanceSha256
-        || sha256(current[R1_CONTINUOUS_AUTHORITY.currentArchitecturePath]) !== R1_CONTINUOUS_AUTHORITY.currentArchitectureSha256
-        || sha256(current[R1_CONTINUOUS_AUTHORITY.currentRoadmapPath]) !== R1_CONTINUOUS_AUTHORITY.currentRoadmapSha256
-        || !current[R1_CONTINUOUS_AUTHORITY.currentDecisionPath].toString('utf8').includes(statement)
-        || !current[R1_CONTINUOUS_AUTHORITY.currentAcceptancePath].toString('utf8').includes(statement)
-        || !current[R1_CONTINUOUS_AUTHORITY.currentDecisionPath].toString('utf8').includes('a700be0ac22c627fbc09c6378136b95d982d05c898a51bd126e5609f9bd8e8b9')
-        || !current[R1_CONTINUOUS_AUTHORITY.currentAcceptancePath].toString('utf8').includes('a700be0ac22c627fbc09c6378136b95d982d05c898a51bd126e5609f9bd8e8b9')) {
-      throw new Error('current successor authority');
-    }
-    return true;
-  } catch (error) {
-    if (error?.code === HISTORICAL_ANCESTRY_ERROR_CODE) throw error;
-    return false;
-  }
-}
-
-async function hasVerifiableReactPrimaryAuthorityCandidate(repositoryRoot) {
-  for (const authority of REACT_PRIMARY_AUTHORITIES) {
-    let matches = true;
-    for (const [relativePath, expected] of authority) {
-      const source = await readFile(join(repositoryRoot, relativePath)).catch(() => null);
-      if (!source || createHash('sha256').update(source).digest('hex') !== expected) {
-        matches = false;
-        break;
-      }
-    }
-    if (matches) return true;
-  }
-  return hasAcceptedR1ContinuousAuthority(repositoryRoot, {allowPending: true});
-}
-
-/**
- * Acceptance-only predicate used by transition callers. A pending A09
- * candidate may be inspected by deterministic checks, but it grants no
- * authority or downstream operation.
- */
-export async function hasAcceptedReactPrimaryAuthority(repositoryRoot) {
-  for (const authority of REACT_PRIMARY_AUTHORITIES) {
-    let matches = true;
-    for (const [relativePath, expected] of authority) {
-      const source = await readFile(join(repositoryRoot, relativePath)).catch(() => null);
-      if (!source || createHash('sha256').update(source).digest('hex') !== expected) {
-        matches = false;
-        break;
-      }
-    }
-    if (matches) return true;
-  }
-  return hasAcceptedR1ContinuousAuthority(repositoryRoot);
+/** The R1 package baseline is a product/package fact, not a delivery authority. */
+export async function hasReactR1PackageBaseline(repositoryRoot) {
+  return isReactR1PackageBaseline(repositoryRoot);
 }
 
 function replaceExact(source, from, to, label) {
@@ -612,8 +105,8 @@ async function setPackageVersion(repositoryRoot, relativePath, fromVersion, toVe
   const path = join(repositoryRoot, relativePath);
   const source = await readFile(path, 'utf8');
   const current = parseJsonStrict(source).version;
-  if (relativePath === 'packages/react/package.json' && current === '0.1.0-alpha.0'
-    && await hasAcceptedReactPrimaryAuthority(repositoryRoot)) return;
+  if (relativePath === 'packages/react/package.json' && isReactR1PackageVersion(current)
+    && await isReactR1PackageBaseline(repositoryRoot)) return;
   if (current !== fromVersion) {
     throw new Error(`CORE_TOKEN_IDENTITY_REFERENCE_STALE: ${relativePath} expected ${fromVersion}`);
   }
@@ -730,8 +223,8 @@ export async function assertDefaultThemeRepositoryState(repositoryRoot, stateNam
   ]) {
     const actualVersion = (await json(join(repositoryRoot, relativePath))).version;
     const currentR1 = relativePath === 'packages/react/package.json'
-      && actualVersion === '0.1.0-alpha.0'
-      && await hasVerifiableReactPrimaryAuthorityCandidate(repositoryRoot);
+      && isReactR1PackageVersion(actualVersion)
+      && await isReactR1PackageBaseline(repositoryRoot);
     if (actualVersion !== version && !currentR1) {
       throw new Error(`CORE_TOKEN_IDENTITY_REFERENCE_STALE: ${relativePath} version`);
     }
@@ -762,21 +255,25 @@ export async function assertDefaultThemeRepositoryState(repositoryRoot, stateNam
     || tokenArtifacts.length !== 1
     || tokenArtifacts[0].id !== state.artifactId
   ) throw new Error('CORE_TOKEN_IDENTITY_REFERENCE_STALE: generated catalog tuple');
+  const reactPackageVersion = (await json(join(repositoryRoot, 'packages/react/package.json'))).version;
   for (const [relativePath, version] of [
     ['packages/react/generated/compatibility.mjs', state.reactPackageVersion],
     ['packages/web/generated/compatibility.mjs', state.webPackageVersion],
   ]) {
     const source = await readFile(join(repositoryRoot, relativePath), 'utf8');
+    const expectedVersion = relativePath === 'packages/react/generated/compatibility.mjs'
+      ? reactPackageVersion
+      : version;
     const r1GeneratedCompatibility = relativePath === 'packages/react/generated/compatibility.mjs'
-      && source.includes('0.1.0-alpha.0') && await hasVerifiableReactPrimaryAuthorityCandidate(repositoryRoot);
-    if (!source.includes(`\"version\":\"${version}\"`) && !r1GeneratedCompatibility) {
+      && source.includes(`\"version\":\"${expectedVersion}\"`)
+      && await isReactR1PackageBaseline(repositoryRoot);
+    if (!source.includes(`\"version\":\"${expectedVersion}\"`) && !r1GeneratedCompatibility) {
       throw new Error(`CORE_TOKEN_IDENTITY_REFERENCE_STALE: ${relativePath}`);
     }
   }
   for (const script of TRANSITION_GENERATORS) {
     if (script === 'packages/react/src/generate.mjs'
-      && await hasVerifiableReactPrimaryAuthorityCandidate(repositoryRoot)
-      && (await json(join(repositoryRoot, 'packages/react/package.json'))).version === '0.1.0-alpha.0') continue;
+      && await isReactR1PackageBaseline(repositoryRoot)) continue;
     await execFile(process.execPath, [script, '--check'], {
       cwd: repositoryRoot,
       encoding: 'utf8',
@@ -827,8 +324,7 @@ export async function transitionDefaultThemeRepository(repositoryRoot, {
     await setAuthoredState(repositoryRoot, from, to);
     for (const generator of TRANSITION_GENERATORS) {
       if (generator === 'packages/react/src/generate.mjs'
-        && await hasAcceptedReactPrimaryAuthority(repositoryRoot)
-        && (await json(join(repositoryRoot, 'packages/react/package.json'))).version === '0.1.0-alpha.0') continue;
+        && await isReactR1PackageBaseline(repositoryRoot)) continue;
       await execFile(process.execPath, [generator], {
         cwd: repositoryRoot,
         encoding: 'utf8',

@@ -1,132 +1,75 @@
 ---
 name: core-ui-delivery
-description: Triage and route Core UI repository work through its canonical delivery profile, proof owners, disclosure gate, risk-based independent reviews, human decision boundaries, and deterministic recovery. Use automatically for every Core UI planning, implementation, evidence, PR, merge, rollback, tracker, or release-adjacent task, including requests to decide the next permitted operation.
+description: Triage Core UI repository work through canonical owners, the active milestone, focused proof, protected pull requests, and risk-based review. Use automatically for Core UI planning, implementation, evidence, PR, merge, tracker, or release-adjacent tasks.
 ---
 
 # Core UI Delivery
 
 Use this repository skill after the global `core-ui-delivery-guard` for every
-Core UI delivery task. It is the activation and triage scaffold for the private
-delivery procedure. It owns no commands, mutable state, reviewer decisions,
-clearance, dispatch, GitHub writes, or Project writes. The root agent remains
-the accountable delivery lead; task decomposition, difficult reasoning,
-escalated blocker resolution, delegation, and final synthesis and decisions
-are root-only responsibilities. Root implementation and routine repository
-research or test/debug loops are exceptional, not normal.
+Core UI task. It routes work to canonical owners and owns no commands, mutable
+state, reviewer decisions, GitHub writes, or Project writes. The root agent
+remains accountable for task decomposition, difficult reasoning, escalation,
+delegation, and final decisions.
 
 ## Named team routing
 
 When delegation is useful, only root delegates to the named reusable agents
 below. Every spawn uses `fork_turns="none"` and the minimum task-local context;
-subagents never spawn or delegate, and never inherit the root turn.
+subagents never spawn or delegate.
 
-- `coder`: normally owns the complete approved, authority-aligned bounded
-  execution after preflight: repository research, implementation, routine
-  debugging, focused tests, and final verification. It has explicit file
-  ownership and makes no architecture decisions or external mutations.
-- `researcher`: optional, bounded, read-only authority, repository, or tracker
-  investigation when implementation is not requested or an independent lane
-  materially improves confidence. The root verifies facts and owns conclusions.
-- `reviewer`: inspects the frozen actual diff under the triggered canonical
-  reviewer contract. Preserve profile-owned role labels such as
-  `core-ui-authority-reviewer`; this identity does not replace the role owner.
-- `browser_debugger`: reproduces or verifies relevant browser UI behavior and
-  collects screenshot, console, DOM, or network evidence without editing app
-  code or local files. It is optional and advisory. Return evidence through
-  MCP/tool output only. Treat its result as advisory, not deterministic proof
-  or renderer review.
-
-Do not create a standing panel. Route only the smallest set required by the
-profile and task risk, and freeze the reviewed diff while `reviewer` runs.
+- `coder`: normally owns one complete bounded execution after preflight:
+  repository research, implementation, routine debugging, focused checks, and
+  final verification.
+- `researcher`: optional, bounded, read-only authority or repository research.
+- `reviewer`: independent inspection of the frozen actual diff when risk calls
+  for it. Preserve canonical role ownership and keep the diff frozen while it
+  runs.
+- `browser_debugger`: optional advisory browser reproduction; it does not edit
+  source or replace deterministic proof.
 
 ## Start every task
 
 1. Resolve the repository root, exact source state, and clean working boundary.
-   Preserve unrelated or user-owned changes; prefer a dedicated topic branch or
-   worktree for authored changes.
-2. Apply the global guard's authority map, live Project read, alignment
-   preflight, and deviation gate. Read `/AGENTS.md`, then the nearest route map
-   for each affected canonical owner.
-3. Load `/tooling/audits/repository-policy/delivery-workflow-profile.json` and
-   validate it through the existing repository-policy check. Derive the active
-   stage, applicability, N/A reasons, invalidation domains, reviewer routes,
-   disclosure owners, and recovery route from the profile. Never copy its enums
-   or command strings into prompts, forms, or this skill.
-   When the task has a task-local `core-ui-delivery-advisory-invocation-v1`
-   manifest, run the profile-owned advisory entrypoint. Treat its packet,
-   conformance, and handoff identities as guidance-layer results only.
-4. Read the canonical authority and owner references selected by the profile.
-   Classify the task as aligned, a required correction, an adjacent improvement,
-   a potential deviation, or unverified before writing.
-5. Report a compact task route: primary coder owner and milestone relationship;
-   Project item and workflow status source; active profile stage and
-   applicability; required owner checks; triggered reviewers and independence;
-   freeze boundary; human decision state; and exact next permitted operation.
-6. Stop before writes when an owner, dependency, tracker fact, disclosure route,
-   or required human decision is missing or contradictory.
+   Preserve unrelated changes and prefer a dedicated worktree for authored
+   changes.
+2. Apply the global guard's authority map. Read `/AGENTS.md`, then the nearest
+   route map for each affected canonical owner.
+3. Read the Architecture, Roadmap, Product Scope, and relevant decision or
+   evidence owner. Classify the task as aligned, a required correction,
+   adjacent work, a potential deviation, or unverified before writing.
+4. Report a compact route: canonical owner, milestone relationship, required
+   checks, risk-selected reviewers, and the next permitted protected-PR action.
+5. Stop before writes when an owner, dependency, tracker fact, or required
+   human decision is missing or contradictory.
 
 ## Fast aligned route
 
-1. Keep one task to one bounded canonical-owner slice. Change the earliest owner
-   and regenerate projections rather than repairing derived output.
-2. During development, run the active owner's declared closure. Defer broad
-   workspace checks until the profile requires them for the frozen candidate.
-3. Freeze the exact commit/tree, diff or complete artifact set, deterministic
-   results, and disclosure boundary before constructing a review packet. Do not
-   edit the candidate while independent review is active.
-   Render and validate the packet first, then derive conformance and its
-   context-free phase handoff. Never hand-author a substitute packet when the
-   canonical renderer applies.
-4. After preflight, normally route one coder to own the complete implementation,
-   repository research, focused checks, routine debugging, and verification.
-   Dispatch optional researcher or browser_debugger specialists only when they
-   materially help. Dispatch reviewers only when selected by the profile and
-   actual risk. Batch
-   findings against the same immutable candidate; after a correction, rewind
-   only to the earliest invalidated domain and rebuild downstream identities.
-5. Treat hosted checks as candidate conformance only. Before every external
-   transition, re-read the bound remote, PR, check, review, and tracker state;
-   perform only the separately authorized operation.
-6. Reconcile routine tracker locators after the authoritative event. Never infer
-   roadmap, product, evidence, lifecycle, capability, or release acceptance from
-   a Project transition, PR state, or reviewer verdict.
-
-## Identity and handoff
-
-Keep source, executed, proof-tool, evidence, packet, hosted observation, and
-human decision identities separate. Record exact commit/tree or digest-bearing
-owner records when the active profile requires them. At each handoff, report
-the current stage, satisfied postcondition, invalidated identities, outstanding
-human decision, and one exact next permitted operation. Do not create packets or
-full-proof runs for explanation-only work unless the profile selects them.
-The handoff is guidance-only: it cannot grant repository, Git, provider,
-tracker, publication, evidence, merge, or release writes.
+1. Change the earliest canonical owner and regenerate projections rather than
+   repairing derived output.
+2. Run the owner's focused deterministic checks during development. Run broad
+   workspace checks for the frozen candidate when the repository requires it.
+3. Freeze the exact diff, deterministic results, proof links, and disclosure
+   boundary before independent review. Rebuild downstream proof after any real
+   correction.
+4. Route one bounded implementation through protected pull-request review.
+   Select independent review by actual change risk and ownership; do not create
+   a standing panel.
+5. Re-read remote PR, CI, review, and tracker state before external transitions.
+   Reconcile only ordinary tracker locators after the authoritative event.
 
 ## Evidence route
 
-Read `/tests/evidence/README.md`. Retain only proof-owner outputs with exact
-source/execution/tool/environment bindings and the linked privacy, retention,
-expiry, exception, and advisory fields. Review packets and task-local logs are
+Read `/tests/evidence/README.md`. Retain proof-owner outputs with exact source,
+execution, tool, environment, privacy, retention, expiry, exception, and
+advisory fields where applicable. Task-local notes and review discussion are
 not evidence unless an owner explicitly admits them.
-
-Apply the profile-linked disclosure procedure before every reviewer or
-publication handoff. Reviewer dispatch, reviewer outcomes, and human decisions
-remain external inputs; local workflow output cannot manufacture them.
-
-## Recovery
-
-On rollback ambiguity, stop at `ROLLBACK_RECOVERY_REQUIRED`. Validate and render
-the fully materialized next instruction from the profile, but do not execute a
-repository or provider mutation until the governing human and Git procedure
-authorize that exact action.
 
 ## Boundaries
 
-- Never add a second registry or duplicate profile enums in prompts or forms.
-- Never accept a submitted clearance, dispatch, review-state, readiness, merge,
-  tracker-state, release, or completion claim as workflow truth.
-- Never expose an external mutation operation from repository-policy modules.
+- Never add a second registry or duplicate canonical enums in prompts or forms.
+- Never accept a submitted clearance, dispatch, review-state, readiness,
+  merge, tracker-state, release, or completion claim as workflow truth.
 - Never weaken an active owner, protected branch rule, or historical evidence
-  chain from candidate code.
-- Never let guidance convenience become a second workflow registry, authority
-  source, proof result, reviewer assignment, human decision, or tracker fact.
+  chain.
+- Never let a convenience layer become a second authority source, proof result,
+  reviewer assignment, human decision, or tracker fact.

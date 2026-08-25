@@ -13,10 +13,11 @@ import {
 
 test('R1.0 package has an exact standalone substrate identity', async () => {
   assert.equal(reactCompatibility.package, '@core-ui/react');
-  assert.equal(reactCompatibility.version, '0.1.0-alpha.0');
   assert.equal(reactCompatibility.upstream.version, '1.20.0');
   assert.equal(reactCompatibility.upstream.gitHead, '5ecb3333001313e83898cd07644227897e3bae1f');
   const manifest = JSON.parse(await readFile(resolve(import.meta.dirname, '../package.json'), 'utf8'));
+  assert.match(manifest.version, /^(?:0\.1\.0-alpha\.(?:0|[1-9]\d*)|0\.1\.0-rc\.1)$/u);
+  assert.equal(reactCompatibility.version, manifest.version);
   assert.equal(manifest.private, true);
   assert.equal(manifest.scripts.prepublishOnly, 'node src/publish-guard.mjs');
   assert.equal(manifest.dependencies['react-aria-components'], '1.20.0');
@@ -46,6 +47,8 @@ test('R1.0 public surface does not export Button or upstream types', async () =>
   assert.equal(release.catalog.status, 'not-applicable');
   assert.equal(release.evidence.status, 'pending');
   assert.equal(release.publication.status, 'disabled');
+  assert.deepEqual(release.publication.requires, ['explicit external publish authorization']);
+  assert.doesNotMatch(JSON.stringify(release), /digest-specific human evidence acceptance/u);
   assert.equal(release.packagePrivate, true);
   assert.deepEqual(release.advisories, []);
   assert.deepEqual(release.exceptions, []);

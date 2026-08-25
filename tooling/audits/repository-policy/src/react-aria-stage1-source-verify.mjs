@@ -2,7 +2,6 @@ import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
-import { verifyCurrentR1ContinuousAuthority } from './r1-continuous-authority-compatibility.mjs';
 
 export const STAGE1_SOURCE = Object.freeze({
   commit: 'dea987aca51cde9da67fe3cac16c5e69a8c46016',
@@ -27,47 +26,11 @@ export const STAGE1_ARTIFACTS = Object.freeze({
   }),
 });
 
-export const R1_ENTRY_BINDING = Object.freeze({
-  decision: Object.freeze({
-    bytes: 18779,
-    path: 'decisions/0010-amendment-03-comprehensive-react-0-1.md',
-    sha256: '8ad4be538ad7a35a8c03e01af573cad27a06225e4c91eba61bb7e693e498544a',
-  }),
-  productScope: Object.freeze({
-    bytes: 122969,
-    path: 'strategy/product-scope.md',
-    sha256: '0cafc0218f0e6795a5d600acb424b4bf514972295c89b48e9042d7faa69a261f',
-    version: '6.0.0',
-  }),
-  roadmap: Object.freeze({
-    bytes: 155544,
-    path: 'strategy/milestone-roadmap.md',
-    sha256: '8006803d050713b104bf485c6c610c2339a65f3e30eb6bf4e1a9222f3a3bdf2b',
-  }),
-  continuous: Object.freeze({
-    productScope: Object.freeze({
-      bytes: 124602,
-      path: 'strategy/product-scope.md',
-      sha256: 'add747d5986c9039029a99b558ae719969fd18ac113051bbec478bd291da8632',
-      version: '6.0.1',
-    }),
-    roadmap: Object.freeze({
-      bytes: 157501,
-      path: 'strategy/milestone-roadmap.md',
-      sha256: '9f321f93a537f69c5604de35f85053d8bf4748e937d6797c9262691e301247a1',
-    }),
-  }),
-});
-
 const digest = (value) => createHash('sha256').update(value).digest('hex');
 const fail = (message) => { throw new Error(`REACT_ARIA_STAGE1_SOURCE_INVALID: ${message}`); };
-const AMENDMENT_09_DECISION_PATH = 'decisions/0010-amendment-09-r1-bootstrap-delivery-recovery.md';
-const AMENDMENT_09_ACCEPTANCE_PATH = 'decisions/0010-amendment-09-r1-bootstrap-delivery-recovery-acceptance.md';
-const git = (repositoryRoot, args) => execFileSync('git', ['-C', repositoryRoot, ...args], {encoding: 'utf8'}).trim();
+const git = (repositoryRoot, args) => execFileSync('git', ['-C', repositoryRoot, ...args], { encoding: 'utf8' }).trim();
 const gitBytes = (repositoryRoot, commit, path) => execFileSync(
-  'git',
-  ['-C', repositoryRoot, 'show', `${commit}:${path}`],
-  {maxBuffer: 64 * 1024 * 1024},
+  'git', ['-C', repositoryRoot, 'show', `${commit}:${path}`], { maxBuffer: 64 * 1024 * 1024 },
 );
 
 function readArtifact(repositoryRoot, artifact) {
@@ -78,14 +41,7 @@ function readArtifact(repositoryRoot, artifact) {
   return bytes;
 }
 
-function readTextArtifact(repositoryRoot, artifact) {
-  const bytes = readFileSync(join(repositoryRoot, artifact.path));
-  if (bytes.byteLength !== artifact.bytes || digest(bytes) !== artifact.sha256) {
-    fail(`authority identity ${artifact.path}`);
-  }
-  return bytes.toString('utf8');
-}
-
+/** Verify the immutable Stage 1 source selector, evaluator, snapshot, and counts. */
 export function verifyReactAriaStage1Source(repositoryRoot, options = {}) {
   const sourceRef = options.sourceRef ?? process.env.CORE_UI_STAGE1_SOURCE_REF ?? STAGE1_SOURCE.commit;
   if (!/^[0-9a-f]{40}$/u.test(sourceRef)) fail('source selector must be one immutable 40-hex commit');
@@ -111,7 +67,6 @@ export function verifyReactAriaStage1Source(repositoryRoot, options = {}) {
   const envelopeBytes = readArtifact(repositoryRoot, STAGE1_ARTIFACTS.envelope);
   const snapshot = JSON.parse(snapshotBytes);
   const envelope = JSON.parse(envelopeBytes);
-
   if (snapshot.coreSource?.commit !== sourceCommit || snapshot.coreSource?.tree !== sourceTree) {
     fail('snapshot committed source binding');
   }
@@ -138,103 +93,18 @@ export function verifyReactAriaStage1Source(repositoryRoot, options = {}) {
 
   return {
     accepted: true,
-    source: {commit: sourceCommit, tree: sourceTree},
+    source: { commit: sourceCommit, tree: sourceTree },
     artifacts: {
-      evaluator: {bytes: evaluatorBytes.byteLength, sha256: digest(evaluatorBytes)},
-      snapshot: {bytes: snapshotBytes.byteLength, sha256: digest(snapshotBytes)},
-      envelope: {bytes: envelopeBytes.byteLength, sha256: digest(envelopeBytes)},
+      evaluator: { bytes: evaluatorBytes.byteLength, sha256: digest(evaluatorBytes) },
+      snapshot: { bytes: snapshotBytes.byteLength, sha256: digest(snapshotBytes) },
+      envelope: { bytes: envelopeBytes.byteLength, sha256: digest(envelopeBytes) },
     },
-    counts: {families: snapshot.families.length, newImmutableIds: snapshot.counts.newImmutableScopeIds, reusedIds: snapshot.counts.existingExactScopeIdsReused, rawExports: snapshot.rawExports.length},
-  };
-}
-
-export function verifyReactR1Entry(repositoryRoot, options = {}) {
-  let authority;
-  try {
-    authority = verifyCurrentR1ContinuousAuthority(repositoryRoot, {
-      productScopeSource: options.productScopeSource,
-      authorityArchitectureSource: options.architectureSource,
-      authorityRoadmapSource: options.roadmapSource,
-      authorityDecisionSource: options.authorityDecisionSource,
-      authorityAcceptanceSource: options.authorityAcceptanceSource,
-    });
-  } catch {
-    fail('R1.0 Product Scope current authority compatibility binding');
-  }
-  const productScopeSource = options.productScopeSource
-    ?? readFileSync(join(repositoryRoot, R1_ENTRY_BINDING.productScope.path), 'utf8');
-  const productScopeBinding = R1_ENTRY_BINDING.continuous.productScope;
-  const roadmapBinding = authority.successor === null
-    ? R1_ENTRY_BINDING.continuous.roadmap
-    : authority.successor.roadmap;
-  if (authority.successor !== null && authority.successor.paths.includes(AMENDMENT_09_DECISION_PATH)) {
-    const amendment09Paths = authority.successor.paths.filter((path) => (
-      path === AMENDMENT_09_DECISION_PATH || path === AMENDMENT_09_ACCEPTANCE_PATH
-    ));
-    if (amendment09Paths.length !== 1 && amendment09Paths.length !== 2
-        || !amendment09Paths.includes(AMENDMENT_09_DECISION_PATH)
-        || amendment09Paths.length === 2 && !amendment09Paths.includes(AMENDMENT_09_ACCEPTANCE_PATH)) {
-      fail('R1 amendment-09 authority successor path set');
-    }
-  }
-  const decisionSource = options.decisionSource
-    ?? readTextArtifact(repositoryRoot, R1_ENTRY_BINDING.decision);
-
-  if (Buffer.byteLength(productScopeSource) !== productScopeBinding.bytes
-      || digest(productScopeSource) !== productScopeBinding.sha256
-      || !productScopeSource.startsWith(`---\nscopeVersion: ${productScopeBinding.version}\n`)) {
-    fail(`R1.0 Product Scope ${productScopeBinding.version} applicability binding`);
-  }
-  const roadmapSource = options.roadmapSource
-    ?? readTextArtifact(repositoryRoot, roadmapBinding);
-  if (Buffer.byteLength(decisionSource) !== R1_ENTRY_BINDING.decision.bytes
-      || digest(decisionSource) !== R1_ENTRY_BINDING.decision.sha256
-      || !decisionSource.includes('Human acceptance: Andrew / ndrewtran: “I accept Core UI comprehensive React 0.1 authority candidate v1')) {
-    fail('R1.0 Decision 0010 amendment-03 identity');
-  }
-  for (const binding of [
-    `${STAGE1_SOURCE.commit}`,
-    `${STAGE1_SOURCE.tree}`,
-    STAGE1_ARTIFACTS.evaluator.sha256,
-    STAGE1_ARTIFACTS.snapshot.sha256,
-    STAGE1_ARTIFACTS.envelope.sha256,
-  ]) {
-    if (!decisionSource.includes(binding)) fail('R1.0 Decision Stage 1 binding');
-  }
-  if (Buffer.byteLength(roadmapSource) !== roadmapBinding.bytes
-      || digest(roadmapSource) !== roadmapBinding.sha256
-      || !roadmapSource.includes('Current R1.0 evidence locator: pending; no current R1.0 evidence acceptance')
-      || !roadmapSource.includes('is recorded. Existing pre-amendment R1.0 evidence is historical-only')
-      || !roadmapSource.includes('historical audit locator only; it is not a current R1 entry or completion rule')) {
-    fail('R1.0 Roadmap applicability gate');
-  }
-
-  const stage1 = verifyReactAriaStage1Source(repositoryRoot, {
-    sourceRef: options.stage1SourceRef,
-  });
-  if (!stage1.accepted || stage1.source.commit !== STAGE1_SOURCE.commit
-      || stage1.source.tree !== STAGE1_SOURCE.tree
-      || stage1.artifacts.snapshot.sha256 !== STAGE1_ARTIFACTS.snapshot.sha256
-      || stage1.artifacts.envelope.sha256 !== STAGE1_ARTIFACTS.envelope.sha256) {
-    fail('R1.0 immutable Stage 1 verifier result');
-  }
-
-  return {
-    accepted: authority.successor?.accepted !== false,
-    activation: {
-      permitted: false,
-      reason: 'current R1.0 evidence locator is pending; historical evidence cannot activate this entry',
-      status: 'blocked-pending-current-evidence',
+    counts: {
+      families: snapshot.families.length,
+      newImmutableIds: snapshot.counts.newImmutableScopeIds,
+      reusedIds: snapshot.counts.existingExactScopeIdsReused,
+      rawExports: snapshot.rawExports.length,
     },
-    applicability: {
-      currentEvidenceLocator: null,
-      historicalEvidence: { sufficient: false, status: 'historical-only' },
-      status: 'pending-current-evidence',
-    },
-    authority,
-    decision: { bytes: R1_ENTRY_BINDING.decision.bytes, sha256: R1_ENTRY_BINDING.decision.sha256 },
-    productScope: { bytes: productScopeBinding.bytes, sha256: productScopeBinding.sha256, version: productScopeBinding.version },
-    stage1,
   };
 }
 

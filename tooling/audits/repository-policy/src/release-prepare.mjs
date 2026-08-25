@@ -6,8 +6,9 @@ import { discoverWorkspacePackages } from './workspace-packages.mjs';
 
 const repositoryRoot = resolve(import.meta.dirname, '../../../..');
 const packages = await discoverWorkspacePackages(repositoryRoot);
+const reactR1Version = /^(?:0\.1\.0-alpha\.(?:0|[1-9]\d*)|0\.1\.0-rc\.1)$/u;
 const reactCandidate = packages.filter(({ name, manifest }) => (
-  name === '@core-ui/react' && manifest.version === '0.1.0-alpha.0'
+  name === '@core-ui/react' && reactR1Version.test(manifest.version)
 ));
 const publishable = packages.filter(({ manifest }) => manifest.private !== true);
 
@@ -26,13 +27,14 @@ if (reactCandidate.length !== 1
 }
 
 if (reactCandidate.length === 1) {
+  const reactVersion = reactCandidate[0].manifest.version;
   const temp = mkdtempSync(join(tmpdir(), 'core-ui-r1-release-'));
   try {
     const packed = spawnSync('pnpm', ['pack', '--pack-destination', temp], {
       cwd: resolve(repositoryRoot, 'packages/react'), encoding: 'utf8', stdio: 'pipe',
     });
     if (packed.status !== 0) throw new Error(`R1.0_PACK_FAILED: ${packed.stderr}`);
-    const archive = join(temp, 'core-ui-react-0.1.0-alpha.0.tgz');
+    const archive = join(temp, `core-ui-react-${reactVersion}.tgz`);
     const listing = spawnSync('tar', ['-tzf', archive], { encoding: 'utf8' });
     if (listing.status !== 0) throw new Error('R1.0_PACK_ARCHIVE_MISSING');
     const entries = listing.stdout.trim().split('\n');
@@ -43,7 +45,7 @@ if (reactCandidate.length === 1) {
       throw new Error('R1.0_PACK_PRIVATE_SOURCE_LEAK');
     }
     const packedManifest = JSON.parse(spawnSync('tar', ['-xOzf', archive, 'package/package.json'], { encoding: 'utf8' }).stdout);
-    if (packedManifest.version !== '0.1.0-alpha.0'
+    if (packedManifest.version !== reactVersion
       || packedManifest.private !== true
       || JSON.stringify(packedManifest.dependencies) !== JSON.stringify({ 'react-aria-components': '1.20.0' })
       || packedManifest.peerDependencies?.react !== '>=19.2.0 <20'
@@ -59,7 +61,7 @@ if (reactCandidate.length === 1) {
     mkdirSync(consumer);
     writeFileSync(join(consumer, 'package.json'), `${JSON.stringify({
       name: 'core-ui-r1-clean-consumer', private: true, type: 'module',
-      dependencies: { '@core-ui/react': 'file:../core-ui-react-0.1.0-alpha.0.tgz', react: '19.2.8', 'react-dom': '19.2.8' },
+      dependencies: { '@core-ui/react': `file:../core-ui-react-${reactVersion}.tgz`, react: '19.2.8', 'react-dom': '19.2.8' },
     }, null, 2)}\n`);
     const install = spawnSync('pnpm', ['install', '--offline', '--ignore-scripts'], { cwd: consumer, encoding: 'utf8', stdio: 'pipe' });
     if (install.status !== 0) throw new Error(`R1.0_PACK_CONSUMER_INSTALL_FAILED: ${install.stderr}`);
@@ -68,7 +70,7 @@ if (reactCandidate.length === 1) {
       const compatibility = await import('@core-ui/react/compatibility');
       const testing = await import('@core-ui/react/testing');
       if (Object.keys(main).join(',') !== 'reactCompatibility') throw new Error('unexpected public entry');
-      if (compatibility.reactCompatibility.version !== '0.1.0-alpha.0') throw new Error('compatibility version');
+      if (compatibility.reactCompatibility.version !== '${reactVersion}') throw new Error('compatibility version');
       if (testing.reactPlatformSafetyFixture.componentSupportClaim !== 'none') throw new Error('support claim');
       if (!import.meta.resolve('@core-ui/react/styles.css').endsWith('/generated/styles.css')) throw new Error('styles resolution');
       let rejected = false;
