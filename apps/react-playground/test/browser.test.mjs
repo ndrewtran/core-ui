@@ -13,6 +13,8 @@ const candidates = [
   '/usr/bin/google-chrome',
   '/usr/bin/chromium',
 ].filter(Boolean);
+const expectedComponents = ['breadcrumbs', 'checkbox', 'disclosure', 'disclosure-group', 'group', 'link', 'meter', 'progress-bar', 'separator', 'toggle-button'];
+const expectedButtonsPerProfile = 10;
 let executablePath;
 for (const candidate of candidates) {
   try { await access(candidate); executablePath = candidate; break; } catch {}
@@ -26,7 +28,7 @@ async function waitForServer(url) {
   throw new Error('playground preview did not become ready');
 }
 
-test('R1.1 Button browser and axe matrix', async () => {
+test('R1.1 React component browser and axe matrix', async () => {
   if (!executablePath) throw new Error('R1_BROWSER_REQUIRED: Chrome or Chromium was not found');
   const appRoot = resolve(import.meta.dirname, '..');
   const server = await createServer({ root: appRoot, server: { host: '127.0.0.1', port: 4173, strictPort: true } });
@@ -46,6 +48,17 @@ test('R1.1 Button browser and axe matrix', async () => {
       const profile = page.locator(`[data-profile="${expected}"]`);
       const result = await profile.evaluate(async (node) => window.axe.run(node));
       if (result.violations.length) throw new Error(`${expected} axe violations: ${result.violations.map(({ id }) => id).join(', ')}`);
+      if (await profile.locator('[data-component]').count() !== expectedComponents.length) {
+        throw new Error(`${expected} must expose all ${expectedComponents.length} R1.1 component articles`);
+      }
+      for (const component of expectedComponents) {
+        if (await profile.locator(`[data-component="${component}"]`).count() !== 1) {
+          throw new Error(`${expected} must expose exactly one ${component} article`);
+        }
+      }
+      if (await profile.locator('button').count() !== expectedButtonsPerProfile) {
+        throw new Error(`${expected} must expose exactly ${expectedButtonsPerProfile} buttons`);
+      }
       const idleFixture = profile.locator('[data-core-fixture-state="idle"]');
       await idleFixture.locator('button').click();
       if (await idleFixture.getAttribute('data-core-press-count') !== '1') throw new Error(`${expected} idle Button must activate exactly once`);
@@ -65,7 +78,6 @@ test('R1.1 Button browser and axe matrix', async () => {
     }
     await page.keyboard.press('Tab');
     await page.keyboard.press('Shift+Tab');
-    if (await page.locator('button').count() !== 18) throw new Error('browser state matrix is incomplete');
     console.log(JSON.stringify({ browser: await browser.version(), profiles: expectedProfiles }));
   } finally {
     await browser?.close();
