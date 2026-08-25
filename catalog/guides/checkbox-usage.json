@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "1.0.0",
+  "id": "core:guide:checkbox-usage",
+  "kind": "guide",
+  "name": "Checkbox usage",
+  "summary": "Portable usage guidance for Checkbox.",
+  "lifecycle": "experimental",
+  "keywords": [
+    "checkbox",
+    "react",
+    "accessibility"
+  ],
+  "platforms": [
+    "web.react"
+  ],
+  "source": "catalog/guides/checkbox-usage.md"
+}

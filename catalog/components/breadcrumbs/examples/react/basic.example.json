@@ -1,0 +1,21 @@
+{
+  "schemaVersion": "1.0.0",
+  "id": "core:example:breadcrumbs-basic-react",
+  "kind": "example",
+  "name": "Basic React Breadcrumbs",
+  "summary": "The minimum React Breadcrumbs example.",
+  "lifecycle": "experimental",
+  "binding": {
+    "ref": "core:component:breadcrumbs#web.react",
+    "guidanceImpact": "normative",
+    "purposes": [
+      "generation",
+      "explanation",
+      "validation"
+    ],
+    "preference": 0
+  },
+  "complexity": "minimal",
+  "prerequisites": [],
+  "source": "catalog/components/breadcrumbs/examples/react/basic.tsx"
+}

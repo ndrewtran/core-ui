@@ -1,5 +1,18 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
+import {
+  Breadcrumbs,
+  Button,
+  Checkbox,
+  Disclosure,
+  DisclosureGroup,
+  Group,
+  Link,
+  Meter,
+  ProgressBar,
+  Separator,
+  ToggleButton,
+} from '@core-ui/react';
 import { R1ButtonFixture } from '../../../packages/react/src/button-fixture.mjs';
 import '@core-ui/react/styles.css';
 
@@ -12,8 +25,51 @@ const profiles = [
   ['light', 'standard', 'full', 'comfortable', 'rtl'],
 ];
 
+function ComponentStates() {
+  return React.createElement(React.Fragment, null,
+    React.createElement('article', { 'data-component': 'breadcrumbs' },
+      React.createElement('h3', null, 'Breadcrumbs'),
+      React.createElement(Breadcrumbs, { 'aria-label': 'Breadcrumb', items: [{ id: 'home', label: 'Home', href: '/' }, { id: 'docs', label: 'Docs' }] })),
+    React.createElement('article', { 'data-component': 'checkbox' },
+      React.createElement('h3', null, 'Checkbox'),
+      React.createElement(Checkbox, { defaultChecked: true }, 'Selected'),
+      React.createElement(Checkbox, { indeterminate: true }, 'Mixed'),
+      React.createElement(Checkbox, { disabled: true }, 'Disabled')),
+    React.createElement('article', { 'data-component': 'disclosure' },
+      React.createElement('h3', null, 'Disclosure'),
+      React.createElement(Disclosure, { title: 'Details', defaultExpanded: true }, 'Expanded content')),
+    React.createElement('article', { 'data-component': 'disclosure-group' },
+      React.createElement('h3', null, 'Disclosure group'),
+      React.createElement(DisclosureGroup, { multiple: false, defaultExpandedIds: ['one'] },
+        React.createElement(Disclosure, { id: 'one', title: 'One' }, 'First panel'),
+        React.createElement(Disclosure, { id: 'two', title: 'Two' }, 'Second panel'))),
+    React.createElement('article', { 'data-component': 'group' },
+      React.createElement('h3', null, 'Group'),
+      React.createElement(Group, { 'aria-label': 'Actions' }, React.createElement(Button, null, 'Save'))),
+    React.createElement('article', { 'data-component': 'link' },
+      React.createElement('h3', null, 'Link'),
+      React.createElement(Link, { href: '/settings' }, 'Enabled'),
+      React.createElement(Link, { href: '/settings', disabled: true }, 'Disabled')),
+    React.createElement('article', { 'data-component': 'meter' },
+      React.createElement('h3', null, 'Meter'),
+      React.createElement(Meter, { label: 'Storage', value: 72 })),
+    React.createElement('article', { 'data-component': 'progress-bar' },
+      React.createElement('h3', null, 'Progress bar'),
+      React.createElement(ProgressBar, { label: 'Upload', value: 64 }),
+      React.createElement(ProgressBar, { label: 'Loading' })),
+    React.createElement('article', { 'data-component': 'separator' },
+      React.createElement('h3', null, 'Separator'),
+      React.createElement(Separator, { orientation: 'horizontal' }),
+      React.createElement(Separator, { orientation: 'vertical' })),
+    React.createElement('article', { 'data-component': 'toggle-button' },
+      React.createElement('h3', null, 'Toggle button'),
+      React.createElement(ToggleButton, { defaultSelected: true }, 'Selected'),
+      React.createElement(ToggleButton, null, 'Idle'),
+      React.createElement(ToggleButton, { disabled: true }, 'Disabled')));
+}
+
 createRoot(document.querySelector('#root')).render(React.createElement('main', null,
-  React.createElement('h1', null, 'Core UI React R1.1 Button'),
+  React.createElement('h1', null, 'Core UI React R1.1'),
   profiles.map(([colorScheme, contrast, motion, density, direction]) => React.createElement('section', {
     key: [colorScheme, contrast, motion, density, direction].join('-'),
     'data-profile': [colorScheme, contrast, motion, density, direction].join('/'),
@@ -27,5 +83,6 @@ createRoot(document.querySelector('#root')).render(React.createElement('main', n
   React.createElement(R1ButtonFixture),
   React.createElement(R1ButtonFixture, { disabled: true }),
   React.createElement(R1ButtonFixture, { pending: true }),
+  React.createElement(ComponentStates),
   )),
 ));

@@ -32,5 +32,153 @@
       { "input": "inherited typography", "core": "consumer/Core inheritance", "disposition": "reasoned-non-token-adaptation" },
       { "input": "donor shadow and opacity details", "core": "private implementation constants", "disposition": "adapt" }
     ]
+  },
+  "components": {
+    "breadcrumbs": {
+      "disposition": "adapt",
+      "donorInputs": [
+        { "path": "packages/react/src/breadcrumbs/Breadcrumbs.styled.tsx", "blob": "6273f1d59f939b1e3970af10b4f2dab4b9f92334" },
+        { "path": "packages/react/src/breadcrumbs/index.ts", "blob": "945048f9def3632e9bc0c3ca9173be43da988ebc" },
+        { "path": "packages/styles/src/breadcrumbs.css", "blob": "7af94410c7370ee636ade4b086f169e30ec3c5a1" }
+      ],
+      "consumedRules": ["--radius-xs", "focus-ring color/rule", "feedback transition duration", "inherited typography"],
+      "rules": [
+        { "input": "--radius-xs", "core": "semantic.control.radius", "disposition": "adapt" },
+        { "input": "focus-ring color/rule", "core": "semantic.focus.ring", "disposition": "adapt" },
+        { "input": "feedback transition duration", "core": "semantic.motion.feedback", "disposition": "adapt" },
+        { "input": "inherited typography", "core": "consumer/Core inheritance", "disposition": "reasoned-non-token-adaptation" }
+      ]
+    },
+    "checkbox": {
+      "disposition": "adapt",
+      "donorInputs": [
+        { "path": "packages/react/src/checkbox/Checkbox.styled.tsx", "blob": "be0d7bd7d69e1e3abbfa750377c97bc04b13e2e1" },
+        { "path": "packages/react/src/checkbox/index.ts", "blob": "c2563f93466e0e1c3d14d32d74bf02e9ab49812e" },
+        { "path": "packages/styles/src/checkbox.css", "blob": "15cbf9cedc173250c6b0db955c696d3d67eb8505" }
+      ],
+      "consumedRules": ["--radius-xs", "--color-60", "focus-ring color/rule", "--red-60 invalid state", "disabled opacity"],
+      "rules": [
+        { "input": "--radius-xs", "core": "semantic.control.radius", "disposition": "adapt" },
+        { "input": "--color-60", "core": "semantic.selection.track", "disposition": "adapt" },
+        { "input": "focus-ring color/rule", "core": "semantic.focus.ring", "disposition": "adapt" },
+        { "input": "--red-60 invalid state", "core": "semantic.feedback.invalid", "disposition": "adapt" },
+        { "input": "disabled opacity", "core": "private implementation constants", "disposition": "reasoned-non-token-adaptation" }
+      ]
+    },
+    "disclosure": {
+      "disposition": "adapt",
+      "donorInputs": [
+        { "path": "packages/react/src/disclosure/Disclosure.styled.tsx", "blob": "1a29955e72ef390e024a9b5e24e703aab016b321" },
+        { "path": "packages/react/src/disclosure/index.ts", "blob": "0e46ede41e818e05393da4b60c958d00278f8e8e" },
+        { "path": "packages/styles/src/disclosure.css", "blob": "67f0f0c4b34f6232d2e9ac43888ec5d972c46ba9" }
+      ],
+      "consumedRules": ["--radius-m", "--space-3xs", "--space-xs", "2.25rem minimum height", "focus-ring color/rule", "feedback transition duration", "disabled opacity", "panel overflow/height adaptation"],
+      "rules": [
+        { "input": "--radius-m", "core": "semantic.control.radius", "disposition": "adapt" },
+        { "input": "--space-3xs", "core": "reference.dimension.space-3xs", "disposition": "adapt" },
+        { "input": "--space-xs", "core": "semantic.control.padding-inline", "disposition": "adapt" },
+        { "input": "2.25rem minimum height", "core": "private implementation constants", "disposition": "reasoned-non-token-adaptation" },
+        { "input": "focus-ring color/rule", "core": "semantic.focus.ring", "disposition": "adapt" },
+        { "input": "feedback transition duration", "core": "semantic.motion.feedback", "disposition": "adapt" },
+        { "input": "disabled opacity", "core": "private implementation constants", "disposition": "reasoned-non-token-adaptation" },
+        { "input": "panel overflow/height adaptation", "core": "private implementation constants", "disposition": "reasoned-non-token-adaptation" }
+      ]
+    },
+    "disclosure-group": {
+      "disposition": "adapt",
+      "donorInputs": [
+        { "path": "packages/react/src/accordion/Accordion.styled.tsx", "blob": "5adc236ec595deeee76fc541b7aac5810eb3d25e" },
+        { "path": "packages/react/src/accordion/index.ts", "blob": "b848173970d0f380541001daecdb159fd1937f3e" },
+        { "path": "packages/styles/src/accordion.css", "blob": "96d069e45d1ae4217c2a312a758f16ea93607193" }
+      ],
+      "consumedRules": ["--radius-l", "--space-xs", "focus-ring color/rule", "feedback transition duration", "disabled opacity"],
+      "rules": [
+        { "input": "--radius-l", "core": "semantic.control.radius", "disposition": "adapt" },
+        { "input": "--space-xs", "core": "semantic.control.padding-inline", "disposition": "adapt" },
+        { "input": "focus-ring color/rule", "core": "semantic.focus.ring", "disposition": "adapt" },
+        { "input": "feedback transition duration", "core": "semantic.motion.feedback", "disposition": "adapt" },
+        { "input": "disabled opacity", "core": "private implementation constants", "disposition": "reasoned-non-token-adaptation" }
+      ]
+    },
+    "group": {
+      "disposition": "no-applicable-donor",
+      "donorInputs": [],
+      "consumedRules": [],
+      "rules": []
+    },
+    "link": {
+      "disposition": "adapt",
+      "donorInputs": [
+        { "path": "packages/react/src/link/Link.styled.tsx", "blob": "1db3d8d8537291918c33520625a8037971a06ae6" },
+        { "path": "packages/react/src/link/index.ts", "blob": "fd19302109c2975556937da3b097949d24883c72" },
+        { "path": "packages/styles/src/link.css", "blob": "f6ab95f40dce3eea1f86dd324aac669ee5c9d4a0" }
+      ],
+      "consumedRules": ["--radius-xs", "focus-ring color/rule", "feedback transition duration", "inherited typography"],
+      "rules": [
+        { "input": "--radius-xs", "core": "semantic.control.radius", "disposition": "adapt" },
+        { "input": "focus-ring color/rule", "core": "semantic.focus.ring", "disposition": "adapt" },
+        { "input": "feedback transition duration", "core": "semantic.motion.feedback", "disposition": "adapt" },
+        { "input": "inherited typography", "core": "consumer/Core inheritance", "disposition": "reasoned-non-token-adaptation" }
+      ]
+    },
+    "meter": {
+      "disposition": "adapt",
+      "donorInputs": [
+        { "path": "packages/react/src/meter/Meter.styled.tsx", "blob": "ad156ca6498bc25993dc5885ed0eb2f79bb2f38a" },
+        { "path": "packages/react/src/meter/index.ts", "blob": "3014b474b7e6c092ed6ecd150923c6356d109b16" },
+        { "path": "packages/styles/src/meter.css", "blob": "a41856198a597798a85651ef382ca12e64d1f546" }
+      ],
+      "consumedRules": ["--space-4xs", "percentage geometry"],
+      "rules": [
+        { "input": "--space-4xs", "core": "reference.dimension.space-4xs", "disposition": "adapt" },
+        { "input": "percentage geometry", "core": "private implementation constants", "disposition": "reasoned-non-token-adaptation" }
+      ]
+    },
+    "progress-bar": {
+      "disposition": "adapt",
+      "donorInputs": [
+        { "path": "packages/react/src/progress-bar/ProgressBar.styled.tsx", "blob": "73af93d6f6f1063f958659e7e2b20e3083ce52f2" },
+        { "path": "packages/react/src/progress-bar/index.ts", "blob": "7fdba1a1a6fe4220a4ffe8a5b7d313e7a1b283fa" },
+        { "path": "packages/styles/src/progress-bar.css", "blob": "f2ecfa101a33ce40cb9a6459734e6b4976392638" }
+      ],
+      "consumedRules": ["--space-xs", "--space-4xs", "--radius-s", "feedback transition duration", "indeterminate animation"],
+      "rules": [
+        { "input": "--space-xs", "core": "semantic.control.padding-inline", "disposition": "adapt" },
+        { "input": "--space-4xs", "core": "reference.dimension.space-4xs", "disposition": "adapt" },
+        { "input": "--radius-s", "core": "semantic.control.radius", "disposition": "adapt" },
+        { "input": "feedback transition duration", "core": "semantic.motion.feedback", "disposition": "adapt" },
+        { "input": "indeterminate animation", "core": "Core reduced-motion-safe indeterminate state", "disposition": "reasoned-non-token-adaptation" }
+      ]
+    },
+    "separator": {
+      "disposition": "adapt",
+      "donorInputs": [
+        { "path": "packages/react/src/separator/Separator.styled.tsx", "blob": "c0489bb20f50e726060b9caf9d4b6d694cc81917" },
+        { "path": "packages/react/src/separator/index.ts", "blob": "533788456c45a09b34bbe64a859896f05859b9be" },
+        { "path": "packages/styles/src/separator.css", "blob": "967f9c2f659ee53d4850b1fa27d57717d7fe4d9d" }
+      ],
+      "consumedRules": ["--neutral-20 separator color", "orientation geometry"],
+      "rules": [
+        { "input": "--neutral-20 separator color", "core": "consumer/currentColor inheritance", "disposition": "reasoned-non-token-adaptation" },
+        { "input": "orientation geometry", "core": "private implementation constants", "disposition": "reasoned-non-token-adaptation" }
+      ]
+    },
+    "toggle-button": {
+      "disposition": "adapt",
+      "donorInputs": [
+        { "path": "packages/react/src/toggle-button/ToggleButton.styled.tsx", "blob": "4045e92c2ef48aef9c0c3300b86439e375a5d5d8" },
+        { "path": "packages/react/src/toggle-button/index.ts", "blob": "87bdbecd5c2fc1be439d17105c3162d905ba0441" },
+        { "path": "packages/styles/src/toggle-button.css", "blob": "cbfba4377573336fcccaed2b22cc38e4d887f4f6" }
+      ],
+      "consumedRules": ["--radius-m", "--space-xs", "2.25rem minimum height", "focus-ring color/rule", "feedback transition duration", "disabled opacity"],
+      "rules": [
+        { "input": "--radius-m", "core": "semantic.control.radius", "disposition": "adapt" },
+        { "input": "--space-xs", "core": "semantic.control.padding-inline", "disposition": "adapt" },
+        { "input": "2.25rem minimum height", "core": "semantic.control.min-height", "disposition": "adapt" },
+        { "input": "focus-ring color/rule", "core": "semantic.focus.ring", "disposition": "adapt" },
+        { "input": "feedback transition duration", "core": "semantic.motion.feedback", "disposition": "adapt" },
+        { "input": "disabled opacity", "core": "private implementation constants", "disposition": "reasoned-non-token-adaptation" }
+      ]
+    }
   }
 }

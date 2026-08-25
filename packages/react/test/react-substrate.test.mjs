@@ -35,7 +35,7 @@ test('R1.1 is packable but direct publication fails closed', () => {
   assert.match(result.stderr, /CORE_REACT_R11_PUBLISH_FORBIDDEN/u);
 });
 
-test('R1.1 packed package exposes only the clean Core Button surface', async () => {
+test('R1.1 packed package exposes a clean Core component surface', async () => {
   const packageRoot = resolve(import.meta.dirname, '..');
   const packRoot = await mkdtemp(join(tmpdir(), 'core-ui-react-pack-'));
   const consumerRoot = await mkdtemp(join(tmpdir(), 'core-ui-react-consumer-'));
@@ -50,7 +50,7 @@ test('R1.1 packed package exposes only the clean Core Button surface', async () 
     const archive = join(packRoot, archiveName);
     const listing = spawnSync('tar', ['-tzf', archive], { encoding: 'utf8' });
     assert.equal(listing.status, 0, listing.stderr);
-    for (const entry of ['package/generated/button.mjs', 'package/generated/index.d.ts', 'package/generated/styles.css', 'package/NOTICE']) {
+    for (const entry of ['package/generated/button.mjs', 'package/generated/components.mjs', 'package/generated/index.d.ts', 'package/generated/styles.css', 'package/NOTICE']) {
       assert.match(listing.stdout, new RegExp(`^${entry.replaceAll('.', '\\.')}$`, 'mu'));
     }
 
@@ -66,11 +66,14 @@ test('R1.1 packed package exposes only the clean Core Button surface', async () 
     const imported = spawnSync(process.execPath, [
       '--input-type=module',
       '-e',
-      "import('@core-ui/react').then(({ Button }) => { if (!Button) throw new Error('Button export missing'); })",
+      "import('@core-ui/react').then((entry) => { for (const name of ['Button', 'Breadcrumbs', 'Checkbox', 'Disclosure', 'DisclosureGroup', 'Group', 'Link', 'Meter', 'ProgressBar', 'Separator', 'ToggleButton']) if (!entry[name]) throw new Error(`${name} export missing`); })",
     ], { cwd: consumerRoot, encoding: 'utf8' });
     assert.equal(imported.status, 0, imported.stderr);
     const publicTypes = await readFile(join(consumerPackage, 'generated/index.d.ts'), 'utf8');
-    assert.doesNotMatch(publicTypes, /react-aria-components|isPending|isDisabled|onPress/u);
+    assert.doesNotMatch(publicTypes, /react-aria-components|isPending|isDisabled|isSelected|isExpanded|onPress|CheckboxGroup|ToggleButtonGroup/u);
+    assert.match(publicTypes, /export interface (?:ButtonProps|BreadcrumbsProps|CheckboxProps|DisclosureProps|DisclosureGroupProps|GroupProps|LinkProps|MeterProps|ProgressBarProps|SeparatorProps|ToggleButtonProps)/u);
+    assert.match(await readFile(join(consumerPackage, 'generated/styles.css'), 'utf8'), /\.core-(?:breadcrumbs|checkbox|disclosure|disclosure-group|group|link|meter|progress-bar|separator|toggle-button)/u);
+    assert.match(await readFile(join(consumerPackage, 'NOTICE'), 'utf8'), /Tale UI/u);
   } finally {
     await Promise.all([
       rm(packRoot, { recursive: true, force: true }),
@@ -79,16 +82,17 @@ test('R1.1 packed package exposes only the clean Core Button surface', async () 
   }
 });
 
-test('R1.1 public surface exports Core Button without upstream types', async () => {
+test('R1.1 public surface exports the Core component slice without upstream types', async () => {
   const packageRoot = resolve(import.meta.dirname, '..');
   const manifest = JSON.parse(await readFile(resolve(packageRoot, 'package.json'), 'utf8'));
   assert.deepEqual(Object.keys(manifest.exports).sort(), ['.', './compatibility', './styles.css', './testing']);
   const entry = await import('../generated/index.mjs');
-  assert.equal('Button' in entry, true);
+  const componentNames = ['Button', 'Breadcrumbs', 'Checkbox', 'Disclosure', 'DisclosureGroup', 'Group', 'Link', 'Meter', 'ProgressBar', 'Separator', 'ToggleButton'];
+  for (const name of componentNames) assert.equal(name in entry, true);
   assert.equal('ButtonProps' in entry, false);
   const release = JSON.parse(await readFile(resolve(packageRoot, 'generated/release.json'), 'utf8'));
-  assert.deepEqual(release.componentExports.map(({ name }) => name), ['Button']);
-  assert.deepEqual(release.bindings.map(({ binding }) => binding), ['core:component:button#web.react']);
+  assert.deepEqual(release.componentExports.map(({ name }) => name), componentNames);
+  assert.deepEqual(release.bindings.map(({ binding }) => binding), componentNames.map((name) => `core:component:${name.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase()}#web.react`));
   assert.deepEqual(release.runtimeProfiles, ['web.react']);
   assert.equal(release.catalog.status, 'bound');
   assert.equal(release.evidence.status, 'pending');
@@ -99,6 +103,11 @@ test('R1.1 public surface exports Core Button without upstream types', async () 
   assert.deepEqual(release.advisories, []);
   assert.deepEqual(release.exceptions, []);
   assert.match(await readFile(resolve(packageRoot, 'NOTICE'), 'utf8'), /Tale UI/);
+  const componentDonorSource = await readFile(resolve(packageRoot, 'generated/component-donor-comparison.json'), 'utf8');
+  const componentDonor = JSON.parse(componentDonorSource.replace(/^\/\/ @generated-from:.*\n\/\/ @generated-content-sha256:.*\n/u, ''));
+  assert.deepEqual(componentDonor.components.map(({ component }) => component), componentNames);
+  assert.equal(componentDonor.components.find(({ component }) => component === 'Group').disposition, 'no-applicable-donor');
+  assert.ok(componentDonor.components.filter(({ disposition }) => disposition === 'adapt').length >= 9);
 });
 
 test('R1.0 upstream inventory is complete, typed, and classified', async () => {
@@ -177,8 +186,10 @@ test('R1.1 generated contracts reject missing, unknown, and publication drift', 
   const descriptor = JSON.parse(await readFile(resolve(packageRoot, 'generated/descriptor.json'), 'utf8'));
   const release = JSON.parse(await readFile(resolve(packageRoot, 'generated/release.json'), 'utf8'));
   const donorComparison = JSON.parse(await readFile(resolve(packageRoot, 'generated/button-donor-comparison.json'), 'utf8'));
+  const componentDonorSource = await readFile(resolve(packageRoot, 'generated/component-donor-comparison.json'), 'utf8');
+  const componentDonorComparison = JSON.parse(componentDonorSource.replace(/^\/\/ @generated-from:.*\n\/\/ @generated-content-sha256:.*\n/u, ''));
   const crosswalk = JSON.parse(await readFile(resolve(packageRoot, '../../catalog/react-r1-0/donor-crosswalk.json'), 'utf8'));
-  const assertGenerated = (overrides = {}) => assertReactR11GeneratedContracts({ descriptor, release, donorComparison, manifest, crosswalk, ...overrides });
+  const assertGenerated = (overrides = {}) => assertReactR11GeneratedContracts({ descriptor, release, donorComparison, componentDonorComparison, manifest, crosswalk, ...overrides });
   assertGenerated();
   const unknownDescriptor = structuredClone(descriptor);
   unknownDescriptor.unknown = true;
@@ -192,6 +203,9 @@ test('R1.1 generated contracts reject missing, unknown, and publication drift', 
   const changedComparison = structuredClone(donorComparison);
   changedComparison.donor.commit = '0'.repeat(40);
   assert.throws(() => assertGenerated({ donorComparison: changedComparison }), /CORE_REACT_R11_DONOR_COMPARISON_DRIFT/u);
+  const changedCrosswalk = structuredClone(crosswalk);
+  changedCrosswalk.components.link.rules[0].core = 'semantic.action.background';
+  assert.throws(() => assertGenerated({ crosswalk: changedCrosswalk }), /CORE_REACT_R11_COMPONENT_DONOR_COMPARISON_DRIFT/u);
 });
 
 test('R1.0 donor inputs are exact, fully crosswalked, licensed, and dependency-free', async () => {
@@ -201,6 +215,14 @@ test('R1.0 donor inputs are exact, fully crosswalked, licensed, and dependency-f
   assert.equal(crosswalk.donor.tree, 'e36c96f683772eedf4652d6adbe7dbcbd1d41f94');
   assert.equal(crosswalk.button.rules.length, crosswalk.button.consumedRules.length);
   assert.deepEqual(crosswalk.button.rules.map(({ input }) => input), crosswalk.button.consumedRules);
+  const componentSlugs = ['breadcrumbs', 'checkbox', 'disclosure', 'disclosure-group', 'group', 'link', 'meter', 'progress-bar', 'separator', 'toggle-button'];
+  assert.deepEqual(Object.keys(crosswalk.components).sort(), componentSlugs.sort());
+  for (const slug of componentSlugs) {
+    const entry = crosswalk.components[slug];
+    assert.deepEqual(entry.rules.map(({ input }) => input), entry.consumedRules);
+    assert.ok(entry.donorInputs.every(({ path, blob }) => path && /^[0-9a-f]{40}$/u.test(blob)));
+    assert.equal(entry.disposition, slug === 'group' ? 'no-applicable-donor' : 'adapt');
+  }
   assert.equal(new Set(crosswalk.sharedPrimitives.map(({ path }) => path)).size, crosswalk.sharedPrimitives.length);
   assert.ok(crosswalk.sharedPrimitives.every(({ blob }) => /^[0-9a-f]{40}$/u.test(blob)));
   const notice = await readFile(resolve(repositoryRoot, 'packages/react/NOTICE'), 'utf8');

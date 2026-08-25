@@ -1,0 +1,21 @@
+{
+  "schemaVersion": "1.0.0",
+  "id": "core:example:disclosure-group-basic-react",
+  "kind": "example",
+  "name": "Basic React DisclosureGroup",
+  "summary": "The minimum React DisclosureGroup example.",
+  "lifecycle": "experimental",
+  "binding": {
+    "ref": "core:component:disclosure-group#web.react",
+    "guidanceImpact": "normative",
+    "purposes": [
+      "generation",
+      "explanation",
+      "validation"
+    ],
+    "preference": 0
+  },
+  "complexity": "minimal",
+  "prerequisites": [],
+  "source": "catalog/components/disclosure-group/examples/react/basic.tsx"
+}

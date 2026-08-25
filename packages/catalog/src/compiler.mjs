@@ -346,8 +346,12 @@ export async function compileCatalog({
           .map(([bindingId]) => [bindingId, bindingSpecRevision({
             component: record,
             bindingId,
-            examples,
-            exampleSources,
+            examples: examples.filter((example) => example.binding.ref.startsWith(`${record.id}#`)),
+            exampleSources: Object.fromEntries(
+              examples
+                .filter((example) => example.binding.ref.startsWith(`${record.id}#`))
+                .map((example) => [example.id, exampleSources[example.id]]),
+            ),
             tokenSources: tokens,
             tokenRequirementSets: Object.entries(tokenRequirementSets)
               .filter(([key]) => key.startsWith(`${bindingId}:`))

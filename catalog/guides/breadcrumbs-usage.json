@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "1.0.0",
+  "id": "core:guide:breadcrumbs-usage",
+  "kind": "guide",
+  "name": "Breadcrumbs usage",
+  "summary": "Portable usage guidance for Breadcrumbs.",
+  "lifecycle": "experimental",
+  "keywords": [
+    "breadcrumbs",
+    "react",
+    "accessibility"
+  ],
+  "platforms": [
+    "web.react"
+  ],
+  "source": "catalog/guides/breadcrumbs-usage.md"
+}

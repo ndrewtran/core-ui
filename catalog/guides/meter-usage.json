@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "1.0.0",
+  "id": "core:guide:meter-usage",
+  "kind": "guide",
+  "name": "Meter usage",
+  "summary": "Portable usage guidance for Meter.",
+  "lifecycle": "experimental",
+  "keywords": [
+    "meter",
+    "react",
+    "accessibility"
+  ],
+  "platforms": [
+    "web.react"
+  ],
+  "source": "catalog/guides/meter-usage.md"
+}

@@ -1,0 +1,21 @@
+{
+  "schemaVersion": "1.0.0",
+  "id": "core:example:meter-basic-react",
+  "kind": "example",
+  "name": "Basic React Meter",
+  "summary": "The minimum React Meter example.",
+  "lifecycle": "experimental",
+  "binding": {
+    "ref": "core:component:meter#web.react",
+    "guidanceImpact": "normative",
+    "purposes": [
+      "generation",
+      "explanation",
+      "validation"
+    ],
+    "preference": 0
+  },
+  "complexity": "minimal",
+  "prerequisites": [],
+  "source": "catalog/components/meter/examples/react/basic.tsx"
+}

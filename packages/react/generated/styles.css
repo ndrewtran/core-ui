@@ -1,5 +1,5 @@
 /* @generated-from: packages/react/src/generate.mjs
- * @generated-content-sha256: sha256:b138983f8ac0d0dc1d8250df839d42885edd652c2e446e2cf04012ced3838f71
+ * @generated-content-sha256: sha256:fb246f39dbdc5007e0af42b68c9126705e0764a12f1c8b99aac1300d9d29925f
  */
 :root {
   --core-component-button-background: #2b2826;
@@ -413,3 +413,37 @@
 
 .core-r1-button[data-disabled] { opacity: 0.5; }
 .core-r1-button[data-pending] { cursor: progress; }
+
+
+.core-breadcrumbs { display: block; }
+.core-breadcrumbs-list { display: flex; flex-wrap: wrap; gap: var(--core-reference-dimension-space-2xs); margin: 0; padding: 0; list-style: none; }
+.core-breadcrumbs-link, .core-link { color: inherit; text-underline-offset: 0.15em; transition: opacity var(--core-semantic-motion-feedback) ease; }
+.core-breadcrumbs-link:focus-visible, .core-link:focus-visible { outline: 2px solid var(--core-semantic-focus-ring); outline-offset: 2px; }
+.core-breadcrumbs-current { font-weight: 600; }
+.core-checkbox { display: inline-flex; align-items: center; gap: var(--core-reference-dimension-space-2xs); cursor: pointer; }
+.core-checkbox-indicator { display: inline-grid; place-items: center; inline-size: 1.125rem; block-size: 1.125rem; flex: 0 0 auto; border: 1.5px solid currentColor; border-radius: var(--core-semantic-control-radius); background: transparent; color: currentColor; font-size: 0.8rem; font-weight: 700; line-height: 1; }
+.core-checkbox-indicator[data-selected], .core-checkbox-indicator[data-indeterminate] { border-color: var(--core-semantic-selection-track); background: var(--core-semantic-selection-track); color: Canvas; }
+.core-checkbox-indicator[data-selected]::before { content: '✓'; }
+.core-checkbox-indicator[data-indeterminate]::before { content: '−'; }
+.core-checkbox input { accent-color: var(--core-semantic-selection-track); }
+.core-checkbox:focus-within { outline: 2px solid var(--core-semantic-focus-ring); outline-offset: 2px; }
+.core-checkbox[data-focus-visible] { outline: 2px solid var(--core-semantic-focus-ring); outline-offset: 2px; }
+.core-checkbox[data-invalid] .core-checkbox-indicator { border-color: var(--core-semantic-feedback-invalid); }
+.core-checkbox[data-disabled] { cursor: not-allowed; opacity: 0.55; }
+.core-disclosure, .core-disclosure-group, .core-group { border: 1px solid currentColor; border-radius: var(--core-semantic-control-radius); padding: var(--core-semantic-control-padding-inline); }
+.core-disclosure-trigger, .core-toggle-button { border: 1px solid transparent; border-radius: var(--core-semantic-control-radius); padding: var(--core-semantic-control-padding-inline); font: inherit; cursor: pointer; }
+.core-disclosure-trigger:focus-visible, .core-toggle-button:focus-visible { outline: 2px solid var(--core-semantic-focus-ring); outline-offset: 2px; }
+.core-disclosure-panel { padding-block-start: var(--core-reference-dimension-space-2xs); }
+.core-group[data-disabled] { opacity: 0.55; }
+.core-link[data-disabled] { cursor: not-allowed; opacity: 0.55; }
+.core-meter, .core-progress-bar { display: grid; gap: var(--core-reference-dimension-space-2xs); }
+.core-meter-track, .core-progress-bar-track { overflow: hidden; min-block-size: 0.5rem; border-radius: var(--core-semantic-control-radius); background: color-mix(in srgb, currentColor 20%, transparent); }
+.core-meter-fill, .core-progress-bar-fill { min-block-size: inherit; border-radius: inherit; background: var(--core-semantic-selection-track); transition: inline-size var(--core-semantic-motion-feedback) ease; }
+.core-progress-bar[data-indeterminate] .core-progress-bar-fill { inline-size: 35%; }
+.core-separator { border: 0; background: currentColor; opacity: 0.45; }
+.core-separator-horizontal { block-size: 1px; inline-size: 100%; }
+.core-separator-vertical { block-size: 100%; inline-size: 1px; min-block-size: 1rem; }
+.core-toggle-button[aria-pressed='true'] { background: var(--core-semantic-action-background); color: var(--core-semantic-action-foreground); }
+.core-toggle-button:disabled { cursor: not-allowed; opacity: 0.55; }
+@media (prefers-reduced-motion: reduce) { .core-breadcrumbs-link, .core-link, .core-meter-fill, .core-progress-bar-fill { transition: none; } }
+@media (forced-colors: active) { .core-disclosure, .core-disclosure-group, .core-group, .core-toggle-button, .core-checkbox input, .core-checkbox-indicator { border-color: ButtonText; } .core-checkbox-indicator[data-selected], .core-checkbox-indicator[data-indeterminate] { background: Highlight; color: HighlightText; } .core-meter-fill, .core-progress-bar-fill { background: Highlight; } .core-separator { background: ButtonText; } }

@@ -1,0 +1,21 @@
+{
+  "schemaVersion": "1.0.0",
+  "id": "core:example:checkbox-basic-react",
+  "kind": "example",
+  "name": "Basic React Checkbox",
+  "summary": "The minimum React Checkbox example.",
+  "lifecycle": "experimental",
+  "binding": {
+    "ref": "core:component:checkbox#web.react",
+    "guidanceImpact": "normative",
+    "purposes": [
+      "generation",
+      "explanation",
+      "validation"
+    ],
+    "preference": 0
+  },
+  "complexity": "minimal",
+  "prerequisites": [],
+  "source": "catalog/components/checkbox/examples/react/basic.tsx"
+}

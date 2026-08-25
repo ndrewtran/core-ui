@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "1.0.0",
+  "id": "core:guide:group-usage",
+  "kind": "guide",
+  "name": "Group usage",
+  "summary": "Portable usage guidance for Group.",
+  "lifecycle": "experimental",
+  "keywords": [
+    "group",
+    "react",
+    "accessibility"
+  ],
+  "platforms": [
+    "web.react"
+  ],
+  "source": "catalog/guides/group-usage.md"
+}

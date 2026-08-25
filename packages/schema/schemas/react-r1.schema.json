@@ -92,10 +92,36 @@
         "version": { "const": "1.20.0" }
       }
     },
+    "componentDonorCrosswalk": {
+      "type": "object", "additionalProperties": false,
+      "required": ["consumedRules", "disposition", "donorInputs", "rules"],
+      "properties": {
+        "disposition": { "enum": ["adopt", "adapt", "defer", "reject", "no-applicable-donor"] },
+        "consumedRules": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+        "donorInputs": {
+          "type": "array", "uniqueItems": true,
+          "items": {
+            "type": "object", "additionalProperties": false, "required": ["blob", "path"],
+            "properties": { "blob": { "$ref": "#/$defs/gitObject" }, "path": { "type": "string", "minLength": 1 } }
+          }
+        },
+        "rules": {
+          "type": "array", "uniqueItems": true,
+          "items": {
+            "type": "object", "additionalProperties": false, "required": ["core", "disposition", "input"],
+            "properties": {
+              "core": { "type": "string", "minLength": 1 },
+              "disposition": { "enum": ["adapt", "reasoned-non-token-adaptation"] },
+              "input": { "type": "string", "minLength": 1 }
+            }
+          }
+        }
+      }
+    },
     "donorCrosswalk": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["button", "buttonBlobs", "dispositions", "donor", "schema", "sharedPrimitives", "spinner", "subtrees"],
+      "required": ["button", "buttonBlobs", "components", "dispositions", "donor", "schema", "sharedPrimitives", "spinner", "subtrees"],
       "properties": {
         "schema": { "const": "core-ui-react-donor-crosswalk-v1" },
         "donor": {
@@ -134,6 +160,22 @@
                 "properties": { "core": { "type": "string", "minLength": 1 }, "disposition": { "enum": ["adapt", "reasoned-non-token-adaptation"] }, "input": { "type": "string", "minLength": 1 } }
               }
             }
+          }
+        },
+        "components": {
+          "type": "object", "additionalProperties": false,
+          "required": ["breadcrumbs", "checkbox", "disclosure", "disclosure-group", "group", "link", "meter", "progress-bar", "separator", "toggle-button"],
+          "properties": {
+            "breadcrumbs": { "$ref": "#/$defs/componentDonorCrosswalk" },
+            "checkbox": { "$ref": "#/$defs/componentDonorCrosswalk" },
+            "disclosure": { "$ref": "#/$defs/componentDonorCrosswalk" },
+            "disclosure-group": { "$ref": "#/$defs/componentDonorCrosswalk" },
+            "group": { "$ref": "#/$defs/componentDonorCrosswalk" },
+            "link": { "$ref": "#/$defs/componentDonorCrosswalk" },
+            "meter": { "$ref": "#/$defs/componentDonorCrosswalk" },
+            "progress-bar": { "$ref": "#/$defs/componentDonorCrosswalk" },
+            "separator": { "$ref": "#/$defs/componentDonorCrosswalk" },
+            "toggle-button": { "$ref": "#/$defs/componentDonorCrosswalk" }
           }
         }
       }
