@@ -27,6 +27,19 @@ const EXPECTED_DONOR_DISPOSITIONS = Object.freeze([
 const EXPECTED_UPSTREAM_DISPOSITIONS = Object.freeze([
   'candidate', 'delivered', 'defer', 'exclude', 'not-a-component',
 ]);
+const R11_COMPONENTS = Object.freeze([
+  ['Button', 'button'],
+  ['Breadcrumbs', 'breadcrumbs'],
+  ['Checkbox', 'checkbox'],
+  ['Disclosure', 'disclosure'],
+  ['DisclosureGroup', 'disclosure-group'],
+  ['Group', 'group'],
+  ['Link', 'link'],
+  ['Meter', 'meter'],
+  ['ProgressBar', 'progress-bar'],
+  ['Separator', 'separator'],
+  ['ToggleButton', 'toggle-button'],
+]);
 
 function sha256(value) {
   return `sha256:${createHash('sha256').update(value).digest('hex')}`;
@@ -100,6 +113,25 @@ export function assertReactR10SourceContracts({
     || !same(crosswalk.dispositions, EXPECTED_DONOR_DISPOSITIONS)) {
     fail('CORE_REACT_DONOR_IDENTITY_DRIFT');
   }
+  const componentCrosswalks = crosswalk.components;
+  const expectedComponentSlugs = R11_COMPONENTS.slice(1).map(([, slug]) => slug);
+  if (!componentCrosswalks
+    || !same(Object.keys(componentCrosswalks).sort(), [...expectedComponentSlugs].sort())) {
+    fail('CORE_REACT_COMPONENT_DONOR_CROSSWALK_DRIFT');
+  }
+  for (const slug of expectedComponentSlugs) {
+    const entry = componentCrosswalks[slug];
+    if (!entry
+      || !Array.isArray(entry.donorInputs)
+      || !Array.isArray(entry.rules)
+      || !Array.isArray(entry.consumedRules)
+      || !same(entry.consumedRules, entry.rules.map(({ input }) => input))
+      || (slug === 'group'
+        ? entry.disposition !== 'no-applicable-donor' || entry.donorInputs.length !== 0 || entry.rules.length !== 0
+        : entry.disposition !== 'adapt' || entry.donorInputs.length === 0 || entry.rules.length === 0)) {
+      fail('CORE_REACT_COMPONENT_DONOR_CROSSWALK_DRIFT');
+    }
+  }
   if (license.dependency !== false || license.donor !== EXPECTED_DONOR.name) {
     fail('CORE_REACT_DONOR_LICENSE_DRIFT');
   }
@@ -135,6 +167,7 @@ export function assertReactR11GeneratedContracts({
   descriptor,
   release,
   donorComparison,
+  componentDonorComparison,
   manifest,
   crosswalk,
 }) {
@@ -145,37 +178,49 @@ export function assertReactR11GeneratedContracts({
     || descriptor.schema !== 'core-ui-renderer-descriptor-v1'
     || descriptor.generatedFrom !== 'packages/react/src/generate.mjs'
     || descriptor.package !== '@core-ui/react'
-    || descriptor.support !== 'unproved; Button export only'
-    || descriptor.bindings.length !== 1
-    || descriptor.exports.length !== 1) {
+    || descriptor.support !== 'unproved; R1.1 React exports only'
+    || descriptor.bindings.length !== R11_COMPONENTS.length
+    || descriptor.exports.length !== R11_COMPONENTS.length) {
     fail('CORE_REACT_R11_DESCRIPTOR_INVALID');
   }
-  const [binding] = descriptor.bindings;
-  const [componentExport] = descriptor.exports;
-  if (binding.binding !== 'core:component:button#web.react'
-    || binding.export !== 'Button'
-    || binding.strategy !== 'direct'
-    || binding.runtimeProfile !== 'web.react'
-    || binding.selector !== '.core-button'
-    || !same(binding.states, ['idle', 'pending', 'disabled'])
-    || !same(binding.api.props, ['disabled', 'pending'])
-    || !same(binding.api.defaults, { disabled: false, pending: false })
-    || componentExport.name !== 'Button'
-    || componentExport.binding !== binding.binding) {
-    fail('CORE_REACT_R11_BUTTON_DESCRIPTOR_DRIFT');
+  for (const [name, slug] of R11_COMPONENTS) {
+    const binding = descriptor.bindings.find(({ export: exportName }) => exportName === name);
+    const componentExport = descriptor.exports.find(({ name: exportName }) => exportName === name);
+    if (!binding || !componentExport
+      || binding.binding !== `core:component:${slug}#web.react`
+      || binding.export !== name
+      || binding.strategy !== 'direct'
+      || binding.runtimeProfile !== 'web.react'
+      || binding.selector !== `.core-${slug}`
+      || !Array.isArray(binding.states)
+      || !Array.isArray(binding.api?.props)
+      || binding.api.props.some((prop) => /^is[A-Z]/u.test(prop) || /(?:onPress|isPending|isDisabled)/u.test(prop))
+      || componentExport.name !== name
+      || componentExport.binding !== binding.binding) {
+      fail('CORE_REACT_R11_COMPONENT_DESCRIPTOR_DRIFT');
+    }
   }
   if (!release.publication
     || release.schema !== 'core-ui-react-release-candidate-v1'
     || release.lifecycle !== 'experimental'
-    || release.componentExports.length !== 1
-    || release.bindings.length !== 1
+    || release.componentExports.length !== R11_COMPONENTS.length
+    || release.bindings.length !== R11_COMPONENTS.length
     || !same(release.runtimeProfiles, ['web.react'])
     || release.catalog.status !== 'bound'
-    || !same(release.catalog.states, ['idle', 'pending', 'disabled'])
+    || !Array.isArray(release.catalog.components)
+    || release.catalog.components.length !== R11_COMPONENTS.length
     || release.evidence.status !== 'pending'
     || !same(release.evidence.ids, ['E-R1.1-01', 'E-R1.1-02', 'E-R1.1-03', 'E-R1.1-04'])
     || release.publication.status !== 'disabled') {
     fail('CORE_REACT_R11_RELEASE_INVALID');
+  }
+  for (const [name, slug] of R11_COMPONENTS) {
+    const binding = `core:component:${slug}#web.react`;
+    if (!release.componentExports.some((entry) => entry.name === name && entry.export === name && entry.binding === binding)
+      || !release.bindings.some((entry) => entry.binding === binding && entry.export === name && entry.runtimeProfile === 'web.react')
+      || !release.catalog.components.some((entry) => entry.component === `core:component:${slug}` && entry.binding === binding && Array.isArray(entry.states))) {
+      fail('CORE_REACT_R11_RELEASE_COMPONENT_DRIFT');
+    }
   }
   if (!same(donorComparison.donor, {
     commit: crosswalk.donor.commit,
@@ -187,5 +232,30 @@ export function assertReactR11GeneratedContracts({
     || donorComparison.result.status !== 'adapted-for-r1.1-button') {
     fail('CORE_REACT_R11_DONOR_COMPARISON_DRIFT');
   }
-  return { descriptor, release, donorComparison };
+  if (componentDonorComparison !== undefined) {
+    if (componentDonorComparison.schema !== 'core-ui-react-component-donor-comparison-v1'
+      || componentDonorComparison.generatedFrom !== 'packages/react/src/generate.mjs'
+      || !same(componentDonorComparison.donor, {
+        name: crosswalk.donor.name,
+        commit: crosswalk.donor.commit,
+        tree: crosswalk.donor.tree,
+      })
+      || !Array.isArray(componentDonorComparison.components)
+      || componentDonorComparison.components.length !== R11_COMPONENTS.length) {
+      fail('CORE_REACT_R11_COMPONENT_DONOR_COMPARISON_INVALID');
+    }
+    for (const [name, slug] of R11_COMPONENTS) {
+      const entry = componentDonorComparison.components.find(({ component }) => component === name);
+      const expectedCrosswalk = name === 'Button' ? crosswalk.button : crosswalk.components[slug];
+      if (!entry
+        || entry.binding !== `core:component:${slug}#web.react`
+        || entry.selector !== `.core-${slug}`
+        || entry.disposition !== expectedCrosswalk.disposition
+        || !same(entry.rules, expectedCrosswalk.rules)
+        || (name !== 'Button' && !same(entry.donorInputs, expectedCrosswalk.donorInputs))) {
+        fail('CORE_REACT_R11_COMPONENT_DONOR_COMPARISON_DRIFT');
+      }
+    }
+  }
+  return { descriptor, release, donorComparison, componentDonorComparison };
 }

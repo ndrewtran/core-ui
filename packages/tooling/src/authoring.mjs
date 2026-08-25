@@ -360,6 +360,7 @@ export function explainRevisions({
     ));
   }
   if (family === 'component' && bindingId !== undefined) {
+    const componentExamples = examples.filter((example) => example.binding?.ref?.startsWith(`${record.id}#`));
     axes.push(revisionAxis(
       'bindingContentRevision',
       bindingContentRevisionPreimage(record.bindings[bindingId], authoring),
@@ -367,8 +368,8 @@ export function explainRevisions({
     axes.push(revisionAxis('bindingSpecRevision', bindingSpecRevisionPreimage({
       component: record,
       bindingId,
-      examples,
-      exampleSources,
+      examples: componentExamples,
+      exampleSources: Object.fromEntries(componentExamples.map((example) => [example.id, exampleSources[example.id]])),
       tokenSources,
       tokenRequirementSets: Array.isArray(tokenRequirementSets)
         ? tokenRequirementSets
@@ -458,6 +459,7 @@ function versionEffectFor(effect, changes) {
 function componentRevisionDelta(record, context, authoring) {
   const content = contentRevision('component', record, authoring);
   const bindings = {};
+  const componentExamples = (context.examples ?? []).filter((example) => example.binding?.ref?.startsWith(`${record.id}#`));
   for (const [bindingId, binding] of Object.entries(record.bindings)) {
     bindings[bindingId] = {
       content: bindingContentRevision(binding, authoring),
@@ -465,8 +467,8 @@ function componentRevisionDelta(record, context, authoring) {
         spec: bindingSpecRevision({
           component: record,
           bindingId,
-          examples: context.examples ?? [],
-          exampleSources: context.exampleSources ?? {},
+          examples: componentExamples,
+          exampleSources: Object.fromEntries(componentExamples.map((example) => [example.id, context.exampleSources?.[example.id]])),
           tokenSources: context.tokenSources ?? [],
           tokenRequirementSets: Object.entries(context.tokenRequirementSets ?? {})
             .filter(([key]) => key.startsWith(`${bindingId}:`))

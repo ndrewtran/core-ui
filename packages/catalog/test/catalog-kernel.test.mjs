@@ -129,9 +129,9 @@ test('E-G0.2-01: declared sources compile to byte-identical ordered bundles', as
   assert.deepEqual(
     first.bundle.relations,
     [...first.bundle.relations].sort((left, right) => (
-      left.type.localeCompare(right.type)
-      || left.source.localeCompare(right.source)
-      || left.target.localeCompare(right.target)
+      (left.type < right.type ? -1 : left.type > right.type ? 1 : 0)
+      || (left.source < right.source ? -1 : left.source > right.source ? 1 : 0)
+      || (left.target < right.target ? -1 : left.target > right.target ? 1 : 0)
     )),
   );
 
@@ -155,6 +155,22 @@ test('E-G0.2-01 negative: generated bundle matches its canonical source manifest
   const compiled = await compileCatalog({ repositoryRoot });
   assert.equal(catalogJson, compiled.bytes);
   assert.equal(baseBundle.catalogDigest, canonicalDigest(preimage(baseBundle)));
+});
+
+test('R1.1 guide sources preserve Markdown newlines', async () => {
+  const manifest = JSON.parse(await readFile(
+    join(repositoryRoot, 'packages/catalog/catalog-sources.json'),
+    'utf8',
+  ));
+  const guideSources = manifest.records
+    .filter(({ family, sourcePath }) => family === 'guide' && sourcePath?.includes('-usage.md'))
+    .map(({ sourcePath }) => sourcePath);
+  assert.equal(guideSources.length, 11);
+  for (const sourcePath of guideSources) {
+    const source = await readFile(join(repositoryRoot, sourcePath), 'utf8');
+    assert.doesNotMatch(source, /\\n/u, sourcePath);
+    assert.ok(source.includes('\n\n'), sourcePath);
+  }
 });
 
 test('E-G0.2-02: list, search, and get are deterministic with exact provenance', () => {
@@ -226,9 +242,9 @@ test('E-G0.2-02: list, search, and get are deterministic with exact provenance',
 test('E-G0.2-02: graph and revisions remain derived from schema-owned contracts', () => {
   const records = baseBundle.artifacts.map(({ record }) => record);
   assert.deepEqual(baseBundle.relations, relationEdges(records).sort((left, right) => (
-    left.type.localeCompare(right.type)
-    || left.source.localeCompare(right.source)
-    || left.target.localeCompare(right.target)
+    (left.type < right.type ? -1 : left.type > right.type ? 1 : 0)
+    || (left.source < right.source ? -1 : left.source > right.source ? 1 : 0)
+    || (left.target < right.target ? -1 : left.target > right.target ? 1 : 0)
   )));
   const button = baseBundle.artifacts.find(({ id }) => id === 'core:component:button');
   assert.equal(button.contentRevision, contentRevision('component', button.record));

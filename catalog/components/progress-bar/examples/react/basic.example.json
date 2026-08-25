@@ -1,0 +1,21 @@
+{
+  "schemaVersion": "1.0.0",
+  "id": "core:example:progress-bar-basic-react",
+  "kind": "example",
+  "name": "Basic React ProgressBar",
+  "summary": "The minimum React ProgressBar example.",
+  "lifecycle": "experimental",
+  "binding": {
+    "ref": "core:component:progress-bar#web.react",
+    "guidanceImpact": "normative",
+    "purposes": [
+      "generation",
+      "explanation",
+      "validation"
+    ],
+    "preference": 0
+  },
+  "complexity": "minimal",
+  "prerequisites": [],
+  "source": "catalog/components/progress-bar/examples/react/basic.tsx"
+}

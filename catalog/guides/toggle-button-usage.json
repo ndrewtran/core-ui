@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "1.0.0",
+  "id": "core:guide:toggle-button-usage",
+  "kind": "guide",
+  "name": "ToggleButton usage",
+  "summary": "Portable usage guidance for ToggleButton.",
+  "lifecycle": "experimental",
+  "keywords": [
+    "togglebutton",
+    "react",
+    "accessibility"
+  ],
+  "platforms": [
+    "web.react"
+  ],
+  "source": "catalog/guides/toggle-button-usage.md"
+}

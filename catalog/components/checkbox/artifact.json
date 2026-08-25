@@ -1,0 +1,228 @@
+{
+  "schemaVersion": "1.0.0",
+  "id": "core:component:checkbox",
+  "kind": "component",
+  "name": "Checkbox",
+  "summary": "Represents a binary or indeterminate selection.",
+  "lifecycle": "experimental",
+  "intent": {
+    "useWhen": [
+      "Selecting or clearing an option"
+    ],
+    "avoidWhen": [
+      "Choosing exactly one option from a set"
+    ]
+  },
+  "anatomy": [
+    "root",
+    "input",
+    "indicator",
+    "label"
+  ],
+  "states": [
+    "idle",
+    "selected",
+    "indeterminate",
+    "disabled",
+    "invalid"
+  ],
+  "accessibility": {
+    "nameRequired": true,
+    "obligations": [
+      "Expose checked or mixed state",
+      "Expose disabled and invalid states"
+    ]
+  },
+  "bindings": {
+    "web.html": {
+      "schemaVersion": "2.0.0",
+      "lifecycle": "experimental",
+      "strategy": "direct",
+      "api": {
+        "props": [
+          "checked",
+          "defaultChecked",
+          "disabled",
+          "indeterminate",
+          "name",
+          "required",
+          "value",
+          "invalid"
+        ],
+        "events": [
+          "change"
+        ],
+        "parts": [
+          "root",
+          "input",
+          "indicator",
+          "label"
+        ],
+        "defaults": {
+          "checked": false,
+          "defaultChecked": false,
+          "disabled": false,
+          "indeterminate": false,
+          "invalid": false
+        }
+      },
+      "behavior": [
+        "Space toggles selection",
+        "Indeterminate state is exposed as mixed until changed"
+      ],
+      "accessibility": [
+        "Expose checkbox role, checked or mixed state, label, disabled, and invalid state"
+      ],
+      "tokenRecipe": {
+        "source": "core:token:default-theme",
+        "requirements": [
+          {
+            "token": "semantic.control.min-height",
+            "requirement": "required"
+          },
+          {
+            "token": "semantic.control.padding-inline",
+            "requirement": "required"
+          },
+          {
+            "token": "semantic.control.radius",
+            "requirement": "required"
+          },
+          {
+            "token": "semantic.selection.track",
+            "requirement": "required"
+          }
+        ]
+      },
+      "platformSafety": [
+        {
+          "profile": "web.html",
+          "requirements": [
+            {
+              "id": "system.forced-colors",
+              "disposition": "required"
+            },
+            {
+              "id": "system.high-contrast",
+              "disposition": "required"
+            },
+            {
+              "id": "native.dynamic-color",
+              "disposition": "not-applicable",
+              "reason": "Native dynamic colors do not apply to web.html."
+            },
+            {
+              "id": "native.font-metrics",
+              "disposition": "not-applicable",
+              "reason": "Native font metrics do not apply to web.html."
+            },
+            {
+              "id": "layout.direction",
+              "disposition": "required"
+            },
+            {
+              "id": "platform.accessibility-mapping",
+              "disposition": "required"
+            }
+          ]
+        }
+      ],
+      "runtimeProfiles": {}
+    },
+    "web.react": {
+      "schemaVersion": "2.0.0",
+      "lifecycle": "experimental",
+      "strategy": "direct",
+      "api": {
+        "props": [
+          "checked",
+          "defaultChecked",
+          "disabled",
+          "indeterminate",
+          "name",
+          "required",
+          "value",
+          "invalid"
+        ],
+        "events": [
+          "change"
+        ],
+        "parts": [
+          "root",
+          "input",
+          "indicator",
+          "label"
+        ],
+        "defaults": {
+          "checked": false,
+          "defaultChecked": false,
+          "disabled": false,
+          "indeterminate": false,
+          "invalid": false
+        }
+      },
+      "behavior": [
+        "Space toggles selection",
+        "Indeterminate state is exposed as mixed until changed"
+      ],
+      "accessibility": [
+        "Expose checkbox role, checked or mixed state, label, disabled, and invalid state"
+      ],
+      "tokenRecipe": {
+        "source": "core:token:default-theme",
+        "requirements": [
+          {
+            "token": "semantic.control.min-height",
+            "requirement": "required"
+          },
+          {
+            "token": "semantic.control.padding-inline",
+            "requirement": "required"
+          },
+          {
+            "token": "semantic.control.radius",
+            "requirement": "required"
+          },
+          {
+            "token": "semantic.selection.track",
+            "requirement": "required"
+          }
+        ]
+      },
+      "platformSafety": [
+        {
+          "profile": "web.react",
+          "requirements": [
+            {
+              "id": "system.forced-colors",
+              "disposition": "required"
+            },
+            {
+              "id": "system.high-contrast",
+              "disposition": "required"
+            },
+            {
+              "id": "native.dynamic-color",
+              "disposition": "not-applicable",
+              "reason": "Native dynamic colors do not apply to web.react."
+            },
+            {
+              "id": "native.font-metrics",
+              "disposition": "not-applicable",
+              "reason": "Native font metrics do not apply to web.react."
+            },
+            {
+              "id": "layout.direction",
+              "disposition": "required"
+            },
+            {
+              "id": "platform.accessibility-mapping",
+              "disposition": "required"
+            }
+          ]
+        }
+      ],
+      "runtimeProfiles": {}
+    }
+  }
+}

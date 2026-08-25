@@ -1,0 +1,194 @@
+{
+  "schemaVersion": "1.0.0",
+  "id": "core:component:disclosure-group",
+  "kind": "component",
+  "name": "DisclosureGroup",
+  "summary": "Coordinates expansion across related disclosures.",
+  "lifecycle": "experimental",
+  "intent": {
+    "useWhen": [
+      "Managing a set of related disclosures"
+    ],
+    "avoidWhen": [
+      "Unrelated independent panels"
+    ]
+  },
+  "anatomy": [
+    "root",
+    "disclosure"
+  ],
+  "states": [
+    "idle",
+    "expanded",
+    "disabled"
+  ],
+  "accessibility": {
+    "nameRequired": false,
+    "obligations": [
+      "Coordinate expanded keys",
+      "Preserve each disclosure trigger relationship"
+    ]
+  },
+  "bindings": {
+    "web.html": {
+      "schemaVersion": "2.0.0",
+      "lifecycle": "experimental",
+      "strategy": "direct",
+      "api": {
+        "props": [
+          "expandedIds",
+          "defaultExpandedIds",
+          "multiple",
+          "disabled"
+        ],
+        "events": [
+          "expandedChange"
+        ],
+        "parts": [
+          "root",
+          "disclosure"
+        ],
+        "defaults": {
+          "expandedIds": [],
+          "defaultExpandedIds": [],
+          "multiple": true,
+          "disabled": false
+        }
+      },
+      "behavior": [
+        "Group state coordinates child Disclosure instances",
+        "Single expansion is supported when multiple is false"
+      ],
+      "accessibility": [
+        "Preserve each child disclosure accessible relationship and state"
+      ],
+      "tokenRecipe": {
+        "source": "core:token:default-theme",
+        "requirements": [
+          {
+            "token": "semantic.control.padding-inline",
+            "requirement": "required"
+          },
+          {
+            "token": "semantic.control.radius",
+            "requirement": "required"
+          }
+        ]
+      },
+      "platformSafety": [
+        {
+          "profile": "web.html",
+          "requirements": [
+            {
+              "id": "system.forced-colors",
+              "disposition": "required"
+            },
+            {
+              "id": "system.high-contrast",
+              "disposition": "required"
+            },
+            {
+              "id": "native.dynamic-color",
+              "disposition": "not-applicable",
+              "reason": "Native dynamic colors do not apply to web.html."
+            },
+            {
+              "id": "native.font-metrics",
+              "disposition": "not-applicable",
+              "reason": "Native font metrics do not apply to web.html."
+            },
+            {
+              "id": "layout.direction",
+              "disposition": "required"
+            },
+            {
+              "id": "platform.accessibility-mapping",
+              "disposition": "required"
+            }
+          ]
+        }
+      ],
+      "runtimeProfiles": {}
+    },
+    "web.react": {
+      "schemaVersion": "2.0.0",
+      "lifecycle": "experimental",
+      "strategy": "direct",
+      "api": {
+        "props": [
+          "expandedIds",
+          "defaultExpandedIds",
+          "multiple",
+          "disabled"
+        ],
+        "events": [
+          "expandedChange"
+        ],
+        "parts": [
+          "root",
+          "disclosure"
+        ],
+        "defaults": {
+          "expandedIds": [],
+          "defaultExpandedIds": [],
+          "multiple": true,
+          "disabled": false
+        }
+      },
+      "behavior": [
+        "Group state coordinates child Disclosure instances",
+        "Single expansion is supported when multiple is false"
+      ],
+      "accessibility": [
+        "Preserve each child disclosure accessible relationship and state"
+      ],
+      "tokenRecipe": {
+        "source": "core:token:default-theme",
+        "requirements": [
+          {
+            "token": "semantic.control.padding-inline",
+            "requirement": "required"
+          },
+          {
+            "token": "semantic.control.radius",
+            "requirement": "required"
+          }
+        ]
+      },
+      "platformSafety": [
+        {
+          "profile": "web.react",
+          "requirements": [
+            {
+              "id": "system.forced-colors",
+              "disposition": "required"
+            },
+            {
+              "id": "system.high-contrast",
+              "disposition": "required"
+            },
+            {
+              "id": "native.dynamic-color",
+              "disposition": "not-applicable",
+              "reason": "Native dynamic colors do not apply to web.react."
+            },
+            {
+              "id": "native.font-metrics",
+              "disposition": "not-applicable",
+              "reason": "Native font metrics do not apply to web.react."
+            },
+            {
+              "id": "layout.direction",
+              "disposition": "required"
+            },
+            {
+              "id": "platform.accessibility-mapping",
+              "disposition": "required"
+            }
+          ]
+        }
+      ],
+      "runtimeProfiles": {}
+    }
+  }
+}

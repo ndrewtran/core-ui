@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "1.0.0",
+  "id": "core:guide:disclosure-group-usage",
+  "kind": "guide",
+  "name": "DisclosureGroup usage",
+  "summary": "Portable usage guidance for DisclosureGroup.",
+  "lifecycle": "experimental",
+  "keywords": [
+    "disclosuregroup",
+    "react",
+    "accessibility"
+  ],
+  "platforms": [
+    "web.react"
+  ],
+  "source": "catalog/guides/disclosure-group-usage.md"
+}

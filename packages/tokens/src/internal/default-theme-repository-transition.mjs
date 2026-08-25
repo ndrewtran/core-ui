@@ -39,6 +39,16 @@ export const DEFAULT_THEME_REPOSITORY_STATES = Object.freeze({
 
 const SNAPSHOT_PATHS = Object.freeze([
   'catalog/components/button/artifact.json',
+  'catalog/components/breadcrumbs/artifact.json',
+  'catalog/components/checkbox/artifact.json',
+  'catalog/components/disclosure/artifact.json',
+  'catalog/components/disclosure-group/artifact.json',
+  'catalog/components/group/artifact.json',
+  'catalog/components/link/artifact.json',
+  'catalog/components/meter/artifact.json',
+  'catalog/components/progress-bar/artifact.json',
+  'catalog/components/separator/artifact.json',
+  'catalog/components/toggle-button/artifact.json',
   'catalog/tokens/button-minimum.json',
   'catalog/tokens/default-theme.json',
   'packages/catalog/catalog-sources.json',
@@ -119,12 +129,16 @@ async function setPackageVersion(repositoryRoot, relativePath, fromVersion, toVe
 }
 
 async function setAuthoredState(repositoryRoot, from, to) {
-  const buttonPath = join(repositoryRoot, 'catalog/components/button/artifact.json');
-  const button = await readFile(buttonPath, 'utf8');
-  if (Object.values(parseJsonStrict(button).bindings).some(({ tokenRecipe }) => tokenRecipe.source !== from.artifactId)) {
-    throw new Error(`CORE_TOKEN_IDENTITY_REFERENCE_STALE: ${buttonPath}`);
+  const componentPaths = SNAPSHOT_PATHS.filter((path) => path.startsWith('catalog/components/') && path.endsWith('/artifact.json'));
+  for (const relativePath of componentPaths) {
+    const componentPath = join(repositoryRoot, relativePath);
+    if (!await exists(componentPath)) continue;
+    const component = await readFile(componentPath, 'utf8');
+    if (Object.values(parseJsonStrict(component).bindings).some(({ tokenRecipe }) => tokenRecipe.source !== from.artifactId)) {
+      throw new Error(`CORE_TOKEN_IDENTITY_REFERENCE_STALE: ${componentPath}`);
+    }
+    if (from.artifactId !== to.artifactId) await writeFile(componentPath, component.replaceAll(from.artifactId, to.artifactId));
   }
-  if (from.artifactId !== to.artifactId) await writeFile(buttonPath, button.replaceAll(from.artifactId, to.artifactId));
 
   const sourcesPath = join(repositoryRoot, 'packages/catalog/catalog-sources.json');
   let sources = await readFile(sourcesPath, 'utf8');
@@ -199,9 +213,12 @@ async function setAuthoredState(repositoryRoot, from, to) {
 export async function assertDefaultThemeRepositoryState(repositoryRoot, stateName) {
   const state = DEFAULT_THEME_REPOSITORY_STATES[stateName];
   if (!state) throw new Error(`CORE_TOKEN_IDENTITY_AUTHORITY_MISMATCH: unknown repository state ${stateName}`);
-  const button = await json(join(repositoryRoot, 'catalog/components/button/artifact.json'));
-  if (Object.values(button.bindings).some(({ tokenRecipe }) => tokenRecipe.source !== state.artifactId)) {
-    throw new Error('CORE_TOKEN_IDENTITY_REFERENCE_STALE: component token recipe');
+  for (const relativePath of SNAPSHOT_PATHS.filter((path) => path.startsWith('catalog/components/') && path.endsWith('/artifact.json'))) {
+    if (!await exists(join(repositoryRoot, relativePath))) continue;
+    const component = await json(join(repositoryRoot, relativePath));
+    if (Object.values(component.bindings).some(({ tokenRecipe }) => tokenRecipe.source !== state.artifactId)) {
+      throw new Error(`CORE_TOKEN_IDENTITY_REFERENCE_STALE: ${relativePath} token recipe`);
+    }
   }
   const sources = await json(join(repositoryRoot, 'packages/catalog/catalog-sources.json'));
   if (sources.records.find(({ family }) => family === 'token-source')?.path !== state.sourcePath) {

@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "1.0.0",
+  "id": "core:guide:progress-bar-usage",
+  "kind": "guide",
+  "name": "ProgressBar usage",
+  "summary": "Portable usage guidance for ProgressBar.",
+  "lifecycle": "experimental",
+  "keywords": [
+    "progressbar",
+    "react",
+    "accessibility"
+  ],
+  "platforms": [
+    "web.react"
+  ],
+  "source": "catalog/guides/progress-bar-usage.md"
+}

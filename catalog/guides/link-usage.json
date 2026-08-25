@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "1.0.0",
+  "id": "core:guide:link-usage",
+  "kind": "guide",
+  "name": "Link usage",
+  "summary": "Portable usage guidance for Link.",
+  "lifecycle": "experimental",
+  "keywords": [
+    "link",
+    "react",
+    "accessibility"
+  ],
+  "platforms": [
+    "web.react"
+  ],
+  "source": "catalog/guides/link-usage.md"
+}

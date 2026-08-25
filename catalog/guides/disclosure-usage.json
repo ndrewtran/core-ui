@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "1.0.0",
+  "id": "core:guide:disclosure-usage",
+  "kind": "guide",
+  "name": "Disclosure usage",
+  "summary": "Portable usage guidance for Disclosure.",
+  "lifecycle": "experimental",
+  "keywords": [
+    "disclosure",
+    "react",
+    "accessibility"
+  ],
+  "platforms": [
+    "web.react"
+  ],
+  "source": "catalog/guides/disclosure-usage.md"
+}

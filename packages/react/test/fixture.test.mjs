@@ -21,6 +21,25 @@ test('R1.1 Button owns Core selectors and required token crosswalk', async () =>
   assert.equal(comparison.consumedRules.length, 9);
 });
 
+test('R1.1 component selectors and donor dispositions stay Core-owned', async () => {
+  const css = await readFile(resolve(import.meta.dirname, '../generated/styles.css'), 'utf8');
+  const comparisonSource = await readFile(resolve(import.meta.dirname, '../generated/component-donor-comparison.json'), 'utf8');
+  const comparison = JSON.parse(comparisonSource.replace(/^\/\/ @generated-from:.*\n\/\/ @generated-content-sha256:.*\n/u, ''));
+  const names = ['Button', 'Breadcrumbs', 'Checkbox', 'Disclosure', 'DisclosureGroup', 'Group', 'Link', 'Meter', 'ProgressBar', 'Separator', 'ToggleButton'];
+  for (const name of names) {
+    const slug = name.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`).replace(/^-/, '');
+    assert.match(css, new RegExp(`\\.core-${slug}(?:\\b|[-_])`));
+  }
+  assert.match(css, /\.core-checkbox-indicator/);
+  assert.match(css, /data-indeterminate/);
+  assert.match(css, /semantic-feedback-invalid/);
+  assert.equal(comparison.components.length, names.length);
+  assert.deepEqual(comparison.components.map(({ component }) => component), names);
+  assert.equal(comparison.components.find(({ component }) => component === 'Group').disposition, 'no-applicable-donor');
+  assert.ok(comparison.components.filter(({ disposition }) => disposition === 'adapt').length >= 9);
+  assert.doesNotMatch(css, /(?:\\.tale-|--color-60|@keyframes|animation:)/u);
+});
+
 test('R1.1 Core Button proves SSR, hydration, disabled and pending state', async () => {
   const server = renderToString(React.createElement(R1ButtonFixture, { pending: true }));
   const disabledServer = renderToString(React.createElement(R1ButtonFixture, { disabled: true }));

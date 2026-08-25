@@ -1,0 +1,162 @@
+import assert from 'node:assert/strict';
+import test from 'node:test';
+import React, { act } from 'react';
+import { createRoot, hydrateRoot } from 'react-dom/client';
+import { renderToString } from 'react-dom/server';
+import { JSDOM } from 'jsdom';
+import {
+  Breadcrumbs,
+  Checkbox,
+  Disclosure,
+  DisclosureGroup,
+  Group,
+  Link,
+  Meter,
+  ProgressBar,
+  Separator,
+  ToggleButton,
+} from '../src/components.mjs';
+
+function installDom(dom) {
+  const keys = ['window', 'document', 'Element', 'HTMLElement', 'HTMLButtonElement', 'HTMLInputElement', 'HTMLAnchorElement', 'HTMLLabelElement', 'HTMLDivElement', 'HTMLOListElement', 'HTMLLIElement', 'SVGElement', 'Node', 'Event', 'MouseEvent', 'KeyboardEvent', 'PointerEvent', 'MutationObserver', 'getComputedStyle'];
+  const previous = Object.fromEntries(keys.map((key) => [key, globalThis[key]]));
+  Object.assign(globalThis, {
+    window: dom.window,
+    document: dom.window.document,
+    Element: dom.window.Element,
+    HTMLElement: dom.window.HTMLElement,
+    HTMLButtonElement: dom.window.HTMLButtonElement,
+    HTMLInputElement: dom.window.HTMLInputElement,
+    HTMLAnchorElement: dom.window.HTMLAnchorElement,
+    HTMLLabelElement: dom.window.HTMLLabelElement,
+    HTMLDivElement: dom.window.HTMLDivElement,
+    HTMLOListElement: dom.window.HTMLOListElement,
+    HTMLLIElement: dom.window.HTMLLIElement,
+    SVGElement: dom.window.SVGElement,
+    Node: dom.window.Node,
+    Event: dom.window.Event,
+    MouseEvent: dom.window.MouseEvent,
+    KeyboardEvent: dom.window.KeyboardEvent,
+    PointerEvent: dom.window.PointerEvent ?? dom.window.MouseEvent,
+    MutationObserver: dom.window.MutationObserver,
+    getComputedStyle: dom.window.getComputedStyle,
+    IS_REACT_ACT_ENVIRONMENT: true,
+  });
+  return () => {
+    for (const [key, value] of Object.entries(previous)) {
+      if (value === undefined) delete globalThis[key];
+      else globalThis[key] = value;
+    }
+    delete globalThis.IS_REACT_ACT_ENVIRONMENT;
+  };
+}
+
+function allComponents({ onCheck, onDisclosure, onToggle, onLink } = {}) {
+  return React.createElement(React.Fragment, null,
+    React.createElement(Breadcrumbs, {
+      'aria-label': 'Breadcrumb',
+      items: [{ id: 'home', label: 'Home', href: '/' }, { id: 'docs', label: 'Docs' }],
+    }),
+    React.createElement(Checkbox, { defaultChecked: true, onChange: onCheck }, 'Accept'),
+    React.createElement(Disclosure, { id: 'details', title: 'Details', defaultExpanded: true, onExpandedChange: onDisclosure }, 'More information'),
+    React.createElement(DisclosureGroup, { defaultExpandedIds: ['one'], multiple: false },
+      React.createElement(Disclosure, { id: 'one', title: 'One' }, 'First'),
+      React.createElement(Disclosure, { id: 'two', title: 'Two' }, 'Second')),
+    React.createElement(Group, { 'aria-label': 'Actions', disabled: true }, React.createElement('button', { type: 'button' }, 'Save')),
+    React.createElement(Link, { href: '/next', onActivate: onLink }, 'Next'),
+    React.createElement(Meter, { label: 'Storage', value: 50 }),
+    React.createElement(ProgressBar, { label: 'Upload', value: 50 }),
+    React.createElement(ProgressBar, { label: 'Loading' }),
+    React.createElement(Separator, { orientation: 'vertical' }),
+    React.createElement(ToggleButton, { defaultSelected: false, onChange: onToggle }, 'Bold'));
+}
+
+test('R1.1 RAC-backed component slice preserves SSR, hydration, semantics, and interactions', async () => {
+  const server = renderToString(allComponents());
+  assert.match(server, /<nav[^>]*aria-label="Breadcrumb"/u);
+  assert.match(server, /role="group"/u);
+  assert.match(server, /<div[^>]*role="meter"/u);
+  assert.match(server, /role="progressbar"/u);
+  assert.match(server, /aria-orientation="vertical"/u);
+  assert.match(server, /aria-pressed="false"/u);
+  const dom = new JSDOM(`<!doctype html><div id="root">${server}</div>`);
+  const restore = installDom(dom);
+  let hydrated;
+  try {
+    const root = document.querySelector('#root');
+    await act(async () => { hydrated = hydrateRoot(root, allComponents()); });
+    assert.equal(root.querySelector('nav[aria-label="Breadcrumb"]') !== null, true);
+    assert.equal(root.querySelector('input[type="checkbox"]').checked, true);
+    assert.equal(root.querySelector('.core-checkbox-indicator[data-selected]') !== null, true);
+    assert.equal(root.querySelector('.core-disclosure > button').getAttribute('aria-expanded'), 'true');
+    assert.equal(root.querySelector('.core-disclosure-panel[role="region"]') !== null, true);
+    assert.equal(root.querySelector('.core-group').getAttribute('aria-disabled'), 'true');
+    assert.equal(root.querySelector('.core-link[href="/next"]') !== null, true);
+    assert.equal(root.querySelector('[role~="meter"]') !== null, true);
+    assert.equal(root.querySelectorAll('.core-progress-bar[role~="progressbar"]').length, 2);
+    assert.equal(root.querySelector('.core-separator-vertical').tagName, 'DIV');
+    assert.equal(root.querySelector('.core-toggle-button').getAttribute('aria-pressed'), 'false');
+    await act(async () => hydrated.unmount());
+    hydrated = undefined;
+
+    const interactionRoot = document.createElement('div');
+    document.body.append(interactionRoot);
+    const changes = [];
+    const rootHandle = createRoot(interactionRoot);
+    await act(async () => rootHandle.render(React.createElement('div', null,
+      React.createElement(Checkbox, { onChange: (value) => changes.push(['checkbox', value]) }, 'Accept'),
+      React.createElement(Disclosure, { title: 'Details' }, 'Content'),
+      React.createElement(ToggleButton, { onChange: (value) => changes.push(['toggle', value]) }, 'Bold'),
+      React.createElement(Link, { href: '/next', onActivate: (event) => changes.push(['link', event]) }, 'Next'))));
+    await act(async () => interactionRoot.querySelector('input[type="checkbox"]').click());
+    await act(async () => interactionRoot.querySelector('.core-disclosure > button').click());
+    await act(async () => interactionRoot.querySelector('.core-toggle-button').click());
+    await act(async () => interactionRoot.querySelector('.core-link').click());
+    assert.deepEqual(changes.slice(0, 3), [['checkbox', true], ['toggle', true], ['link', changes[2]?.[1]]]);
+    assert.equal(interactionRoot.querySelector('.core-disclosure > button').getAttribute('aria-expanded'), 'true');
+    assert.equal(changes[2][1].type, 'activate');
+    assert.equal(changes[2][1].target instanceof dom.window.HTMLAnchorElement, true);
+    await act(async () => rootHandle.unmount());
+    interactionRoot.remove();
+  } finally {
+    if (hydrated) await act(async () => hydrated.unmount());
+    restore();
+    dom.window.close();
+  }
+});
+
+test('R1.1 Core labels, checkbox indicator states, and breadcrumb current normalization are accessible', async () => {
+  const dom = new JSDOM('<!doctype html><div id="root"></div>');
+  const restore = installDom(dom);
+  try {
+    const root = document.querySelector('#root');
+    await act(async () => createRoot(root).render(React.createElement(React.Fragment, null,
+      React.createElement(Breadcrumbs, {
+        items: [
+          { id: 'home', label: 'Home', href: '/', current: true },
+          { id: 'docs', label: React.createElement('strong', null, 'Docs'), href: '/docs' },
+        ],
+      }),
+      React.createElement(Checkbox, { indeterminate: true, invalid: true, disabled: true }, 'Accept'),
+      React.createElement(Meter, { label: 'String storage', value: 50 }),
+      React.createElement(Meter, { label: React.createElement('span', null, 'Storage'), value: 50 }),
+      React.createElement(ProgressBar, { label: 'String upload', value: 50 }),
+      React.createElement(ProgressBar, { label: React.createElement('span', null, 'Upload'), value: 50 }),
+    )));
+    assert.equal(root.querySelector('nav[aria-label="Breadcrumbs"]') !== null, true);
+    assert.equal(root.querySelectorAll('[aria-current="page"]').length, 1);
+    assert.equal(root.querySelector('[aria-current="page"]').textContent, 'Docs');
+    assert.equal(root.querySelector('.core-checkbox-indicator[data-indeterminate]') !== null, true);
+    assert.equal(root.querySelector('.core-checkbox[data-invalid]') !== null, true);
+    assert.equal(root.querySelector('.core-checkbox[data-disabled]') !== null, true);
+    const labelledComponents = [...root.querySelectorAll('.core-meter, .core-progress-bar')];
+    assert.deepEqual(labelledComponents.map((component) => component.getAttribute('aria-label')), [null, null, null, null]);
+    assert.deepEqual(labelledComponents.map((component) => {
+      const id = component.getAttribute('aria-labelledby');
+      return root.querySelector(`[id="${id}"]`)?.textContent;
+    }), ['String storage', 'Storage', 'String upload', 'Upload']);
+  } finally {
+    restore();
+    dom.window.close();
+  }
+});

@@ -5,7 +5,11 @@
   "pageBudgetProfilePath": "packages/catalog/token-section-page-budget-profile.json",
   "platformSafetyContractPath": "strategy/platform-safety-contract.json",
   "queryApiVersion": "2.0.0",
-  "supportedQueryApiVersions": ["1.1.0", "1.2.0", "2.0.0"],
+  "supportedQueryApiVersions": [
+    "1.1.0",
+    "1.2.0",
+    "2.0.0"
+  ],
   "records": [
     {
       "family": "capability",
@@ -34,6 +38,146 @@
       "family": "token-source",
       "path": "catalog/tokens/default-theme.json",
       "baselineOccurrencesPath": "packages/tokens/generated/tale-token-occurrences.json"
+    },
+    {
+      "family": "component",
+      "path": "catalog/components/breadcrumbs/artifact.json"
+    },
+    {
+      "family": "example",
+      "path": "catalog/components/breadcrumbs/examples/react/basic.example.json",
+      "sourcePath": "catalog/components/breadcrumbs/examples/react/basic.tsx"
+    },
+    {
+      "family": "guide",
+      "path": "catalog/guides/breadcrumbs-usage.json",
+      "sourcePath": "catalog/guides/breadcrumbs-usage.md"
+    },
+    {
+      "family": "component",
+      "path": "catalog/components/checkbox/artifact.json"
+    },
+    {
+      "family": "example",
+      "path": "catalog/components/checkbox/examples/react/basic.example.json",
+      "sourcePath": "catalog/components/checkbox/examples/react/basic.tsx"
+    },
+    {
+      "family": "guide",
+      "path": "catalog/guides/checkbox-usage.json",
+      "sourcePath": "catalog/guides/checkbox-usage.md"
+    },
+    {
+      "family": "component",
+      "path": "catalog/components/disclosure/artifact.json"
+    },
+    {
+      "family": "example",
+      "path": "catalog/components/disclosure/examples/react/basic.example.json",
+      "sourcePath": "catalog/components/disclosure/examples/react/basic.tsx"
+    },
+    {
+      "family": "guide",
+      "path": "catalog/guides/disclosure-usage.json",
+      "sourcePath": "catalog/guides/disclosure-usage.md"
+    },
+    {
+      "family": "component",
+      "path": "catalog/components/disclosure-group/artifact.json"
+    },
+    {
+      "family": "example",
+      "path": "catalog/components/disclosure-group/examples/react/basic.example.json",
+      "sourcePath": "catalog/components/disclosure-group/examples/react/basic.tsx"
+    },
+    {
+      "family": "guide",
+      "path": "catalog/guides/disclosure-group-usage.json",
+      "sourcePath": "catalog/guides/disclosure-group-usage.md"
+    },
+    {
+      "family": "component",
+      "path": "catalog/components/group/artifact.json"
+    },
+    {
+      "family": "example",
+      "path": "catalog/components/group/examples/react/basic.example.json",
+      "sourcePath": "catalog/components/group/examples/react/basic.tsx"
+    },
+    {
+      "family": "guide",
+      "path": "catalog/guides/group-usage.json",
+      "sourcePath": "catalog/guides/group-usage.md"
+    },
+    {
+      "family": "component",
+      "path": "catalog/components/link/artifact.json"
+    },
+    {
+      "family": "example",
+      "path": "catalog/components/link/examples/react/basic.example.json",
+      "sourcePath": "catalog/components/link/examples/react/basic.tsx"
+    },
+    {
+      "family": "guide",
+      "path": "catalog/guides/link-usage.json",
+      "sourcePath": "catalog/guides/link-usage.md"
+    },
+    {
+      "family": "component",
+      "path": "catalog/components/meter/artifact.json"
+    },
+    {
+      "family": "example",
+      "path": "catalog/components/meter/examples/react/basic.example.json",
+      "sourcePath": "catalog/components/meter/examples/react/basic.tsx"
+    },
+    {
+      "family": "guide",
+      "path": "catalog/guides/meter-usage.json",
+      "sourcePath": "catalog/guides/meter-usage.md"
+    },
+    {
+      "family": "component",
+      "path": "catalog/components/progress-bar/artifact.json"
+    },
+    {
+      "family": "example",
+      "path": "catalog/components/progress-bar/examples/react/basic.example.json",
+      "sourcePath": "catalog/components/progress-bar/examples/react/basic.tsx"
+    },
+    {
+      "family": "guide",
+      "path": "catalog/guides/progress-bar-usage.json",
+      "sourcePath": "catalog/guides/progress-bar-usage.md"
+    },
+    {
+      "family": "component",
+      "path": "catalog/components/separator/artifact.json"
+    },
+    {
+      "family": "example",
+      "path": "catalog/components/separator/examples/react/basic.example.json",
+      "sourcePath": "catalog/components/separator/examples/react/basic.tsx"
+    },
+    {
+      "family": "guide",
+      "path": "catalog/guides/separator-usage.json",
+      "sourcePath": "catalog/guides/separator-usage.md"
+    },
+    {
+      "family": "component",
+      "path": "catalog/components/toggle-button/artifact.json"
+    },
+    {
+      "family": "example",
+      "path": "catalog/components/toggle-button/examples/react/basic.example.json",
+      "sourcePath": "catalog/components/toggle-button/examples/react/basic.tsx"
+    },
+    {
+      "family": "guide",
+      "path": "catalog/guides/toggle-button-usage.json",
+      "sourcePath": "catalog/guides/toggle-button-usage.md"
     }
   ]
 }

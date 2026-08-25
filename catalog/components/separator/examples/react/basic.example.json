@@ -1,0 +1,21 @@
+{
+  "schemaVersion": "1.0.0",
+  "id": "core:example:separator-basic-react",
+  "kind": "example",
+  "name": "Basic React Separator",
+  "summary": "The minimum React Separator example.",
+  "lifecycle": "experimental",
+  "binding": {
+    "ref": "core:component:separator#web.react",
+    "guidanceImpact": "normative",
+    "purposes": [
+      "generation",
+      "explanation",
+      "validation"
+    ],
+    "preference": 0
+  },
+  "complexity": "minimal",
+  "prerequisites": [],
+  "source": "catalog/components/separator/examples/react/basic.tsx"
+}
