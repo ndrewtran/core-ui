@@ -1,12 +1,12 @@
 <!-- @generated-from: packages/react/src/generate.mjs -->
-<!-- @generated-content-sha256: sha256:b41734746d3a94fae27884e496ef7e64454d2df93fc02fb59c8697c4e657c113 -->
+<!-- @generated-content-sha256: sha256:39aa8c021e60624e474ec296cf21b3c185c917c7319b137832fd70c38d8f7528 -->
 # @core-ui/react
 
-Experimental, unpublished R1.0 baseline for the standalone Core UI React renderer.
+Experimental, unpublished R1.1 Button slice for the standalone Core UI React renderer.
 
-- React Aria Components 1.20.0 is the internal starting point.
-- Core UI owns the public API, tokens, styling, accessibility, lifecycle, and support claims.
-- No component is exported or supported by this baseline.
+- Button is a Core-owned public export for the `web.react` binding.
+- React Aria Components 1.20.0 is an internal replaceable substrate.
+- Core owns the Button API, tokens, styling, accessibility, lifecycle, and support boundary.
 - Tale UI is a pinned styling donor, never a dependency.
 
-The generated stylesheet and private Button fixture exist only to prove the baseline before R1.1. They are not a Button support claim.
+The package remains private and unpublished until the separately authorized React prerelease boundary.

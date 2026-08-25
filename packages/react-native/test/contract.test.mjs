@@ -101,6 +101,16 @@ test('E-G1.2-03 React Native Web remains an explicit unsupported profile', () =>
   assert.equal(JSON.stringify(nativeProfiles).includes('web.react"'), false);
 });
 
+test('E-G1.2-04 native Button remains a disabled-only deferred boundary', async () => {
+  const binding = component.record.bindings['native.react-native'];
+  assert.deepEqual(binding.api.props, ['disabled']);
+  assert.deepEqual(binding.api.defaults, { disabled: false });
+  assert.deepEqual(binding.accessibility, ['Expose accessible name and disabled state']);
+  assert.doesNotMatch(JSON.stringify(binding), /pending/iu);
+  assert.equal(nativeProfileProjection.componentSupportClaim, 'none');
+  assert.doesNotMatch(await readFile(resolve(packageRoot, 'src/index.mjs'), 'utf8'), /\bButton\b/u);
+});
+
 test('E-G1.2-04 native themes are exact @core-ui/tokens projections with no CSS authority', async () => {
   assert.equal(nativeThemeProjection.componentSupportClaim, 'none');
   assert.equal(nativeThemeProjection.source.tokenId, tokenArtifact.id);

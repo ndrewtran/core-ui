@@ -1,5 +1,5 @@
 // @generated-from: packages/catalog/catalog-sources.json
-// @generated-content-sha256: sha256:823b12d2b7d31e8d9dc82afda0a45412bb9589a128c931ff06cb4bb2067a8664
+// @generated-content-sha256: sha256:b51f1c4e9075bb6479edb1c0a630c5d3988418c1516ed6e1b934fac1efed4ddc
 export type NativeProfileId = 'android' | 'ios' | 'native.react-native-web';
 export type NativeProfile = Readonly<
   | { profile: 'android'; validationProfile: 'native.android'; strategy: 'adapted'; lifecycle: 'experimental'; platformSafetyRequirementSetDigest: "sha256:9c98f1329080b3f9f554d1a0e10a04fb6d865f23fc1b0208c31f5edcb8c74401"; tokenRequirementSetDigest: "sha256:78598adeb18b3c3931578e12819a56264a9d1d76afc05d4bf2778adda52f9513"; }
@@ -12,7 +12,7 @@ export interface NativeProfileProjection {
   readonly componentId: 'core:component:button';
   readonly bindingRef: 'core:component:button#native.react-native';
   readonly bindingContentRevision: "sha256:9fd5619f1669f731a31bfd49b25198506af7df0117ed15e7ed7a36b46576d2f0";
-  readonly bindingSpecRevision: "sha256:589c901a1ae6d09bcd5606d16bf93f6ba29291d58e4ef6dbb82383692bede2f6";
+  readonly bindingSpecRevision: "sha256:a6a03b1805f9285097811f0f7773c28c0b43102d8cde84987c7c53c2b8ae8d2f";
   readonly componentSupportClaim: 'none';
   readonly platformSafetyContractDigest: "sha256:4ce80ab4d5ee2ebd9db45265b0ab9e5ce56dc18f3c59f17548bc680648705d97";
   readonly profiles: Readonly<Record<NativeProfileId, NativeProfile>>;

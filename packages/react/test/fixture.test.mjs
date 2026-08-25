@@ -3,24 +3,25 @@ import test from 'node:test';
 import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import React, { act } from 'react';
-import { hydrateRoot } from 'react-dom/client';
+import { createRoot, hydrateRoot } from 'react-dom/client';
 import { renderToString } from 'react-dom/server';
 import { JSDOM } from 'jsdom';
+import { Button } from '../src/button.mjs';
 import { R1ButtonFixture } from '../src/button-fixture.mjs';
 
-test('R1.0 comparison fixture owns Core selectors and required token crosswalk', async () => {
+test('R1.1 Button owns Core selectors and required token crosswalk', async () => {
   const css = await readFile(resolve(import.meta.dirname, '../generated/styles.css'), 'utf8');
   const comparison = JSON.parse(await readFile(resolve(import.meta.dirname, '../generated/button-donor-comparison.json'), 'utf8'));
   assert.match(css, /\.core-r1-button/);
   for (const token of ['core-component-button-background', 'core-component-button-foreground', 'core-component-button-radius', 'core-component-button-padding-inline', 'core-component-button-min-height']) assert.match(css, new RegExp(token));
   assert.doesNotMatch(css, /--color-60|\.tale-/);
   assert.equal(comparison.donor.commit, '94bf62a26c02605c8928dfeb24f0ddc4be1c92fd');
-  assert.equal(comparison.result.selector, '.core-r1-button');
-  assert.equal(comparison.result.status, 'adapted-for-private-r1.0-fixture');
+  assert.equal(comparison.result.selector, '.core-button');
+  assert.equal(comparison.result.status, 'adapted-for-r1.1-button');
   assert.equal(comparison.consumedRules.length, 9);
 });
 
-test('R1.0 React Aria fixture proves SSR, hydration, disabled and pending state', async () => {
+test('R1.1 Core Button proves SSR, hydration, disabled and pending state', async () => {
   const server = renderToString(React.createElement(R1ButtonFixture, { pending: true }));
   const disabledServer = renderToString(React.createElement(R1ButtonFixture, { disabled: true }));
   assert.match(server, /aria-busy="true"/);
@@ -61,6 +62,35 @@ test('R1.0 React Aria fixture proves SSR, hydration, disabled and pending state'
     assert.equal(presses, 0);
     assert.equal(root.firstElementChild.dataset.corePressCount, '0');
     await act(async () => hydrated.unmount());
+
+    const ref = React.createRef();
+    const consumer = createRoot(root);
+    await act(async () => consumer.render(React.createElement(Button, {
+      ref,
+      'aria-label': 'Core action',
+      'data-consumer-hook': 'preserved',
+    }, 'Save')));
+    const direct = root.querySelector('button');
+    assert.equal(ref.current, direct);
+    assert.equal(direct.getAttribute('aria-label'), 'Core action');
+    assert.equal(direct.dataset.consumerHook, 'preserved');
+
+    let activation;
+    await act(async () => consumer.render(React.createElement(Button, {
+      onActivate: (event) => { activation = event; },
+    }, 'Activate')));
+    let clickError;
+    try {
+      await act(async () => root.querySelector('button').click());
+    } catch (error) {
+      clickError = error;
+    }
+    assert.equal(clickError, undefined);
+    assert.equal(activation.type, 'activate');
+    assert.ok(['mouse', 'pen', 'touch', 'keyboard', 'virtual', undefined].includes(activation.pointerType));
+    assert.equal(activation.target instanceof dom.window.HTMLButtonElement, true);
+    assert.equal('preventDefault' in activation, false);
+    await act(async () => consumer.unmount());
   } finally {
     for (const [key, value] of Object.entries(previous)) if (value === undefined) delete globalThis[key]; else globalThis[key] = value;
     delete globalThis.IS_REACT_ACT_ENVIRONMENT;

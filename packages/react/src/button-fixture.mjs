@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Button } from 'react-aria-components';
+import { Button } from './button.mjs';
 
 export function R1ButtonFixture({ disabled = false, pending = false, onPress }) {
   const [pressCount, setPressCount] = useState(0);
@@ -9,12 +9,10 @@ export function R1ButtonFixture({ disabled = false, pending = false, onPress }) 
     'data-core-press-count': pressCount,
   }, React.createElement(Button, {
     className: 'core-r1-button',
-    isDisabled: disabled,
-    isPending: pending,
-    'aria-busy': pending || undefined,
-    'aria-disabled': pending || undefined,
+    disabled,
+    pending,
     'data-core-state': pending ? 'pending' : pressCount > 0 ? 'pressed' : 'idle',
-    onPress: (event) => {
+    onActivate: (event) => {
       setPressCount((count) => count + 1);
       onPress?.(event);
     },

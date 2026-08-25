@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 import { webCompatibility, webSurfaces } from '../src/index.mjs';
 import { compileWebSurface } from '../src/compile-surface.mjs';
@@ -14,7 +15,9 @@ test('E-G1.1-02 machine-enumerates only binding and token-policy derived hooks',
   for (const surface of [html, react]) {
     assert.equal(surface.rootClass, '.core-button');
     assert.deepEqual(surface.slots, ['[data-core-slot="label"]']);
-    assert.deepEqual(surface.states, ['data-core-state-disabled']);
+    assert.deepEqual(surface.states, surface === html
+      ? ['data-core-state-disabled']
+      : ['data-core-state-disabled', 'data-core-state-pending']);
     assert.deepEqual(surface.events, ['core:activate']);
     assert.deepEqual(surface.publicCustomProperties, [
       '--core-component-button-background',
@@ -25,11 +28,24 @@ test('E-G1.1-02 machine-enumerates only binding and token-policy derived hooks',
     assert.ok(!JSON.stringify(surface).includes('wrapper'));
   }
   assert.deepEqual(
-    { ...html, bindingRef: null, bindingSpecRevision: null },
-    { ...react, bindingRef: null, bindingSpecRevision: null },
+    (({ bindingRef, bindingSpecRevision, states, ...surface }) => surface)(html),
+    (({ bindingRef, bindingSpecRevision, states, ...surface }) => surface)(react),
   );
   assert.equal(webCompatibility.bindings['web.html'].lifecycle, 'experimental');
   assert.equal(webCompatibility.bindings['web.react'].lifecycle, 'experimental');
+  assert.deepEqual(button.record.bindings['web.html'].api.props, ['disabled']);
+  assert.deepEqual(button.record.bindings['web.react'].api.props, ['disabled', 'pending']);
+  assert.doesNotMatch(JSON.stringify(html), /pending/u);
+  assert.match(JSON.stringify(react), /pending/u);
+});
+
+test('E-G1.1-02 framework-free web output does not inherit React-only pending', async () => {
+  const bindings = await readFile(new URL('../generated/bindings.d.ts', import.meta.url), 'utf8');
+  const stylesheet = await readFile(new URL('../generated/button.css', import.meta.url), 'utf8');
+  const [htmlTypes, reactTypes] = bindings.split('\n\n');
+  assert.doesNotMatch(htmlTypes, /pending/u);
+  assert.match(reactTypes, /pending/u);
+  assert.doesNotMatch(stylesheet, /pending/u);
 });
 
 test('E-G1.1-02 refuses nonexistent exports and non-component identities', () => {
