@@ -83,7 +83,6 @@ consistently:
 | Capability | Manifest-declared operation or projection with explicit availability and policy on a particular surface. |
 | Runtime protocol | Ownership and lifecycle rules for controllers, adapters, global effects, providers, and renderer integration. |
 | Change intent envelope | Versioned, derived preview of a proposed write: objective, authority, effect, affected closure, invalidated proof, required checks, and confirmation policy. It neither owns product truth nor grants authority to mutate. |
-| Delivery workflow record | Private repository-policy procedure that validates and renders references to authority, source, proof, review, publication, and recovery facts owned elsewhere. Its lifecycle labels are procedural states, not product commitment, roadmap status, artifact lifecycle, capability availability, evidence acceptance, or write authority. |
 | Operational exception | Explicit, scoped, expiring permission to narrow support or defer a waivable obligation. It cannot alter canonical truth, manufacture proof, broaden compatibility, or authorize a generated-file patch. |
 
 Use **public contract** only as an explicitly qualified collective phrase, such
@@ -979,18 +978,19 @@ counterpart. The donor snapshot includes `packages/styles/src` tree
 Tale supplies visual and structural input only. It is not a runtime, build,
 development, generated-source, or synchronization dependency; Tale package
 names, `.tale-*` selectors, custom-property names, component APIs, registry
-records, and story files do not become Core public contracts by copying. Each
-R1 scope lock maps the applicable donor CSS and shared primitive rules to the
-Core-owned `web.react` styling-hook contract and token requirements, then
-records `adopt`, `adapt`, `defer`, `reject`, or `no-applicable-donor` with a
-reason. The resulting CSS is owned solely by `@core-ui/react` source.
+records, and story files do not become Core public contracts by copying. The
+fixed 53-family table maps applicable donor CSS and shared primitive rules to
+the Core-owned `web.react` styling-hook contract and token requirements, then
+records `adopt`, `adapt`, or `no-applicable-donor` with a reason for each
+committed family. `defer` and `reject` apply only to documented upstream
+material outside that committed family table. The resulting CSS is owned
+solely by `@core-ui/react` source.
 
-For an applicable donor, routine delivered/exportable closure is limited to
-`adopt` or `adapt`. `defer` and `reject` are fail-closed candidate states: the
-component remains unexported and unreleasable until a separately accepted,
-decision-bearing exception supplies the alternate visual direction and
-reconciles the tranche contract. `no-applicable-donor` is valid only when the
-pinned snapshot has no applicable counterpart.
+For an applicable donor in the fixed 53 table, delivered/exportable closure is
+limited to `adopt` or `adapt`; `no-applicable-donor` is valid only when the
+pinned snapshot has no applicable counterpart. A `defer` or `reject` outside
+the committed family table remains a fail-closed upstream disposition and
+does not remove or postpone a committed family.
 
 Every consumed donor custom property resolves through an exact crosswalk to an
 existing Core token, a separately admitted Core semantic/component token, or a
@@ -1039,8 +1039,8 @@ React Aria Components is the default internal React substrate and is pinned as
 an exact runtime dependency for each accepted baseline. Core UI owns its public
 contract. React Aria types and exports are not re-exported as Core UI API, and
 an upstream export does not become a Core UI component without a canonical
-component mapping or an accepted `defer`, `exclude`, or `not-a-component`
-disposition.
+component mapping. `defer`, `exclude`, or `not-a-component` dispositions are
+for documented upstream material outside the fixed 53 committed families.
 
 React must not become the source for:
 
@@ -1125,14 +1125,14 @@ tree import, undeclared file dependency, or `@core-ui/web` import.
 
 | Package | Responsibility | Must not own |
 | --- | --- | --- |
-| `@core-ui/schema` | Versioned source and response schemas, generated types, platform IDs, authoring helpers, and the closed internal `ChangeIntentEnvelope` grammar. | Product semantics, components, renderers, or site code. |
+| `@core-ui/schema` | Versioned source and response schemas, generated types, platform IDs, and authoring helpers. A later admitted capability may add a `ChangeIntentEnvelope` grammar. | Product semantics, components, renderers, or site code. |
 | `@core-ui/tokens` | Canonical tokens and deterministic web/native/design-tool transforms. | Component behavior or docs rendering. |
 | `@core-ui/foundation` | Enforced `semantic`, pure `logic`, and optional portable `interaction` sub-boundaries. | Selectors, React hooks, browser globals, native views, or mandatory cross-platform transitions. |
 | `@core-ui/web` | Later W1 HTML/CSS/controller implementation for `web.html` binding specs. | React or native implementation; a React prerequisite, shared React runtime, or shared React CSS owner. |
 | `@core-ui/react` | React rendering, CSS, SSR/hydration, effects, host refinements, package guidance, and exports for `web.react` contracts. | Canonical component metadata, React Aria public API, or another renderer's contract. |
 | `@core-ui/react-native` | Later N1 native primitive/runtime implementation and explicit platform files for native binding specs. | React/React Aria authority, CSS parsing, DOM, Expo, or Storybook hosts. |
 | `@core-ui/catalog` | Compiled catalog assets and pure discovery/query/planning API. | CLI parsing, MCP transport, project mutation. |
-| `@core-ui/tooling` | Self-describing CLI, MCP adapters, local validation, maintainer scaffolds and semantic diffs, the private read-only `ChangeIntentEnvelope` producer and validator, and safe project operations. | A second artifact index, product decisions, or renderer implementation. |
+| `@core-ui/tooling` | Self-describing CLI, MCP adapters, local validation, maintainer scaffolds, semantic diffs, and (when separately admitted) safe project operations. | A second artifact index, product decisions, or renderer implementation. |
 
 At the React package-only boundary, schema, tokens, foundation, catalog, and
 tooling remain private authoring/build/proof authorities. Productization later
@@ -1467,18 +1467,12 @@ it. Scaffolded fixtures must round-trip through validation and compilation,
 and diagnostics must lead back to the earliest editable owner. This couples
 governance growth to usable maintainer workflows.
 
-### Change intent protocol
+### Change intent protocol (later capability)
 
-Every automated write-capable workflow emits a versioned
-`ChangeIntentEnvelope` before changing repository or consumer-project files.
-`core plan` remains a read-only composition operation over `PatternRecord`; it
-is not a repository mutation planner and does not authorize writes.
-
-`@core-ui/schema` owns the closed internal envelope grammar. `@core-ui/tooling`
-owns the private read-only producer and validator. The private
-`tooling/audits/repository-policy/` workflow is a consumer of exact envelopes
-and results; it never reconstructs or re-authors their objective, write set,
-affected/stale closure, version effects, or confirmation policy.
+`ChangeIntentEnvelope` is a later, separately admitted read-only authoring
+capability. It is not materialized as an active repository-wide delivery gate
+or R1 ingress. `core plan` remains a read-only composition operation over
+`PatternRecord`; it does not authorize writes.
 
 The envelope contains:
 
@@ -1514,82 +1508,6 @@ and retained evidence can make it `proved`. An explanation-only result has an
 empty write set. This makes “what changes, why, and what becomes stale”
 machine-readable without creating a second source of product truth.
 
-
-### Private repository delivery workflow
-
-Core UI may maintain one private, repository-policy-owned delivery workflow
-record to make the existing authority, proof, review, disclosure, publication,
-and recovery sequence deterministic for repository-working maintainers and
-agents. It is an internal conformance and operator-guidance surface, not a
-public command, package, capability, product artifact, evidence record, or
-mutation protocol.
-
-The record may own only its closed procedural schema, process-state
-vocabulary, exact schema-pointer-to-invalidation-domain map, deterministic
-advisory packet and PR-body rendering, stable diagnostics, local limits, and
-rollback/recovery grammar. It references every product, authority, source,
-affected-set, proof, review, human-decision, hosted, tracker, and release fact
-through the canonical owner plus exact identity. It cannot author those facts,
-infer external state, manufacture clearance, accept evidence, or execute a
-repository, provider, Project, package, publication, or release mutation.
-
-The procedural states `AUTHORITY_ALIGNED` and `CHANGE_PLAN_READY` mean only
-that required owner references and packet fields are present and internally
-valid. They do not mean the governing human accepted a decision, the affected
-closure is complete, or a write is authorized. Local machine validation may
-advance only through `PACKET_RENDERED`; clearance, review, acceptance,
-publication, hosted, tracker, readiness, merge, release, and completion state
-remain externally observed and locally `unknown` unless supplied as immutable
-reviewed inputs. A local record cannot promote itself from those inputs.
-
-`ChangeIntentEnvelope` remains the sole owner of objective, graph-derived
-authoritative write set, affected/stale closure, compatibility/version effects,
-confirmation policy, base-drift rejection, and operation-journal binding.
-Before G1.9, a delivery workflow record may validate a human-authored expected
-path set only as an explicitly incomplete procedural bound and may not call it
-graph-derived or complete. From G1.9 onward, a record that concerns an authored
-repository change binds the exact final `ChangeIntentEnvelope` digest and
-projects, rather than re-authors, its write set and affected closure. A
-contradiction fails closed.
-
-The accepted plan retains its reviewed validation source `3026adc082861cb5f096193b8c2ca384d368aac1` and tree `28a7f6fb70a30eda983c0be3b95f8d9d1da77b97`. Its only admitted tree-equivalent implementation successor is merge commit `5a2d9d175dc02b40b619e7f183c7c9b3e18269e0`, whose second parent is the reviewed source and whose tree is byte-identical. This narrow lineage rule does not authorize another commit, parent topology, tree, or content change; any such change expires the plan application and requires a new decision.
-
-The private schema/profile family uses normal Core UI SemVer interpretation. Version `1.0.0` has readable range `>=1.0.0 <2.0.0`; unsupported or incompatible versions fail closed. Whole-control disable/removal is operational rollback and does not substitute for an incompatible field migration within a retained schema family.
-
-The private schema/profile family is admitted only while all of these remain
-true:
-
-- `tooling/audits/repository-policy/` is the sole owner and consumer;
-- repository templates and the repository-local skill provide the scaffold;
-- stable diagnostics point to the earliest editable owner;
-- the exact field-domain map provides the procedural semantic diff and
-  invalidation route without replacing graph-derived affected closure;
-- positive, negative, disclosure-order, drift, hosted-routing, race, rollback,
-  and interruption fixtures prove the bounded protocol;
-- the package-internal operations are read-only and unavailable as public Core
-  UI capabilities;
-- removal disables enforcement first and then removes only the recorded write
-  set in dependency order with digest and path-subset checks; and
-- timing and false-invalidation observations remain non-authoritative
-  operational telemetry, never product or milestone acceptance.
-
-Authority acceptance precedes every repository write. The exact accepted authority bytes are published first in their own protected PR and must pass postmerge verification on the default branch. Only then may the exact separate ten-path ChangeIntent prerequisite PR carry the RB-01 and RB-02 implementation boundaries and its evidence-only child appending the 28 applicability successors against the frozen final source after RB-02. No earlier authority-stage successor generation is authored, so the accepted successors remain terminal through the prerequisite merge.
-
-The repository-local skill is operator guidance for this private procedure. It
-is not the G2.3 public bootstrap, does not enter the Core UI capability
-manifest, and cannot duplicate product facts or grant mutation authority. The
-entire control may be removed without changing a public package, command,
-catalog, renderer, token, binding, release identity, or retained historical
-evidence.
-
-The immediate renderer consumer is G1.2 delivery and
-`fixture:platform-safety-native`: the workflow is intended to reduce repeated
-packet construction, invalidation, and review overhead while preserving its
-exact proof. Activation is an adjacent repository control, not a G1.2 entry
-condition or deliverable, and cannot delay G1.2 except when a canonical-source,
-integrity, disclosure, compatibility, or required-proof failure would already
-block that work. Later G1.3-G1.9 work may use the same procedure under its own
-authority and evidence.
 
 ## Generation and repository hygiene
 
@@ -2249,19 +2167,16 @@ do not execute extensions.
 
 ## How changes propagate
 
-Before any automated workflow below writes files, it produces a
-`ChangeIntentEnvelope` against the current base. The maintainer reviews the
-objective, authoritative owners, semantic diff, write set, affected closure,
-proof/version effects, and required confirmation. Applying the change binds
-that preview to its operation journal; validation then replaces provisional
-readiness with evidence-backed results. Manual edits remain possible, but the
-same envelope is generated from their diff before merge so impact cannot be
-hidden by bypassing the writer.
+When the separately admitted change-intent capability is activated, an
+automated workflow may produce a `ChangeIntentEnvelope` preview against the
+current base. Its own roadmap entry must define review, stale-preview, and
+operation-journal rules. Ordinary repository changes remain governed by
+canonical ownership, focused proof, protected CI, and protected pull requests.
 
 ### Adding a component
 
-1. Select the component through an accepted Roadmap-owned React tranche scope
-   lock bound to the exact shared baseline.
+1. Select the component through the fixed Roadmap-owned R1 family allocation
+   bound to the existing immutable Stage 1/R1.0 baseline.
 2. Add or update `catalog/components/<slug>/artifact.json` as the sole owner of
    identity, renderer-neutral semantics, artifact lifecycle, risk, and
    alternatives.
@@ -2278,8 +2193,8 @@ hidden by bypassing the writer.
    surfaces and run the tranche closure.
 8. Run focused agent evaluation only as informational evidence.
 
-Routine components inside an accepted tranche need no per-component authority
-or human acceptance. A new public-contract or ontology decision, dependency,
+Routine components inside the fixed R1 family allocation need no per-component
+authority or human acceptance. A new public-contract or ontology decision, dependency,
 security/privacy boundary, support expansion, stable promotion, or declared
 exception remains a decision-bearing delta before implementation.
 
@@ -2362,27 +2277,29 @@ without touching generated output.
 ### React-primary component delivery and prerelease
 
 The first public component boundary is a standalone React package, delivered
-through accepted tranches rather than a simultaneous renderer matrix:
+through the fixed R1 family allocation rather than a simultaneous renderer matrix:
 
 1. `R1.0` freezes the React Aria Components `1.20.0` substrate, standalone
    package graph, shared CSS/SSR/hydration/accessibility/compatibility and
-   packed-consumer baseline, and the Button tranche lock.
+   packed-consumer baseline used by the fixed 53-family allocation.
 2. `R1.1` delivers Button first and then accepted foundation/simple controls.
 3. `R1.2` delivers accepted forms and field controls.
 4. `R1.3` delivers accepted collections and composites.
 5. `R1.4` delivers accepted overlays and temporal interactions.
-6. `R1.5` closes the exact pinned upstream surface with one Core mapping or an
-   accepted `defer`, `exclude`, or `not-a-component` disposition for every
-   documented item.
+6. `R1.5` closes the exact pinned upstream surface and delivers every one of
+   the fixed 53 committed families. Deferral, exclusion, or
+   `not-a-component` dispositions apply only to documented upstream material
+   outside those committed families; they cannot remove a committed family.
 7. `R1 exit` may publish only `@core-ui/react@0.1.0-rc.1` under `next` after
    exact tarball, provenance, registry, rollback, checks, and human publish
    authorization pass.
 
-Each tranche has one exact scope lock, baseline identity, implementation
-sequence, deterministic proof closure, risk-selected independent review set,
-and post-proof human release acceptance. Components may run in parallel inside
-the accepted tranche while consuming the same baseline and creating no
-decision-bearing exception.
+The four implementation tranches consume one fixed 53-family allocation and
+the existing immutable Stage 1/R1.0 baseline. They have an implementation
+sequence, deterministic proof closure, and risk-selected review set, but no
+new tranche lock, digest acceptance, or post-proof human evidence-acceptance
+gate. Components may run in parallel after Button begins while consuming the
+same baseline and creating no decision-bearing exception.
 
 Proof is proportional to the exported React contract. Static and low-
 interaction components use deterministic schema/type/render/CSS/accessibility/
@@ -2500,96 +2417,29 @@ And:
 - Multi-framework work does not begin by inventing an abstraction without a
   second real framework.
 
-## R1 continuous-execution envelope
+## R1 ordinary React delivery
 
-For the exact comprehensive React `0.1` program, a designated human may accept
-one closed execution envelope whose authority source, exact materialized
-successor tree, immutable 53-family snapshot, current R1.0 baseline,
-derivation rules, allowed operations, proof predicates, invalidation
-conditions, and terminal stop boundary are all frozen before execution.
+R1 is ordinary protected pull-request delivery over the accepted React `0.1`
+scope. The accepted 53-family inventory, immutable Stage 1 snapshot, and R1.0
+baseline are the existing lock for R1.1-R1.4. No further tranche-lock decision,
+digest acceptance, or per-component authorization is required.
 
-Within that accepted envelope, mechanically derived tranche locks and retained
-evidence are conditionally admitted only after every declared deterministic,
-negative-path, disclosure, immutable-relation, risk-selected manual/AT, and
-profile-selected independent-review predicate passes. This is standing human
-authority over closed predicates; it is not a claim that the human inspected
-future bytes. Drift, ambiguity, a missing result, an inaccessible required
-environment, or a decision-bearing delta fails closed before affected work.
+React Aria Components `1.20.0` remains an internal replaceable substrate and
+Tale UI commit `94bf62a26c02605c8928dfeb24f0ddc4be1c92fd` remains a one-time
+styling donor, never a dependency or live owner. Core UI owns every public
+component contract and every committed family remains export-ready at R1 exit.
+Button is the first R1.1 component; R1.5 is breadth and release closure, not
+another implementation inventory.
 
-The envelope may authorize goal-owned branches and worktrees, bounded source
-and evidence work, generation and checks, protected intermediate PR delivery,
-verified Project reconciliation, and successful cleanup. It cannot waive
-canonical ownership, accessibility, privacy, integrity, evidence immutability,
-protected-branch rules, support or lifecycle boundaries, or release controls.
-It never authorizes npm publication, dist-tag mutation, deployment, direct
-default-branch writes, or the final R1-exit PR merge.
+Each bounded component pull request changes the earliest canonical owners,
+regenerates projections, preserves the Core-owned public boundary, runs focused
+type, unit, render, CSS, accessibility, generation, and packed-consumer checks,
+and uses the normal protected CI and review-bot workflow. Proof is proportional
+to the exported behavior; required evidence is retained from the tests and
+reviews that deliver the tranche. Ordinary implementation does not require a
+task-local operation descriptor or a separate human evidence-acceptance gate.
 
-Decision 0009 amendment 03 owns the repository, Git, Project, evidence, and
-stop-boundary execution grant. Decision 0010 amendment 04 owns the unchanged
-53-family product semantics, conditional lock/evidence admission, bounded
-initial-contract delegation, and R1.4 exit correction.
-
-The complete accepted envelope, canonical materialization manifest, and
-deterministically rendered owner-acceptance record are immutable repository
-inputs. Every later operation resolves them through the private
-`r1-continuous-execution-verify.mjs` owner. That verifier consumes the current
-authority, snapshot, R1.0 baseline, exact operation descriptor, applicable
-lock/evidence, Project preimage/preview/result, and Git/PR/check/merge
-observation; it emits one canonical pass/fail result with all input identities,
-permitted write set, invalidation causes, and next permitted operation.
-Unknown, missing, mismatched, incomplete, or out-of-envelope input fails
-closed.
-
-The verifier and its repository-policy integration may be bootstrapped once
-through the exact path-bounded grant in the accepted envelope. Amendment 09
-admits only the exact amendment-09 authority self-delivery and, after that
-authority is protectively merged and verified, the exact ten-path PR #92
-bootstrap-delivery sequence through its authenticated postmerge
-`verifier-bootstrap` receipt. These are one-time, path- and digest-bound
-exceptions; no ordinary ChangeIntent, prior substantive verifier result, or
-bootstrap receipt is required only for those exact transitions because PR #92
-installs the sole verifier owner. After the authenticated receipt exists,
-every Project, component, retained-evidence, or routine Git/PR/merge/cleanup
-operation again requires the exact current task-local `ChangeIntentEnvelope`,
-passing substantive verifier result, and bootstrap receipt. No later bootstrap
-or recovery exception exists.
-
-The private verifier has two deterministic modes. Descriptor-free
-`source-inspection` is read-only and may run over an ordinary protected-CI
-pull-request diff; it validates current authority, prerequisite lineage,
-repository policy, source, generation identity, and deterministic checks but
-authorizes no operation or clearance. Apart from the exact accepted authority
-recovery that necessarily precedes the corrected prerequisite, every
-authorized R1 repository/evidence write or Git, PR, protected-merge, Project,
-cleanup, or other external transition requires an explicit task-local `ChangeIntentEnvelope`
-verification against its exact current preimage immediately before the
-transition. The recovery exception is path- and digest-bound and cannot be
-reused after its protected merge.
-
-Post-proof and ready-merge review clearance is a separate external
-orchestration responsibility. ChangeIntent may derive required reviewer roles,
-but repository code cannot author or authenticate reviewer assignment,
-dispatch, work, outcome, or clearance. The root orchestrator binds fresh
-profile-selected reviewer inputs to the frozen packet, source, deterministic
-outputs, disclosure boundary, and, for ready-merge, current hosted state. A
-deterministic verifier pass cannot manufacture review clearance, and review
-cannot waive a deterministic failure.
-## Minimum Architecture wording
-
-Architecture must record only these additional durable rules:
-
-1. The React `0.1` committed inventory is the 53 Core-owned family outcomes in
-   the accepted immutable Stage 1 snapshot and Product Scope 6.0.0, not the
-   React Aria export list.
-2. React Aria remains an internal replaceable implementation input; raw
-   upstream exports, names, parts, helpers, hooks, utilities, and types are not
-   public merely because the dependency exports them.
-3. Existing canonical component/pattern, `web.react` binding, React source,
-   example, Tale styling donor, evidence, and release owners do not change.
-4. Accepted R1.1-R1.4 locks are independently executable after the common R1.0
-   baseline; R1.5 is a breadth/release closure, not a fifth implementation
-   inventory.
-5. The exact snapshot identity is a fail-closed authority and release input.
-   Drift returns to authority acceptance.
-6. RSC/client-boundary support and all secondary renderer work remain absent
-   until separate authority admission.
+RSC/client-boundary support, framework-free web, React Native, React Native Web,
+cross-renderer equivalence, Scale, stable support, and `latest` remain later or
+separately admitted work. Npm publication, dist-tag changes, and the final
+R1-exit pull-request merge remain separate exact human stops.

@@ -1,13 +1,9 @@
 import { execFileSync } from 'node:child_process';
-import { lstatSync, readFileSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { canonicalJson, parseJsonStrict } from '@core-ui/schema';
 import { sha256 } from './policy.mjs';
-import {
-  verifyCurrentR1ContinuousAuthority,
-  verifyHistoricalR1ContinuousAuthority,
-} from './r1-continuous-authority-compatibility.mjs';
-import { verifyReactR1Entry } from './react-aria-stage1-source-verify.mjs';
+import { verifyHistoricalR1ContinuousAuthority } from './r1-continuous-authority-compatibility.mjs';
 
 const DECISION_PATH = 'decisions/0007-delivery-workflow-authority.json';
 const ACCEPTANCE_PATH = 'decisions/0007-delivery-workflow-authority-acceptance.json';
@@ -20,16 +16,6 @@ const ACCEPTANCE_BYTES = 558;
 const ACCEPTANCE_SHA256 = 'sha256:282defb18bd1d897c14dc62e3ebc44cabf0d3cdbf4cd8c0419d71b9d1d03ed8d';
 const PRODUCT_SCOPE_BYTES = 90165;
 const PRODUCT_SCOPE_SHA256 = 'sha256:7c8404e20d01f6a0cc975b17a7893f5594f6f0d313806a6fced9d0c62d886873';
-const CURRENT_PRODUCT_SCOPE_BYTES = 114420;
-const CURRENT_PRODUCT_SCOPE_SHA256 = 'sha256:b645bedfad6427f18535898938d2551ce8f6005a0e636c1288f60b8199578b73';
-const COMPREHENSIVE_PRODUCT_SCOPE_BYTES = 122969;
-const COMPREHENSIVE_PRODUCT_SCOPE_SHA256 = 'sha256:0cafc0218f0e6795a5d600acb424b4bf514972295c89b48e9042d7faa69a261f';
-const CONTINUOUS_PRODUCT_SCOPE_BYTES = 124602;
-const CONTINUOUS_PRODUCT_SCOPE_SHA256 = 'sha256:add747d5986c9039029a99b558ae719969fd18ac113051bbec478bd291da8632';
-const COMPREHENSIVE_ARCHITECTURE_SHA256 = 'sha256:c33f829298748e0c776c63a29449cd27d3cc9519d63d1c3c2b7f0c83d794ec02';
-const COMPREHENSIVE_ROADMAP_SHA256 = 'sha256:8006803d050713b104bf485c6c610c2339a65f3e30eb6bf4e1a9222f3a3bdf2b';
-const CONTINUOUS_ARCHITECTURE_SHA256 = 'sha256:fa94c95f08c659f977af43a4438ffdb8d1774a06332786fae61f03f0799c085b';
-const CONTINUOUS_ROADMAP_SHA256 = 'sha256:9f321f93a537f69c5604de35f85053d8bf4748e937d6797c9262691e301247a1';
 const ARCHITECTURE_SHA256 = 'sha256:bdf8eb132fcdace479a05569020fd91acb0bde02dd1b24b33ce0f96ceaf39371';
 const ROADMAP_SHA256 = 'sha256:808a972cf2d92064aacb0a10560ac512c0ac878b9c960098d9ddc7d84354f4c0';
 const HISTORICAL_AUTHORITY_SOURCE = 'b27cb4fb3d71f8feca9505684201286d76f62d42';
@@ -49,6 +35,7 @@ const REVIEW_AMENDMENT04_PATH = 'decisions/0009-amendment-04-repository-policy-r
 const REVIEW_AMENDMENT04_ACCEPTANCE_PATH = 'decisions/0009-amendment-04-repository-policy-readme-historical-compatibility-acceptance.md';
 const REVIEW_AMENDMENT04_BYTES = 2948;
 const REVIEW_AMENDMENT04_SHA256 = 'sha256:4269d3c8f43e00328c85e353ec0d08fb6e37dae9a72abc55c5918f600e3d089f';
+const REVIEW_SUCCESSOR_SOURCE = '02b5aeab66013f2f04ee9847161b48a11c7cbd41';
 const R1_README_RECOVERY_PATH = 'decisions/0010-amendment-08-r1-readme-historical-compatibility-recovery.md';
 const R1_README_RECOVERY_ACCEPTANCE_PATH = 'decisions/0010-amendment-08-r1-readme-historical-compatibility-recovery-acceptance.md';
 const R1_README_RECOVERY_BYTES = 3050;
@@ -66,15 +53,6 @@ const REVIEW_SUCCESSOR_YAML_BYTES = 577;
 const REVIEW_SUCCESSOR_YAML_SHA256 = 'sha256:0cad2dfe963cdbca6b698415d0d9fe045d8e968bc198b505e7c83d24cc33869a';
 const REVIEW_PREDECESSOR_SKILL_BYTES = 5789;
 const REVIEW_PREDECESSOR_SKILL_SHA256 = 'sha256:5695b79539fd4cfe15e379cca448c6c35d59d3fa46c62044383e9381455cbae5';
-const REVIEW_HISTORICAL_ARTIFACT_PATHS = new Set([
-  'tests/evidence/delivery-review-readiness-applicability-profile.mjs',
-  'tests/evidence/delivery-review-readiness-applicability-profile.test.mjs',
-  'tooling/audits/repository-policy/src/delivery-workflow-authority-verify.mjs',
-  'tooling/audits/repository-policy/src/evidence-verify.mjs',
-  'tooling/audits/repository-policy/test/delivery-workflow-authority.test.mjs',
-  'tooling/audits/repository-policy/test/evidence-integrity.test.mjs',
-  REVIEW_README_PATH,
-]);
 const REVIEW_PLAN_SHA256 = 'sha256:43a7b1724b4e107e253703952ac4839f7c99880f4b96e56b8e73e56de1aded7d';
 const REVIEW_TASK_ID = '019ff5d8-5a4b-7252-958d-bab8b0087c34';
 const REVIEW_SCOPES = [
@@ -103,24 +81,30 @@ const readHistoricalAuthority = (repositoryRoot, path) => execFileSync(
   ['show', `${HISTORICAL_AUTHORITY_SOURCE}:${path}`],
   { cwd: repositoryRoot, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 },
 );
+const readCommittedArtifact = (repositoryRoot, commit, path) => execFileSync(
+  'git',
+  ['show', `${commit}:${path}`],
+  { cwd: repositoryRoot, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 },
+);
+const readHistoricalArtifact = (repositoryRoot, path) => {
+  try {
+    return execFileSync('git', ['show', `${REVIEW_HISTORICAL_SOURCE}:${path}`], {
+      cwd: repositoryRoot,
+      encoding: 'buffer',
+      maxBuffer: 64 * 1024 * 1024,
+    });
+  } catch {
+    fail(`historical artifact identity ${path}`);
+  }
+};
 
 export function verifyDeliveryWorkflowAuthority(repositoryRoot, options = {}) {
-  const sourceMode = options.sourceMode ?? 'current';
-  if (sourceMode !== 'current' && sourceMode !== 'historical') {
-    fail('source mode must be current or explicit historical');
+  if (options.sourceMode !== 'historical') {
+    fail('historical audit requires explicit sourceMode: historical');
   }
-  const historicalSource = sourceMode === 'historical';
-  let r1Authority;
+  let historicalR1Authority;
   try {
-    r1Authority = historicalSource
-      ? verifyHistoricalR1ContinuousAuthority(repositoryRoot)
-      : verifyCurrentR1ContinuousAuthority(repositoryRoot, {
-        productScopeSource: options.productScopeSource,
-        authorityArchitectureSource: options.architectureSource,
-        authorityRoadmapSource: options.roadmapSource,
-        authorityDecisionSource: options.authorityDecisionSource,
-        authorityAcceptanceSource: options.authorityAcceptanceSource,
-      });
+    historicalR1Authority = verifyHistoricalR1ContinuousAuthority(repositoryRoot);
   } catch {
     fail('R1 continuous authority compatibility');
   }
@@ -129,9 +113,7 @@ export function verifyDeliveryWorkflowAuthority(repositoryRoot, options = {}) {
   const acceptanceSource = options.acceptanceSource
     ?? readFileSync(join(repositoryRoot, ACCEPTANCE_PATH), 'utf8');
   const productScopeSource = options.productScopeSource
-    ?? (historicalSource
-      ? readHistoricalAuthority(repositoryRoot, PRODUCT_SCOPE_PATH)
-      : readFileSync(join(repositoryRoot, PRODUCT_SCOPE_PATH), 'utf8'));
+    ?? readHistoricalAuthority(repositoryRoot, PRODUCT_SCOPE_PATH);
   const decision = parseJsonStrict(decisionSource);
   const acceptance = parseJsonStrict(acceptanceSource);
 
@@ -139,51 +121,19 @@ export function verifyDeliveryWorkflowAuthority(repositoryRoot, options = {}) {
   if (acceptanceSource !== canonicalJson(acceptance)) fail('acceptance must be canonical JSON');
   if (Buffer.byteLength(decisionSource) !== DECISION_BYTES || digest(decisionSource) !== DECISION_SHA256) fail('decision identity');
   if (Buffer.byteLength(acceptanceSource) !== ACCEPTANCE_BYTES || digest(acceptanceSource) !== ACCEPTANCE_SHA256) fail('acceptance identity');
-  const productScopeVersion = (
-    Buffer.byteLength(productScopeSource) === PRODUCT_SCOPE_BYTES
+  const productScopeVersion = Buffer.byteLength(productScopeSource) === PRODUCT_SCOPE_BYTES
     && digest(productScopeSource) === PRODUCT_SCOPE_SHA256
     && productScopeSource.startsWith('---\nscopeVersion: 4.0.2\n')
-  ) ? '4.0.2' : (
-    Buffer.byteLength(productScopeSource) === CURRENT_PRODUCT_SCOPE_BYTES
-    && digest(productScopeSource) === CURRENT_PRODUCT_SCOPE_SHA256
-    && productScopeSource.startsWith('---\nscopeVersion: 5.0.1\n')
-  ) ? '5.0.1' : (
-    Buffer.byteLength(productScopeSource) === COMPREHENSIVE_PRODUCT_SCOPE_BYTES
-    && digest(productScopeSource) === COMPREHENSIVE_PRODUCT_SCOPE_SHA256
-    && productScopeSource.startsWith('---\nscopeVersion: 6.0.0\n')
-  ) ? '6.0.0' : (
-    Buffer.byteLength(productScopeSource) === CONTINUOUS_PRODUCT_SCOPE_BYTES
-    && digest(productScopeSource) === CONTINUOUS_PRODUCT_SCOPE_SHA256
-    && productScopeSource.startsWith('---\nscopeVersion: 6.0.1\n')
-    && !historicalSource
-  ) ? '6.0.1' : null;
-  if (productScopeVersion === null) fail('Product Scope accepted identity');
-  if (!historicalSource && productScopeVersion !== '6.0.0' && productScopeVersion !== '6.0.1') {
-    fail('current source mode requires accepted Product Scope 6.0.x');
-  }
+    ? '4.0.2'
+    : null;
+  if (productScopeVersion === null) fail('historical Product Scope accepted identity');
   const architectureSource = options.architectureSource
-    ?? (historicalSource
-      ? readHistoricalAuthority(repositoryRoot, ARCHITECTURE_PATH)
-      : readFileSync(join(repositoryRoot, ARCHITECTURE_PATH), 'utf8'));
+    ?? readHistoricalAuthority(repositoryRoot, ARCHITECTURE_PATH);
   const roadmapSource = options.roadmapSource
-    ?? (historicalSource
-      ? readHistoricalAuthority(repositoryRoot, ROADMAP_PATH)
-      : readFileSync(join(repositoryRoot, ROADMAP_PATH), 'utf8'));
-  const expectedArchitectureSha256 = historicalSource
-    ? ARCHITECTURE_SHA256
-    : r1Authority.successor
-      ? `sha256:${r1Authority.successor.architecture.sha256}`
-    : productScopeVersion === '6.0.1'
-      ? CONTINUOUS_ARCHITECTURE_SHA256
-      : COMPREHENSIVE_ARCHITECTURE_SHA256;
-  const expectedRoadmapSha256 = historicalSource
-    ? ROADMAP_SHA256
-    : r1Authority.successor
-      ? `sha256:${r1Authority.successor.roadmap.sha256}`
-    : productScopeVersion === '6.0.1'
-      ? CONTINUOUS_ROADMAP_SHA256
-      : COMPREHENSIVE_ROADMAP_SHA256;
-  if (digest(architectureSource) !== expectedArchitectureSha256 || digest(roadmapSource) !== expectedRoadmapSha256) fail('Architecture or roadmap identity');
+    ?? readHistoricalAuthority(repositoryRoot, ROADMAP_PATH);
+  if (digest(architectureSource) !== ARCHITECTURE_SHA256 || digest(roadmapSource) !== ROADMAP_SHA256) {
+    fail('historical Architecture or roadmap identity');
+  }
 
   if (decision.decisionId !== 'core-ui:decision:0007' || decision.state !== 'acceptance-candidate') fail('decision identity or state');
   if (decision.acceptanceTopology.owner !== 'ndrewtran' || decision.acceptanceTopology.issueNumber !== 54) fail('decision owner or issue');
@@ -223,15 +173,9 @@ export function verifyDeliveryWorkflowAuthority(repositoryRoot, options = {}) {
     applicabilityTargets: decision.authorityApplicability.targets.length,
     decision: { bytes: Buffer.byteLength(decisionSource), sha256: digest(decisionSource) },
     productScope: { bytes: Buffer.byteLength(productScopeSource), sha256: digest(productScopeSource), version: productScopeVersion },
-    sourceMode,
+    sourceMode: 'historical',
   };
-  if (!historicalSource) {
-    result.r1Entry = verifyReactR1Entry(repositoryRoot, {
-      productScopeSource,
-      roadmapSource,
-    });
-  }
-  result.r1Authority = r1Authority;
+  result.r1Authority = historicalR1Authority;
   return result;
 }
 
@@ -241,9 +185,9 @@ export function verifyDecision0009Amendment02SkillSuccessor(repositoryRoot, opti
   const acceptanceSource = options.reviewAmendment02AcceptanceSource
     ?? readFileSync(join(repositoryRoot, REVIEW_AMENDMENT02_ACCEPTANCE_PATH), 'utf8');
   const skillSource = options.reviewSuccessorSkillSource
-    ?? readFileSync(join(repositoryRoot, REVIEW_SUCCESSOR_SKILL_PATH), 'utf8');
+    ?? readCommittedArtifact(repositoryRoot, REVIEW_SUCCESSOR_SOURCE, REVIEW_SUCCESSOR_SKILL_PATH);
   const yamlSource = options.reviewSuccessorYamlSource
-    ?? readFileSync(join(repositoryRoot, REVIEW_SUCCESSOR_YAML_PATH), 'utf8');
+    ?? readCommittedArtifact(repositoryRoot, REVIEW_SUCCESSOR_SOURCE, REVIEW_SUCCESSOR_YAML_PATH);
 
   if (Buffer.byteLength(amendmentSource) !== REVIEW_AMENDMENT02_BYTES
       || digest(amendmentSource) !== REVIEW_AMENDMENT02_SHA256) {
@@ -487,70 +431,12 @@ export function verifyDeliveryReviewReadinessAuthority(repositoryRoot, options =
           || entry.sha256 !== REVIEW_PREDECESSOR_SKILL_SHA256) {
         fail('Decision 0009 predecessor SKILL identity');
       }
-      continue;
     }
-    if (entry.path === REVIEW_README_PATH) {
-      let indexEntry;
-      try {
-        indexEntry = execFileSync('git', ['ls-files', '--stage', '--error-unmatch', '--', entry.path], {
-          cwd: repositoryRoot,
-          encoding: 'utf8',
-        });
-      } catch {
-        fail(`current artifact index identity ${entry.path}`);
-      }
-      const indexLines = indexEntry.trimEnd().split('\n');
-      if (indexLines.length !== 1
-          || !new RegExp(`^100644 [0-9a-f]{40} 0\\t${entry.path.replaceAll('.', '\\.')}$`, 'u').test(indexLines[0])) {
-        fail(`current artifact index identity ${entry.path}`);
-      }
-      let indexStatus;
-      try {
-        indexStatus = execFileSync('git', [
-          'status', '--porcelain=v2', '--untracked-files=all', '--', entry.path,
-        ], {
-          cwd: repositoryRoot,
-          encoding: 'utf8',
-        });
-      } catch {
-        fail(`current artifact index status ${entry.path}`);
-      }
-      const statusLines = indexStatus.trimEnd() === '' ? [] : indexStatus.trimEnd().split('\n');
-      if (statusLines.some((line) => {
-        if (!line.startsWith('1 ') || line.length < 4) return true;
-        // Porcelain-v2's X column is the index status. After `git rm --cached`,
-        // `git add -N` reports DA: reject that intent-to-add entry while
-        // retaining ordinary tracked entries with mutable worktree bytes (.M).
-        return line[2] === 'D';
-      })) {
-        fail(`current artifact index intent-to-add ${entry.path}`);
-      }
-      let current;
-      try {
-        current = lstatSync(join(repositoryRoot, entry.path));
-      } catch {
-        fail(`current artifact identity ${entry.path}`);
-      }
-      if (!current.isFile() || current.isSymbolicLink()) {
-        fail(`current artifact identity ${entry.path}`);
-      }
-    }
-    let bytes = readFileSync(join(repositoryRoot, entry.path));
-    if (REVIEW_HISTORICAL_ARTIFACT_PATHS.has(entry.path)) {
-      try {
-        bytes = execFileSync('git', ['show', `${REVIEW_HISTORICAL_SOURCE}:${entry.path}`], {
-          cwd: repositoryRoot,
-          encoding: 'buffer',
-          maxBuffer: 64 * 1024 * 1024,
-        });
-      } catch {
-        fail(`historical artifact identity ${entry.path}`);
-      }
-      if (entry.path === REVIEW_README_PATH
-          && (bytes.byteLength !== REVIEW_README_HISTORICAL_BYTES
-            || digest(bytes) !== REVIEW_README_HISTORICAL_SHA256)) {
-        fail(`historical artifact identity ${entry.path}`);
-      }
+    const bytes = readHistoricalArtifact(repositoryRoot, entry.path);
+    if (entry.path === REVIEW_README_PATH
+        && (bytes.byteLength !== REVIEW_README_HISTORICAL_BYTES
+          || digest(bytes) !== REVIEW_README_HISTORICAL_SHA256)) {
+      fail(`historical artifact identity ${entry.path}`);
     }
     if (bytes.byteLength !== entry.byteLength || digest(bytes) !== entry.sha256) fail(`artifact identity ${entry.path}`);
   }
@@ -622,6 +508,6 @@ if (process.argv[1] && resolve(process.argv[1]) === resolve(import.meta.filename
   const repositoryRoot = resolve(import.meta.dirname, '../../../..');
   process.stdout.write(`${canonicalJson({
     deliveryReviewReadiness: verifyDeliveryReviewReadinessAuthority(repositoryRoot),
-    deliveryWorkflow: verifyDeliveryWorkflowAuthority(repositoryRoot),
+    deliveryWorkflow: verifyDeliveryWorkflowAuthority(repositoryRoot, { sourceMode: 'historical' }),
   })}\n`);
 }

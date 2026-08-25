@@ -33,55 +33,6 @@ body:
       description: Record source, artifact, binding, package, catalog, token, release-manifest, and environment revisions as applicable.
     validations:
       required: true
-  - type: input
-    id: source_identity
-    attributes:
-      label: Source identity
-      description: Exact product or repository source identity; do not substitute the executed or proof-tool identity.
-    validations:
-      required: true
-  - type: input
-    id: executed_identity
-    attributes:
-      label: Executed identity
-      description: Exact checkout identity that produced the result.
-    validations:
-      required: true
-  - type: input
-    id: proof_tool_identity
-    attributes:
-      label: Proof-tool identity
-      description: Exact proof-tool source identity.
-    validations:
-      required: true
-  - type: input
-    id: identity_owner
-    attributes:
-      label: Identity correlation owner
-      description: Canonical owner reference defining whether source, executed, and proof-tool identities must match.
-    validations:
-      required: true
-  - type: input
-    id: evidence_identity
-    attributes:
-      label: Evidence identity
-      description: Exact retained identity, or the canonical owner-declared N/A record.
-    validations:
-      required: true
-  - type: input
-    id: review_packet_identity
-    attributes:
-      label: Review packet identity
-      description: Packet ID, profile, algorithm, digest, and byte length. This task-local identity is not evidence.
-    validations:
-      required: true
-  - type: input
-    id: invalidation_domains
-    attributes:
-      label: Invalidation domains
-      description: Values resolved from the active delivery workflow profile; do not invent new values here.
-    validations:
-      required: true
   - type: textarea
     id: procedure
     attributes:

@@ -3,7 +3,7 @@
 const assert = require('node:assert/strict');
 const test = require('node:test');
 
-const { DELIVERY_IDENTITY_FIELDS, validatePlanningPullRequest } = require('./validate-planning-pr.cjs');
+const { validatePlanningPullRequest } = require('./validate-planning-pr.cjs');
 
 const completeBody = `
 - Authority change record: #1
@@ -14,69 +14,34 @@ const completeBody = `
 - Open tracker migration: issues #1–#19 and the Core UI Delivery Project
 `;
 
-const deliveryBody = `${completeBody}
-- Source identity: 1111111111111111111111111111111111111111 / 2222222222222222222222222222222222222222
-- Executed identity: 1111111111111111111111111111111111111111 / 2222222222222222222222222222222222222222
-- Proof-tool identity: 3333333333333333333333333333333333333333 / 4444444444444444444444444444444444444444
-- Identity correlation owner: repository-policy-owner
-- Evidence identity: owner-declared N/A record core-ui-evidence-binding-v1:no-evidence-route
-- Review packet identity: packet-1 / core-ui-review-packet-v1 / sha256 / sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa / 1024
-- Invalidation domains: AUTHORITY, PROOF_TOOL, PACKET
-`;
-
 test('ignores pull requests outside authority sources', () => {
-  assert.deepEqual(
-    validatePlanningPullRequest({
-      files: ['README.md'],
-      labels: [],
-      body: '',
-    }),
-    [],
-  );
+  assert.deepEqual(validatePlanningPullRequest({ files: ['README.md'], labels: [], body: '' }), []);
 });
 
 test('accepts a complete Product Scope authority publication', () => {
-  assert.deepEqual(
-    validatePlanningPullRequest({
-      files: ['strategy/product-scope.md'],
-      labels: ['type:architecture-maintenance'],
-      body: completeBody,
-    }),
-    [],
-  );
+  assert.deepEqual(validatePlanningPullRequest({
+    files: ['strategy/product-scope.md'],
+    labels: ['type:architecture-maintenance'],
+    body: completeBody,
+  }), []);
 });
 
 test('rejects an authority change without a label or change record', () => {
-  const errors = validatePlanningPullRequest({
-    files: ['strategy/milestone-roadmap.md'],
-    labels: [],
-    body: '',
-  });
-
+  const errors = validatePlanningPullRequest({ files: ['strategy/milestone-roadmap.md'], labels: [], body: '' });
   assert.equal(errors.length, 2);
   assert.match(errors[0], /label/);
   assert.match(errors[1], /change record/);
 });
 
 test('protects the executable platform-safety registry as architecture authority', () => {
-  const errors = validatePlanningPullRequest({
-    files: ['strategy/platform-safety-contract.json'],
-    labels: [],
-    body: '',
-  });
-
+  const errors = validatePlanningPullRequest({ files: ['strategy/platform-safety-contract.json'], labels: [], body: '' });
   assert.equal(errors.length, 2);
   assert.match(errors[0], /label/);
   assert.match(errors[1], /change record/);
 });
 
 test('rejects a planning-control-only change without governance metadata', () => {
-  const errors = validatePlanningPullRequest({
-    files: ['.github/workflows/repository-planning-policy.yml'],
-    labels: [],
-    body: '',
-  });
-
+  const errors = validatePlanningPullRequest({ files: ['.github/workflows/repository-planning-policy.yml'], labels: [], body: '' });
   assert.equal(errors.length, 2);
   assert.match(errors[0], /label/);
   assert.match(errors[1], /change record/);
@@ -95,7 +60,6 @@ test('rejects incomplete Product Scope change metadata', () => {
 - Open tracker migration: N/A
 `,
   });
-
   assert.equal(errors.length, 5);
   assert.match(errors[0], /Scope version effect/);
   assert.match(errors[1], /Affected Scope IDs/);
@@ -104,60 +68,10 @@ test('rejects incomplete Product Scope change metadata', () => {
   assert.match(errors[4], /Open tracker migration/);
 });
 
-test('accepts complete delivery workflow identities without local clearance', () => {
+test('routes repository-policy and skill changes through ordinary governance metadata', () => {
   assert.deepEqual(validatePlanningPullRequest({
-    files: ['tooling/audits/repository-policy/delivery-workflow-profile.json'],
-    labels: ['type:architecture-maintenance'],
-    body: deliveryBody,
-  }), []);
-});
-
-test('protects the advisory runtime and continuation fault-test route', () => {
-  for (const file of [
-    'tooling/audits/repository-policy/src/delivery-advisory.mjs',
-    'tests/evidence/capture-0009-delivery-review-readiness-applicability.mjs',
-    'tests/evidence/delivery-review-readiness-applicability-profile.test.mjs',
-    'tooling/audits/repository-policy/package.json',
-  ]) {
-    assert.deepEqual(validatePlanningPullRequest({ files: [file], labels: ['type:decision'], body: deliveryBody }), []);
-  }
-});
-
-test('protects every delivery integrity owner and fixture added by Decision 0009', () => {
-  for (const file of [
-    '.github/scripts/validate-planning-pr.cjs',
-    '.github/scripts/validate-planning-pr.test.cjs',
-    'tooling/audits/repository-policy/src/evidence-applicability-supersession.mjs',
-    'tooling/audits/repository-policy/test/delivery/disable.mjs',
-    'tooling/audits/repository-policy/test/evidence-integrity.test.mjs',
-    'tooling/audits/repository-policy/test/fixtures/delivery-workflow/scenarios.json',
-  ]) {
-    assert.deepEqual(validatePlanningPullRequest({ files: [file], labels: [], body: '' }), [
-      'Authority-source changes require the type:architecture-maintenance or type:decision label.',
-      'Authority-source changes require an Authority change record: #… reference.',
-      ...DELIVERY_IDENTITY_FIELDS.map((label) => `Delivery workflow changes require a substantive ${label} entry.`),
-    ]);
-  }
-});
-
-test('rejects omitted and substituted delivery identities', () => {
-  const errors = validatePlanningPullRequest({
-    files: ['.agents/skills/core-ui-delivery/SKILL.md'],
+    files: ['.agents/skills/core-ui-delivery/agents/openai.yaml'],
     labels: ['type:decision'],
-    body: `${completeBody}\n- Source identity: one identity for everything`,
-  });
-  assert.equal(errors.length, 6);
-  assert.match(errors[0], /Executed identity/);
-  assert.match(errors[5], /Invalidation domains/);
-});
-
-test('rejects local clearance and dispatch claims for delivery controls', () => {
-  const errors = validatePlanningPullRequest({
-    files: ['tests/evidence/README.md'],
-    labels: ['type:architecture-maintenance'],
-    body: `${deliveryBody}\n- Clearance: clear\n- Dispatch: complete`,
-  });
-  assert.equal(errors.length, 2);
-  assert.match(errors[0], /Clearance/);
-  assert.match(errors[1], /Dispatch/);
+    body: completeBody,
+  }), []);
 });

@@ -15,12 +15,6 @@ import {
 import { sha256 } from '../src/policy.mjs';
 import { acceptanceCommentBody } from '../src/tale-token-annex-acceptance.mjs';
 import { assertAuthorityDecisionShape } from '../src/evidence-applicability-supersession.mjs';
-import { captureReviewReadiness } from '../../../../tests/evidence/capture-0009-delivery-review-readiness-applicability.mjs';
-import {
-  assertReviewReadinessRoot,
-  REVIEW_READINESS_ROOT,
-  resolveReviewReadinessSourceIdentity,
-} from '../../../../tests/evidence/delivery-review-readiness-applicability-profile.mjs';
 
 const execFile = promisify(execFileCallback);
 const repositoryRoot = resolve(import.meta.dirname, '../../../..');
@@ -1124,34 +1118,4 @@ test('a passing recertification cannot extend a superseded chain', async () => {
     verifyEvidence(withoutPriorRecertification.root),
     'EVIDENCE_RECERTIFICATION_AFTER_SUPERSESSION',
   );
-});
-
-test('Decision 0009 compatibility preserves audit history without treating worktree state as current proof', async () => {
-  const { sourceRevision: resolvedSource, sourceTree } = await resolveReviewReadinessSourceIdentity(repositoryRoot);
-  const parent = await mkdtemp(join(tmpdir(), 'core-ui-review-readiness-rollback-'));
-  const root = join(parent, 'repository');
-  try {
-    await execFile('git', ['clone', '--quiet', '--shared', repositoryRoot, root]);
-    await git(root, 'checkout', '--quiet', resolvedSource);
-    await captureReviewReadiness({
-      repositoryRoot: root,
-      sourceRevision: resolvedSource,
-      sourceTree,
-      timestamp: '2026-08-12T12:30:00Z',
-    });
-    const profile = JSON.parse(await readFile(join(root, 'tooling/audits/repository-policy/delivery-workflow-profile.json'), 'utf8'));
-    const historicalBefore = await readFile(join(root, REVIEW_READINESS_ROOT, 'index.json'));
-    for (const path of Object.values(profile.recoveryStepPaths).flat()) {
-      await rm(join(root, path), { force: true, recursive: true });
-    }
-    const retained = await assertReviewReadinessRoot(root);
-    assert.equal(retained.fileCount, 30);
-    assert.deepEqual(await readFile(join(root, REVIEW_READINESS_ROOT, 'index.json')), historicalBefore);
-    assert.equal(profile.applicabilityRebindContract.diagnosticCode, 'DELIVERY_ROLLBACK_APPLICABILITY_REBIND_REQUIRED');
-    await mkdir(join(root, 'tests/evidence/unaccepted-rebind'), { recursive: true });
-    await writeFile(join(root, 'tests/evidence/unaccepted-rebind/index.json'), canonicalJson({ records: [], schema: 'core-ui-evidence-index-v1', sourceRevision: resolvedSource, sourceTree, supersessions: [] }));
-    assert.ok((await verifyEvidence(root)).indexCount > 0);
-  } finally {
-    await rm(parent, { force: true, recursive: true });
-  }
 });

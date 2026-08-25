@@ -1,5 +1,5 @@
 ---
-scopeVersion: 6.0.1
+scopeVersion: 6.0.2
 status: execution-baseline
 product: Core UI
 architecture: ./monorepo-architecture.md
@@ -33,6 +33,14 @@ tracker may reference scope and milestone IDs but cannot change product scope.
 
 This is not a status report. Git history records changes to product commitment;
 the tracker records delivery progress.
+
+Product Scope `6.0.2` is a patch clarification for the R1 delivery reset. It
+changes no Scope ID, commitment, family, tranche membership, public API,
+platform, package, dependency, lifecycle, support claim, release boundary,
+non-goal, or product meaning. The accepted 53-family table, immutable Stage 1
+snapshot, and R1.0 baseline remain the existing R1 lock; ordinary component
+delivery does not require another lock, digest acceptance, or human
+evidence-acceptance gate.
 
 ## Scope vocabulary
 
@@ -186,7 +194,7 @@ hosted services, design-tool integration, or another framework.
 ### React `0.1` prerelease boundary
 
 The current `0.1` product commitment is a package-only React prerelease. Each
-accepted tranche may publish `@core-ui/react@0.1.0-alpha.N` under `next`; R1
+R1 tranche may publish `@core-ui/react@0.1.0-alpha.N` under `next` once its
 breadth closure may propose `0.1.0-rc.1`. No `latest` tag, stable `0.1.0`,
 framework-free package, native package/profile, public catalog/tooling/CLI,
 cross-platform equivalence, or secondary-renderer support claim belongs to this
@@ -540,25 +548,6 @@ guidance, affected proof, and retained historical retrieval.
 | `SCOPE-AUTHOR-AUTOFIX` | `committed` | Preview-only semantics-preserving mechanical autofixes | Foundation |
 
 
-### Private repository delivery control
-
-The repository may implement the decision-0007 deterministic delivery workflow
-as an internal maintainer procedure under `SCOPE-FOUNDATION-001` and the
-existing proof/privacy/integrity commitments. This is a patch clarification,
-not a product outcome or new scope item. It adds no public command, package,
-capability, artifact kind, durable product relation, renderer, platform,
-support claim, release boundary, or commitment transition. It does not satisfy
-`SCOPE-AUTHOR-CLOSURE` or `SCOPE-AUTHOR-CHANGE-INTENT`; from G1.9 onward it
-consumes their owned output by exact digest. Its repository-local skill is not
-the G2.3 public bootstrap.
-
-The workflow's schema/profile, packet rendering, invalidation routing,
-diagnostics, fixtures, and rollback are private repository-policy
-implementation details. Operational duration and false-invalidation counts may
-be retained as task-local observations, but they are not `SCOPE-METRIC-005`,
-are not product metrics, and cannot promote a capability, milestone, package,
-support claim, or release.
-
 ### Initial allowlisted canonical proposals
 
 The following are admitted for G2.6. They are not available until their closed
@@ -657,10 +646,9 @@ publish Scale.
 
 `SCOPE-CAP-BREADTH` remains the later cross-platform breadth capability and
 does not commit an unnamed inventory. React-primary breadth is instead owned by
-`SCOPE-REACT-BREADTH-001`: each accepted tranche lock names the exact upstream
-snapshot items, proposed Core IDs, and dispositions, and its Product Scope
-amendment admits the exact new component IDs before implementation. Each such
-admission records:
+`SCOPE-REACT-BREADTH-001`: the fixed family table names the exact upstream
+snapshot items, Core IDs, and dispositions. No per-family Product Scope
+amendment is required inside that committed inventory. Each family record has:
 
 - the user workflow and unmet intent;
 - component versus pattern ownership;
@@ -1359,15 +1347,15 @@ context captured by default.
 | `SCOPE-OUTCOME-MULTIPLATFORM-SECONDARY` | `deferred` | Framework-free/native consumers later receive platform-correct adaptations from the renderer-neutral semantic system. | `web.html`, native RN/iOS/Android/RNW | W1/N1/X1 | R1 exit, demand, accepted lock, explicit activation; never blocks or inherits React. |
 | `SCOPE-SYSTEM-REACT` | `committed` | Standalone React substrate, CSS/runtime ownership, React Aria baseline, and tranche delivery. | `web.react`; `@core-ui/react` | R1.0 and every R1 tranche | Exact baseline; no secondary implementation or canonical inventory ownership. |
 | `SCOPE-SYSTEM-WEB-HTML-SECONDARY` | `deferred` | Future framework-free binding/package system. | `web.html`; `@core-ui/web` | W1.0 and W1 tranches | R1 exit, demand, accepted lock/activation; no React dependency or automatic API equivalence. |
-| `SCOPE-REACT-BREADTH-001` | `committed` | Disposition-complete Core React coverage of the applicable documented pinned React Aria component surface. | `web.react`; `@core-ui/react` | R1.1–R1.5; `E-R1.5-01…06` | Accepted tranche locks/baseline; not a raw count/export target and explicit exclusions are allowed. |
-| `SCOPE-COMP-BUTTON-REACT` | `committed` | React Button action, pending, disabled, name, and first complete React addition path. | `web.react`; `@core-ui/react` | R1.0/R1.1 | Accepted Button lock; no secondary counterpart or stable claim. |
-| `SCOPE-COMP-TEXTFIELD-REACT` | `committed` | React TextField value, validation, label, description, error, and form relations. | `web.react`; `@core-ui/react` | R1.2 `E-R1.2-01…04` | Accepted R1.2 lock/baseline; no secondary binding claim. |
-| `SCOPE-COMP-SWITCH-REACT` | `committed` | React Switch state, group, and control semantics. | `web.react`; `@core-ui/react` | R1.2 `E-R1.2-01…04` | Accepted R1.2 lock/baseline; no secondary binding claim. |
-| `SCOPE-PATTERN-FORM-REACT` | `committed` | React Form composition, validation, submission, and deterministic examples. | `web.react`; React package/examples | R1.2 `E-R1.2-01…04` | Accepted lock/component prerequisites; no planner or native composition claim. |
-| `SCOPE-COMP-SELECT-REACT` | `committed` | React Select selection, focus, keyboard, and form contract. | `web.react`; `@core-ui/react` | R1.3 `E-R1.3-01…05` | Accepted lock/baseline and required manual proof; no native picker/equivalence claim. |
-| `SCOPE-COMP-TABS-REACT` | `committed` | React Tabs orientation, focus/selection, and panel relations. | `web.react`; `@core-ui/react` | R1.3 `E-R1.3-01…05` | Accepted lock/baseline/risk proof; no native disposition claim. |
-| `SCOPE-COMP-DIALOG-REACT` | `committed` | React Dialog overlay, focus, dismissal, effects, and accessibility. | `web.react`; `@core-ui/react` | R1.4 `E-R1.4-01…06` | Accepted lock/baseline and required manual/AT proof before export; no native equivalence. |
-| `SCOPE-COMP-TOAST-REACT` | `committed` | React Toast host, ordering, timing, announcements, teardown, and concurrency. | `web.react`; `@core-ui/react` | R1.4 `E-R1.4-01…06` | Accepted lock/baseline and required manual/AT proof before export; no native equivalence. |
+| `SCOPE-REACT-BREADTH-001` | `committed` | Disposition-complete Core React coverage of the 53-family fixed inventory from the pinned React Aria component surface. | `web.react`; `@core-ui/react` | R1.1–R1.5; `E-R1.5-01…06` | Fixed family table, immutable Stage 1 snapshot, and R1.0 baseline; not a raw count/export shortcut. |
+| `SCOPE-COMP-BUTTON-REACT` | `committed` | React Button action, pending, disabled, name, and first complete React addition path. | `web.react`; `@core-ui/react` | R1.0/R1.1 | Fixed family allocation and baseline; no secondary counterpart or stable claim. |
+| `SCOPE-COMP-TEXTFIELD-REACT` | `committed` | React TextField value, validation, label, description, error, and form relations. | `web.react`; `@core-ui/react` | R1.2 `E-R1.2-01…04` | Fixed family allocation and baseline; no secondary binding claim. |
+| `SCOPE-COMP-SWITCH-REACT` | `committed` | React Switch state, group, and control semantics. | `web.react`; `@core-ui/react` | R1.2 `E-R1.2-01…04` | Fixed family allocation and baseline; no secondary binding claim. |
+| `SCOPE-PATTERN-FORM-REACT` | `committed` | React Form composition, validation, submission, and deterministic examples. | `web.react`; React package/examples | R1.2 `E-R1.2-01…04` | Fixed family allocation/component prerequisites; no planner or native composition claim. |
+| `SCOPE-COMP-SELECT-REACT` | `committed` | React Select selection, focus, keyboard, and form contract. | `web.react`; `@core-ui/react` | R1.3 `E-R1.3-01…05` | Fixed family allocation/baseline and required manual proof; no native picker/equivalence claim. |
+| `SCOPE-COMP-TABS-REACT` | `committed` | React Tabs orientation, focus/selection, and panel relations. | `web.react`; `@core-ui/react` | R1.3 `E-R1.3-01…05` | Fixed family allocation/baseline/risk proof; no native disposition claim. |
+| `SCOPE-COMP-DIALOG-REACT` | `committed` | React Dialog overlay, focus, dismissal, effects, and accessibility. | `web.react`; `@core-ui/react` | R1.4 `E-R1.4-01…06` | Fixed family allocation/baseline and required manual/AT proof before export; no native equivalence. |
+| `SCOPE-COMP-TOAST-REACT` | `committed` | React Toast host, ordering, timing, announcements, teardown, and concurrency. | `web.react`; `@core-ui/react` | R1.4 `E-R1.4-01…06` | Fixed family allocation/baseline and required manual/AT proof before export; no native equivalence. |
 | `SCOPE-PRODUCT-REACT-PRERELEASE` | `committed` | Publish exact React alpha/RC tarball and manifest under `next`. | Public npm `@core-ui/react` | R1 tranche releases; `E-R1-EXIT-01…04` | Namespace control, tarball/provenance/checks, explicit publish authorization; no stable/catalog/tooling/secondary package. |
 | `SCOPE-SURFACE-REACT-PACKAGE-GUIDANCE` | `committed` | Generated version-bound README, API, export/component, styling, and compatibility guidance inside the tarball. | `@core-ui/react` | R1.0 package fixture and every tranche | Exact canonical/binding/package identities; no query/history/dense/MCP/authoring and never canonical. |
 | `SCOPE-METRIC-REACT-COVERAGE` | `committed` | Pinned-upstream disposition coverage plus exported React contract/proof coverage by risk. | R1 | R1.5 evidence policy | Snapshot/threshold fixed before measurement; raw count alone cannot pass. |
@@ -1390,25 +1378,12 @@ The R1 public graph is exactly `@core-ui/react@0.1.0-alpha.N` with
 dependency. Private Core packages may generate tarball contents but do not
 become runtime dependencies.
 
-Every R1 tranche uses one exact scope lock and baseline, one deterministic
-closure, and risk-selected independent review. Under accepted Decision 0009
-amendment 03 and Decision 0010 amendment 04, the R1 continuous-execution
-envelope is the standing human decision for a mechanically derived lock and
-exact retained evidence only when every closed derivation, deterministic,
-negative-path, risk-selected manual/AT, disclosure, immutable-identity, and
-profile-selected independent-review predicate passes. This is conditional
-admission, not a claim that the human inspected future bytes. Routine locked
-components need no per-component authority loop.
-
-The complete accepted envelope, canonical materialization manifest, and
-deterministically rendered owner-acceptance record are immutable repository
-inputs. After their exact authority merge, the private R1 continuous-execution
-verifier and repository-policy integration must be bootstrapped through the
-accepted path-bounded exception. Until that bootstrap is merged and verified,
-no Project migration, tranche activation, component implementation, retained
-evidence acceptance, or routine Git operation is admitted. Every later
-operation requires one passing canonical verifier result bound to all required
-authority, scope, baseline, proof, review, Project, and Git inputs.
+Every R1 tranche uses the fixed family allocation and common baseline, one
+deterministic closure, and risk-selected review appropriate to its exported
+behavior. Routine components inside the committed React `0.1` inventory need
+no per-component authority loop, tranche-lock decision, digest acceptance, or
+human evidence-acceptance message. Ordinary protected CI and review-bot
+coverage remain required.
 
 Shared proof is reusable only while the exact React Aria identity, package
 graph, styling/runtime ownership, SSR/hydration, catalog/compiler,
@@ -1442,7 +1417,8 @@ Before implementation, this authority may be superseded without runtime
 migration. After implementation begins, changing substrate, standalone package
 graph, release boundary, canonical ownership, or the secondary-track relation
 requires a new accepted decision and affected authority reconciliation.
-Removing an upstream item from breadth requires a reasoned scope-lock
+Committed React families cannot be removed from breadth by routine work. Raw
+upstream material outside those families may receive a reasoned non-family
 disposition; adding another React dependency requires a decision-bearing
 tranche delta; native dependencies remain later per-component N1 decisions.
 
@@ -1479,7 +1455,7 @@ component/pattern IDs introduced by `5.0.0`, `SCOPE-THEME-DEFAULT`,
 and design-tool work remain unavailable under their existing activation rules.
 
 R1.0 gains the pinned donor/style-crosswalk/private-playground baseline.
-R1.1–R1.4 apply it per locked component, and R1.5 closes donor dispositions and
+R1.1–R1.4 apply it across the committed family allocations, and R1.5 closes donor dispositions and
 visual adaptations across the delivered React surface. No evidence result is
 accepted by this clarification; the new R1 baseline and tranche proof remain
 future work. There are no release additions or removals, no consumer migration,
@@ -1619,15 +1595,15 @@ the exact previously committed ID is retained.
 | `Virtualizer` | `Virtualizer` | `SCOPE-COMP-VIRTUALIZER-REACT` | new | R1.3 |
 
 Each row is `committed`; its package/platform is `@core-ui/react` / `web.react`;
-its activation requires this authority, the exact Stage 1/R1.0 snapshot, an
-exact lock proved conforming to the accepted continuous-execution envelope,
-Core-owned contract, applicable Tale donor disposition, risk-selected
-deterministic and manual proof, conditional evidence acceptance under every
-envelope predicate, and the unchanged React prerelease release boundary. No row commits
+its activation uses the fixed 53-family table, immutable Stage 1/R1.0
+baseline, Core-owned contract, applicable Tale donor disposition,
+risk-selected deterministic and manual proof, and the unchanged React
+prerelease release boundary. No row commits
 a React Aria public name, raw helper/type export, secondary renderer,
 cross-platform counterpart, stable lifecycle, or independent release.
 
-The existing `SCOPE-REACT-BREADTH-001` outcome is changed in 6.0.0 from
+The existing `SCOPE-REACT-BREADTH-001` outcome is recorded in the accepted
+6.0.0 authority as
 disposition-complete applicable coverage with permitted exclusions to complete
 delivery of all 53 exact snapshot families. `SCOPE-METRIC-REACT-COVERAGE`
 measures exact 53-of-53 Core contract/export/proof closure plus complete raw
@@ -1652,27 +1628,29 @@ reproof. Removal of a committed family is a major scope change.
 
 ## Project boundary
 
-This authority does not itself update the GitHub Project. After accepted
-authority is materialized and verified on the default branch, a fresh exact
-Project migration may reconcile #74-#81 and any required successor item to
-Product Scope 6.0.1, the exact snapshot, Decisions 0009 amendment 03 and 0010
-amendment 04, and the revised R1 tranches. The accepted continuous-execution
-candidate, materialization manifest, and acceptance record are its standing
-human authorization; no second migration approval is required when the private
-conformance verifier binds a current live preimage, exact preview, write set,
-and verified result. Tracker status never changes Product Scope or evidence.
+This authority does not generally update the GitHub Project. Once, after the
+reset is accepted, merged, and verified on the default branch, one reset-
+specific Project reconciliation is explicitly authorized to update the Project
+README to Product Scope `6.0.2`, Decision 0011, and the reset pull request while
+preserving historical locators, and to replace issue #76's obsolete
+continuous-envelope/scope-lock blocker with the already satisfied R1.0 plus
+fixed 53-family scope boundary. Only after that one-time reconciliation may
+standing Project synchronization update Roadmap-proved workflow status and
+pull-request locators. It must preserve scope and authority references,
+evidence meaning, priority, iteration, target dates, blockers, assignee, and
+reviewer decisions for their own explicit owners. Tracker status never changes
+Product Scope or evidence.
 
 ## Explicit non-goals
 
-Product Scope 6.0.1 itself performs no repository implementation, dependency
+Product Scope 6.0.2 itself performs no repository implementation, dependency
 installation, component work, CSS copy, playground work, evidence capture,
 Project mutation, package publication, release, deployment, support claim,
 stable promotion, React Aria public re-export, raw-export breadth target,
 RSC/client-boundary support, framework-free implementation, React Native
 implementation, RNW support, equivalence claim, public catalog or tooling
-product, Scale port, new theme system, or production change. The separately
-accepted continuous-execution candidate authorizes only its bounded authority,
-verifier-bootstrap, and in-envelope delivery operations.
+product, Scale port, new theme system, or production change. It does not itself
+authorize repository, Git, Project, package, publication, or release mutations.
 
 It does not rewrite historical evidence or reuse historical Scope IDs for new
 outcomes. It does not allow a count-only completion claim. It does not permit
@@ -1680,8 +1658,7 @@ an upstream or Tale contract to replace a Core-owned public contract.
 
 ## Acceptance effect
 
-Digest-specific acceptance of the exact R1 continuous-execution candidate and
-materialization manifest authorizes its exact authority PR and, after verified
-merge, the in-envelope repository, Git, Project, implementation, evidence, and
-intermediate-merge operations. Npm publication and the final R1-exit PR merge
-remain separate authorization boundaries.
+Acceptance of Decision 0011 and its reviewed materialization authorizes the
+ordinary protected-PR reset and continued bounded R1.1-R1.5 implementation
+within the unchanged product boundary. Npm publication, dist-tag mutation,
+and the final R1-exit PR merge remain separate authorization boundaries.

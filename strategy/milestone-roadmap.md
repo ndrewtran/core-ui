@@ -112,7 +112,7 @@ entry; R1 uses only an explicit reusable-proof binding or bounded reproof.
   or required-proof rule without it.
 - Shared foundation code is added only after a real slice demonstrates the
   repeated semantic, logic, or interaction shape.
-- React breadth proceeds only inside accepted tranche locks against the exact
+- React breadth proceeds only inside the fixed family allocations against the exact
   shared baseline. Framework-free/native breadth and broad tooling wait for
   their own activation and entry evidence.
 
@@ -151,55 +151,20 @@ No milestone may silently broaden its target matrix, supported runtime profile,
 public API, or evidence claim. Narrowing support requires an explicit canonical
 disposition or permitted operational exception.
 
-From G1.9 onward, every authored repository change—whether produced manually
-or by tooling—attaches a `ChangeIntentEnvelope` derived from the final diff
-before merge. The envelope remains read-only until an enabled write protocol
-exists. From G2.5 onward, any automated apply must bind explicit approval and
-the operation journal to that exact envelope digest; a changed diff invalidates
-the approval.
+From G1.9 onward, the separately admitted `ChangeIntentEnvelope` capability may
+provide an optional read-only preview for its named authoring workflows. It is
+not a repository-wide merge prerequisite and is not an R1 component-delivery
+prerequisite. A later write-capable protocol, if admitted, must establish its
+own approval, journal, and stale-preview rules.
 
-For current R1, the private ChangeIntent owner (`@core-ui/schema`'s closed
-internal grammar and `@core-ui/tooling`'s private read-only producer/validator)
-and its consumption by the private R1 verifier must be materialized and passing
-before any component or retained-evidence write. This is current R1
-prerequisite sequencing only; it does not revive superseded G1.9 or its
-historical evidence.
+### Repository delivery boundary
 
-
-### Adjacent repository delivery workflow control
-
-The deterministic delivery workflow is a separately tracked, non-milestone
-repository control activated after accepted G1.1. It does not reopen completed
-G0.0, add evidence to G0.0, or satisfy G0.5, G1.9, G2.5, or G2.6. Its immediate
-named consumer is G1.2 and `fixture:platform-safety-native`; it remains
-non-blocking for renderer delivery except for failures already made
-non-waivable by canonical-source, integrity, disclosure, compatibility, or
-required-proof rules.
-
-The exact unchanged plan is applied from merge commit `5a2d9d175dc02b40b619e7f183c7c9b3e18269e0` only because it has reviewed source `3026adc082861cb5f096193b8c2ca384d368aac1` as second parent and the same tree `28a7f6fb70a30eda983c0be3b95f8d9d1da77b97`. No broader tree-equivalence rule exists.
-
-The activation contract is fixed:
-
-| ID | Required assertion |
-| --- | --- |
-| `E-DELIVERY-01` | One private owner, one closed schema/profile, and no public command, package, capability, artifact kind, revision axis, durable product relation, or product commitment is introduced. |
-| `E-DELIVERY-02` | Every terminal schema leaf has one stable field ID and one exact RFC 6901 schema pointer mapped to exactly one invalidation domain; gaps, overlaps, wildcard ownership, and heuristic classification fail. |
-| `E-DELIVERY-03` | The procedure references canonical authority, source, affected-set, proof, review, human-decision, hosted, tracker, and release owners without copying their policy literals or promoting external state. |
-| `E-DELIVERY-04` | `ChangeIntentEnvelope` remains the sole owner of intent and graph-derived affected closure; pre-G1.9 expected paths are explicitly incomplete and post-G1.9 records bind the exact envelope digest. |
-| `E-DELIVERY-05` | Disclosure precedes dispatch, sensitive evidence remains independently reviewed, and local packet rendering cannot manufacture clearance. |
-| `E-DELIVERY-06` | Positive, negative, compound-route, privacy, dispatch-order, hosted-routing, race, interruption, rollback, and recovery fixtures pass. |
-| `E-DELIVERY-07` | Candidate-side checks run through the existing repository-policy task graph; no trusted hosted writer, mutation adapter, proof cache, or replay capability is enabled. |
-| `E-DELIVERY-08` | Full removal disables enforcement first, removes only the recorded write set, preserves historical text/evidence, and restores prior repository-policy behavior with generation identity. |
-
-The accepted authority is recorded before repository writes. The exact authority bytes are published first in their own protected PR and must pass postmerge verification on the default branch. Only then may the exact separate ten-path ChangeIntent prerequisite PR carry RB-01 and RB-02; its final-source evidence-only child appends all 28 authority-applicability successors after RB-02. A separate earlier successor generation is forbidden because later repository-policy changes would immediately stale it.
-
-The control activates only after exact pre-write authority and schema/catalog
-review, a separately recorded owner decision bound to the accepted plan and
-authority candidate, the two reviewed rollout boundaries, complete
-deterministic proof, post-proof evidence/privacy and release review, protected
-PR checks, and merge. Its workflow status is never roadmap completion.
-Operational duration and false-invalidation counts may be observed, but own no
-Product Scope metric and gate no milestone or release.
+Repository delivery controls are implementation policy, not roadmap milestones
+or renderer entry conditions. Ordinary R1 component work uses canonical owners,
+proportional deterministic and risk-selected proof, protected CI, and protected
+pull-request review. No private delivery profile, operation descriptor,
+tranche-lock digest, or separate evidence-acceptance gate is required for an R1
+component or routine protected-PR operation.
 
 ### Non-waivable rules
 
@@ -726,48 +691,18 @@ separate later tracks and cannot block or inherit R1 proof.
 
 ### R1 shared tranche contract
 
-Every R1 tranche binds one exact React Aria Components baseline, standalone
-package graph, reusable-proof baseline digest, conforming scope-lock digest,
-canonical component/binding/example revisions, deterministic closure, and
-risk-selected independent review. Under accepted Decision 0009 amendment 03
-and Decision 0010 amendment 04, the R1 continuous-execution envelope is the
-designated human decision for a mechanically derived lock and retained evidence
-only when every exact derivation, deterministic, negative-path, risk-selected
-manual/AT, disclosure, immutable-relation, and independent-review predicate
-passes. This conditional admission does not claim that the human inspected
-future bytes.
+Every R1 tranche uses the exact React Aria Components baseline, standalone
+package graph, reusable proof baseline, canonical component/binding/example
+revisions, deterministic closure, and risk-selected review appropriate to the
+exported behavior. The accepted 53-family inventory, immutable Stage 1
+snapshot, and R1.0 baseline are the common lock for R1.1-R1.4. No further
+tranche-lock decision, digest acceptance, or per-component authorization is
+required. Button is the first visible R1.1 component.
 
-After exact authority materialization and the private ChangeIntent owner, the
-private R1 continuous-execution verifier is the mandatory entry gate for every
-Project migration, tranche lock, component stage, retained-evidence
-acceptance, and routine Git/PR/merge operation. Amendment 09 is the sole
-authority self-delivery correction and, after its protected merge is verified,
-admits only the exact ten-path PR #92 bootstrap-delivery sequence through the
-authenticated postmerge `verifier-bootstrap` receipt. Those exceptions are
-one-time, path- and digest-bound, and do not add a ChangeIntent operation kind.
-Every operation after that receipt binds the exact current task-local
-ChangeIntent, passing substantive verifier result, and bootstrap receipt, or
-remains blocked.
-
-Ordinary protected CI runs the same repository-policy entrypoint without a
-task-local operation descriptor in read-only `source-inspection` mode. That
-mode validates authority, prerequisite lineage, source, policy, generation,
-and deterministic checks but grants no write, transition, review, merge,
-evidence, publication, release, or completion authority. The exact accepted
-amendment-09 authority self-delivery and exact PR #92 bootstrap-delivery
-sequence are the only path- and digest-bound pre-receipt exceptions. After the
-authenticated postmerge bootstrap receipt, immediately before every
-authorized R1 write or external transition, the exact current task-local
-ChangeIntent must be reverified against the current preimage; no bootstrap or
-recovery exception can be reused.
-
-Post-proof and ready-merge review clearance remains external to deterministic
-source and operation verification. The root orchestrator dispatches the fresh
-profile-selected reviewers and binds their external assignments and outcomes
-to the frozen source, packet, outputs, disclosure boundary, and applicable
-hosted state. Repository tooling may derive required review roles but cannot
-manufacture reviewer dispatch, result, or clearance. Drift or a finding
-rewinds the earliest affected gate.
+Each bounded pull request changes the earliest canonical owners, regenerates
+projections, keeps React Aria internal, migrates applicable Tale styling into
+Core-owned CSS and token hooks, and runs focused checks proportional to the
+exported behavior. Protected CI and normal review-bot coverage remain required.
 
 The shared baseline also pins Tale UI commit
 `94bf62a26c02605c8928dfeb24f0ddc4be1c92fd` and its component-style,
@@ -780,13 +715,12 @@ responsible accessibility/platform corrections override byte copying.
 An applicable donor closes routinely only as `adopt` or `adapt`. `defer` or
 `reject` keeps the component unexported and unreleasable until a separately
 accepted decision-bearing exception supplies an alternate visual direction and
-reconciles the exact tranche lock. `no-applicable-donor` is only an absence
+reconciles the fixed family allocation. `no-applicable-donor` is only an absence
 disposition, not a shortcut around an applicable donor.
 
-An exact conforming scope lock is required before implementation. Routine
-components inside it require no separate authority decision or human approval.
-The delivery lead may freeze the initial Core `0.1` family contract within the
-delegated Decision 0010 amendment-04 boundary. A contract outside that boundary,
+The fixed family allocation and common baseline are required before
+implementation. Routine components inside them require no separate authority
+decision or human approval. A contract outside that boundary,
 another ontology decision or runtime graph node, security/privacy boundary,
 support expansion, stable promotion, or exception is a decision-bearing delta
 accepted before implementation.
@@ -801,21 +735,10 @@ registry, checks, release manifest, rollback, and human authorization.
 
 **Entry**
 
-- Product Scope `6.0.0`, Decision 0010 amendments 01–03, and the accepted
-  immutable Stage 1 snapshot are accepted and materialized. The separate
-  `tooling/audits/repository-policy/src/react-aria-stage1-source-verify.mjs`
-  verifier is the fail-closed R1.0 entry/applicability gate. It receives the explicit immutable selector
-  `CORE_UI_STAGE1_SOURCE_REF=dea987aca51cde9da67fe3cac16c5e69a8c46016` and
-  compares that committed source to tree
-  `af0f923abaf8cdf55acb3c402fa929cfb439335d`. Moving refs such as
-  `origin/main`, branches, and `HEAD` are not valid selectors. The gate also
-  binds Product Scope `6.0.0`, Decision 0010 amendment 03, the exact snapshot
-  and envelope, and a successful verifier result. The accepted Stage 1
-  evaluator, snapshot, and envelope remain byte-immutable inputs. Missing,
-  replaced, or mismatched Stage 1 binding fails closed.
-- Current R1.0 evidence locator: pending; no current R1.0 evidence acceptance
-  is recorded. Existing pre-amendment R1.0 evidence is historical-only and is
-  not sufficient for this entry or activation.
+- The accepted immutable Stage 1 snapshot, fixed 53-family table, and R1.0
+  package/substrate baseline are already materialized. They remain the
+  fail-closed authority and release inputs; no further lock or evidence
+  acceptance is required for ordinary R1 implementation.
 - Exact reusable G1.0 token/theme facts are selected and rebound; no historical
   result is accepted by ancestry or name alone.
 - `core:component:button#web.react` is the named first renderer slice.
@@ -835,7 +758,7 @@ registry, checks, release manifest, rollback, and human authorization.
 - private generated React playground baseline for canonical examples,
   theme/mode/state coverage, and visual donor comparison; it is not the P2.3
   public explorer;
-- accepted Button tranche lock and a complete React-only Button fixture.
+- the first Button implementation fixture and complete React-only proof.
 
 **Evidence:** `E-R1.0-01` package/substrate and pinned donor identity;
 `E-R1.0-02` Core-owned contract/export/donor-crosswalk/license-notice boundary;
@@ -844,15 +767,14 @@ comparison;
 `E-R1.0-04` accessibility/compatibility baseline; `E-R1.0-05` packed clean-
 consumer and generated-guidance proof, including negative runtime-edge cases.
 
-**Exit:** the exact reusable baseline is accepted and Button implementation may
+**Exit:** the exact reusable baseline is fixed and Button implementation may
 begin. No component publication or support claim follows.
 
 ### R1.1 Foundation and simple controls
 
-**Entry:** accepted R1.0 plus an exact R1.1 scope lock proved conforming to the
-accepted R1 continuous-execution envelope.
+**Entry:** the fixed R1.0 baseline and the fixed 53-family R1.1 allocation.
 
-**Deliverables:** Button first, then accepted low/medium-risk foundation,
+**Deliverables:** Button first, then the remaining low/medium-risk foundation,
 action, and disclosure components; one tranche implementation sequence,
 exception ledger, exact donor-style dispositions/crosswalks, Core-owned CSS,
 generated package surfaces, and packed proof.
@@ -863,15 +785,14 @@ SSR/hydration, and automated accessibility; `E-R1.1-03` generated
 descriptor/guidance/export parity and packed consumer; `E-R1.1-04` risk-
 selected browser/manual results, advisories, exceptions, and release manifest.
 
-**Exit:** every locked component is export-ready;
-an exact accepted `0.1.0-alpha.N` publication may be proposed.
+**Exit:** every committed family in the fixed R1.1 allocation is export-ready;
+an exact `0.1.0-alpha.N` publication may be proposed.
 
 ### R1.2 Forms and field controls
 
-**Entry:** accepted baseline plus an exact R1.2 scope lock proved conforming to
-the accepted R1 continuous-execution envelope.
+**Entry:** the fixed R1.0 baseline and the fixed 53-family R1.2 allocation.
 
-**Deliverables:** TextField, Switch, Form, and other accepted form/field
+**Deliverables:** TextField, Switch, Form, and other form/field
 components with value, state, label, description, error, validation,
 submission, and composition contracts, including migrated Tale field-family
 primitives under Core-owned hooks and tokens.
@@ -880,14 +801,13 @@ primitives under Core-owned hooks and tokens.
 label/error behavior and types; `E-R1.2-03` browser and required accessibility
 proof; `E-R1.2-04` generated/packed/release correlation.
 
-**Exit:** the locked tranche's exact export and prerelease conditions pass.
+**Exit:** the fixed R1.2 allocation's exact export and prerelease conditions pass.
 
 ### R1.3 Collections and composites
 
-**Entry:** accepted baseline plus an exact R1.3 scope lock proved conforming to
-the accepted R1 continuous-execution envelope.
+**Entry:** the fixed R1.0 baseline and the fixed 53-family R1.3 allocation.
 
-**Deliverables:** Select, Tabs, and accepted collection/composite components
+**Deliverables:** Select, Tabs, and collection/composite components
 with explicit focus, keyboard, selection, composition, and state ownership,
 plus exact donor-style dispositions and visual comparisons.
 
@@ -895,14 +815,13 @@ plus exact donor-style dispositions and visual comparisons.
 behavior; `E-R1.3-03` selection/form/composition behavior; `E-R1.3-04` required
 accessibility evidence; `E-R1.3-05` generated/packed/release correlation.
 
-**Exit:** the locked tranche's exact export and prerelease conditions pass.
+**Exit:** the fixed R1.3 allocation's exact export and prerelease conditions pass.
 
 ### R1.4 Overlays and temporal interactions
 
-**Entry:** accepted baseline plus an exact R1.4 scope lock proved conforming to
-the accepted R1 continuous-execution envelope.
+**Entry:** the fixed R1.0 baseline and the fixed 53-family R1.4 allocation.
 
-**Deliverables:** Dialog, Toast, and accepted overlay/temporal components with
+**Deliverables:** Dialog, Toast, and overlay/temporal components with
 focus, dismissal, portal/global-effect, ordering, timing, announcement,
 concurrency, and teardown ownership, plus exact donor-style dispositions and
 visual comparisons that never override responsible focus/accessibility fixes.
@@ -913,7 +832,7 @@ dismissal behavior; `E-R1.4-03` temporal/announcement/concurrency behavior;
 profiles; `E-R1.4-05` teardown/advisory/exception proof; `E-R1.4-06`
 generated/packed/release correlation.
 
-**Exit:** every component named by the exact R1.4 lock is export-ready and has
+**Exit:** every family in the fixed R1.4 allocation is export-ready and has
 complete evidence for its exact contract and risk profile. Missing required
 proof keeps the component unexported and blocks R1.4 completion. An exact alpha
 publication candidate may be prepared only after all seven R1.4 families
@@ -922,18 +841,17 @@ equivalence claim follows.
 
 ### R1.5 React breadth closure
 
-**Entry:** R1.1–R1.4 complete and the exact mechanically derived R1.5 closure
-lock is proved conforming to the accepted R1 continuous-execution envelope.
+**Entry:** R1.1–R1.4 complete. R1.5 closes the fixed 53-family inventory and
+release proof; it does not introduce another implementation inventory.
 
 **Deliverables:** an exact `53/53` committed-family reconciliation: every
 documented family in the pinned React Aria snapshot maps to a committed Core
 family root, contract, export, lifecycle ledger, evidence/support record, and
 packed prerelease graph. A `defer`, `exclude`, or `not-a-component` disposition
-cannot satisfy an R1.5 family outcome or R1 exit; any unresolved family blocks
-closure. Every committed component also maps the pinned Tale style to
-exportable `adopt`/`adapt`, valid absence `no-applicable-donor`, or a fail-closed
-`defer`/`reject` that remains unexported until its separately accepted exception
-is reconciled, with complete Core token/style ownership.
+outside the fixed 53 families cannot alter an R1.5 family outcome. Every
+committed family maps the pinned Tale style to exportable `adopt`/`adapt` or
+valid absence `no-applicable-donor`, with complete Core token/style ownership;
+all 53 remain export-ready at R1 exit.
 
 **Evidence:** `E-R1.5-01` upstream and donor-style disposition completeness;
 `E-R1.5-02` canonical/binding/export/CSS-crosswalk coverage; `E-R1.5-03`
@@ -2527,12 +2445,12 @@ valid outcomes and do not make the core product incomplete.
 
 | ID | Milestone | Hard dependencies | Blocks |
 | --- | --- | --- | --- |
-| R1.0 | React package/substrate and Tale styling-donor baseline | Gate 0; accepted Product Scope 6.0.0, Decision 0010 amendments 01–03, and the accepted Stage 1 snapshot through the immutable committed-source route | R1.1–R1.5 |
-| R1.1 | Foundation and simple controls | Accepted R1.0 and exact R1.1 tranche lock | R1.5, eligible alpha |
-| R1.2 | Forms and field controls | Accepted R1.0 and exact R1.2 tranche lock | R1.5, eligible alpha |
-| R1.3 | Collections and composites | Accepted R1.0 and exact R1.3 tranche lock | R1.5, eligible alpha |
-| R1.4 | Overlays and temporal interactions | Accepted R1.0 and exact R1.4 tranche lock | R1.5, eligible alpha |
-| R1.5 | React breadth closure | R1.1–R1.4 and exact 53/53 closure lock proved conforming to the accepted continuous-execution envelope | R1 exit |
+| R1.0 | React package/substrate and Tale styling-donor baseline | Gate 0; accepted Product Scope 6.0.2, Decision 0010 amendments 01–03, and the accepted Stage 1 snapshot through the immutable committed-source route | R1.1–R1.5 |
+| R1.1 | Foundation and simple controls | Fixed R1.0 baseline and the fixed 53-family R1.1 allocation | R1.5, eligible alpha |
+| R1.2 | Forms and field controls | Fixed R1.0 baseline and the fixed 53-family R1.2 allocation | R1.5, eligible alpha |
+| R1.3 | Collections and composites | Fixed R1.0 baseline and the fixed 53-family R1.3 allocation | R1.5, eligible alpha |
+| R1.4 | Overlays and temporal interactions | Fixed R1.0 baseline and the fixed 53-family R1.4 allocation | R1.5, eligible alpha |
+| R1.5 | React breadth closure | R1.1–R1.4 and the fixed 53-family 53/53 closure | R1 exit |
 | R1 exit | React prerelease publication | R1.5 and exact publish authorization | P2.1; optional W1/N1/S1 activation reviews |
 | P2.1 | React packages, catalog, CLI, compatibility | R1 exit and accepted public package graph | P2.2, P2.3, P2 exit |
 | P2.2 | React consumer validation/local authority | P2.1 | P2.3, P2 exit |
@@ -2684,7 +2602,6 @@ and stays absent until that trigger is proved.
 | Design-tool authority inversion | Tool nodes/variables become canonical or lossy import writes silently. | Reject import; report mapping/loss; produce proposal only against canonical owners. |
 | Promptable semantics becomes vague layer | Terms lack stable owner, meaning, query behavior, or measurable benefit. | Keep editorial/unsupported; close discovery without new ontology. |
 | Component-count pressure | Breadth rises while proof, retrieval quality, or maintainer throughput degrades. | Stop admissions; repair the addition path and metrics before resuming breadth. |
-| Delivery procedure duplicates later owners | A procedural field asserts intent, graph-derived affected closure, human acceptance, hosted truth, tracker truth, or write authority. | Reject the record; bind the canonical owner and exact identity, or defer until that owner exists. |
 
 ## Milestone activation and review packet
 
@@ -2709,34 +2626,28 @@ tracking, not this long-lived roadmap.
 
 ## Recommended first execution sequence
 
-1. Materialize Product Scope `6.0.0`, Decision 0010 amendments 01–03, the
-   accepted Stage 1 snapshot, and the React-primary/Tale-donor
-   Architecture/Roadmap authority before implementation. Run the evaluator
-   against its exact committed source selector and reject moving references.
-2. Materialize the continuous-execution authority, then the private ChangeIntent
-   owner and its verifier consumption, and merge the one bounded private
-   conformance-verifier bootstrap. Then reconcile the live Project through an
-   exact verifier-approved migration under the standing decision; do not
-   interpret superseded G-series status or its historical evidence as R1
-   readiness.
-3. Activate R1.0 against exact reusable token/theme facts, the pinned Tale
-   styling donor/crosswalk, and the accepted Button tranche lock.
-4. Prove the standalone React Aria/package/CSS/donor-comparison/private-
+1. Use Product Scope `6.0.2`, Decision 0010 amendments 01–03, the accepted
+   Stage 1 snapshot, and the React-primary/Tale-donor Architecture/Roadmap
+   authority as the existing R1 baseline. Do not interpret superseded G-series
+   status or historical evidence as current R1 readiness.
+2. Activate R1.0 against exact reusable token/theme facts, the pinned Tale
+   styling donor/crosswalk, and the first Button implementation fixture.
+3. Prove the standalone React Aria/package/CSS/donor-comparison/private-
    playground/SSR/hydration/accessibility/compatibility/packed baseline before
    Button implementation begins.
-5. Deliver R1.1–R1.4 through exact locks proved conforming to the accepted
-   continuous-execution envelope, allowing routine components to run in
-   parallel against the same frozen baseline.
-6. Close the pinned React Aria surface in R1.5 through the exact `53/53`
+4. Deliver R1.1–R1.4 in Roadmap order against the common fixed 53-family
+   baseline, allowing routine components to run in parallel against the same
+   baseline after Button begins.
+5. Close the pinned React Aria surface in R1.5 through the exact `53/53`
    committed-family reconciliation; defer, exclude, and not-a-component are
    not completion outcomes. Then propose the exact R1 exit package.
-7. Publish no npm artifact without a separate exact external-mutation
+6. Publish no npm artifact without a separate exact external-mutation
    authorization and verified rollback tuple.
-8. Productize catalog/tooling, installed-local guidance, and React docs through
+7. Productize catalog/tooling, installed-local guidance, and React docs through
    P2.1–P2 exit.
-9. Activate W1, N1, X1, or S1 only through their own demand, scope-lock,
+8. Activate W1, N1, X1, or S1 only through their own demand, scope-lock,
    platform/profile, evidence, and human-decision boundaries.
-10. Admit other capabilities independently. They never become implicit R1
+9. Admit other capabilities independently. They never become implicit R1
    prerequisites.
 
 ## Roadmap completion checklist
@@ -2765,23 +2676,13 @@ If any answer is “no,” stop the affected capability at its current gate, ret
 the failure evidence, and repair the earliest authoritative owner. Do not patch
 a projection, lower the evidence claim, or expand the milestone to hide the
 failure.
-## Roadmap reconciliation and tranche locks
+## Roadmap reconciliation and fixed R1 family allocations
 
-R1.0 remains the baseline milestone. Before any family implementation under
-Product Scope 6.0.0, R1.0 must reproduce the exact Stage 1 snapshot and bind the
-same identity into its reusable proof baseline and every tranche lock. The
-existing accepted R1.0 evidence predates this major amendment and is historical
-input only until exact applicability to this scope and snapshot is proved; it
-cannot silently satisfy the new all-53 baseline.
-
-The retained R1.0 evidence remains historically bound to Product Scope 6.0.0,
-Decision 0010 amendments 01–03, the accepted Stage 1 snapshot and envelope,
-and the immutable committed-source selector enforced by
-`react-aria-stage1-source-verify.mjs` as the fail-closed entry/applicability
-gate. Product Scope 6.0.1 and Decision 0010 amendment 04 change only the
-conditional execution process; a passing R1 continuous-execution verifier
-must prove the retained baseline remains applicable before a tranche lock may
-use it. Earlier Product Scope 5.0.1 or
+R1.0 remains the baseline milestone. The accepted fixed 53-family table,
+immutable Stage 1 snapshot, and R1.0 package/substrate baseline are the existing
+lock for all four implementation tranches. Product Scope 6.0.2 clarifies that
+ordinary R1 implementation does not require another scope lock, digest
+acceptance, or human evidence-acceptance gate. Earlier Product Scope 5.0.1 or
 Decision 0010 amendment 01–02 wording retained elsewhere in this roadmap is a
 historical audit locator only; it is not a current R1 entry or completion rule.
 
@@ -2805,14 +2706,11 @@ The immutable tranche family sets are:
   ledger, styling-donor disposition, evidence and support matrix, packed
   prerelease graph, generated guidance, and React `0.1` release candidate.
 
-After the common R1.0 baseline and each exact lock are proved conforming to the
-accepted R1 continuous-execution envelope, R1.1 through R1.4 may proceed
-independently; none may change another tranche or the 53-set.
-Each tranche freezes its Core-owned public contracts and uses shared proof only
-while the exact baseline identity and invalidation set remain unchanged. Each
-retains focused deterministic proof, risk-selected independent review,
-applicable manual browser/AT proof before export, conditional evidence
-acceptance under the exact envelope predicates, packed-consumer validation,
+After the common R1.0 baseline, R1.1 through R1.4 may proceed independently in
+Roadmap order; none may change another tranche or the 53-set. Each tranche
+freezes its Core-owned public contracts and uses shared proof from the common
+baseline. Each retains focused deterministic proof, risk-selected review,
+applicable manual browser/AT proof before export, packed-consumer validation,
 and failure evidence. R1.5 begins only after R1.1 through R1.4 are complete.
 
 No per-family implementation loop may replace tranche proof with a broad

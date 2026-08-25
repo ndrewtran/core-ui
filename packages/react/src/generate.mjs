@@ -89,7 +89,7 @@ const releaseRecord = {
   tokenSource: { path: 'catalog/tokens/default-theme.json', sha256: expectedTokenSha256 },
   evidence: { status: 'pending', ids: ['E-R1.0-01', 'E-R1.0-02', 'E-R1.0-03', 'E-R1.0-04', 'E-R1.0-05'] },
   advisories: [], exceptions: [],
-  publication: { status: 'disabled', requires: ['digest-specific human evidence acceptance', 'explicit external publish authorization'] },
+  publication: { status: 'disabled', requires: ['explicit external publish authorization'] },
   rollback: { status: 'candidate-branch-only-before-merge' },
 };
 for (const rule of crosswalk.button.rules) {

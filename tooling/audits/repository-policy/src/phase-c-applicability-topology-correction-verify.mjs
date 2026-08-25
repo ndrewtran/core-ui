@@ -2,7 +2,6 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import { canonicalJson, parseJsonStrict } from '@core-ui/schema';
-import { verifyDeliveryWorkflowAuthority } from './delivery-workflow-authority-verify.mjs';
 
 const root = path.resolve(import.meta.dirname, '../../../..');
 const parentPath = path.join(root, 'decisions/0005-default-theme-token-source-identity.json');
@@ -127,13 +126,9 @@ if (decisionSource !== canonicalJson(decision)) fail('decision is not Core canon
 if (hash(decisionSource) !== expectedDecisionSha256) fail('decision digest differs from reviewed acceptance candidate');
 const originalProductScope = hash(scopeSource) === expectedProductScopeSha256
   && scopeSource.startsWith('---\nscopeVersion: 4.0.1\n');
-let successorProductScope = null;
+const successorProductScopeVersion = scopeSource.match(/^---\nscopeVersion: ([^\n]+)\n/u)?.[1] ?? null;
 if (!originalProductScope) {
-  try {
-    successorProductScope = verifyDeliveryWorkflowAuthority(root, { productScopeSource: scopeSource }).productScope;
-  } catch (error) {
-    fail(`Product Scope authority successor: ${error.message}`);
-  }
+  if (successorProductScopeVersion === null) fail('Product Scope successor version');
 }
 exactKeys(decision, expectedTopLevelKeys, 'decision');
 if ((scopeSource.match(/### Phase C applicability-chain topology correction \(`4\.0\.1`\)/gu) ?? []).length !== 1) fail('Product Scope correction section');
@@ -276,7 +271,7 @@ const result = {
   productScope: {
     bytes: Buffer.byteLength(scopeSource),
     sha256: hash(scopeSource),
-    version: originalProductScope ? '4.0.1' : successorProductScope.version,
+    version: originalProductScope ? '4.0.1' : successorProductScopeVersion,
   },
   terminalPartition: targetNames.length,
 };
