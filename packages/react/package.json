@@ -18,7 +18,10 @@
     "generate": "node src/generate.mjs",
     "generate:check": "node src/generate.mjs --check"
   },
-  "dependencies": { "react-aria-components": "1.20.0" },
+  "dependencies": {
+    "@internationalized/date": "3.12.3",
+    "react-aria-components": "1.20.0"
+  },
   "peerDependencies": { "react": ">=19.2.0 <20", "react-dom": ">=19.2.0 <20" },
   "devDependencies": {
     "@core-ui/catalog": "workspace:*",

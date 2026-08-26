@@ -1,0 +1,1 @@
+{"schemaVersion":"1.0.0","id":"core:guide:date-field-usage","kind":"guide","name":"DateField usage","summary":"Use DateField through the Core React binding.","lifecycle":"experimental","keywords":["date-field","react","forms"],"platforms":["web.react"],"source":"catalog/guides/date-field-usage.md"}

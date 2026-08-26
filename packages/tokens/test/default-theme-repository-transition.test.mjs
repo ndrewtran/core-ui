@@ -29,6 +29,13 @@ const transitionPaths = [
   'packages/web/package.json',
   'packages/web/src/generate.mjs',
 ];
+const transitionOwnedCandidatePaths = new Set([
+  'catalog/tokens/button-minimum.json',
+  'catalog/tokens/default-theme.json',
+  'packages/tokens/src/default-theme-identity-migration.mjs',
+  'packages/tokens/src/internal/default-theme-repository-transition.mjs',
+]);
+const historicalBaseline = '168ceede80cec7d20d1f1438de769e7d9c112184';
 
 async function pathsUnder(root, relativePath) {
   const path = join(root, relativePath);
@@ -54,15 +61,9 @@ async function digestPaths(root) {
 }
 
 async function candidatePaths() {
-  const [changed, untracked] = await Promise.all([
-    execFile('git', ['diff', '--name-only', 'HEAD'], { cwd: repositoryRoot, encoding: 'utf8' }),
-    execFile('git', ['ls-files', '--others', '--exclude-standard'], { cwd: repositoryRoot, encoding: 'utf8' }),
-  ]);
-  return [...new Set([
-    ...`${changed.stdout}\n${untracked.stdout}`.trim().split('\n').filter(Boolean),
-    'catalog/tokens/button-minimum.json',
-    'catalog/tokens/default-theme.json',
-  ])].sort();
+  // This is a historical R1.1 simulation: overlay only transition-owned
+  // inputs/scripts, never the current R1.2 component catalog.
+  return [...transitionOwnedCandidatePaths].sort();
 }
 
 async function overlayCandidate(target) {
@@ -115,8 +116,7 @@ test('TALE-TOKEN-C repository transition restores failed changes and replays ide
       cwd: repositoryRoot,
       encoding: 'utf8',
     });
-    const revision = (await execFile('git', ['rev-parse', 'HEAD'], { cwd: repositoryRoot, encoding: 'utf8' })).stdout.trim();
-    await execFile('git', ['checkout', '--detach', revision], { cwd: worktree, encoding: 'utf8' });
+    await execFile('git', ['checkout', '--detach', historicalBaseline], { cwd: worktree, encoding: 'utf8' });
     await overlayCandidate(worktree);
     await execFile('pnpm', ['install', '--offline', '--frozen-lockfile'], {
       cwd: worktree,

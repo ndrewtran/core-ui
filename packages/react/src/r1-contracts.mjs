@@ -1,5 +1,6 @@
 import { createHash } from 'node:crypto';
 import { canonicalJson, validateContractDocument } from '@core-ui/schema';
+import { EXPECTED_R12_COMPONENT_SLUGS, EXPECTED_R12_DONOR_CONTRACT } from './r1-2-donor-contract.mjs';
 
 const EXPECTED_UPSTREAM = Object.freeze({
   package: 'react-aria-components',
@@ -258,4 +259,57 @@ export function assertReactR11GeneratedContracts({
     }
   }
   return { descriptor, release, donorComparison, componentDonorComparison };
+}
+
+/** Validates the R1.2 field tranche projection without exposing RAC types. */
+export function assertReactR12GeneratedContracts({ descriptor, release, donorComparison, manifest, componentNames, crosswalk }) {
+  if (manifest.private !== true || release.packagePrivate !== true) fail('CORE_REACT_R12_PUBLICATION_GUARD_MISSING');
+  if (!same(crosswalk, EXPECTED_R12_DONOR_CONTRACT)
+    || !same(Object.keys(crosswalk.components ?? {}).sort(), [...EXPECTED_R12_COMPONENT_SLUGS].sort())
+    || crosswalk.components && Object.values(crosswalk.components).some((entry) => entry.disposition !== 'adapt')) {
+    fail('CORE_REACT_R12_DONOR_PROVENANCE_DRIFT');
+  }
+  if (!Array.isArray(crosswalk.sharedPrimitives)
+    || !same(crosswalk.sharedPrimitives, EXPECTED_R12_DONOR_CONTRACT.sharedPrimitives)) fail('CORE_REACT_R12_SHARED_DONOR_INPUT_DRIFT');
+  if (descriptor.schema !== 'core-ui-renderer-descriptor-v1'
+    || descriptor.generatedFrom !== 'packages/react/src/generate.mjs'
+    || descriptor.package !== '@core-ui/react'
+    || descriptor.support !== 'unproved; R1.2 React exports only'
+    || descriptor.bindings.length !== componentNames.length
+    || descriptor.exports.length !== componentNames.length) fail('CORE_REACT_R12_DESCRIPTOR_INVALID');
+  for (const name of componentNames) {
+    const binding = descriptor.bindings.find(({ export: exportName }) => exportName === name);
+    const componentExport = descriptor.exports.find(({ name: exportName }) => exportName === name);
+    if (!binding || !componentExport || binding.binding !== componentExport.binding
+      || binding.strategy !== 'direct' || binding.runtimeProfile !== 'web.react'
+      || binding.api.props.some((prop) => /^is[A-Z]/u.test(prop) || /(?:onPress|isPending|isDisabled)/u.test(prop))) {
+      fail('CORE_REACT_R12_COMPONENT_DESCRIPTOR_DRIFT');
+    }
+  }
+  if (release.schema !== 'core-ui-react-release-candidate-v1'
+    || release.lifecycle !== 'experimental'
+    || release.componentExports.length !== componentNames.length
+    || release.bindings.length !== componentNames.length
+    || !same(release.runtimeProfiles, ['web.react'])
+    || !release.catalog
+    || !release.evidence
+    || !release.publication
+    || release.catalog.status !== 'bound'
+    || release.catalog.components.length !== componentNames.length
+    || release.evidence.status !== 'pending'
+    || !same(release.evidence.ids, ['E-R1.2-01', 'E-R1.2-02', 'E-R1.2-03', 'E-R1.2-04'])
+    || release.publication.status !== 'disabled') fail('CORE_REACT_R12_RELEASE_INVALID');
+  if (donorComparison.schema !== 'core-ui-react-r1-2-donor-comparison-v1'
+    || donorComparison.generatedFrom !== 'packages/react/src/generate.mjs'
+    || !same(donorComparison.donor, EXPECTED_R12_DONOR_CONTRACT.donor)
+    || donorComparison.components.length !== EXPECTED_R12_COMPONENT_SLUGS.length) fail('CORE_REACT_R12_DONOR_COMPARISON_INVALID');
+  for (const component of donorComparison.components) {
+    const slug = component.binding.replace(/^core:component:([^#]+)#.*$/u, '$1');
+    const source = EXPECTED_R12_DONOR_CONTRACT.components[slug];
+    if (!source || component.disposition !== 'adapt' || component.selector !== `.core-${slug}`
+      || !same(component.rules, source.rules) || !same(component.donorInputs, source.donorInputs)) {
+      fail('CORE_REACT_R12_DONOR_COMPARISON_DRIFT');
+    }
+  }
+  return { descriptor, release, donorComparison };
 }

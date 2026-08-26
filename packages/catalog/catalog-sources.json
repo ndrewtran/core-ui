@@ -178,6 +178,160 @@
       "family": "guide",
       "path": "catalog/guides/toggle-button-usage.json",
       "sourcePath": "catalog/guides/toggle-button-usage.md"
+    },
+    {
+      "family": "component",
+      "path": "catalog/components/autocomplete/artifact.json"
+    },
+    {
+      "family": "example",
+      "path": "catalog/components/autocomplete/examples/react/basic.example.json",
+      "sourcePath": "catalog/components/autocomplete/examples/react/basic.tsx"
+    },
+    {
+      "family": "guide",
+      "path": "catalog/guides/autocomplete-usage.json",
+      "sourcePath": "catalog/guides/autocomplete-usage.md"
+    },
+    {
+      "family": "component",
+      "path": "catalog/components/checkbox-group/artifact.json"
+    },
+    {
+      "family": "example",
+      "path": "catalog/components/checkbox-group/examples/react/basic.example.json",
+      "sourcePath": "catalog/components/checkbox-group/examples/react/basic.tsx"
+    },
+    {
+      "family": "guide",
+      "path": "catalog/guides/checkbox-group-usage.json",
+      "sourcePath": "catalog/guides/checkbox-group-usage.md"
+    },
+    {
+      "family": "component",
+      "path": "catalog/components/date-field/artifact.json"
+    },
+    {
+      "family": "example",
+      "path": "catalog/components/date-field/examples/react/basic.example.json",
+      "sourcePath": "catalog/components/date-field/examples/react/basic.tsx"
+    },
+    {
+      "family": "guide",
+      "path": "catalog/guides/date-field-usage.json",
+      "sourcePath": "catalog/guides/date-field-usage.md"
+    },
+    {
+      "family": "component",
+      "path": "catalog/components/date-picker/artifact.json"
+    },
+    {
+      "family": "example",
+      "path": "catalog/components/date-picker/examples/react/basic.example.json",
+      "sourcePath": "catalog/components/date-picker/examples/react/basic.tsx"
+    },
+    {
+      "family": "guide",
+      "path": "catalog/guides/date-picker-usage.json",
+      "sourcePath": "catalog/guides/date-picker-usage.md"
+    },
+    {
+      "family": "component",
+      "path": "catalog/components/date-range-picker/artifact.json"
+    },
+    {
+      "family": "example",
+      "path": "catalog/components/date-range-picker/examples/react/basic.example.json",
+      "sourcePath": "catalog/components/date-range-picker/examples/react/basic.tsx"
+    },
+    {
+      "family": "guide",
+      "path": "catalog/guides/date-range-picker-usage.json",
+      "sourcePath": "catalog/guides/date-range-picker-usage.md"
+    },
+    {
+      "family": "component",
+      "path": "catalog/components/form/artifact.json"
+    },
+    {
+      "family": "example",
+      "path": "catalog/components/form/examples/react/basic.example.json",
+      "sourcePath": "catalog/components/form/examples/react/basic.tsx"
+    },
+    {
+      "family": "guide",
+      "path": "catalog/guides/form-usage.json",
+      "sourcePath": "catalog/guides/form-usage.md"
+    },
+    {
+      "family": "component",
+      "path": "catalog/components/number-field/artifact.json"
+    },
+    {
+      "family": "example",
+      "path": "catalog/components/number-field/examples/react/basic.example.json",
+      "sourcePath": "catalog/components/number-field/examples/react/basic.tsx"
+    },
+    {
+      "family": "guide",
+      "path": "catalog/guides/number-field-usage.json",
+      "sourcePath": "catalog/guides/number-field-usage.md"
+    },
+    {
+      "family": "component",
+      "path": "catalog/components/search-field/artifact.json"
+    },
+    {
+      "family": "example",
+      "path": "catalog/components/search-field/examples/react/basic.example.json",
+      "sourcePath": "catalog/components/search-field/examples/react/basic.tsx"
+    },
+    {
+      "family": "guide",
+      "path": "catalog/guides/search-field-usage.json",
+      "sourcePath": "catalog/guides/search-field-usage.md"
+    },
+    {
+      "family": "component",
+      "path": "catalog/components/switch/artifact.json"
+    },
+    {
+      "family": "example",
+      "path": "catalog/components/switch/examples/react/basic.example.json",
+      "sourcePath": "catalog/components/switch/examples/react/basic.tsx"
+    },
+    {
+      "family": "guide",
+      "path": "catalog/guides/switch-usage.json",
+      "sourcePath": "catalog/guides/switch-usage.md"
+    },
+    {
+      "family": "component",
+      "path": "catalog/components/text-field/artifact.json"
+    },
+    {
+      "family": "example",
+      "path": "catalog/components/text-field/examples/react/basic.example.json",
+      "sourcePath": "catalog/components/text-field/examples/react/basic.tsx"
+    },
+    {
+      "family": "guide",
+      "path": "catalog/guides/text-field-usage.json",
+      "sourcePath": "catalog/guides/text-field-usage.md"
+    },
+    {
+      "family": "component",
+      "path": "catalog/components/time-field/artifact.json"
+    },
+    {
+      "family": "example",
+      "path": "catalog/components/time-field/examples/react/basic.example.json",
+      "sourcePath": "catalog/components/time-field/examples/react/basic.tsx"
+    },
+    {
+      "family": "guide",
+      "path": "catalog/guides/time-field-usage.json",
+      "sourcePath": "catalog/guides/time-field-usage.md"
     }
   ]
 }

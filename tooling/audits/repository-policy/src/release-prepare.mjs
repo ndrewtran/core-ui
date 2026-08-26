@@ -6,9 +6,78 @@ import { discoverWorkspacePackages } from './workspace-packages.mjs';
 
 const repositoryRoot = resolve(import.meta.dirname, '../../../..');
 const packages = await discoverWorkspacePackages(repositoryRoot);
-const reactR1Version = /^(?:0\.1\.0-alpha\.(?:0|[1-9]\d*)|0\.1\.0-rc\.1)$/u;
+const reactVersionPattern = /^0\.1\.0-alpha\.(?:0|[1-9]\d*)$/u;
+const deliveredExports = [
+  'Button', 'Breadcrumbs', 'Checkbox', 'Disclosure', 'DisclosureGroup', 'Group',
+  'Link', 'Meter', 'ProgressBar', 'Separator', 'ToggleButton',
+  'Autocomplete', 'CheckboxGroup', 'DateField', 'DatePicker', 'DateRangePicker',
+  'Form', 'NumberField', 'SearchField', 'Switch', 'TextField', 'TimeField',
+];
+const expectedRuntimeDependencies = {
+  '@internationalized/date': '3.12.3',
+  'react-aria-components': '1.20.0',
+};
+const expectedPeerDependencies = {
+  react: '>=19.2.0 <20',
+  'react-dom': '>=19.2.0 <20',
+};
+const expectedGeneratedEntries = [
+  'package/generated/button-donor-comparison.json',
+  'package/generated/button-donor-comparison.json.provenance',
+  'package/generated/button.mjs',
+  'package/generated/compatibility.mjs',
+  'package/generated/component-donor-comparison.json',
+  'package/generated/component-donor-comparison.json.provenance',
+  'package/generated/components.mjs',
+  'package/generated/descriptor.json',
+  'package/generated/descriptor.json.provenance',
+  'package/generated/fields.mjs',
+  'package/generated/index.d.ts',
+  'package/generated/index.mjs',
+  'package/generated/r1-2-donor-comparison.json',
+  'package/generated/r1-2-donor-comparison.json.provenance',
+  'package/generated/release.json',
+  'package/generated/release.json.provenance',
+  'package/generated/styles.css',
+  'package/generated/testing.mjs',
+];
+const expectedPackageEntries = [
+  ...expectedGeneratedEntries,
+  'package/LICENSE',
+  'package/NOTICE',
+  'package/README.md',
+  'package/package.json',
+];
+
+function fail(code, detail) {
+  throw new Error(`${code}: ${detail}`);
+}
+
+function stableJson(value) {
+  return JSON.stringify(value);
+}
+
+function readArchiveFile(archive, path) {
+  const result = spawnSync('tar', ['-xOzf', archive, path], { encoding: 'utf8' });
+  if (result.status !== 0) fail('R1.2_PACK_CONTENT_MISSING', path);
+  return result.stdout;
+}
+
+function parseGeneratedJson(source) {
+  return JSON.parse(source.replace(/^\/\/ @generated-from:.*\n\/\/ @generated-content-sha256:.*\n/u, ''));
+}
+
+function equalEntries(actual, expected) {
+  return actual.length === expected.length
+    && actual.every((entry, index) => entry === expected[index]);
+}
+
+function assertIncludes(value, expected, code) {
+  if (!value.includes(expected)) fail(code, expected);
+}
+
 const reactCandidate = packages.filter(({ name, manifest }) => (
-  name === '@core-ui/react' && reactR1Version.test(manifest.version)
+  name === '@core-ui/react' && reactVersionPattern.test(manifest.version)
 ));
 const publishable = packages.filter(({ manifest }) => manifest.private !== true);
 
@@ -19,70 +88,163 @@ if (publishable.length !== 0) {
   process.exit(1);
 }
 
-if (reactCandidate.length !== 1
-  || reactCandidate[0].manifest.private !== true
-  || reactCandidate[0].manifest.scripts?.prepublishOnly !== 'node src/publish-guard.mjs') {
-  console.error('R1.0_PUBLICATION_GUARD_INVALID: the packable React baseline must remain private with its fail-closed prepublish guard');
+if (reactCandidate.length !== 1) {
+  console.error('R1.2_PUBLICATION_GUARD_INVALID: exactly one private R1.2 React candidate is required');
   process.exit(1);
 }
 
-if (reactCandidate.length === 1) {
-  const reactVersion = reactCandidate[0].manifest.version;
-  const temp = mkdtempSync(join(tmpdir(), 'core-ui-r1-release-'));
-  try {
-    const packed = spawnSync('pnpm', ['pack', '--pack-destination', temp], {
-      cwd: resolve(repositoryRoot, 'packages/react'), encoding: 'utf8', stdio: 'pipe',
-    });
-    if (packed.status !== 0) throw new Error(`R1.0_PACK_FAILED: ${packed.stderr}`);
-    const archive = join(temp, `core-ui-react-${reactVersion}.tgz`);
-    const listing = spawnSync('tar', ['-tzf', archive], { encoding: 'utf8' });
-    if (listing.status !== 0) throw new Error('R1.0_PACK_ARCHIVE_MISSING');
-    const entries = listing.stdout.trim().split('\n');
-    for (const required of ['package/generated/index.mjs', 'package/generated/index.d.ts', 'package/generated/compatibility.mjs', 'package/generated/styles.css', 'package/generated/descriptor.json', 'package/generated/release.json', 'package/generated/button-donor-comparison.json', 'package/LICENSE', 'package/NOTICE', 'package/README.md']) {
-      if (!entries.includes(required)) throw new Error(`R1.0_PACK_CONTENT_MISSING: ${required}`);
-    }
-    if (entries.some((entry) => entry.startsWith('package/src/') || entry.startsWith('package/test/'))) {
-      throw new Error('R1.0_PACK_PRIVATE_SOURCE_LEAK');
-    }
-    const packedManifest = JSON.parse(spawnSync('tar', ['-xOzf', archive, 'package/package.json'], { encoding: 'utf8' }).stdout);
-    if (packedManifest.version !== reactVersion
-      || packedManifest.private !== true
-      || JSON.stringify(packedManifest.dependencies) !== JSON.stringify({ 'react-aria-components': '1.20.0' })
-      || packedManifest.peerDependencies?.react !== '>=19.2.0 <20'
-      || packedManifest.peerDependencies?.['react-dom'] !== '>=19.2.0 <20'
-      || JSON.stringify(packedManifest).includes('workspace:')
-      || JSON.stringify(packedManifest).includes('@core-ui/web')
-      || JSON.stringify(packedManifest).includes('tale-ui')) {
-      throw new Error('R1.0_PACK_MANIFEST_INVALID');
-    }
-    const entrySource = spawnSync('tar', ['-xOzf', archive, 'package/generated/index.mjs'], { encoding: 'utf8' }).stdout;
-    if (/\bButton\b|react-aria-components/u.test(entrySource)) throw new Error('R1.0_PACK_COMPONENT_EXPORT_FORBIDDEN');
-    const consumer = join(temp, 'consumer');
-    mkdirSync(consumer);
-    writeFileSync(join(consumer, 'package.json'), `${JSON.stringify({
-      name: 'core-ui-r1-clean-consumer', private: true, type: 'module',
-      dependencies: { '@core-ui/react': `file:../core-ui-react-${reactVersion}.tgz`, react: '19.2.8', 'react-dom': '19.2.8' },
-    }, null, 2)}\n`);
-    const install = spawnSync('pnpm', ['install', '--offline', '--ignore-scripts'], { cwd: consumer, encoding: 'utf8', stdio: 'pipe' });
-    if (install.status !== 0) throw new Error(`R1.0_PACK_CONSUMER_INSTALL_FAILED: ${install.stderr}`);
-    const consumerCheck = spawnSync(process.execPath, ['--input-type=module', '--eval', `
-      const main = await import('@core-ui/react');
-      const compatibility = await import('@core-ui/react/compatibility');
-      const testing = await import('@core-ui/react/testing');
-      if (Object.keys(main).join(',') !== 'reactCompatibility') throw new Error('unexpected public entry');
-      if (compatibility.reactCompatibility.version !== '${reactVersion}') throw new Error('compatibility version');
-      if (testing.reactPlatformSafetyFixture.componentSupportClaim !== 'none') throw new Error('support claim');
-      if (!import.meta.resolve('@core-ui/react/styles.css').endsWith('/generated/styles.css')) throw new Error('styles resolution');
-      let rejected = false;
-      try { await import('@core-ui/react/button'); } catch (error) { rejected = error?.code === 'ERR_PACKAGE_PATH_NOT_EXPORTED'; }
-      if (!rejected) throw new Error('undeclared component subpath resolved');
-    `], { cwd: consumer, encoding: 'utf8', stdio: 'pipe' });
-    if (consumerCheck.status !== 0) throw new Error(`R1.0_PACK_CONSUMER_IMPORT_FAILED: ${consumerCheck.stderr}`);
-  } finally { rmSync(temp, { recursive: true, force: true }); }
-  console.log('R1.0 release boundary passed; @core-ui/react remains technically private and unpublished.');
-  process.exit(0);
+const reactPackage = reactCandidate[0];
+const reactPackageRoot = resolve(repositoryRoot, 'packages/react');
+const manifest = reactPackage.manifest;
+if (manifest.private !== true || manifest.scripts?.prepublishOnly !== 'node src/publish-guard.mjs') {
+  console.error('R1.2_PUBLICATION_GUARD_INVALID: the R1.2 React candidate must remain private with its fail-closed prepublish guard');
+  process.exit(1);
 }
 
-console.log(
-  'Foundation checks passed; no publishable package or public release candidate exists.',
-);
+const publicationGuard = spawnSync(process.execPath, ['src/publish-guard.mjs'], {
+  cwd: reactPackageRoot,
+  encoding: 'utf8',
+});
+if (publicationGuard.status === 0 || !publicationGuard.stderr.includes('CORE_REACT_R12_PUBLISH_FORBIDDEN')) {
+  fail('R1.2_PUBLICATION_GUARD_INVALID', 'direct publication must remain fail-closed');
+}
+
+const temp = mkdtempSync(join(tmpdir(), 'core-ui-r1-2-release-'));
+try {
+  const packed = spawnSync('pnpm', ['pack', '--pack-destination', temp], {
+    cwd: reactPackageRoot,
+    encoding: 'utf8',
+    stdio: 'pipe',
+    env: { ...process.env, npm_config_engine_strict: 'false' },
+  });
+  if (packed.status !== 0) fail('R1.2_PACK_FAILED', packed.stderr);
+  const archive = join(temp, `core-ui-react-${manifest.version}.tgz`);
+  const listing = spawnSync('tar', ['-tzf', archive], { encoding: 'utf8' });
+  if (listing.status !== 0) fail('R1.2_PACK_ARCHIVE_MISSING', listing.stderr);
+  const entries = listing.stdout.trim().split('\n').sort();
+  const expectedEntries = [...expectedPackageEntries].sort();
+  if (!equalEntries(entries, expectedEntries)) {
+    fail('R1.2_PACK_CONTENT_INVALID', `expected ${expectedEntries.join(', ')}, received ${entries.join(', ')}`);
+  }
+  if (entries.some((entry) => entry.startsWith('package/src/') || entry.startsWith('package/test/'))) {
+    fail('R1.2_PACK_PRIVATE_SOURCE_LEAK', 'private source or tests entered the archive');
+  }
+
+  const packedManifest = JSON.parse(readArchiveFile(archive, 'package/package.json'));
+  if (packedManifest.name !== '@core-ui/react'
+    || packedManifest.version !== manifest.version
+    || packedManifest.private !== true
+    || stableJson(packedManifest.dependencies) !== stableJson(expectedRuntimeDependencies)
+    || stableJson(packedManifest.peerDependencies) !== stableJson(expectedPeerDependencies)
+    || stableJson(packedManifest.exports) !== stableJson(manifest.exports)) {
+    fail('R1.2_PACK_MANIFEST_INVALID', 'name, version, privacy, runtime graph, peers, exports, or guard drifted');
+  }
+  const packedManifestText = JSON.stringify(packedManifest);
+  for (const forbidden of ['workspace:', '@core-ui/web', 'tale-ui']) {
+    if (packedManifestText.includes(forbidden)) fail('R1.2_PACK_MANIFEST_INVALID', `forbidden package reference: ${forbidden}`);
+  }
+
+  const publicEntry = readArchiveFile(archive, 'package/generated/index.mjs');
+  const publicTypes = readArchiveFile(archive, 'package/generated/index.d.ts');
+  for (const forbidden of ['react-aria-components', '@internationalized/date', 'react-stately', 'ComboBox', 'Calendar', 'RangeCalendar', 'Popover', 'Dialog']) {
+    if (publicEntry.includes(forbidden) || publicTypes.includes(forbidden)) {
+      fail('R1.2_PACK_PUBLIC_LEAK', `upstream or deferred family leaked through the public surface: ${forbidden}`);
+    }
+  }
+  const descriptor = JSON.parse(readArchiveFile(archive, 'package/generated/descriptor.json'));
+  const release = JSON.parse(readArchiveFile(archive, 'package/generated/release.json'));
+  const donorComparison = parseGeneratedJson(readArchiveFile(archive, 'package/generated/r1-2-donor-comparison.json'));
+  if (!equalEntries(deliveredExports, descriptor.bindings.map(({ export: name }) => name))
+    || !equalEntries(deliveredExports, release.componentExports.map(({ name }) => name))
+    || !equalEntries(deliveredExports.slice(11), donorComparison.components.map(({ component }) => component))) {
+    fail('R1.2_PACK_EXPORT_SURFACE_INVALID', 'descriptor, release, donor, and public export surfaces disagree');
+  }
+  if (release.packagePrivate !== true
+    || release.publication?.status !== 'disabled'
+    || stableJson(release.runtimeProfiles) !== stableJson(['web.react'])
+    || donorComparison.donor?.commit !== '94bf62a26c02605c8928dfeb24f0ddc4be1c92fd') {
+    fail('R1.2_PACK_RELEASE_METADATA_INVALID', 'support, publication, runtime, or donor boundary drifted');
+  }
+
+  const readme = readArchiveFile(archive, 'package/README.md');
+  const notice = readArchiveFile(archive, 'package/NOTICE');
+  const styles = readArchiveFile(archive, 'package/generated/styles.css');
+  for (const name of deliveredExports) assertIncludes(readme, name, 'R1.2_PACK_GUIDANCE_MISSING');
+  assertIncludes(readme, 'web.react', 'R1.2_PACK_GUIDANCE_MISSING');
+  assertIncludes(notice, 'Tale UI', 'R1.2_PACK_NOTICE_INVALID');
+  for (const name of deliveredExports) {
+    const slug = name.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
+    assertIncludes(styles, `.core-${slug}`, 'R1.2_PACK_STYLE_MISSING');
+  }
+
+  const consumer = join(temp, 'consumer');
+  mkdirSync(consumer);
+  writeFileSync(join(consumer, 'package.json'), `${JSON.stringify({
+    name: 'core-ui-r1-2-clean-consumer', private: true, type: 'module',
+    dependencies: { '@core-ui/react': `file:../core-ui-react-${manifest.version}.tgz`, react: '19.2.8', 'react-dom': '19.2.8' },
+  }, null, 2)}\n`);
+  const install = spawnSync('pnpm', ['install', '--offline', '--ignore-scripts'], {
+    cwd: consumer,
+    encoding: 'utf8',
+    stdio: 'pipe',
+    env: { ...process.env, npm_config_engine_strict: 'false' },
+  });
+  if (install.status !== 0) fail('R1.2_PACK_CONSUMER_INSTALL_FAILED', install.stderr);
+
+  const consumerScript = `
+    import React from 'react';
+    import {renderToString} from 'react-dom/server';
+    const entry = await import('@core-ui/react');
+    const compatibility = await import('@core-ui/react/compatibility');
+    const testing = await import('@core-ui/react/testing');
+    const expected = ${JSON.stringify(['reactCompatibility', ...deliveredExports])};
+    if (JSON.stringify(Object.keys(entry).sort()) !== JSON.stringify([...expected].sort())) throw new Error('exact public export surface');
+    if (compatibility.reactCompatibility.version !== '${manifest.version}') throw new Error('compatibility version');
+    if (testing.reactPlatformSafetyFixture.componentSupportClaim !== 'none') throw new Error('support claim');
+    const packageEntry = await import.meta.resolve('@core-ui/react');
+    await import(new URL('./fields.mjs', packageEntry));
+    if (!import.meta.resolve('@core-ui/react/styles.css').endsWith('/generated/styles.css')) throw new Error('styles resolution');
+    const {
+      Autocomplete, Breadcrumbs, Button, Checkbox, CheckboxGroup, DateField, DatePicker,
+      DateRangePicker, Disclosure, DisclosureGroup, Form, Group, Link, Meter, NumberField,
+      ProgressBar, SearchField, Separator, Switch, TextField, TimeField, ToggleButton,
+    } = entry;
+    const rendered = renderToString(React.createElement(Form, {method: 'post'},
+      React.createElement(Button, null, 'Save'),
+      React.createElement(Breadcrumbs, {'aria-label': 'Path', items: [{label: 'Home', href: '/'}]}),
+      React.createElement(Checkbox, {name: 'enabled', value: 'yes'}, 'Enabled'),
+      React.createElement(CheckboxGroup, {label: 'Alerts', name: 'alerts'}, React.createElement(Checkbox, {value: 'email'}, 'Email')),
+      React.createElement(Disclosure, {title: 'Details'}, 'Details'),
+      React.createElement(DisclosureGroup, null, React.createElement(Disclosure, {title: 'More'}, 'More')),
+      React.createElement(Group, {role: 'group', 'aria-label': 'Group'}, 'Group'),
+      React.createElement(Link, {href: '/'}, 'Home'),
+      React.createElement(Meter, {label: 'Storage', value: 2}),
+      React.createElement(ProgressBar, {label: 'Upload', value: 2}),
+      React.createElement(Separator),
+      React.createElement(ToggleButton, null, 'Toggle'),
+      React.createElement(Autocomplete, {label: 'City', items: ['Melbourne'], defaultValue: 'Mel'}),
+      React.createElement(DateField, {label: 'Birthday', name: 'date', value: '2026-08-26'}),
+      React.createElement(DatePicker, {label: 'Due date', name: 'due', value: '2026-08-26'}),
+      React.createElement(DateRangePicker, {label: 'Trip', startName: 'rangeStart', endName: 'rangeEnd', value: {start: '2026-08-26', end: '2026-09-01'}}),
+      React.createElement(NumberField, {label: 'Quantity', name: 'quantity', value: 2}),
+      React.createElement(SearchField, {label: 'Search', name: 'query', value: 'Core'}),
+      React.createElement(Switch, {label: 'Enabled', name: 'switch'}),
+      React.createElement(TextField, {label: 'Name', name: 'name', value: 'Core'}),
+      React.createElement(TimeField, {label: 'Start', name: 'time', value: '09:30'}),
+    ));
+    for (const marker of ['<form', 'name="date"', 'name="due"', 'name="rangeStart"', 'name="rangeEnd"', 'name="time"', '2026-08-26', '09:30:00']) if (!rendered.includes(marker)) throw new Error('render/form/temporal behavior');
+    let rejected = false;
+    try { await import('@core-ui/react/button'); } catch (error) { rejected = error?.code === 'ERR_PACKAGE_PATH_NOT_EXPORTED'; }
+    if (!rejected) throw new Error('undeclared component subpath resolved');
+  `;
+  const consumerCheck = spawnSync(process.execPath, ['--input-type=module', '--eval', consumerScript], {
+    cwd: consumer,
+    encoding: 'utf8',
+    stdio: 'pipe',
+  });
+  if (consumerCheck.status !== 0) fail('R1.2_PACK_CONSUMER_IMPORT_FAILED', consumerCheck.stderr || consumerCheck.stdout);
+} finally {
+  rmSync(temp, { recursive: true, force: true });
+}
+
+console.log('R1.2 release preparation passed; @core-ui/react remains technically private and unpublished.');

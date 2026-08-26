@@ -1,14 +1,26 @@
 import {
+  Autocomplete,
+  type AutocompleteSelectionItem,
   Breadcrumbs,
   Button,
   Checkbox,
+  CheckboxGroup,
+  DateField,
+  DatePicker,
+  DateRangePicker,
   Disclosure,
   DisclosureGroup,
+  Form,
   Group,
   Link,
   Meter,
+  NumberField,
   ProgressBar,
+  SearchField,
   Separator,
+  Switch,
+  TextField,
+  TimeField,
   ToggleButton,
   reactCompatibility,
 } from '@core-ui/react';
@@ -62,6 +74,60 @@ const componentSlice = (
   </>
 );
 void componentSlice;
+
+const fields = (
+  <Form onSubmit={(event) => event.preventDefault()}>
+    <TextField label="Name" value="Andrew" onChange={(value) => { const text: string = value; void text; }} />
+    <SearchField label="Search" defaultValue="Core" onSubmit={(value) => { const text: string = value; void text; }} />
+    <NumberField label="Quantity" defaultValue={2} onChange={(value) => { const amount: number = value; void amount; }} />
+    <CheckboxGroup label="Alerts" defaultValue={['email']}><Checkbox value="email">Email</Checkbox></CheckboxGroup>
+    <Switch label="Enabled" selected onChange={(selected) => { const value: boolean = selected; void value; }} />
+    <DateField label="Birthday" value="2026-08-26" onChange={(value) => { const date: string | undefined = value; void date; }} />
+    <DatePicker label="Due" defaultValue="2026-08-26" />
+    <DateRangePicker label="Trip" startName="tripStart" endName="tripEnd" defaultValue={{ start: '2026-08-26', end: '2026-09-01' }} />
+    <TimeField label="Start" defaultValue="09:30" />
+    <Autocomplete label="City" items={['Melbourne', { label: 'Sydney' }, {}]} onSelect={(item) => {
+      if (!item) return;
+      const normalized: AutocompleteSelectionItem = item;
+      const id: string = normalized.id;
+      const value: string = normalized.value;
+      void normalized.label;
+      void id;
+      void value;
+    }} />
+    <Autocomplete label="Rich city" items={[{ id: 'mel', label: <strong>Melbourne</strong>, value: 'Melbourne' }]} />
+  </Form>
+);
+void fields;
+
+// Core's public field contracts do not expose RAC prop names or temporal objects.
+// @ts-expect-error Core owns `disabled`, not the upstream `isDisabled` prop.
+const upstreamFieldProp = <TextField label="Name" isDisabled />;
+void upstreamFieldProp;
+// @ts-expect-error Date fields accept Core ISO strings, not upstream date objects.
+const upstreamDateValue = <DateField label="Birthday" value={{ year: 2026, month: 8, day: 26 }} />;
+void upstreamDateValue;
+
+const ariaNamedField = <TextField aria-label="Name" />;
+const labelledByField = <TextField aria-labelledby="name-heading" />;
+void ariaNamedField;
+void labelledByField;
+// @ts-expect-error Every Core field requires label, aria-label, or aria-labelledby.
+const unnamedTextField = <TextField />;
+void unnamedTextField;
+// @ts-expect-error Switch uses the same Core accessible-name contract.
+const unnamedSwitch = <Switch>Enabled</Switch>;
+void unnamedSwitch;
+// Switch's canonical contract intentionally excludes field validation props.
+// @ts-expect-error Switch does not expose required.
+const switchRequired = <Switch label="Enabled" required />;
+void switchRequired;
+// @ts-expect-error Switch does not expose invalid.
+const switchInvalid = <Switch label="Enabled" invalid />;
+void switchInvalid;
+// @ts-expect-error R1.2 fields do not expose the upstream validationBehavior prop.
+const fieldValidationBehavior = <TextField label="Name" validationBehavior="native" />;
+void fieldValidationBehavior;
 
 // Breadcrumb landmarks require a Core-owned accessible name; JS callers receive the safe fallback.
 // @ts-expect-error Breadcrumbs requires Core's explicit accessible name.

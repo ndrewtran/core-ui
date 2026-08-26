@@ -1,3 +1,3 @@
 // @generated-from: packages/react/src/generate.mjs
-// @generated-content-sha256: sha256:9e4d144fcf54e53c83632cfe47c4383e2bb522e87420fe0aaa1bffcdd8b69f13
-export const reactPlatformSafetyFixture = Object.freeze({ componentSupportClaim: 'none', fixture: 'r1.1-react-components' });
+// @generated-content-sha256: sha256:6a579cdbaa5ea119217a4b858d1737a1d6fc2df5226987447fb4e43c262f1deb
+export const reactPlatformSafetyFixture = Object.freeze({ componentSupportClaim: 'none', fixture: 'r1.2-react-fields' });
