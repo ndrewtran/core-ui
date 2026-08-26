@@ -965,6 +965,17 @@ guidance may be deterministically compiled into its tarball by private build
 authorities without becoming runtime workspace dependencies or duplicate
 owners.
 
+For Core value adapters, `@core-ui/react` is approved to directly use
+`@internationalized/date@3.12.3` as an internal runtime dependency only for
+`DateField`, `DatePicker`, `DateRangePicker`, `TimeField`, `Calendar`, and
+`RangeCalendar`. It is the single resolved `3.12.3` instance already present
+in the pinned `react-aria-components@1.20.0` closure, so the direct declaration
+adds no installed package or version. Core public values remain ISO dates
+`YYYY-MM-DD`, local times `HH:mm[:ss[.fraction]]`, and Core-owned `{start,end}`
+ranges. No `@internationalized/date` or React Aria public type, value, import
+path, export, lifecycle, or ownership path may leak through the package; this
+is an internal, replaceable adapter dependency only.
+
 #### Tale styling donor boundary
 
 The initial React visual implementation uses the matching component styling
@@ -1105,12 +1116,14 @@ flowchart TD
   canonical["private canonical/build authorities\nschema, tokens, foundation, catalog, tooling"]
   react["@core-ui/react@0.1.0-alpha.N\nfirst public component package"]
   aria["react-aria-components@1.20.0\nexact internal runtime dependency"]
+  temporal["@internationalized/date@3.12.3\napproved internal temporal adapter dependency"]
   peers["react + react-dom\n>=19.2.0 <20 peers"]
   web["@core-ui/web\nlater W1 track"]
   native["@core-ui/react-native\nlater N1 track"]
 
   canonical -. deterministic compilation .-> react
   aria --> react
+  temporal --> react
   peers --> react
   canonical -. later activation .-> web
   canonical -. later activation .-> native
@@ -1119,9 +1132,18 @@ flowchart TD
 The React-primary prerelease publishes exactly `@core-ui/react`. It has no
 runtime dependency on another Core UI workspace package or `@core-ui/web`.
 React and React DOM are peers at `>=19.2.0 <20`; React Aria Components is the
-exact `1.20.0` runtime dependency for the accepted baseline. The packed tarball
-must contain no unresolved `workspace:` dependency, repository-only or source-
-tree import, undeclared file dependency, or `@core-ui/web` import.
+exact `1.20.0` runtime dependency for the accepted baseline, and
+`@internationalized/date@3.12.3` is the approved direct internal runtime
+dependency for
+Core value adapters in exactly `DateField`, `DatePicker`, `DateRangePicker`,
+`TimeField`, `Calendar`, and `RangeCalendar`. The latter is already the single
+resolved `3.12.3` instance in the React Aria closure, so direct declaration
+adds no installed package or version. Core public values remain ISO dates
+`YYYY-MM-DD`, local times `HH:mm[:ss[.fraction]]`, and Core-owned `{start,end}`
+ranges; neither `@internationalized/date` nor React Aria public type, value,
+import path, export, lifecycle, or ownership may leak. The packed tarball must
+contain no unresolved `workspace:` dependency, repository-only or source-tree
+import, undeclared file dependency, or `@core-ui/web` import.
 
 | Package | Responsibility | Must not own |
 | --- | --- | --- |
