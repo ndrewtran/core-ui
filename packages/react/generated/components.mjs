@@ -1,5 +1,5 @@
 // @generated-from: packages/react/src/components.mjs
-// @generated-content-sha256: sha256:9a484e559027c348e177ea99893003f88f9cef626c199e0ef73351bd4808462f
+// @generated-content-sha256: sha256:8810cfc515a7642b6c53c09509bffc5c83983dacb789b5085dedf16d9a59c971
 import React from 'react';
 import {
   Breadcrumb as AriaBreadcrumb,
@@ -318,3 +318,17 @@ export const ToggleButton = React.forwardRef(function ToggleButton({
 });
 
 ToggleButton.displayName = 'ToggleButton';
+
+export {
+  Autocomplete,
+  CheckboxGroup,
+  DateField,
+  DatePicker,
+  DateRangePicker,
+  Form,
+  NumberField,
+  SearchField,
+  Switch,
+  TextField,
+  TimeField,
+} from './fields.mjs';

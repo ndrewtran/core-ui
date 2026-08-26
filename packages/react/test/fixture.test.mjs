@@ -8,6 +8,7 @@ import { renderToString } from 'react-dom/server';
 import { JSDOM } from 'jsdom';
 import { Button } from '../src/button.mjs';
 import { R1ButtonFixture } from '../src/button-fixture.mjs';
+import { EXPECTED_R12_DONOR_CONTRACT } from '../src/r1-2-donor-contract.mjs';
 
 test('R1.1 Button owns Core selectors and required token crosswalk', async () => {
   const css = await readFile(resolve(import.meta.dirname, '../generated/styles.css'), 'utf8');
@@ -21,11 +22,11 @@ test('R1.1 Button owns Core selectors and required token crosswalk', async () =>
   assert.equal(comparison.consumedRules.length, 9);
 });
 
-test('R1.1 component selectors and donor dispositions stay Core-owned', async () => {
+test('R1.2 component selectors and donor dispositions stay Core-owned', async () => {
   const css = await readFile(resolve(import.meta.dirname, '../generated/styles.css'), 'utf8');
   const comparisonSource = await readFile(resolve(import.meta.dirname, '../generated/component-donor-comparison.json'), 'utf8');
   const comparison = JSON.parse(comparisonSource.replace(/^\/\/ @generated-from:.*\n\/\/ @generated-content-sha256:.*\n/u, ''));
-  const names = ['Button', 'Breadcrumbs', 'Checkbox', 'Disclosure', 'DisclosureGroup', 'Group', 'Link', 'Meter', 'ProgressBar', 'Separator', 'ToggleButton'];
+  const names = ['Button', 'Breadcrumbs', 'Checkbox', 'Disclosure', 'DisclosureGroup', 'Group', 'Link', 'Meter', 'ProgressBar', 'Separator', 'ToggleButton', 'Autocomplete', 'CheckboxGroup', 'DateField', 'DatePicker', 'DateRangePicker', 'Form', 'NumberField', 'SearchField', 'Switch', 'TextField', 'TimeField'];
   for (const name of names) {
     const slug = name.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`).replace(/^-/, '');
     assert.match(css, new RegExp(`\\.core-${slug}(?:\\b|[-_])`));
@@ -38,6 +39,29 @@ test('R1.1 component selectors and donor dispositions stay Core-owned', async ()
   assert.equal(comparison.components.find(({ component }) => component === 'Group').disposition, 'no-applicable-donor');
   assert.ok(comparison.components.filter(({ disposition }) => disposition === 'adapt').length >= 9);
   assert.doesNotMatch(css, /(?:\\.tale-|--color-60|@keyframes|animation:)/u);
+});
+
+test('R1.2 donor crosswalk is exact, adapted, and dependency-free', async () => {
+  const repositoryRoot = resolve(import.meta.dirname, '../../..');
+  const crosswalk = JSON.parse(await readFile(resolve(repositoryRoot, 'catalog/react-r1-2/donor-crosswalk.json'), 'utf8'));
+  const slugs = ['autocomplete', 'checkbox-group', 'date-field', 'date-picker', 'date-range-picker', 'form', 'number-field', 'search-field', 'switch', 'text-field', 'time-field'];
+  assert.equal(crosswalk.schema, 'core-ui-react-r1-2-donor-crosswalk-v1');
+  assert.deepEqual(crosswalk, EXPECTED_R12_DONOR_CONTRACT);
+  assert.equal(crosswalk.donor.commit, '94bf62a26c02605c8928dfeb24f0ddc4be1c92fd');
+  assert.equal(crosswalk.dependency, false);
+  assert.deepEqual(crosswalk.sharedPrimitives, [
+    { path: 'packages/styles/src/_primitives.css', blob: 'b54d4ab7296f992731cfd844b4edac28d5254ee8' },
+    { path: 'packages/styles/src/button.css', blob: '32227dc8969351bb11499d53e7773425b3fe7e68' },
+  ]);
+  assert.deepEqual(Object.keys(crosswalk.components).sort(), slugs.sort());
+  for (const slug of slugs) {
+    const entry = crosswalk.components[slug];
+    assert.equal(entry.disposition, 'adapt');
+    assert.deepEqual(entry.rules.map(({ input }) => input), entry.consumedRules);
+    assert.ok(entry.donorInputs.length >= 3);
+    assert.ok(entry.donorInputs.every(({ path, blob }) => path && /^[0-9a-f]{40}$/u.test(blob)));
+  }
+  assert.match(await readFile(resolve(repositoryRoot, 'packages/react/NOTICE'), 'utf8'), /Tale UI contributors/);
 });
 
 test('R1.1 Core Button proves SSR, hydration, disabled and pending state', async () => {

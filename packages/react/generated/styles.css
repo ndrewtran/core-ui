@@ -1,5 +1,5 @@
 /* @generated-from: packages/react/src/generate.mjs
- * @generated-content-sha256: sha256:fb246f39dbdc5007e0af42b68c9126705e0764a12f1c8b99aac1300d9d29925f
+ * @generated-content-sha256: sha256:9b16342a13b0a3c6ca09c7221448d73529be94ea2a06043403c12f0807de3c8b
  */
 :root {
   --core-component-button-background: #2b2826;
@@ -447,3 +447,68 @@
 .core-toggle-button:disabled { cursor: not-allowed; opacity: 0.55; }
 @media (prefers-reduced-motion: reduce) { .core-breadcrumbs-link, .core-link, .core-meter-fill, .core-progress-bar-fill { transition: none; } }
 @media (forced-colors: active) { .core-disclosure, .core-disclosure-group, .core-group, .core-toggle-button, .core-checkbox input, .core-checkbox-indicator { border-color: ButtonText; } .core-checkbox-indicator[data-selected], .core-checkbox-indicator[data-indeterminate] { background: Highlight; color: HighlightText; } .core-meter-fill, .core-progress-bar-fill { background: Highlight; } .core-separator { background: ButtonText; } }
+
+.core-form { display: flex; flex-direction: column; gap: var(--core-reference-dimension-space-xs); inline-size: 100%; }
+.core-text-field, .core-search-field, .core-number-field, .core-date-field, .core-time-field, .core-date-picker, .core-date-range-picker, .core-autocomplete { display: flex; flex-direction: column; gap: var(--core-reference-dimension-space-2xs); inline-size: 100%; max-inline-size: 32rem; }
+.core-field-label { color: inherit; font: inherit; font-weight: 600; line-height: 1.25; }
+.core-field-description { color: inherit; opacity: .78; font-size: .875em; line-height: 1.35; }
+.core-field-error { color: var(--core-semantic-feedback-invalid); font-size: .875em; line-height: 1.35; }
+.core-field-input, .core-date-input { box-sizing: border-box; min-block-size: var(--core-semantic-control-min-height); inline-size: 100%; border: 1px solid color-mix(in srgb, currentColor 55%, transparent); border-radius: var(--core-semantic-control-radius); background: var(--core-semantic-field-background); color: inherit; font: inherit; line-height: 1.35; }
+.core-field-input { padding: var(--core-semantic-control-padding-inline); }
+.core-field-input:hover:not(:disabled), .core-date-input:hover:not([aria-disabled='true']) { border-color: currentColor; }
+.core-field-input:focus-visible, .core-date-input:focus-within, .core-number-control:focus-within, .core-date-control:focus-within, .core-date-range-control:focus-within { outline: 2px solid var(--core-semantic-focus-ring); outline-offset: 2px; }
+.core-field-input:disabled, [data-disabled] .core-field-input, [data-disabled] .core-date-input { cursor: not-allowed; opacity: .55; }
+[data-readonly] .core-field-input, [data-readonly] .core-date-input { background: color-mix(in srgb, var(--core-semantic-field-background) 70%, currentColor); }
+[data-invalid] .core-field-input, [data-invalid] .core-date-input, [data-invalid] .core-number-control, [data-invalid] .core-date-control, [data-invalid] .core-date-range-control { border-color: var(--core-semantic-feedback-invalid); }
+.core-checkbox-group { display: flex; flex-direction: column; gap: var(--core-reference-dimension-space-2xs); inline-size: 100%; max-inline-size: 32rem; padding: var(--core-semantic-control-padding-inline); border: 1px solid color-mix(in srgb, currentColor 55%, transparent); border-radius: var(--core-semantic-control-radius); }
+.core-checkbox-group:focus-within { outline: 2px solid var(--core-semantic-focus-ring); outline-offset: 2px; }
+.core-number-control, .core-date-control, .core-date-range-control { display: inline-flex; align-items: stretch; gap: 0; min-block-size: var(--core-semantic-control-min-height); border: 1px solid color-mix(in srgb, currentColor 55%, transparent); border-radius: var(--core-semantic-control-radius); overflow: hidden; }
+.core-number-control .core-field-input { min-inline-size: 5rem; flex: 1 1 auto; border: 0; border-radius: 0; }
+.core-number-stepper, .core-date-trigger, .core-search-clear { display: inline-flex; align-items: center; justify-content: center; min-block-size: var(--core-semantic-control-min-height); padding-inline: var(--core-reference-dimension-space-2xs); border: 0; border-inline-start: 1px solid color-mix(in srgb, currentColor 30%, transparent); background: transparent; color: inherit; font: inherit; cursor: pointer; }
+.core-number-stepper:hover:not(:disabled), .core-date-trigger:hover:not(:disabled), .core-search-clear:hover:not(:disabled) { background: color-mix(in srgb, currentColor 12%, transparent); }
+.core-number-stepper:active:not(:disabled), .core-date-trigger:active:not(:disabled), .core-search-clear:active:not(:disabled) { background: color-mix(in srgb, currentColor 20%, transparent); }
+.core-number-stepper:focus-visible, .core-date-trigger:focus-visible, .core-search-clear:focus-visible { outline: 2px solid var(--core-semantic-focus-ring); outline-offset: -2px; }
+.core-number-stepper:disabled, .core-date-trigger:disabled, .core-search-clear:disabled { cursor: not-allowed; opacity: .5; }
+.core-search-field { position: relative; }
+.core-search-field .core-field-input { padding-inline-end: 4rem; }
+.core-search-clear { position: absolute; inset-inline-end: .25rem; inset-block-end: 0; min-block-size: calc(var(--core-semantic-control-min-height) - .5rem); border: 0; }
+.core-date-input { display: inline-flex; align-items: center; inline-size: auto; min-inline-size: 10rem; padding-inline: var(--core-semantic-control-padding-inline); border: 0; border-radius: 0; }
+.core-date-segment { padding: .125rem .0625rem; border-radius: .125rem; }
+.core-date-segment[data-focused] { background: var(--core-semantic-focus-ring); color: Canvas; }
+.core-date-range-control .core-date-input { min-inline-size: 8rem; }
+.core-date-range-separator { display: inline-flex; align-items: center; padding-inline: var(--core-reference-dimension-space-2xs); }
+.core-date-popover { min-inline-size: 18rem; padding: var(--core-semantic-control-padding-inline); border: 1px solid color-mix(in srgb, currentColor 55%, transparent); border-radius: var(--core-semantic-control-radius); background: var(--core-semantic-overlay-background); box-shadow: 0 8px 24px rgb(0 0 0 / 24%); }
+.core-date-dialog { outline: none; }
+.core-calendar { display: grid; gap: var(--core-reference-dimension-space-2xs); }
+.core-calendar-grid { border-spacing: .125rem; }
+.core-calendar-cell { inline-size: 2rem; block-size: 2rem; border-radius: var(--core-semantic-control-radius); color: inherit; }
+.core-calendar-cell:hover:not([aria-disabled='true']), .core-calendar-cell[data-focused] { background: color-mix(in srgb, var(--core-semantic-selection-track) 22%, transparent); }
+.core-calendar-cell[aria-selected='true'], .core-calendar-cell[data-selected] { background: var(--core-semantic-selection-track); color: Canvas; }
+.core-autocomplete-search { inline-size: 100%; }
+.core-autocomplete-list { display: flex; flex-direction: column; gap: .125rem; min-inline-size: 100%; max-block-size: 16rem; margin: .25rem 0 0; padding: .25rem; overflow-y: auto; border: 1px solid color-mix(in srgb, currentColor 55%, transparent); border-radius: var(--core-semantic-control-radius); background: var(--core-semantic-overlay-background); box-shadow: 0 8px 24px rgb(0 0 0 / 24%); list-style: none; }
+.core-autocomplete-option { padding: var(--core-reference-dimension-space-2xs) var(--core-semantic-control-padding-inline); border-radius: calc(var(--core-semantic-control-radius) - 1px); cursor: pointer; }
+.core-autocomplete-option:hover, .core-autocomplete-option[data-focused], .core-autocomplete-option[aria-selected='true'] { background: color-mix(in srgb, var(--core-semantic-selection-track) 20%, transparent); }
+.core-autocomplete-option[aria-selected='true'] { color: var(--core-semantic-selection-track); font-weight: 600; }
+.core-switch { position: relative; display: inline-flex; align-items: center; gap: var(--core-reference-dimension-space-2xs); inline-size: fit-content; cursor: pointer; }
+.core-switch input { position: absolute; inline-size: 1px; block-size: 1px; opacity: 0; }
+.core-switch-indicator { position: relative; display: inline-block; inline-size: 2.5rem; block-size: 1.5rem; flex: 0 0 auto; border: 1px solid currentColor; border-radius: 999px; background: transparent; transition: background-color var(--core-semantic-motion-feedback) ease; }
+.core-switch-indicator::after { position: absolute; inset-block-start: .1875rem; inset-inline-start: .1875rem; inline-size: 1rem; block-size: 1rem; border-radius: 50%; background: currentColor; content: ''; transition: inset-inline-start var(--core-semantic-motion-feedback) ease; }
+.core-switch-indicator[data-selected] { border-color: var(--core-semantic-selection-track); background: var(--core-semantic-selection-track); color: Canvas; }
+.core-switch-indicator[data-selected]::after { inset-inline-start: 1.1875rem; background: currentColor; }
+.core-switch:focus-within { outline: 2px solid var(--core-semantic-focus-ring); outline-offset: 2px; }
+.core-switch[data-disabled] { cursor: not-allowed; opacity: .55; }
+.core-switch[data-invalid] .core-switch-indicator { border-color: var(--core-semantic-feedback-invalid); }
+@media (prefers-reduced-motion: reduce) { .core-switch-indicator, .core-switch-indicator::after { transition: none; } }
+@media (forced-colors: active) {
+  .core-field-input, .core-date-input, .core-number-control, .core-date-control, .core-date-range-control, .core-checkbox-group, .core-date-popover, .core-autocomplete-list, .core-switch-indicator { border-color: ButtonText; background: Canvas; color: CanvasText; box-shadow: none; }
+  .core-field-input:focus-visible, .core-date-input:focus-within, .core-number-control:focus-within, .core-date-control:focus-within, .core-date-range-control:focus-within, .core-switch:focus-within { outline-color: Highlight; }
+  [data-invalid] .core-field-input, [data-invalid] .core-date-input, [data-invalid] .core-number-control, [data-invalid] .core-date-control, [data-invalid] .core-date-range-control, .core-switch[data-invalid] .core-switch-indicator { border-color: Mark; }
+  .core-number-stepper, .core-date-trigger, .core-search-clear { color: ButtonText; }
+  .core-calendar-cell[aria-selected='true'], .core-calendar-cell[data-selected], .core-autocomplete-option[aria-selected='true'], .core-switch-indicator[data-selected] { background: Highlight; color: HighlightText; }
+  .core-switch-indicator::after { background: ButtonText; }
+}
+@media (prefers-contrast: more) {
+  .core-field-input, .core-date-input, .core-number-control, .core-date-control, .core-date-range-control, .core-checkbox-group, .core-date-popover, .core-autocomplete-list, .core-switch-indicator { border-width: 2px; }
+  .core-field-label, .core-field-error { font-weight: 700; }
+  .core-autocomplete-option[aria-selected='true'], .core-calendar-cell[aria-selected='true'], .core-calendar-cell[data-selected] { outline: 2px solid currentColor; outline-offset: -2px; }
+}

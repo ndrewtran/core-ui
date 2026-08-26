@@ -8,7 +8,7 @@ import { join, resolve } from 'node:path';
 import { reactCompatibility } from '../generated/index.mjs';
 import { compileTokenGraph, compileTokenRequirementSet, validateThemeForRequirementSet } from '@core-ui/tokens';
 import {
-  assertReactR11GeneratedContracts,
+  assertReactR12GeneratedContracts,
   assertReactR10SourceContracts,
 } from '../src/r1-contracts.mjs';
 
@@ -22,17 +22,18 @@ test('R1.1 package has an exact standalone substrate identity', async () => {
   assert.equal(manifest.private, true);
   assert.equal(manifest.scripts.prepublishOnly, 'node src/publish-guard.mjs');
   assert.equal(manifest.dependencies['react-aria-components'], '1.20.0');
+  assert.equal(manifest.dependencies['@internationalized/date'], '3.12.3');
   assert.equal(manifest.dependencies['@core-ui/web'], undefined);
 });
 
-test('R1.1 is packable but direct publication fails closed', () => {
+test('R1.2 is packable but direct publication fails closed', () => {
   const packageRoot = resolve(import.meta.dirname, '..');
   const result = spawnSync(process.execPath, ['src/publish-guard.mjs'], {
     cwd: packageRoot,
     encoding: 'utf8',
   });
   assert.notEqual(result.status, 0);
-  assert.match(result.stderr, /CORE_REACT_R11_PUBLISH_FORBIDDEN/u);
+  assert.match(result.stderr, /CORE_REACT_R12_PUBLISH_FORBIDDEN/u);
 });
 
 test('R1.1 packed package exposes a clean Core component surface', async () => {
@@ -43,6 +44,7 @@ test('R1.1 packed package exposes a clean Core component surface', async () => {
     const packed = spawnSync('pnpm', ['pack', '--pack-destination', packRoot], {
       cwd: packageRoot,
       encoding: 'utf8',
+      env: { ...process.env, npm_config_engine_strict: 'false' },
     });
     assert.equal(packed.status, 0, packed.stderr);
     const archiveName = (await readdir(packRoot)).find((name) => name.endsWith('.tgz'));
@@ -50,7 +52,7 @@ test('R1.1 packed package exposes a clean Core component surface', async () => {
     const archive = join(packRoot, archiveName);
     const listing = spawnSync('tar', ['-tzf', archive], { encoding: 'utf8' });
     assert.equal(listing.status, 0, listing.stderr);
-    for (const entry of ['package/generated/button.mjs', 'package/generated/components.mjs', 'package/generated/index.d.ts', 'package/generated/styles.css', 'package/NOTICE']) {
+    for (const entry of ['package/generated/button.mjs', 'package/generated/components.mjs', 'package/generated/fields.mjs', 'package/generated/index.d.ts', 'package/generated/styles.css', 'package/generated/r1-2-donor-comparison.json', 'package/generated/r1-2-donor-comparison.json.provenance', 'package/NOTICE']) {
       assert.match(listing.stdout, new RegExp(`^${entry.replaceAll('.', '\\.')}$`, 'mu'));
     }
 
@@ -66,13 +68,13 @@ test('R1.1 packed package exposes a clean Core component surface', async () => {
     const imported = spawnSync(process.execPath, [
       '--input-type=module',
       '-e',
-      "import('@core-ui/react').then((entry) => { for (const name of ['Button', 'Breadcrumbs', 'Checkbox', 'Disclosure', 'DisclosureGroup', 'Group', 'Link', 'Meter', 'ProgressBar', 'Separator', 'ToggleButton']) if (!entry[name]) throw new Error(`${name} export missing`); })",
+      "import('@core-ui/react').then((entry) => { for (const name of ['Button', 'Breadcrumbs', 'Checkbox', 'Disclosure', 'DisclosureGroup', 'Group', 'Link', 'Meter', 'ProgressBar', 'Separator', 'ToggleButton', 'Autocomplete', 'CheckboxGroup', 'DateField', 'DatePicker', 'DateRangePicker', 'Form', 'NumberField', 'SearchField', 'Switch', 'TextField', 'TimeField']) if (!entry[name]) throw new Error(`${name} export missing`); })",
     ], { cwd: consumerRoot, encoding: 'utf8' });
     assert.equal(imported.status, 0, imported.stderr);
     const publicTypes = await readFile(join(consumerPackage, 'generated/index.d.ts'), 'utf8');
-    assert.doesNotMatch(publicTypes, /react-aria-components|isPending|isDisabled|isSelected|isExpanded|onPress|CheckboxGroup|ToggleButtonGroup/u);
-    assert.match(publicTypes, /export interface (?:ButtonProps|BreadcrumbsProps|CheckboxProps|DisclosureProps|DisclosureGroupProps|GroupProps|LinkProps|MeterProps|ProgressBarProps|SeparatorProps|ToggleButtonProps)/u);
-    assert.match(await readFile(join(consumerPackage, 'generated/styles.css'), 'utf8'), /\.core-(?:breadcrumbs|checkbox|disclosure|disclosure-group|group|link|meter|progress-bar|separator|toggle-button)/u);
+    assert.doesNotMatch(publicTypes, /react-aria-components|react-stately|@internationalized\/date|isPending|isDisabled|isSelected|isExpanded|onPress|ComboBox|Calendar|RangeCalendar|Popover|Dialog/u);
+  assert.match(publicTypes, /export (?:interface|type) (?:ButtonProps|BreadcrumbsProps|CheckboxProps|DisclosureProps|DisclosureGroupProps|GroupProps|LinkProps|MeterProps|ProgressBarProps|SeparatorProps|ToggleButtonProps|AutocompleteProps|CheckboxGroupProps|DateFieldProps|DatePickerProps|DateRangePickerProps|FormProps|NumberFieldProps|SearchFieldProps|SwitchProps|TextFieldProps|TimeFieldProps)/u);
+    assert.match(await readFile(join(consumerPackage, 'generated/styles.css'), 'utf8'), /\.core-(?:breadcrumbs|checkbox|disclosure|disclosure-group|group|link|meter|progress-bar|separator|toggle-button|autocomplete|checkbox-group|date-field|date-picker|date-range-picker|form|number-field|search-field|switch|text-field|time-field)/u);
     assert.match(await readFile(join(consumerPackage, 'NOTICE'), 'utf8'), /Tale UI/u);
   } finally {
     await Promise.all([
@@ -82,12 +84,12 @@ test('R1.1 packed package exposes a clean Core component surface', async () => {
   }
 });
 
-test('R1.1 public surface exports the Core component slice without upstream types', async () => {
+test('R1.2 public surface exports the Core component slice without upstream types', async () => {
   const packageRoot = resolve(import.meta.dirname, '..');
   const manifest = JSON.parse(await readFile(resolve(packageRoot, 'package.json'), 'utf8'));
   assert.deepEqual(Object.keys(manifest.exports).sort(), ['.', './compatibility', './styles.css', './testing']);
   const entry = await import('../generated/index.mjs');
-  const componentNames = ['Button', 'Breadcrumbs', 'Checkbox', 'Disclosure', 'DisclosureGroup', 'Group', 'Link', 'Meter', 'ProgressBar', 'Separator', 'ToggleButton'];
+  const componentNames = ['Button', 'Breadcrumbs', 'Checkbox', 'Disclosure', 'DisclosureGroup', 'Group', 'Link', 'Meter', 'ProgressBar', 'Separator', 'ToggleButton', 'Autocomplete', 'CheckboxGroup', 'DateField', 'DatePicker', 'DateRangePicker', 'Form', 'NumberField', 'SearchField', 'Switch', 'TextField', 'TimeField'];
   for (const name of componentNames) assert.equal(name in entry, true);
   assert.equal('ButtonProps' in entry, false);
   const release = JSON.parse(await readFile(resolve(packageRoot, 'generated/release.json'), 'utf8'));
@@ -180,32 +182,32 @@ test('R1.0 upstream and catalog contracts reject complete-surface and shape drif
   assert.throws(() => assertSource({ license: missingLicense }), /CORE_SCHEMA_INVALID/u);
 });
 
-test('R1.1 generated contracts reject missing, unknown, and publication drift', async () => {
+test('R1.2 generated contracts reject missing, unknown, and publication drift', async () => {
   const packageRoot = resolve(import.meta.dirname, '..');
   const manifest = JSON.parse(await readFile(resolve(packageRoot, 'package.json'), 'utf8'));
   const descriptor = JSON.parse(await readFile(resolve(packageRoot, 'generated/descriptor.json'), 'utf8'));
   const release = JSON.parse(await readFile(resolve(packageRoot, 'generated/release.json'), 'utf8'));
-  const donorComparison = JSON.parse(await readFile(resolve(packageRoot, 'generated/button-donor-comparison.json'), 'utf8'));
-  const componentDonorSource = await readFile(resolve(packageRoot, 'generated/component-donor-comparison.json'), 'utf8');
-  const componentDonorComparison = JSON.parse(componentDonorSource.replace(/^\/\/ @generated-from:.*\n\/\/ @generated-content-sha256:.*\n/u, ''));
-  const crosswalk = JSON.parse(await readFile(resolve(packageRoot, '../../catalog/react-r1-0/donor-crosswalk.json'), 'utf8'));
-  const assertGenerated = (overrides = {}) => assertReactR11GeneratedContracts({ descriptor, release, donorComparison, componentDonorComparison, manifest, crosswalk, ...overrides });
+  const donorSource = await readFile(resolve(packageRoot, 'generated/r1-2-donor-comparison.json'), 'utf8');
+  const donorComparison = JSON.parse(donorSource.replace(/^\/\/ @generated-from:.*\n\/\/ @generated-content-sha256:.*\n/u, ''));
+  const crosswalk = JSON.parse(await readFile(resolve(packageRoot, '../../catalog/react-r1-2/donor-crosswalk.json'), 'utf8'));
+  const componentNames = ['Button', 'Breadcrumbs', 'Checkbox', 'Disclosure', 'DisclosureGroup', 'Group', 'Link', 'Meter', 'ProgressBar', 'Separator', 'ToggleButton', 'Autocomplete', 'CheckboxGroup', 'DateField', 'DatePicker', 'DateRangePicker', 'Form', 'NumberField', 'SearchField', 'Switch', 'TextField', 'TimeField'];
+  const assertGenerated = (overrides = {}) => assertReactR12GeneratedContracts({ descriptor, release, donorComparison, manifest, componentNames, crosswalk, ...overrides });
   assertGenerated();
   const unknownDescriptor = structuredClone(descriptor);
-  unknownDescriptor.unknown = true;
-  assert.throws(() => assertGenerated({ descriptor: unknownDescriptor }), /CORE_REACT_R11_DESCRIPTOR_INVALID/u);
+  unknownDescriptor.support = 'drifted support claim';
+  assert.throws(() => assertGenerated({ descriptor: unknownDescriptor }), /CORE_REACT_R12_DESCRIPTOR_INVALID/u);
   const missingRelease = structuredClone(release);
   delete missingRelease.publication;
-  assert.throws(() => assertGenerated({ release: missingRelease }), /CORE_REACT_R11_RELEASE_INVALID/u);
+  assert.throws(() => assertGenerated({ release: missingRelease }), /CORE_REACT_R12_RELEASE_INVALID/u);
   const publishableManifest = structuredClone(manifest);
   publishableManifest.private = false;
-  assert.throws(() => assertGenerated({ manifest: publishableManifest }), /CORE_REACT_R11_PUBLICATION_GUARD_MISSING/u);
+  assert.throws(() => assertGenerated({ manifest: publishableManifest }), /CORE_REACT_R12_PUBLICATION_GUARD_MISSING/u);
   const changedComparison = structuredClone(donorComparison);
   changedComparison.donor.commit = '0'.repeat(40);
-  assert.throws(() => assertGenerated({ donorComparison: changedComparison }), /CORE_REACT_R11_DONOR_COMPARISON_DRIFT/u);
+  assert.throws(() => assertGenerated({ donorComparison: changedComparison }), /CORE_REACT_R12_DONOR_COMPARISON_(?:INVALID|DRIFT)/u);
   const changedCrosswalk = structuredClone(crosswalk);
-  changedCrosswalk.components.link.rules[0].core = 'semantic.action.background';
-  assert.throws(() => assertGenerated({ crosswalk: changedCrosswalk }), /CORE_REACT_R11_COMPONENT_DONOR_COMPARISON_DRIFT/u);
+  changedCrosswalk.components['date-field'].rules[0].core = 'semantic.action.background';
+  assert.throws(() => assertGenerated({ crosswalk: changedCrosswalk }), /CORE_REACT_R12_(?:DONOR_PROVENANCE|DONOR_COMPARISON)_DRIFT/u);
 });
 
 test('R1.0 donor inputs are exact, fully crosswalked, licensed, and dependency-free', async () => {

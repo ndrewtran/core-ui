@@ -157,7 +157,7 @@ test('E-G0.2-01 negative: generated bundle matches its canonical source manifest
   assert.equal(baseBundle.catalogDigest, canonicalDigest(preimage(baseBundle)));
 });
 
-test('R1.1 guide sources preserve Markdown newlines', async () => {
+test('R1.2 guide sources preserve Markdown newlines', async () => {
   const manifest = JSON.parse(await readFile(
     join(repositoryRoot, 'packages/catalog/catalog-sources.json'),
     'utf8',
@@ -165,7 +165,7 @@ test('R1.1 guide sources preserve Markdown newlines', async () => {
   const guideSources = manifest.records
     .filter(({ family, sourcePath }) => family === 'guide' && sourcePath?.includes('-usage.md'))
     .map(({ sourcePath }) => sourcePath);
-  assert.equal(guideSources.length, 11);
+  assert.equal(guideSources.length, 22);
   for (const sourcePath of guideSources) {
     const source = await readFile(join(repositoryRoot, sourcePath), 'utf8');
     assert.doesNotMatch(source, /\\n/u, sourcePath);
