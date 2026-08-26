@@ -1,5 +1,5 @@
 /* @generated-from: packages/react/src/generate.mjs
- * @generated-content-sha256: sha256:41eb6542364925b0500cd01462c3c745217d42fd046c62cb95154fc254eb7a11
+ * @generated-content-sha256: sha256:dc5e3de3469b52b77f71864d9545d258b8bd943761e225498dd4d53bea0788bb
  */
 :root {
   --core-component-button-background: #2b2826;
@@ -583,6 +583,9 @@
   .core-autocomplete-option[aria-selected='true'], .core-calendar-cell[aria-selected='true'], .core-calendar-cell[data-selected] { outline: 2px solid currentColor; outline-offset: -2px; }
 }
 
+.core-file-trigger { display: inline-flex; align-items: center; justify-content: center; min-block-size: var(--core-semantic-control-min-height); padding: var(--core-semantic-control-padding-inline); border: 1px solid currentColor; border-radius: var(--core-semantic-control-radius); background: var(--core-semantic-action-background); color: var(--core-semantic-action-foreground); font: inherit; cursor: pointer; }
+.core-file-trigger:focus-visible { outline: 2px solid var(--core-semantic-focus-ring); outline-offset: 2px; }
+.core-file-trigger[disabled], .core-file-trigger[data-disabled] { cursor: not-allowed; opacity: .55; }
 .core-drop-zone { display: grid; place-items: center; min-block-size: 8rem; padding: var(--core-semantic-control-padding-inline); border: 2px dashed var(--core-semantic-selection-track); border-radius: var(--core-semantic-control-radius); cursor: pointer; transition: background-color var(--core-semantic-motion-feedback) ease, border-color var(--core-semantic-motion-feedback) ease; }
 .core-drop-zone[data-hovered], .core-drop-zone[data-drop-target] { background: color-mix(in srgb, var(--core-semantic-selection-track) 16%, transparent); }
 .core-drop-zone[data-focus-visible] { outline: 2px solid var(--core-semantic-focus-ring); outline-offset: 2px; }
@@ -609,3 +612,18 @@
 @media (prefers-reduced-motion: reduce) { .core-drop-zone, .core-dialog, .core-popover, .core-preview-trigger, .core-tooltip, .core-toast { animation: none; transition: none; } }
 @media (forced-colors: active) { .core-drop-zone, .core-dialog, .core-popover, .core-preview-trigger, .core-tooltip, .core-toast { border-color: ButtonText; background: Canvas; color: CanvasText; box-shadow: none; } .core-dialog-backdrop { background: Canvas; } .core-drop-zone[data-focus-visible], .core-dialog:focus-visible, .core-popover:focus-visible, .core-preview-trigger:focus-visible, .core-tooltip:focus-visible, .core-dialog-close:focus-visible, .core-toast-dismiss:focus-visible { outline-color: Highlight; } .core-toast[data-variant='success'] { border-color: Highlight; } }
 @media (prefers-contrast: more) { .core-drop-zone, .core-dialog, .core-popover, .core-preview-trigger, .core-tooltip, .core-toast { border-width: 2px; } }
+
+@media (forced-colors: active) {
+  .core-r1-button, .core-file-trigger {
+    border-color: ButtonText;
+    background: ButtonFace;
+    color: ButtonText;
+    box-shadow: none;
+  }
+  .core-r1-button[data-disabled], .core-file-trigger[disabled], .core-file-trigger[data-disabled] {
+    border-color: GrayText;
+    color: GrayText;
+  }
+  .core-r1-button[data-focus-visible], .core-file-trigger:focus-visible { outline-color: Highlight; }
+  .core-toggle-button[aria-pressed='true'] { background: Highlight; color: HighlightText; }
+}

@@ -443,3 +443,208 @@ export function assertReactR14GeneratedContracts({ descriptor, release, donorCom
     || !/from ['"]react-aria-components['"]/u.test(overlaysSource)) fail('CORE_REACT_R14_RUNTIME_EXPORT_DRIFT');
   return { descriptor, release, donorComparison };
 }
+
+const R15_EVIDENCE_IDS = Object.freeze([
+  'E-R1.5-01', 'E-R1.5-02', 'E-R1.5-03', 'E-R1.5-04', 'E-R1.5-05', 'E-R1.5-06',
+]);
+
+function r15TrancheEvidence(tranche) {
+  const count = tranche === 'R1.3' ? 5 : tranche === 'R1.4' ? 6 : 4;
+  return Array.from({ length: count }, (_, index) => `E-${tranche}-${String(index + 1).padStart(2, '0')}`);
+}
+
+function r15Slug(artifact) {
+  return artifact.id.slice('core:component:'.length);
+}
+
+/** Validates the R1.5 closure without introducing another component owner. */
+export function assertReactR15GeneratedContracts({
+  closure,
+  snapshot,
+  componentArtifacts,
+  crosswalks,
+  descriptor,
+  release,
+  donorComparison,
+  closureRecord,
+  manifest,
+  runtimeSources,
+  styles,
+}) {
+  const failR15 = (code) => fail(`CORE_REACT_R15_${code}`);
+  if (closure?.schema !== 'core-ui-react-r1-5-closure-v1'
+    || closure.tranche !== 'R1.5'
+    || !same(Object.keys(closure).sort(), ['advisories', 'agentDiscovery', 'compatibility', 'evidenceCapture', 'exceptions', 'performance', 'publication', 'schema', 'tranche'].sort())
+    || closure.compatibility?.runtimeProfile !== 'web.react'
+    || closure.compatibility?.node !== '>=24.19.0 <25'
+    || closure.compatibility?.react !== '>=19.2.0 <20'
+    || closure.compatibility?.reactDom !== '>=19.2.0 <20'
+    || closure.compatibility?.browserMatrix?.browser !== 'Google Chrome 151'
+    || closure.compatibility?.browserMatrix?.axe !== '4.13.0'
+    || closure.compatibility?.browserMatrix?.source !== 'apps/react-playground/test/browser.test.mjs'
+    || !same(closure.compatibility?.browserMatrix?.profiles, [
+      'light/standard/full/comfortable/ltr',
+      'dark/standard/full/comfortable/ltr',
+      'light/more/full/comfortable/ltr',
+      'light/standard/reduced/comfortable/ltr',
+      'light/standard/full/compact/ltr',
+      'light/standard/full/comfortable/rtl',
+    ])
+    || closure.compatibility?.status !== 'representative-baseline'
+    || closure.performance?.status !== 'representative-baseline'
+    || closure.performance?.method !== 'release preparation measures packed import and SSR'
+    || closure.performance?.budgets?.packedImportMilliseconds !== 2000
+    || closure.performance?.budgets?.ssrMilliseconds !== 1000
+    || closure.agentDiscovery?.status !== 'informational'
+    || closure.agentDiscovery?.claim !== 'no support or release gate'
+    || !same(Object.keys(closure.evidenceCapture ?? {}).sort(), ['allowed', 'collection', 'prohibited', 'retention'].sort())
+    || closure.evidenceCapture?.collection !== 'default-off'
+    || !same(closure.evidenceCapture?.allowed, ['sanitized repository-relative paths', 'canonical IDs'])
+    || !same(closure.evidenceCapture?.prohibited, ['credentials', 'consumer data'])
+    || closure.evidenceCapture?.retention !== 'protected PR check/review logs'
+    || !same(closure.exceptions, [])
+    || !same(closure.advisories, [])
+    || closure.publication?.candidateVersion !== '0.1.0-rc.1'
+    || closure.publication?.status !== 'disabled'
+    || closure.publication?.private !== true) failR15('CLOSURE_SOURCE_INVALID');
+
+  if (!Array.isArray(snapshot?.families) || snapshot.families.length !== 53
+    || !Array.isArray(componentArtifacts) || componentArtifacts.length !== 53
+    || new Set(componentArtifacts.map(r15Slug)).size !== 53) failR15('FAMILY_COUNT_INVALID');
+
+  const artifactsBySlug = new Map(componentArtifacts.map((artifact) => [r15Slug(artifact), artifact]));
+  const snapshotByFamily = new Map(snapshot.families.map((entry) => [entry.family, entry]));
+  const familySlug = (family) => family === 'Modal'
+    ? 'dialog'
+    : family.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
+  const familySources = snapshot.families.map((upstreamFamily) => {
+    const slug = familySlug(upstreamFamily.family);
+    const artifact = artifactsBySlug.get(slug);
+    const runtimeSource = Object.keys(runtimeSources ?? {}).find((path) => (
+      new RegExp(`export\\s+const\\s+${artifact?.name}\\b`, 'u').test(runtimeSources[path])
+    ));
+    return {
+      family: upstreamFamily.family,
+      slug,
+      rootExport: upstreamFamily.rootExport,
+      rootKind: upstreamFamily.rootKind,
+      exportName: artifact?.name,
+      tranche: upstreamFamily.tranche,
+      runtimeSource,
+      artifactPath: `catalog/components/${slug}/artifact.json`,
+    };
+  });
+  if (familySources.some(({ exportName, runtimeSource }) => !exportName || !runtimeSource)
+    || !Array.isArray(closureRecord?.families)
+    || closureRecord.families.length !== 53
+    || new Set(closureRecord.families.map(({ slug }) => slug)).size !== 53
+    || !same(closureRecord.families.map(({ family }) => family).sort(), familySources.map(({ family }) => family).sort())
+    || closureRecord.upstream?.package !== 'react-aria-components'
+    || closureRecord.upstream?.version !== '1.20.0'
+    || closureRecord.upstream?.commit !== EXPECTED_UPSTREAM.commit
+    || closureRecord.upstream?.tree !== EXPECTED_UPSTREAM.tree
+    || closureRecord.upstream?.rawExports !== 613
+    || closureRecord.upstream?.documentedFamilies !== 53
+    || !same(closureRecord.upstream?.rawDispositionCounts, {
+      'committed-family-root': 53,
+      'family-part': 75,
+      'internal-runtime-support': 158,
+      'internal-type-support': 327,
+    })
+    || closureRecord.donor?.name !== EXPECTED_DONOR.name
+    || closureRecord.donor?.commit !== EXPECTED_DONOR.commit
+    || closureRecord.donor?.tree !== EXPECTED_DONOR.tree
+    || closureRecord.donor?.dependency !== false
+    || closureRecord.donor?.ownership !== 'Core-owned token/style results') failR15('FAMILY_GRAPH_INVALID');
+  const crosswalkBySlug = new Map();
+  for (const source of crosswalks) {
+    if (source?.donor?.commit !== EXPECTED_DONOR.commit || source.donor.tree !== EXPECTED_DONOR.tree || (source.dependency !== undefined && source.dependency !== false)) failR15('DONOR_IDENTITY_INVALID');
+    for (const [slug, entry] of Object.entries(source.components ?? {})) crosswalkBySlug.set(slug, entry);
+  }
+  const buttonCrosswalk = crosswalks.find((source) => source?.button)?.button;
+  const buttonDonorInputs = Object.entries(crosswalks.find((source) => source?.button)?.buttonBlobs ?? {}).map(([kind, blob]) => ({ kind, blob }));
+  if (!buttonCrosswalk || crosswalkBySlug.size !== 52) failR15('DONOR_FAMILY_MAP_INVALID');
+
+  for (const source of familySources) {
+    const artifact = artifactsBySlug.get(source.slug);
+    const upstream = snapshotByFamily.get(source.family);
+    const donor = source.slug === 'button' ? buttonCrosswalk : crosswalkBySlug.get(source.slug);
+    if (!artifact || !upstream || !donor
+      || source.rootExport !== upstream.rootExport
+      || source.tranche !== upstream.tranche
+      || source.artifactPath !== `catalog/components/${source.slug}/artifact.json`
+      || !['R1.1', 'R1.2', 'R1.3', 'R1.4'].includes(source.tranche)
+      || artifact.name !== source.exportName
+      || artifact.lifecycle !== 'experimental'
+      || source.runtimeSource !== `packages/react/src/${source.runtimeSource.split('/').at(-1)}`) failR15('FAMILY_SOURCE_INVALID');
+    const bindingId = `core:component:${source.slug}#web.react`;
+    const binding = artifact.bindings?.['web.react'];
+    if (!binding || binding.lifecycle !== 'experimental' || binding.strategy !== 'direct'
+      || !Array.isArray(binding.api?.props) || binding.api.props.some((prop) => /^is[A-Z]/u.test(prop))
+      || donor.disposition !== 'adapt' && donor.disposition !== 'no-applicable-donor') failR15('FAMILY_CONTRACT_INVALID');
+    if (!Array.isArray(donor.consumedRules) || !Array.isArray(donor.rules)
+      || !same(donor.consumedRules, donor.rules.map(({ input }) => input))) failR15('DONOR_RULE_INVALID');
+    const donorInputs = source.slug === 'button' ? buttonDonorInputs : donor.donorInputs;
+    if (donor.disposition === 'no-applicable-donor'
+      && (donorInputs.length || donor.rules.length || donor.tokenHooks?.length)) failR15('DONOR_ABSENCE_INVALID');
+    if (donor.disposition === 'adapt' && !donorInputs.length) failR15('DONOR_ADAPTATION_INVALID');
+    for (const rule of donor.rules) {
+      if (!rule.core || !['adapt', 'reasoned-non-token-adaptation'].includes(rule.disposition)) failR15('DONOR_RULE_INVALID');
+    }
+    const runtimeSource = runtimeSources?.[source.runtimeSource];
+    if (typeof runtimeSource !== 'string' || !new RegExp(`export\\s+const\\s+${source.exportName}\\b`, 'u').test(runtimeSource)) failR15('RUNTIME_EXPORT_INVALID');
+    const expectedDonorHooks = donor.tokenHooks ?? [...new Set(donor.rules.map(({ core }) => core).filter((core) => core.includes('.')))];
+    if (!styles.includes(`.core-${source.slug}`)
+      || !Array.isArray(expectedDonorHooks)
+      || expectedDonorHooks.some((hook) => !styles.includes(`--core-${hook.replaceAll('.', '-')}`))) failR15('STYLE_OWNERSHIP_INVALID');
+    const familyClosure = closureRecord?.families?.find(({ slug }) => slug === source.slug);
+    const descriptorBinding = descriptor.bindings?.find(({ binding: value }) => value === bindingId);
+    const descriptorExport = descriptor.exports?.find(({ binding: value }) => value === bindingId);
+    const releaseExport = release.componentExports?.find(({ binding: value }) => value === bindingId);
+    const releaseBinding = release.bindings?.find(({ binding: value }) => value === bindingId);
+    const donorComparisonEntry = donorComparison.components?.find(({ binding: value }) => value === bindingId);
+    if (!familyClosure
+      || familyClosure.family !== source.family
+      || familyClosure.root?.export !== source.rootExport
+      || familyClosure.root?.kind !== source.rootKind
+      || familyClosure.contract?.artifact !== source.artifactPath
+      || familyClosure.contract?.binding !== bindingId
+      || familyClosure.contract?.lifecycle !== artifact.lifecycle
+      || !same(familyClosure.contract?.states, artifact.states)
+      || !same(familyClosure.contract?.api, binding.api)
+      || familyClosure.export?.name !== source.exportName
+      || familyClosure.export?.module !== '.'
+      || familyClosure.lifecycle?.binding !== binding.lifecycle
+      || !same(familyClosure.evidence?.tranche, r15TrancheEvidence(source.tranche))
+      || !same(familyClosure.evidence?.final, R15_EVIDENCE_IDS)
+      || familyClosure.evidence?.status !== 'pending'
+      || familyClosure.evidence?.support !== 'unproved; R1.5 React exports only'
+      || familyClosure.packed?.binding !== bindingId
+      || familyClosure.packed?.export !== source.exportName
+      || familyClosure.packed?.runtimeProfile !== 'web.react'
+      || familyClosure.packed?.selector !== `.core-${source.slug}`
+      || familyClosure.donor?.disposition !== donor.disposition
+      || familyClosure.donor?.ownership !== 'Core-owned token/style results') failR15('FAMILY_CLOSURE_INVALID');
+    if (!descriptorBinding || !descriptorExport || descriptorBinding.export !== source.exportName
+      || descriptorBinding.strategy !== 'direct' || descriptorBinding.runtimeProfile !== 'web.react'
+      || descriptorBinding.selector !== `.core-${source.slug}` || descriptorExport.name !== source.exportName
+      || !releaseExport || releaseExport.name !== source.exportName || !releaseBinding
+      || releaseBinding.export !== source.exportName || releaseBinding.runtimeProfile !== 'web.react'
+      || !donorComparisonEntry || donorComparisonEntry.disposition !== donor.disposition
+      || donorComparisonEntry.selector !== `.core-${source.slug}`) failR15('PROJECTION_PARITY_INVALID');
+  }
+
+  if (manifest?.private !== true
+    || descriptor?.support !== 'unproved; R1.5 React exports only'
+    || descriptor?.bindings?.length !== 53 || descriptor?.exports?.length !== 53
+    || release?.packagePrivate !== true || release?.componentExports?.length !== 53
+    || release?.bindings?.length !== 53 || release?.catalog?.status !== 'bound'
+    || release.catalog.components?.length !== 53
+    || release?.evidence?.status !== 'pending' || !same(release.evidence.ids, R15_EVIDENCE_IDS)
+    || release?.publication?.status !== 'disabled'
+    || donorComparison?.schema !== 'core-ui-react-r1-5-donor-comparison-v1'
+    || donorComparison?.components?.length !== 53) failR15('RELEASE_CLOSURE_INVALID');
+  return { closure, closureRecord, descriptor, release, donorComparison };
+}
+
+export const assertReactR15ClosureContracts = assertReactR15GeneratedContracts;

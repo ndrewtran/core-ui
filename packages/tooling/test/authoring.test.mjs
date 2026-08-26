@@ -13,6 +13,7 @@ import {
   explainRevisions,
   loadRepositoryAuthoringContext,
   previewAutofix,
+  previewChangeIntent,
   scaffoldComponent,
   semanticDiff,
 } from '../src/index.mjs';
@@ -487,6 +488,98 @@ test('E-G0.5-04: affected closure is graph-derived and extends through declared 
     (error) => error instanceof AuthoringPolicyError
       && error.ruleId === 'authoring.closure.source-undeclared',
   );
+});
+
+test('E-R1.5-04: change intent previews canonical impact without authorizing a write', async () => {
+  const { context, component, revisionContext } = await setup();
+  const after = structuredClone(component.record);
+  after.summary = `${after.summary} Updated`;
+  const intent = previewChangeIntent({
+    context,
+    family: 'component',
+    recordPath: component.source.record,
+    before: component.record,
+    after,
+    objective: 'Clarify the Button summary.',
+    revisionContext,
+  });
+  assert.equal(intent.mode, 'preview-only');
+  assert.deepEqual(intent.base, {
+    sourceRevision: context.sourceRevision,
+    artifactId: component.id,
+    recordPath: component.source.record,
+  });
+  assert.equal(intent.objective, 'Clarify the Button summary.');
+  assert.deepEqual(intent.writeSet, [{
+    path: component.source.record,
+    artifactId: component.id,
+    bytes: `${canonicalJson(after)}\n`,
+  }]);
+  assert.equal(intent.semantic.changes.length, 1);
+  assert.equal(intent.versionEffect, 'patch');
+  assert.ok(intent.invalidated.artifacts.includes(component.id));
+  assert.ok(intent.invalidated.projections.includes('packages/catalog/generated/catalog.json'));
+  assert.ok(intent.invalidated.packages.some(({ name }) => name === '@core-ui/catalog'));
+  assert.ok(intent.invalidated.checks.includes('pnpm --filter @core-ui/catalog check'));
+  assert.equal(intent.proofEffects.status, 'pending');
+  assert.equal(intent.readiness.status, 'not-ready');
+  assert.equal(intent.confirmationPolicy.requiresConfirmation, false);
+  assert.equal(Object.isFrozen(intent), true);
+  assert.equal(component.record.summary.endsWith('Updated'), false);
+});
+
+test('E-R1.5-04 negative: change intent rejects stale bases and invalid proposed sources', async () => {
+  const { context, component, revisionContext } = await setup();
+  const after = structuredClone(component.record);
+  after.summary = `${after.summary} Updated`;
+  const stale = structuredClone(component.record);
+  stale.summary = `${stale.summary} Stale`;
+  assert.throws(
+    () => previewChangeIntent({
+      context,
+      recordPath: component.source.record,
+      before: stale,
+      after,
+      objective: 'Clarify the Button summary.',
+      revisionContext,
+    }),
+    (error) => error instanceof AuthoringPolicyError
+      && error.ruleId === 'authoring.change-intent.base-drift',
+  );
+  const invalid = structuredClone(component.record);
+  invalid.summary = '';
+  assert.throws(
+    () => previewChangeIntent({
+      context,
+      recordPath: component.source.record,
+      before: component.record,
+      after: invalid,
+      objective: 'Clarify the Button summary.',
+      revisionContext,
+    }),
+    (error) => error instanceof AuthoringPolicyError
+      && error.ruleId === 'authoring.change-intent.proposed-invalid',
+  );
+});
+
+test('E-R1.5-02: every React family and example source passes canonical diagnosis', async () => {
+  const { context } = await setup();
+  const components = context.catalogBundle.artifacts.filter(({ kind }) => kind === 'component');
+  const examples = context.catalogBundle.artifacts.filter(({ kind, record }) => (
+    kind === 'example' && record.binding?.ref?.endsWith('#web.react')
+  ));
+  assert.equal(components.length, 53);
+  assert.equal(examples.length, 53);
+  for (const artifact of [...components, ...examples]) {
+    const diagnosis = diagnoseCanonicalSource({
+      context,
+      family: artifact.kind,
+      record: artifact.record,
+      recordPath: artifact.source.record,
+    });
+    assert.equal(diagnosis.valid, true, artifact.id);
+    assert.deepEqual(diagnosis.diagnostics, [], artifact.id);
+  }
 });
 
 test('E-G0.5-04: an injected stable field must couple scaffold, diff, diagnostics, and closure', async () => {
