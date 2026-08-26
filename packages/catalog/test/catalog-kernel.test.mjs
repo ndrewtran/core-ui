@@ -51,6 +51,15 @@ const R13_COMPONENTS = Object.freeze([
   ['tree', 'Tree'],
   ['virtualizer', 'Virtualizer'],
 ]);
+const R14_COMPONENTS = Object.freeze([
+  ['drop-zone', 'DropZone'],
+  ['file-trigger', 'FileTrigger'],
+  ['dialog', 'Dialog'],
+  ['popover', 'Popover'],
+  ['preview-trigger', 'PreviewTrigger'],
+  ['toast', 'Toast'],
+  ['tooltip', 'Tooltip'],
+]);
 
 function preimage(bundle) {
   const { catalogDigest: _catalogDigest, ...value } = bundle;
@@ -183,7 +192,7 @@ test('E-G0.2-01 negative: generated bundle matches its canonical source manifest
   assert.equal(baseBundle.catalogDigest, canonicalDigest(preimage(baseBundle)));
 });
 
-test('R1.3 guide sources preserve Markdown newlines', async () => {
+test('R1.4 guide sources preserve Markdown newlines', async () => {
   const manifest = JSON.parse(await readFile(
     join(repositoryRoot, 'packages/catalog/catalog-sources.json'),
     'utf8',
@@ -191,11 +200,27 @@ test('R1.3 guide sources preserve Markdown newlines', async () => {
   const guideSources = manifest.records
     .filter(({ family, sourcePath }) => family === 'guide' && sourcePath?.includes('-usage.md'))
     .map(({ sourcePath }) => sourcePath);
-  assert.equal(guideSources.length, 46);
+  assert.equal(guideSources.length, 53);
   for (const sourcePath of guideSources) {
     const source = await readFile(join(repositoryRoot, sourcePath), 'utf8');
     assert.doesNotMatch(source, /\\n/u, sourcePath);
     assert.ok(source.includes('\n\n'), sourcePath);
+  }
+});
+
+test('R1.4 catalog closure registers and discovers every canonical family', async () => {
+  const manifest = JSON.parse(await readFile(
+    join(repositoryRoot, 'packages/catalog/catalog-sources.json'),
+    'utf8',
+  ));
+  const sourcePaths = new Set(manifest.records.map(({ path }) => path));
+  for (const [slug, name] of R14_COMPONENTS) {
+    const id = `core:component:${slug}`;
+    assert.equal(sourcePaths.has(`catalog/components/${slug}/artifact.json`), true, `${name} artifact source`);
+    assert.equal(sourcePaths.has(`catalog/components/${slug}/examples/react/basic.example.json`), true, `${name} example source`);
+    assert.equal(getArtifact({ id, detail: 'brief' }).data.artifact.id, id, `${name} canonical id`);
+    assert.equal(searchArtifacts({ query: name, limit: 100, detail: 'brief' }).data.items.some((item) => item.id === id), true, `${name} canonical name search`);
+    assert.equal(searchArtifacts({ query: id, limit: 100, detail: 'brief' }).data.items.some((item) => item.id === id), true, `${name} canonical id search`);
   }
 });
 

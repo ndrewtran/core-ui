@@ -1,5 +1,5 @@
 /* @generated-from: packages/react/src/generate.mjs
- * @generated-content-sha256: sha256:c992c779469007fe2de643dda133af226780763aaa61a04c39c67738acd5f3d4
+ * @generated-content-sha256: sha256:41eb6542364925b0500cd01462c3c745217d42fd046c62cb95154fc254eb7a11
  */
 :root {
   --core-component-button-background: #2b2826;
@@ -582,3 +582,30 @@
   .core-field-label, .core-field-error { font-weight: 700; }
   .core-autocomplete-option[aria-selected='true'], .core-calendar-cell[aria-selected='true'], .core-calendar-cell[data-selected] { outline: 2px solid currentColor; outline-offset: -2px; }
 }
+
+.core-drop-zone { display: grid; place-items: center; min-block-size: 8rem; padding: var(--core-semantic-control-padding-inline); border: 2px dashed var(--core-semantic-selection-track); border-radius: var(--core-semantic-control-radius); cursor: pointer; transition: background-color var(--core-semantic-motion-feedback) ease, border-color var(--core-semantic-motion-feedback) ease; }
+.core-drop-zone[data-hovered], .core-drop-zone[data-drop-target] { background: color-mix(in srgb, var(--core-semantic-selection-track) 16%, transparent); }
+.core-drop-zone[data-focus-visible] { outline: 2px solid var(--core-semantic-focus-ring); outline-offset: 2px; }
+.core-drop-zone[data-disabled] { cursor: not-allowed; opacity: .5; }
+.core-dialog-backdrop { z-index: 1000; display: grid; place-items: center; padding: var(--core-semantic-control-padding-inline); background: rgb(0 0 0 / 55%); }
+.core-dialog { display: grid; box-sizing: border-box; inline-size: min(100%, 36rem); max-block-size: calc(100vh - 2 * var(--core-semantic-control-padding-inline)); overflow: auto; padding: var(--core-semantic-control-padding-inline); border: 1px solid currentColor; border-radius: var(--core-semantic-control-radius); background: var(--core-semantic-overlay-background); color: inherit; box-shadow: 0 1rem 3rem rgb(0 0 0 / 35%); outline: none; animation: core-overlay-enter var(--core-semantic-motion-feedback) ease-out; }
+.core-dialog:focus-visible { outline: 2px solid var(--core-semantic-focus-ring); outline-offset: 2px; }
+.core-dialog-title { margin: 0 2rem 0 0; font: inherit; font-weight: 700; }
+.core-dialog-content { margin-block-start: var(--core-semantic-control-padding-inline); }
+.core-dialog-close { grid-row: 1; justify-self: end; border: 0; background: transparent; color: inherit; font: inherit; font-size: 1.25rem; cursor: pointer; }
+.core-dialog-close:focus-visible, .core-toast-dismiss:focus-visible { outline: 2px solid var(--core-semantic-focus-ring); outline-offset: 2px; }
+.core-popover, .core-preview-trigger, .core-tooltip { z-index: 1001; max-inline-size: min(24rem, calc(100vw - 2 * var(--core-semantic-control-padding-inline))); padding: var(--core-semantic-control-padding-inline); border: 1px solid currentColor; border-radius: var(--core-semantic-control-radius); background: var(--core-semantic-overlay-background); color: inherit; box-shadow: 0 .5rem 1.5rem rgb(0 0 0 / 24%); animation: core-overlay-enter var(--core-semantic-motion-feedback) ease-out; }
+.core-popover:focus-visible, .core-preview-trigger:focus-visible, .core-tooltip:focus-visible { outline: 2px solid var(--core-semantic-focus-ring); outline-offset: 2px; }
+.core-tooltip { max-inline-size: 20rem; font-size: .875rem; pointer-events: none; }
+.core-toast-region { position: fixed; z-index: 1100; inset-block-end: var(--core-semantic-control-padding-inline); inset-inline-end: var(--core-semantic-control-padding-inline); display: grid; gap: var(--core-reference-dimension-space-2xs); inline-size: min(24rem, calc(100vw - 2 * var(--core-semantic-control-padding-inline))); }
+.core-toast { display: grid; grid-template-columns: 1fr auto; gap: .25rem var(--core-semantic-control-padding-inline); padding: var(--core-semantic-control-padding-inline); border: 1px solid currentColor; border-radius: var(--core-semantic-control-radius); background: var(--core-semantic-overlay-background); color: inherit; box-shadow: 0 .5rem 1.5rem rgb(0 0 0 / 24%); animation: core-overlay-enter var(--core-semantic-motion-feedback) ease-out; }
+.core-toast-title, .core-toast-message { grid-column: 1; }
+.core-toast-title-fallback { position: absolute; inline-size: 1px; block-size: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+.core-toast-dismiss { grid-column: 2; grid-row: 1 / span 2; align-self: start; border: 0; background: transparent; color: inherit; font: inherit; cursor: pointer; }
+.core-toast[data-variant='success'] { border-color: var(--core-semantic-selection-track); }
+.core-toast[data-variant='warning'] { border-color: currentColor; }
+.core-toast[data-variant='danger'] { border-color: var(--core-semantic-feedback-invalid); }
+@keyframes core-overlay-enter { from { opacity: 0; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .core-drop-zone, .core-dialog, .core-popover, .core-preview-trigger, .core-tooltip, .core-toast { animation: none; transition: none; } }
+@media (forced-colors: active) { .core-drop-zone, .core-dialog, .core-popover, .core-preview-trigger, .core-tooltip, .core-toast { border-color: ButtonText; background: Canvas; color: CanvasText; box-shadow: none; } .core-dialog-backdrop { background: Canvas; } .core-drop-zone[data-focus-visible], .core-dialog:focus-visible, .core-popover:focus-visible, .core-preview-trigger:focus-visible, .core-tooltip:focus-visible, .core-dialog-close:focus-visible, .core-toast-dismiss:focus-visible { outline-color: Highlight; } .core-toast[data-variant='success'] { border-color: Highlight; } }
+@media (prefers-contrast: more) { .core-drop-zone, .core-dialog, .core-popover, .core-preview-trigger, .core-tooltip, .core-toast { border-width: 2px; } }

@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto';
 import { canonicalJson, validateContractDocument } from '@core-ui/schema';
 import { EXPECTED_R12_COMPONENT_SLUGS, EXPECTED_R12_DONOR_CONTRACT } from './r1-2-donor-contract.mjs';
 import { EXPECTED_R13_COMPONENT_SLUGS, EXPECTED_R13_DONOR_CONTRACT } from './r1-3-donor-contract.mjs';
+import { EXPECTED_R14_COMPONENT_SLUGS, EXPECTED_R14_DONOR_CONTRACT } from './r1-4-donor-contract.mjs';
 
 const EXPECTED_UPSTREAM = Object.freeze({
   package: 'react-aria-components',
@@ -377,5 +378,68 @@ export function assertReactR13GeneratedContracts({ descriptor, release, donorCom
   }
   const names = ['Calendar', 'ColorArea', 'ColorField', 'ColorPicker', 'ColorSlider', 'ColorSwatch', 'ColorSwatchPicker', 'ColorWheel', 'ComboBox', 'GridList', 'ListBox', 'Menu', 'RadioGroup', 'RangeCalendar', 'Select', 'Slider', 'Table', 'Tabs', 'TagGroup', 'ToggleButtonGroup', 'TokenField', 'Toolbar', 'Tree', 'Virtualizer'];
   if (!collectionsSource || names.some((name) => !collectionsSource.includes(`export const ${name}`))) fail('CORE_REACT_R13_RUNTIME_EXPORT_DRIFT');
+  return { descriptor, release, donorComparison };
+}
+
+/** Validates the R1.4 overlay projection and its stable Core-owned surface. */
+export function assertReactR14GeneratedContracts({ descriptor, release, donorComparison, manifest, componentNames, crosswalk, overlaysSource }) {
+  if (manifest.private !== true || release.packagePrivate !== true) fail('CORE_REACT_R14_PUBLICATION_GUARD_MISSING');
+  if (!same(crosswalk, EXPECTED_R14_DONOR_CONTRACT)
+    || crosswalk.schema !== 'core-ui-react-r1-4-donor-crosswalk-v1'
+    || crosswalk.tranche !== 'R1.4'
+    || crosswalk.dependency !== false
+    || !same(Object.keys(crosswalk.components ?? {}).sort(), [...EXPECTED_R14_COMPONENT_SLUGS].sort())
+    || !same(crosswalk.donor, EXPECTED_DONOR)) fail('CORE_REACT_R14_DONOR_PROVENANCE_DRIFT');
+  for (const slug of EXPECTED_R14_COMPONENT_SLUGS) {
+    const entry = crosswalk.components[slug];
+    if (!entry || entry.disposition !== 'adapt' || !Array.isArray(entry.donorInputs) || entry.donorInputs.length === 0
+      || !Array.isArray(entry.rules) || !Array.isArray(entry.consumedRules) || !Array.isArray(entry.tokenHooks)
+      || !same(entry.consumedRules, entry.rules.map(({ input }) => input))) fail('CORE_REACT_R14_DONOR_CROSSWALK_DRIFT');
+    for (const input of entry.donorInputs) {
+      if (!/^packages\/(?:styles|react)\/.+$/u.test(input.path) || !/^[0-9a-f]{40}$/u.test(input.blob)
+        || /^([0-9a-f])\1{39}$/u.test(input.blob)) fail('CORE_REACT_R14_DONOR_BLOB_INVALID');
+    }
+  }
+  if (!descriptor || descriptor.schema !== 'core-ui-renderer-descriptor-v1'
+    || descriptor.generatedFrom !== 'packages/react/src/generate.mjs'
+    || descriptor.package !== '@core-ui/react'
+    || descriptor.support !== 'unproved; R1.4 React exports only'
+    || descriptor.bindings.length !== 53
+    || descriptor.exports.length !== 53
+    || componentNames.length !== EXPECTED_R14_COMPONENT_SLUGS.length) fail('CORE_REACT_R14_DESCRIPTOR_INVALID');
+  for (const slug of EXPECTED_R14_COMPONENT_SLUGS) {
+    const binding = descriptor.bindings.find(({ binding: value }) => value === `core:component:${slug}#web.react`);
+    const componentExport = descriptor.exports.find(({ binding: value }) => value === `core:component:${slug}#web.react`);
+    if (!binding || !componentExport || binding.strategy !== 'direct' || binding.runtimeProfile !== 'web.react'
+      || binding.api.props.some((prop) => /^is[A-Z]/u.test(prop) || /(?:onPress|isPending|isDisabled)/u.test(prop))) {
+      fail('CORE_REACT_R14_COMPONENT_DESCRIPTOR_DRIFT');
+    }
+  }
+  if (release.schema !== 'core-ui-react-release-candidate-v1'
+    || release.lifecycle !== 'experimental'
+    || release.componentExports.length !== 53
+    || release.bindings.length !== 53
+    || !same(release.runtimeProfiles, ['web.react'])
+    || release.catalog?.status !== 'bound'
+    || release.catalog.components.length !== 53
+    || release.evidence?.status !== 'pending'
+    || !same(release.evidence.ids, ['E-R1.4-01', 'E-R1.4-02', 'E-R1.4-03', 'E-R1.4-04', 'E-R1.4-05', 'E-R1.4-06'])
+    || release.publication?.status !== 'disabled') fail('CORE_REACT_R14_RELEASE_INVALID');
+  if (donorComparison.schema !== 'core-ui-react-r1-4-donor-comparison-v1'
+    || donorComparison.generatedFrom !== 'packages/react/src/generate.mjs'
+    || !same(donorComparison.donor, EXPECTED_R14_DONOR_CONTRACT.donor)
+    || donorComparison.components.length !== EXPECTED_R14_COMPONENT_SLUGS.length) fail('CORE_REACT_R14_DONOR_COMPARISON_INVALID');
+  for (const slug of EXPECTED_R14_COMPONENT_SLUGS) {
+    const source = EXPECTED_R14_DONOR_CONTRACT.components[slug];
+    const entry = donorComparison.components.find(({ binding }) => binding === `core:component:${slug}#web.react`);
+    if (!entry || entry.disposition !== source.disposition || entry.selector !== `.core-${slug}`
+      || !same(entry.donorInputs, source.donorInputs) || !same(entry.tokenHooks, source.tokenHooks) || !same(entry.rules, source.rules)) {
+      fail('CORE_REACT_R14_DONOR_COMPARISON_DRIFT');
+    }
+  }
+  const names = ['DropZone', 'FileTrigger', 'Dialog', 'Popover', 'PreviewTrigger', 'Toast', 'ToastProvider', 'useToast', 'Tooltip'];
+  if (!overlaysSource || names.some((name) => !overlaysSource.includes(`export ${name === 'useToast' ? 'function' : 'const'} ${name}`))
+    || /export\s+const\s+Modal\b/u.test(overlaysSource)
+    || !/from ['"]react-aria-components['"]/u.test(overlaysSource)) fail('CORE_REACT_R14_RUNTIME_EXPORT_DRIFT');
   return { descriptor, release, donorComparison };
 }
