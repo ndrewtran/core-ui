@@ -699,6 +699,18 @@ snapshot, and R1.0 baseline are the common lock for R1.1-R1.4. No further
 tranche-lock decision, digest acceptance, or per-component authorization is
 required. Button is the first visible R1.1 component.
 
+The approved R1 target package graph also includes the single resolved
+`@internationalized/date@3.12.3` instance as a direct internal runtime
+dependency of `@core-ui/react`, used only for Core value adapters in exactly
+`DateField`, `DatePicker`, `DateRangePicker`, `TimeField`, `Calendar`, and
+`RangeCalendar`. Core public values remain ISO dates `YYYY-MM-DD`, local times
+`HH:mm[:ss[.fraction]]`, and Core-owned `{start,end}` ranges; no upstream
+temporal or React Aria public type, value, import path, export, lifecycle, or
+ownership may leak. Decision 0011 amendment 01's manifest/lockfile, adapter,
+derived-guidance, release-prepare, and packed-consumer assertions are later
+implementation work and add no family, Scope ID, tranche, support/lifecycle,
+or release commitment.
+
 Each bounded pull request changes the earliest canonical owners, regenerates
 projections, keeps React Aria internal, migrates applicable Tale styling into
 Core-owned CSS and token hooks, and runs focused checks proportional to the
@@ -2447,8 +2459,8 @@ valid outcomes and do not make the core product incomplete.
 | --- | --- | --- | --- |
 | R1.0 | React package/substrate and Tale styling-donor baseline | Gate 0; accepted Product Scope 6.0.2, Decision 0010 amendments 01–03, and the accepted Stage 1 snapshot through the immutable committed-source route | R1.1–R1.5 |
 | R1.1 | Foundation and simple controls | Fixed R1.0 baseline and the fixed 53-family R1.1 allocation | R1.5, eligible alpha |
-| R1.2 | Forms and field controls | Fixed R1.0 baseline and the fixed 53-family R1.2 allocation | R1.5, eligible alpha |
-| R1.3 | Collections and composites | Fixed R1.0 baseline and the fixed 53-family R1.3 allocation | R1.5, eligible alpha |
+| R1.2 | Forms and field controls | Fixed R1.0 baseline, Product Scope 6.0.3 temporal-adapter clarification, and the fixed 53-family R1.2 allocation | R1.5, eligible alpha |
+| R1.3 | Collections and composites | Fixed R1.0 baseline, Product Scope 6.0.3 temporal-adapter clarification, and the fixed 53-family R1.3 allocation | R1.5, eligible alpha |
 | R1.4 | Overlays and temporal interactions | Fixed R1.0 baseline and the fixed 53-family R1.4 allocation | R1.5, eligible alpha |
 | R1.5 | React breadth closure | R1.1–R1.4 and the fixed 53-family 53/53 closure | R1 exit |
 | R1 exit | React prerelease publication | R1.5 and exact publish authorization | P2.1; optional W1/N1/S1 activation reviews |
@@ -2626,7 +2638,7 @@ tracking, not this long-lived roadmap.
 
 ## Recommended first execution sequence
 
-1. Use Product Scope `6.0.2`, Decision 0010 amendments 01–03, the accepted
+1. Use Product Scope `6.0.3`, Decision 0010 amendments 01–03, the accepted
    Stage 1 snapshot, and the React-primary/Tale-donor Architecture/Roadmap
    authority as the existing R1 baseline. Do not interpret superseded G-series
    status or historical evidence as current R1 readiness.
@@ -2680,11 +2692,15 @@ failure.
 
 R1.0 remains the baseline milestone. The accepted fixed 53-family table,
 immutable Stage 1 snapshot, and R1.0 package/substrate baseline are the existing
-lock for all four implementation tranches. Product Scope 6.0.2 clarifies that
-ordinary R1 implementation does not require another scope lock, digest
-acceptance, or human evidence-acceptance gate. Earlier Product Scope 5.0.1 or
+lock for all four implementation tranches. Product Scope 6.0.3 carries forward
+the 6.0.2 clarification that ordinary R1 implementation does not require
+another scope lock, digest acceptance, or human evidence-acceptance gate.
+Earlier Product Scope 5.0.1 or
 Decision 0010 amendment 01–02 wording retained elsewhere in this roadmap is a
 historical audit locator only; it is not a current R1 entry or completion rule.
+R1.0 remains historically complete against Product Scope 6.0.2; Product Scope
+6.0.3 is the successor input for the approved temporal dependency in R1.2 and
+R1.3 and does not retroactively change R1.0 evidence.
 
 The immutable tranche family sets are:
 
@@ -2721,6 +2737,8 @@ affected tranche.
 
 R1 exit remains an exact prerelease of only `@core-ui/react` under `next`, with
 the already-authorized React/React DOM peer boundary and internal
-`react-aria-components@1.20.0` dependency. Every registry mutation requires a
+`react-aria-components@1.20.0` dependency plus the approved direct internal
+`@internationalized/date@3.12.3` temporal-adapter dependency limited to the six
+named value-adapter families above. Every registry mutation requires a
 separate exact publication authorization and a final registry/version/dist-tag
 collision and authorization-drift check. This authority publishes nothing.

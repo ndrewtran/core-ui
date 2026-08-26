@@ -1,5 +1,5 @@
 ---
-scopeVersion: 6.0.2
+scopeVersion: 6.0.3
 status: execution-baseline
 product: Core UI
 architecture: ./monorepo-architecture.md
@@ -34,13 +34,15 @@ tracker may reference scope and milestone IDs but cannot change product scope.
 This is not a status report. Git history records changes to product commitment;
 the tracker records delivery progress.
 
-Product Scope `6.0.2` is a patch clarification for the R1 delivery reset. It
-changes no Scope ID, commitment, family, tranche membership, public API,
-platform, package, dependency, lifecycle, support claim, release boundary,
-non-goal, or product meaning. The accepted 53-family table, immutable Stage 1
-snapshot, and R1.0 baseline remain the existing R1 lock; ordinary component
-delivery does not require another lock, digest acceptance, or human
-evidence-acceptance gate.
+Product Scope `6.0.3` is a patch clarification recording Decision 0011
+amendment 01's narrow internal temporal adapter dependency. It adds no Scope
+ID, commitment, family, tranche membership, public API, platform, package,
+lifecycle, support claim, release boundary, non-goal, or product meaning. The
+accepted 53-family table, immutable Stage 1 snapshot, and R1.0 baseline remain
+the existing R1 lock; ordinary component delivery does not require another
+lock, digest acceptance, or human evidence-acceptance gate. The package graph
+effect is internal and replaceable only, with no public package or consumer
+contract change.
 
 ## Scope vocabulary
 
@@ -749,9 +751,12 @@ accessibility, package, compatibility, integrity, or generation failures.
   `adapt`, while `defer`/`reject` requires a separately accepted exception and
   remains unexported until reconciled; absence of a donor is explicit and never
   blocks a responsible Core implementation;
-- the standalone `@core-ui/react` tarball has exact React/React DOM peers and
-  React Aria dependency, with no Core workspace runtime edge or React Aria
-  public API leak;
+- the standalone `@core-ui/react` tarball has exact React/React DOM peers,
+  `react-aria-components@1.20.0`, and the approved direct internal
+  `@internationalized/date@3.12.3` dependency limited to Core value adapters
+  in `DateField`, `DatePicker`, `DateRangePicker`, `TimeField`, `Calendar`, and
+  `RangeCalendar`, with no Core workspace runtime edge or upstream public API
+  leak;
 - the first-party default token/theme system satisfies every applicable React
   requirement and accessibility adaptation;
 - package exports, types, CSS, guidance, descriptors, compatibility metadata,
@@ -1372,11 +1377,14 @@ source owns React/CSS implementation, SSR/hydration, effects, host refinements,
 and runtime/effect lifecycle. Executable example code remains owned by its
 canonical example source.
 
-The R1 public graph is exactly `@core-ui/react@0.1.0-alpha.N` with
-`react-aria-components@1.20.0`, React peer `>=19.2.0 <20`, and React DOM peer
-`>=19.2.0 <20`. There is no Core workspace runtime edge or `@core-ui/web`
-dependency. Private Core packages may generate tarball contents but do not
-become runtime dependencies.
+The approved R1 target graph is exactly `@core-ui/react@0.1.0-alpha.N` with
+direct internal runtime dependencies `react-aria-components@1.20.0` and
+`@internationalized/date@3.12.3`, React peer `>=19.2.0 <20`, and React DOM
+peer `>=19.2.0 <20`. The date dependency is limited to Core value adapters in
+`DateField`, `DatePicker`, `DateRangePicker`, `TimeField`, `Calendar`, and
+`RangeCalendar`; it exposes no upstream public contract. There is no Core
+workspace runtime edge or `@core-ui/web` dependency. Private Core packages may
+generate tarball contents but do not become runtime dependencies.
 
 Every R1 tranche uses the fixed family allocation and common baseline, one
 deterministic closure, and risk-selected review appropriate to its exported
@@ -1643,7 +1651,7 @@ Product Scope or evidence.
 
 ## Explicit non-goals
 
-Product Scope 6.0.2 itself performs no repository implementation, dependency
+Product Scope 6.0.3 itself performs no repository implementation, dependency
 installation, component work, CSS copy, playground work, evidence capture,
 Project mutation, package publication, release, deployment, support claim,
 stable promotion, React Aria public re-export, raw-export breadth target,
@@ -1662,3 +1670,39 @@ Acceptance of Decision 0011 and its reviewed materialization authorizes the
 ordinary protected-PR reset and continued bounded R1.1-R1.5 implementation
 within the unchanged product boundary. Npm publication, dist-tag mutation,
 and the final R1-exit PR merge remain separate authorization boundaries.
+
+## Product Scope 6.0.3 temporal adapter clarification
+
+Product Scope advances from `6.0.2` to `6.0.3` as a patch clarification for
+the accepted Decision 0011 amendment 01. It records one direct internal
+runtime dependency of `@core-ui/react`: `@internationalized/date@3.12.3`, used
+only by Core value adapters in exactly `DateField`, `DatePicker`,
+`DateRangePicker`, `TimeField`, `Calendar`, and `RangeCalendar`.
+
+The approved exact React target package graph is:
+
+```text
+@core-ui/react@0.1.0-alpha.N
+├── dependency: react-aria-components@1.20.0
+├── dependency: @internationalized/date@3.12.3 (direct internal runtime; Core value adapters only in DateField, DatePicker, DateRangePicker, TimeField, Calendar, RangeCalendar)
+├── peer: react >=19.2.0 <20
+└── peer: react-dom >=19.2.0 <20
+```
+
+`@internationalized/date@3.12.3` is already the single resolved `3.12.3`
+instance in the pinned `react-aria-components@1.20.0` closure, so its direct
+declaration adds no installed package or version. Core public contracts remain
+ISO dates `YYYY-MM-DD`, local times `HH:mm[:ss[.fraction]]`, and Core-owned
+`{start,end}` ranges. No `@internationalized/date` or React Aria public type,
+value, import path, export, lifecycle, or ownership path leaks through the
+package; this dependency is internal and replaceable only.
+
+This clarification adds no Scope ID, commitment, family, tranche, platform,
+support/lifecycle claim, public API, package, or release effect. The 53-family
+inventory, all four tranches, existing Scope ID states, React Aria and Tale
+authority, deferred tracks, Project boundaries, and npm, dist-tag, production,
+consumer, and final-R1-exit-merge stops remain unchanged. It authorizes no
+implementation, dependency installation, evidence, support claim, publication,
+or Project or consumer mutation. The reset-specific Project reconciliation
+already recorded for Product Scope `6.0.2` remains historical; this
+clarification does not authorize a Project write.
