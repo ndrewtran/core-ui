@@ -811,3 +811,124 @@ export function affectedClosure({
     }],
   });
 }
+
+/**
+ * Builds a read-only impact preview for one validated canonical source change.
+ * The returned write set identifies the source owner only; no operation is
+ * authorized or executed by this helper.
+ */
+export function previewChangeIntent({
+  context,
+  family = 'component',
+  recordPath,
+  before,
+  after,
+  objective,
+  revisionContext = {},
+  authoring = {},
+} = {}) {
+  if (!isObject(context) || !isObject(context.catalogBundle) || !isObject(context.sourceManifest)) {
+    throw new AuthoringPolicyError(
+      'authoring.change-intent.context-required',
+      'a validated repository authoring context is required',
+    );
+  }
+  if (typeof objective !== 'string' || objective.trim().length === 0) {
+    throw new AuthoringPolicyError(
+      'authoring.change-intent.objective-required',
+      'the proposed change must declare a non-empty objective',
+    );
+  }
+  assertRelativePath(recordPath, 'recordPath');
+  const entry = sourceEntry(context, recordPath, family);
+  if (!entry) {
+    throw new AuthoringPolicyError(
+      'authoring.change-intent.source-undeclared',
+      'the proposed change must target an exact declared canonical source',
+      { family, recordPath },
+    );
+  }
+  const canonical = context.catalogBundle.artifacts.find(({ kind, source }) => (
+    kind === family && source?.record === recordPath
+  ));
+  if (!canonical) {
+    throw new AuthoringPolicyError(
+      'authoring.change-intent.artifact-missing',
+      'the canonical source is absent from the validated catalog revision',
+      { family, recordPath },
+    );
+  }
+  if (canonicalJson(canonical.record) !== canonicalJson(before)) {
+    throw new AuthoringPolicyError(
+      'authoring.change-intent.base-drift',
+      'the proposed before-image is not the exact canonical record at the source revision',
+      { artifactId: canonical.id, recordPath, sourceRevision: context.sourceRevision },
+    );
+  }
+  let semantic;
+  try {
+    semantic = semanticDiff({
+      family,
+      before,
+      after,
+      revisionContext,
+      authoring,
+    });
+  } catch (error) {
+    if (!(error instanceof SchemaValidationError)) throw error;
+    throw new AuthoringPolicyError(
+      'authoring.change-intent.proposed-invalid',
+      'the proposed after-image is not a valid canonical source record',
+      { artifactId: canonical.id, recordPath, diagnostics: error.issues },
+    );
+  }
+  if (semantic.changes.length === 0) {
+    throw new AuthoringPolicyError(
+      'authoring.change-intent.no-op',
+      'the proposed after-image does not change the canonical record',
+      { artifactId: canonical.id, recordPath },
+    );
+  }
+  const closure = affectedClosure({
+    context,
+    sourcePaths: [recordPath],
+    artifactIds: [canonical.id],
+    authoring,
+  });
+  return deepFreeze({
+    mode: 'preview-only',
+    base: {
+      sourceRevision: context.sourceRevision,
+      artifactId: canonical.id,
+      recordPath,
+    },
+    objective: objective.trim(),
+    writeSet: [{ path: recordPath, artifactId: canonical.id, bytes: `${canonicalJson(after)}\n` }],
+    semantic: {
+      effect: semantic.effect,
+      changes: semantic.changes,
+      revisions: semantic.revisions,
+    },
+    invalidated: {
+      artifacts: closure.artifacts,
+      projections: closure.projections,
+      packages: closure.packages,
+      checks: closure.requiredChecks,
+    },
+    versionEffect: semantic.versionEffect,
+    proofEffects: {
+      status: 'pending',
+      deferred: closure.deferred,
+      checks: closure.requiredChecks,
+    },
+    readiness: {
+      status: 'not-ready',
+      reason: 'preview-only; required checks and proof remain unexecuted',
+    },
+    confirmationPolicy: {
+      mode: 'read-only',
+      requiresConfirmation: false,
+      authorization: 'not applicable',
+    },
+  });
+}

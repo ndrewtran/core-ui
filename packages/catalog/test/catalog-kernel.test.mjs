@@ -224,6 +224,33 @@ test('R1.4 catalog closure registers and discovers every canonical family', asyn
   }
 });
 
+test('R1.5 React curriculum selects one exact generation example for every family', () => {
+  const components = baseBundle.artifacts
+    .filter(({ kind }) => kind === 'component')
+    .sort((left, right) => left.id.localeCompare(right.id));
+  assert.equal(components.length, 53);
+  const selected = components.map((component) => {
+    const response = getArtifact({
+      id: component.id,
+      platform: 'web.react',
+      section: 'examples',
+      purpose: 'generation',
+      detail: 'brief',
+    });
+    assert.equal(response.data.value.length, 1, component.id);
+    const example = baseBundle.artifacts.find(({ id }) => id === response.data.value[0].id);
+    assert.ok(example, component.id);
+    assert.deepEqual(example.record.prerequisites, [], component.id);
+    assert.equal(example.record.binding.preference, 0, component.id);
+    assert.equal(example.record.complexity, 'minimal', component.id);
+    assert.deepEqual(example.platforms, ['web.react'], component.id);
+    assert.deepEqual(example.record.binding.purposes, ['generation', 'explanation', 'validation'], component.id);
+    assert.equal(example.record.binding.ref, `${component.id}#web.react`, component.id);
+    return example.id;
+  });
+  assert.equal(new Set(selected).size, 53);
+});
+
 test('R1.3 catalog closure registers and discovers every canonical family', async () => {
   const manifest = JSON.parse(await readFile(
     join(repositoryRoot, 'packages/catalog/catalog-sources.json'),

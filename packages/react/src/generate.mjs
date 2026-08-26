@@ -9,6 +9,7 @@ import {
   assertReactR12GeneratedContracts,
   assertReactR13GeneratedContracts,
   assertReactR14GeneratedContracts,
+  assertReactR15GeneratedContracts,
 } from './r1-contracts.mjs';
 import { EXPECTED_R12_COMPONENT_SLUGS, EXPECTED_R12_DONOR_CONTRACT } from './r1-2-donor-contract.mjs';
 import { EXPECTED_R13_COMPONENT_SLUGS, EXPECTED_R13_DONOR_CONTRACT } from './r1-3-donor-contract.mjs';
@@ -25,12 +26,14 @@ const expectedTokenSha256 = 'cd4aca7d436ce080bed36f1358924bed0c130dacb94455dfb5e
 if (tokenSha256 !== expectedTokenSha256) throw new Error('CORE_REACT_TOKEN_SOURCE_DRIFT');
 const tokenSource = JSON.parse(tokenRaw);
 const snapshot = JSON.parse(await readFile(resolve(repositoryRoot, 'catalog/react-r1-0/upstream-snapshot.json'), 'utf8'));
+const familySnapshot = JSON.parse(await readFile(resolve(repositoryRoot, 'catalog/react-r1-0/react-aria-1.20.0-family-evaluation.snapshot.json'), 'utf8'));
 const upstreamExportsRaw = await readFile(resolve(repositoryRoot, 'catalog/react-r1-0/upstream-exports.json'));
 const upstreamExports = JSON.parse(upstreamExportsRaw);
 const crosswalk = JSON.parse(await readFile(resolve(repositoryRoot, 'catalog/react-r1-0/donor-crosswalk.json'), 'utf8'));
 const r12Crosswalk = JSON.parse(await readFile(resolve(repositoryRoot, 'catalog/react-r1-2/donor-crosswalk.json'), 'utf8'));
 const r13Crosswalk = JSON.parse(await readFile(resolve(repositoryRoot, 'catalog/react-r1-3/donor-crosswalk.json'), 'utf8'));
 const r14Crosswalk = JSON.parse(await readFile(resolve(repositoryRoot, 'catalog/react-r1-4/donor-crosswalk.json'), 'utf8'));
+const r15ClosureSource = JSON.parse(await readFile(resolve(repositoryRoot, 'catalog/react-r1-5/closure.json'), 'utf8'));
 const license = JSON.parse(await readFile(resolve(repositoryRoot, 'catalog/react-r1-0/license.json'), 'utf8'));
 const r11Slugs = ['button', 'breadcrumbs', 'checkbox', 'disclosure', 'disclosure-group', 'group', 'link', 'meter', 'progress-bar', 'separator', 'toggle-button'];
 const r12Slugs = [...EXPECTED_R12_COMPONENT_SLUGS];
@@ -41,6 +44,13 @@ const componentSource = await readFile(resolve(packageRoot, 'src/components.mjs'
 const fieldsSource = await readFile(resolve(packageRoot, 'src/fields.mjs'), 'utf8');
 const collectionsSource = await readFile(resolve(packageRoot, 'src/collections.mjs'), 'utf8');
 const overlaysSource = await readFile(resolve(packageRoot, 'src/overlays.mjs'), 'utf8');
+const runtimeSources = {
+  'packages/react/src/button.mjs': buttonSource,
+  'packages/react/src/components.mjs': componentSource,
+  'packages/react/src/fields.mjs': fieldsSource,
+  'packages/react/src/collections.mjs': collectionsSource,
+  'packages/react/src/overlays.mjs': overlaysSource,
+};
 const buttonArtifact = JSON.parse(await readFile(resolve(repositoryRoot, 'catalog/components/button/artifact.json'), 'utf8'));
 const buttonBinding = buttonArtifact.bindings['web.react'];
 if (!buttonBinding || !buttonBinding.api.props.includes('pending')
@@ -309,6 +319,9 @@ const fieldCss = `
 }
 `;
 const overlayCss = `
+.core-file-trigger { display: inline-flex; align-items: center; justify-content: center; min-block-size: var(--core-semantic-control-min-height); padding: var(--core-semantic-control-padding-inline); border: 1px solid currentColor; border-radius: var(--core-semantic-control-radius); background: var(--core-semantic-action-background); color: var(--core-semantic-action-foreground); font: inherit; cursor: pointer; }
+.core-file-trigger:focus-visible { outline: 2px solid var(--core-semantic-focus-ring); outline-offset: 2px; }
+.core-file-trigger[disabled], .core-file-trigger[data-disabled] { cursor: not-allowed; opacity: .55; }
 .core-drop-zone { display: grid; place-items: center; min-block-size: 8rem; padding: var(--core-semantic-control-padding-inline); border: 2px dashed var(--core-semantic-selection-track); border-radius: var(--core-semantic-control-radius); cursor: pointer; transition: background-color var(--core-semantic-motion-feedback) ease, border-color var(--core-semantic-motion-feedback) ease; }
 .core-drop-zone[data-hovered], .core-drop-zone[data-drop-target] { background: color-mix(in srgb, var(--core-semantic-selection-track) 16%, transparent); }
 .core-drop-zone[data-focus-visible] { outline: 2px solid var(--core-semantic-focus-ring); outline-offset: 2px; }
@@ -336,7 +349,23 @@ const overlayCss = `
 @media (forced-colors: active) { .core-drop-zone, .core-dialog, .core-popover, .core-preview-trigger, .core-tooltip, .core-toast { border-color: ButtonText; background: Canvas; color: CanvasText; box-shadow: none; } .core-dialog-backdrop { background: Canvas; } .core-drop-zone[data-focus-visible], .core-dialog:focus-visible, .core-popover:focus-visible, .core-preview-trigger:focus-visible, .core-tooltip:focus-visible, .core-dialog-close:focus-visible, .core-toast-dismiss:focus-visible { outline-color: Highlight; } .core-toast[data-variant='success'] { border-color: Highlight; } }
 @media (prefers-contrast: more) { .core-drop-zone, .core-dialog, .core-popover, .core-preview-trigger, .core-tooltip, .core-toast { border-width: 2px; } }
 `;
-const fullCssBody = `${cssBody}\n${componentCss}${collectionCss}${fieldCss}${overlayCss}`;
+const forcedColorCss = `
+@media (forced-colors: active) {
+  .core-r1-button, .core-file-trigger {
+    border-color: ButtonText;
+    background: ButtonFace;
+    color: ButtonText;
+    box-shadow: none;
+  }
+  .core-r1-button[data-disabled], .core-file-trigger[disabled], .core-file-trigger[data-disabled] {
+    border-color: GrayText;
+    color: GrayText;
+  }
+  .core-r1-button[data-focus-visible], .core-file-trigger:focus-visible { outline-color: Highlight; }
+  .core-toggle-button[aria-pressed='true'] { background: Highlight; color: HighlightText; }
+}
+`;
+const fullCssBody = `${cssBody}\n${componentCss}${collectionCss}${fieldCss}${overlayCss}${forcedColorCss}`;
 
 const compatibility = {
   schema: 'core-ui-react-compatibility-v1',
@@ -344,7 +373,20 @@ const compatibility = {
   version: manifest.version,
   upstream: { package: 'react-aria-components', version: '1.20.0', gitHead: '5ecb3333001313e83898cd07644227897e3bae1f' },
   tokenSource: { path: 'catalog/tokens/default-theme.json', sha256: expectedTokenSha256 },
-  support: 'unproved; R1.4 React exports only',
+  compatibilityProfile: {
+    runtimeProfile: r15ClosureSource.compatibility.runtimeProfile,
+    status: r15ClosureSource.compatibility.status,
+    tested: {
+      node: r15ClosureSource.compatibility.node,
+      react: r15ClosureSource.compatibility.react,
+      reactDom: r15ClosureSource.compatibility.reactDom,
+      browserMatrix: r15ClosureSource.compatibility.browserMatrix,
+    },
+    notClaimed: ['assistive technology', 'zoom', 'locale', 'browsers outside Google Chrome 151'],
+  },
+  performance: r15ClosureSource.performance,
+  publication: r15ClosureSource.publication,
+  support: 'unproved; R1.5 React exports only',
 };
 const compatibilityBody = `function deepFreeze(value) {\n  if (value && typeof value === 'object' && !Object.isFrozen(value)) {\n    Object.freeze(value);\n    for (const child of Object.values(value)) deepFreeze(child);\n  }\n  return value;\n}\nexport const reactCompatibility = deepFreeze(${canonicalJson(compatibility)});\n`;
 const indexBody = "export { reactCompatibility } from './compatibility.mjs';\nexport { Button } from './button.mjs';\nexport { Breadcrumbs, Checkbox, Disclosure, DisclosureGroup, Group, Link, Meter, ProgressBar, Separator, ToggleButton, Autocomplete, CheckboxGroup, DateField, DatePicker, DateRangePicker, Form, NumberField, SearchField, Switch, TextField, TimeField } from './components.mjs';\nexport { Calendar, ColorArea, ColorField, ColorPicker, ColorSlider, ColorSwatch, ColorSwatchPicker, ColorWheel, ComboBox, GridList, ListBox, Menu, RadioGroup, RangeCalendar, Select, Slider, Table, Tabs, TagGroup, ToggleButtonGroup, TokenField, Toolbar, Tree, Virtualizer } from './collections.mjs';\nexport { DropZone, FileTrigger, Dialog, Popover, PreviewTrigger, Toast, ToastProvider, useToast, Tooltip } from './overlays.mjs';\n";
@@ -518,11 +560,45 @@ export type TooltipProps = { content: Exclude<React.ReactNode, null | undefined 
 export declare const Tooltip: React.ForwardRefExoticComponent<TooltipProps & React.RefAttributes<HTMLDivElement>>;
 `;
 const reactTypesBody = typesBody.replace("export const reactCompatibility: Readonly<Record<string, unknown>>;\n", `export const reactCompatibility: Readonly<Record<string, unknown>>;\n${fieldsTypes}${collectionsTypes}${overlaysTypes}`);
-const testingBody = "export const reactPlatformSafetyFixture = Object.freeze({ componentSupportClaim: 'none', fixture: 'r1.4-react-overlays' });\n";
-const readmeBody = `# @core-ui/react\n\nExperimental, unpublished R1.4 React slice for the standalone Core UI renderer.\n\n- Button, Breadcrumbs, Checkbox, Disclosure, DisclosureGroup, Group, Link, Meter, ProgressBar, Separator, ToggleButton, Autocomplete, CheckboxGroup, DateField, DatePicker, DateRangePicker, Form, NumberField, SearchField, Switch, TextField, TimeField, Calendar, ColorArea, ColorField, ColorPicker, ColorSlider, ColorSwatch, ColorSwatchPicker, ColorWheel, ComboBox, GridList, ListBox, Menu, RadioGroup, RangeCalendar, Select, Slider, Table, Tabs, TagGroup, ToggleButtonGroup, TokenField, Toolbar, Tree, Virtualizer, DropZone, FileTrigger, Dialog, Popover, PreviewTrigger, Toast, ToastProvider, useToast, and Tooltip are Core-owned public exports for the \`web.react\` binding.\n- React Aria Components 1.20.0 is an internal replaceable substrate.\n- Core owns the public APIs, tokens, styling, accessibility, lifecycle, and support boundary.\n- Tale UI is a pinned styling donor, never a dependency.\n\nThe package remains private and unpublished until the separately authorized React prerelease boundary.\n`;
+const testingBody = "export const reactPlatformSafetyFixture = Object.freeze({ componentSupportClaim: 'none', fixture: 'r1.5-react-breadth', discovery: 'informational' });\n";
+const readmeBody = `# @core-ui/react\n\nR1.5 React breadth closure for the standalone Core UI renderer.\n\n- The 53 Core-owned family exports are listed below for the \`web.react\` binding.\n- React Aria Components 1.20.0 is an internal replaceable substrate.\n- Core owns the public APIs, tokens, selectors, styling, accessibility behavior, lifecycle, and prop names.\n- Tale UI is a pinned styling donor; generated styling results are Core-owned and Tale UI is not a dependency.\n`;
+const markdownCell = (value) => String(value).replaceAll('|', '\\|').replaceAll('\n', ' ');
+const readmeComponentRows = componentArtifacts.map((artifact) => {
+  const slug = artifact.id.slice('core:component:'.length);
+  const binding = artifact.bindings['web.react'];
+  return `| ${markdownCell(artifact.name)} | ${markdownCell(artifact.lifecycle)} | .core-${slug} | ${markdownCell(binding.api.props.join(', ') || 'none')} |`;
+}).join('\n');
+const readmeGuidance = `
+## Local tarball usage
+
+Install the versioned local candidate from the package directory:
+
+\`\`\`sh
+pnpm add ./core-ui-react-${manifest.version}.tgz
+\`\`\`
+
+Import the generated Core styles once, then use the React exports:
+
+\`\`\`tsx
+import '@core-ui/react/styles.css';
+import { Button } from '@core-ui/react';
+
+export function Example() {
+  return <Button onActivate={() => {}}>Save</Button>;
+}
+\`\`\`
+
+The renderer owns the Core selectors, tokens, accessibility behavior, lifecycle, and public prop names. React Aria Components is an internal implementation substrate; this package does not transfer its APIs or styling boundary.
+
+Supporting runtime exports: \`ToastProvider\` and \`useToast\` are available alongside \`Toast\` for managed notifications.
+
+| Export | Lifecycle | Selector | Public props |
+| --- | --- | --- | --- |
+${readmeComponentRows}
+`;
 const descriptorRecord = {
   schema: 'core-ui-renderer-descriptor-v1', generatedFrom: 'packages/react/src/generate.mjs',
-  package: manifest.name, version: manifest.version, support: 'unproved; R1.4 React exports only',
+  package: manifest.name, version: manifest.version, support: 'unproved; R1.5 React exports only',
   bindings: componentArtifacts.map((artifact) => ({
     binding: `${artifact.id}#web.react`, export: artifact.name, module: '.',
     lifecycle: 'experimental', strategy: 'direct', runtimeProfile: 'web.react',
@@ -539,7 +615,7 @@ const releaseRecord = {
   packagePrivate: manifest.private,
   catalog: { status: 'bound', components: componentArtifacts.map((artifact) => ({ component: artifact.id, binding: `${artifact.id}#web.react`, states: artifact.states })) },
   tokenSource: { path: 'catalog/tokens/default-theme.json', sha256: expectedTokenSha256 },
-  evidence: { status: 'pending', ids: ['E-R1.4-01', 'E-R1.4-02', 'E-R1.4-03', 'E-R1.4-04', 'E-R1.4-05', 'E-R1.4-06'] },
+  evidence: { status: 'pending', ids: ['E-R1.5-01', 'E-R1.5-02', 'E-R1.5-03', 'E-R1.5-04', 'E-R1.5-05', 'E-R1.5-06'] },
   advisories: [], exceptions: [],
   publication: { status: 'disabled', requires: ['explicit external publish authorization'] },
   rollback: { status: 'candidate-branch-only-before-merge' },
@@ -678,7 +754,130 @@ for (const slug of r14Slugs) {
     if (!fullCssBody.includes(`--core-${hook.replaceAll('.', '-')}`)) throw new Error(`CORE_REACT_R14_TOKEN_HOOK_UNCONSUMED: ${slug}:${hook}`);
   }
 }
-assertReactR14GeneratedContracts({ descriptor: descriptorRecord, release: releaseRecord, donorComparison: r14DonorComparisonRecord, manifest, componentNames: r14Slugs.map((slug) => componentArtifacts.find(({ id }) => id === `core:component:${slug}`).name), crosswalk: r14Crosswalk, overlaysSource });
+const r14DescriptorRecord = { ...descriptorRecord, support: 'unproved; R1.4 React exports only' };
+const r14ReleaseRecord = { ...releaseRecord, evidence: { status: 'pending', ids: ['E-R1.4-01', 'E-R1.4-02', 'E-R1.4-03', 'E-R1.4-04', 'E-R1.4-05', 'E-R1.4-06'] } };
+assertReactR14GeneratedContracts({ descriptor: r14DescriptorRecord, release: r14ReleaseRecord, donorComparison: r14DonorComparisonRecord, manifest, componentNames: r14Slugs.map((slug) => componentArtifacts.find(({ id }) => id === `core:component:${slug}`).name), crosswalk: r14Crosswalk, overlaysSource });
+
+const crosswalkSources = [crosswalk, r12Crosswalk, r13Crosswalk, r14Crosswalk];
+const crosswalkBySlug = new Map(crosswalkSources.flatMap((source) => Object.entries(source.components ?? {})));
+const snapshotByFamily = new Map(familySnapshot.families.map((family) => [family.family, family]));
+const artifactBySlug = new Map(componentArtifacts.map((artifact) => [artifact.id.slice('core:component:'.length), artifact]));
+const R15_EVIDENCE_IDS = Object.freeze(['E-R1.5-01', 'E-R1.5-02', 'E-R1.5-03', 'E-R1.5-04', 'E-R1.5-05', 'E-R1.5-06']);
+const r15TrancheEvidence = (tranche) => Array.from({ length: tranche === 'R1.3' ? 5 : tranche === 'R1.4' ? 6 : 4 }, (_, index) => `E-${tranche}-${String(index + 1).padStart(2, '0')}`);
+const familySlug = (family) => family === 'Modal'
+  ? 'dialog'
+  : family.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
+const runtimeSourceFor = (exportName) => Object.entries(runtimeSources)
+  .find(([, source]) => new RegExp(`export\\s+const\\s+${exportName}\\b`, 'u').test(source))?.[0];
+const r15Families = familySnapshot.families.map((upstreamFamily) => {
+  const slug = familySlug(upstreamFamily.family);
+  const artifact = artifactBySlug.get(slug);
+  const runtimeSource = runtimeSourceFor(artifact?.name);
+  if (!artifact || !runtimeSource) throw new Error(`CORE_REACT_R15_FAMILY_OWNER_MISSING: ${upstreamFamily.family}`);
+  return {
+    family: upstreamFamily.family,
+    slug,
+    rootExport: upstreamFamily.rootExport,
+    rootKind: upstreamFamily.rootKind,
+    exportName: artifact.name,
+    tranche: upstreamFamily.tranche,
+    runtimeSource,
+    artifactPath: `catalog/components/${slug}/artifact.json`,
+  };
+});
+const r15ClosureRecord = {
+  schema: 'core-ui-react-r1-5-closure-v1',
+  generatedFrom: 'catalog/react-r1-5/closure.json',
+  package: manifest.name,
+  version: manifest.version,
+  upstream: {
+    package: familySnapshot.upstream.package,
+    version: familySnapshot.upstream.version,
+    commit: familySnapshot.upstream.commit,
+    tree: familySnapshot.upstream.tree,
+    snapshot: 'catalog/react-r1-0/react-aria-1.20.0-family-evaluation.snapshot.json',
+    rawExports: familySnapshot.counts.rawExports,
+    documentedFamilies: familySnapshot.counts.documentedFamilies,
+    rawDispositionCounts: familySnapshot.counts.rawDispositionCounts,
+  },
+  donor: {
+    name: crosswalk.donor.name,
+    commit: crosswalk.donor.commit,
+    tree: crosswalk.donor.tree,
+    dependency: false,
+    ownership: 'Core-owned token/style results',
+    sourceCrosswalks: ['catalog/react-r1-0/donor-crosswalk.json', 'catalog/react-r1-2/donor-crosswalk.json', 'catalog/react-r1-3/donor-crosswalk.json', 'catalog/react-r1-4/donor-crosswalk.json'],
+  },
+  families: r15Families.map((source) => {
+    const artifact = artifactBySlug.get(source.slug);
+    const binding = artifact.bindings['web.react'];
+    const upstreamFamily = snapshotByFamily.get(source.family);
+    const donor = source.slug === 'button' ? crosswalk.button : crosswalkBySlug.get(source.slug);
+    const donorInputs = source.slug === 'button'
+      ? Object.entries(crosswalk.buttonBlobs).map(([kind, blob]) => ({ kind, blob }))
+      : donor.donorInputs;
+    const tokenHooks = donor.tokenHooks ?? [...new Set(donor.rules.map(({ core }) => core).filter((core) => core.includes('.')))];
+    return {
+      family: source.family,
+      slug: source.slug,
+      root: { export: source.rootExport, kind: upstreamFamily.rootKind },
+      tranche: source.tranche,
+      contract: {
+        artifact: source.artifactPath,
+        binding: `${artifact.id}#web.react`,
+        lifecycle: artifact.lifecycle,
+        states: artifact.states,
+        api: binding.api,
+        parts: artifact.anatomy,
+        runtimeSource: source.runtimeSource,
+      },
+      export: { name: source.exportName, module: '.', kind: 'component' },
+      lifecycle: { artifact: artifact.lifecycle, binding: binding.lifecycle, strategy: binding.strategy },
+      evidence: { tranche: r15TrancheEvidence(source.tranche), final: R15_EVIDENCE_IDS, status: 'pending', support: 'unproved; R1.5 React exports only' },
+      packed: { package: manifest.name, version: manifest.version, private: manifest.private, entry: 'generated/index.mjs', types: 'generated/index.d.ts', styles: 'generated/styles.css', binding: `${artifact.id}#web.react`, export: source.exportName, runtimeProfile: 'web.react', selector: `.core-${source.slug}` },
+      donor: { disposition: donor.disposition, donorInputs, rules: donor.rules, tokenHooks, ownership: 'Core-owned token/style results' },
+    };
+  }),
+  evidence: { status: 'pending', ids: R15_EVIDENCE_IDS, support: 'unproved; R1.5 React exports only' },
+  compatibility: r15ClosureSource.compatibility,
+  performance: r15ClosureSource.performance,
+  agentDiscovery: r15ClosureSource.agentDiscovery,
+  evidenceCapture: r15ClosureSource.evidenceCapture,
+  exceptions: r15ClosureSource.exceptions,
+  advisories: r15ClosureSource.advisories,
+  publication: r15ClosureSource.publication,
+};
+const r15DonorComparisonRecord = {
+  schema: 'core-ui-react-r1-5-donor-comparison-v1',
+  generatedFrom: 'packages/react/src/generate.mjs',
+  tranche: 'R1.5',
+  donor: r15ClosureRecord.donor,
+  components: r15ClosureRecord.families.map(({ slug, export: componentExport, donor }) => ({
+    component: componentExport.name,
+    family: r15ClosureRecord.families.find(({ slug: value }) => value === slug).family,
+    binding: `core:component:${slug}#web.react`,
+    disposition: donor.disposition,
+    selector: `.core-${slug}`,
+    donorInputs: donor.donorInputs,
+    tokenHooks: donor.tokenHooks,
+    rules: donor.rules,
+    ownership: donor.ownership,
+    result: { cssSelector: `.core-${slug}`, status: donor.disposition === 'no-applicable-donor' ? 'no-applicable-donor' : 'adapted-for-r1.5' },
+  })),
+};
+assertReactR15GeneratedContracts({
+  closure: r15ClosureSource,
+  snapshot: familySnapshot,
+  componentArtifacts,
+  crosswalks: crosswalkSources,
+  descriptor: descriptorRecord,
+  release: releaseRecord,
+  donorComparison: r15DonorComparisonRecord,
+  closureRecord: r15ClosureRecord,
+  manifest,
+  runtimeSources,
+  styles: fullCssBody,
+});
 const descriptor = `${canonicalJson(descriptorRecord)}\n`;
 const release = `${canonicalJson(releaseRecord)}\n`;
 const donorComparison = `${canonicalJson(donorComparisonRecord)}\n`;
@@ -697,6 +896,14 @@ const r13DonorComparison = generatedText(
 const r14DonorComparison = generatedText(
   'packages/react/src/generate.mjs',
   `${canonicalJson(r14DonorComparisonRecord)}\n`,
+);
+const r15DonorComparison = generatedText(
+  'packages/react/src/generate.mjs',
+  `${canonicalJson(r15DonorComparisonRecord)}\n`,
+);
+const r15Closure = generatedText(
+  'catalog/react-r1-5/closure.json',
+  `${canonicalJson(r15ClosureRecord)}\n`,
 );
 function provenance(path, bytes) {
   const body = `${canonicalJson({ path: `packages/react/generated/${path}`, sha256: `sha256:${sha256(bytes)}` })}\n`;
@@ -722,6 +929,10 @@ const outputs = new Map([
   ['r1-3-donor-comparison.json.provenance', provenance('r1-3-donor-comparison.json', r13DonorComparison)],
   ['r1-4-donor-comparison.json', r14DonorComparison],
   ['r1-4-donor-comparison.json.provenance', provenance('r1-4-donor-comparison.json', r14DonorComparison)],
+  ['r1-5-donor-comparison.json', r15DonorComparison],
+  ['r1-5-donor-comparison.json.provenance', provenance('r1-5-donor-comparison.json', r15DonorComparison)],
+  ['r1-5-closure.json', r15Closure],
+  ['r1-5-closure.json.provenance', provenance('r1-5-closure.json', r15Closure)],
   ['component-donor-comparison.json', componentDonorComparison],
   ['component-donor-comparison.json.provenance', provenance('component-donor-comparison.json', componentDonorComparison)],
   ['components.mjs', generatedText('packages/react/src/components.mjs', componentSource)],
@@ -729,7 +940,7 @@ const outputs = new Map([
   ['collections.mjs', generatedText('packages/react/src/collections.mjs', collectionsSource)],
   ['overlays.mjs', generatedText('packages/react/src/overlays.mjs', overlaysSource)],
 ]);
-const readme = generatedText('packages/react/src/generate.mjs', readmeBody, '<!--', ' -->');
+const readme = generatedText('packages/react/src/generate.mjs', `${readmeBody}${readmeGuidance}`, '<!--', ' -->');
 
 if (process.argv.includes('--check')) {
   for (const [name, expected] of outputs) {
@@ -746,4 +957,4 @@ if (process.argv.includes('--check')) {
   await writeFile(resolve(packageRoot, 'README.md'), readme);
 }
 
-console.log('[react] generated standalone R1.4 overlay projections from canonical owners');
+console.log('[react] generated standalone R1.5 breadth closure projections from canonical owners');

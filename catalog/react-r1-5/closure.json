@@ -1,0 +1,51 @@
+{
+  "schema": "core-ui-react-r1-5-closure-v1",
+  "tranche": "R1.5",
+  "compatibility": {
+    "runtimeProfile": "web.react",
+    "node": ">=24.19.0 <25",
+    "react": ">=19.2.0 <20",
+    "reactDom": ">=19.2.0 <20",
+    "browserMatrix": {
+      "source": "apps/react-playground/test/browser.test.mjs",
+      "browser": "Google Chrome 151",
+      "axe": "4.13.0",
+      "profiles": [
+        "light/standard/full/comfortable/ltr",
+        "dark/standard/full/comfortable/ltr",
+        "light/more/full/comfortable/ltr",
+        "light/standard/reduced/comfortable/ltr",
+        "light/standard/full/compact/ltr",
+        "light/standard/full/comfortable/rtl"
+      ]
+    },
+    "status": "representative-baseline"
+  },
+  "performance": {
+    "status": "representative-baseline",
+    "method": "release preparation measures packed import and SSR",
+    "budgets": {
+      "packedImportMilliseconds": 2000,
+      "ssrMilliseconds": 1000
+    }
+  },
+  "agentDiscovery": {
+    "status": "informational",
+    "claim": "no support or release gate",
+    "runtimeProfiles": ["web.react"]
+  },
+  "evidenceCapture": {
+    "collection": "default-off",
+    "allowed": ["sanitized repository-relative paths", "canonical IDs"],
+    "prohibited": ["credentials", "consumer data"],
+    "retention": "protected PR check/review logs"
+  },
+  "exceptions": [],
+  "advisories": [],
+  "publication": {
+    "candidateVersion": "0.1.0-rc.1",
+    "status": "disabled",
+    "private": true,
+    "requires": ["explicit external publish authorization"]
+  }
+}

@@ -14,6 +14,7 @@ export {
   explainRevisions,
   loadRepositoryAuthoringContext,
   previewAutofix,
+  previewChangeIntent,
   scaffoldComponent,
   semanticDiff,
 } from './authoring.mjs';
