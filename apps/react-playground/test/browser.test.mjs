@@ -13,8 +13,9 @@ const candidates = [
   '/usr/bin/google-chrome',
   '/usr/bin/chromium',
 ].filter(Boolean);
-const expectedComponents = ['breadcrumbs', 'checkbox', 'autocomplete', 'checkbox-group', 'date-field', 'date-picker', 'date-range-picker', 'form', 'number-field', 'search-field', 'switch', 'text-field', 'time-field', 'disclosure', 'disclosure-group', 'group', 'link', 'meter', 'progress-bar', 'separator', 'toggle-button'];
-const expectedButtonsPerProfile = 16;
+const expectedComponents = ['breadcrumbs', 'checkbox', 'autocomplete', 'checkbox-group', 'date-field', 'date-picker', 'date-range-picker', 'form', 'number-field', 'search-field', 'switch', 'text-field', 'time-field', 'disclosure', 'disclosure-group', 'group', 'link', 'meter', 'progress-bar', 'separator', 'toggle-button', 'calendar', 'color-area', 'color-field', 'color-picker', 'color-slider', 'color-swatch', 'color-swatch-picker', 'color-wheel', 'combo-box', 'grid-list', 'list-box', 'menu', 'radio-group', 'range-calendar', 'select', 'slider', 'table', 'tabs', 'tag-group', 'toggle-button-group', 'token-field', 'toolbar', 'tree', 'virtualizer'];
+const expectedButtonsPerProfile = 30;
+const documentAnimationSettleTimeoutMs = 2000;
 const port = Number(process.env.CORE_UI_PLAYGROUND_PORT ?? 4174);
 let executablePath;
 for (const candidate of candidates) {
@@ -29,7 +30,44 @@ async function waitForServer(url) {
   throw new Error('playground preview did not become ready');
 }
 
-test('R1.2 React component browser and axe matrix', async () => {
+async function waitForDocumentAnimations(page) {
+  await page.evaluate(async (timeoutMs) => {
+    const startedAt = performance.now();
+    let timeoutId;
+    const describeAnimations = () => document.getAnimations().map((animation) => ({
+      playState: animation.playState,
+      currentTime: animation.currentTime,
+      target: animation.effect?.target?.outerHTML?.slice(0, 240),
+    }));
+    const deadline = new Promise((_, reject) => {
+      timeoutId = setTimeout(() => {
+        reject(new Error(`Document animations did not settle within ${timeoutMs}ms (elapsed ${Math.round(performance.now() - startedAt)}ms): ${JSON.stringify(describeAnimations())}`));
+      }, timeoutMs);
+    });
+    const waitForFrame = () => Promise.race([
+      new Promise((resolveFrame) => requestAnimationFrame(resolveFrame)),
+      deadline,
+    ]);
+    try {
+      // Flush the media-query style change before collecting its transitions.
+      void document.documentElement.offsetWidth;
+      await waitForFrame();
+      let animations = document.getAnimations();
+      while (animations.length > 0) {
+        await Promise.race([
+          Promise.all(animations.map((animation) => animation.finished.catch(() => undefined))),
+          deadline,
+        ]);
+        await waitForFrame();
+        animations = document.getAnimations();
+      }
+    } finally {
+      clearTimeout(timeoutId);
+    }
+  }, documentAnimationSettleTimeoutMs);
+}
+
+test('R1.3 React component browser and axe matrix', async () => {
   if (!executablePath) throw new Error('R1_BROWSER_REQUIRED: Chrome or Chromium was not found');
   const appRoot = resolve(import.meta.dirname, '..');
   const server = await createServer({ root: appRoot, server: { host: '127.0.0.1', port, strictPort: true } });
@@ -52,15 +90,40 @@ test('R1.2 React component browser and axe matrix', async () => {
     await page.emulateMedia({ forcedColors: 'active' });
     if (!await page.locator('[data-profile]').first().isVisible()) throw new Error('R1.2 forced-colors profile did not render');
     await page.emulateMedia({ forcedColors: 'none' });
+    await waitForDocumentAnimations(page);
     const profiles = await page.locator('[data-profile]').evaluateAll((nodes) => nodes.map((node) => node.dataset.profile));
     const expectedProfiles = ['light/standard/full/comfortable/ltr', 'dark/standard/full/comfortable/ltr', 'light/more/full/comfortable/ltr', 'light/standard/reduced/comfortable/ltr', 'light/standard/full/compact/ltr', 'light/standard/full/comfortable/rtl'];
     for (const expected of expectedProfiles) {
       if (!profiles.includes(expected)) throw new Error(`missing browser profile: ${expected}`);
       const profile = page.locator(`[data-profile="${expected}"]`);
       const result = await profile.evaluate(async (node) => window.axe.run(node));
-      if (result.violations.length) throw new Error(`${expected} axe violations: ${result.violations.map(({ id }) => id).join(', ')}`);
+      if (result.violations.length) {
+        const diagnostics = await profile.evaluate((profileNode, violations) => violations.map(({ id, help, nodes }) => ({
+          id,
+          help,
+          nodes: nodes.map(({ target, failureSummary, any }) => {
+            let element;
+            for (const selector of target) {
+              try {
+                element = profileNode.querySelector(selector);
+                if (element) break;
+              } catch {}
+            }
+            const style = element ? getComputedStyle(element) : null;
+            return {
+              target,
+              html: element?.outerHTML.slice(0, 300),
+              color: style?.color,
+              backgroundColor: style?.backgroundColor,
+              any: any?.map(({ data, message }) => ({ data, message })),
+              failureSummary,
+            };
+          }),
+        })), result.violations);
+        throw new Error(`${expected} axe violations: ${JSON.stringify(diagnostics)}`);
+      }
       if (await profile.locator('[data-component]').count() !== expectedComponents.length) {
-        throw new Error(`${expected} must expose all ${expectedComponents.length} R1.2 component articles`);
+        throw new Error(`${expected} must expose all ${expectedComponents.length} R1.3 component articles`);
       }
       for (const component of expectedComponents) {
         if (await profile.locator(`[data-component="${component}"]`).count() !== 1) {

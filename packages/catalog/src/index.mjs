@@ -918,7 +918,14 @@ export function createCatalogApi(inputBundle, options = {}) {
         for (const indexed of indexById.get(artifact.id).terms) {
           const match = indexed.term === term ? 'exact' : indexed.term.startsWith(term) ? 'prefix' : null;
           if (match) {
-            const points = (match === 'exact' ? 20 : 10) + (indexed.field === 'name' ? 5 : 0);
+            // An artifact's own identity must outrank an incidental match in
+            // many relation records (for example, `default-theme` references
+            // several Button variants). Keep relation matches useful for
+            // discovery, but make an exact id/name match decisive.
+            const identityMatch = indexed.field === 'id' || indexed.field === 'name';
+            const points = identityMatch
+              ? (match === 'exact' ? 1000 : 500) + (indexed.field === 'name' ? 25 : 0)
+              : (match === 'exact' ? 20 : 10);
             score += points;
             reasons.push({
               queryTerm: term,

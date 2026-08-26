@@ -25,6 +25,32 @@ import {
 
 const repositoryRoot = resolve(import.meta.dirname, '../../..');
 const baseBundle = JSON.parse(catalogJson);
+const R13_COMPONENTS = Object.freeze([
+  ['calendar', 'Calendar'],
+  ['color-area', 'ColorArea'],
+  ['color-field', 'ColorField'],
+  ['color-picker', 'ColorPicker'],
+  ['color-slider', 'ColorSlider'],
+  ['color-swatch', 'ColorSwatch'],
+  ['color-swatch-picker', 'ColorSwatchPicker'],
+  ['color-wheel', 'ColorWheel'],
+  ['combo-box', 'ComboBox'],
+  ['grid-list', 'GridList'],
+  ['list-box', 'ListBox'],
+  ['menu', 'Menu'],
+  ['radio-group', 'RadioGroup'],
+  ['range-calendar', 'RangeCalendar'],
+  ['select', 'Select'],
+  ['slider', 'Slider'],
+  ['table', 'Table'],
+  ['tabs', 'Tabs'],
+  ['tag-group', 'TagGroup'],
+  ['toggle-button-group', 'ToggleButtonGroup'],
+  ['token-field', 'TokenField'],
+  ['toolbar', 'Toolbar'],
+  ['tree', 'Tree'],
+  ['virtualizer', 'Virtualizer'],
+]);
 
 function preimage(bundle) {
   const { catalogDigest: _catalogDigest, ...value } = bundle;
@@ -157,7 +183,7 @@ test('E-G0.2-01 negative: generated bundle matches its canonical source manifest
   assert.equal(baseBundle.catalogDigest, canonicalDigest(preimage(baseBundle)));
 });
 
-test('R1.2 guide sources preserve Markdown newlines', async () => {
+test('R1.3 guide sources preserve Markdown newlines', async () => {
   const manifest = JSON.parse(await readFile(
     join(repositoryRoot, 'packages/catalog/catalog-sources.json'),
     'utf8',
@@ -165,11 +191,28 @@ test('R1.2 guide sources preserve Markdown newlines', async () => {
   const guideSources = manifest.records
     .filter(({ family, sourcePath }) => family === 'guide' && sourcePath?.includes('-usage.md'))
     .map(({ sourcePath }) => sourcePath);
-  assert.equal(guideSources.length, 22);
+  assert.equal(guideSources.length, 46);
   for (const sourcePath of guideSources) {
     const source = await readFile(join(repositoryRoot, sourcePath), 'utf8');
     assert.doesNotMatch(source, /\\n/u, sourcePath);
     assert.ok(source.includes('\n\n'), sourcePath);
+  }
+});
+
+test('R1.3 catalog closure registers and discovers every canonical family', async () => {
+  const manifest = JSON.parse(await readFile(
+    join(repositoryRoot, 'packages/catalog/catalog-sources.json'),
+    'utf8',
+  ));
+  const sourcePaths = new Set(manifest.records.map(({ path }) => path));
+  for (const [slug, name] of R13_COMPONENTS) {
+    const id = `core:component:${slug}`;
+    assert.equal(sourcePaths.has(`catalog/components/${slug}/artifact.json`), true, `${name} artifact source`);
+    assert.equal(sourcePaths.has(`catalog/components/${slug}/examples/react/basic.example.json`), true, `${name} example source`);
+    assert.equal(sourcePaths.has(`catalog/guides/${slug}-usage.json`), true, `${name} guide source`);
+    assert.equal(getArtifact({ id, detail: 'brief' }).data.artifact.id, id, `${name} canonical id`);
+    assert.equal(searchArtifacts({ query: name, limit: 100, detail: 'brief' }).data.items.some((item) => item.id === id), true, `${name} canonical name search`);
+    assert.equal(searchArtifacts({ query: id, limit: 100, detail: 'brief' }).data.items.some((item) => item.id === id), true, `${name} canonical id search`);
   }
 });
 
@@ -835,6 +878,7 @@ test('TALE-TOKEN-A selected catalog descriptor owns query defaults and support',
 test('E-G0.2-04: search is bounded and retrieval traverses only direct relations', () => {
   const search = searchArtifacts({ query: 'button', limit: 1, detail: 'brief' });
   assert.equal(search.data.items.length, 1);
+  assert.equal(search.data.items[0].id, 'core:component:button');
   assert.equal(Object.hasOwn(search.data.items[0], 'record'), false);
   assert.ok(JSON.stringify(search).length < 8_000);
 

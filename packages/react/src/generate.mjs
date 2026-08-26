@@ -7,8 +7,10 @@ import {
   assertReactR10SourceContracts,
   assertReactR11GeneratedContracts,
   assertReactR12GeneratedContracts,
+  assertReactR13GeneratedContracts,
 } from './r1-contracts.mjs';
 import { EXPECTED_R12_COMPONENT_SLUGS, EXPECTED_R12_DONOR_CONTRACT } from './r1-2-donor-contract.mjs';
+import { EXPECTED_R13_COMPONENT_SLUGS, EXPECTED_R13_DONOR_CONTRACT } from './r1-3-donor-contract.mjs';
 
 const packageRoot = resolve(import.meta.dirname, '..');
 const repositoryRoot = resolve(packageRoot, '../..');
@@ -25,12 +27,15 @@ const upstreamExportsRaw = await readFile(resolve(repositoryRoot, 'catalog/react
 const upstreamExports = JSON.parse(upstreamExportsRaw);
 const crosswalk = JSON.parse(await readFile(resolve(repositoryRoot, 'catalog/react-r1-0/donor-crosswalk.json'), 'utf8'));
 const r12Crosswalk = JSON.parse(await readFile(resolve(repositoryRoot, 'catalog/react-r1-2/donor-crosswalk.json'), 'utf8'));
+const r13Crosswalk = JSON.parse(await readFile(resolve(repositoryRoot, 'catalog/react-r1-3/donor-crosswalk.json'), 'utf8'));
 const license = JSON.parse(await readFile(resolve(repositoryRoot, 'catalog/react-r1-0/license.json'), 'utf8'));
 const r11Slugs = ['button', 'breadcrumbs', 'checkbox', 'disclosure', 'disclosure-group', 'group', 'link', 'meter', 'progress-bar', 'separator', 'toggle-button'];
 const r12Slugs = [...EXPECTED_R12_COMPONENT_SLUGS];
+const r13Slugs = [...EXPECTED_R13_COMPONENT_SLUGS];
 const buttonSource = await readFile(resolve(packageRoot, 'src/button.mjs'), 'utf8');
 const componentSource = await readFile(resolve(packageRoot, 'src/components.mjs'), 'utf8');
 const fieldsSource = await readFile(resolve(packageRoot, 'src/fields.mjs'), 'utf8');
+const collectionsSource = await readFile(resolve(packageRoot, 'src/collections.mjs'), 'utf8');
 const buttonArtifact = JSON.parse(await readFile(resolve(repositoryRoot, 'catalog/components/button/artifact.json'), 'utf8'));
 const buttonBinding = buttonArtifact.bindings['web.react'];
 if (!buttonBinding || !buttonBinding.api.props.includes('pending')
@@ -43,9 +48,10 @@ const componentArtifacts = [
   ...await Promise.all([
     'breadcrumbs', 'checkbox', 'disclosure', 'disclosure-group', 'group', 'link', 'meter', 'progress-bar', 'separator', 'toggle-button',
     'autocomplete', 'checkbox-group', 'date-field', 'date-picker', 'date-range-picker', 'form', 'number-field', 'search-field', 'switch', 'text-field', 'time-field',
+    ...r13Slugs,
   ].map(async (slug) => JSON.parse(await readFile(resolve(repositoryRoot, `catalog/components/${slug}/artifact.json`), 'utf8')))),
 ];
-if (componentArtifacts.length !== 22 || new Set(componentArtifacts.map(({ id }) => id)).size !== 22) {
+if (componentArtifacts.length !== 46 || new Set(componentArtifacts.map(({ id }) => id)).size !== 46) {
   throw new Error('CORE_REACT_R1_COMPONENT_ALLOCATION_DRIFT');
 }
 for (const artifact of componentArtifacts) {
@@ -63,6 +69,13 @@ for (const artifact of componentArtifacts) {
   } else if (r12Slugs.includes(artifact.id.slice('core:component:'.length))) {
     const slug = artifact.id.slice('core:component:'.length);
     const componentCrosswalk = r12Crosswalk.components?.[slug];
+    if (!componentCrosswalk
+      || canonicalJson(componentCrosswalk.consumedRules) !== canonicalJson(componentCrosswalk.rules.map(({ input }) => input))) {
+      throw new Error(`CORE_REACT_${artifact.name.toUpperCase()}_DONOR_CROSSWALK_DRIFT`);
+    }
+  } else if (r13Slugs.includes(artifact.id.slice('core:component:'.length))) {
+    const slug = artifact.id.slice('core:component:'.length);
+    const componentCrosswalk = r13Crosswalk.components?.[slug];
     if (!componentCrosswalk
       || canonicalJson(componentCrosswalk.consumedRules) !== canonicalJson(componentCrosswalk.rules.map(({ input }) => input))) {
       throw new Error(`CORE_REACT_${artifact.name.toUpperCase()}_DONOR_CROSSWALK_DRIFT`);
@@ -146,6 +159,77 @@ const componentCss = `
 @media (prefers-reduced-motion: reduce) { .core-breadcrumbs-link, .core-link, .core-meter-fill, .core-progress-bar-fill { transition: none; } }
 @media (forced-colors: active) { .core-disclosure, .core-disclosure-group, .core-group, .core-toggle-button, .core-checkbox input, .core-checkbox-indicator { border-color: ButtonText; } .core-checkbox-indicator[data-selected], .core-checkbox-indicator[data-indeterminate] { background: Highlight; color: HighlightText; } .core-meter-fill, .core-progress-bar-fill { background: Highlight; } .core-separator { background: ButtonText; } }
 `;
+const collectionCss = `
+.core-calendar, .core-range-calendar { display: grid; gap: var(--core-reference-dimension-space-2xs); }
+.core-calendar-grid { border-spacing: .125rem; }
+.core-calendar-cell, .core-range-calendar-cell { inline-size: 2rem; block-size: 2rem; border: 0; border-radius: var(--core-semantic-control-radius); color: inherit; font: inherit; }
+.core-calendar-cell[data-focused], .core-range-calendar-cell[data-focused], .core-calendar-cell[aria-selected='true'], .core-range-calendar-cell[aria-selected='true'] { background: var(--core-semantic-selection-track); color: Canvas; }
+.core-color-area, .core-color-slider, .core-color-wheel { position: relative; outline: none; }
+.core-color-area { inline-size: 14rem; block-size: 10rem; border-radius: var(--core-semantic-control-radius); background: linear-gradient(to right, transparent, var(--core-semantic-selection-track)), linear-gradient(to top, #000, transparent); }
+.core-color-area-thumb, .core-color-slider-thumb, .core-color-wheel-thumb { position: absolute; inline-size: 1rem; block-size: 1rem; border: 2px solid CanvasText; border-radius: 50%; box-shadow: 0 0 0 1px Canvas; outline: none; }
+.core-color-area-thumb[data-focus-visible], .core-color-slider-thumb[data-focus-visible], .core-color-wheel-thumb[data-focus-visible] { outline: 2px solid var(--core-semantic-focus-ring); outline-offset: 2px; }
+.core-color-slider { display: grid; gap: var(--core-reference-dimension-space-2xs); min-inline-size: 12rem; }
+.core-color-slider-track, .core-slider-track { position: relative; display: block; block-size: .5rem; border-radius: var(--core-semantic-control-radius); background: linear-gradient(to right, var(--core-semantic-selection-track), transparent); }
+.core-color-slider-fill, .core-slider-fill { block-size: 100%; border-radius: inherit; background: var(--core-semantic-selection-track); }
+.core-color-wheel { inline-size: 12rem; block-size: 12rem; }
+.core-color-wheel-track { inline-size: 100%; block-size: 100%; border-radius: 50%; background: conic-gradient(red, yellow, lime, cyan, blue, magenta, red); }
+.core-color-picker { display: grid; gap: var(--core-reference-dimension-space-2xs); }
+.core-color-field { display: grid; gap: var(--core-reference-dimension-space-2xs); max-inline-size: 24rem; }
+.core-color-swatch { display: inline-block; inline-size: 1.5rem; block-size: 1.5rem; border: 1px solid currentColor; border-radius: var(--core-semantic-control-radius); }
+.core-color-swatch-picker { display: flex; flex-wrap: wrap; gap: var(--core-reference-dimension-space-2xs); }
+.core-color-swatch-picker-item[aria-selected='true'] { outline: 2px solid var(--core-semantic-selection-track); outline-offset: 2px; }
+.core-combo-box, .core-select { position: relative; display: grid; gap: var(--core-reference-dimension-space-2xs); max-inline-size: 24rem; }
+.core-combo-box-trigger, .core-select-trigger { min-block-size: var(--core-semantic-control-min-height); border: 1px solid currentColor; border-radius: var(--core-semantic-control-radius); background: var(--core-semantic-field-background); color: inherit; font: inherit; }
+.core-combo-box-popover, .core-select-popover { min-inline-size: 14rem; padding: var(--core-semantic-control-padding-inline); border: 1px solid currentColor; border-radius: var(--core-semantic-control-radius); background: var(--core-semantic-overlay-background); }
+.core-combo-box-list, .core-select-list, .core-list-box, .core-grid-list { display: flex; flex-direction: column; gap: var(--core-reference-dimension-space-2xs); margin: 0; padding: var(--core-semantic-control-padding-inline); list-style: none; }
+.core-combo-box-option, .core-select-option, .core-list-box-item, .core-grid-list-item, .core-menu-item { padding: var(--core-reference-dimension-space-2xs) var(--core-semantic-control-padding-inline); border-radius: var(--core-semantic-control-radius); }
+.core-combo-box-option[data-focused], .core-select-option[data-focused], .core-list-box-item[aria-selected='true'], .core-grid-list-item[aria-selected='true'], .core-menu-item[data-focused] { background: var(--core-semantic-selection-track); color: Canvas; }
+.core-list-box-item[data-focus-visible], .core-grid-list-item[data-focus-visible], .core-color-swatch-picker-item[data-focus-visible], .core-table-row[data-focus-visible] { outline: 2px solid var(--core-semantic-focus-ring); outline-offset: 2px; }
+.core-radio-group { display: grid; gap: var(--core-reference-dimension-space-2xs); }
+.core-radio { display: inline-flex; align-items: center; gap: var(--core-reference-dimension-space-2xs); cursor: pointer; }
+.core-radio-indicator { display: inline-grid; place-items: center; inline-size: 1rem; block-size: 1rem; flex: 0 0 auto; border: 1.5px solid currentColor; border-radius: 50%; background: transparent; }
+.core-radio[data-selected] .core-radio-indicator { border-color: var(--core-semantic-selection-track); background: var(--core-semantic-selection-track); box-shadow: inset 0 0 0 .25rem Canvas; }
+.core-radio:focus-within, .core-radio[data-focus-visible] { outline: 2px solid var(--core-semantic-focus-ring); outline-offset: 2px; }
+.core-radio[data-disabled] { cursor: not-allowed; opacity: .55; }
+.core-radio[data-readonly] { cursor: default; }
+.core-slider { display: grid; gap: var(--core-reference-dimension-space-2xs); min-inline-size: 12rem; }
+.core-table { border-collapse: collapse; }
+.core-table-cell, .core-table-column { padding: var(--core-reference-dimension-space-2xs) var(--core-semantic-control-padding-inline); border-block-end: 1px solid currentColor; text-align: start; }
+.core-table-row[aria-selected='true'] { background: var(--core-semantic-selection-track); color: Canvas; }
+.core-tabs { display: grid; gap: var(--core-reference-dimension-space-2xs); }
+.core-tab-list { display: flex; gap: var(--core-reference-dimension-space-2xs); }
+.core-tab { padding: var(--core-reference-dimension-space-2xs) var(--core-semantic-control-padding-inline); border: 0; border-radius: var(--core-semantic-control-radius); background: transparent; color: inherit; font: inherit; }
+.core-tab[aria-selected='true'] { background: var(--core-semantic-selection-track); color: Canvas; }
+.core-tab-panel { padding: var(--core-reference-dimension-space-2xs); }
+.core-tag-group, .core-token-field { display: grid; gap: var(--core-reference-dimension-space-2xs); }
+.core-tag-list { display: flex; flex-wrap: wrap; gap: var(--core-reference-dimension-space-2xs); }
+.core-tag, .core-token { display: inline-flex; align-items: center; gap: var(--core-reference-dimension-space-2xs); padding: .125rem var(--core-semantic-control-padding-inline); border-radius: var(--core-semantic-control-radius); background: var(--core-semantic-selection-track); color: Canvas; }
+.core-tag-remove { border: 0; background: transparent; color: inherit; font: inherit; }
+.core-toggle-button-group { display: inline-flex; gap: var(--core-reference-dimension-space-2xs); }
+.core-toggle-button-group [aria-pressed='true'] { background: var(--core-semantic-selection-track); color: Canvas; }
+.core-token-input { min-block-size: var(--core-semantic-control-min-height); padding: var(--core-semantic-control-padding-inline); border: 1px solid currentColor; border-radius: var(--core-semantic-control-radius); background: var(--core-semantic-field-background); color: inherit; }
+.core-toolbar { display: flex; flex-wrap: wrap; gap: var(--core-reference-dimension-space-2xs); align-items: center; }
+.core-tree { display: grid; gap: var(--core-reference-dimension-space-2xs); margin: 0; padding: 0; list-style: none; }
+.core-tree-item { padding: var(--core-reference-dimension-space-2xs) var(--core-semantic-control-padding-inline); border-radius: var(--core-semantic-control-radius); }
+.core-tree-item[aria-selected='true'], .core-tree-item[data-focused] { background: var(--core-semantic-selection-track); color: Canvas; }
+.core-virtualizer { display: block; max-block-size: 100%; contain: strict; }
+.core-virtualizer-item { box-sizing: border-box; padding: var(--core-reference-dimension-space-2xs) var(--core-semantic-control-padding-inline); border-radius: var(--core-semantic-control-radius); }
+.core-virtualizer-item[aria-selected='true'], .core-virtualizer-item[data-focused] { background: var(--core-semantic-selection-track); color: Canvas; }
+@media (forced-colors: active) {
+  .core-color-area, .core-color-slider, .core-color-wheel, .core-combo-box-trigger, .core-select-trigger, .core-combo-box-popover, .core-select-popover, .core-token-input { border-color: ButtonText; background: Canvas; color: CanvasText; }
+  .core-color-area-thumb, .core-color-slider-thumb, .core-color-wheel-thumb, .core-table-cell, .core-table-column { border-color: ButtonText; box-shadow: none; }
+  .core-calendar-cell[data-focused], .core-range-calendar-cell[data-focused], .core-calendar-cell[aria-selected='true'], .core-range-calendar-cell[aria-selected='true'], .core-list-box-item[aria-selected='true'], .core-grid-list-item[aria-selected='true'], .core-menu-item[data-focused], .core-table-row[aria-selected='true'], .core-tab[aria-selected='true'], .core-tree-item[aria-selected='true'], .core-tree-item[data-focused], .core-virtualizer-item[aria-selected='true'], .core-virtualizer-item[data-focused] { background: Highlight; color: HighlightText; }
+  .core-radio-indicator { border-color: ButtonText; }
+  .core-radio[data-selected] .core-radio-indicator { border-color: Highlight; background: Highlight; box-shadow: inset 0 0 0 .25rem Canvas; }
+  .core-list-box-item[data-focus-visible], .core-grid-list-item[data-focus-visible], .core-color-swatch-picker-item[data-focus-visible], .core-table-row[data-focus-visible] { outline-color: Highlight; }
+  .core-color-area-thumb[data-focus-visible], .core-color-slider-thumb[data-focus-visible], .core-color-wheel-thumb[data-focus-visible] { outline-color: Highlight; }
+}
+@media (prefers-contrast: more) {
+  .core-color-area, .core-color-slider-track, .core-color-wheel-track, .core-combo-box-trigger, .core-select-trigger, .core-token-input { border-width: 2px; }
+  .core-list-box-item[aria-selected='true'], .core-grid-list-item[aria-selected='true'], .core-tab[aria-selected='true'], .core-tree-item[aria-selected='true'], .core-virtualizer-item[aria-selected='true'] { outline: 2px solid currentColor; outline-offset: -2px; }
+  .core-list-box-item[data-focus-visible], .core-grid-list-item[data-focus-visible], .core-color-swatch-picker-item[data-focus-visible], .core-table-row[data-focus-visible] { outline-width: 3px; }
+}
+`;
 const fieldCss = `
 .core-form { display: flex; flex-direction: column; gap: var(--core-reference-dimension-space-xs); inline-size: 100%; }
 .core-text-field, .core-search-field, .core-number-field, .core-date-field, .core-time-field, .core-date-picker, .core-date-range-picker, .core-autocomplete { display: flex; flex-direction: column; gap: var(--core-reference-dimension-space-2xs); inline-size: 100%; max-inline-size: 32rem; }
@@ -212,7 +296,7 @@ const fieldCss = `
   .core-autocomplete-option[aria-selected='true'], .core-calendar-cell[aria-selected='true'], .core-calendar-cell[data-selected] { outline: 2px solid currentColor; outline-offset: -2px; }
 }
 `;
-const fullCssBody = `${cssBody}\n${componentCss}${fieldCss}`;
+const fullCssBody = `${cssBody}\n${componentCss}${collectionCss}${fieldCss}`;
 
 const compatibility = {
   schema: 'core-ui-react-compatibility-v1',
@@ -220,10 +304,10 @@ const compatibility = {
   version: manifest.version,
   upstream: { package: 'react-aria-components', version: '1.20.0', gitHead: '5ecb3333001313e83898cd07644227897e3bae1f' },
   tokenSource: { path: 'catalog/tokens/default-theme.json', sha256: expectedTokenSha256 },
-  support: 'unproved; R1.2 React exports only',
+  support: 'unproved; R1.3 React exports only',
 };
 const compatibilityBody = `function deepFreeze(value) {\n  if (value && typeof value === 'object' && !Object.isFrozen(value)) {\n    Object.freeze(value);\n    for (const child of Object.values(value)) deepFreeze(child);\n  }\n  return value;\n}\nexport const reactCompatibility = deepFreeze(${canonicalJson(compatibility)});\n`;
-const indexBody = "export { reactCompatibility } from './compatibility.mjs';\nexport { Button } from './button.mjs';\nexport { Breadcrumbs, Checkbox, Disclosure, DisclosureGroup, Group, Link, Meter, ProgressBar, Separator, ToggleButton, Autocomplete, CheckboxGroup, DateField, DatePicker, DateRangePicker, Form, NumberField, SearchField, Switch, TextField, TimeField } from './components.mjs';\n";
+const indexBody = "export { reactCompatibility } from './compatibility.mjs';\nexport { Button } from './button.mjs';\nexport { Breadcrumbs, Checkbox, Disclosure, DisclosureGroup, Group, Link, Meter, ProgressBar, Separator, ToggleButton, Autocomplete, CheckboxGroup, DateField, DatePicker, DateRangePicker, Form, NumberField, SearchField, Switch, TextField, TimeField } from './components.mjs';\nexport { Calendar, ColorArea, ColorField, ColorPicker, ColorSlider, ColorSwatch, ColorSwatchPicker, ColorWheel, ComboBox, GridList, ListBox, Menu, RadioGroup, RangeCalendar, Select, Slider, Table, Tabs, TagGroup, ToggleButtonGroup, TokenField, Toolbar, Tree, Virtualizer } from './collections.mjs';\n";
 const typesBody = `import type * as React from 'react';
 
 export type ButtonPointerType = 'mouse' | 'pen' | 'touch' | 'keyboard' | 'virtual' | undefined;
@@ -275,6 +359,10 @@ export type CoreAccessibleName =
   | { label: Exclude<React.ReactNode, null | undefined | boolean>; 'aria-label'?: never; 'aria-labelledby'?: never }
   | { label?: never; 'aria-label': string; 'aria-labelledby'?: never }
   | { label?: never; 'aria-label'?: never; 'aria-labelledby': string };
+export type CoreAriaAccessibleName =
+  | { 'aria-label': string; 'aria-labelledby'?: never }
+  | { 'aria-label'?: never; 'aria-labelledby': string };
+export type CoreAriaLabel = { 'aria-label': string };
 export type NamedFieldProps = FieldValidationProps & CoreAccessibleName;
 export type TextFieldProps = NamedFieldProps & { value?: string; defaultValue?: string; onChange?: (value: string) => void; name?: string; placeholder?: string; type?: 'text' | 'email' | 'password' | 'url' | 'tel'; };
 export declare const TextField: React.ForwardRefExoticComponent<TextFieldProps & React.RefAttributes<HTMLDivElement>>;
@@ -301,12 +389,71 @@ export interface AutocompleteSelectionItem { id: string; label: React.ReactNode;
 export type AutocompleteProps = NamedFieldProps & { items?: Array<AutocompleteItem | string>; value?: string; defaultValue?: string; onChange?: (value: string) => void; onSelect?: (item?: AutocompleteSelectionItem) => void; name?: string; placeholder?: string; };
 export declare const Autocomplete: React.ForwardRefExoticComponent<AutocompleteProps & React.RefAttributes<HTMLDivElement>>;
 `;
-const reactTypesBody = typesBody.replace("export const reactCompatibility: Readonly<Record<string, unknown>>;\n", `export const reactCompatibility: Readonly<Record<string, unknown>>;\n${fieldsTypes}`);
-const testingBody = "export const reactPlatformSafetyFixture = Object.freeze({ componentSupportClaim: 'none', fixture: 'r1.2-react-fields' });\n";
-const readmeBody = `# @core-ui/react\n\nExperimental, unpublished R1.2 React slice for the standalone Core UI renderer.\n\n- Button, Breadcrumbs, Checkbox, Disclosure, DisclosureGroup, Group, Link, Meter, ProgressBar, Separator, ToggleButton, Autocomplete, CheckboxGroup, DateField, DatePicker, DateRangePicker, Form, NumberField, SearchField, Switch, TextField, and TimeField are Core-owned public exports for the \`web.react\` binding.\n- React Aria Components 1.20.0 is an internal replaceable substrate.\n- Core owns the public APIs, tokens, styling, accessibility, lifecycle, and support boundary.\n- Tale UI is a pinned styling donor, never a dependency.\n\nThe package remains private and unpublished until the separately authorized React prerelease boundary.\n`;
+const collectionsTypes = `
+export type CoreColorValue = string;
+export interface CoreCollectionItem { id?: string; key?: string; label?: React.ReactNode; value?: string; textValue?: string; disabled?: boolean; [key: string]: unknown; }
+export type CoreSelection = string[] | 'all';
+export type CoreItems = Array<CoreCollectionItem | string>;
+export type CalendarProps = CoreAccessibleName & { value?: CoreDateValue; defaultValue?: CoreDateValue; focusedValue?: CoreDateValue; minValue?: CoreDateValue; maxValue?: CoreDateValue; onChange?: (value?: CoreDateValue) => void; onFocusChange?: (value?: CoreDateValue) => void; disabled?: boolean; readOnly?: boolean; required?: boolean; invalid?: boolean; className?: string; };
+export declare const Calendar: React.ForwardRefExoticComponent<CalendarProps & React.RefAttributes<HTMLDivElement>>;
+export type RangeCalendarProps = CoreAccessibleName & { value?: CoreDateRange; defaultValue?: CoreDateRange; minValue?: CoreDateValue; maxValue?: CoreDateValue; onChange?: (value?: CoreDateRange) => void; disabled?: boolean; readOnly?: boolean; required?: boolean; invalid?: boolean; className?: string; };
+export declare const RangeCalendar: React.ForwardRefExoticComponent<RangeCalendarProps & React.RefAttributes<HTMLDivElement>>;
+export type ColorAreaProps = CoreAccessibleName & { value?: CoreColorValue; defaultValue?: CoreColorValue; disabled?: boolean; readOnly?: boolean; onChange?: (value: CoreColorValue) => void; className?: string; };
+export declare const ColorArea: React.ForwardRefExoticComponent<ColorAreaProps & React.RefAttributes<HTMLDivElement>>;
+export type ColorFieldProps = NamedFieldProps & { value?: CoreColorValue; defaultValue?: CoreColorValue; onChange?: (value: CoreColorValue) => void; name?: string; };
+export declare const ColorField: React.ForwardRefExoticComponent<ColorFieldProps & React.RefAttributes<HTMLDivElement>>;
+export type ColorPickerProps = { value?: CoreColorValue; defaultValue?: CoreColorValue; disabled?: boolean; readOnly?: boolean; onChange?: (value: CoreColorValue) => void; children?: React.ReactNode; className?: string; };
+export declare const ColorPicker: React.ForwardRefExoticComponent<ColorPickerProps & React.RefAttributes<HTMLDivElement>>;
+export type ColorSliderProps = CoreAccessibleName & { value?: CoreColorValue; defaultValue?: CoreColorValue; channel?: string; colorSpace?: string; disabled?: boolean; orientation?: 'horizontal' | 'vertical'; onChange?: (value: CoreColorValue) => void; className?: string; };
+export declare const ColorSlider: React.ForwardRefExoticComponent<ColorSliderProps & React.RefAttributes<HTMLDivElement>>;
+export type ColorSwatchProps = { color: CoreColorValue; disabled?: boolean; className?: string; };
+export declare const ColorSwatch: React.ForwardRefExoticComponent<ColorSwatchProps & React.RefAttributes<HTMLDivElement>>;
+export type ColorSwatchPickerProps = CoreAriaAccessibleName & { items?: CoreItems; value?: CoreColorValue; defaultValue?: CoreColorValue; disabled?: boolean; onChange?: (value: CoreColorValue) => void; className?: string; };
+export declare const ColorSwatchPicker: React.ForwardRefExoticComponent<ColorSwatchPickerProps & React.RefAttributes<HTMLDivElement>>;
+export type ColorWheelProps = CoreAriaAccessibleName & { value?: CoreColorValue; defaultValue?: CoreColorValue; disabled?: boolean; onChange?: (value: CoreColorValue) => void; className?: string; };
+export declare const ColorWheel: React.ForwardRefExoticComponent<ColorWheelProps & React.RefAttributes<HTMLDivElement>>;
+export type CollectionProps = CoreAriaAccessibleName & { items?: CoreItems; selectedIds?: CoreSelection; defaultSelectedIds?: CoreSelection; disabled?: boolean; selectionMode?: 'none' | 'single' | 'multiple'; onSelectionChange?: (ids: CoreSelection) => void; onAction?: (item?: CoreCollectionItem) => void; className?: string; };
+export type GridListProps = CollectionProps;
+export declare const GridList: React.ForwardRefExoticComponent<GridListProps & React.RefAttributes<HTMLDivElement>>;
+export type ListBoxProps = CollectionProps;
+export declare const ListBox: React.ForwardRefExoticComponent<ListBoxProps & React.RefAttributes<HTMLDivElement>>;
+export type MenuProps = CoreAriaAccessibleName & { items?: CoreItems; disabled?: boolean; shouldCloseOnSelect?: boolean; onAction?: (item?: CoreCollectionItem) => void; onSelect?: (item?: CoreCollectionItem) => void; className?: string; };
+export declare const Menu: React.ForwardRefExoticComponent<MenuProps & React.RefAttributes<HTMLDivElement>>;
+export type RadioOption = { id?: string; value: string; label?: React.ReactNode; disabled?: boolean; };
+export type RadioGroupProps = CoreAccessibleName & { options?: RadioOption[]; value?: string; defaultValue?: string; disabled?: boolean; readOnly?: boolean; required?: boolean; invalid?: boolean; onChange?: (value: string) => void; className?: string; };
+export declare const RadioGroup: React.ForwardRefExoticComponent<RadioGroupProps & React.RefAttributes<HTMLDivElement>>;
+export type SelectProps = NamedFieldProps & { items?: CoreItems; value?: string; defaultValue?: string; disabled?: boolean; readOnly?: boolean; required?: boolean; invalid?: boolean; name?: string; placeholder?: string; onChange?: (value?: string) => void; };
+export declare const Select: React.ForwardRefExoticComponent<SelectProps & React.RefAttributes<HTMLDivElement>>;
+export type ComboBoxProps = NamedFieldProps & { items?: CoreItems; value?: string; defaultValue?: string; selectedId?: string; defaultSelectedId?: string; disabled?: boolean; readOnly?: boolean; required?: boolean; invalid?: boolean; name?: string; placeholder?: string; onChange?: (value: string) => void; onSelect?: (item?: CoreCollectionItem) => void; };
+export declare const ComboBox: React.ForwardRefExoticComponent<ComboBoxProps & React.RefAttributes<HTMLDivElement>>;
+export type SliderProps = CoreAccessibleName & { value?: number; defaultValue?: number; min?: number; max?: number; step?: number; disabled?: boolean; orientation?: 'horizontal' | 'vertical'; onChange?: (value: number) => void; className?: string; };
+export declare const Slider: React.ForwardRefExoticComponent<SliderProps & React.RefAttributes<HTMLDivElement>>;
+export interface CoreTableColumn extends CoreCollectionItem { isRowHeader?: boolean; sortable?: boolean; }
+export interface CoreTableRow extends CoreCollectionItem { values?: Record<string, React.ReactNode>; }
+export type TableProps = CoreAriaLabel & { columns?: CoreTableColumn[]; rows?: CoreTableRow[]; selectedIds?: CoreSelection; defaultSelectedIds?: CoreSelection; disabled?: boolean; selectionMode?: 'none' | 'single' | 'multiple'; onSelectionChange?: (ids: CoreSelection) => void; onRowAction?: (row?: CoreTableRow) => void; className?: string; };
+export declare const Table: React.ForwardRefExoticComponent<TableProps & React.RefAttributes<HTMLTableElement>>;
+export type TabsProps = CoreAriaAccessibleName & { items?: CoreItems; value?: string; defaultValue?: string; disabled?: boolean; orientation?: 'horizontal' | 'vertical'; onChange?: (value: string) => void; className?: string; };
+export declare const Tabs: React.ForwardRefExoticComponent<TabsProps & React.RefAttributes<HTMLDivElement>>;
+export type TagGroupProps = CoreAccessibleName & { items?: CoreItems; disabled?: boolean; onRemove?: (items: CoreCollectionItem[]) => void; onAction?: (item?: CoreCollectionItem) => void; className?: string; };
+export declare const TagGroup: React.ForwardRefExoticComponent<TagGroupProps & React.RefAttributes<HTMLDivElement>>;
+export type ToggleButtonGroupProps = CoreAriaAccessibleName & { selectedIds?: CoreSelection; defaultSelectedIds?: CoreSelection; disabled?: boolean; orientation?: 'horizontal' | 'vertical'; onSelectionChange?: (ids: CoreSelection) => void; children?: React.ReactNode; className?: string; };
+export declare const ToggleButtonGroup: React.ForwardRefExoticComponent<ToggleButtonGroupProps & React.RefAttributes<HTMLDivElement>>;
+export type TokenFieldProps = CoreAccessibleName & { value?: string[]; defaultValue?: string[]; disabled?: boolean; readOnly?: boolean; name?: string; placeholder?: string; onChange?: (value: string[]) => void; className?: string; };
+export declare const TokenField: React.ForwardRefExoticComponent<TokenFieldProps & React.RefAttributes<HTMLDivElement>>;
+export type ToolbarProps = CoreAriaAccessibleName & { orientation?: 'horizontal' | 'vertical'; disabled?: boolean; children?: React.ReactNode; className?: string; };
+export declare const Toolbar: React.ForwardRefExoticComponent<ToolbarProps & React.RefAttributes<HTMLDivElement>>;
+export interface CoreTreeItem extends CoreCollectionItem { children?: CoreTreeItem[]; items?: CoreTreeItem[]; }
+export type TreeProps = CoreAriaAccessibleName & { items?: CoreTreeItem[]; selectedIds?: CoreSelection; defaultSelectedIds?: CoreSelection; expandedIds?: CoreSelection; defaultExpandedIds?: CoreSelection; disabled?: boolean; selectionMode?: 'none' | 'single' | 'multiple'; onSelectionChange?: (ids: CoreSelection) => void; onExpandedChange?: (ids: CoreSelection) => void; onAction?: (item?: CoreTreeItem) => void; className?: string; };
+export declare const Tree: React.ForwardRefExoticComponent<TreeProps & React.RefAttributes<HTMLDivElement>>;
+export type VirtualizerProps = CoreAriaLabel & { items?: CoreItems; height?: number; itemHeight?: number; overscan?: number; disabled?: boolean; onScroll?: React.UIEventHandler<HTMLDivElement>; className?: string; style?: React.CSSProperties; };
+export declare const Virtualizer: React.ForwardRefExoticComponent<VirtualizerProps & React.RefAttributes<HTMLDivElement>>;
+`;
+const reactTypesBody = typesBody.replace("export const reactCompatibility: Readonly<Record<string, unknown>>;\n", `export const reactCompatibility: Readonly<Record<string, unknown>>;\n${fieldsTypes}${collectionsTypes}`);
+const testingBody = "export const reactPlatformSafetyFixture = Object.freeze({ componentSupportClaim: 'none', fixture: 'r1.3-react-collections' });\n";
+const readmeBody = `# @core-ui/react\n\nExperimental, unpublished R1.3 React slice for the standalone Core UI renderer.\n\n- Button, Breadcrumbs, Checkbox, Disclosure, DisclosureGroup, Group, Link, Meter, ProgressBar, Separator, ToggleButton, Autocomplete, CheckboxGroup, DateField, DatePicker, DateRangePicker, Form, NumberField, SearchField, Switch, TextField, TimeField, Calendar, ColorArea, ColorField, ColorPicker, ColorSlider, ColorSwatch, ColorSwatchPicker, ColorWheel, ComboBox, GridList, ListBox, Menu, RadioGroup, RangeCalendar, Select, Slider, Table, Tabs, TagGroup, ToggleButtonGroup, TokenField, Toolbar, Tree, and Virtualizer are Core-owned public exports for the \`web.react\` binding.\n- React Aria Components 1.20.0 is an internal replaceable substrate.\n- Core owns the public APIs, tokens, styling, accessibility, lifecycle, and support boundary.\n- Tale UI is a pinned styling donor, never a dependency.\n\nThe package remains private and unpublished until the separately authorized React prerelease boundary.\n`;
 const descriptorRecord = {
   schema: 'core-ui-renderer-descriptor-v1', generatedFrom: 'packages/react/src/generate.mjs',
-  package: manifest.name, version: manifest.version, support: 'unproved; R1.2 React exports only',
+  package: manifest.name, version: manifest.version, support: 'unproved; R1.3 React exports only',
   bindings: componentArtifacts.map((artifact) => ({
     binding: `${artifact.id}#web.react`, export: artifact.name, module: '.',
     lifecycle: 'experimental', strategy: 'direct', runtimeProfile: 'web.react',
@@ -323,7 +470,7 @@ const releaseRecord = {
   packagePrivate: manifest.private,
   catalog: { status: 'bound', components: componentArtifacts.map((artifact) => ({ component: artifact.id, binding: `${artifact.id}#web.react`, states: artifact.states })) },
   tokenSource: { path: 'catalog/tokens/default-theme.json', sha256: expectedTokenSha256 },
-  evidence: { status: 'pending', ids: ['E-R1.2-01', 'E-R1.2-02', 'E-R1.2-03', 'E-R1.2-04'] },
+  evidence: { status: 'pending', ids: ['E-R1.3-01', 'E-R1.3-02', 'E-R1.3-03', 'E-R1.3-04', 'E-R1.3-05'] },
   advisories: [], exceptions: [],
   publication: { status: 'disabled', requires: ['explicit external publish authorization'] },
   rollback: { status: 'candidate-branch-only-before-merge' },
@@ -345,22 +492,25 @@ const componentDonorComparisonRecord = {
   donor: { name: crosswalk.donor.name, commit: crosswalk.donor.commit, tree: crosswalk.donor.tree },
   components: componentArtifacts.map((artifact) => {
     const slug = artifact.id.slice('core:component:'.length);
-    const source = artifact.name === 'Button' ? crosswalk.button : crosswalk.components[slug] ?? r12Crosswalk.components[slug];
+    const source = artifact.name === 'Button' ? crosswalk.button : crosswalk.components[slug] ?? r12Crosswalk.components[slug] ?? r13Crosswalk.components[slug];
     return { ...(source?.donorInputs ? { donorInputs: source.donorInputs } : {}), component: artifact.name, binding: `${artifact.id}#web.react`, disposition: source.disposition, selector: `.core-${slug}`, rules: source.rules };
   }),
 };
-const r11Artifacts = componentArtifacts.filter((artifact) => !r12Slugs.includes(artifact.id.slice('core:component:'.length)));
+const r11Artifacts = componentArtifacts.filter((artifact) => {
+  const slug = artifact.id.slice('core:component:'.length);
+  return !r12Slugs.includes(slug) && !r13Slugs.includes(slug);
+});
 const r11DescriptorRecord = {
   ...descriptorRecord,
   support: 'unproved; R1.1 React exports only',
-  bindings: descriptorRecord.bindings.filter(({ binding }) => !r12Slugs.some((slug) => binding === `core:component:${slug}#web.react`)),
-  exports: descriptorRecord.exports.filter(({ binding }) => !r12Slugs.some((slug) => binding === `core:component:${slug}#web.react`)),
+  bindings: descriptorRecord.bindings.filter(({ binding }) => !r12Slugs.some((slug) => binding === `core:component:${slug}#web.react`) && !r13Slugs.some((slug) => binding === `core:component:${slug}#web.react`)),
+  exports: descriptorRecord.exports.filter(({ binding }) => !r12Slugs.some((slug) => binding === `core:component:${slug}#web.react`) && !r13Slugs.some((slug) => binding === `core:component:${slug}#web.react`)),
 };
 const r11ReleaseRecord = {
   ...releaseRecord,
-  componentExports: releaseRecord.componentExports.filter(({ binding }) => !r12Slugs.some((slug) => binding === `core:component:${slug}#web.react`)),
-  bindings: releaseRecord.bindings.filter(({ binding }) => !r12Slugs.some((slug) => binding === `core:component:${slug}#web.react`)),
-  catalog: { ...releaseRecord.catalog, components: releaseRecord.catalog.components.filter(({ component }) => !r12Slugs.includes(component.slice('core:component:'.length))) },
+  componentExports: releaseRecord.componentExports.filter(({ binding }) => !r12Slugs.some((slug) => binding === `core:component:${slug}#web.react`) && !r13Slugs.some((slug) => binding === `core:component:${slug}#web.react`)),
+  bindings: releaseRecord.bindings.filter(({ binding }) => !r12Slugs.some((slug) => binding === `core:component:${slug}#web.react`) && !r13Slugs.some((slug) => binding === `core:component:${slug}#web.react`)),
+  catalog: { ...releaseRecord.catalog, components: releaseRecord.catalog.components.filter(({ component }) => !r12Slugs.includes(component.slice('core:component:'.length)) && !r13Slugs.includes(component.slice('core:component:'.length))) },
   evidence: { status: 'pending', ids: ['E-R1.1-01', 'E-R1.1-02', 'E-R1.1-03', 'E-R1.1-04'] },
 };
 const r11ComponentDonorComparisonRecord = {
@@ -382,7 +532,46 @@ for (const slug of r12Slugs) {
     if (!fullCssBody.includes(`--core-${hook.replaceAll('.', '-')}`)) throw new Error(`CORE_REACT_R12_TOKEN_HOOK_UNCONSUMED: ${slug}:${hook}`);
   }
 }
-assertReactR12GeneratedContracts({ descriptor: descriptorRecord, release: releaseRecord, donorComparison: r12DonorComparisonRecord, manifest, componentNames: componentArtifacts.map(({ name }) => name), crosswalk: r12Crosswalk });
+const r12DescriptorRecord = {
+  ...descriptorRecord,
+  support: 'unproved; R1.2 React exports only',
+  bindings: descriptorRecord.bindings.filter(({ binding }) => r12Slugs.some((slug) => binding === `core:component:${slug}#web.react`)),
+  exports: descriptorRecord.exports.filter(({ binding }) => r12Slugs.some((slug) => binding === `core:component:${slug}#web.react`)),
+};
+const r12ReleaseRecord = {
+  ...releaseRecord,
+  componentExports: releaseRecord.componentExports.filter(({ binding }) => r12Slugs.some((slug) => binding === `core:component:${slug}#web.react`)),
+  bindings: releaseRecord.bindings.filter(({ binding }) => r12Slugs.some((slug) => binding === `core:component:${slug}#web.react`)),
+  catalog: { ...releaseRecord.catalog, components: releaseRecord.catalog.components.filter(({ component }) => r12Slugs.includes(component.slice('core:component:'.length))) },
+  evidence: { status: 'pending', ids: ['E-R1.2-01', 'E-R1.2-02', 'E-R1.2-03', 'E-R1.2-04'] },
+};
+assertReactR12GeneratedContracts({ descriptor: r12DescriptorRecord, release: r12ReleaseRecord, donorComparison: r12DonorComparisonRecord, manifest, componentNames: r12Slugs.map((slug) => componentArtifacts.find(({ id }) => id === `core:component:${slug}`).name), crosswalk: r12Crosswalk });
+const r13DonorComparisonRecord = {
+  schema: 'core-ui-react-r1-3-donor-comparison-v1',
+  generatedFrom: 'packages/react/src/generate.mjs',
+  donor: r13Crosswalk.donor,
+  components: r13Slugs.map((slug) => {
+    const source = EXPECTED_R13_DONOR_CONTRACT.components[slug];
+    const artifact = componentArtifacts.find(({ id }) => id === `core:component:${slug}`);
+    return {
+      component: artifact.name,
+      binding: `${artifact.id}#web.react`,
+      disposition: source.disposition,
+      selector: `.core-${slug}`,
+      donorInputs: source.donorInputs,
+      tokenHooks: source.tokenHooks,
+      rules: source.rules,
+      result: { cssSelector: `.core-${slug}`, status: source.disposition === 'no-applicable-donor' ? 'no-applicable-donor' : 'adapted-for-r1.3' },
+    };
+  }),
+};
+for (const slug of r13Slugs) {
+  const source = EXPECTED_R13_DONOR_CONTRACT.components[slug];
+  for (const hook of source.tokenHooks) {
+    if (!fullCssBody.includes(`--core-${hook.replaceAll('.', '-')}`)) throw new Error(`CORE_REACT_R13_TOKEN_HOOK_UNCONSUMED: ${slug}:${hook}`);
+  }
+}
+assertReactR13GeneratedContracts({ descriptor: descriptorRecord, release: releaseRecord, donorComparison: r13DonorComparisonRecord, manifest, componentNames: componentArtifacts.map(({ name }) => name), crosswalk: r13Crosswalk, collectionsSource });
 const descriptor = `${canonicalJson(descriptorRecord)}\n`;
 const release = `${canonicalJson(releaseRecord)}\n`;
 const donorComparison = `${canonicalJson(donorComparisonRecord)}\n`;
@@ -393,6 +582,10 @@ const componentDonorComparison = generatedText(
 const r12DonorComparison = generatedText(
   'packages/react/src/generate.mjs',
   `${canonicalJson(r12DonorComparisonRecord)}\n`,
+);
+const r13DonorComparison = generatedText(
+  'packages/react/src/generate.mjs',
+  `${canonicalJson(r13DonorComparisonRecord)}\n`,
 );
 function provenance(path, bytes) {
   const body = `${canonicalJson({ path: `packages/react/generated/${path}`, sha256: `sha256:${sha256(bytes)}` })}\n`;
@@ -414,10 +607,13 @@ const outputs = new Map([
   ['button-donor-comparison.json.provenance', provenance('button-donor-comparison.json', donorComparison)],
   ['r1-2-donor-comparison.json', r12DonorComparison],
   ['r1-2-donor-comparison.json.provenance', provenance('r1-2-donor-comparison.json', r12DonorComparison)],
+  ['r1-3-donor-comparison.json', r13DonorComparison],
+  ['r1-3-donor-comparison.json.provenance', provenance('r1-3-donor-comparison.json', r13DonorComparison)],
   ['component-donor-comparison.json', componentDonorComparison],
   ['component-donor-comparison.json.provenance', provenance('component-donor-comparison.json', componentDonorComparison)],
   ['components.mjs', generatedText('packages/react/src/components.mjs', componentSource)],
   ['fields.mjs', generatedText('packages/react/src/fields.mjs', fieldsSource)],
+  ['collections.mjs', generatedText('packages/react/src/collections.mjs', collectionsSource)],
 ]);
 const readme = generatedText('packages/react/src/generate.mjs', readmeBody, '<!--', ' -->');
 
@@ -436,4 +632,4 @@ if (process.argv.includes('--check')) {
   await writeFile(resolve(packageRoot, 'README.md'), readme);
 }
 
-console.log('[react] generated standalone R1.2 forms and field projections from canonical owners');
+console.log('[react] generated standalone R1.3 collection and color projections from canonical owners');

@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 import { canonicalJson, validateContractDocument } from '@core-ui/schema';
 import { EXPECTED_R12_COMPONENT_SLUGS, EXPECTED_R12_DONOR_CONTRACT } from './r1-2-donor-contract.mjs';
+import { EXPECTED_R13_COMPONENT_SLUGS, EXPECTED_R13_DONOR_CONTRACT } from './r1-3-donor-contract.mjs';
 
 const EXPECTED_UPSTREAM = Object.freeze({
   package: 'react-aria-components',
@@ -311,5 +312,70 @@ export function assertReactR12GeneratedContracts({ descriptor, release, donorCom
       fail('CORE_REACT_R12_DONOR_COMPARISON_DRIFT');
     }
   }
+  return { descriptor, release, donorComparison };
+}
+
+/** Validates the R1.3 collection/color projection and its exact Tale donor crosswalk. */
+export function assertReactR13GeneratedContracts({ descriptor, release, donorComparison, manifest, componentNames, crosswalk, collectionsSource }) {
+  if (manifest.private !== true || release.packagePrivate !== true) fail('CORE_REACT_R13_PUBLICATION_GUARD_MISSING');
+  if (!same(crosswalk, EXPECTED_R13_DONOR_CONTRACT)
+    || !same(Object.keys(crosswalk.components ?? {}).sort(), [...EXPECTED_R13_COMPONENT_SLUGS].sort())
+    || crosswalk.donor.commit !== '94bf62a26c02605c8928dfeb24f0ddc4be1c92fd'
+    || crosswalk.donor.tree !== 'e36c96f683772eedf4652d6adbe7dbcbd1d41f94') {
+    fail('CORE_REACT_R13_DONOR_PROVENANCE_DRIFT');
+  }
+  for (const slug of EXPECTED_R13_COMPONENT_SLUGS) {
+    const entry = crosswalk.components[slug];
+    const noDonor = slug === 'token-field';
+    if (!entry || !Array.isArray(entry.donorInputs) || !Array.isArray(entry.rules) || !Array.isArray(entry.consumedRules) || !Array.isArray(entry.tokenHooks)
+      || !same(entry.consumedRules, entry.rules.map(({ input }) => input))
+      || entry.disposition !== (noDonor ? 'no-applicable-donor' : 'adapt')
+      || (noDonor ? (entry.donorInputs.length !== 0 || entry.rules.length !== 0 || entry.tokenHooks.length !== 0)
+        : (entry.donorInputs.length === 0 || entry.rules.length === 0))) {
+      fail('CORE_REACT_R13_DONOR_CROSSWALK_DRIFT');
+    }
+    for (const input of entry.donorInputs) {
+      if (!/^packages\/(?:styles|react)\/.+$/u.test(input.path) || !/^[0-9a-f]{40}$/u.test(input.blob)
+        || /^([0-9a-f])\1{39}$/u.test(input.blob)) fail('CORE_REACT_R13_DONOR_BLOB_INVALID');
+    }
+  }
+  if (!descriptor || descriptor.schema !== 'core-ui-renderer-descriptor-v1'
+    || descriptor.generatedFrom !== 'packages/react/src/generate.mjs'
+    || descriptor.package !== '@core-ui/react'
+    || descriptor.support !== 'unproved; R1.3 React exports only'
+    || descriptor.bindings.length !== componentNames.length
+    || descriptor.exports.length !== componentNames.length
+    || componentNames.length !== 46) fail('CORE_REACT_R13_DESCRIPTOR_INVALID');
+  for (const slug of EXPECTED_R13_COMPONENT_SLUGS) {
+    const binding = descriptor.bindings.find(({ binding: value }) => value === `core:component:${slug}#web.react`);
+    const componentExport = descriptor.exports.find(({ binding: value }) => value === `core:component:${slug}#web.react`);
+    if (!binding || !componentExport || binding.strategy !== 'direct' || binding.runtimeProfile !== 'web.react'
+      || binding.api.props.some((prop) => /^is[A-Z]/u.test(prop) || /(?:onPress|isPending|isDisabled)/u.test(prop))) {
+      fail('CORE_REACT_R13_COMPONENT_DESCRIPTOR_DRIFT');
+    }
+  }
+  if (release.schema !== 'core-ui-react-release-candidate-v1'
+    || release.lifecycle !== 'experimental'
+    || release.componentExports.length !== componentNames.length
+    || release.bindings.length !== componentNames.length
+    || !same(release.runtimeProfiles, ['web.react'])
+    || release.catalog?.status !== 'bound'
+    || release.catalog.components.length !== componentNames.length
+    || !same(release.evidence?.ids, ['E-R1.3-01', 'E-R1.3-02', 'E-R1.3-03', 'E-R1.3-04', 'E-R1.3-05'])
+    || release.publication?.status !== 'disabled') fail('CORE_REACT_R13_RELEASE_INVALID');
+  if (donorComparison.schema !== 'core-ui-react-r1-3-donor-comparison-v1'
+    || donorComparison.generatedFrom !== 'packages/react/src/generate.mjs'
+    || !same(donorComparison.donor, EXPECTED_R13_DONOR_CONTRACT.donor)
+    || donorComparison.components.length !== EXPECTED_R13_COMPONENT_SLUGS.length) fail('CORE_REACT_R13_DONOR_COMPARISON_INVALID');
+  for (const slug of EXPECTED_R13_COMPONENT_SLUGS) {
+    const source = EXPECTED_R13_DONOR_CONTRACT.components[slug];
+    const entry = donorComparison.components.find(({ binding }) => binding === `core:component:${slug}#web.react`);
+    if (!entry || entry.disposition !== source.disposition || entry.selector !== `.core-${slug}`
+      || !same(entry.donorInputs, source.donorInputs) || !same(entry.tokenHooks, source.tokenHooks) || !same(entry.rules, source.rules)) {
+      fail('CORE_REACT_R13_DONOR_COMPARISON_DRIFT');
+    }
+  }
+  const names = ['Calendar', 'ColorArea', 'ColorField', 'ColorPicker', 'ColorSlider', 'ColorSwatch', 'ColorSwatchPicker', 'ColorWheel', 'ComboBox', 'GridList', 'ListBox', 'Menu', 'RadioGroup', 'RangeCalendar', 'Select', 'Slider', 'Table', 'Tabs', 'TagGroup', 'ToggleButtonGroup', 'TokenField', 'Toolbar', 'Tree', 'Virtualizer'];
+  if (!collectionsSource || names.some((name) => !collectionsSource.includes(`export const ${name}`))) fail('CORE_REACT_R13_RUNTIME_EXPORT_DRIFT');
   return { descriptor, release, donorComparison };
 }

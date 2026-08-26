@@ -332,6 +332,342 @@
       "family": "guide",
       "path": "catalog/guides/time-field-usage.json",
       "sourcePath": "catalog/guides/time-field-usage.md"
+    },
+    {
+      "family": "component",
+      "path": "catalog/components/calendar/artifact.json"
+    },
+    {
+      "family": "example",
+      "path": "catalog/components/calendar/examples/react/basic.example.json",
+      "sourcePath": "catalog/components/calendar/examples/react/basic.tsx"
+    },
+    {
+      "family": "guide",
+      "path": "catalog/guides/calendar-usage.json",
+      "sourcePath": "catalog/guides/calendar-usage.md"
+    },
+    {
+      "family": "component",
+      "path": "catalog/components/color-area/artifact.json"
+    },
+    {
+      "family": "example",
+      "path": "catalog/components/color-area/examples/react/basic.example.json",
+      "sourcePath": "catalog/components/color-area/examples/react/basic.tsx"
+    },
+    {
+      "family": "guide",
+      "path": "catalog/guides/color-area-usage.json",
+      "sourcePath": "catalog/guides/color-area-usage.md"
+    },
+    {
+      "family": "component",
+      "path": "catalog/components/color-field/artifact.json"
+    },
+    {
+      "family": "example",
+      "path": "catalog/components/color-field/examples/react/basic.example.json",
+      "sourcePath": "catalog/components/color-field/examples/react/basic.tsx"
+    },
+    {
+      "family": "guide",
+      "path": "catalog/guides/color-field-usage.json",
+      "sourcePath": "catalog/guides/color-field-usage.md"
+    },
+    {
+      "family": "component",
+      "path": "catalog/components/color-picker/artifact.json"
+    },
+    {
+      "family": "example",
+      "path": "catalog/components/color-picker/examples/react/basic.example.json",
+      "sourcePath": "catalog/components/color-picker/examples/react/basic.tsx"
+    },
+    {
+      "family": "guide",
+      "path": "catalog/guides/color-picker-usage.json",
+      "sourcePath": "catalog/guides/color-picker-usage.md"
+    },
+    {
+      "family": "component",
+      "path": "catalog/components/color-slider/artifact.json"
+    },
+    {
+      "family": "example",
+      "path": "catalog/components/color-slider/examples/react/basic.example.json",
+      "sourcePath": "catalog/components/color-slider/examples/react/basic.tsx"
+    },
+    {
+      "family": "guide",
+      "path": "catalog/guides/color-slider-usage.json",
+      "sourcePath": "catalog/guides/color-slider-usage.md"
+    },
+    {
+      "family": "component",
+      "path": "catalog/components/color-swatch/artifact.json"
+    },
+    {
+      "family": "example",
+      "path": "catalog/components/color-swatch/examples/react/basic.example.json",
+      "sourcePath": "catalog/components/color-swatch/examples/react/basic.tsx"
+    },
+    {
+      "family": "guide",
+      "path": "catalog/guides/color-swatch-usage.json",
+      "sourcePath": "catalog/guides/color-swatch-usage.md"
+    },
+    {
+      "family": "component",
+      "path": "catalog/components/color-swatch-picker/artifact.json"
+    },
+    {
+      "family": "example",
+      "path": "catalog/components/color-swatch-picker/examples/react/basic.example.json",
+      "sourcePath": "catalog/components/color-swatch-picker/examples/react/basic.tsx"
+    },
+    {
+      "family": "guide",
+      "path": "catalog/guides/color-swatch-picker-usage.json",
+      "sourcePath": "catalog/guides/color-swatch-picker-usage.md"
+    },
+    {
+      "family": "component",
+      "path": "catalog/components/color-wheel/artifact.json"
+    },
+    {
+      "family": "example",
+      "path": "catalog/components/color-wheel/examples/react/basic.example.json",
+      "sourcePath": "catalog/components/color-wheel/examples/react/basic.tsx"
+    },
+    {
+      "family": "guide",
+      "path": "catalog/guides/color-wheel-usage.json",
+      "sourcePath": "catalog/guides/color-wheel-usage.md"
+    },
+    {
+      "family": "component",
+      "path": "catalog/components/combo-box/artifact.json"
+    },
+    {
+      "family": "example",
+      "path": "catalog/components/combo-box/examples/react/basic.example.json",
+      "sourcePath": "catalog/components/combo-box/examples/react/basic.tsx"
+    },
+    {
+      "family": "guide",
+      "path": "catalog/guides/combo-box-usage.json",
+      "sourcePath": "catalog/guides/combo-box-usage.md"
+    },
+    {
+      "family": "component",
+      "path": "catalog/components/grid-list/artifact.json"
+    },
+    {
+      "family": "example",
+      "path": "catalog/components/grid-list/examples/react/basic.example.json",
+      "sourcePath": "catalog/components/grid-list/examples/react/basic.tsx"
+    },
+    {
+      "family": "guide",
+      "path": "catalog/guides/grid-list-usage.json",
+      "sourcePath": "catalog/guides/grid-list-usage.md"
+    },
+    {
+      "family": "component",
+      "path": "catalog/components/list-box/artifact.json"
+    },
+    {
+      "family": "example",
+      "path": "catalog/components/list-box/examples/react/basic.example.json",
+      "sourcePath": "catalog/components/list-box/examples/react/basic.tsx"
+    },
+    {
+      "family": "guide",
+      "path": "catalog/guides/list-box-usage.json",
+      "sourcePath": "catalog/guides/list-box-usage.md"
+    },
+    {
+      "family": "component",
+      "path": "catalog/components/menu/artifact.json"
+    },
+    {
+      "family": "example",
+      "path": "catalog/components/menu/examples/react/basic.example.json",
+      "sourcePath": "catalog/components/menu/examples/react/basic.tsx"
+    },
+    {
+      "family": "guide",
+      "path": "catalog/guides/menu-usage.json",
+      "sourcePath": "catalog/guides/menu-usage.md"
+    },
+    {
+      "family": "component",
+      "path": "catalog/components/radio-group/artifact.json"
+    },
+    {
+      "family": "example",
+      "path": "catalog/components/radio-group/examples/react/basic.example.json",
+      "sourcePath": "catalog/components/radio-group/examples/react/basic.tsx"
+    },
+    {
+      "family": "guide",
+      "path": "catalog/guides/radio-group-usage.json",
+      "sourcePath": "catalog/guides/radio-group-usage.md"
+    },
+    {
+      "family": "component",
+      "path": "catalog/components/range-calendar/artifact.json"
+    },
+    {
+      "family": "example",
+      "path": "catalog/components/range-calendar/examples/react/basic.example.json",
+      "sourcePath": "catalog/components/range-calendar/examples/react/basic.tsx"
+    },
+    {
+      "family": "guide",
+      "path": "catalog/guides/range-calendar-usage.json",
+      "sourcePath": "catalog/guides/range-calendar-usage.md"
+    },
+    {
+      "family": "component",
+      "path": "catalog/components/select/artifact.json"
+    },
+    {
+      "family": "example",
+      "path": "catalog/components/select/examples/react/basic.example.json",
+      "sourcePath": "catalog/components/select/examples/react/basic.tsx"
+    },
+    {
+      "family": "guide",
+      "path": "catalog/guides/select-usage.json",
+      "sourcePath": "catalog/guides/select-usage.md"
+    },
+    {
+      "family": "component",
+      "path": "catalog/components/slider/artifact.json"
+    },
+    {
+      "family": "example",
+      "path": "catalog/components/slider/examples/react/basic.example.json",
+      "sourcePath": "catalog/components/slider/examples/react/basic.tsx"
+    },
+    {
+      "family": "guide",
+      "path": "catalog/guides/slider-usage.json",
+      "sourcePath": "catalog/guides/slider-usage.md"
+    },
+    {
+      "family": "component",
+      "path": "catalog/components/table/artifact.json"
+    },
+    {
+      "family": "example",
+      "path": "catalog/components/table/examples/react/basic.example.json",
+      "sourcePath": "catalog/components/table/examples/react/basic.tsx"
+    },
+    {
+      "family": "guide",
+      "path": "catalog/guides/table-usage.json",
+      "sourcePath": "catalog/guides/table-usage.md"
+    },
+    {
+      "family": "component",
+      "path": "catalog/components/tabs/artifact.json"
+    },
+    {
+      "family": "example",
+      "path": "catalog/components/tabs/examples/react/basic.example.json",
+      "sourcePath": "catalog/components/tabs/examples/react/basic.tsx"
+    },
+    {
+      "family": "guide",
+      "path": "catalog/guides/tabs-usage.json",
+      "sourcePath": "catalog/guides/tabs-usage.md"
+    },
+    {
+      "family": "component",
+      "path": "catalog/components/tag-group/artifact.json"
+    },
+    {
+      "family": "example",
+      "path": "catalog/components/tag-group/examples/react/basic.example.json",
+      "sourcePath": "catalog/components/tag-group/examples/react/basic.tsx"
+    },
+    {
+      "family": "guide",
+      "path": "catalog/guides/tag-group-usage.json",
+      "sourcePath": "catalog/guides/tag-group-usage.md"
+    },
+    {
+      "family": "component",
+      "path": "catalog/components/toggle-button-group/artifact.json"
+    },
+    {
+      "family": "example",
+      "path": "catalog/components/toggle-button-group/examples/react/basic.example.json",
+      "sourcePath": "catalog/components/toggle-button-group/examples/react/basic.tsx"
+    },
+    {
+      "family": "guide",
+      "path": "catalog/guides/toggle-button-group-usage.json",
+      "sourcePath": "catalog/guides/toggle-button-group-usage.md"
+    },
+    {
+      "family": "component",
+      "path": "catalog/components/token-field/artifact.json"
+    },
+    {
+      "family": "example",
+      "path": "catalog/components/token-field/examples/react/basic.example.json",
+      "sourcePath": "catalog/components/token-field/examples/react/basic.tsx"
+    },
+    {
+      "family": "guide",
+      "path": "catalog/guides/token-field-usage.json",
+      "sourcePath": "catalog/guides/token-field-usage.md"
+    },
+    {
+      "family": "component",
+      "path": "catalog/components/toolbar/artifact.json"
+    },
+    {
+      "family": "example",
+      "path": "catalog/components/toolbar/examples/react/basic.example.json",
+      "sourcePath": "catalog/components/toolbar/examples/react/basic.tsx"
+    },
+    {
+      "family": "guide",
+      "path": "catalog/guides/toolbar-usage.json",
+      "sourcePath": "catalog/guides/toolbar-usage.md"
+    },
+    {
+      "family": "component",
+      "path": "catalog/components/tree/artifact.json"
+    },
+    {
+      "family": "example",
+      "path": "catalog/components/tree/examples/react/basic.example.json",
+      "sourcePath": "catalog/components/tree/examples/react/basic.tsx"
+    },
+    {
+      "family": "guide",
+      "path": "catalog/guides/tree-usage.json",
+      "sourcePath": "catalog/guides/tree-usage.md"
+    },
+    {
+      "family": "component",
+      "path": "catalog/components/virtualizer/artifact.json"
+    },
+    {
+      "family": "example",
+      "path": "catalog/components/virtualizer/examples/react/basic.example.json",
+      "sourcePath": "catalog/components/virtualizer/examples/react/basic.tsx"
+    },
+    {
+      "family": "guide",
+      "path": "catalog/guides/virtualizer-usage.json",
+      "sourcePath": "catalog/guides/virtualizer-usage.md"
     }
   ]
 }
