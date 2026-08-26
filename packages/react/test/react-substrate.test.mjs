@@ -19,7 +19,7 @@ test('R1.1 package has an exact standalone substrate identity', async () => {
   const manifest = JSON.parse(await readFile(resolve(import.meta.dirname, '../package.json'), 'utf8'));
   assert.match(manifest.version, /^(?:0\.1\.0-alpha\.(?:0|[1-9]\d*)|0\.1\.0-rc\.1)$/u);
   assert.equal(reactCompatibility.version, manifest.version);
-  assert.equal(reactCompatibility.support, 'unproved; R1.3 React exports only');
+  assert.equal(reactCompatibility.support, 'unproved; R1.4 React exports only');
   assert.equal(manifest.private, true);
   assert.equal(manifest.scripts.prepublishOnly, 'node src/publish-guard.mjs');
   assert.equal(manifest.dependencies['react-aria-components'], '1.20.0');
@@ -27,14 +27,14 @@ test('R1.1 package has an exact standalone substrate identity', async () => {
   assert.equal(manifest.dependencies['@core-ui/web'], undefined);
 });
 
-test('R1.3 is packable but direct publication fails closed', () => {
+test('R1.4 is packable but direct publication fails closed', () => {
   const packageRoot = resolve(import.meta.dirname, '..');
   const result = spawnSync(process.execPath, ['src/publish-guard.mjs'], {
     cwd: packageRoot,
     encoding: 'utf8',
   });
   assert.notEqual(result.status, 0);
-  assert.match(result.stderr, /CORE_REACT_R13_PUBLISH_FORBIDDEN/u);
+  assert.match(result.stderr, /CORE_REACT_R14_PUBLISH_FORBIDDEN/u);
 });
 
 test('R1.1 packed package exposes a clean Core component surface', async () => {
@@ -53,7 +53,7 @@ test('R1.1 packed package exposes a clean Core component surface', async () => {
     const archive = join(packRoot, archiveName);
     const listing = spawnSync('tar', ['-tzf', archive], { encoding: 'utf8' });
     assert.equal(listing.status, 0, listing.stderr);
-    for (const entry of ['package/generated/button.mjs', 'package/generated/components.mjs', 'package/generated/fields.mjs', 'package/generated/collections.mjs', 'package/generated/index.d.ts', 'package/generated/styles.css', 'package/generated/r1-2-donor-comparison.json', 'package/generated/r1-2-donor-comparison.json.provenance', 'package/generated/r1-3-donor-comparison.json', 'package/generated/r1-3-donor-comparison.json.provenance', 'package/NOTICE']) {
+    for (const entry of ['package/generated/button.mjs', 'package/generated/components.mjs', 'package/generated/fields.mjs', 'package/generated/collections.mjs', 'package/generated/overlays.mjs', 'package/generated/index.d.ts', 'package/generated/styles.css', 'package/generated/r1-2-donor-comparison.json', 'package/generated/r1-2-donor-comparison.json.provenance', 'package/generated/r1-3-donor-comparison.json', 'package/generated/r1-3-donor-comparison.json.provenance', 'package/generated/r1-4-donor-comparison.json', 'package/generated/r1-4-donor-comparison.json.provenance', 'package/NOTICE']) {
       assert.match(listing.stdout, new RegExp(`^${entry.replaceAll('.', '\\.')}$`, 'mu'));
     }
 
@@ -69,11 +69,11 @@ test('R1.1 packed package exposes a clean Core component surface', async () => {
     const imported = spawnSync(process.execPath, [
       '--input-type=module',
       '-e',
-      "import('@core-ui/react').then((entry) => { if (entry.reactCompatibility.support !== 'unproved; R1.3 React exports only') throw new Error('compatibility support'); for (const name of ['Button', 'Breadcrumbs', 'Checkbox', 'Disclosure', 'DisclosureGroup', 'Group', 'Link', 'Meter', 'ProgressBar', 'Separator', 'ToggleButton', 'Autocomplete', 'CheckboxGroup', 'DateField', 'DatePicker', 'DateRangePicker', 'Form', 'NumberField', 'SearchField', 'Switch', 'TextField', 'TimeField', 'Calendar', 'ColorArea', 'ColorField', 'ColorPicker', 'ColorSlider', 'ColorSwatch', 'ColorSwatchPicker', 'ColorWheel', 'ComboBox', 'GridList', 'ListBox', 'Menu', 'RadioGroup', 'RangeCalendar', 'Select', 'Slider', 'Table', 'Tabs', 'TagGroup', 'ToggleButtonGroup', 'TokenField', 'Toolbar', 'Tree', 'Virtualizer']) if (!entry[name]) throw new Error(`${name} export missing`); })",
+      "import('@core-ui/react').then((entry) => { if (entry.reactCompatibility.support !== 'unproved; R1.4 React exports only') throw new Error('compatibility support'); for (const name of ['Button', 'Breadcrumbs', 'Checkbox', 'Disclosure', 'DisclosureGroup', 'Group', 'Link', 'Meter', 'ProgressBar', 'Separator', 'ToggleButton', 'Autocomplete', 'CheckboxGroup', 'DateField', 'DatePicker', 'DateRangePicker', 'Form', 'NumberField', 'SearchField', 'Switch', 'TextField', 'TimeField', 'Calendar', 'ColorArea', 'ColorField', 'ColorPicker', 'ColorSlider', 'ColorSwatch', 'ColorSwatchPicker', 'ColorWheel', 'ComboBox', 'GridList', 'ListBox', 'Menu', 'RadioGroup', 'RangeCalendar', 'Select', 'Slider', 'Table', 'Tabs', 'TagGroup', 'ToggleButtonGroup', 'TokenField', 'Toolbar', 'Tree', 'Virtualizer', 'DropZone', 'FileTrigger', 'Dialog', 'Popover', 'PreviewTrigger', 'Toast', 'ToastProvider', 'useToast', 'Tooltip']) if (!entry[name]) throw new Error(`${name} export missing`); })",
     ], { cwd: consumerRoot, encoding: 'utf8' });
     assert.equal(imported.status, 0, imported.stderr);
     const publicTypes = await readFile(join(consumerPackage, 'generated/index.d.ts'), 'utf8');
-    assert.doesNotMatch(publicTypes, /react-aria-components|react-stately|@internationalized\/date|isPending|isDisabled|isSelected|isExpanded|onPress|Popover|Dialog/u);
+    assert.doesNotMatch(publicTypes, /react-aria-components|react-stately|@internationalized\/date|isPending|isDisabled|isSelected|isExpanded|onPress/u);
   assert.match(publicTypes, /export (?:interface|type) (?:ButtonProps|BreadcrumbsProps|CheckboxProps|DisclosureProps|DisclosureGroupProps|GroupProps|LinkProps|MeterProps|ProgressBarProps|SeparatorProps|ToggleButtonProps|AutocompleteProps|CheckboxGroupProps|DateFieldProps|DatePickerProps|DateRangePickerProps|FormProps|NumberFieldProps|SearchFieldProps|SwitchProps|TextFieldProps|TimeFieldProps|CalendarProps|ColorAreaProps|ColorFieldProps|ColorPickerProps|ColorSliderProps|ColorSwatchProps|ColorSwatchPickerProps|ColorWheelProps|ComboBoxProps|GridListProps|ListBoxProps|MenuProps|RadioGroupProps|RangeCalendarProps|SelectProps|SliderProps|TableProps|TabsProps|TagGroupProps|ToggleButtonGroupProps|TokenFieldProps|ToolbarProps|TreeProps|VirtualizerProps)/u);
     assert.match(await readFile(join(consumerPackage, 'generated/styles.css'), 'utf8'), /\.core-(?:breadcrumbs|checkbox|disclosure|disclosure-group|group|link|meter|progress-bar|separator|toggle-button|autocomplete|checkbox-group|date-field|date-picker|date-range-picker|form|number-field|search-field|switch|text-field|time-field)/u);
     assert.match(await readFile(join(consumerPackage, 'NOTICE'), 'utf8'), /Tale UI/u);
@@ -90,8 +90,8 @@ test('R1.2 public surface exports the Core component slice without upstream type
   const manifest = JSON.parse(await readFile(resolve(packageRoot, 'package.json'), 'utf8'));
   assert.deepEqual(Object.keys(manifest.exports).sort(), ['.', './compatibility', './styles.css', './testing']);
   const entry = await import('../generated/index.mjs');
-  assert.equal(entry.reactCompatibility.support, 'unproved; R1.3 React exports only');
-  const componentNames = ['Button', 'Breadcrumbs', 'Checkbox', 'Disclosure', 'DisclosureGroup', 'Group', 'Link', 'Meter', 'ProgressBar', 'Separator', 'ToggleButton', 'Autocomplete', 'CheckboxGroup', 'DateField', 'DatePicker', 'DateRangePicker', 'Form', 'NumberField', 'SearchField', 'Switch', 'TextField', 'TimeField', 'Calendar', 'ColorArea', 'ColorField', 'ColorPicker', 'ColorSlider', 'ColorSwatch', 'ColorSwatchPicker', 'ColorWheel', 'ComboBox', 'GridList', 'ListBox', 'Menu', 'RadioGroup', 'RangeCalendar', 'Select', 'Slider', 'Table', 'Tabs', 'TagGroup', 'ToggleButtonGroup', 'TokenField', 'Toolbar', 'Tree', 'Virtualizer'];
+  assert.equal(entry.reactCompatibility.support, 'unproved; R1.4 React exports only');
+  const componentNames = ['Button', 'Breadcrumbs', 'Checkbox', 'Disclosure', 'DisclosureGroup', 'Group', 'Link', 'Meter', 'ProgressBar', 'Separator', 'ToggleButton', 'Autocomplete', 'CheckboxGroup', 'DateField', 'DatePicker', 'DateRangePicker', 'Form', 'NumberField', 'SearchField', 'Switch', 'TextField', 'TimeField', 'Calendar', 'ColorArea', 'ColorField', 'ColorPicker', 'ColorSlider', 'ColorSwatch', 'ColorSwatchPicker', 'ColorWheel', 'ComboBox', 'GridList', 'ListBox', 'Menu', 'RadioGroup', 'RangeCalendar', 'Select', 'Slider', 'Table', 'Tabs', 'TagGroup', 'ToggleButtonGroup', 'TokenField', 'Toolbar', 'Tree', 'Virtualizer', 'DropZone', 'FileTrigger', 'Dialog', 'Popover', 'PreviewTrigger', 'Toast', 'Tooltip'];
   for (const name of componentNames) assert.equal(name in entry, true);
   assert.equal('ButtonProps' in entry, false);
   const release = JSON.parse(await readFile(resolve(packageRoot, 'generated/release.json'), 'utf8'));
@@ -100,7 +100,7 @@ test('R1.2 public surface exports the Core component slice without upstream type
   assert.deepEqual(release.runtimeProfiles, ['web.react']);
   assert.equal(release.catalog.status, 'bound');
   assert.equal(release.evidence.status, 'pending');
-  assert.deepEqual(release.evidence.ids, ['E-R1.3-01', 'E-R1.3-02', 'E-R1.3-03', 'E-R1.3-04', 'E-R1.3-05']);
+  assert.deepEqual(release.evidence.ids, ['E-R1.4-01', 'E-R1.4-02', 'E-R1.4-03', 'E-R1.4-04', 'E-R1.4-05', 'E-R1.4-06']);
   assert.equal(release.publication.status, 'disabled');
   assert.deepEqual(release.publication.requires, ['explicit external publish authorization']);
   assert.doesNotMatch(JSON.stringify(release), /digest-specific human evidence acceptance/u);

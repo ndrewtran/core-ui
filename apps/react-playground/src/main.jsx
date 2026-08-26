@@ -47,6 +47,15 @@ import {
   Toolbar,
   Tree,
   Virtualizer,
+  DropZone,
+  FileTrigger,
+  Dialog,
+  Popover,
+  PreviewTrigger,
+  Toast,
+  ToastProvider,
+  Tooltip,
+  useToast,
 } from '@core-ui/react';
 import { R1ButtonFixture } from '../../../packages/react/src/button-fixture.mjs';
 import '@core-ui/react/styles.css';
@@ -59,6 +68,105 @@ const profiles = [
   ['light', 'standard', 'full', 'compact', 'ltr'],
   ['light', 'standard', 'full', 'comfortable', 'rtl'],
 ];
+
+function DropZoneDemo() {
+  const [status, setStatus] = React.useState('Ready for files');
+  return React.createElement('article', { 'data-component': 'drop-zone' },
+    React.createElement('h3', null, 'Drop zone'),
+    React.createElement(DropZone, {
+      'aria-label': 'Upload files',
+      'data-r1-4-control': 'drop-zone',
+      onActivate: () => setStatus('Drop zone activated'),
+      onDrop: (event) => setStatus(`${event.items.length} item${event.items.length === 1 ? '' : 's'} dropped`),
+    }, React.createElement('span', { 'data-r1-4-status': 'drop-zone' }, status)));
+}
+
+function FileTriggerDemo() {
+  const [status, setStatus] = React.useState('No file selected');
+  return React.createElement('article', { 'data-component': 'file-trigger' },
+    React.createElement('h3', null, 'File trigger'),
+    React.createElement(FileTrigger, {
+      acceptedFileTypes: ['image/*'],
+      allowsMultiple: true,
+      onSelect: (files) => setStatus(files.length ? files.map((file) => file.name).join(', ') : 'No file selected'),
+    }, React.createElement(Button, { 'data-r1-4-control': 'file-trigger' }, 'Choose images')),
+    React.createElement('output', { 'data-r1-4-status': 'file-trigger', 'aria-live': 'polite' }, status));
+}
+
+function DialogDemo() {
+  return React.createElement('article', { 'data-component': 'dialog' },
+    React.createElement('h3', null, 'Dialog'),
+    React.createElement(Dialog, {
+      title: 'Delete draft',
+      trigger: React.createElement(Button, { 'data-r1-4-control': 'dialog-open' }, 'Open dialog'),
+      'data-r1-4-overlay': 'dialog',
+    }, React.createElement('p', null, 'This dialog traps focus and closes with Escape.')));
+}
+
+function PopoverDemo() {
+  return React.createElement('article', { 'data-component': 'popover' },
+    React.createElement('h3', null, 'Popover'),
+    React.createElement(Popover, {
+      'aria-label': 'More actions',
+      trigger: React.createElement(Button, { 'data-r1-4-control': 'popover-open' }, 'More actions'),
+      'data-r1-4-overlay': 'popover',
+    }, React.createElement('p', null, 'Additional actions appear next to the trigger.')));
+}
+
+function PreviewTriggerDemo() {
+  return React.createElement('article', { 'data-component': 'preview-trigger' },
+    React.createElement('h3', null, 'Preview trigger'),
+    React.createElement(PreviewTrigger, {
+      'aria-label': 'Document preview',
+      delay: 0,
+      closeDelay: 0,
+      trigger: React.createElement(Button, { 'data-r1-4-control': 'preview-trigger' }, 'Preview document'),
+      'data-r1-4-overlay': 'preview',
+    }, React.createElement('p', null, 'A quick preview is available on focus or hover.')));
+}
+
+function ToastDemo() {
+  const toastManager = useToast();
+  const [showDeclarativeToast, setShowDeclarativeToast] = React.useState(false);
+  const addToast = React.useCallback(() => {
+    toastManager.add('Your changes are saved.', { title: 'Saved', variant: 'success', duration: 5000 });
+  }, [toastManager]);
+  const dismissDeclarativeToast = React.useCallback(() => setShowDeclarativeToast(false), []);
+  return React.createElement('article', { 'data-component': 'toast' },
+    React.createElement('h3', null, 'Toast'),
+    React.createElement(Button, { 'data-r1-4-control': 'toast-add', onActivate: addToast }, 'Show toast'),
+    React.createElement(Button, { 'data-r1-4-control': 'toast-declarative', onActivate: () => setShowDeclarativeToast(true) }, 'Show declarative toast'),
+    showDeclarativeToast ? React.createElement(Toast, {
+      message: 'A declarative notification is visible.',
+      title: 'Notice',
+      duration: 5000,
+      onDismiss: dismissDeclarativeToast,
+    }) : null);
+}
+
+function TooltipDemo() {
+  return React.createElement('article', { 'data-component': 'tooltip' },
+    React.createElement('h3', null, 'Tooltip'),
+    React.createElement(Tooltip, {
+      content: 'Keyboard shortcut: ⌘K',
+      delay: 0,
+      closeDelay: 0,
+      trigger: React.createElement(Button, { 'data-r1-4-control': 'tooltip-trigger' }, 'Keyboard help'),
+      'data-r1-4-overlay': 'tooltip',
+    }));
+}
+
+function OverlayStates() {
+  return React.createElement('section', { 'data-r1-4-section': true, 'aria-labelledby': 'r1-4-heading' },
+    React.createElement('h2', { id: 'r1-4-heading' }, 'R1.4 overlays and temporal interactions'),
+    React.createElement(DropZoneDemo),
+    React.createElement(FileTriggerDemo),
+    React.createElement(DialogDemo),
+    React.createElement(PopoverDemo),
+    React.createElement(PreviewTriggerDemo),
+    React.createElement(ToastDemo),
+    React.createElement(TooltipDemo));
+}
 
 function ComponentStates() {
   return React.createElement(React.Fragment, null,
@@ -210,21 +318,24 @@ function ComponentStates() {
       React.createElement(Virtualizer, { 'aria-label': 'Results', items: Array.from({ length: 32 }, (_, index) => `Result ${index + 1}`), height: 180 })));
 }
 
-createRoot(document.querySelector('#root')).render(React.createElement('main', null,
-  React.createElement('h1', null, 'Core UI React R1.3'),
-  profiles.map(([colorScheme, contrast, motion, density, direction]) => React.createElement('section', {
-    key: [colorScheme, contrast, motion, density, direction].join('-'),
-    'data-profile': [colorScheme, contrast, motion, density, direction].join('/'),
-    'data-core-color-scheme': colorScheme,
-    'data-core-contrast': contrast,
-    'data-core-motion': motion,
-    'data-core-density': density,
-    'data-core-direction': direction,
-  },
-  React.createElement('h2', null, `${colorScheme} · ${contrast} · ${motion} · ${density} · ${direction}`),
-  React.createElement(R1ButtonFixture),
-  React.createElement(R1ButtonFixture, { disabled: true }),
-  React.createElement(R1ButtonFixture, { pending: true }),
-  React.createElement(ComponentStates),
-  )),
+createRoot(document.querySelector('#root')).render(React.createElement(ToastProvider, null,
+  React.createElement('main', null,
+    React.createElement('h1', null, 'Core UI React R1.4'),
+    profiles.map(([colorScheme, contrast, motion, density, direction]) => React.createElement('section', {
+      key: [colorScheme, contrast, motion, density, direction].join('-'),
+      'data-profile': [colorScheme, contrast, motion, density, direction].join('/'),
+      'data-core-color-scheme': colorScheme,
+      'data-core-contrast': contrast,
+      'data-core-motion': motion,
+      'data-core-density': density,
+      'data-core-direction': direction,
+    },
+    React.createElement('h2', null, `${colorScheme} · ${contrast} · ${motion} · ${density} · ${direction}`),
+    React.createElement(R1ButtonFixture),
+    React.createElement(R1ButtonFixture, { disabled: true }),
+    React.createElement(R1ButtonFixture, { pending: true }),
+    React.createElement(ComponentStates),
+    React.createElement(OverlayStates),
+    )),
+  ),
 ));

@@ -13,8 +13,8 @@ const candidates = [
   '/usr/bin/google-chrome',
   '/usr/bin/chromium',
 ].filter(Boolean);
-const expectedComponents = ['breadcrumbs', 'checkbox', 'autocomplete', 'checkbox-group', 'date-field', 'date-picker', 'date-range-picker', 'form', 'number-field', 'search-field', 'switch', 'text-field', 'time-field', 'disclosure', 'disclosure-group', 'group', 'link', 'meter', 'progress-bar', 'separator', 'toggle-button', 'calendar', 'color-area', 'color-field', 'color-picker', 'color-slider', 'color-swatch', 'color-swatch-picker', 'color-wheel', 'combo-box', 'grid-list', 'list-box', 'menu', 'radio-group', 'range-calendar', 'select', 'slider', 'table', 'tabs', 'tag-group', 'toggle-button-group', 'token-field', 'toolbar', 'tree', 'virtualizer'];
-const expectedButtonsPerProfile = 30;
+const expectedComponents = ['breadcrumbs', 'checkbox', 'autocomplete', 'checkbox-group', 'date-field', 'date-picker', 'date-range-picker', 'form', 'number-field', 'search-field', 'switch', 'text-field', 'time-field', 'disclosure', 'disclosure-group', 'group', 'link', 'meter', 'progress-bar', 'separator', 'toggle-button', 'calendar', 'color-area', 'color-field', 'color-picker', 'color-slider', 'color-swatch', 'color-swatch-picker', 'color-wheel', 'combo-box', 'grid-list', 'list-box', 'menu', 'radio-group', 'range-calendar', 'select', 'slider', 'table', 'tabs', 'tag-group', 'toggle-button-group', 'token-field', 'toolbar', 'tree', 'virtualizer', 'drop-zone', 'file-trigger', 'dialog', 'popover', 'preview-trigger', 'toast', 'tooltip'];
+const expectedButtonsPerProfile = 38;
 const documentAnimationSettleTimeoutMs = 2000;
 const port = Number(process.env.CORE_UI_PLAYGROUND_PORT ?? 4174);
 let executablePath;
@@ -67,7 +67,12 @@ async function waitForDocumentAnimations(page) {
   }, documentAnimationSettleTimeoutMs);
 }
 
-test('R1.3 React component browser and axe matrix', async () => {
+async function assertNoAxeViolations(scope, label) {
+  const result = await scope.evaluate(async (node) => window.axe.run(node));
+  if (result.violations.length) throw new Error(`${label} axe violations: ${JSON.stringify(result.violations.map(({ id, help }) => ({ id, help })))}`);
+}
+
+test('R1.4 React component browser and axe matrix', async () => {
   if (!executablePath) throw new Error('R1_BROWSER_REQUIRED: Chrome or Chromium was not found');
   const appRoot = resolve(import.meta.dirname, '..');
   const server = await createServer({ root: appRoot, server: { host: '127.0.0.1', port, strictPort: true } });
@@ -87,9 +92,9 @@ test('R1.3 React component browser and axe matrix', async () => {
       } catch { return false; }
     }));
     if (!fieldMediaProof) throw new Error('R1.2 field CSS must load forced-colors and high-contrast adaptations');
-    await page.emulateMedia({ forcedColors: 'active' });
+    await page.emulateMedia({ forcedColors: 'active', reducedMotion: 'no-preference' });
     if (!await page.locator('[data-profile]').first().isVisible()) throw new Error('R1.2 forced-colors profile did not render');
-    await page.emulateMedia({ forcedColors: 'none' });
+    await page.emulateMedia({ forcedColors: 'none', reducedMotion: 'no-preference' });
     await waitForDocumentAnimations(page);
     const profiles = await page.locator('[data-profile]').evaluateAll((nodes) => nodes.map((node) => node.dataset.profile));
     const expectedProfiles = ['light/standard/full/comfortable/ltr', 'dark/standard/full/comfortable/ltr', 'light/more/full/comfortable/ltr', 'light/standard/reduced/comfortable/ltr', 'light/standard/full/compact/ltr', 'light/standard/full/comfortable/rtl'];
@@ -123,7 +128,7 @@ test('R1.3 React component browser and axe matrix', async () => {
         throw new Error(`${expected} axe violations: ${JSON.stringify(diagnostics)}`);
       }
       if (await profile.locator('[data-component]').count() !== expectedComponents.length) {
-        throw new Error(`${expected} must expose all ${expectedComponents.length} R1.3 component articles`);
+        throw new Error(`${expected} must expose all ${expectedComponents.length} R1.4 component articles`);
       }
       for (const component of expectedComponents) {
         if (await profile.locator(`[data-component="${component}"]`).count() !== 1) {
@@ -131,8 +136,11 @@ test('R1.3 React component browser and axe matrix', async () => {
         }
       }
       if (await profile.locator('button').count() !== expectedButtonsPerProfile) {
-        throw new Error(`${expected} must expose exactly ${expectedButtonsPerProfile} buttons`);
+        throw new Error(`${expected} must expose exactly ${expectedButtonsPerProfile} R1.4 buttons`);
       }
+      const overlaySection = profile.locator('[data-r1-4-section]');
+      if (await overlaySection.count() !== 1) throw new Error(`${expected} must expose exactly one R1.4 section`);
+      await assertNoAxeViolations(overlaySection, `${expected} R1.4`);
       const idleFixture = profile.locator('[data-core-fixture-state="idle"]');
       await idleFixture.locator('button').click();
       if (await idleFixture.getAttribute('data-core-press-count') !== '1') throw new Error(`${expected} idle Button must activate exactly once`);
@@ -177,8 +185,71 @@ test('R1.3 React component browser and axe matrix', async () => {
         await autocompleteInput.evaluate((node) => node.blur());
         await autocompleteInput.focus();
         if (await profile.locator('.core-autocomplete-list').getAttribute('hidden') !== null) throw new Error('Autocomplete focus after selection must reopen suggestions');
+
+        const dropZone = profile.locator('[data-r1-4-control="drop-zone"]');
+        await dropZone.hover();
+        if (await dropZone.getAttribute('data-hovered') !== 'true') throw new Error('DropZone hover must expose its active state');
+
+        const fileTrigger = profile.locator('[data-component="file-trigger"]');
+        const fileInput = fileTrigger.locator('input[type="file"]');
+        if (await fileInput.getAttribute('accept') !== 'image/*') throw new Error('FileTrigger must expose its accepted image type');
+        if (await fileInput.getAttribute('multiple') === null) throw new Error('FileTrigger must allow multiple files');
+        await fileInput.setInputFiles({ name: 'avatar.png', mimeType: 'image/png', buffer: Buffer.from('fixture') });
+        if (await fileTrigger.locator('[data-r1-4-status="file-trigger"]').textContent() !== 'avatar.png') throw new Error('FileTrigger selection must update its status');
+
+        const dialogTrigger = profile.locator('[data-r1-4-control="dialog-open"]');
+        await dialogTrigger.focus();
+        await dialogTrigger.press('Enter');
+        const dialog = page.locator('[data-r1-4-overlay="dialog"]');
+        if (await dialog.count() !== 1 || !await dialog.isVisible()) throw new Error('Dialog must open from its keyboard trigger');
+        await page.keyboard.press('Escape');
+        if (await dialog.count() !== 0) throw new Error('Dialog Escape must dismiss the dialog');
+
+        const popoverTrigger = profile.locator('[data-r1-4-control="popover-open"]');
+        await popoverTrigger.focus();
+        await popoverTrigger.press('Enter');
+        const popover = page.locator('[data-r1-4-overlay="popover"]');
+        if (await popover.count() !== 1 || !await popover.isVisible()) throw new Error('Popover must open from its keyboard trigger');
+        await page.keyboard.press('Escape');
+        if (await popover.count() !== 0) throw new Error('Popover Escape must dismiss the popover');
+
+        const previewTrigger = profile.locator('[data-r1-4-control="preview-trigger"]');
+        await previewTrigger.focus();
+        const preview = page.locator('[data-r1-4-overlay="preview"]');
+        if (await preview.count() !== 1 || !await preview.isVisible()) throw new Error('PreviewTrigger must show its preview on focus');
+        await page.keyboard.press('Escape');
+        await preview.waitFor({ state: 'detached' });
+
+        const tooltipTrigger = profile.locator('[data-r1-4-control="tooltip-trigger"]');
+        await tooltipTrigger.focus();
+        const tooltip = page.locator('[data-r1-4-overlay="tooltip"]');
+        if (await tooltip.count() !== 1 || !await tooltip.isVisible()) throw new Error('Tooltip must show on focus');
+        await tooltipTrigger.evaluate((node) => node.blur());
+        await tooltip.waitFor({ state: 'detached' });
+
+        const toastTrigger = profile.locator('[data-r1-4-control="toast-add"]');
+        await toastTrigger.click();
+        const toast = page.locator('.core-toast').filter({ hasText: 'Your changes are saved.' });
+        if (await toast.count() !== 1 || !await toast.isVisible()) throw new Error('useToast must announce a visible toast');
+        if (await toast.locator('[role="alert"]').count() !== 1) throw new Error('Toast must expose an announcement region');
+        await toast.locator('.core-toast-dismiss').click();
+        if (await toast.count() !== 0) throw new Error('Toast dismiss must remove the notification');
+
+        const declarativeToastTrigger = profile.locator('[data-r1-4-control="toast-declarative"]');
+        await declarativeToastTrigger.click();
+        const declarativeToast = page.locator('.core-toast').filter({ hasText: 'A declarative notification is visible.' });
+        if (await declarativeToast.count() !== 1 || !await declarativeToast.isVisible()) throw new Error('Toast component must render through ToastProvider');
+        await declarativeToast.locator('.core-toast-dismiss').click();
+        if (await declarativeToast.count() !== 0) throw new Error('Declarative Toast dismiss must remove the notification');
       }
     }
+    await page.emulateMedia({ forcedColors: 'active', reducedMotion: 'no-preference' });
+    await assertNoAxeViolations(page.locator('[data-profile]').first().locator('[data-r1-4-section]'), 'R1.4 forced-colors');
+    await page.emulateMedia({ forcedColors: 'none', reducedMotion: 'reduce' });
+    await assertNoAxeViolations(page.locator('[data-profile="light/standard/reduced/comfortable/ltr"] [data-r1-4-section]'), 'R1.4 reduced-motion');
+    await page.emulateMedia({ forcedColors: 'none', reducedMotion: 'no-preference' });
+    await assertNoAxeViolations(page.locator('[data-profile="light/more/full/comfortable/ltr"] [data-r1-4-section]'), 'R1.4 high-contrast');
+    await assertNoAxeViolations(page.locator('[data-profile="light/standard/full/comfortable/rtl"] [data-r1-4-section]'), 'R1.4 RTL');
     await page.keyboard.press('Tab');
     await page.keyboard.press('Shift+Tab');
     console.log(JSON.stringify({ browser: await browser.version(), profiles: expectedProfiles }));

@@ -668,6 +668,104 @@
       "family": "guide",
       "path": "catalog/guides/virtualizer-usage.json",
       "sourcePath": "catalog/guides/virtualizer-usage.md"
+    },
+    {
+      "family": "component",
+      "path": "catalog/components/drop-zone/artifact.json"
+    },
+    {
+      "family": "example",
+      "path": "catalog/components/drop-zone/examples/react/basic.example.json",
+      "sourcePath": "catalog/components/drop-zone/examples/react/basic.tsx"
+    },
+    {
+      "family": "guide",
+      "path": "catalog/guides/drop-zone-usage.json",
+      "sourcePath": "catalog/guides/drop-zone-usage.md"
+    },
+    {
+      "family": "component",
+      "path": "catalog/components/file-trigger/artifact.json"
+    },
+    {
+      "family": "example",
+      "path": "catalog/components/file-trigger/examples/react/basic.example.json",
+      "sourcePath": "catalog/components/file-trigger/examples/react/basic.tsx"
+    },
+    {
+      "family": "guide",
+      "path": "catalog/guides/file-trigger-usage.json",
+      "sourcePath": "catalog/guides/file-trigger-usage.md"
+    },
+    {
+      "family": "component",
+      "path": "catalog/components/dialog/artifact.json"
+    },
+    {
+      "family": "example",
+      "path": "catalog/components/dialog/examples/react/basic.example.json",
+      "sourcePath": "catalog/components/dialog/examples/react/basic.tsx"
+    },
+    {
+      "family": "guide",
+      "path": "catalog/guides/dialog-usage.json",
+      "sourcePath": "catalog/guides/dialog-usage.md"
+    },
+    {
+      "family": "component",
+      "path": "catalog/components/popover/artifact.json"
+    },
+    {
+      "family": "example",
+      "path": "catalog/components/popover/examples/react/basic.example.json",
+      "sourcePath": "catalog/components/popover/examples/react/basic.tsx"
+    },
+    {
+      "family": "guide",
+      "path": "catalog/guides/popover-usage.json",
+      "sourcePath": "catalog/guides/popover-usage.md"
+    },
+    {
+      "family": "component",
+      "path": "catalog/components/preview-trigger/artifact.json"
+    },
+    {
+      "family": "example",
+      "path": "catalog/components/preview-trigger/examples/react/basic.example.json",
+      "sourcePath": "catalog/components/preview-trigger/examples/react/basic.tsx"
+    },
+    {
+      "family": "guide",
+      "path": "catalog/guides/preview-trigger-usage.json",
+      "sourcePath": "catalog/guides/preview-trigger-usage.md"
+    },
+    {
+      "family": "component",
+      "path": "catalog/components/toast/artifact.json"
+    },
+    {
+      "family": "example",
+      "path": "catalog/components/toast/examples/react/basic.example.json",
+      "sourcePath": "catalog/components/toast/examples/react/basic.tsx"
+    },
+    {
+      "family": "guide",
+      "path": "catalog/guides/toast-usage.json",
+      "sourcePath": "catalog/guides/toast-usage.md"
+    },
+    {
+      "family": "component",
+      "path": "catalog/components/tooltip/artifact.json"
+    },
+    {
+      "family": "example",
+      "path": "catalog/components/tooltip/examples/react/basic.example.json",
+      "sourcePath": "catalog/components/tooltip/examples/react/basic.tsx"
+    },
+    {
+      "family": "guide",
+      "path": "catalog/guides/tooltip-usage.json",
+      "sourcePath": "catalog/guides/tooltip-usage.md"
     }
   ]
 }

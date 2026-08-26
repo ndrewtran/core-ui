@@ -1,0 +1,43 @@
+{
+  "schemaVersion": "1.0.0",
+  "id": "core:component:drop-zone",
+  "kind": "component",
+  "name": "DropZone",
+  "summary": "Accepts files dragged or pasted into a bounded drop target.",
+  "lifecycle": "experimental",
+  "intent": { "useWhen": ["Collecting files by drag and drop or paste"], "avoidWhen": ["Selecting a file from a native picker only"] },
+  "anatomy": ["root", "content"],
+  "states": ["idle", "drop-target", "focused", "disabled"],
+  "accessibility": { "nameRequired": false, "obligations": ["Expose a keyboard- and pointer-operable drop target.", "Expose disabled state and focus indication."] },
+  "bindings": {
+    "web.react": {
+      "schemaVersion": "2.0.0",
+      "lifecycle": "experimental",
+      "strategy": "direct",
+      "api": {
+        "props": ["children", "disabled", "onDrop", "onActivate", "className", "aria-label", "aria-labelledby"],
+        "events": ["drop", "activate"],
+        "parts": ["root", "content"],
+        "defaults": { "disabled": false }
+      },
+      "behavior": ["Delegate pointer, keyboard, and clipboard drop semantics to the RAC DropZone and translate its DropEvent to the Core drop item facade.", "Do not read browser globals during SSR."],
+      "accessibility": ["Expose RAC's keyboard drop affordance alongside pointer and clipboard input.", "Expose disabled and visible-focus state and preserve the consumer-provided accessible name."],
+      "tokenRecipe": { "source": "core:token:default-theme", "requirements": [
+        { "token": "semantic.control.radius", "requirement": "required" },
+        { "token": "semantic.control.padding-inline", "requirement": "required" },
+        { "token": "semantic.focus.ring", "requirement": "required" },
+        { "token": "semantic.selection.track", "requirement": "required" },
+        { "token": "semantic.motion.feedback", "requirement": "required" }
+      ] },
+      "platformSafety": [{ "profile": "web.react", "requirements": [
+        { "id": "system.forced-colors", "disposition": "required" },
+        { "id": "system.high-contrast", "disposition": "required" },
+        { "id": "native.dynamic-color", "disposition": "not-applicable", "reason": "Native dynamic colors do not apply to the React web binding." },
+        { "id": "native.font-metrics", "disposition": "not-applicable", "reason": "Native font metrics do not apply to the React web binding." },
+        { "id": "layout.direction", "disposition": "required" },
+        { "id": "platform.accessibility-mapping", "disposition": "required" }
+      ] }],
+      "runtimeProfiles": {}
+    }
+  }
+}

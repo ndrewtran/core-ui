@@ -1,5 +1,5 @@
 // @generated-from: packages/react/src/generate.mjs
-// @generated-content-sha256: sha256:0027898b26399bcdad4010ec0987b458efbd48bc30b57ab3685aec2010c20301
+// @generated-content-sha256: sha256:50285fd6dc829c888381dc2d351802f289328e844d223c5289af60a2bf8d052d
 import type * as React from 'react';
 
 export type ButtonPointerType = 'mouse' | 'pen' | 'touch' | 'keyboard' | 'virtual' | undefined;
@@ -137,3 +137,31 @@ export type TreeProps = CoreAriaAccessibleName & { items?: CoreTreeItem[]; selec
 export declare const Tree: React.ForwardRefExoticComponent<TreeProps & React.RefAttributes<HTMLDivElement>>;
 export type VirtualizerProps = CoreAriaLabel & { items?: CoreItems; height?: number; itemHeight?: number; overscan?: number; disabled?: boolean; onScroll?: React.UIEventHandler<HTMLDivElement>; className?: string; style?: React.CSSProperties; };
 export declare const Virtualizer: React.ForwardRefExoticComponent<VirtualizerProps & React.RefAttributes<HTMLDivElement>>;
+
+export type CoreDropOperation = 'copy' | 'link' | 'move' | 'cancel';
+export interface CoreFileDropItem { readonly kind: 'file'; readonly type: string; readonly name: string; readonly getFile: () => Promise<File>; readonly getText: () => Promise<string>; }
+export interface CoreDirectoryDropItem { readonly kind: 'directory'; readonly name: string; readonly getEntries: () => AsyncIterable<CoreDropItem>; }
+export interface CoreTextDropItem { readonly kind: 'text'; readonly types: ReadonlySet<string>; readonly getText: (type: string) => Promise<string>; }
+export type CoreDropItem = CoreFileDropItem | CoreDirectoryDropItem | CoreTextDropItem;
+export interface CoreDropEvent { readonly type: 'drop'; readonly x: number; readonly y: number; readonly dropOperation: CoreDropOperation; readonly items: CoreDropItem[]; }
+export interface CoreDropActivateEvent { readonly type: 'activate'; readonly x: number; readonly y: number; }
+export interface DropZoneProps { children?: React.ReactNode; disabled?: boolean; className?: string; 'aria-label'?: string; 'aria-labelledby'?: string; onDrop?: (event: CoreDropEvent) => void; onActivate?: (event: CoreDropActivateEvent) => void; }
+export declare const DropZone: React.ForwardRefExoticComponent<DropZoneProps & React.RefAttributes<HTMLDivElement>>;
+export interface FileTriggerProps { children?: React.ReactNode; acceptedFileTypes?: readonly string[]; allowsMultiple?: boolean; acceptDirectory?: boolean; defaultCamera?: 'user' | 'environment'; disabled?: boolean; className?: string; onSelect?: (files: File[]) => void; }
+export declare const FileTrigger: React.ForwardRefExoticComponent<FileTriggerProps & React.RefAttributes<HTMLInputElement>>;
+export type OverlayAccessibleName = { 'aria-label': string; 'aria-labelledby'?: never } | { 'aria-label'?: never; 'aria-labelledby': string };
+export type DialogProps = { children?: React.ReactNode; open?: boolean; defaultOpen?: boolean; dismissable?: boolean; trigger?: React.ReactElement; onOpenChange?: (open: boolean) => void; className?: string; } & ({ title: Exclude<React.ReactNode, null | undefined | boolean>; 'aria-label'?: string; 'aria-labelledby'?: string } | ({ title?: never } & OverlayAccessibleName));
+export declare const Dialog: React.ForwardRefExoticComponent<DialogProps & React.RefAttributes<HTMLElement>>;
+export type PopoverProps = { children: React.ReactNode; trigger: React.ReactElement; open?: boolean; defaultOpen?: boolean; dismissable?: boolean; placement?: 'top' | 'bottom' | 'start' | 'end'; onOpenChange?: (open: boolean) => void; className?: string; } & OverlayAccessibleName;
+export declare const Popover: React.ForwardRefExoticComponent<PopoverProps & React.RefAttributes<HTMLDivElement>>;
+export type PreviewTriggerProps = { children: React.ReactNode; trigger: React.ReactElement; delay?: number; closeDelay?: number; open?: boolean; defaultOpen?: boolean; placement?: 'top' | 'bottom' | 'start' | 'end'; onOpenChange?: (open: boolean) => void; className?: string; } & OverlayAccessibleName;
+export declare const PreviewTrigger: React.ForwardRefExoticComponent<PreviewTriggerProps & React.RefAttributes<HTMLDivElement>>;
+export interface ToastProps { message: Exclude<React.ReactNode, null | undefined | boolean>; title?: React.ReactNode; variant?: 'neutral' | 'success' | 'warning' | 'danger'; duration?: number; onDismiss?: () => void; className?: string; }
+export declare const Toast: React.FC<ToastProps>;
+export interface ToastOptions { title?: React.ReactNode; variant?: 'neutral' | 'success' | 'warning' | 'danger'; duration?: number; onDismiss?: () => void; className?: string; }
+export interface ToastManager { add: (message: Exclude<React.ReactNode, null | undefined | boolean>, options?: ToastOptions) => string; remove: (key: string) => void; }
+export interface ToastProviderProps { children?: React.ReactNode; maxVisible?: number; className?: string; }
+export declare const ToastProvider: React.FC<ToastProviderProps>;
+export declare function useToast(): ToastManager;
+export type TooltipProps = { content: Exclude<React.ReactNode, null | undefined | boolean>; trigger: React.ReactElement; delay?: number; closeDelay?: number; placement?: 'top' | 'bottom' | 'start' | 'end'; open?: boolean; defaultOpen?: boolean; onOpenChange?: (open: boolean) => void; className?: string; };
+export declare const Tooltip: React.ForwardRefExoticComponent<TooltipProps & React.RefAttributes<HTMLDivElement>>;

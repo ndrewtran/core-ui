@@ -1,3 +1,3 @@
 // @generated-from: packages/react/src/generate.mjs
-// @generated-content-sha256: sha256:2377d081c2f98f7b30eb7e207b5763e4e481a2c3f5bad7d97b46deee4790f6f5
-export const reactPlatformSafetyFixture = Object.freeze({ componentSupportClaim: 'none', fixture: 'r1.3-react-collections' });
+// @generated-content-sha256: sha256:293305452e9b518d1f02d38e7987cae457c85361802a8b47fd83ca29e20b0fac
+export const reactPlatformSafetyFixture = Object.freeze({ componentSupportClaim: 'none', fixture: 'r1.4-react-overlays' });

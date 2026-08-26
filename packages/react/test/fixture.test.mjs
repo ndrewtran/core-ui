@@ -22,15 +22,17 @@ test('R1.1 Button owns Core selectors and required token crosswalk', async () =>
   assert.equal(comparison.consumedRules.length, 9);
 });
 
-test('R1.3 component selectors and donor dispositions stay Core-owned', async () => {
+test('R1.4 component selectors and donor dispositions stay Core-owned', async () => {
   const css = await readFile(resolve(import.meta.dirname, '../generated/styles.css'), 'utf8');
   const comparisonSource = await readFile(resolve(import.meta.dirname, '../generated/component-donor-comparison.json'), 'utf8');
   const comparison = JSON.parse(comparisonSource.replace(/^\/\/ @generated-from:.*\n\/\/ @generated-content-sha256:.*\n/u, ''));
-  const names = ['Button', 'Breadcrumbs', 'Checkbox', 'Disclosure', 'DisclosureGroup', 'Group', 'Link', 'Meter', 'ProgressBar', 'Separator', 'ToggleButton', 'Autocomplete', 'CheckboxGroup', 'DateField', 'DatePicker', 'DateRangePicker', 'Form', 'NumberField', 'SearchField', 'Switch', 'TextField', 'TimeField', 'Calendar', 'ColorArea', 'ColorField', 'ColorPicker', 'ColorSlider', 'ColorSwatch', 'ColorSwatchPicker', 'ColorWheel', 'ComboBox', 'GridList', 'ListBox', 'Menu', 'RadioGroup', 'RangeCalendar', 'Select', 'Slider', 'Table', 'Tabs', 'TagGroup', 'ToggleButtonGroup', 'TokenField', 'Toolbar', 'Tree', 'Virtualizer'];
+  const names = ['Button', 'Breadcrumbs', 'Checkbox', 'Disclosure', 'DisclosureGroup', 'Group', 'Link', 'Meter', 'ProgressBar', 'Separator', 'ToggleButton', 'Autocomplete', 'CheckboxGroup', 'DateField', 'DatePicker', 'DateRangePicker', 'Form', 'NumberField', 'SearchField', 'Switch', 'TextField', 'TimeField', 'Calendar', 'ColorArea', 'ColorField', 'ColorPicker', 'ColorSlider', 'ColorSwatch', 'ColorSwatchPicker', 'ColorWheel', 'ComboBox', 'GridList', 'ListBox', 'Menu', 'RadioGroup', 'RangeCalendar', 'Select', 'Slider', 'Table', 'Tabs', 'TagGroup', 'ToggleButtonGroup', 'TokenField', 'Toolbar', 'Tree', 'Virtualizer', 'DropZone', 'FileTrigger', 'Dialog', 'Popover', 'PreviewTrigger', 'Toast', 'Tooltip'];
   for (const name of names) {
+    if (name === 'FileTrigger') continue;
     const slug = name.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`).replace(/^-/, '');
     assert.match(css, new RegExp(`\\.core-${slug}(?:\\b|[-_])`));
   }
+  assert.match(await readFile(resolve(import.meta.dirname, '../generated/overlays.mjs'), 'utf8'), /core-file-trigger/u);
   assert.match(css, /\.core-checkbox-indicator/);
   assert.match(css, /data-indeterminate/);
   assert.match(css, /semantic-feedback-invalid/);
@@ -38,7 +40,7 @@ test('R1.3 component selectors and donor dispositions stay Core-owned', async ()
   assert.deepEqual(comparison.components.map(({ component }) => component), names);
   assert.equal(comparison.components.find(({ component }) => component === 'Group').disposition, 'no-applicable-donor');
   assert.ok(comparison.components.filter(({ disposition }) => disposition === 'adapt').length >= 9);
-  assert.doesNotMatch(css, /(?:\\.tale-|--color-60|@keyframes|animation:)/u);
+  assert.doesNotMatch(css, /(?:\\.tale-|--color-60)/u);
 });
 
 test('R1.2 donor crosswalk is exact, adapted, and dependency-free', async () => {

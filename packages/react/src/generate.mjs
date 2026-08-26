@@ -8,9 +8,11 @@ import {
   assertReactR11GeneratedContracts,
   assertReactR12GeneratedContracts,
   assertReactR13GeneratedContracts,
+  assertReactR14GeneratedContracts,
 } from './r1-contracts.mjs';
 import { EXPECTED_R12_COMPONENT_SLUGS, EXPECTED_R12_DONOR_CONTRACT } from './r1-2-donor-contract.mjs';
 import { EXPECTED_R13_COMPONENT_SLUGS, EXPECTED_R13_DONOR_CONTRACT } from './r1-3-donor-contract.mjs';
+import { EXPECTED_R14_COMPONENT_SLUGS, EXPECTED_R14_DONOR_CONTRACT } from './r1-4-donor-contract.mjs';
 
 const packageRoot = resolve(import.meta.dirname, '..');
 const repositoryRoot = resolve(packageRoot, '../..');
@@ -28,14 +30,17 @@ const upstreamExports = JSON.parse(upstreamExportsRaw);
 const crosswalk = JSON.parse(await readFile(resolve(repositoryRoot, 'catalog/react-r1-0/donor-crosswalk.json'), 'utf8'));
 const r12Crosswalk = JSON.parse(await readFile(resolve(repositoryRoot, 'catalog/react-r1-2/donor-crosswalk.json'), 'utf8'));
 const r13Crosswalk = JSON.parse(await readFile(resolve(repositoryRoot, 'catalog/react-r1-3/donor-crosswalk.json'), 'utf8'));
+const r14Crosswalk = JSON.parse(await readFile(resolve(repositoryRoot, 'catalog/react-r1-4/donor-crosswalk.json'), 'utf8'));
 const license = JSON.parse(await readFile(resolve(repositoryRoot, 'catalog/react-r1-0/license.json'), 'utf8'));
 const r11Slugs = ['button', 'breadcrumbs', 'checkbox', 'disclosure', 'disclosure-group', 'group', 'link', 'meter', 'progress-bar', 'separator', 'toggle-button'];
 const r12Slugs = [...EXPECTED_R12_COMPONENT_SLUGS];
 const r13Slugs = [...EXPECTED_R13_COMPONENT_SLUGS];
+const r14Slugs = [...EXPECTED_R14_COMPONENT_SLUGS];
 const buttonSource = await readFile(resolve(packageRoot, 'src/button.mjs'), 'utf8');
 const componentSource = await readFile(resolve(packageRoot, 'src/components.mjs'), 'utf8');
 const fieldsSource = await readFile(resolve(packageRoot, 'src/fields.mjs'), 'utf8');
 const collectionsSource = await readFile(resolve(packageRoot, 'src/collections.mjs'), 'utf8');
+const overlaysSource = await readFile(resolve(packageRoot, 'src/overlays.mjs'), 'utf8');
 const buttonArtifact = JSON.parse(await readFile(resolve(repositoryRoot, 'catalog/components/button/artifact.json'), 'utf8'));
 const buttonBinding = buttonArtifact.bindings['web.react'];
 if (!buttonBinding || !buttonBinding.api.props.includes('pending')
@@ -48,10 +53,10 @@ const componentArtifacts = [
   ...await Promise.all([
     'breadcrumbs', 'checkbox', 'disclosure', 'disclosure-group', 'group', 'link', 'meter', 'progress-bar', 'separator', 'toggle-button',
     'autocomplete', 'checkbox-group', 'date-field', 'date-picker', 'date-range-picker', 'form', 'number-field', 'search-field', 'switch', 'text-field', 'time-field',
-    ...r13Slugs,
+    ...r13Slugs, ...r14Slugs,
   ].map(async (slug) => JSON.parse(await readFile(resolve(repositoryRoot, `catalog/components/${slug}/artifact.json`), 'utf8')))),
 ];
-if (componentArtifacts.length !== 46 || new Set(componentArtifacts.map(({ id }) => id)).size !== 46) {
+if (componentArtifacts.length !== 53 || new Set(componentArtifacts.map(({ id }) => id)).size !== 53) {
   throw new Error('CORE_REACT_R1_COMPONENT_ALLOCATION_DRIFT');
 }
 for (const artifact of componentArtifacts) {
@@ -76,6 +81,13 @@ for (const artifact of componentArtifacts) {
   } else if (r13Slugs.includes(artifact.id.slice('core:component:'.length))) {
     const slug = artifact.id.slice('core:component:'.length);
     const componentCrosswalk = r13Crosswalk.components?.[slug];
+    if (!componentCrosswalk
+      || canonicalJson(componentCrosswalk.consumedRules) !== canonicalJson(componentCrosswalk.rules.map(({ input }) => input))) {
+      throw new Error(`CORE_REACT_${artifact.name.toUpperCase()}_DONOR_CROSSWALK_DRIFT`);
+    }
+  } else if (r14Slugs.includes(artifact.id.slice('core:component:'.length))) {
+    const slug = artifact.id.slice('core:component:'.length);
+    const componentCrosswalk = r14Crosswalk.components?.[slug];
     if (!componentCrosswalk
       || canonicalJson(componentCrosswalk.consumedRules) !== canonicalJson(componentCrosswalk.rules.map(({ input }) => input))) {
       throw new Error(`CORE_REACT_${artifact.name.toUpperCase()}_DONOR_CROSSWALK_DRIFT`);
@@ -296,7 +308,35 @@ const fieldCss = `
   .core-autocomplete-option[aria-selected='true'], .core-calendar-cell[aria-selected='true'], .core-calendar-cell[data-selected] { outline: 2px solid currentColor; outline-offset: -2px; }
 }
 `;
-const fullCssBody = `${cssBody}\n${componentCss}${collectionCss}${fieldCss}`;
+const overlayCss = `
+.core-drop-zone { display: grid; place-items: center; min-block-size: 8rem; padding: var(--core-semantic-control-padding-inline); border: 2px dashed var(--core-semantic-selection-track); border-radius: var(--core-semantic-control-radius); cursor: pointer; transition: background-color var(--core-semantic-motion-feedback) ease, border-color var(--core-semantic-motion-feedback) ease; }
+.core-drop-zone[data-hovered], .core-drop-zone[data-drop-target] { background: color-mix(in srgb, var(--core-semantic-selection-track) 16%, transparent); }
+.core-drop-zone[data-focus-visible] { outline: 2px solid var(--core-semantic-focus-ring); outline-offset: 2px; }
+.core-drop-zone[data-disabled] { cursor: not-allowed; opacity: .5; }
+.core-dialog-backdrop { z-index: 1000; display: grid; place-items: center; padding: var(--core-semantic-control-padding-inline); background: rgb(0 0 0 / 55%); }
+.core-dialog { display: grid; box-sizing: border-box; inline-size: min(100%, 36rem); max-block-size: calc(100vh - 2 * var(--core-semantic-control-padding-inline)); overflow: auto; padding: var(--core-semantic-control-padding-inline); border: 1px solid currentColor; border-radius: var(--core-semantic-control-radius); background: var(--core-semantic-overlay-background); color: inherit; box-shadow: 0 1rem 3rem rgb(0 0 0 / 35%); outline: none; animation: core-overlay-enter var(--core-semantic-motion-feedback) ease-out; }
+.core-dialog:focus-visible { outline: 2px solid var(--core-semantic-focus-ring); outline-offset: 2px; }
+.core-dialog-title { margin: 0 2rem 0 0; font: inherit; font-weight: 700; }
+.core-dialog-content { margin-block-start: var(--core-semantic-control-padding-inline); }
+.core-dialog-close { grid-row: 1; justify-self: end; border: 0; background: transparent; color: inherit; font: inherit; font-size: 1.25rem; cursor: pointer; }
+.core-dialog-close:focus-visible, .core-toast-dismiss:focus-visible { outline: 2px solid var(--core-semantic-focus-ring); outline-offset: 2px; }
+.core-popover, .core-preview-trigger, .core-tooltip { z-index: 1001; max-inline-size: min(24rem, calc(100vw - 2 * var(--core-semantic-control-padding-inline))); padding: var(--core-semantic-control-padding-inline); border: 1px solid currentColor; border-radius: var(--core-semantic-control-radius); background: var(--core-semantic-overlay-background); color: inherit; box-shadow: 0 .5rem 1.5rem rgb(0 0 0 / 24%); animation: core-overlay-enter var(--core-semantic-motion-feedback) ease-out; }
+.core-popover:focus-visible, .core-preview-trigger:focus-visible, .core-tooltip:focus-visible { outline: 2px solid var(--core-semantic-focus-ring); outline-offset: 2px; }
+.core-tooltip { max-inline-size: 20rem; font-size: .875rem; pointer-events: none; }
+.core-toast-region { position: fixed; z-index: 1100; inset-block-end: var(--core-semantic-control-padding-inline); inset-inline-end: var(--core-semantic-control-padding-inline); display: grid; gap: var(--core-reference-dimension-space-2xs); inline-size: min(24rem, calc(100vw - 2 * var(--core-semantic-control-padding-inline))); }
+.core-toast { display: grid; grid-template-columns: 1fr auto; gap: .25rem var(--core-semantic-control-padding-inline); padding: var(--core-semantic-control-padding-inline); border: 1px solid currentColor; border-radius: var(--core-semantic-control-radius); background: var(--core-semantic-overlay-background); color: inherit; box-shadow: 0 .5rem 1.5rem rgb(0 0 0 / 24%); animation: core-overlay-enter var(--core-semantic-motion-feedback) ease-out; }
+.core-toast-title, .core-toast-message { grid-column: 1; }
+.core-toast-title-fallback { position: absolute; inline-size: 1px; block-size: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+.core-toast-dismiss { grid-column: 2; grid-row: 1 / span 2; align-self: start; border: 0; background: transparent; color: inherit; font: inherit; cursor: pointer; }
+.core-toast[data-variant='success'] { border-color: var(--core-semantic-selection-track); }
+.core-toast[data-variant='warning'] { border-color: currentColor; }
+.core-toast[data-variant='danger'] { border-color: var(--core-semantic-feedback-invalid); }
+@keyframes core-overlay-enter { from { opacity: 0; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .core-drop-zone, .core-dialog, .core-popover, .core-preview-trigger, .core-tooltip, .core-toast { animation: none; transition: none; } }
+@media (forced-colors: active) { .core-drop-zone, .core-dialog, .core-popover, .core-preview-trigger, .core-tooltip, .core-toast { border-color: ButtonText; background: Canvas; color: CanvasText; box-shadow: none; } .core-dialog-backdrop { background: Canvas; } .core-drop-zone[data-focus-visible], .core-dialog:focus-visible, .core-popover:focus-visible, .core-preview-trigger:focus-visible, .core-tooltip:focus-visible, .core-dialog-close:focus-visible, .core-toast-dismiss:focus-visible { outline-color: Highlight; } .core-toast[data-variant='success'] { border-color: Highlight; } }
+@media (prefers-contrast: more) { .core-drop-zone, .core-dialog, .core-popover, .core-preview-trigger, .core-tooltip, .core-toast { border-width: 2px; } }
+`;
+const fullCssBody = `${cssBody}\n${componentCss}${collectionCss}${fieldCss}${overlayCss}`;
 
 const compatibility = {
   schema: 'core-ui-react-compatibility-v1',
@@ -304,10 +344,10 @@ const compatibility = {
   version: manifest.version,
   upstream: { package: 'react-aria-components', version: '1.20.0', gitHead: '5ecb3333001313e83898cd07644227897e3bae1f' },
   tokenSource: { path: 'catalog/tokens/default-theme.json', sha256: expectedTokenSha256 },
-  support: 'unproved; R1.3 React exports only',
+  support: 'unproved; R1.4 React exports only',
 };
 const compatibilityBody = `function deepFreeze(value) {\n  if (value && typeof value === 'object' && !Object.isFrozen(value)) {\n    Object.freeze(value);\n    for (const child of Object.values(value)) deepFreeze(child);\n  }\n  return value;\n}\nexport const reactCompatibility = deepFreeze(${canonicalJson(compatibility)});\n`;
-const indexBody = "export { reactCompatibility } from './compatibility.mjs';\nexport { Button } from './button.mjs';\nexport { Breadcrumbs, Checkbox, Disclosure, DisclosureGroup, Group, Link, Meter, ProgressBar, Separator, ToggleButton, Autocomplete, CheckboxGroup, DateField, DatePicker, DateRangePicker, Form, NumberField, SearchField, Switch, TextField, TimeField } from './components.mjs';\nexport { Calendar, ColorArea, ColorField, ColorPicker, ColorSlider, ColorSwatch, ColorSwatchPicker, ColorWheel, ComboBox, GridList, ListBox, Menu, RadioGroup, RangeCalendar, Select, Slider, Table, Tabs, TagGroup, ToggleButtonGroup, TokenField, Toolbar, Tree, Virtualizer } from './collections.mjs';\n";
+const indexBody = "export { reactCompatibility } from './compatibility.mjs';\nexport { Button } from './button.mjs';\nexport { Breadcrumbs, Checkbox, Disclosure, DisclosureGroup, Group, Link, Meter, ProgressBar, Separator, ToggleButton, Autocomplete, CheckboxGroup, DateField, DatePicker, DateRangePicker, Form, NumberField, SearchField, Switch, TextField, TimeField } from './components.mjs';\nexport { Calendar, ColorArea, ColorField, ColorPicker, ColorSlider, ColorSwatch, ColorSwatchPicker, ColorWheel, ComboBox, GridList, ListBox, Menu, RadioGroup, RangeCalendar, Select, Slider, Table, Tabs, TagGroup, ToggleButtonGroup, TokenField, Toolbar, Tree, Virtualizer } from './collections.mjs';\nexport { DropZone, FileTrigger, Dialog, Popover, PreviewTrigger, Toast, ToastProvider, useToast, Tooltip } from './overlays.mjs';\n";
 const typesBody = `import type * as React from 'react';
 
 export type ButtonPointerType = 'mouse' | 'pen' | 'touch' | 'keyboard' | 'virtual' | undefined;
@@ -448,12 +488,41 @@ export declare const Tree: React.ForwardRefExoticComponent<TreeProps & React.Ref
 export type VirtualizerProps = CoreAriaLabel & { items?: CoreItems; height?: number; itemHeight?: number; overscan?: number; disabled?: boolean; onScroll?: React.UIEventHandler<HTMLDivElement>; className?: string; style?: React.CSSProperties; };
 export declare const Virtualizer: React.ForwardRefExoticComponent<VirtualizerProps & React.RefAttributes<HTMLDivElement>>;
 `;
-const reactTypesBody = typesBody.replace("export const reactCompatibility: Readonly<Record<string, unknown>>;\n", `export const reactCompatibility: Readonly<Record<string, unknown>>;\n${fieldsTypes}${collectionsTypes}`);
-const testingBody = "export const reactPlatformSafetyFixture = Object.freeze({ componentSupportClaim: 'none', fixture: 'r1.3-react-collections' });\n";
-const readmeBody = `# @core-ui/react\n\nExperimental, unpublished R1.3 React slice for the standalone Core UI renderer.\n\n- Button, Breadcrumbs, Checkbox, Disclosure, DisclosureGroup, Group, Link, Meter, ProgressBar, Separator, ToggleButton, Autocomplete, CheckboxGroup, DateField, DatePicker, DateRangePicker, Form, NumberField, SearchField, Switch, TextField, TimeField, Calendar, ColorArea, ColorField, ColorPicker, ColorSlider, ColorSwatch, ColorSwatchPicker, ColorWheel, ComboBox, GridList, ListBox, Menu, RadioGroup, RangeCalendar, Select, Slider, Table, Tabs, TagGroup, ToggleButtonGroup, TokenField, Toolbar, Tree, and Virtualizer are Core-owned public exports for the \`web.react\` binding.\n- React Aria Components 1.20.0 is an internal replaceable substrate.\n- Core owns the public APIs, tokens, styling, accessibility, lifecycle, and support boundary.\n- Tale UI is a pinned styling donor, never a dependency.\n\nThe package remains private and unpublished until the separately authorized React prerelease boundary.\n`;
+const overlaysTypes = `
+export type CoreDropOperation = 'copy' | 'link' | 'move' | 'cancel';
+export interface CoreFileDropItem { readonly kind: 'file'; readonly type: string; readonly name: string; readonly getFile: () => Promise<File>; readonly getText: () => Promise<string>; }
+export interface CoreDirectoryDropItem { readonly kind: 'directory'; readonly name: string; readonly getEntries: () => AsyncIterable<CoreDropItem>; }
+export interface CoreTextDropItem { readonly kind: 'text'; readonly types: ReadonlySet<string>; readonly getText: (type: string) => Promise<string>; }
+export type CoreDropItem = CoreFileDropItem | CoreDirectoryDropItem | CoreTextDropItem;
+export interface CoreDropEvent { readonly type: 'drop'; readonly x: number; readonly y: number; readonly dropOperation: CoreDropOperation; readonly items: CoreDropItem[]; }
+export interface CoreDropActivateEvent { readonly type: 'activate'; readonly x: number; readonly y: number; }
+export interface DropZoneProps { children?: React.ReactNode; disabled?: boolean; className?: string; 'aria-label'?: string; 'aria-labelledby'?: string; onDrop?: (event: CoreDropEvent) => void; onActivate?: (event: CoreDropActivateEvent) => void; }
+export declare const DropZone: React.ForwardRefExoticComponent<DropZoneProps & React.RefAttributes<HTMLDivElement>>;
+export interface FileTriggerProps { children?: React.ReactNode; acceptedFileTypes?: readonly string[]; allowsMultiple?: boolean; acceptDirectory?: boolean; defaultCamera?: 'user' | 'environment'; disabled?: boolean; className?: string; onSelect?: (files: File[]) => void; }
+export declare const FileTrigger: React.ForwardRefExoticComponent<FileTriggerProps & React.RefAttributes<HTMLInputElement>>;
+export type OverlayAccessibleName = { 'aria-label': string; 'aria-labelledby'?: never } | { 'aria-label'?: never; 'aria-labelledby': string };
+export type DialogProps = { children?: React.ReactNode; open?: boolean; defaultOpen?: boolean; dismissable?: boolean; trigger?: React.ReactElement; onOpenChange?: (open: boolean) => void; className?: string; } & ({ title: Exclude<React.ReactNode, null | undefined | boolean>; 'aria-label'?: string; 'aria-labelledby'?: string } | ({ title?: never } & OverlayAccessibleName));
+export declare const Dialog: React.ForwardRefExoticComponent<DialogProps & React.RefAttributes<HTMLElement>>;
+export type PopoverProps = { children: React.ReactNode; trigger: React.ReactElement; open?: boolean; defaultOpen?: boolean; dismissable?: boolean; placement?: 'top' | 'bottom' | 'start' | 'end'; onOpenChange?: (open: boolean) => void; className?: string; } & OverlayAccessibleName;
+export declare const Popover: React.ForwardRefExoticComponent<PopoverProps & React.RefAttributes<HTMLDivElement>>;
+export type PreviewTriggerProps = { children: React.ReactNode; trigger: React.ReactElement; delay?: number; closeDelay?: number; open?: boolean; defaultOpen?: boolean; placement?: 'top' | 'bottom' | 'start' | 'end'; onOpenChange?: (open: boolean) => void; className?: string; } & OverlayAccessibleName;
+export declare const PreviewTrigger: React.ForwardRefExoticComponent<PreviewTriggerProps & React.RefAttributes<HTMLDivElement>>;
+export interface ToastProps { message: Exclude<React.ReactNode, null | undefined | boolean>; title?: React.ReactNode; variant?: 'neutral' | 'success' | 'warning' | 'danger'; duration?: number; onDismiss?: () => void; className?: string; }
+export declare const Toast: React.FC<ToastProps>;
+export interface ToastOptions { title?: React.ReactNode; variant?: 'neutral' | 'success' | 'warning' | 'danger'; duration?: number; onDismiss?: () => void; className?: string; }
+export interface ToastManager { add: (message: Exclude<React.ReactNode, null | undefined | boolean>, options?: ToastOptions) => string; remove: (key: string) => void; }
+export interface ToastProviderProps { children?: React.ReactNode; maxVisible?: number; className?: string; }
+export declare const ToastProvider: React.FC<ToastProviderProps>;
+export declare function useToast(): ToastManager;
+export type TooltipProps = { content: Exclude<React.ReactNode, null | undefined | boolean>; trigger: React.ReactElement; delay?: number; closeDelay?: number; placement?: 'top' | 'bottom' | 'start' | 'end'; open?: boolean; defaultOpen?: boolean; onOpenChange?: (open: boolean) => void; className?: string; };
+export declare const Tooltip: React.ForwardRefExoticComponent<TooltipProps & React.RefAttributes<HTMLDivElement>>;
+`;
+const reactTypesBody = typesBody.replace("export const reactCompatibility: Readonly<Record<string, unknown>>;\n", `export const reactCompatibility: Readonly<Record<string, unknown>>;\n${fieldsTypes}${collectionsTypes}${overlaysTypes}`);
+const testingBody = "export const reactPlatformSafetyFixture = Object.freeze({ componentSupportClaim: 'none', fixture: 'r1.4-react-overlays' });\n";
+const readmeBody = `# @core-ui/react\n\nExperimental, unpublished R1.4 React slice for the standalone Core UI renderer.\n\n- Button, Breadcrumbs, Checkbox, Disclosure, DisclosureGroup, Group, Link, Meter, ProgressBar, Separator, ToggleButton, Autocomplete, CheckboxGroup, DateField, DatePicker, DateRangePicker, Form, NumberField, SearchField, Switch, TextField, TimeField, Calendar, ColorArea, ColorField, ColorPicker, ColorSlider, ColorSwatch, ColorSwatchPicker, ColorWheel, ComboBox, GridList, ListBox, Menu, RadioGroup, RangeCalendar, Select, Slider, Table, Tabs, TagGroup, ToggleButtonGroup, TokenField, Toolbar, Tree, Virtualizer, DropZone, FileTrigger, Dialog, Popover, PreviewTrigger, Toast, ToastProvider, useToast, and Tooltip are Core-owned public exports for the \`web.react\` binding.\n- React Aria Components 1.20.0 is an internal replaceable substrate.\n- Core owns the public APIs, tokens, styling, accessibility, lifecycle, and support boundary.\n- Tale UI is a pinned styling donor, never a dependency.\n\nThe package remains private and unpublished until the separately authorized React prerelease boundary.\n`;
 const descriptorRecord = {
   schema: 'core-ui-renderer-descriptor-v1', generatedFrom: 'packages/react/src/generate.mjs',
-  package: manifest.name, version: manifest.version, support: 'unproved; R1.3 React exports only',
+  package: manifest.name, version: manifest.version, support: 'unproved; R1.4 React exports only',
   bindings: componentArtifacts.map((artifact) => ({
     binding: `${artifact.id}#web.react`, export: artifact.name, module: '.',
     lifecycle: 'experimental', strategy: 'direct', runtimeProfile: 'web.react',
@@ -470,7 +539,7 @@ const releaseRecord = {
   packagePrivate: manifest.private,
   catalog: { status: 'bound', components: componentArtifacts.map((artifact) => ({ component: artifact.id, binding: `${artifact.id}#web.react`, states: artifact.states })) },
   tokenSource: { path: 'catalog/tokens/default-theme.json', sha256: expectedTokenSha256 },
-  evidence: { status: 'pending', ids: ['E-R1.3-01', 'E-R1.3-02', 'E-R1.3-03', 'E-R1.3-04', 'E-R1.3-05'] },
+  evidence: { status: 'pending', ids: ['E-R1.4-01', 'E-R1.4-02', 'E-R1.4-03', 'E-R1.4-04', 'E-R1.4-05', 'E-R1.4-06'] },
   advisories: [], exceptions: [],
   publication: { status: 'disabled', requires: ['explicit external publish authorization'] },
   rollback: { status: 'candidate-branch-only-before-merge' },
@@ -492,25 +561,25 @@ const componentDonorComparisonRecord = {
   donor: { name: crosswalk.donor.name, commit: crosswalk.donor.commit, tree: crosswalk.donor.tree },
   components: componentArtifacts.map((artifact) => {
     const slug = artifact.id.slice('core:component:'.length);
-    const source = artifact.name === 'Button' ? crosswalk.button : crosswalk.components[slug] ?? r12Crosswalk.components[slug] ?? r13Crosswalk.components[slug];
+    const source = artifact.name === 'Button' ? crosswalk.button : crosswalk.components[slug] ?? r12Crosswalk.components[slug] ?? r13Crosswalk.components[slug] ?? r14Crosswalk.components[slug];
     return { ...(source?.donorInputs ? { donorInputs: source.donorInputs } : {}), component: artifact.name, binding: `${artifact.id}#web.react`, disposition: source.disposition, selector: `.core-${slug}`, rules: source.rules };
   }),
 };
 const r11Artifacts = componentArtifacts.filter((artifact) => {
   const slug = artifact.id.slice('core:component:'.length);
-  return !r12Slugs.includes(slug) && !r13Slugs.includes(slug);
+  return !r12Slugs.includes(slug) && !r13Slugs.includes(slug) && !r14Slugs.includes(slug);
 });
 const r11DescriptorRecord = {
   ...descriptorRecord,
   support: 'unproved; R1.1 React exports only',
-  bindings: descriptorRecord.bindings.filter(({ binding }) => !r12Slugs.some((slug) => binding === `core:component:${slug}#web.react`) && !r13Slugs.some((slug) => binding === `core:component:${slug}#web.react`)),
-  exports: descriptorRecord.exports.filter(({ binding }) => !r12Slugs.some((slug) => binding === `core:component:${slug}#web.react`) && !r13Slugs.some((slug) => binding === `core:component:${slug}#web.react`)),
+  bindings: descriptorRecord.bindings.filter(({ binding }) => !r12Slugs.some((slug) => binding === `core:component:${slug}#web.react`) && !r13Slugs.some((slug) => binding === `core:component:${slug}#web.react`) && !r14Slugs.some((slug) => binding === `core:component:${slug}#web.react`)),
+  exports: descriptorRecord.exports.filter(({ binding }) => !r12Slugs.some((slug) => binding === `core:component:${slug}#web.react`) && !r13Slugs.some((slug) => binding === `core:component:${slug}#web.react`) && !r14Slugs.some((slug) => binding === `core:component:${slug}#web.react`)),
 };
 const r11ReleaseRecord = {
   ...releaseRecord,
-  componentExports: releaseRecord.componentExports.filter(({ binding }) => !r12Slugs.some((slug) => binding === `core:component:${slug}#web.react`) && !r13Slugs.some((slug) => binding === `core:component:${slug}#web.react`)),
-  bindings: releaseRecord.bindings.filter(({ binding }) => !r12Slugs.some((slug) => binding === `core:component:${slug}#web.react`) && !r13Slugs.some((slug) => binding === `core:component:${slug}#web.react`)),
-  catalog: { ...releaseRecord.catalog, components: releaseRecord.catalog.components.filter(({ component }) => !r12Slugs.includes(component.slice('core:component:'.length)) && !r13Slugs.includes(component.slice('core:component:'.length))) },
+  componentExports: releaseRecord.componentExports.filter(({ binding }) => !r12Slugs.some((slug) => binding === `core:component:${slug}#web.react`) && !r13Slugs.some((slug) => binding === `core:component:${slug}#web.react`) && !r14Slugs.some((slug) => binding === `core:component:${slug}#web.react`)),
+  bindings: releaseRecord.bindings.filter(({ binding }) => !r12Slugs.some((slug) => binding === `core:component:${slug}#web.react`) && !r13Slugs.some((slug) => binding === `core:component:${slug}#web.react`) && !r14Slugs.some((slug) => binding === `core:component:${slug}#web.react`)),
+  catalog: { ...releaseRecord.catalog, components: releaseRecord.catalog.components.filter(({ component }) => !r12Slugs.includes(component.slice('core:component:'.length)) && !r13Slugs.includes(component.slice('core:component:'.length)) && !r14Slugs.includes(component.slice('core:component:'.length))) },
   evidence: { status: 'pending', ids: ['E-R1.1-01', 'E-R1.1-02', 'E-R1.1-03', 'E-R1.1-04'] },
 };
 const r11ComponentDonorComparisonRecord = {
@@ -571,7 +640,45 @@ for (const slug of r13Slugs) {
     if (!fullCssBody.includes(`--core-${hook.replaceAll('.', '-')}`)) throw new Error(`CORE_REACT_R13_TOKEN_HOOK_UNCONSUMED: ${slug}:${hook}`);
   }
 }
-assertReactR13GeneratedContracts({ descriptor: descriptorRecord, release: releaseRecord, donorComparison: r13DonorComparisonRecord, manifest, componentNames: componentArtifacts.map(({ name }) => name), crosswalk: r13Crosswalk, collectionsSource });
+const r13DescriptorRecord = {
+  ...descriptorRecord,
+  support: 'unproved; R1.3 React exports only',
+  bindings: descriptorRecord.bindings.filter(({ binding }) => !r14Slugs.some((slug) => binding === `core:component:${slug}#web.react`)),
+  exports: descriptorRecord.exports.filter(({ binding }) => !r14Slugs.some((slug) => binding === `core:component:${slug}#web.react`)),
+};
+const r13ReleaseRecord = {
+  ...releaseRecord,
+  componentExports: releaseRecord.componentExports.filter(({ binding }) => !r14Slugs.some((slug) => binding === `core:component:${slug}#web.react`)),
+  bindings: releaseRecord.bindings.filter(({ binding }) => !r14Slugs.some((slug) => binding === `core:component:${slug}#web.react`)),
+  catalog: { ...releaseRecord.catalog, components: releaseRecord.catalog.components.filter(({ component }) => !r14Slugs.includes(component.slice('core:component:'.length))) },
+  evidence: { status: 'pending', ids: ['E-R1.3-01', 'E-R1.3-02', 'E-R1.3-03', 'E-R1.3-04', 'E-R1.3-05'] },
+};
+assertReactR13GeneratedContracts({ descriptor: r13DescriptorRecord, release: r13ReleaseRecord, donorComparison: r13DonorComparisonRecord, manifest, componentNames: r13DescriptorRecord.exports.map(({ name }) => name), crosswalk: r13Crosswalk, collectionsSource });
+const r14DonorComparisonRecord = {
+  schema: 'core-ui-react-r1-4-donor-comparison-v1',
+  generatedFrom: 'packages/react/src/generate.mjs',
+  donor: r14Crosswalk.donor,
+  components: r14Slugs.map((slug) => {
+    const source = EXPECTED_R14_DONOR_CONTRACT.components[slug];
+    const artifact = componentArtifacts.find(({ id }) => id === `core:component:${slug}`);
+    return {
+      component: artifact.name,
+      binding: `${artifact.id}#web.react`,
+      disposition: source.disposition,
+      selector: `.core-${slug}`,
+      donorInputs: source.donorInputs,
+      tokenHooks: source.tokenHooks,
+      rules: source.rules,
+      result: { cssSelector: `.core-${slug}`, status: 'adapted-for-r1.4' },
+    };
+  }),
+};
+for (const slug of r14Slugs) {
+  for (const hook of EXPECTED_R14_DONOR_CONTRACT.components[slug].tokenHooks) {
+    if (!fullCssBody.includes(`--core-${hook.replaceAll('.', '-')}`)) throw new Error(`CORE_REACT_R14_TOKEN_HOOK_UNCONSUMED: ${slug}:${hook}`);
+  }
+}
+assertReactR14GeneratedContracts({ descriptor: descriptorRecord, release: releaseRecord, donorComparison: r14DonorComparisonRecord, manifest, componentNames: r14Slugs.map((slug) => componentArtifacts.find(({ id }) => id === `core:component:${slug}`).name), crosswalk: r14Crosswalk, overlaysSource });
 const descriptor = `${canonicalJson(descriptorRecord)}\n`;
 const release = `${canonicalJson(releaseRecord)}\n`;
 const donorComparison = `${canonicalJson(donorComparisonRecord)}\n`;
@@ -586,6 +693,10 @@ const r12DonorComparison = generatedText(
 const r13DonorComparison = generatedText(
   'packages/react/src/generate.mjs',
   `${canonicalJson(r13DonorComparisonRecord)}\n`,
+);
+const r14DonorComparison = generatedText(
+  'packages/react/src/generate.mjs',
+  `${canonicalJson(r14DonorComparisonRecord)}\n`,
 );
 function provenance(path, bytes) {
   const body = `${canonicalJson({ path: `packages/react/generated/${path}`, sha256: `sha256:${sha256(bytes)}` })}\n`;
@@ -609,11 +720,14 @@ const outputs = new Map([
   ['r1-2-donor-comparison.json.provenance', provenance('r1-2-donor-comparison.json', r12DonorComparison)],
   ['r1-3-donor-comparison.json', r13DonorComparison],
   ['r1-3-donor-comparison.json.provenance', provenance('r1-3-donor-comparison.json', r13DonorComparison)],
+  ['r1-4-donor-comparison.json', r14DonorComparison],
+  ['r1-4-donor-comparison.json.provenance', provenance('r1-4-donor-comparison.json', r14DonorComparison)],
   ['component-donor-comparison.json', componentDonorComparison],
   ['component-donor-comparison.json.provenance', provenance('component-donor-comparison.json', componentDonorComparison)],
   ['components.mjs', generatedText('packages/react/src/components.mjs', componentSource)],
   ['fields.mjs', generatedText('packages/react/src/fields.mjs', fieldsSource)],
   ['collections.mjs', generatedText('packages/react/src/collections.mjs', collectionsSource)],
+  ['overlays.mjs', generatedText('packages/react/src/overlays.mjs', overlaysSource)],
 ]);
 const readme = generatedText('packages/react/src/generate.mjs', readmeBody, '<!--', ' -->');
 
@@ -632,4 +746,4 @@ if (process.argv.includes('--check')) {
   await writeFile(resolve(packageRoot, 'README.md'), readme);
 }
 
-console.log('[react] generated standalone R1.3 collection and color projections from canonical owners');
+console.log('[react] generated standalone R1.4 overlay projections from canonical owners');

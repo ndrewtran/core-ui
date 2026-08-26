@@ -19,6 +19,9 @@ import {
   DateRangePicker,
   Disclosure,
   DisclosureGroup,
+  Dialog,
+  DropZone,
+  FileTrigger,
   Form,
   GridList,
   Group,
@@ -28,6 +31,8 @@ import {
   Menu,
   NumberField,
   ProgressBar,
+  Popover,
+  PreviewTrigger,
   RadioGroup,
   RangeCalendar,
   SearchField,
@@ -40,13 +45,18 @@ import {
   TagGroup,
   TextField,
   TimeField,
+  Toast,
+  ToastProvider,
   ToggleButton,
   ToggleButtonGroup,
   TokenField,
   Toolbar,
   Tree,
+  Tooltip,
   Virtualizer,
+  type CoreDropEvent,
   reactCompatibility,
+  useToast,
 } from '@core-ui/react';
 
 const schema: Readonly<Record<string, unknown>> = reactCompatibility;
@@ -314,3 +324,71 @@ void rangeCalendarDescription;
 // @ts-expect-error RangeCalendar does not expose errorMessage.
 const rangeCalendarErrorMessage = <RangeCalendar label="Range" errorMessage="Unsupported" />;
 void rangeCalendarErrorMessage;
+
+const r14Overlays = (
+  <>
+    <DropZone aria-label="Upload" onDrop={(event) => {
+      const drop: CoreDropEvent = event;
+      const operation: 'copy' | 'link' | 'move' | 'cancel' = drop.dropOperation;
+      for (const item of drop.items) {
+        if (item.kind === 'file') void item.getFile();
+        if (item.kind === 'text') void item.types;
+        if (item.kind === 'directory') void item.getEntries();
+      }
+      void operation;
+    }}>Drop files</DropZone>
+    <FileTrigger acceptedFileTypes={['image/png', 'image/jpeg'] as const} allowsMultiple onSelect={(files) => { const selected: File[] = files; void selected; }}>Choose files</FileTrigger>
+    <Dialog title="Confirm" trigger={<button type="button">Open</button>}>Dialog content</Dialog>
+    <Dialog aria-label="Programmatic dialog" open={false}>Dialog content</Dialog>
+    <Popover aria-label="Details" trigger={<button type="button">Details</button>}>Popover content</Popover>
+    <PreviewTrigger aria-label="Item preview" trigger={<a href="/items/1">Preview</a>} open={false}>Preview content</PreviewTrigger>
+    <ToastProvider><Toast message="Saved" variant="success" onDismiss={() => undefined} /></ToastProvider>
+    <Tooltip trigger={<button type="button">Help</button>} content="Helpful information" delay={500} closeDelay={0} />
+  </>
+);
+void r14Overlays;
+
+function ToastAction() {
+  const manager = useToast();
+  const key: string = manager.add('Saved', { duration: 5000, onDismiss: () => undefined });
+  manager.remove(key);
+  // @ts-expect-error Toast messages exclude null.
+  manager.add(null);
+  // @ts-expect-error Toast messages exclude undefined.
+  manager.add(undefined);
+  // @ts-expect-error Toast messages exclude booleans.
+  manager.add(false);
+  return null;
+}
+void ToastAction;
+
+// @ts-expect-error DropZone exposes a Core drop event, not a native DragEvent.
+const nativeDropEvent = <DropZone onDrop={(event) => event.dataTransfer.files} />;
+void nativeDropEvent;
+// @ts-expect-error FileTrigger uses the exact acceptedFileTypes array contract.
+const fileTriggerAcceptAlias = <FileTrigger acceptedFileTypes="image/*" />;
+void fileTriggerAcceptAlias;
+// @ts-expect-error Dialog requires a title, aria-label, or aria-labelledby.
+const unnamedDialog = <Dialog>Content</Dialog>;
+void unnamedDialog;
+// @ts-expect-error Popover requires an accessible name.
+const unnamedPopover = <Popover trigger={<button type="button">Open</button>}>Content</Popover>;
+void unnamedPopover;
+// @ts-expect-error PreviewTrigger requires a trigger.
+const triggerlessPreview = <PreviewTrigger aria-label="Preview">Content</PreviewTrigger>;
+void triggerlessPreview;
+// @ts-expect-error Toast requires a message.
+const emptyToast = <Toast />;
+void emptyToast;
+// @ts-expect-error Toast owns one required message rather than a redundant description alias.
+const redundantToastDescription = <Toast message="Saved" description="Duplicate detail" />;
+void redundantToastDescription;
+// @ts-expect-error Tooltip requires content.
+const emptyTooltip = <Tooltip trigger={<button type="button">Help</button>} />;
+void emptyTooltip;
+// @ts-expect-error Tooltip has one explicit trigger prop rather than an ambiguous children alias.
+const childTooltip = <Tooltip content="Help"><button type="button">Help</button></Tooltip>;
+void childTooltip;
+// @ts-expect-error Core owns `open`, not the upstream `isOpen` prop.
+const upstreamPopoverState = <Popover aria-label="Details" trigger={<button type="button">Details</button>} isOpen>Content</Popover>;
+void upstreamPopoverState;
