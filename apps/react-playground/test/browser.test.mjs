@@ -244,6 +244,7 @@ test('R1.4 React component browser and axe matrix', async () => {
       }
     }
     await page.emulateMedia({ forcedColors: 'active', reducedMotion: 'no-preference' });
+    await waitForDocumentAnimations(page);
     await assertNoAxeViolations(page.locator('[data-profile]').first().locator('[data-r1-4-section]'), 'R1.4 forced-colors');
     await page.emulateMedia({ forcedColors: 'none', reducedMotion: 'reduce' });
     await assertNoAxeViolations(page.locator('[data-profile="light/standard/reduced/comfortable/ltr"] [data-r1-4-section]'), 'R1.4 reduced-motion');

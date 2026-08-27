@@ -370,11 +370,41 @@ export async function loadTaleTokenMaterialization(repositoryRoot) {
   };
 }
 
+/**
+ * Reproduce the accepted Tale token source from its frozen decision inputs.
+ * This audit intentionally never reads or writes the current theme source.
+ */
+export async function runTaleTokenMaterializationHistoricalAudit(repositoryRoot) {
+  const paths = TALE_TOKEN_MATERIALIZATION_PATHS;
+  const identities = TALE_TOKEN_MATERIALIZATION_IDENTITIES;
+  const [phaseB, parentDecision, resetDecision] = await Promise.all([
+    exactFile(repositoryRoot, paths.phaseBSource, identities.phaseBFile),
+    exactFile(repositoryRoot, paths.parentDecision, identities.parentDecision),
+    exactFile(repositoryRoot, paths.resetDecision, identities.resetDecision),
+  ]);
+  const source = materializeDefaultThemeTokenSource({
+    phaseBSource: phaseB.value,
+    parentDecision: parentDecision.value,
+    resetDecision: resetDecision.value,
+  });
+  return {
+    changed: false,
+    fixture: [paths.phaseBSource, paths.parentDecision, paths.resetDecision],
+    mode: 'audit',
+    state: 'historical-fixture',
+    source: {
+      canonicalSha256: canonicalDigest(source),
+      tokenCount: Object.keys(source.tokens).length,
+    },
+  };
+}
+
 export async function runTaleTokenMaterialization(
   repositoryRoot,
   options = {},
 ) {
-  const { mode = 'write' } = options;
+  const { mode = 'audit' } = options;
+  if (mode === 'audit') return runTaleTokenMaterializationHistoricalAudit(repositoryRoot);
   let loaded = await loadTaleTokenMaterialization(repositoryRoot);
   const preIdentityPath = join(repositoryRoot, TALE_TOKEN_MATERIALIZATION_PATHS.preIdentitySource);
   if (mode === 'check') {
@@ -461,11 +491,20 @@ export async function runTaleTokenMaterialization(
 const invokedPath = process.argv[1] ? resolve(process.argv[1]) : null;
 if (invokedPath === resolve(import.meta.filename)) {
   const repositoryRoot = resolve(import.meta.dirname, '../../..');
-  const mode = process.argv.includes('--check') ? 'check'
+  const legacyMode = process.argv.find((argument) => [
+    '--materialize', '--write', '--rollback', '--rollback-check',
+  ].includes(argument));
+  if (legacyMode) {
+    fail('CORE_TOKEN_HISTORICAL_AUDIT_ONLY', `${legacyMode} is unavailable; use --audit with frozen fixtures`);
+  }
+  const mode = process.argv.includes('--audit') ? 'audit'
+    : process.argv.includes('--check') ? 'check'
     : process.argv.includes('--dry-run') ? 'dry-run'
       : process.argv.includes('--rollback-check') ? 'rollback-check'
         : process.argv.includes('--rollback') ? 'rollback'
-          : 'write';
-  const result = await runTaleTokenMaterialization(repositoryRoot, { mode });
+          : 'audit';
+  const result = mode === 'audit'
+    ? await runTaleTokenMaterializationHistoricalAudit(repositoryRoot)
+    : await runTaleTokenMaterialization(repositoryRoot, { mode });
   process.stdout.write(`${JSON.stringify(result)}\n`);
 }

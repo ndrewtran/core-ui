@@ -1,5 +1,5 @@
 // @generated-from: packages/react/src/overlays.mjs
-// @generated-content-sha256: sha256:d040e8a461e356d98ab3c5fe8bc5380249aee5596e391308fe86c53835df33d3
+// @generated-content-sha256: sha256:7b48e57f3712f07c7a070c27b3e5d7d494967f3f4605983233dbf82c6775ebde
 import React from 'react';
 import { Button as CoreButton } from './button.mjs';
 import {
@@ -195,6 +195,7 @@ const PopupContent = React.forwardRef(function PopupContent({ children, classNam
     ...props,
     ref,
     placement,
+    className: 'core-popover-positioner',
     isKeyboardDismissDisabled: !dismissable,
     shouldCloseOnInteractOutside: dismissable ? undefined : () => false,
   }, React.createElement(AriaDialog, {

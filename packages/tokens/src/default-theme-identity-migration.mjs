@@ -9,6 +9,10 @@ import {
   hasReactR1PackageBaseline,
   transitionDefaultThemeRepository,
 } from './internal/default-theme-repository-transition.mjs';
+import {
+  materializeDefaultThemeTokenSource,
+  TALE_TOKEN_MATERIALIZATION_PATHS,
+} from './tale-token-materialization.mjs';
 
 const execFile = promisify(execFileCallback);
 const HISTORICAL_PRODUCT_SCOPE_SOURCE = 'b27cb4fb3d71f8feca9505684201286d76f62d42';
@@ -828,11 +832,49 @@ export async function inspectDefaultThemeIdentity(repositoryRoot) {
   return { bytes: postBytes, state: 'post-migration' };
 }
 
+/**
+ * Verify the historical identity transition from frozen materialization inputs.
+ * Current canonical theme bytes are deliberately outside this audit boundary.
+ */
+export async function runDefaultThemeIdentityHistoricalAudit(repositoryRoot) {
+  const inputs = {};
+  for (const path of [
+    TALE_TOKEN_MATERIALIZATION_PATHS.phaseBSource,
+    TALE_TOKEN_MATERIALIZATION_PATHS.parentDecision,
+    TALE_TOKEN_MATERIALIZATION_PATHS.resetDecision,
+  ]) {
+    inputs[path] = strict(await readFile(join(repositoryRoot, path), 'utf8'), path);
+  }
+  const materialized = materializeDefaultThemeTokenSource({
+    phaseBSource: inputs[TALE_TOKEN_MATERIALIZATION_PATHS.phaseBSource],
+    parentDecision: inputs[TALE_TOKEN_MATERIALIZATION_PATHS.parentDecision],
+    resetDecision: inputs[TALE_TOKEN_MATERIALIZATION_PATHS.resetDecision],
+  });
+  const preMigration = structuredClone(materialized);
+  preMigration.id = DEFAULT_THEME_IDENTITY.preMigration.artifactId;
+  const postMigration = migrateDefaultThemeIdentityValue(preMigration);
+  return {
+    changed: false,
+    fixture: [
+      TALE_TOKEN_MATERIALIZATION_PATHS.phaseBSource,
+      TALE_TOKEN_MATERIALIZATION_PATHS.parentDecision,
+      TALE_TOKEN_MATERIALIZATION_PATHS.resetDecision,
+    ],
+    mode: 'audit',
+    postMigration: {
+      artifactId: postMigration.id,
+      canonicalSha256: canonicalDigest(postMigration),
+    },
+    state: 'historical-fixture',
+  };
+}
+
 export async function runDefaultThemeIdentityMigration(
   repositoryRoot,
   options = {},
 ) {
-  const { mode = 'write' } = options;
+  const { mode = 'audit' } = options;
+  if (mode === 'audit') return runDefaultThemeIdentityHistoricalAudit(repositoryRoot);
   const inspected = await inspectDefaultThemeIdentity(repositoryRoot);
   await assertAcceptedRepository(repositoryRoot, inspected.state);
   const prePath = join(repositoryRoot, DEFAULT_THEME_IDENTITY_PATHS.preMigration);
@@ -889,9 +931,19 @@ export async function runDefaultThemeIdentityMigration(
 const invokedPath = process.argv[1] ? resolve(process.argv[1]) : null;
 if (invokedPath === resolve(import.meta.filename)) {
   const repositoryRoot = resolve(import.meta.dirname, '../../..');
-  const mode = process.argv.includes('--check') ? 'check'
+  const legacyMode = process.argv.find((argument) => [
+    '--migrate', '--write', '--rollback',
+  ].includes(argument));
+  if (legacyMode) {
+    fail('CORE_TOKEN_HISTORICAL_AUDIT_ONLY', `${legacyMode} is unavailable; use --audit with frozen fixtures`);
+  }
+  const mode = process.argv.includes('--audit') ? 'audit'
+    : process.argv.includes('--check') ? 'check'
     : process.argv.includes('--dry-run') ? 'dry-run'
       : process.argv.includes('--rollback') ? 'rollback'
-        : 'write';
-  process.stdout.write(`${JSON.stringify(await runDefaultThemeIdentityMigration(repositoryRoot, { mode }))}\n`);
+        : 'audit';
+  const result = mode === 'audit'
+    ? await runDefaultThemeIdentityHistoricalAudit(repositoryRoot)
+    : await runDefaultThemeIdentityMigration(repositoryRoot, { mode });
+  process.stdout.write(`${JSON.stringify(result)}\n`);
 }

@@ -259,8 +259,9 @@ export const SearchField = React.forwardRef(function SearchField({
     label,
     description,
     errorMessage,
-    input: React.createElement(AriaInput, { className: 'core-field-input', placeholder }),
-    children: React.createElement(AriaButton, { slot: 'clear', type: 'button', className: 'core-search-clear', onPress: onClear }, 'Clear'),
+    input: React.createElement('div', { className: 'core-search-control' },
+      React.createElement(AriaInput, { className: 'core-field-input', placeholder }),
+      React.createElement(AriaButton, { slot: 'clear', type: 'button', className: 'core-search-clear', onPress: onClear }, 'Clear')),
   }));
 });
 

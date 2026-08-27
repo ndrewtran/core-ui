@@ -34,6 +34,21 @@ function expectCode(code, operation) {
   assert.throws(operation, (error) => error instanceof TokenContractError && error.code === code);
 }
 
+function contrastRatio(foreground, background) {
+  const luminance = (hex) => {
+    const channels = [0, 1, 2].map((index) => Number.parseInt(hex.slice(index * 2 + 1, index * 2 + 3), 16) / 255);
+    return channels.reduce((total, channel, index) => {
+      const linear = channel <= 0.03928 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4;
+      return total + linear * [0.2126, 0.7152, 0.0722][index];
+    }, 0);
+  };
+  const foregroundLuminance = luminance(foreground);
+  const backgroundLuminance = luminance(background);
+  const lighter = Math.max(foregroundLuminance, backgroundLuminance);
+  const darker = Math.min(foregroundLuminance, backgroundLuminance);
+  return (lighter + 0.05) / (darker + 0.05);
+}
+
 function crosswalkFixture() {
   const occurrences = [
     { ordinal: 1, file: '_color.css', selector: ':root', name: '--action-dark', value: '#1f2937' },
@@ -278,13 +293,13 @@ test('E-G1.0-02 web and native transforms retain canonical provenance without cr
   assert.equal(web.css, react.css);
   assert.equal((web.css.match(/--core-reference-/gu) ?? []).length, 296);
   assert.equal(Object.keys(ios.theme).filter((id) => id.startsWith('reference.')).length, 296);
-  assert.equal(Object.keys(ios.theme).filter((id) => id.startsWith('semantic.')).length, 11);
+  assert.equal(Object.keys(ios.theme).filter((id) => id.startsWith('semantic.')).length, 56);
   assert.equal(Object.keys(ios.theme).filter((id) => id.startsWith('component.')).length, 5);
   assert.deepEqual(android.theme, ios.theme);
   assert.equal(Object.hasOwn(ios, 'css'), false);
   assert.equal(ios.provenance.digest, web.provenance.digest);
   assert.equal(android.provenance.digest, web.provenance.digest);
-  assert.equal(Object.keys(ios.theme).length, 312);
+  assert.equal(Object.keys(ios.theme).length, 357);
   assert.equal(web.tokenContractVersion, '2.0.0');
   consumeButtonStaticWebTransform(web, { target: 'web.html' });
   consumeButtonStaticWebTransform(react, { target: 'web.react' });
@@ -301,6 +316,29 @@ test('E-G1.0-02 web and native transforms retain canonical provenance without cr
   expectCode('CORE_TOKEN_PROFILE_INVALID', () => compileNativeTheme(source, {
     profile: 'native.react-native-web',
   }));
+});
+
+test('default theme link and invalid semantic colors meet contrast in both color schemes', () => {
+  const references = Object.fromEntries(
+    Object.entries(source.tokens)
+      .filter(([id]) => id.startsWith('reference.'))
+      .map(([id, token]) => [id, token.value]),
+  );
+  const link = source.tokens['semantic.content.link'];
+  const invalid = source.tokens['semantic.feedback.invalid'];
+  assert.equal(link.alias, 'reference.color.bluegreen-70');
+  assert.equal(link.modes['colorScheme.dark'].alias, 'reference.color.bluegreen-20');
+  assert.equal(invalid.alias, 'reference.color.error-60');
+  assert.equal(invalid.modes['colorScheme.dark'].alias, 'reference.color.error-30');
+
+  for (const [foreground, background] of [
+    [references['reference.color.bluegreen-70'], references['reference.color.neutral-5']],
+    [references['reference.color.bluegreen-20'], references['reference.color.neutral-90']],
+    [references['reference.color.error-60'], references['reference.color.neutral-5']],
+    [references['reference.color.error-30'], references['reference.color.neutral-90']],
+  ]) {
+    assert.ok(contrastRatio(foreground, background) >= 4.5, `${foreground} on ${background} lacks 4.5:1 contrast`);
+  }
 });
 
 test('Decision 0005 changes only renderer source and provenance identity', () => {
@@ -410,7 +448,7 @@ test('E-G1.0-04 requirement digests track exact semantic closure only', () => {
   assert.notEqual(unrelatedSet.sourceRevision, base.sourceRevision);
 
   const dependency = structuredClone(source);
-  dependency.tokens['reference.color.neutral-90'].value = '#000001';
+  dependency.tokens['reference.color.bluegreen-60'].value = '#000001';
   const dependencySet = compileTokenRequirementSet({
     source: dependency, recipe, bindingId: 'web.html', profile: 'web.html',
   });

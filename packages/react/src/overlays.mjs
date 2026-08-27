@@ -193,6 +193,7 @@ const PopupContent = React.forwardRef(function PopupContent({ children, classNam
     ...props,
     ref,
     placement,
+    className: 'core-popover-positioner',
     isKeyboardDismissDisabled: !dismissable,
     shouldCloseOnInteractOutside: dismissable ? undefined : () => false,
   }, React.createElement(AriaDialog, {

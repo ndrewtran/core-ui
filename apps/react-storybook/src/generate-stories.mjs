@@ -1,0 +1,133 @@
+import { mkdir, readdir, readFile, unlink, writeFile } from 'node:fs/promises';
+import { resolve } from 'node:path';
+import { generatedText, loadPolicy } from '../../../tooling/audits/repository-policy/src/policy.mjs';
+import { adapterNames } from './storybook-factory.mjs';
+
+const repositoryRoot = resolve(import.meta.dirname, '../../..');
+const descriptorPath = resolve(repositoryRoot, 'packages/react/generated/descriptor.json');
+const snapshotPath = resolve(repositoryRoot, 'catalog/react-r1-0/react-aria-1.20.0-family-evaluation.snapshot.json');
+const generatedRoot = resolve(import.meta.dirname, '../.storybook/generated');
+const checkOnly = process.argv.includes('--check');
+
+const descriptor = JSON.parse(await readFile(descriptorPath, 'utf8'));
+const snapshot = JSON.parse(await readFile(snapshotPath, 'utf8'));
+const policy = await loadPolicy(repositoryRoot);
+const generatedSource = 'apps/react-storybook/src/generate-stories.mjs';
+
+function fail(message) {
+  throw new Error(`REACT_STORYBOOK_GENERATION_ERROR: ${message}`);
+}
+
+function familySlug(name) {
+  return name.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
+}
+
+const bindings = descriptor.bindings;
+if (bindings.length !== 53) fail(`expected 53 Core bindings, found ${bindings.length}`);
+if (new Set(bindings.map(({ export: name }) => name)).size !== bindings.length) fail('duplicate Core binding export');
+if (bindings.some((binding) => binding.runtimeProfile !== 'web.react')) fail('non-web.react binding in React showcase');
+
+const snapshotFamilies = new Map(snapshot.families.map((family) => [family.corePublicFamily, family]));
+const records = bindings.map((binding) => {
+  const family = snapshotFamilies.get(binding.export);
+  if (!family) fail(`missing canonical tranche for ${binding.export}`);
+  return { family: binding.export, tranche: family.tranche, binding };
+});
+
+const names = records.map(({ family }) => family);
+const missingAdapters = names.filter((name) => !adapterNames.includes(name));
+const unknownAdapters = adapterNames.filter((name) => !names.includes(name));
+if (missingAdapters.length) fail(`missing explicit adapters: ${missingAdapters.join(', ')}`);
+if (unknownAdapters.length) fail(`unknown explicit adapters: ${unknownAdapters.join(', ')}`);
+
+function storySource(record) {
+  return `import * as Core from '@core-ui/react';
+import { argTypesForBinding, createStory } from '../../src/storybook-factory.mjs';
+
+const binding = ${JSON.stringify(record.binding, null, 2)};
+const record = { family: '${record.family}', tranche: '${record.tranche}', binding };
+
+export default {
+  title: 'Core React/${record.tranche}/${record.family}',
+  component: Core.${record.family},
+  tags: ['autodocs'],
+  parameters: {
+    controls: {
+      include: binding.api.props,
+    },
+    docs: {
+      description: {
+        component: 'Private development showcase for the Core-owned ${record.family} family.',
+      },
+    },
+  },
+  argTypes: argTypesForBinding(binding),
+};
+export const Default = createStory(record, 'default');
+export const States = createStory(record, 'states');
+`;
+}
+
+const outputs = new Map(records.map((record) => [
+  `${record.tranche.replaceAll('.', '-').toLowerCase()}-${familySlug(record.family)}.stories.mjs`,
+  generatedText({ source: generatedSource, body: storySource(record), policy }),
+]));
+const manifest = {
+  schema: 'core-ui-react-storybook-manifest-v1',
+  generatedFrom: [
+    'packages/react/generated/descriptor.json',
+    'catalog/react-r1-0/react-aria-1.20.0-family-evaluation.snapshot.json',
+  ],
+  count: records.length,
+  families: records.map(({ family, tranche, binding }) => ({
+    family,
+    tranche,
+    props: binding.api.props,
+    defaults: binding.api.defaults ?? {},
+    states: binding.states,
+  })),
+};
+const manifestBody = [
+  `export const manifest = Object.freeze(${JSON.stringify(manifest, null, 2)});`,
+  'export default manifest;',
+  '',
+].join('\n');
+outputs.set('manifest.mjs', generatedText({
+  source: generatedSource,
+  body: manifestBody,
+  policy,
+}));
+
+async function assertGenerated() {
+  let entries;
+  try {
+    entries = await readdir(generatedRoot);
+  } catch {
+    fail('generated story output is missing; run pnpm generate:stories');
+  }
+  const expectedNames = new Set(outputs.keys());
+  for (const entry of entries) {
+    if (!expectedNames.has(entry)) fail(`unexpected generated output ${entry}`);
+  }
+  for (const [name, expected] of outputs) {
+    let actual;
+    try {
+      actual = await readFile(resolve(generatedRoot, name), 'utf8');
+    } catch {
+      fail(`missing generated output ${name}`);
+    }
+    if (actual !== expected) fail(`generated output drift in ${name}`);
+  }
+}
+
+if (checkOnly) {
+  await assertGenerated();
+} else {
+  await mkdir(generatedRoot, { recursive: true });
+  for (const entry of await readdir(generatedRoot)) {
+    if (!outputs.has(entry)) await unlink(resolve(generatedRoot, entry));
+  }
+  for (const [name, content] of outputs) await writeFile(resolve(generatedRoot, name), content, 'utf8');
+}
+
+console.log(`React Storybook projection: ${records.length}/53 families, ${outputs.size - 1} stories`);

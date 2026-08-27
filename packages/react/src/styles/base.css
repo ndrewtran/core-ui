@@ -1,0 +1,198 @@
+/* Core-owned control foundations. */
+
+/* Component styles consume named semantic roles from the Core theme. */
+
+:where(.core-button, .core-toggle-button, .core-disclosure-trigger, .core-select-trigger,
+  .core-combo-box-trigger, .core-file-trigger, .core-date-trigger, .core-number-stepper,
+  .core-search-clear, .core-tag-remove, .core-tree-toggle) {
+  box-sizing: border-box;
+  font: inherit;
+  line-height: 1;
+}
+
+:where(.core-button, .core-toggle-button, .core-disclosure-trigger, .core-select-trigger,
+  .core-combo-box-trigger, .core-file-trigger, .core-date-trigger, .core-number-stepper,
+  .core-search-clear, .core-tag-remove, .core-tree-toggle):focus-visible {
+  outline: 2px solid var(--core-semantic-focus-ring);
+  outline-offset: 2px;
+}
+
+.core-button,
+.core-r1-button {
+  --core-button-background: var(--core-component-button-background);
+  --core-button-foreground: var(--core-component-button-foreground);
+  --core-button-radius: var(--core-component-button-radius);
+  --core-button-min-height: var(--core-component-button-min-height);
+  --core-button-padding: var(--core-component-button-padding-inline);
+  --core-button-feedback-duration: var(--core-semantic-motion-feedback);
+  display: inline-flex;
+  position: relative;
+  align-items: center;
+  justify-content: center;
+  gap: var(--core-semantic-layout-control-gap);
+  min-block-size: var(--core-button-min-height);
+  padding: var(--core-semantic-layout-control-gap) var(--core-button-padding);
+  border: 1px solid transparent;
+  border-radius: var(--core-button-radius);
+  background: var(--core-button-background);
+  color: var(--core-button-foreground);
+  font: inherit;
+  font-size: var(--core-semantic-typography-body-size);
+  font-weight: var(--core-semantic-typography-control-weight);
+  line-height: 1;
+  white-space: nowrap;
+  inline-size: fit-content;
+  user-select: none;
+  cursor: pointer;
+  box-shadow: var(--core-semantic-elevation-control);
+  transition:
+    background-color var(--core-button-feedback-duration) ease,
+    border-color var(--core-button-feedback-duration) ease,
+    color var(--core-button-feedback-duration) ease,
+    opacity var(--core-button-feedback-duration) ease;
+}
+
+.core-button[data-hovered]:not([data-disabled], [data-pending]),
+.core-r1-button[data-hovered]:not([data-disabled], [data-pending]) {
+  background: var(--core-semantic-action-background-hover);
+  border-color: transparent;
+}
+
+.core-button[data-pressed]:not([data-disabled], [data-pending]),
+.core-r1-button[data-pressed]:not([data-disabled], [data-pending]) {
+  background: var(--core-semantic-action-background-pressed);
+  border-color: transparent;
+}
+
+.core-button[data-disabled],
+.core-r1-button[data-disabled] {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.core-button[data-pending],
+.core-r1-button[data-pending] {
+  cursor: progress;
+}
+
+.core-button[data-pending]::after,
+.core-r1-button[data-pending]::after {
+  inline-size: auto;
+  block-size: auto;
+  margin-inline-start: var(--core-semantic-layout-control-gap);
+  content: '…';
+  font-size: var(--core-semantic-typography-body-size);
+  font-weight: var(--core-semantic-typography-control-weight);
+  letter-spacing: 0.08em;
+}
+
+.core-button:focus-visible,
+.core-r1-button:focus-visible {
+  outline: 2px solid var(--core-semantic-focus-ring);
+  outline-offset: 2px;
+}
+
+.core-toggle-button {
+  --core-toggle-background: transparent;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--core-semantic-layout-control-gap);
+  min-block-size: var(--core-semantic-control-min-height);
+  padding: var(--core-semantic-layout-control-gap) var(--core-semantic-control-padding-inline);
+  border: 1px solid var(--core-semantic-border-default);
+  border-radius: var(--core-semantic-control-radius);
+  background: var(--core-toggle-background);
+  color: var(--core-semantic-content-default);
+  font-weight: var(--core-semantic-typography-control-weight);
+  cursor: pointer;
+  outline: none;
+  user-select: none;
+  transition:
+    background-color var(--core-semantic-motion-feedback) ease,
+    border-color var(--core-semantic-motion-feedback) ease,
+    color var(--core-semantic-motion-feedback) ease,
+    opacity var(--core-semantic-motion-feedback) ease;
+}
+
+.core-toggle-button[data-hovered]:not([data-disabled], [data-selected]) {
+  background: var(--core-semantic-surface-hover);
+  border-color: var(--core-semantic-border-strong);
+  color: var(--core-semantic-content-strong);
+}
+
+.core-toggle-button[data-selected],
+.core-toggle-button[aria-pressed='true'] {
+  background: var(--core-semantic-selection-track);
+  border-color: var(--core-semantic-selection-track);
+  color: var(--core-semantic-action-foreground);
+}
+
+.core-toggle-button[data-selected][data-hovered]:not([data-disabled]),
+.core-toggle-button[aria-pressed='true'][data-hovered]:not([data-disabled]) {
+  background: color-mix(in srgb, var(--core-semantic-selection-track) 88%, var(--core-semantic-content-inverse));
+  border-color: color-mix(in srgb, var(--core-semantic-selection-track) 88%, var(--core-semantic-content-inverse));
+}
+
+.core-toggle-button[data-disabled],
+.core-toggle-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+.core-toggle-button-group {
+  display: inline-flex;
+  align-items: center;
+  inline-size: fit-content;
+  gap: 0;
+  overflow: hidden;
+  border: 1px solid var(--core-semantic-border-default);
+  border-radius: var(--core-semantic-control-radius);
+}
+
+.core-toggle-button-group .core-toggle-button {
+  border: 0;
+  border-inline-end: 1px solid var(--core-semantic-border-default);
+  border-radius: 0;
+}
+
+.core-toggle-button-group .core-toggle-button:last-child {
+  border-inline-end: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .core-button,
+  .core-r1-button,
+  .core-toggle-button {
+    transition: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .core-button,
+  .core-r1-button,
+  .core-toggle-button {
+    border-color: ButtonText;
+    background: ButtonFace;
+    color: ButtonText;
+    box-shadow: none;
+  }
+
+  .core-button[data-disabled],
+  .core-r1-button[data-disabled],
+  .core-toggle-button[data-disabled] {
+    border-color: GrayText;
+    color: GrayText;
+  }
+
+  :where(.core-button, .core-r1-button, .core-toggle-button):focus-visible {
+    outline-color: Highlight;
+  }
+}
+
+@media (prefers-contrast: more) {
+  :where(.core-button, .core-r1-button, .core-toggle-button) {
+    border-width: 2px;
+  }
+}

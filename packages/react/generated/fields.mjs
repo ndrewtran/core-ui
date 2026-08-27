@@ -1,5 +1,5 @@
 // @generated-from: packages/react/src/fields.mjs
-// @generated-content-sha256: sha256:acd4fe633854c18e0676af40a58e00d31338d6cffa0debd400ac8201292e7277
+// @generated-content-sha256: sha256:e15561064193ff5a66f0910978b331904f2a147035da142c2868d854fa870a00
 import React from 'react';
 import {
   Autocomplete as AriaAutocomplete,
@@ -261,8 +261,9 @@ export const SearchField = React.forwardRef(function SearchField({
     label,
     description,
     errorMessage,
-    input: React.createElement(AriaInput, { className: 'core-field-input', placeholder }),
-    children: React.createElement(AriaButton, { slot: 'clear', type: 'button', className: 'core-search-clear', onPress: onClear }, 'Clear'),
+    input: React.createElement('div', { className: 'core-search-control' },
+      React.createElement(AriaInput, { className: 'core-field-input', placeholder }),
+      React.createElement(AriaButton, { slot: 'clear', type: 'button', className: 'core-search-clear', onPress: onClear }, 'Clear')),
   }));
 });
 

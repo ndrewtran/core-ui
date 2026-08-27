@@ -69,6 +69,11 @@ const profiles = [
   ['light', 'standard', 'full', 'comfortable', 'rtl'],
 ];
 
+const profileSurfaceStyle = {
+  backgroundColor: 'var(--core-semantic-surface-canvas)',
+  color: 'var(--core-semantic-content-default)',
+};
+
 function DropZoneDemo() {
   const [status, setStatus] = React.useState('Ready for files');
   return React.createElement('article', { 'data-component': 'drop-zone' },
@@ -329,6 +334,7 @@ createRoot(document.querySelector('#root')).render(React.createElement(ToastProv
       'data-core-motion': motion,
       'data-core-density': density,
       'data-core-direction': direction,
+      style: profileSurfaceStyle,
     },
     React.createElement('h2', null, `${colorScheme} · ${contrast} · ${motion} · ${density} · ${direction}`),
     React.createElement(R1ButtonFixture),

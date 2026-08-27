@@ -13,6 +13,8 @@ test('private playground exposes the bounded R1.4 React component states', async
   assert.match(source, /R1ButtonFixture/);
   assert.match(source, /ToastProvider/);
   assert.match(source, /useToast/);
+  assert.match(source, /backgroundColor: 'var\(--core-semantic-surface-canvas\)'/u);
+  assert.match(source, /color: 'var\(--core-semantic-content-default\)'/u);
   for (const component of ['Breadcrumbs', 'Checkbox', 'Autocomplete', 'CheckboxGroup', 'DateField', 'DatePicker', 'DateRangePicker', 'Form', 'NumberField', 'SearchField', 'Switch', 'TextField', 'TimeField', 'Disclosure', 'DisclosureGroup', 'Group', 'Link', 'Meter', 'ProgressBar', 'Separator', 'ToggleButton', 'Calendar', 'ColorArea', 'ColorField', 'ColorPicker', 'ColorSlider', 'ColorSwatch', 'ColorSwatchPicker', 'ColorWheel', 'ComboBox', 'GridList', 'ListBox', 'Menu', 'RadioGroup', 'RangeCalendar', 'Select', 'Slider', 'Table', 'Tabs', 'TagGroup', 'ToggleButtonGroup', 'TokenField', 'Toolbar', 'Tree', 'Virtualizer', 'DropZone', 'FileTrigger', 'Dialog', 'Popover', 'PreviewTrigger', 'Toast', 'Tooltip']) {
     const slug = component.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`).replace(/^-/, '');
     assert.match(source, new RegExp(`data-component.*${slug}`));

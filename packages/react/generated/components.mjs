@@ -1,5 +1,5 @@
 // @generated-from: packages/react/src/components.mjs
-// @generated-content-sha256: sha256:8810cfc515a7642b6c53c09509bffc5c83983dacb789b5085dedf16d9a59c971
+// @generated-content-sha256: sha256:35db023fcfc9e8f9f7c3dc11bcc078d8014be47702f537539fdd7fca62bb5264
 import React from 'react';
 import {
   Breadcrumb as AriaBreadcrumb,
@@ -11,7 +11,6 @@ import {
   Group as AriaGroup,
   Link as AriaLink,
   Label as AriaLabel,
-  Meter as AriaMeter,
   ProgressBar as AriaProgressBar,
   Separator as AriaSeparator,
   ToggleButton as AriaToggleButton,
@@ -241,16 +240,7 @@ export const Meter = React.forwardRef(function Meter({
     ? React.createElement(AriaLabel, { id: labelId, elementType: 'span', className: 'core-value-label' }, label)
     : null,
   React.createElement('div', { className: 'core-meter-track' }, React.createElement('div', { className: 'core-meter-fill', style: { inlineSize: `${percentage}%` } })),
-  React.createElement(AriaMeter, {
-    value,
-    minValue,
-    maxValue,
-    formatOptions,
-    hidden: true,
-    'aria-label': 'Meter visual',
-    className: 'core-meter-visual',
-    children: null,
-  }));
+  );
 });
 
 Meter.displayName = 'Meter';

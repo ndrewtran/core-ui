@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { spawnSync } from 'node:child_process';
 import { cp, mkdir, mkdtemp, readFile, rm, unlink, writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import test from 'node:test';
@@ -9,7 +10,6 @@ import {
   materializeDefaultThemeTokenSource,
   materializeTaleTokenSource,
   projectTaleBaselineOccurrences,
-  runTaleTokenMaterialization,
   TaleTokenMaterializationError,
   TALE_TOKEN_MATERIALIZATION_IDENTITIES,
   TALE_TOKEN_MATERIALIZATION_PATHS,
@@ -85,33 +85,62 @@ test('TALE-TOKEN-C occurrence projection is exact, ordered, and media-free', asy
   assert.equal(occurrences.some((occurrence) => Object.hasOwn(occurrence, 'media')), false);
 });
 
-test('TALE-TOKEN-C current source is an independently verified final idempotent result', async () => {
-  const loaded = await loadTaleTokenMaterialization(repositoryRoot);
-  assert.equal(loaded.state, 'materialized');
-  assert.equal(canonicalDigest(loaded.currentSource), TALE_TOKEN_MATERIALIZATION_IDENTITIES.finalSource);
-  assert.deepEqual(await runTaleTokenMaterialization(repositoryRoot, { mode: 'check' }), {
-    changed: false,
-    mode: 'check',
-    state: 'materialized',
+test('TALE-TOKEN-C historical materialization fixture is independently verified', async () => {
+  const root = await materializedFixtureRepository();
+  try {
+    const loaded = await loadTaleTokenMaterialization(root);
+    assert.equal(loaded.state, 'materialized');
+    assert.equal(canonicalDigest(loaded.currentSource), TALE_TOKEN_MATERIALIZATION_IDENTITIES.finalSource);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test('TALE-TOKEN-C CLI audits by default and rejects legacy writes without mutation', async () => {
+  const sourcePath = resolve(repositoryRoot, TALE_TOKEN_MATERIALIZATION_PATHS.currentSource);
+  const scriptPath = resolve(repositoryRoot, 'packages/tokens/src/tale-token-materialization.mjs');
+  const before = await readFile(sourcePath, 'utf8');
+  const audit = spawnSync(process.execPath, [scriptPath], {
+    cwd: resolve(repositoryRoot, 'packages/tokens'),
+    encoding: 'utf8',
   });
-  assert.deepEqual(await runTaleTokenMaterialization(repositoryRoot, { mode: 'dry-run' }), {
-    changed: false,
-    mode: 'dry-run',
-    state: 'materialized',
-  });
+  assert.equal(audit.status, 0, audit.stderr);
+  assert.match(audit.stdout, /"mode":"audit"/u);
+
+  for (const legacyFlag of ['--write', '--materialize', '--rollback', '--rollback-check']) {
+    const legacy = spawnSync(process.execPath, [scriptPath, legacyFlag], {
+      cwd: resolve(repositoryRoot, 'packages/tokens'),
+      encoding: 'utf8',
+    });
+    assert.notEqual(legacy.status, 0, legacyFlag);
+    assert.match(`${legacy.stdout}${legacy.stderr}`, /CORE_TOKEN_HISTORICAL_AUDIT_ONLY/u, legacyFlag);
+  }
+  assert.equal(await readFile(sourcePath, 'utf8'), before);
 });
 
 async function temporaryRepository() {
   const root = await mkdtemp(join(process.cwd(), '.tale-token-materialization-'));
   for (const path of Object.values(TALE_TOKEN_MATERIALIZATION_PATHS).filter(
-    (path) => path !== TALE_TOKEN_MATERIALIZATION_PATHS.preIdentitySource,
+    (path) => path !== TALE_TOKEN_MATERIALIZATION_PATHS.preIdentitySource
+      && path !== TALE_TOKEN_MATERIALIZATION_PATHS.currentSource,
   )) {
     await mkdir(resolve(root, path, '..'), { recursive: true });
     await cp(resolve(repositoryRoot, path), resolve(root, path));
   }
   const phaseB = await readFile(resolve(root, TALE_TOKEN_MATERIALIZATION_PATHS.phaseBSource), 'utf8');
-  await unlink(resolve(root, TALE_TOKEN_MATERIALIZATION_PATHS.currentSource));
-  await writeFile(resolve(root, TALE_TOKEN_MATERIALIZATION_PATHS.preIdentitySource), phaseB);
+  const preIdentityPath = resolve(root, TALE_TOKEN_MATERIALIZATION_PATHS.preIdentitySource);
+  await mkdir(resolve(preIdentityPath, '..'), { recursive: true });
+  await writeFile(preIdentityPath, phaseB);
+  return root;
+}
+
+async function materializedFixtureRepository() {
+  const root = await temporaryRepository();
+  await unlink(resolve(root, TALE_TOKEN_MATERIALIZATION_PATHS.preIdentitySource));
+  const sourcePath = resolve(root, TALE_TOKEN_MATERIALIZATION_PATHS.currentSource);
+  await mkdir(resolve(sourcePath, '..'), { recursive: true });
+  const source = materializeDefaultThemeTokenSource(await inputs());
+  await writeFile(sourcePath, `${JSON.stringify(source, null, 2)}\n`);
   return root;
 }
 
@@ -134,9 +163,9 @@ test('TALE-TOKEN-C rejects base, target, meaning, collision, and final near-matc
     const prePath = resolve(root, TALE_TOKEN_MATERIALIZATION_PATHS.preIdentitySource);
     const currentPath = resolve(root, TALE_TOKEN_MATERIALIZATION_PATHS.currentSource);
     await unlink(prePath);
-    await cp(resolve(repositoryRoot, TALE_TOKEN_MATERIALIZATION_PATHS.currentSource), currentPath);
-    const current = parseJsonStrict(await readFile(currentPath, 'utf8'));
+    const current = materializeDefaultThemeTokenSource(input);
     current.tokens['semantic.action.background'].meaning = 'Near match.';
+    await mkdir(resolve(currentPath, '..'), { recursive: true });
     await writeFile(currentPath, `${JSON.stringify(current, null, 2)}\n`);
     await assert.rejects(
       loadTaleTokenMaterialization(root),

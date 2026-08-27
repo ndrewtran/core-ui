@@ -9,7 +9,6 @@ import {
   Group as AriaGroup,
   Link as AriaLink,
   Label as AriaLabel,
-  Meter as AriaMeter,
   ProgressBar as AriaProgressBar,
   Separator as AriaSeparator,
   ToggleButton as AriaToggleButton,
@@ -239,16 +238,7 @@ export const Meter = React.forwardRef(function Meter({
     ? React.createElement(AriaLabel, { id: labelId, elementType: 'span', className: 'core-value-label' }, label)
     : null,
   React.createElement('div', { className: 'core-meter-track' }, React.createElement('div', { className: 'core-meter-fill', style: { inlineSize: `${percentage}%` } })),
-  React.createElement(AriaMeter, {
-    value,
-    minValue,
-    maxValue,
-    formatOptions,
-    hidden: true,
-    'aria-label': 'Meter visual',
-    className: 'core-meter-visual',
-    children: null,
-  }));
+  );
 });
 
 Meter.displayName = 'Meter';

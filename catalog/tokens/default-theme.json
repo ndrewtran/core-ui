@@ -59,10 +59,36 @@
       "unit": "hex",
       "meaning": "Background for an immediate action.",
       "overridePolicy": "theme",
-      "alias": "reference.color.neutral-90",
+      "alias": "reference.color.bluegreen-60",
       "modes": {
         "colorScheme.dark": {
-          "alias": "reference.color.neutral-5"
+          "alias": "reference.color.bluegreen-40"
+        }
+      }
+    },
+    "semantic.action.background-hover": {
+      "layer": "semantic",
+      "type": "color",
+      "unit": "hex",
+      "meaning": "Interactive action background while hovered.",
+      "overridePolicy": "theme",
+      "alias": "reference.color.bluegreen-50",
+      "modes": {
+        "colorScheme.dark": {
+          "alias": "reference.color.bluegreen-30"
+        }
+      }
+    },
+    "semantic.action.background-pressed": {
+      "layer": "semantic",
+      "type": "color",
+      "unit": "hex",
+      "meaning": "Interactive action background while pressed.",
+      "overridePolicy": "theme",
+      "alias": "reference.color.bluegreen-40",
+      "modes": {
+        "colorScheme.dark": {
+          "alias": "reference.color.bluegreen-20"
         }
       }
     },
@@ -72,10 +98,10 @@
       "unit": "hex",
       "meaning": "Foreground content on an immediate action.",
       "overridePolicy": "theme",
-      "alias": "reference.color.neutral-5",
+      "alias": "reference.color.bluegreen-5",
       "modes": {
         "colorScheme.dark": {
-          "alias": "reference.color.neutral-96"
+          "alias": "reference.color.bluegreen-100"
         }
       }
     },
@@ -85,7 +111,7 @@
       "unit": "px",
       "meaning": "Minimum interactive control height.",
       "overridePolicy": "theme",
-      "alias": "reference.dimension.space-l"
+      "value": 36
     },
     "semantic.control.padding-inline": {
       "layer": "semantic",
@@ -106,7 +132,7 @@
       "unit": "px",
       "meaning": "Corner radius for controls.",
       "overridePolicy": "theme",
-      "alias": "reference.dimension.radius-xs"
+      "alias": "reference.dimension.radius-m"
     },
     "semantic.field.background": {
       "layer": "semantic",
@@ -114,15 +140,25 @@
       "unit": "hex",
       "meaning": "Background for editable fields and selections.",
       "overridePolicy": "theme",
-      "alias": "reference.color.neutral-5"
+      "alias": "reference.color.neutral-5",
+      "modes": {
+        "colorScheme.dark": {
+          "alias": "reference.color.neutral-100"
+        }
+      }
     },
     "semantic.feedback.invalid": {
       "layer": "semantic",
       "type": "color",
       "unit": "hex",
       "meaning": "Indicator for invalid input and form state.",
-      "overridePolicy": "fixed",
-      "alias": "reference.color.error-60"
+      "overridePolicy": "theme",
+      "alias": "reference.color.error-60",
+      "modes": {
+        "colorScheme.dark": {
+          "alias": "reference.color.error-30"
+        }
+      }
     },
     "semantic.focus.ring": {
       "layer": "semantic",
@@ -146,7 +182,12 @@
       "unit": "hex",
       "meaning": "Background surface for dialog overlays.",
       "overridePolicy": "theme",
-      "alias": "reference.color.neutral-5"
+      "alias": "reference.color.neutral-5",
+      "modes": {
+        "colorScheme.dark": {
+          "alias": "reference.color.neutral-100"
+        }
+      }
     },
     "semantic.selection.track": {
       "layer": "semantic",
@@ -154,7 +195,426 @@
       "unit": "hex",
       "meaning": "Track for boolean selection controls.",
       "overridePolicy": "theme",
-      "alias": "reference.color.neutral-90"
+      "alias": "reference.color.bluegreen-60",
+      "modes": {
+        "colorScheme.dark": {
+          "alias": "reference.color.bluegreen-40"
+        }
+      }
+    },
+    "semantic.surface.canvas": {
+      "layer": "semantic",
+      "type": "color",
+      "unit": "hex",
+      "meaning": "Default canvas surface behind Core content.",
+      "overridePolicy": "theme",
+      "alias": "reference.color.neutral-5",
+      "modes": {
+        "colorScheme.dark": {
+          "alias": "reference.color.neutral-90"
+        }
+      }
+    },
+    "semantic.surface.raised": {
+      "layer": "semantic",
+      "type": "color",
+      "unit": "hex",
+      "meaning": "Raised surface for controls and content above the canvas.",
+      "overridePolicy": "theme",
+      "alias": "reference.color.neutral-10",
+      "modes": {
+        "colorScheme.dark": {
+          "alias": "reference.color.neutral-80"
+        }
+      }
+    },
+    "semantic.surface.subtle": {
+      "layer": "semantic",
+      "type": "color",
+      "unit": "hex",
+      "meaning": "Subtle surface for secondary containers and tags.",
+      "overridePolicy": "theme",
+      "alias": "reference.color.neutral-12",
+      "modes": {
+        "colorScheme.dark": {
+          "alias": "reference.color.neutral-82"
+        }
+      }
+    },
+    "semantic.surface.hover": {
+      "layer": "semantic",
+      "type": "color",
+      "unit": "hex",
+      "meaning": "Hover surface for interactive controls.",
+      "overridePolicy": "theme",
+      "alias": "reference.color.neutral-14",
+      "modes": {
+        "colorScheme.dark": {
+          "alias": "reference.color.neutral-70"
+        }
+      }
+    },
+    "semantic.content.faint": {
+      "layer": "semantic",
+      "type": "color",
+      "unit": "hex",
+      "meaning": "Faint content used for dividers and low-emphasis indicators.",
+      "overridePolicy": "theme",
+      "alias": "reference.color.neutral-40"
+    },
+    "semantic.content.muted": {
+      "layer": "semantic",
+      "type": "color",
+      "unit": "hex",
+      "meaning": "Muted content for descriptions, placeholders, and secondary values.",
+      "overridePolicy": "theme",
+      "alias": "reference.color.neutral-50",
+      "modes": {
+        "colorScheme.dark": {
+          "alias": "reference.color.neutral-30"
+        }
+      }
+    },
+    "semantic.content.default": {
+      "layer": "semantic",
+      "type": "color",
+      "unit": "hex",
+      "meaning": "Default content color for Core controls and text.",
+      "overridePolicy": "theme",
+      "alias": "reference.color.neutral-80",
+      "modes": {
+        "colorScheme.dark": {
+          "alias": "reference.color.neutral-10"
+        }
+      }
+    },
+    "semantic.content.strong": {
+      "layer": "semantic",
+      "type": "color",
+      "unit": "hex",
+      "meaning": "Strong content color for labels, headings, and primary text.",
+      "overridePolicy": "theme",
+      "alias": "reference.color.neutral-90",
+      "modes": {
+        "colorScheme.dark": {
+          "alias": "reference.color.neutral-5"
+        }
+      }
+    },
+    "semantic.content.inverse": {
+      "layer": "semantic",
+      "type": "color",
+      "unit": "hex",
+      "meaning": "Maximum-contrast content on strong surfaces.",
+      "overridePolicy": "theme",
+      "alias": "reference.color.neutral-100",
+      "modes": {
+        "colorScheme.dark": {
+          "alias": "reference.color.neutral-5"
+        }
+      }
+    },
+    "semantic.content.link": {
+      "layer": "semantic",
+      "type": "color",
+      "unit": "hex",
+      "meaning": "Default content color for links and text-only selected controls.",
+      "overridePolicy": "theme",
+      "alias": "reference.color.bluegreen-70",
+      "modes": {
+        "colorScheme.dark": {
+          "alias": "reference.color.bluegreen-20"
+        }
+      }
+    },
+    "semantic.content.link-hover": {
+      "layer": "semantic",
+      "type": "color",
+      "unit": "hex",
+      "meaning": "Link content while hovered.",
+      "overridePolicy": "theme",
+      "alias": "reference.color.bluegreen-100",
+      "modes": {
+        "colorScheme.dark": {
+          "alias": "reference.color.bluegreen-5"
+        }
+      }
+    },
+    "semantic.content.link-pressed": {
+      "layer": "semantic",
+      "type": "color",
+      "unit": "hex",
+      "meaning": "Link content while pressed.",
+      "overridePolicy": "theme",
+      "alias": "reference.color.bluegreen-90",
+      "modes": {
+        "colorScheme.dark": {
+          "alias": "reference.color.bluegreen-10"
+        }
+      }
+    },
+    "semantic.border.subtle": {
+      "layer": "semantic",
+      "type": "color",
+      "unit": "hex",
+      "meaning": "Subtle border for grouped content and separators.",
+      "overridePolicy": "theme",
+      "alias": "reference.color.neutral-20",
+      "modes": {
+        "colorScheme.dark": {
+          "alias": "reference.color.neutral-70"
+        }
+      }
+    },
+    "semantic.border.default": {
+      "layer": "semantic",
+      "type": "color",
+      "unit": "hex",
+      "meaning": "Default border for controls and collection containers.",
+      "overridePolicy": "theme",
+      "alias": "reference.color.neutral-22",
+      "modes": {
+        "colorScheme.dark": {
+          "alias": "reference.color.neutral-60"
+        }
+      }
+    },
+    "semantic.border.strong": {
+      "layer": "semantic",
+      "type": "color",
+      "unit": "hex",
+      "meaning": "Strong border for field controls and drop targets.",
+      "overridePolicy": "theme",
+      "alias": "reference.color.neutral-26",
+      "modes": {
+        "colorScheme.dark": {
+          "alias": "reference.color.neutral-50"
+        }
+      }
+    },
+    "semantic.overlay.scrim": {
+      "layer": "semantic",
+      "type": "color",
+      "unit": "hex",
+      "meaning": "Scrim behind modal dialog content.",
+      "overridePolicy": "theme",
+      "alias": "reference.color.scrim-default"
+    },
+    "semantic.status.success": {
+      "layer": "semantic",
+      "type": "color",
+      "unit": "hex",
+      "meaning": "Status accent for successful feedback.",
+      "overridePolicy": "theme",
+      "alias": "reference.color.success-60"
+    },
+    "semantic.status.warning": {
+      "layer": "semantic",
+      "type": "color",
+      "unit": "hex",
+      "meaning": "Status accent for warning feedback.",
+      "overridePolicy": "theme",
+      "alias": "reference.color.warning-60"
+    },
+    "semantic.layout.control-gap": {
+      "layer": "semantic",
+      "type": "dimension",
+      "unit": "px",
+      "meaning": "Compact gap between content inside interactive controls.",
+      "overridePolicy": "theme",
+      "alias": "reference.dimension.space-3xs"
+    },
+    "semantic.layout.group-gap": {
+      "layer": "semantic",
+      "type": "dimension",
+      "unit": "px",
+      "meaning": "Gap between adjacent controls and collection items.",
+      "overridePolicy": "theme",
+      "alias": "reference.dimension.space-2xs"
+    },
+    "semantic.layout.section-gap": {
+      "layer": "semantic",
+      "type": "dimension",
+      "unit": "px",
+      "meaning": "Vertical gap between field and overlay sections.",
+      "overridePolicy": "theme",
+      "alias": "reference.dimension.space-s"
+    },
+    "semantic.layout.tight-inset": {
+      "layer": "semantic",
+      "type": "dimension",
+      "unit": "px",
+      "meaning": "Tight inset for compact options and transient controls.",
+      "overridePolicy": "theme",
+      "alias": "reference.dimension.space-4xs"
+    },
+    "semantic.shape.indicator-radius": {
+      "layer": "semantic",
+      "type": "dimension",
+      "unit": "px",
+      "meaning": "Corner radius for compact choice indicators.",
+      "overridePolicy": "theme",
+      "alias": "reference.dimension.radius-xs"
+    },
+    "semantic.shape.container-radius": {
+      "layer": "semantic",
+      "type": "dimension",
+      "unit": "px",
+      "meaning": "Corner radius for grouped collection containers.",
+      "overridePolicy": "theme",
+      "alias": "reference.dimension.radius-l"
+    },
+    "semantic.shape.overlay-radius": {
+      "layer": "semantic",
+      "type": "dimension",
+      "unit": "px",
+      "meaning": "Corner radius for modal surfaces.",
+      "overridePolicy": "theme",
+      "alias": "reference.dimension.radius-xl"
+    },
+    "semantic.shape.option-radius": {
+      "layer": "semantic",
+      "type": "dimension",
+      "unit": "px",
+      "meaning": "Corner radius for selectable options and rows.",
+      "overridePolicy": "theme",
+      "alias": "reference.dimension.radius-s"
+    },
+    "semantic.shape.thumb-radius": {
+      "layer": "semantic",
+      "type": "dimension",
+      "unit": "px",
+      "meaning": "Small corner radius for color and range thumbs.",
+      "overridePolicy": "theme",
+      "value": 2
+    },
+    "semantic.shape.wheel-radius": {
+      "layer": "semantic",
+      "type": "dimension",
+      "unit": "px",
+      "meaning": "Corner radius for wheel and large color controls.",
+      "overridePolicy": "theme",
+      "alias": "reference.dimension.radius-2xl"
+    },
+    "semantic.shape.pill-radius": {
+      "layer": "semantic",
+      "type": "dimension",
+      "unit": "px",
+      "meaning": "Fully rounded shape for tags and tracks.",
+      "overridePolicy": "theme",
+      "alias": "reference.dimension.radius-full"
+    },
+    "semantic.typography.control-weight": {
+      "layer": "semantic",
+      "type": "number",
+      "unit": "unitless",
+      "meaning": "Medium weight for interactive control labels.",
+      "overridePolicy": "theme",
+      "alias": "reference.number.font-weight-medium"
+    },
+    "semantic.typography.label-weight": {
+      "layer": "semantic",
+      "type": "number",
+      "unit": "unitless",
+      "meaning": "Semibold weight for labels and headings.",
+      "overridePolicy": "theme",
+      "alias": "reference.number.font-weight-semibold"
+    },
+    "semantic.typography.body-weight": {
+      "layer": "semantic",
+      "type": "number",
+      "unit": "unitless",
+      "meaning": "Regular weight for body content.",
+      "overridePolicy": "theme",
+      "alias": "reference.number.font-weight-regular"
+    },
+    "semantic.typography.body-line-height": {
+      "layer": "semantic",
+      "type": "number",
+      "unit": "unitless",
+      "meaning": "Relaxed line height for readable content.",
+      "overridePolicy": "theme",
+      "alias": "reference.number.line-height-relaxed"
+    },
+    "semantic.typography.body-size": {
+      "layer": "semantic",
+      "type": "dimension",
+      "unit": "px",
+      "meaning": "Base text size for Core controls and content.",
+      "overridePolicy": "theme",
+      "alias": "reference.dimension.font-size-m"
+    },
+    "semantic.typography.small-size": {
+      "layer": "semantic",
+      "type": "dimension",
+      "unit": "px",
+      "meaning": "Small text size for metadata and tooltips.",
+      "overridePolicy": "theme",
+      "alias": "reference.dimension.font-size-s"
+    },
+    "semantic.typography.tiny-size": {
+      "layer": "semantic",
+      "type": "dimension",
+      "unit": "px",
+      "meaning": "Tiny text size for compact indicators and calendar headers.",
+      "overridePolicy": "theme",
+      "alias": "reference.dimension.font-size-xs"
+    },
+    "semantic.typography.heading-weight": {
+      "layer": "semantic",
+      "type": "number",
+      "unit": "unitless",
+      "meaning": "Bold weight for dialog and feedback headings.",
+      "overridePolicy": "theme",
+      "value": 700
+    },
+    "semantic.elevation.control": {
+      "layer": "semantic",
+      "type": "string",
+      "unit": "string",
+      "meaning": "Subtle elevation for primary controls.",
+      "overridePolicy": "theme",
+      "value": "rgba(0, 0, 0, 0) 0 0 0 0, rgba(0, 0, 0, 0) 0 0 0 0, rgba(0, 0, 0, 0) 0 0 0 0, rgba(0, 0, 0, 0) 0 0 0 1px inset, rgba(10, 13, 18, 0.18) 0 0 0 1px inset, rgba(10, 13, 18, 0.05) 0 -2px 0 0 inset, rgba(10, 13, 18, 0.05) 0 1px 2px 0"
+    },
+    "semantic.elevation.floating": {
+      "layer": "semantic",
+      "type": "string",
+      "unit": "string",
+      "meaning": "Elevation for floating popovers and previews.",
+      "overridePolicy": "theme",
+      "value": "0 0.25rem 1rem rgb(0 0 0 / 20%)"
+    },
+    "semantic.elevation.overlay": {
+      "layer": "semantic",
+      "type": "string",
+      "unit": "string",
+      "meaning": "Elevation for selectable overlay surfaces.",
+      "overridePolicy": "theme",
+      "value": "0 0.5rem 1.5rem rgb(0 0 0 / 24%)"
+    },
+    "semantic.elevation.tooltip": {
+      "layer": "semantic",
+      "type": "string",
+      "unit": "string",
+      "meaning": "Elevation for tooltip surfaces.",
+      "overridePolicy": "theme",
+      "value": "0 0.25rem 0.75rem rgb(0 0 0 / 20%)"
+    },
+    "semantic.elevation.modal": {
+      "layer": "semantic",
+      "type": "string",
+      "unit": "string",
+      "meaning": "Elevation for modal dialog surfaces.",
+      "overridePolicy": "theme",
+      "value": "0 1rem 3rem rgb(0 0 0 / 35%)"
+    },
+    "semantic.elevation.indicator": {
+      "layer": "semantic",
+      "type": "string",
+      "unit": "string",
+      "meaning": "Small elevation for movable control indicators.",
+      "overridePolicy": "theme",
+      "value": "0 1px 3px rgb(0 0 0 / 24%)"
     },
     "component.button.background": {
       "layer": "component",

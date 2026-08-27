@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 import React, { act } from 'react';
 import { createRoot, hydrateRoot } from 'react-dom/client';
@@ -79,6 +80,26 @@ test('R1.2 fields preserve Core labels, errors, SSR, hydration, and state callba
     restore();
     dom.window.close();
   }
+});
+
+test('SearchField keeps its clear action in the input control grid with supporting text', async () => {
+  const markup = renderToString(React.createElement(SearchField, {
+    label: 'Search',
+    description: 'Find a result',
+    errorMessage: 'No result found',
+    defaultValue: 'Core',
+    invalid: true,
+  }));
+  const dom = new JSDOM(`<!doctype html><div id="root">${markup}</div>`);
+  const control = dom.window.document.querySelector('.core-search-control');
+  assert.ok(control);
+  assert.equal(control.querySelector('input')?.parentElement, control);
+  assert.equal(control.querySelector('.core-search-clear')?.parentElement, control);
+  assert.match(dom.window.document.querySelector('.core-search-field')?.textContent ?? '', /Find a result.*No result found/u);
+  const css = await readFile(new URL('../generated/styles.css', import.meta.url), 'utf8');
+  assert.match(css, /\.core-search-control\s*\{[^}]*grid-template-columns:\s*minmax\(0, 1fr\)/u);
+  assert.match(css, /\.core-search-control \.core-field-input\s*\{[^}]*padding-inline-end:/u);
+  dom.window.close();
 });
 
 test('R1.2 form controls support controlled callbacks, keyboard-compatible input, and submit/reset', async () => {

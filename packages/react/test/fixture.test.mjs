@@ -142,3 +142,50 @@ test('R1.1 Core Button proves SSR, hydration, disabled and pending state', async
     dom.window.close();
   }
 });
+
+test('Core styles bind donor states and public theme hooks', async () => {
+  const css = await readFile(resolve(import.meta.dirname, '../generated/styles.css'), 'utf8');
+
+  assert.match(css, /\.core-button[\s\S]*border: 1px solid transparent;[\s\S]*font-size: var\(--core-semantic-typography-body-size\)/u);
+  assert.match(css, /\.core-button[\s\S]*box-shadow: var\(--core-semantic-elevation-control\)/u);
+  assert.match(css, /\.core-button\[data-hovered\][\s\S]*var\(--core-semantic-action-background-hover\)/u);
+  assert.match(css, /\.core-button\[data-pressed\][\s\S]*var\(--core-semantic-action-background-pressed\)/u);
+
+  assert.match(css, /\.core-link\[data-hovered\][\s\S]*var\(--core-semantic-content-link-hover\)/u);
+  assert.match(css, /\.core-link\[data-pressed\][\s\S]*var\(--core-semantic-content-link-pressed\)/u);
+  assert.match(css, /\.core-link[^\{]*\{[\s\S]*var\(--core-semantic-content-link\)/u);
+  assert.match(css, /\.core-tab\[aria-selected='true'\][\s\S]*var\(--core-semantic-content-link\)/u);
+  assert.match(css, /\.core-autocomplete-option\[aria-selected='true'\][\s\S]*var\(--core-semantic-content-link\)/u);
+  assert.match(css, /\.core-breadcrumbs-item\[data-current\][\s\S]*font-weight: var\(--core-semantic-typography-label-weight\)/u);
+  assert.match(css, /\.core-breadcrumbs-item\[data-disabled\][\s\S]*opacity: 0\.45/u);
+
+  assert.match(css, /\.core-dialog-modal\[data-entering\] \.core-dialog[\s\S]*animation-name: core-overlay-enter/u);
+  assert.match(css, /\.core-popover-positioner\[data-exiting\] \.core-popover[\s\S]*animation-name: core-overlay-exit/u);
+  assert.match(css, /\.core-tooltip\[data-entering\][\s\S]*animation-name: core-overlay-enter/u);
+  assert.match(css, /\.core-toast\[data-exiting\][\s\S]*animation-name: core-overlay-exit/u);
+  assert.match(css, /\.core-dialog-backdrop\s*\{[\s\S]*position: fixed;[\s\S]*inset: 0;/u);
+  assert.match(css, /\.core-dialog-content\s*\{[\s\S]*font-weight: var\(--core-semantic-typography-body-weight\)/u);
+  assert.match(css, /\.core-field-description\s*\{[\s\S]*color: var\(--core-semantic-content-default\)/u);
+  assert.match(css, /\.core-button\[data-pending\]::after[\s\S]*content: '…';/u);
+  assert.match(css, /\.core-progress-bar\[data-indeterminate\] \.core-progress-bar-fill[\s\S]*margin-inline-start: 30%;/u);
+  assert.doesNotMatch(css, /core-control-spin|core-progress-indeterminate|animation:[^;]*infinite/u);
+
+  assert.match(css, /--core-component-button-background: #025768;/u);
+  assert.match(css, /--core-component-button-foreground: #e6f0f0;/u);
+  assert.match(css, /--core-component-button-min-height: 36px;/u);
+  assert.match(css, /--core-component-button-radius: 10px;/u);
+  assert.match(css, /\[data-core-color-scheme='dark'\][\s\S]*--core-component-button-background: #539198;/u);
+  assert.match(css, /\[data-core-color-scheme='dark'\][\s\S]*--core-component-button-foreground: #012334;/u);
+  assert.match(css, /\[data-core-color-scheme='dark'\][\s\S]*--core-semantic-field-background: #11100f;/u);
+  assert.match(css, /\[data-core-color-scheme='dark'\][\s\S]*--core-semantic-overlay-background: #11100f;/u);
+  assert.match(css, /--core-semantic-selection-track: #025768;/u);
+  assert.match(css, /--core-semantic-content-link: #02485b;/u);
+  assert.match(css, /--core-semantic-feedback-invalid: #cc3330;/u);
+  assert.match(css, /\[data-core-color-scheme='dark'\][\s\S]*--core-semantic-content-link: #a4c7c9;/u);
+  assert.match(css, /\[data-core-color-scheme='dark'\][\s\S]*--core-semantic-feedback-invalid: #e59796;/u);
+  assert.match(css, /@media \(forced-colors: active\)[\s\S]*\.core-file-trigger \{[^}]*background: ButtonFace;[^}]*color: ButtonText;/u);
+
+  assert.doesNotMatch(css, /var\(--core-reference-/u);
+  assert.doesNotMatch(css, /var\(--core-private-/u);
+  assert.doesNotMatch(css, /(?:\.tale-|--color-60|--radius-m|--space-xs)/u);
+});

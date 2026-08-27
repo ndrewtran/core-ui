@@ -1,0 +1,35 @@
+:root {
+  color-scheme: light;
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+:root[data-core-color-scheme='light'] {
+  background: #fff;
+  color: #171717;
+}
+
+:root[data-core-color-scheme='dark'] {
+  color-scheme: dark;
+  background: #000;
+  color: #fff;
+}
+
+body {
+  min-width: 20rem;
+  margin: 0;
+  background: inherit;
+  color: inherit;
+  font: inherit;
+}
+
+#storybook-root,
+.core-storybook-surface {
+  min-height: 100vh;
+  background: inherit;
+  color: inherit;
+}
+
+.core-storybook-surface {
+  box-sizing: border-box;
+  padding: 1.5rem;
+}
