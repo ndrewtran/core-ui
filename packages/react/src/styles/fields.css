@@ -1,194 +1,422 @@
-/* Core-owned styling for form fields and field-like composites. */
+/* Core-owned field parity source. */
+/* Core component source: autocomplete.css */
+.core-field-input {
+  display: block;
+  width: 100%;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+.core-field-input:hover {
+  border-color: var(--core-semantic-content-faint);
+}
 
+.core-autocomplete-search {
+  display: block;
+  width: 100%;
+}
+
+.core-autocomplete-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--core-semantic-layout-tight-inset);
+}
+
+.core-autocomplete-option[data-selected] {
+  color: var(--core-semantic-selection-track);
+  font-weight: var(--core-semantic-typography-control-weight);
+}
+/* Core component source: date-field.css */
+.core-date-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--core-semantic-layout-control-gap);
+  width: max-content;
+}
+/* Core component source: date-picker.css */
+.core-date-picker {
+  display: flex;
+  flex-direction: column;
+  gap: var(--core-semantic-layout-control-gap);
+  width: max-content;
+}
+/* Core component source: date-range-picker.css */
+.core-date-range-picker {
+  display: flex;
+  flex-direction: column;
+  gap: var(--core-semantic-layout-control-gap);
+  width: max-content;
+}
+/* Core component source: form.css */
 .core-form {
   display: flex;
   flex-direction: column;
   gap: var(--core-semantic-layout-section-gap);
-  inline-size: 100%;
+  width: 100%;
 }
 
-.core-form > .core-button,
-.core-form > .core-r1-button {
-  margin-block-start: var(--core-semantic-control-padding-inline);
+.core-form > .core-button {
+  margin-top: var(--core-semantic-control-padding-inline);
+}
+/* Core component source: number-field.css */
+.core-number-field {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--core-semantic-layout-control-gap);
+  width: var(--core-component-number-field-width, fit-content);
 }
 
-.core-form-reset-anchor { position: absolute; inline-size: 1px; block-size: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); }
+.core-number-control {
+  display: inline-flex;
+  align-items: stretch;
+  width: var(--core-component-number-field-group-width, 100%);
+  max-width: 100%;
+  border: 1px solid var(--core-semantic-border-strong);
+  border-radius: var(--core-semantic-control-radius);
+  overflow: hidden;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
 
-:where(.core-text-field, .core-search-field, .core-number-field, .core-date-field,
-  .core-time-field, .core-date-picker, .core-date-range-picker, .core-autocomplete,
-  .core-color-field) {
+.core-number-control:focus-within {
+  border-color: var(--core-semantic-focus-ring);
+  box-shadow: 0 0 0 2px var(--core-semantic-content-inverse), 0 0 0 4px var(--core-semantic-focus-ring);
+}
+
+.core-number-control:hover:not(:focus-within) {
+  border-color: var(--core-semantic-content-faint);
+}
+
+.core-number-control > .core-field-input {
+  box-sizing: border-box;
+
+  flex: 1 1 3.75rem;
+  min-width: 0;
+  min-height: 2.25rem;
+  padding: var(--core-semantic-layout-control-gap) var(--core-semantic-control-padding-inline);
+  border: none;
+  background-color: transparent;
+  color: var(--core-semantic-content-strong);
+  font-family: Inter, sans-serif;
+  font-size: var(--core-semantic-typography-body-size);
+  text-align: center;
+  outline: none;
+}
+
+.core-number-control > .core-field-input::placeholder {
+  color: var(--core-semantic-content-muted);
+}
+
+.core-number-stepper {
+  width: 2rem;
+  min-height: 2.25rem;
+  border-radius: 0;
+  background-color: var(--core-semantic-surface-raised);
+  color: var(--core-semantic-content-default);
+  font-size: var(--core-semantic-typography-body-size);
+  font-family: Inter, sans-serif;
+}
+
+.core-number-stepper-decrement {
+  border-right: 1px solid var(--core-semantic-border-default);
+  border-radius: var(--core-semantic-control-radius) 0 0 var(--core-semantic-control-radius);
+}
+
+.core-number-stepper-increment {
+  border-left: 1px solid var(--core-semantic-border-default);
+  border-radius: 0 var(--core-semantic-control-radius) var(--core-semantic-control-radius) 0;
+}
+
+.core-number-stepper:hover:not(:disabled) {
+  background-color: var(--core-semantic-border-subtle);
+  color: var(--core-semantic-content-strong);
+}
+
+.core-number-stepper:active:not(:disabled) {
+  background-color: var(--core-semantic-border-strong);
+}
+
+.core-number-field[data-disabled] .core-number-control {
+  background-color: var(--core-semantic-surface-hover);
+  border-color: var(--core-semantic-border-strong);
+  color: var(--core-semantic-content-strong);
+  cursor: not-allowed;
+}
+
+.core-number-field[data-disabled] .core-number-stepper {
+  background-color: var(--core-semantic-surface-hover);
+  border-color: var(--core-semantic-border-strong);
+  color: var(--core-semantic-content-default);
+}
+
+.core-number-field[data-disabled] .core-number-control > .core-field-input,
+.core-number-field[data-disabled] .core-number-stepper {
+  pointer-events: none;
+}
+
+.core-number-field[data-invalid] .core-number-control {
+  border-color: var(--core-semantic-feedback-invalid);
+}
+
+.core-number-field[data-invalid] .core-number-control:focus-within {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--core-semantic-feedback-invalid) 20%, transparent);
+}
+/* Core component source: search-field.css */
+.core-search-field {
   display: flex;
   flex-direction: column;
-  inline-size: 100%;
-  max-inline-size: 32rem;
   gap: var(--core-semantic-layout-control-gap);
+  width: 100%;
+  position: relative;
 }
 
-.core-field-label {
+.core-field-input {
+  display: block;
+  width: 100%;
+  line-height: 1.5;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    background-color 0.15s ease;
+}
+
+.core-field-input:hover:not(:focus, [data-disabled], [data-invalid]) {
+  border-color: var(--core-semantic-content-faint);
+}
+
+.core-field-input[data-invalid] {
+  border-color: var(--core-semantic-feedback-invalid);
+}
+
+.core-field-input[data-invalid]:focus,
+.core-field-input[data-invalid][data-focused] {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--core-semantic-feedback-invalid) 20%, transparent);
+}
+
+.core-field-input[data-disabled],
+.core-field-input:disabled {
+  border-color: var(--core-semantic-border-strong);
   color: var(--core-semantic-content-strong);
-  font: inherit;
-  font-weight: var(--core-semantic-typography-label-weight);
-  line-height: 1.3;
+  cursor: not-allowed;
+  background-color: var(--core-semantic-surface-hover);
+}
+
+.core-search-control .core-field-input {
+  padding-inline-end: 2rem;
+}
+
+.core-search-clear {
+  position: static;
+  grid-column: 2;
+  grid-row: 1;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--core-semantic-content-muted);
+  font-size: var(--core-semantic-typography-body-size);
+  cursor: pointer;
+  outline: none;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
+  flex-shrink: 0;
+}
+
+.core-search-clear[data-hovered] {
+  background-color: var(--core-semantic-surface-hover);
+  color: var(--core-semantic-content-default);
+}
+
+.core-search-clear[data-pressed] {
+  background-color: var(--core-semantic-border-subtle);
+}
+
+.core-search-clear[data-focus-visible] {
+  box-shadow:
+    0 0 0 2px var(--core-semantic-content-inverse),
+    0 0 0 4px var(--core-semantic-focus-ring);
+}
+
+.core-search-clear[data-disabled] {
+  background-color: var(--core-semantic-surface-hover);
+  color: var(--core-semantic-content-default);
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.core-search-field[data-empty] .core-search-clear {
+  display: none;
+}
+
+/* The clear action shares the input's control grid in the pinned donor. */
+.core-search-control {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+}
+
+.core-search-control .core-field-input {
+  grid-column: 1 / -1;
+  grid-row: 1;
+  padding-inline-end: 2rem;
 }
 
 .core-field-description {
   color: var(--core-semantic-content-default);
-  font-size: var(--core-semantic-typography-small-size);
-  line-height: 1.4;
+  font-weight: var(--core-semantic-typography-body-weight);
 }
+/* Core component source: switch.css */
+.core-switch {
+  --core-component-switch-track-width: 2.5rem;
+  --core-component-switch-track-height: 1.375rem;
+  --core-component-switch-thumb-size: 0.875rem;
+  --core-component-switch-thumb-offset: 0.25rem;
 
-.core-field-error {
-  color: var(--core-semantic-feedback-invalid);
-  font-size: var(--core-semantic-typography-small-size);
-  line-height: 1.4;
-}
-
-.core-field-input,
-.core-date-input {
-  box-sizing: border-box;
-  inline-size: 100%;
-  min-block-size: var(--core-semantic-control-min-height);
-  padding: var(--core-semantic-layout-control-gap) var(--core-semantic-control-padding-inline);
-  border: 1px solid var(--core-semantic-border-strong);
-  border-radius: var(--core-semantic-control-radius);
-  background: var(--core-semantic-field-background);
-  color: var(--core-semantic-content-strong);
-  font: inherit;
-  line-height: var(--core-semantic-typography-body-line-height);
-  outline: none;
-  transition: border-color var(--core-semantic-motion-feedback) ease, box-shadow var(--core-semantic-motion-feedback) ease, background-color var(--core-semantic-motion-feedback) ease;
-}
-
-.core-field-input::placeholder,
-.core-date-input[data-placeholder] { color: var(--core-semantic-content-muted); }
-.core-field-input:hover:not(:focus, :disabled, [data-disabled], [data-invalid]),
-.core-date-input:hover:not([aria-disabled='true']) { border-color: var(--core-semantic-content-faint); }
-.core-field-input:focus-visible,
-.core-date-input:focus-within,
-.core-number-control:focus-within,
-.core-date-control:focus-within,
-.core-date-range-control:focus-within { border-color: var(--core-semantic-focus-ring); box-shadow: 0 0 0 3px color-mix(in srgb, var(--core-semantic-focus-ring) 20%, transparent); }
-:where(.core-text-field, .core-search-field, .core-number-field, .core-date-field,
-  .core-time-field, .core-date-picker, .core-date-range-picker, .core-autocomplete,
-  .core-color-field)[data-invalid] .core-field-input,
-:where(.core-date-field, .core-date-picker, .core-date-range-picker, .core-time-field)[data-invalid] .core-date-input { border-color: var(--core-semantic-feedback-invalid); }
-:where(.core-text-field, .core-search-field, .core-number-field, .core-date-field,
-  .core-time-field, .core-date-picker, .core-date-range-picker, .core-autocomplete,
-  .core-color-field)[data-invalid] .core-field-input:focus-visible,
-:where(.core-date-field, .core-date-picker, .core-date-range-picker, .core-time-field)[data-invalid] .core-date-input:focus-within { box-shadow: 0 0 0 3px color-mix(in srgb, var(--core-semantic-feedback-invalid) 20%, transparent); }
-:where(.core-text-field, .core-search-field, .core-number-field, .core-date-field,
-  .core-time-field, .core-date-picker, .core-date-range-picker, .core-autocomplete,
-  .core-color-field)[data-disabled] .core-field-input,
-:where(.core-date-field, .core-date-picker, .core-date-range-picker, .core-time-field)[data-disabled] .core-date-input,
-.core-field-input:disabled { cursor: not-allowed; opacity: 0.45; background: var(--core-semantic-surface-hover); }
-:where(.core-text-field, .core-search-field, .core-number-field, .core-date-field,
-  .core-time-field, .core-date-picker, .core-date-range-picker, .core-autocomplete,
-  .core-color-field)[data-readonly] .core-field-input,
-:where(.core-date-field, .core-date-picker, .core-date-range-picker, .core-time-field)[data-readonly] .core-date-input { background: color-mix(in srgb, var(--core-semantic-field-background) 70%, var(--core-semantic-border-subtle)); }
-
-.core-checkbox-group {
-  display: flex;
-  flex-direction: column;
-  inline-size: 100%;
-  max-inline-size: 32rem;
-  gap: var(--core-semantic-layout-control-gap);
-  padding: var(--core-semantic-control-padding-inline);
-  border: 1px solid var(--core-semantic-border-strong);
-  border-radius: var(--core-semantic-control-radius);
-}
-.core-checkbox-group[data-invalid] { border-color: var(--core-semantic-feedback-invalid); }
-.core-checkbox-group[data-disabled] { cursor: not-allowed; opacity: 0.45; }
-.core-checkbox-group:focus-within { outline: 2px solid var(--core-semantic-focus-ring); outline-offset: 2px; }
-
-.core-number-control,
-.core-date-control,
-.core-date-range-control {
-  display: inline-flex;
-  align-items: stretch;
-  inline-size: 100%;
-  min-block-size: var(--core-semantic-control-min-height);
-  overflow: hidden;
-  border: 1px solid var(--core-semantic-border-strong);
-  border-radius: var(--core-semantic-control-radius);
-  transition: border-color var(--core-semantic-motion-feedback) ease, box-shadow var(--core-semantic-motion-feedback) ease;
-}
-.core-number-control .core-field-input { min-inline-size: 3.75rem; flex: 1 1 auto; border: 0; border-radius: 0; text-align: center; }
-.core-number-stepper,
-.core-date-trigger,
-.core-search-clear {
+  position: relative;
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  flex: 0 0 auto;
-  min-block-size: var(--core-semantic-control-min-height);
-  padding-inline: var(--core-semantic-layout-group-gap);
-  border: 0;
-  background: var(--core-semantic-surface-raised);
+  gap: var(--core-semantic-layout-control-gap);
+  min-height: var(--core-component-switch-track-height);
+  padding-inline-start: calc(var(--core-component-switch-track-width) + var(--core-semantic-layout-control-gap));
   color: var(--core-semantic-content-default);
+  font-family: Inter, sans-serif;
+  font-size: var(--core-semantic-typography-body-size);
+  font-weight: var(--core-semantic-typography-control-weight);
   cursor: pointer;
   outline: none;
-  transition: background-color var(--core-semantic-motion-feedback) ease, color var(--core-semantic-motion-feedback) ease;
-}
-.core-number-stepper:first-child { border-inline-end: 1px solid var(--core-semantic-border-default); }
-.core-number-stepper:last-child,
-.core-date-trigger { border-inline-start: 1px solid var(--core-semantic-border-default); }
-:where(.core-number-stepper, .core-date-trigger, .core-search-clear):hover:not(:disabled, [data-disabled]) { background: var(--core-semantic-border-subtle); color: var(--core-semantic-content-strong); }
-:where(.core-number-stepper, .core-date-trigger, .core-search-clear):active:not(:disabled, [data-disabled]) { background: var(--core-semantic-border-strong); }
-:where(.core-number-stepper, .core-date-trigger, .core-search-clear):disabled,
-:where(.core-number-stepper, .core-date-trigger, .core-search-clear)[data-disabled] { cursor: not-allowed; opacity: 0.45; }
-:where(.core-number-field, .core-date-picker, .core-date-range-picker)[data-invalid] :where(.core-number-control, .core-date-control, .core-date-range-control) { border-color: var(--core-semantic-feedback-invalid); }
-:where(.core-number-field, .core-date-picker, .core-date-range-picker)[data-disabled] :where(.core-number-control, .core-date-control, .core-date-range-control) { cursor: not-allowed; opacity: 0.45; }
-
-.core-search-control { position: relative; display: grid; grid-template-columns: minmax(0, 1fr); align-items: center; }
-.core-search-control .core-field-input { grid-area: 1 / 1; padding-inline-end: calc(1.5rem + var(--core-semantic-layout-group-gap)); }
-.core-search-clear { position: static; z-index: 1; grid-area: 1 / 1; justify-self: end; align-self: center; inline-size: 1.5rem; min-block-size: 1.5rem; margin-inline-end: var(--core-semantic-layout-tight-inset); padding: 0; border-radius: 50%; background: transparent; color: var(--core-semantic-content-muted); }
-.core-search-clear:hover:not(:disabled, [data-disabled]) { background: var(--core-semantic-surface-hover); color: var(--core-semantic-content-default); }
-.core-search-clear[data-pressed] { background: var(--core-semantic-surface-hover); }
-.core-search-clear[data-focus-visible] { box-shadow: 0 0 0 2px var(--core-semantic-surface-raised), 0 0 0 4px var(--core-semantic-focus-ring); }
-.core-search-field[data-empty] .core-search-clear { display: none; }
-
-.core-date-input { display: inline-flex; align-items: center; inline-size: auto; min-inline-size: 10rem; padding-inline: var(--core-semantic-control-padding-inline); border: 0; border-radius: 0; background: transparent; }
-.core-date-segment { padding: 0.125rem 0.0625rem; border-radius: 0.125rem; }
-.core-date-segment[data-focused] { background: var(--core-semantic-focus-ring); color: var(--core-semantic-action-foreground); }
-.core-date-range-control .core-date-input { min-inline-size: 8rem; }
-.core-date-range-separator { display: inline-flex; align-items: center; padding-inline: var(--core-semantic-layout-group-gap); color: var(--core-semantic-content-muted); }
-.core-date-popover { min-inline-size: 18rem; padding: var(--core-semantic-control-padding-inline); border: 1px solid var(--core-semantic-border-subtle); border-radius: var(--core-semantic-control-radius); background: var(--core-semantic-overlay-background); box-shadow: var(--core-semantic-elevation-overlay); }
-.core-date-dialog { outline: none; }
-
-.core-autocomplete-search { inline-size: 100%; }
-.core-autocomplete-list { display: flex; flex-direction: column; min-inline-size: 100%; max-block-size: 17.5rem; gap: var(--core-semantic-layout-tight-inset); margin: 0; padding: var(--core-semantic-layout-tight-inset); overflow-y: auto; border: 1px solid var(--core-semantic-border-subtle); border-radius: var(--core-semantic-control-radius); background: var(--core-semantic-overlay-background); box-shadow: var(--core-semantic-elevation-overlay); list-style: none; }
-.core-autocomplete-option { padding: var(--core-semantic-layout-control-gap) var(--core-semantic-control-padding-inline); border-radius: var(--core-semantic-shape-option-radius); cursor: pointer; }
-.core-autocomplete-option[data-focused],
-.core-autocomplete-option[aria-selected='true'] { background: color-mix(in srgb, var(--core-semantic-selection-track) 12%, transparent); }
-.core-autocomplete-option[aria-selected='true'] { color: var(--core-semantic-content-link); font-weight: var(--core-semantic-typography-label-weight); }
-
-.core-switch-field { display: flex; flex-direction: column; gap: var(--core-semantic-layout-control-gap); }
-.core-switch { position: relative; display: inline-flex; align-items: center; min-block-size: 1.375rem; inline-size: fit-content; padding-inline-start: 2.875rem; color: var(--core-semantic-content-default); font-weight: var(--core-semantic-typography-control-weight); cursor: pointer; outline: none; }
-.core-switch-indicator { position: absolute; inset-inline-start: 0; inset-block-start: 50%; inline-size: 2.5rem; block-size: 1.375rem; border: 1.5px solid var(--core-semantic-content-faint); border-radius: var(--core-semantic-shape-pill-radius); background: var(--core-semantic-border-subtle); transform: translateY(-50%); transition: background-color 200ms ease, border-color 200ms ease, box-shadow 200ms ease; }
-.core-switch-indicator::after { position: absolute; inset-block-start: 50%; inset-inline-start: 0.25rem; inline-size: 0.875rem; block-size: 0.875rem; border-radius: 50%; background: var(--core-semantic-content-default); box-shadow: var(--core-semantic-elevation-indicator); content: ''; transform: translateY(-50%); transition: transform 200ms ease, background-color 200ms ease; }
-.core-switch-indicator[data-selected] { border-color: var(--core-semantic-selection-track); background: var(--core-semantic-selection-track); }
-.core-switch-indicator[data-selected]::after { background: var(--core-semantic-action-foreground); transform: translate(1.25rem, -50%); }
-.core-switch[data-hovered]:not([data-disabled], [data-selected]) .core-switch-indicator { border-color: var(--core-semantic-content-muted); background: var(--core-semantic-border-strong); }
-.core-switch[data-selected][data-hovered]:not([data-disabled]) .core-switch-indicator { border-color: color-mix(in srgb, var(--core-semantic-selection-track) 88%, var(--core-semantic-surface-canvas)); background: color-mix(in srgb, var(--core-semantic-selection-track) 88%, var(--core-semantic-surface-canvas)); }
-.core-switch[data-focus-visible] .core-switch-indicator,
-.core-switch:focus-visible .core-switch-indicator { box-shadow: 0 0 0 2px var(--core-semantic-surface-raised), 0 0 0 4px var(--core-semantic-focus-ring); }
-.core-switch-field[data-disabled] .core-switch,
-.core-switch[data-disabled] { cursor: not-allowed; opacity: 0.45; }
-.core-switch-field[data-invalid] .core-switch-indicator { border-color: var(--core-semantic-feedback-invalid); }
-
-@media (prefers-reduced-motion: reduce) {
-  .core-field-input, .core-date-input, .core-number-control, .core-number-stepper, .core-date-trigger, .core-search-clear, .core-switch-indicator, .core-switch-indicator::after { transition: none; }
+  flex-shrink: 0;
 }
 
-@media (forced-colors: active) {
-  :where(.core-field-input, .core-date-input, .core-number-control, .core-date-control, .core-date-range-control, .core-checkbox-group, .core-date-popover, .core-autocomplete-list, .core-token-input, .core-switch-indicator) { border-color: ButtonText; background: Canvas; color: CanvasText; box-shadow: none; }
-  :where(.core-field-input, .core-date-input, .core-number-control, .core-date-control, .core-date-range-control, .core-switch):focus-visible { outline-color: Highlight; }
-  :where(.core-text-field, .core-search-field, .core-number-field, .core-date-field, .core-time-field, .core-date-picker, .core-date-range-picker, .core-autocomplete, .core-color-field, .core-switch-field)[data-invalid] :where(.core-field-input, .core-date-input, .core-number-control, .core-date-control, .core-date-range-control, .core-switch-indicator) { border-color: Mark; }
-  .core-switch-indicator[data-selected], .core-autocomplete-option[aria-selected='true'] { border-color: Highlight; background: Highlight; color: HighlightText; }
-  .core-switch-indicator::after { background: ButtonText; }
+.core-switch::before {
+  content: '';
+  position: absolute;
+  inset-inline-start: 0;
+  inset-block-start: 50%;
+  width: var(--core-component-switch-track-width);
+  height: var(--core-component-switch-track-height);
+  border-radius: var(--core-semantic-shape-pill-radius);
+  border: 1.5px solid var(--core-semantic-content-faint);
+  background-color: var(--core-semantic-border-subtle);
+  transform: translateY(-50%);
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
-@media (prefers-contrast: more) {
-  :where(.core-field-input, .core-date-input, .core-number-control, .core-date-control, .core-date-range-control, .core-checkbox-group, .core-date-popover, .core-autocomplete-list, .core-switch-indicator) { border-width: 2px; }
-  .core-field-label, .core-field-error { font-weight: var(--core-semantic-typography-heading-weight); }
+.core-switch[data-focus-visible]::before {
+  box-shadow:
+    0 0 0 2px var(--core-semantic-content-inverse),
+    0 0 0 4px var(--core-semantic-focus-ring);
+}
+
+.core-switch[data-selected]::before {
+  background-color: var(--core-semantic-selection-track);
+  border-color: var(--core-semantic-selection-track);
+}
+
+.core-switch[data-selected][data-hovered]:not([data-disabled])::before {
+  background-color: var(--core-semantic-action-background-hover);
+  border-color: var(--core-semantic-action-background-hover);
+}
+
+.core-switch[data-hovered]:not([data-disabled], [data-selected])::before {
+  border-color: var(--core-semantic-content-muted);
+  background-color: var(--core-semantic-border-strong);
+}
+
+.core-switch[data-invalid]::before {
+  border-color: var(--core-semantic-feedback-invalid);
+}
+
+.core-switch[data-disabled] {
+  color: var(--core-semantic-content-default);
+  cursor: not-allowed;
+}
+
+.core-switch[data-disabled]::before {
+  background-color: var(--core-semantic-surface-hover);
+  border-color: var(--core-semantic-content-default);
+}
+
+.core-switch[data-disabled][data-selected]::before {
+  background-color: var(--core-semantic-content-default);
+  border-color: var(--core-semantic-content-default);
+}
+
+.core-switch-indicator {
+  position: absolute;
+  inset-inline-start: var(--core-component-switch-thumb-offset);
+  inset-block-start: 50%;
+  width: var(--core-component-switch-thumb-size);
+  height: var(--core-component-switch-thumb-size);
+  border-radius: 50%;
+  background-color: var(--core-semantic-content-default);
+  box-shadow: var(--core-semantic-elevation-indicator);
+  transition:
+    transform 0.2s ease,
+    background-color 0.2s ease;
+  transform: translate(0, -50%);
+  z-index: 1;
+  flex-shrink: 0;
+  pointer-events: none;
+}
+
+.core-switch[data-selected] .core-switch-indicator,
+.core-switch-indicator[data-selected] {
+  transform: translate(
+    calc(
+      var(--core-component-switch-track-width) - (var(--core-component-switch-thumb-offset) * 1.2) -
+        var(--core-component-switch-thumb-size)
+    ),
+    -50%
+  );
+  background-color: var(--core-semantic-action-foreground);
+}
+/* Core component source: text-field.css */
+.core-field-input {
+  display: block;
+  width: 100%;
+  line-height: 1.5;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    background-color 0.15s ease;
+}
+
+.core-field-input:hover:not(:focus, [data-disabled], [data-invalid]) {
+  border-color: var(--core-semantic-content-faint);
+}
+
+.core-field-input[data-invalid] {
+  border-color: var(--core-semantic-feedback-invalid);
+}
+
+.core-field-input[data-invalid]:focus,
+.core-field-input[data-invalid][data-focused] {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--core-semantic-feedback-invalid) 20%, transparent);
+}
+
+.core-field-input[data-disabled],
+.core-field-input:disabled {
+  border-color: var(--core-semantic-border-strong);
+  color: var(--core-semantic-content-strong);
+  cursor: not-allowed;
+  background-color: var(--core-semantic-surface-hover);
+}
+/* Core component source: time-field.css */
+.core-time-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--core-semantic-layout-control-gap);
+  width: max-content;
 }

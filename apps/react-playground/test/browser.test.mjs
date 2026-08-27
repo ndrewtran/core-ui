@@ -215,8 +215,11 @@ test('R1.4 React component browser and axe matrix', async () => {
 
         const previewTrigger = profile.locator('[data-r1-4-control="preview-trigger"]');
         await previewTrigger.focus();
+        await page.keyboard.press('Shift+Tab');
+        await page.keyboard.press('Tab');
+        if (!await previewTrigger.evaluate((node) => document.activeElement === node)) throw new Error('PreviewTrigger must be keyboard reachable');
         const preview = page.locator('[data-r1-4-overlay="preview"]');
-        if (await preview.count() !== 1 || !await preview.isVisible()) throw new Error('PreviewTrigger must show its preview on focus');
+        await preview.waitFor({ state: 'visible' });
         await page.keyboard.press('Escape');
         await preview.waitFor({ state: 'detached' });
 

@@ -157,7 +157,8 @@ test('Core styles bind donor states and public theme hooks', async () => {
   assert.match(css, /\.core-tab\[aria-selected='true'\][\s\S]*var\(--core-semantic-content-link\)/u);
   assert.match(css, /\.core-autocomplete-option\[aria-selected='true'\][\s\S]*var\(--core-semantic-content-link\)/u);
   assert.match(css, /\.core-breadcrumbs-item\[data-current\][\s\S]*font-weight: var\(--core-semantic-typography-label-weight\)/u);
-  assert.match(css, /\.core-breadcrumbs-item\[data-disabled\][\s\S]*opacity: 0\.45/u);
+  assert.match(css, /\.core-breadcrumbs-item\[data-disabled\]:not\(\[data-current\]\)[^}]*color: var\(--core-semantic-content-default\)/u);
+  assert.doesNotMatch(css, /\.core-breadcrumbs-item\[data-disabled\][^}]*opacity:/u);
 
   assert.match(css, /\.core-dialog-modal\[data-entering\] \.core-dialog[\s\S]*animation-name: core-overlay-enter/u);
   assert.match(css, /\.core-popover-positioner\[data-exiting\] \.core-popover[\s\S]*animation-name: core-overlay-exit/u);

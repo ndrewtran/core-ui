@@ -278,10 +278,10 @@ function ToastView({ toast }) {
   const value = toast.content;
   const hasTitle = hasRenderableLabel(value.title);
   return React.createElement(AriaToast, { toast, className: classNames('core-toast', value.className), 'data-variant': value.variant },
-    React.createElement(AriaToastContent, null,
+    React.createElement(AriaToastContent, { className: 'core-toast-content' },
       React.createElement(AriaText, { slot: 'title', className: classNames('core-toast-title', !hasTitle && 'core-toast-title-fallback') }, hasTitle ? value.title : TOAST_FALLBACK_TITLE),
-      React.createElement(AriaText, { slot: 'description', className: 'core-toast-message' }, value.message),
-      React.createElement(AriaButton, { slot: 'close', className: 'core-toast-dismiss', 'aria-label': 'Dismiss notification' }, '×')));
+      React.createElement(AriaText, { slot: 'description', className: 'core-toast-message' }, value.message)),
+    React.createElement(AriaButton, { slot: 'close', className: 'core-toast-dismiss', 'aria-label': 'Dismiss notification' }, '×'));
 }
 
 /** Stable Core facade over RAC's unstable queue/region implementation. */
@@ -328,7 +328,7 @@ export const ToastProvider = function ToastProvider({ children, maxVisible = 5, 
   const manager = React.useMemo(() => ({ add, remove }), [add, remove]);
   const value = React.useMemo(() => ({ manager, dispose }), [dispose, manager]);
   return React.createElement(ToastContext.Provider, { value }, children,
-    React.createElement(UNSTABLE_ToastRegion, { queue, className: classNames('core-toast-region', className), 'aria-label': 'Notifications' },
+    React.createElement(UNSTABLE_ToastRegion, { queue, className: classNames('core-toast-region', className), 'aria-label': 'Notifications', 'data-placement': 'top-end' },
       ({ toast }) => React.createElement(ToastView, { toast })));
 };
 

@@ -168,6 +168,13 @@ function storyFamily(entry) {
   return entry.title?.split('/').at(-1) ?? entry.id;
 }
 
+const INTERACTION_OPEN_LOCATORS = Object.freeze({
+  DatePicker: { trigger: '.core-date-trigger', overlay: '.core-date-popover' },
+  DateRangePicker: { trigger: '.core-date-trigger', overlay: '.core-date-popover' },
+  ComboBox: { trigger: '.core-combo-box-trigger', overlay: '.core-combo-box-popover' },
+  Select: { trigger: '.core-select-trigger', overlay: '.core-select-popover' },
+});
+
 function formatViolations(violations) {
   return violations.map((violation) => [
     `${violation.id} (${violation.impact ?? 'unknown'}): ${violation.help}`,
@@ -198,15 +205,56 @@ async function waitForStory(page, scheme) {
   }, scheme, { timeout: storyTimeoutMs });
 }
 
-async function runAxe(page) {
-  return page.evaluate(async () => {
+async function waitForDocumentAnimations(page) {
+  await page.evaluate(async () => {
+    await new Promise((resolveFrame) => requestAnimationFrame(resolveFrame));
+    let animations = document.getAnimations();
+    while (animations.length > 0) {
+      await Promise.all(animations.map((animation) => animation.finished.catch(() => undefined)));
+      await new Promise((resolveFrame) => requestAnimationFrame(resolveFrame));
+      animations = document.getAnimations();
+    }
+  });
+}
+
+async function runAxe(page, contextSelector) {
+  return page.evaluate(async (contextSelector) => {
     const deadline = performance.now() + 5_000;
     while (window.axe._running) {
       if (performance.now() >= deadline) throw new Error('Axe did not become idle before evaluation');
       await new Promise((resolvePromise) => setTimeout(resolvePromise, 0));
     }
-    return window.axe.run(document.body);
-  });
+    const context = contextSelector ? document.querySelector(contextSelector) : document.body;
+    if (!context) throw new Error(`Axe context did not resolve: ${contextSelector}`);
+    return window.axe.run(context);
+  }, contextSelector);
+}
+
+async function waitForInteractionOpen(page, family) {
+  const locators = INTERACTION_OPEN_LOCATORS[family];
+  assert.ok(locators, `missing interaction-open locators for ${family}`);
+  await page.waitForFunction(({ triggerSelector, overlaySelector }) => {
+    const section = [...document.querySelectorAll('.core-storybook-state')]
+      .find((candidate) => candidate.querySelector('h3')?.textContent === 'open');
+    const trigger = section?.querySelector(triggerSelector);
+    const overlay = document.querySelector(`${overlaySelector}:not([hidden])`);
+    if (!trigger || trigger.getAttribute('aria-expanded') !== 'true' || !overlay) return false;
+    const style = getComputedStyle(overlay);
+    return style.display !== 'none' && style.visibility !== 'hidden' && style.opacity !== '0';
+  }, { triggerSelector: locators.trigger, overlaySelector: locators.overlay }, { timeout: storyTimeoutMs });
+}
+
+async function waitForInteractionClosed(page, family) {
+  const locators = INTERACTION_OPEN_LOCATORS[family];
+  await page.waitForFunction(({ triggerSelector, overlaySelector }) => {
+    const section = [...document.querySelectorAll('.core-storybook-state')]
+      .find((candidate) => candidate.querySelector('h3')?.textContent === 'open');
+    const trigger = section?.querySelector(triggerSelector);
+    const overlay = document.querySelector(`${overlaySelector}:not([hidden])`);
+    const overlayHidden = !overlay || ['none', 'hidden'].includes(getComputedStyle(overlay).display)
+      || getComputedStyle(overlay).visibility === 'hidden' || overlay.getAttribute('aria-hidden') === 'true';
+    return trigger?.getAttribute('aria-expanded') !== 'true' && overlayHidden;
+  }, { triggerSelector: locators.trigger, overlaySelector: locators.overlay }, { timeout: storyTimeoutMs });
 }
 
 test('all Core React Storybook families are axe-clean in light and dark', { timeout: testTimeoutMs }, async () => {
@@ -258,7 +306,21 @@ test('all Core React Storybook families are axe-clean in light and dark', { time
           const storyUrl = `${baseUrl}/iframe.html?id=${encodeURIComponent(story.id)}&viewMode=story&globals=${encodeURIComponent(`colorScheme:${scheme}`)}`;
           await page.goto(storyUrl, { waitUntil: 'domcontentloaded' });
           await waitForStory(page, scheme);
+          await waitForDocumentAnimations(page);
           await page.addScriptTag({ content: axe.source });
+          const family = storyFamily(story);
+          const interactionOpen = story.name === 'States' && INTERACTION_OPEN_LOCATORS[family];
+          if (interactionOpen) {
+            await waitForInteractionOpen(page, family);
+            const portalResult = await runAxe(page, `${interactionOpen.overlay}:not([hidden])`);
+            assert.equal(
+              portalResult.violations.length,
+              0,
+              `${scheme} ${story.id} (${family}) open portal has axe violations:\n${formatViolations(portalResult.violations)}`,
+            );
+            await page.keyboard.press('Escape');
+            await waitForInteractionClosed(page, family);
+          }
           const result = await runAxe(page);
           assert.equal(
             result.violations.length,

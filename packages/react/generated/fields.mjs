@@ -1,5 +1,5 @@
 // @generated-from: packages/react/src/fields.mjs
-// @generated-content-sha256: sha256:e15561064193ff5a66f0910978b331904f2a147035da142c2868d854fa870a00
+// @generated-content-sha256: sha256:40b58f5c399cc2f6ecb462a310f9f09759d572f08ce548860f12e15ff54d542c
 import React from 'react';
 import {
   Autocomplete as AriaAutocomplete,
@@ -263,7 +263,7 @@ export const SearchField = React.forwardRef(function SearchField({
     errorMessage,
     input: React.createElement('div', { className: 'core-search-control' },
       React.createElement(AriaInput, { className: 'core-field-input', placeholder }),
-      React.createElement(AriaButton, { slot: 'clear', type: 'button', className: 'core-search-clear', onPress: onClear }, 'Clear')),
+      React.createElement(AriaButton, { slot: 'clear', type: 'button', className: 'core-search-clear', 'aria-label': 'Clear search', onPress: onClear }, '×')),
   }));
 });
 
@@ -312,9 +312,9 @@ export const NumberField = React.forwardRef(function NumberField({
     description,
     errorMessage,
     input: React.createElement(AriaGroup, { className: 'core-number-control' },
-      React.createElement(AriaButton, { slot: 'decrement', type: 'button', className: 'core-number-stepper' }, '−'),
+      React.createElement(AriaButton, { slot: 'decrement', type: 'button', className: 'core-number-stepper core-number-stepper-decrement' }, '−'),
       React.createElement(AriaInput, { className: 'core-field-input', inputMode: 'decimal' }),
-      React.createElement(AriaButton, { slot: 'increment', type: 'button', className: 'core-number-stepper' }, '+')),
+      React.createElement(AriaButton, { slot: 'increment', type: 'button', className: 'core-number-stepper core-number-stepper-increment' }, '+')),
   }));
 });
 

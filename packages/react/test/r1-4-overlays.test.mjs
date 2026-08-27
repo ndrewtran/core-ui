@@ -310,6 +310,20 @@ test('title-less useToast notifications have an accessible RAC name', async () =
     assert.ok(title);
     assert.equal(title.classList.contains('core-toast-title-fallback'), true);
     assert.equal(title.textContent, 'Notification');
+    const content = toast.querySelector('.core-toast-content');
+    const dismiss = toast.querySelector('.core-toast-dismiss');
+    assert.ok(content);
+    assert.ok(dismiss);
+    assert.equal(content.parentElement, toast);
+    assert.equal(dismiss.parentElement, toast);
+    assert.equal(content.contains(dismiss), false);
+    assert.equal(dismiss.getAttribute('aria-label'), 'Dismiss notification');
+    const styles = await readFile(resolve(import.meta.dirname, '../generated/styles.css'), 'utf8');
+    assert.match(styles, /:where\([\s\S]*\.core-toast-dismiss[\s\S]*border:\s*1px solid transparent;[\s\S]*appearance:\s*none;/u);
+    assert.match(styles, /\.core-toast-dismiss\s*\{[^}]*aspect-ratio:\s*1;[\s\S]*width:\s*calc\(1rem \+ var\(--core-semantic-layout-tight-inset\) \+ var\(--core-semantic-layout-tight-inset\) \+ 2px\);[\s\S]*height:\s*calc\(1rem \+ var\(--core-semantic-layout-tight-inset\) \+ var\(--core-semantic-layout-tight-inset\) \+ 2px\);[\s\S]*padding:\s*var\(--core-semantic-layout-tight-inset\);[\s\S]*border-radius:\s*var\(--core-semantic-shape-option-radius\)/u);
+    assert.match(styles, /\.core-dialog-close\s*\{[^}]*aspect-ratio:\s*1;[\s\S]*width:\s*calc\(1rem \+ var\(--core-semantic-layout-tight-inset\) \+ var\(--core-semantic-layout-tight-inset\) \+ 2px\);[\s\S]*height:\s*calc\(1rem \+ var\(--core-semantic-layout-tight-inset\) \+ var\(--core-semantic-layout-tight-inset\) \+ 2px\);/u);
+    assert.match(styles, /\.core-toast\s*\{[^}]*grid-template-columns:\s*minmax\(0, 1fr\) auto/u);
+    assert.match(styles, /\.core-toast-content\s*\{[^}]*display:\s*grid/u);
   } finally {
     await act(async () => root.unmount());
     env.restore();

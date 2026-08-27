@@ -12,9 +12,9 @@
 .core-breadcrumbs-current { color: var(--core-semantic-content-strong); font-weight: var(--core-semantic-typography-label-weight); }
 .core-breadcrumbs-item[data-current] .core-breadcrumbs-current,
 .core-breadcrumbs-item[data-current] .core-breadcrumbs-link { color: var(--core-semantic-content-strong); font-weight: var(--core-semantic-typography-label-weight); }
-.core-breadcrumbs-item[data-disabled]:not([data-current]) { cursor: not-allowed; opacity: 0.45; }
+.core-breadcrumbs-item[data-disabled]:not([data-current]) { color: var(--core-semantic-content-default); cursor: not-allowed; }
 .core-link[data-current] { color: var(--core-semantic-content-strong); font-weight: var(--core-semantic-typography-label-weight); }
-.core-link[data-disabled] { cursor: not-allowed; opacity: 0.45; }
+.core-link[data-disabled] { color: var(--core-semantic-content-default); cursor: not-allowed; }
 
 .core-checkbox { display: inline-flex; align-items: center; gap: var(--core-semantic-layout-group-gap); color: var(--core-semantic-content-default); cursor: pointer; }
 .core-checkbox-label { line-height: 1.3; }
@@ -25,7 +25,17 @@
 .core-checkbox input { accent-color: var(--core-semantic-selection-track); }
 .core-checkbox:focus-within, .core-checkbox[data-focus-visible] { outline: 2px solid var(--core-semantic-focus-ring); outline-offset: 2px; }
 .core-checkbox[data-invalid] .core-checkbox-indicator { border-color: var(--core-semantic-feedback-invalid); }
-.core-checkbox[data-disabled] { cursor: not-allowed; opacity: 0.45; }
+.core-checkbox[data-disabled] { color: var(--core-semantic-content-default); cursor: not-allowed; }
+.core-checkbox[data-disabled] .core-checkbox-indicator {
+  border-color: var(--core-semantic-content-default);
+  background-color: var(--core-semantic-surface-hover);
+}
+.core-checkbox[data-disabled] .core-checkbox-indicator[data-selected],
+.core-checkbox[data-disabled] .core-checkbox-indicator[data-indeterminate] {
+  border-color: var(--core-semantic-content-default);
+  background-color: var(--core-semantic-content-default);
+  color: var(--core-semantic-action-foreground);
+}
 
 .core-disclosure-group { overflow: hidden; border: 1px solid var(--core-semantic-border-subtle); border-radius: var(--core-semantic-shape-container-radius); }
 .core-disclosure { border-block-end: 1px solid var(--core-semantic-border-subtle); }
@@ -43,13 +53,11 @@
 .core-value-label, .core-switch-label { color: var(--core-semantic-content-default); font-weight: var(--core-semantic-typography-label-weight); line-height: 1.3; }
 .core-meter-track, .core-progress-bar-track { position: relative; inline-size: 100%; min-block-size: 0.5rem; overflow: hidden; border-radius: var(--core-semantic-shape-pill-radius); background: var(--core-semantic-border-subtle); }
 .core-meter-fill, .core-progress-bar-fill { min-block-size: inherit; border-radius: inherit; background: var(--core-semantic-selection-track); transition: inline-size var(--core-semantic-motion-feedback) ease; }
-.core-meter-visual { display: contents; }
 .core-progress-bar[data-indeterminate] .core-progress-bar-fill {
   inline-size: 40%;
   margin-inline-start: 30%;
   background: var(--core-semantic-selection-track);
 }
-
 .core-separator { border: 0; background: var(--core-semantic-border-subtle); }
 .core-separator-horizontal { block-size: 1px; inline-size: 100%; }
 .core-separator-vertical { block-size: 100%; inline-size: 1px; min-block-size: 1rem; }
@@ -68,4 +76,598 @@
 @media (prefers-contrast: more) {
   .core-checkbox-indicator, .core-disclosure-group { border-width: 2px; }
   .core-meter-track, .core-progress-bar-track { outline: 1px solid currentColor; outline-offset: 1px; }
+}
+
+/* Core parity declarations take precedence over generic component defaults. */
+
+/* Core component source: button.css */
+.core-button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--core-semantic-layout-control-gap);
+  border: 1px solid transparent;
+  border-radius: var(--core-semantic-control-radius);
+  font-family: Inter, sans-serif;
+  font-size: var(--core-semantic-typography-body-size);
+  font-weight: var(--core-semantic-typography-control-weight);
+  line-height: 1;
+  text-decoration: none;
+  cursor: pointer;
+  outline: none;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease,
+    box-shadow 0.15s ease;
+  white-space: nowrap;
+  user-select: none;
+
+  padding: var(--core-semantic-layout-control-gap) var(--core-semantic-control-padding-inline);
+  min-height: 2.25rem;
+  width: fit-content;
+}
+
+.core-button:focus-visible {
+  box-shadow:
+    0 0 0 2px var(--core-semantic-content-inverse),
+    0 0 0 4px var(--core-semantic-focus-ring);
+}
+
+.core-button[data-disabled] {
+  background-color: var(--core-semantic-surface-hover);
+  border-color: var(--core-semantic-border-strong);
+  color: var(--core-semantic-content-default);
+  pointer-events: none;
+  cursor: not-allowed;
+}
+
+.core-r1-button[data-disabled] {
+  background-color: var(--core-semantic-surface-hover);
+  border-color: var(--core-semantic-border-strong);
+  color: var(--core-semantic-content-default);
+  pointer-events: none;
+  cursor: not-allowed;
+}
+
+.core-button[data-pending] {
+  cursor: default;
+}
+
+.core-button {
+  background-color: var(--core-semantic-selection-track);
+  color: var(--core-semantic-action-foreground);
+  border-color: transparent;
+  box-shadow:
+    rgba(0, 0, 0, 0) 0 0 0 0,
+    rgba(0, 0, 0, 0) 0 0 0 0,
+    rgba(0, 0, 0, 0) 0 0 0 0,
+    rgba(0, 0, 0, 0) 0 0 0 1px inset,
+    rgba(10, 13, 18, 0.18) 0 0 0 1px inset,
+    rgba(10, 13, 18, 0.05) 0 -2px 0 0 inset,
+    rgba(10, 13, 18, 0.05) 0 1px 2px 0;
+}
+
+.core-button:hover:not([data-disabled], [data-pending]) {
+  background-color: var(--core-semantic-action-background-hover);
+}
+
+.core-button:active:not([data-disabled], [data-pending]) {
+  background-color: var(--core-semantic-action-background-pressed);
+}
+
+/* Core component source: breadcrumbs.css */
+.core-breadcrumbs {
+  display: flex;
+  align-items: center;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-family: Inter, sans-serif;
+  font-size: var(--core-semantic-typography-body-size);
+}
+
+.core-breadcrumbs-item {
+  display: inline-flex;
+  align-items: center;
+}
+
+.core-breadcrumbs-item:not(:last-child)::after {
+  content: '/';
+  display: inline-block;
+  margin: 0 var(--core-semantic-layout-control-gap);
+  color: var(--core-semantic-content-faint);
+  font-weight: 400;
+  pointer-events: none;
+}
+
+.core-breadcrumbs-item[data-current] {
+  font-weight: 600;
+  color: var(--core-semantic-content-inverse);
+}
+
+.core-breadcrumbs-link {
+  color: var(--core-semantic-content-default);
+  text-decoration: none;
+  outline: none;
+  border-radius: var(--core-semantic-shape-indicator-radius);
+  transition: color 0.15s ease;
+  cursor: pointer;
+}
+
+.core-breadcrumbs-link[data-hovered] {
+  color: var(--core-semantic-content-link-hover);
+  text-decoration: underline;
+}
+
+.core-breadcrumbs-link[data-pressed] {
+  color: var(--core-semantic-content-link-hover);
+}
+
+.core-breadcrumbs-link[data-focus-visible] {
+  box-shadow:
+    0 0 0 2px var(--core-semantic-content-inverse),
+    0 0 0 4px var(--core-semantic-focus-ring);
+}
+
+.core-breadcrumbs-link[data-current] {
+  color: var(--core-semantic-content-strong);
+  font-weight: 600;
+  cursor: default;
+  pointer-events: none;
+}
+
+.core-breadcrumbs-link[data-disabled] {
+  color: var(--core-semantic-content-default);
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.core-breadcrumbs-current[data-disabled] {
+  color: var(--core-semantic-content-default);
+}
+
+/* Core component source: checkbox.css */
+.core-checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--core-semantic-layout-group-gap);
+  cursor: pointer;
+  outline: none;
+  user-select: none;
+}
+
+.core-checkbox-indicator {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.125rem;
+  height: 1.125rem;
+  border-radius: var(--core-semantic-shape-indicator-radius);
+  border: 1.5px solid var(--core-semantic-content-faint);
+  background-color: var(--core-semantic-surface-raised);
+  outline: none;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+  flex-shrink: 0;
+  pointer-events: none;
+}
+
+.core-checkbox[data-focus-visible] .core-checkbox-indicator {
+  box-shadow:
+    0 0 0 2px var(--core-semantic-content-inverse),
+    0 0 0 4px var(--core-semantic-focus-ring);
+}
+
+.core-checkbox[data-selected] .core-checkbox-indicator {
+  background-color: var(--core-semantic-selection-track);
+  border-color: var(--core-semantic-selection-track);
+}
+
+.core-checkbox[data-selected][data-hovered]:not([data-disabled]) .core-checkbox-indicator {
+  background-color: var(--core-semantic-action-background-hover);
+  border-color: var(--core-semantic-action-background-hover);
+}
+
+.core-checkbox[data-indeterminate] .core-checkbox-indicator {
+  background-color: var(--core-semantic-selection-track);
+  border-color: var(--core-semantic-selection-track);
+}
+
+.core-checkbox[data-hovered]:not([data-disabled], [data-selected], [data-indeterminate])
+  .core-checkbox-indicator {
+  border-color: var(--core-semantic-content-muted);
+  background-color: var(--core-semantic-surface-hover);
+}
+
+.core-checkbox[data-invalid] .core-checkbox-indicator {
+  border-color: var(--core-semantic-feedback-invalid);
+}
+
+.core-checkbox[data-disabled] {
+  color: var(--core-semantic-content-default);
+  cursor: not-allowed;
+}
+
+.core-checkbox-indicator svg {
+  width: 0.75rem;
+  height: 0.75rem;
+  color: var(--core-semantic-action-foreground);
+  stroke-width: 4;
+  display: block;
+}
+
+.core-checkbox:not([data-selected], [data-indeterminate]) .core-checkbox-indicator svg {
+  visibility: hidden;
+}
+
+/* Core component source: disclosure.css */
+.core-disclosure {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+}
+
+.core-disclosure[data-align='end'] {
+  align-items: flex-end;
+}
+
+.core-disclosure-trigger {
+  position: relative;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  align-self: flex-start;
+  gap: var(--core-semantic-layout-control-gap);
+  border: 1px solid transparent;
+  border-radius: var(--core-semantic-control-radius);
+  background-color: color-mix(in srgb, var(--core-semantic-content-strong) 8%, transparent);
+  color: var(--core-semantic-content-strong);
+  font-family: Inter, sans-serif;
+  font-size: var(--core-semantic-typography-body-size);
+  font-weight: var(--core-semantic-typography-control-weight);
+  line-height: 1;
+  text-decoration: none;
+  cursor: pointer;
+  outline: none;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease,
+    box-shadow 0.15s ease;
+  white-space: nowrap;
+  user-select: none;
+  padding: var(--core-semantic-layout-control-gap) var(--core-semantic-control-padding-inline);
+  min-height: 2.25rem;
+  width: fit-content;
+}
+
+.core-disclosure[data-align='end'] .core-disclosure-trigger {
+  align-self: flex-end;
+}
+
+.core-disclosure:not([data-disabled])
+  .core-disclosure-trigger:hover:not([data-disabled], [data-pending]) {
+  background-color: color-mix(in srgb, var(--core-semantic-content-strong) 12%, transparent);
+}
+
+.core-disclosure:not([data-disabled])
+  .core-disclosure-trigger:active:not([data-disabled], [data-pending]) {
+  background-color: color-mix(in srgb, var(--core-semantic-content-strong) 16%, transparent);
+}
+
+.core-disclosure-trigger:focus-visible {
+  box-shadow:
+    0 0 0 2px var(--core-semantic-content-inverse),
+    0 0 0 4px var(--core-semantic-focus-ring);
+}
+
+.core-disclosure[data-disabled] .core-disclosure-trigger,
+.core-disclosure-trigger[data-disabled] {
+  background-color: var(--core-semantic-surface-hover);
+  border-color: var(--core-semantic-border-strong);
+  color: var(--core-semantic-content-strong);
+  pointer-events: none;
+  cursor: not-allowed;
+}
+
+.core-disclosure-panel {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  height: var(--disclosure-panel-height, auto);
+  margin-top: var(--core-semantic-layout-control-gap);
+}
+
+/* DisclosureGroup uses the full-width accordion trigger geometry from Tale. */
+.core-disclosure-group .core-disclosure-trigger {
+  align-self: stretch;
+  width: 100%;
+  justify-content: space-between;
+  padding: var(--core-semantic-control-padding-inline)
+    var(--core-semantic-layout-section-gap)
+    var(--core-semantic-control-padding-inline)
+    var(--core-semantic-control-padding-inline);
+}
+
+/* Core component source: link.css */
+.core-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--core-semantic-layout-control-gap);
+  outline: none;
+  cursor: pointer;
+}
+
+.core-link:not(.core-button) {
+  color: var(--core-semantic-content-link);
+  font-family: Inter, sans-serif;
+  font-size: inherit;
+  text-decoration: none;
+  text-underline-offset: 0.2em;
+  border-radius: var(--core-semantic-shape-indicator-radius);
+  transition: color 0.15s ease;
+}
+
+.core-link:not(.core-button) {
+  text-decoration: underline;
+}
+
+.core-link:not(.core-button)[data-hovered] {
+  color: var(--core-semantic-content-link-hover);
+}
+
+.core-link:not(.core-button)[data-pressed] {
+  color: var(--core-semantic-content-link-pressed);
+}
+
+.core-link[data-focus-visible] {
+  box-shadow:
+    0 0 0 2px var(--core-semantic-content-inverse),
+    0 0 0 4px var(--core-semantic-focus-ring);
+  text-decoration: none;
+}
+
+.core-link:not(.core-button)[data-current] {
+  color: var(--core-semantic-content-strong);
+  font-weight: 600;
+  text-decoration: none;
+  cursor: default;
+}
+
+.core-link[data-disabled] {
+  color: var(--core-semantic-content-default);
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Core component source: meter.css */
+.core-meter {
+  display: flex;
+  flex-direction: column;
+  gap: var(--core-semantic-layout-tight-inset);
+  width: 100%;
+}
+
+/* Core component source: progress-bar.css */
+.core-progress-bar[data-complete] .core-progress-bar-fill {
+  background-color: var(--core-semantic-status-success, var(--core-semantic-selection-track));
+}
+
+@keyframes core-progress-bar-indeterminate {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(300%);
+  }
+}
+
+.core-progress-bar[data-indeterminate] .core-progress-bar-fill,
+.core-progress-bar-fill[data-indeterminate] {
+  width: 40% !important;
+  animation: core-progress-bar-indeterminate 1.5s ease-in-out 1;
+}
+
+/* Core component source: separator.css */
+.core-separator {
+  display: block;
+  border: none;
+  background-color: var(--core-semantic-border-subtle);
+  width: 100%;
+  height: 1px;
+  flex-shrink: 0;
+}
+
+.core-separator-vertical,
+.core-separator[aria-orientation='vertical'] {
+  width: 1px;
+  height: auto;
+  align-self: stretch;
+}
+
+/* Core component source: toggle-button.css */
+.core-toggle-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--core-semantic-layout-control-gap);
+  border: 1px solid var(--core-semantic-border-default);
+  border-radius: var(--core-semantic-control-radius);
+  background-color: transparent;
+  color: var(--core-semantic-content-default);
+  font-family: Inter, sans-serif;
+  font-size: var(--core-semantic-typography-body-size);
+  font-weight: var(--core-semantic-typography-control-weight);
+  line-height: 1;
+  cursor: pointer;
+  outline: none;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease,
+    box-shadow 0.15s ease;
+  user-select: none;
+
+  padding: var(--core-semantic-layout-control-gap) var(--core-semantic-control-padding-inline);
+  min-height: 2.25rem;
+}
+
+.core-toggle-button:focus-visible {
+  box-shadow:
+    0 0 0 2px var(--core-semantic-content-inverse),
+    0 0 0 4px var(--core-semantic-focus-ring);
+}
+
+.core-toggle-button:hover:not([data-disabled], [data-selected]) {
+  background-color: var(--core-semantic-surface-hover);
+  border-color: var(--core-semantic-border-strong);
+  color: var(--core-semantic-content-strong);
+}
+
+.core-toggle-button[data-selected] {
+  background-color: var(--core-semantic-content-default);
+  border-color: var(--core-semantic-content-default);
+  color: var(--core-semantic-action-foreground);
+}
+
+.core-toggle-button[data-selected]:hover:not([data-disabled]) {
+  background-color: var(--core-semantic-content-strong);
+  border-color: var(--core-semantic-content-strong);
+  color: var(--core-semantic-action-foreground);
+}
+
+.core-toggle-button[data-disabled] {
+  background-color: var(--core-semantic-surface-hover);
+  border-color: var(--core-semantic-border-strong);
+  color: var(--core-semantic-content-default);
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.core-toggle-button[data-selected][data-disabled] {
+  background-color: var(--core-semantic-content-default);
+  border-color: var(--core-semantic-content-default);
+  color: var(--core-semantic-action-foreground);
+}
+
+.core-toggle-button-group {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  gap: 0;
+  border-radius: var(--core-semantic-control-radius);
+  overflow: hidden;
+  border: 1px solid var(--core-semantic-border-default);
+}
+
+.core-toggle-button-group .core-toggle-button {
+  border-radius: 0;
+  border: none;
+  border-right: 1px solid var(--core-semantic-border-default);
+}
+
+.core-toggle-button-group .core-toggle-button:last-child {
+  border-right: none;
+}
+
+/* The RAC input remains the focus target; the indicator is the only painted control. */
+.core-checkbox input[type='checkbox'] {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.core-checkbox[data-focus-visible] .core-checkbox-indicator,
+.core-checkbox:focus-within .core-checkbox-indicator {
+  box-shadow:
+    0 0 0 2px var(--core-semantic-content-inverse),
+    0 0 0 4px var(--core-semantic-focus-ring);
+}
+
+/* Core Button has one public visual variant: the pinned primary treatment. */
+.core-button,
+.core-r1-button {
+  background-color: var(--core-semantic-selection-track);
+  border-color: transparent;
+  color: var(--core-semantic-action-foreground);
+  box-shadow: var(--core-semantic-elevation-control);
+}
+
+.core-button:hover:not([data-disabled], [data-pending]),
+.core-r1-button:hover:not([data-disabled], [data-pending]) {
+  background-color: var(--core-semantic-action-background-hover);
+}
+
+.core-button:active:not([data-disabled], [data-pending]),
+.core-r1-button:active:not([data-disabled], [data-pending]) {
+  background-color: var(--core-semantic-action-background-pressed);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :where(.core-button, .core-checkbox, .core-link, .core-disclosure, .core-meter, .core-progress-bar, .core-toggle-button) {
+    animation: none !important;
+    transition-duration: 0s !important;
+  }
+}
+
+:where([data-reduced-motion], [data-core-motion='reduced']) :where(.core-button, .core-checkbox, .core-link, .core-disclosure, .core-meter, .core-progress-bar, .core-toggle-button) {
+  animation: none !important;
+  transition-duration: 0s !important;
+}
+
+/* Core state attributes are the stable styling contract for RAC state. */
+.core-button[data-hovered]:not([data-disabled], [data-pending]) {
+  background-color: var(--core-semantic-action-background-hover);
+}
+
+.core-button[data-pressed]:not([data-disabled], [data-pending]) {
+  background-color: var(--core-semantic-action-background-pressed);
+}
+
+.core-button[data-pending]::after {
+  content: '…';
+  margin-inline-start: var(--core-semantic-layout-control-gap);
+  letter-spacing: 0.08em;
+}
+
+.core-breadcrumbs-item[data-current] {
+  font-weight: var(--core-semantic-typography-label-weight);
+}
+
+.core-breadcrumbs-item[data-disabled]:not([data-current]) {
+  color: var(--core-semantic-content-default);
+}
+
+@media (forced-colors: active) {
+  :where(.core-button, .core-r1-button, .core-toggle-button) {
+    forced-color-adjust: none;
+    border-color: ButtonText;
+    background: ButtonFace;
+    color: ButtonText;
+    box-shadow: none;
+  }
+
+  :where(.core-button, .core-r1-button, .core-toggle-button)[data-disabled] {
+    border-color: GrayText;
+    color: GrayText;
+  }
+
+  :where(.core-button, .core-r1-button, .core-toggle-button):focus-visible {
+    outline: 2px solid Highlight;
+    outline-offset: 2px;
+  }
 }

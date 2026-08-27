@@ -42,13 +42,15 @@ const UNCONTROLLED_PROPS = new Map(CONTROLLED_DEFAULT_PAIRS);
 
 const SELECT_PROPS = Object.freeze({
   colorSpace: ['hex', 'hsl', 'hsb', 'rgb'],
+  defaultCamera: ['user', 'environment'],
   method: ['get', 'post'],
   orientation: ['horizontal', 'vertical'],
-  placement: ['top', 'bottom', 'left', 'right'],
+  placement: ['top', 'bottom', 'start', 'end'],
+  role: ['group', 'region', 'presentation'],
   selectionMode: ['none', 'single', 'multiple'],
   type: ['text', 'email', 'password', 'url', 'tel'],
   validationBehavior: ['aria', 'native'],
-  variant: ['neutral', 'info', 'success', 'warning', 'error'],
+  variant: ['neutral', 'success', 'warning', 'danger'],
 });
 
 const callbackType = { summary: 'Core callback' };
@@ -112,40 +114,254 @@ function setControlledArg(args, props, name, value) {
   if (uncontrolled && props.has(uncontrolled)) delete args[uncontrolled];
 }
 
-export function storyArgsForBinding(binding, variant, family) {
-  const args = normalizeDefaultArgs(binding);
-  if (variant !== 'states') return args;
+const STATE_BOOLEAN_PROPS = Object.freeze([
+  'checked', 'current', 'disabled', 'expanded', 'indeterminate', 'invalid',
+  'open', 'pending', 'readOnly', 'required', 'selected',
+]);
 
+const OVERLAY_FAMILIES = new Set(['Dialog', 'Popover', 'PreviewTrigger', 'Tooltip', 'Toast']);
+const INTERACTION_OPEN_FAMILIES = new Set(['DatePicker', 'DateRangePicker', 'ComboBox', 'Select']);
+const INTERACTION_OPEN_SELECTORS = Object.freeze({
+  DatePicker: '.core-date-trigger',
+  DateRangePicker: '.core-date-trigger',
+  ComboBox: '.core-combo-box-trigger',
+  Select: '.core-select-trigger',
+});
+const LIFECYCLE_ATTRIBUTES = Object.freeze({
+  entering: 'data-entering',
+  opening: 'data-entering',
+  exiting: 'data-exiting',
+  closing: 'data-exiting',
+});
+
+function stateVariantNames(binding, family) {
+  const names = [...binding.states];
   const props = new Set(binding.api.props);
-  if (props.has('disabled')) args.disabled = true;
-  if (props.has('invalid')) args.invalid = true;
-  if (props.has('checked')) setControlledArg(args, props, 'checked', true);
-  else if (props.has('defaultChecked')) args.defaultChecked = true;
-  if (props.has('selected')) setControlledArg(args, props, 'selected', true);
-  else if (props.has('defaultSelected')) args.defaultSelected = true;
-  if (props.has('expanded')) setControlledArg(args, props, 'expanded', true);
-  else if (props.has('defaultExpanded')) args.defaultExpanded = true;
-  if (props.has('expandedIds')) {
-    setControlledArg(args, props, 'expandedIds', family === 'Tree' ? ['src'] : ['one']);
-  } else if (props.has('defaultExpandedIds')) {
-    args.defaultExpandedIds = ['one'];
+  if (props.has('placement')) names.push('placement');
+  if (family === 'DropZone') names.push('dragging');
+  if (OVERLAY_FAMILIES.has(family)) names.push('entering', 'exiting');
+  return [...new Set(names)];
+}
+
+function resetStateArgs(binding, sourceArgs) {
+  const props = new Set(binding.api.props);
+  const args = { ...sourceArgs };
+  for (const name of STATE_BOOLEAN_PROPS) {
+    if (props.has(name)) args[name] = false;
   }
-  if (props.has('open')) setControlledArg(args, props, 'open', true);
-  else if (props.has('defaultOpen')) args.defaultOpen = true;
-  if (props.has('orientation')) args.orientation = 'vertical';
-  if (props.has('value') && typeof args.value === 'number') {
-    setControlledArg(args, props, 'value', Math.max(args.value, 72));
+  for (const [controlled, uncontrolled] of CONTROLLED_DEFAULT_PAIRS) {
+    if (!props.has(controlled) || !props.has(uncontrolled)) continue;
+    delete args[controlled];
+    if (args[uncontrolled] === undefined) {
+      const defaults = binding.api.defaults ?? {};
+      const value = defaults[uncontrolled] ?? defaults[controlled];
+      if (value !== undefined) args[uncontrolled] = value;
+    }
   }
-  if (props.has('value') && args.value === undefined && typeof args.maxValue === 'number') {
-    setControlledArg(args, props, 'value', args.maxValue);
-  }
-  if (props.has('value') && typeof args.value === 'string' && /^\d{4}-\d{2}-\d{2}$/u.test(args.value)) {
-    setControlledArg(args, props, 'value', '2026-09-01');
-  }
-  if (props.has('variant')) args.variant = 'success';
-  if (props.has('method')) args.method = 'post';
-  if (props.has('current')) args.current = true;
   return args;
+}
+
+function setSelectedState(args, props, family) {
+  if (props.has('checked')) return setControlledArg(args, props, 'checked', true);
+  if (props.has('selected')) return setControlledArg(args, props, 'selected', true);
+  if (props.has('selectedIds')) {
+    const selectedId = family === 'Tree' ? 'src'
+      : family === 'Table' ? 'ada'
+        : family === 'ToggleButtonGroup' ? 'bold' : 'One';
+    return setControlledArg(args, props, 'selectedIds', [selectedId]);
+  }
+  if (props.has('selectedId')) return setControlledArg(args, props, 'selectedId', 'Melbourne');
+  if (!props.has('value')) return undefined;
+  if (family === 'CheckboxGroup') return setControlledArg(args, props, 'value', ['email']);
+  if (family === 'RadioGroup') return setControlledArg(args, props, 'value', 's');
+  if (family === 'Tabs') return setControlledArg(args, props, 'value', 'overview');
+  if (family === 'Select') return setControlledArg(args, props, 'value', 'Melbourne');
+  if (family === 'Calendar') return setControlledArg(args, props, 'value', '2026-08-26');
+  if (family === 'RangeCalendar') return setControlledArg(args, props, 'value', { start: '2026-08-26', end: '2026-09-01' });
+  if (family === 'ColorSwatchPicker') return setControlledArg(args, props, 'value', '#ff0000');
+  if (typeof args.value === 'number') return setControlledArg(args, props, 'value', args.max ?? args.maxValue ?? 72);
+  return undefined;
+}
+
+function stateIsSupported(binding, state, family) {
+  const props = new Set(binding.api.props);
+  const normalizedState = state.toLowerCase().replaceAll('-', '');
+  switch (normalizedState) {
+    case 'idle':
+    case 'visible':
+      return true;
+    case 'disabled':
+      return props.has('disabled');
+    case 'invalid':
+      return props.has('invalid');
+    case 'readonly':
+      return props.has('readOnly');
+    case 'required':
+      return props.has('required');
+    case 'selected':
+      return props.has('checked')
+        || props.has('selected')
+        || props.has('selectedIds')
+        || props.has('selectedId')
+        || ['CheckboxGroup', 'RadioGroup', 'Tabs', 'Select', 'Calendar', 'RangeCalendar', 'ColorSwatchPicker'].includes(family) && props.has('value');
+    case 'indeterminate':
+      return props.has('indeterminate') || family === 'ProgressBar';
+    case 'expanded':
+    case 'collapsed':
+      return props.has('expanded') || props.has('expandedIds');
+    case 'pending':
+      return props.has('pending');
+    case 'open':
+      return props.has('open') || INTERACTION_OPEN_FAMILIES.has(family);
+    case 'opening':
+    case 'entering':
+    case 'closed':
+    case 'closing':
+    case 'exiting':
+      return props.has('open')
+        || family === 'Toast' && (normalizedState === 'entering' || normalizedState === 'exiting');
+    case 'focused':
+      // StateVariant focuses the first public interactive target after mount.
+      return true;
+    case 'drop target':
+    case 'droptarget':
+    case 'dragging':
+      return family === 'DropZone';
+    case 'low':
+    case 'high':
+      return family === 'Meter' && props.has('value');
+    case 'progress':
+    case 'complete':
+      return family === 'ProgressBar' && props.has('value');
+    case 'filled':
+      return family === 'SearchField' && props.has('value');
+    case 'empty':
+      return props.has('items') || props.has('rows');
+    case 'placement':
+      return props.has('placement');
+    case 'vertical':
+      return props.has('orientation');
+    case 'horizontal':
+      return props.has('orientation');
+    case 'timed':
+      return props.has('duration');
+    case 'current':
+      return props.has('current');
+    // Pressed and dismissed are transient lifecycle results without a Core
+    // prop or reliable public interaction that can hold the state in a story.
+    case 'pressed':
+    case 'dismissed':
+    case 'submitting':
+      return false;
+    default:
+      return false;
+  }
+}
+
+function applyStateArgs(args, binding, state, family) {
+  const props = new Set(binding.api.props);
+  const normalizedState = state.toLowerCase().replaceAll('-', '');
+  switch (normalizedState) {
+    case 'disabled':
+      if (props.has('disabled')) args.disabled = true;
+      break;
+    case 'invalid':
+      if (props.has('invalid')) args.invalid = true;
+      break;
+    case 'readonly':
+      if (props.has('readOnly')) args.readOnly = true;
+      break;
+    case 'required':
+      if (props.has('required')) args.required = true;
+      break;
+    case 'selected':
+      setSelectedState(args, props, family);
+      break;
+    case 'indeterminate':
+      if (props.has('indeterminate')) args.indeterminate = true;
+      else if (family === 'ProgressBar' && props.has('value')) args.value = undefined;
+      break;
+    case 'expanded':
+      if (props.has('expanded')) setControlledArg(args, props, 'expanded', true);
+      else if (props.has('expandedIds')) setControlledArg(args, props, 'expandedIds', family === 'Tree' ? ['src'] : ['one']);
+      break;
+    case 'collapsed':
+      if (props.has('expanded')) setControlledArg(args, props, 'expanded', false);
+      else if (props.has('expandedIds')) setControlledArg(args, props, 'expandedIds', []);
+      break;
+    case 'pending':
+      if (props.has('pending')) args.pending = true;
+      break;
+    case 'open':
+    case 'opening':
+    case 'entering':
+      if (props.has('open')) setControlledArg(args, props, 'open', true);
+      break;
+    case 'closed':
+    case 'closing':
+    case 'exiting':
+    case 'dismissed':
+      if (props.has('open')) setControlledArg(args, props, 'open', false);
+      break;
+    case 'focused':
+      // Focus is applied by the private StateVariant wrapper after mount.
+      break;
+    case 'drop target':
+    case 'droptarget':
+    case 'dragging':
+      // The private StateVariant wrapper dispatches a real dragenter event.
+      break;
+    case 'low':
+      if (family === 'Meter' && props.has('value')) setControlledArg(args, props, 'value', 24);
+      break;
+    case 'high':
+      if (family === 'Meter' && props.has('value')) setControlledArg(args, props, 'value', 88);
+      break;
+    case 'progress':
+      if (family === 'ProgressBar' && props.has('value')) setControlledArg(args, props, 'value', 64);
+      break;
+    case 'complete':
+      if (family === 'ProgressBar' && props.has('value')) setControlledArg(args, props, 'value', args.maxValue ?? 100);
+      break;
+    case 'filled':
+      if (props.has('value') && (typeof args.value === 'string' || args.value === undefined)) setControlledArg(args, props, 'value', 'Core');
+      break;
+    case 'empty':
+      if (props.has('items')) args.items = [];
+      if (props.has('rows')) args.rows = [];
+      break;
+    case 'placement':
+      if (props.has('placement')) args.placement = 'top';
+      break;
+    case 'current':
+      if (props.has('current')) args.current = true;
+      break;
+    case 'vertical':
+      if (props.has('orientation')) args.orientation = 'vertical';
+      break;
+    case 'timed':
+      if (props.has('duration')) args.duration = 1_000;
+      break;
+    default:
+      break;
+  }
+  return args;
+}
+
+export function storyArgsForBinding(binding, variant, family) {
+  if (variant === 'default' || variant === 'states') return normalizeDefaultArgs(binding);
+  return stateArgsForBinding(binding, variant, family);
+}
+
+export function stateArgsForBinding(binding, state, family, sourceArgs = normalizeDefaultArgs(binding)) {
+  return applyStateArgs(resetStateArgs(binding, sourceArgs), binding, state, family);
+}
+
+export function stateCoverageForBinding(binding, family) {
+  return stateVariantNames(binding, family).map((state) => ({
+    name: state,
+    args: stateArgsForBinding(binding, state, family),
+  }));
 }
 
 const e = (type, props, ...children) => React.createElement(type, props, ...children);
@@ -163,7 +379,7 @@ const ADAPTERS = {
   Group: (args) => e(Core.Group, { ...args, 'aria-label': fallback(args['aria-label'], 'Actions') }, e(Core.Button, null, 'Save')),
   Link: (args) => e(Core.Link, { ...args, href: fallback(args.href, '/settings') }, 'Settings'),
   Meter: (args) => e(Core.Meter, { ...args, label: fallback(args.label, 'Storage'), value: args.value ?? 72 }),
-  ProgressBar: (args) => e(Core.ProgressBar, { ...args, label: fallback(args.label, 'Upload'), value: args.value ?? 64 }),
+  ProgressBar: (args) => e(Core.ProgressBar, { ...args, label: fallback(args.label, 'Upload'), value: Object.hasOwn(args, 'value') ? args.value : 64 }),
   Separator: (args) => e(Core.Separator, args),
   ToggleButton: (args) => e(Core.ToggleButton, args, 'Pin'),
   Autocomplete: (args) => e(Core.Autocomplete, { ...args, label: fallback(args.label, 'City'), items: fallback(args.items, ['Melbourne', 'Sydney']), placeholder: fallback(args.placeholder, 'Choose a city') }),
@@ -232,6 +448,233 @@ const ADAPTERS = {
 
 export const adapterNames = Object.freeze(Object.keys(ADAPTERS));
 
+function focusStateTarget(element) {
+  if (!element) return;
+  const target = element.matches('button, a[href], input, select, textarea, [role="button"], [tabindex]:not([tabindex="-1"])')
+    ? element
+    : element.querySelector('button, a[href], input, select, textarea, [role="button"], [tabindex]:not([tabindex="-1"])');
+  target?.focus();
+}
+
+function dispatchDragEnter(element) {
+  const target = element?.querySelector('.core-drop-zone') ?? element;
+  if (!target || typeof target.dispatchEvent !== 'function') return;
+  let dataTransfer;
+  try {
+    dataTransfer = typeof DataTransfer === 'function' ? new DataTransfer() : undefined;
+    if (dataTransfer) dataTransfer.effectAllowed = 'all';
+  } catch {
+    dataTransfer = undefined;
+  }
+  dataTransfer ??= {
+    effectAllowed: 'all',
+    dropEffect: 'none',
+    files: [],
+    items: [],
+    types: ['Files'],
+  };
+  const event = typeof DragEvent === 'function'
+    ? new DragEvent('dragenter', { bubbles: true, cancelable: true, dataTransfer })
+    : new Event('dragenter', { bubbles: true, cancelable: true });
+  if (!event.dataTransfer) Object.defineProperty(event, 'dataTransfer', { value: dataTransfer });
+  target.dispatchEvent(event);
+}
+
+function scheduleOpenInteraction(element, family) {
+  const target = element?.querySelector(INTERACTION_OPEN_SELECTORS[family]);
+  if (!target) return undefined;
+  const handle = scheduleFrame(() => {
+    if (target.isConnected && target.getAttribute('aria-expanded') !== 'true') target.click();
+  });
+  return () => cancelFrame(handle);
+}
+
+function lifecycleMarker(family, state) {
+  return `core-storybook-lifecycle-${family}-${state}`.replaceAll(/[^a-z0-9-]/gi, '-').toLowerCase();
+}
+
+function findOverlayHost(target) {
+  if (typeof document === 'undefined' || !target) return undefined;
+  return [...document.body.children].find((child) => child.contains(target));
+}
+
+/** Keep the private overlay portals distinguishable to the Storybook a11y host. */
+function OverlayHost({ marker, children }) {
+  React.useEffect(() => {
+    if (!marker || typeof document === 'undefined') return undefined;
+    let managedHost;
+    let originalRole;
+    let originalLabel;
+    const annotateHost = () => {
+      const host = findOverlayHost(document.querySelector(`.${marker}`));
+      if (!host || host === managedHost) return;
+      managedHost = host;
+      originalRole = host.getAttribute('role');
+      originalLabel = host.getAttribute('aria-label');
+      if (!originalRole) host.setAttribute('role', 'region');
+      host.setAttribute('aria-label', `Core UI overlay ${marker}`);
+    };
+    const observer = typeof MutationObserver === 'function'
+      ? new MutationObserver(annotateHost)
+      : undefined;
+    observer?.observe(document.body, { childList: true, subtree: true });
+    annotateHost();
+    return () => {
+      observer?.disconnect();
+      if (!managedHost) return;
+      if (originalRole === null) managedHost.removeAttribute('role');
+      else managedHost.setAttribute('role', originalRole);
+      if (originalLabel === null) managedHost.removeAttribute('aria-label');
+      else managedHost.setAttribute('aria-label', originalLabel);
+    };
+  }, [marker]);
+  return children;
+}
+
+function scheduleFrame(callback) {
+  if (typeof requestAnimationFrame === 'function') return requestAnimationFrame(callback);
+  return setTimeout(callback, 0);
+}
+
+function cancelFrame(handle) {
+  if (typeof cancelAnimationFrame === 'function') cancelAnimationFrame(handle);
+  else clearTimeout(handle);
+}
+
+const LifecycleSelectionContext = React.createContext(null);
+
+function LifecycleSelection({ family, states, children }) {
+  const [activeState, setActiveState] = React.useState(states[0]);
+  const selectId = `core-storybook-lifecycle-select-${family.toLowerCase()}`;
+  return e(React.Fragment, null,
+    e('label', { htmlFor: selectId }, 'Lifecycle state'),
+    e('select', {
+      id: selectId,
+      value: activeState,
+      'aria-label': `${family} lifecycle state`,
+      'data-core-storybook-lifecycle-select': family,
+      onChange: (event) => setActiveState(event.target.value),
+    }, states.map((state) => e('option', { key: state, value: state }, state))),
+    e(LifecycleSelectionContext.Provider, { value: activeState }, children),
+  );
+}
+
+function LifecycleTransition({ family, state, args }) {
+  const isClosing = state === 'closing' || state === 'exiting';
+  const isToast = family === 'Toast';
+  const [open, setOpen] = React.useState(!isToast && isClosing);
+  const [toastMounted, setToastMounted] = React.useState(isClosing);
+  const [toastRevision, setToastRevision] = React.useState(0);
+  const [phase, setPhase] = React.useState(isClosing ? 'open' : 'closed');
+
+  React.useEffect(() => {
+    const frame = scheduleFrame(() => {
+      setPhase(isClosing ? 'exiting' : 'entering');
+      if (isToast) setToastMounted(!isClosing);
+      else setOpen(!isClosing);
+    });
+    const reopen = isClosing
+      ? setTimeout(() => {
+        setPhase('entering');
+        if (isToast) {
+          setToastRevision(1);
+          setToastMounted(true);
+        }
+        else setOpen(true);
+      }, 300)
+      : undefined;
+    const settle = setTimeout(() => {
+      setPhase('open');
+    }, isClosing ? 600 : 300);
+    return () => {
+      cancelFrame(frame);
+      if (reopen !== undefined) clearTimeout(reopen);
+      clearTimeout(settle);
+    };
+  }, [isClosing, isToast]);
+
+  const transitionArgs = { ...args };
+  let rendered;
+  if (isToast) {
+    transitionArgs.duration = isClosing && toastRevision === 0 ? 50 : (args.duration ?? 5_000);
+    rendered = toastMounted
+      ? React.cloneElement(renderFamily(family, transitionArgs), { key: toastRevision })
+      : null;
+  } else {
+    transitionArgs.open = open;
+    rendered = renderFamily(family, transitionArgs);
+  }
+  return e(React.Fragment, null,
+    e('div', {
+      className: 'core-storybook-transition-status',
+      'data-core-storybook-transition': phase,
+      'aria-hidden': 'true',
+    }, `${state}: ${phase}`),
+    rendered,
+  );
+}
+
+function StateVariant({ family, state, args, available }) {
+  const stateRef = React.useRef(null);
+  React.useEffect(() => {
+    if (state === 'focused') focusStateTarget(stateRef.current);
+    if (state === 'drop-target' || state === 'dragging') dispatchDragEnter(stateRef.current);
+    if (state !== 'open' || !INTERACTION_OPEN_FAMILIES.has(family)) return undefined;
+    return scheduleOpenInteraction(stateRef.current, family);
+  }, [family, state]);
+
+  const variantArgs = { ...args };
+  const lifecycleAttribute = LIFECYCLE_ATTRIBUTES[state];
+  const activeLifecycleState = React.useContext(LifecycleSelectionContext);
+  const marker = OVERLAY_FAMILIES.has(family) ? lifecycleMarker(family, state) : undefined;
+  if (marker) {
+    variantArgs.className = [variantArgs.className, marker].filter(Boolean).join(' ');
+  }
+  // The matrix intentionally mounts several landmark instances at once. Give
+  // Core's nav/group adapters unique accessible names without adding a prop
+  // to the public API or changing the controls contract.
+  if (family === 'Breadcrumbs' || family === 'Group') {
+    variantArgs['aria-label'] = `${family} ${state}`;
+  }
+  const labelId = `core-storybook-state-${family}-${state.replaceAll(/[^a-z0-9]+/gi, '-').toLowerCase()}`;
+  const rendered = !available
+    ? e('p', {
+      className: 'core-storybook-state-unavailable',
+      'data-core-storybook-state': 'unavailable',
+    }, `Unavailable: Core ${family} has no public prop or supported interaction for the ${state} state.`)
+    : lifecycleAttribute
+    ? activeLifecycleState === state
+      ? e(LifecycleTransition, { family, state, args: variantArgs })
+      : e('p', { className: 'core-storybook-lifecycle-inactive' }, `Select ${state} to inspect this lifecycle state.`)
+    : renderFamily(family, variantArgs);
+  const stateContent = e('section', {
+    ref: stateRef,
+    className: 'core-storybook-state',
+    'aria-labelledby': labelId,
+    'data-core-storybook-lifecycle': lifecycleAttribute ? state : undefined,
+  }, e('h3', { id: labelId }, state), rendered);
+  return marker ? e(OverlayHost, { marker }, stateContent) : stateContent;
+}
+
+export function renderStateCoverage(record, args = storyArgsForBinding(record.binding, 'states', record.family)) {
+  const variants = stateCoverageForBinding(record.binding, record.family);
+  const stateMatrix = e('div', { className: 'core-storybook-states' }, variants.map(({ name }) => e(StateVariant, {
+    key: name,
+    family: record.family,
+    state: name,
+    available: stateIsSupported(record.binding, name, record.family),
+    args: stateArgsForBinding(record.binding, name, record.family, args),
+  })));
+  const lifecycleStates = variants.map(({ name }) => name).filter((name) => LIFECYCLE_ATTRIBUTES[name]);
+  return lifecycleStates.length > 0
+    ? e('div', { className: 'core-storybook-lifecycle-showcase' }, e(LifecycleSelection, {
+      family: record.family,
+      states: lifecycleStates,
+      children: stateMatrix,
+    }))
+    : stateMatrix;
+}
+
 export function renderFamily(family, args) {
   const adapter = ADAPTERS[family];
   if (!adapter) throw new Error(`Unknown Core UI React story family: ${family}`);
@@ -261,6 +704,11 @@ export function createStory(record, variant) {
     name: variant === 'states' ? 'States' : 'Default',
     args: storyArgsForBinding(record.binding, variant, record.family),
     argTypes: argTypesForBinding(record.binding),
-    render: (args) => renderFamily(record.family, args),
+    parameters: variant === 'states'
+      ? { coreStateCoverage: stateCoverageForBinding(record.binding, record.family) }
+      : undefined,
+    render: (args) => variant === 'states'
+      ? renderStateCoverage(record, args)
+      : renderFamily(record.family, args),
   };
 }

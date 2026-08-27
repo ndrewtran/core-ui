@@ -1,5 +1,5 @@
 // @generated-from: packages/react/src/components.mjs
-// @generated-content-sha256: sha256:35db023fcfc9e8f9f7c3dc11bcc078d8014be47702f537539fdd7fca62bb5264
+// @generated-content-sha256: sha256:f444cccfdc648fda545914ccb176ccdf4cadaa83a375b58495af4d02ed38329a
 import React from 'react';
 import {
   Breadcrumb as AriaBreadcrumb,
@@ -43,7 +43,7 @@ export const Breadcrumbs = React.forwardRef(function Breadcrumbs({
   const resolvedAriaLabel = ariaLabel ?? 'Breadcrumbs';
   const navigate = (key) => {
     const item = collectionItems.find((candidate) => String(candidate.id) === String(key));
-    if (item) onNavigate?.(item);
+    if (item && !item.disabled) onNavigate?.(item);
   };
   return React.createElement('nav', {
     ...props,
@@ -59,10 +59,13 @@ export const Breadcrumbs = React.forwardRef(function Breadcrumbs({
       const current = item.id === collectionItems.at(-1)?.id;
       return React.createElement(AriaBreadcrumb, {
         id: item.id,
+        isDisabled: item.disabled,
+        'data-current': current || undefined,
+        'data-disabled': item.disabled || undefined,
         className: 'core-breadcrumbs-item',
       }, item.href && !current
-        ? React.createElement(AriaLink, { href: item.href, className: 'core-breadcrumbs-link' }, item.label)
-        : React.createElement('span', { className: 'core-breadcrumbs-current', 'aria-current': current ? 'page' : undefined }, item.label));
+        ? React.createElement(AriaLink, { href: item.href, isDisabled: item.disabled, 'data-disabled': item.disabled || undefined, className: 'core-breadcrumbs-link' }, item.label)
+        : React.createElement('span', { className: 'core-breadcrumbs-current', 'aria-current': current ? 'page' : undefined, 'data-disabled': item.disabled || undefined }, item.label));
     },
   }));
 });
@@ -177,7 +180,6 @@ export const Group = React.forwardRef(function Group({
     isReadOnly: readOnly,
     'aria-disabled': disabled || undefined,
     'aria-invalid': invalid || undefined,
-    'aria-readonly': readOnly || undefined,
   }, children);
 });
 

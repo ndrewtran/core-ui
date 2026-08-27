@@ -1,200 +1,347 @@
-/* Core-owned styling for overlays and transient feedback. */
+/* Core-owned overlay parity source. */
+/* Core component source: drop-zone.css */
+.core-drop-zone {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 5rem;
+  padding: var(--core-semantic-layout-section-gap);
+  font-family: Inter, sans-serif;
+  font-size: var(--core-semantic-typography-body-size);
+  color: var(--core-semantic-content-default);
+  background-color: var(--core-semantic-surface-canvas);
+  border: 2px dashed var(--core-semantic-border-strong);
+  border-radius: var(--core-semantic-layout-control-gap);
+  outline: none;
+  transition:
+    border-color 0.15s ease,
+    background-color 0.15s ease,
+    color 0.15s ease;
+}
+.core-drop-zone[data-focus-visible] {
+  box-shadow:
+    0 0 0 2px var(--core-semantic-content-inverse),
+    0 0 0 4px var(--core-semantic-focus-ring);
+}
+
+.core-drop-zone[data-drop-target] {
+  border-color: var(--core-semantic-selection-track);
+  background-color: color-mix(in srgb, var(--core-semantic-selection-track) 8%, transparent);
+  color: var(--core-semantic-selection-track);
+}
+
+.core-drop-zone[data-disabled] {
+  background-color: var(--core-semantic-surface-hover);
+  border-color: var(--core-semantic-border-strong);
+  color: var(--core-semantic-content-default);
+  cursor: not-allowed;
+  pointer-events: none;
+}
+/* Core component source: file-trigger.css */
+
+/* Core component source: dialog.css */
+.core-dialog {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 101;
+  width: min(90vw, 30rem);
+  max-height: min(90vh, 40rem);
+  overflow-y: auto;
+  background-color: var(--core-semantic-surface-raised);
+  border: 1px solid var(--core-semantic-border-subtle);
+  border-radius: var(--core-semantic-shape-overlay-radius);
+  box-shadow: var(--core-semantic-elevation-modal);
+  padding: var(--core-semantic-layout-section-gap);
+  display: flex;
+  flex-direction: column;
+  gap: var(--core-semantic-control-padding-inline);
+  outline: none;
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
+}
+
+.core-dialog[data-entering],
+.core-dialog[data-exiting] {
+  opacity: 0;
+  transform: translate(-50%, calc(-50% - 0.5rem));
+}
+
+.core-dialog-close {
+  aspect-ratio: 1;
+  width: calc(1rem + var(--core-semantic-layout-tight-inset) + var(--core-semantic-layout-tight-inset) + 2px);
+  height: calc(1rem + var(--core-semantic-layout-tight-inset) + var(--core-semantic-layout-tight-inset) + 2px);
+  min-height: auto;
+  padding: var(--core-semantic-layout-tight-inset);
+  border-radius: var(--core-semantic-shape-option-radius);
+  top: var(--core-semantic-layout-group-gap);
+  right: var(--core-semantic-control-padding-inline);
+}
+
+.core-dialog-content {
+  color: var(--core-semantic-content-default);
+  font-weight: var(--core-semantic-typography-body-weight);
+}
+/* Core component source: popover.css */
+.core-popover {
+  position: relative;
+  padding: var(--core-semantic-layout-group-gap);
+  max-width: 20rem;
+  background-color: var(--core-semantic-content-strong);
+  border-color: var(--core-semantic-content-inverse);
+  color: var(--core-semantic-border-subtle);
+}
+
+/* Core component source: preview-card.css */
+.core-preview-trigger {
+  background-color: var(--core-semantic-surface-raised);
+  border: 1px solid var(--core-semantic-border-subtle);
+  border-radius: var(--core-semantic-shape-container-radius);
+  box-shadow: var(--core-semantic-elevation-overlay);
+  padding: var(--core-semantic-control-padding-inline);
+  max-width: 20rem;
+  outline: none;
+  transition:
+    opacity 0.15s ease,
+    transform 0.15s ease;
+}
+
+.core-preview-trigger[data-entering],
+.core-preview-trigger[data-exiting] {
+  opacity: 0;
+  transform: scale(0.97);
+}
+
+/* Core component source: toast.css */
+.core-toast-region {
+  position: fixed;
+  z-index: 200;
+  display: flex;
+  width: min(24rem, calc(100vw - (2 * var(--core-semantic-layout-section-gap))));
+  max-height: calc(100vh - (2 * var(--core-semantic-layout-section-gap)));
+  gap: var(--core-semantic-layout-group-gap);
+  pointer-events: none;
+}
+
+.core-toast-list {
+  display: contents;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.core-toast-announcer {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.core-toast-region[data-placement^='top'] {
+  top: var(--core-semantic-layout-section-gap);
+  flex-direction: column;
+}
+
+.core-toast-region[data-placement^='bottom'] {
+  bottom: var(--core-semantic-layout-section-gap);
+  flex-direction: column-reverse;
+}
+
+.core-toast-region[data-placement$='start'] {
+  inset-inline-start: var(--core-semantic-layout-section-gap);
+}
+
+.core-toast-region[data-placement$='end'] {
+  inset-inline-end: var(--core-semantic-layout-section-gap);
+}
+
+.core-toast {
+  position: relative;
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--core-semantic-control-padding-inline);
+  align-items: start;
+  width: 100%;
+  padding: var(--core-semantic-control-padding-inline);
+  color: var(--core-semantic-content-strong);
+  font-family: Inter, sans-serif;
+  font-size: var(--core-semantic-typography-small-size);
+  line-height: var(--core-semantic-typography-body-line-height);
+  pointer-events: auto;
+  background-color: var(--core-popup-bg);
+  border: 1px solid var(--core-popup-border-color);
+  border-inline-start-width: 0.25rem;
+  border-radius: var(--core-popup-radius);
+  box-shadow: var(--core-semantic-elevation-modal);
+  outline: none;
+  transition:
+    opacity var(--core-popup-transition-duration) var(--core-popup-transition-easing),
+    transform var(--core-popup-transition-duration) var(--core-popup-transition-easing);
+}
+
+.core-toast[data-variant='neutral'] {
+  border-inline-start-color: var(--core-semantic-content-muted);
+}
+
+.core-toast[data-variant='success'] {
+  border-inline-start-color: var(--core-semantic-status-success);
+}
+
+.core-toast[data-variant='warning'] {
+  border-inline-start-color: var(--core-semantic-status-warning);
+}
+
+.core-toast[data-variant='danger'] {
+  border-inline-start-color: var(--core-semantic-feedback-invalid);
+}
+
+.core-toast[data-entering],
+.core-toast[data-exiting] {
+  opacity: 0;
+  transform: translateY(var(--core-semantic-layout-group-gap));
+}
+
+.core-toast-content {
+  display: grid;
+  min-width: 0;
+  gap: var(--core-semantic-layout-tight-inset);
+}
+
+.core-toast-title {
+  margin: 0;
+  color: var(--core-semantic-content-strong);
+  font-weight: var(--core-semantic-typography-label-weight);
+}
+
+.core-toast-title-fallback {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.core-toast-message {
+  margin: 0;
+  color: var(--core-semantic-content-default);
+}
+
+.core-toast-dismiss {
+  aspect-ratio: 1;
+  width: calc(1rem + var(--core-semantic-layout-tight-inset) + var(--core-semantic-layout-tight-inset) + 2px);
+  height: calc(1rem + var(--core-semantic-layout-tight-inset) + var(--core-semantic-layout-tight-inset) + 2px);
+  min-height: auto;
+  padding: var(--core-semantic-layout-tight-inset);
+  border-radius: var(--core-semantic-shape-option-radius);
+  flex: none;
+}
+
+@media (max-width: 30rem) {
+  .core-toast-region {
+    inset-inline: var(--core-semantic-layout-section-gap);
+    width: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .core-toast {
+    transition: none;
+  }
+}
+/* Core component source: tooltip.css */
+.core-tooltip {
+  background-color: var(--core-semantic-content-default);
+  color: var(--core-semantic-action-foreground);
+  font-family: Inter, sans-serif;
+  font-size: var(--core-semantic-typography-small-size);
+  font-weight: var(--core-semantic-typography-control-weight);
+  line-height: 1.4;
+  padding: var(--core-semantic-layout-tight-inset) var(--core-semantic-layout-control-gap);
+  border-radius: var(--core-semantic-control-radius);
+  max-width: 15rem;
+  overflow-wrap: anywhere;
+  box-shadow: var(--core-semantic-elevation-indicator);
+  transition:
+    opacity 0.1s ease,
+    transform 0.1s ease;
+  pointer-events: none;
+}
+
+.core-tooltip[data-entering],
+.core-tooltip[data-exiting] {
+  opacity: 0;
+  transform: scale(0.96);
+}
 
 .core-file-trigger {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-block-size: var(--core-semantic-control-min-height);
-  padding: var(--core-semantic-layout-control-gap) var(--core-semantic-control-padding-inline);
-  border: 1px solid var(--core-semantic-action-background);
-  border-radius: var(--core-semantic-control-radius);
-  background: var(--core-semantic-action-background);
-  color: var(--core-semantic-action-foreground);
-  font: inherit;
-  cursor: pointer;
-}
-
-.core-file-trigger:hover:not([data-disabled]) { background: color-mix(in srgb, var(--core-semantic-action-background) 88%, var(--core-semantic-surface-canvas)); border-color: color-mix(in srgb, var(--core-semantic-action-background) 88%, var(--core-semantic-surface-canvas)); }
-.core-file-trigger[disabled], .core-file-trigger[data-disabled] { cursor: not-allowed; opacity: 0.45; }
-
-.core-drop-zone {
-  display: grid;
-  place-items: center;
-  min-block-size: 5rem;
-  padding: var(--core-semantic-control-padding-inline);
-  border: 2px dashed var(--core-semantic-border-strong);
-  border-radius: var(--core-semantic-control-radius);
-  background: var(--core-semantic-surface-canvas);
-  color: var(--core-semantic-content-default);
-  cursor: pointer;
-  transition: background-color var(--core-semantic-motion-feedback) ease, border-color var(--core-semantic-motion-feedback) ease, color var(--core-semantic-motion-feedback) ease;
-}
-
-.core-drop-zone[data-hovered],
-.core-drop-zone[data-drop-target] {
-  border-color: var(--core-semantic-selection-track);
-  background: color-mix(in srgb, var(--core-semantic-selection-track) 8%, var(--core-semantic-surface-canvas));
-  color: var(--core-semantic-action-background);
-}
-
-.core-drop-zone[data-focus-visible] { outline: 2px solid var(--core-semantic-focus-ring); outline-offset: 2px; }
-.core-drop-zone[data-disabled] { cursor: not-allowed; }
-
-.core-dialog-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 1000;
-  display: grid;
-  place-items: center;
-  padding: var(--core-semantic-layout-section-gap);
-  background: var(--core-semantic-overlay-scrim);
-}
-
-.core-dialog-modal { max-block-size: 100%; }
-
-.core-dialog {
-  display: grid;
-  box-sizing: border-box;
-  inline-size: min(90vw, 30rem);
-  max-block-size: min(90vh, 40rem);
-  overflow: auto;
-  gap: var(--core-semantic-layout-group-gap);
-  padding: var(--core-semantic-layout-section-gap);
-  border: 1px solid var(--core-semantic-border-subtle);
-  border-radius: var(--core-semantic-shape-overlay-radius);
-  background: var(--core-semantic-overlay-background);
-  color: var(--core-semantic-content-strong);
-  box-shadow: var(--core-semantic-elevation-modal);
-  outline: none;
-  animation-duration: var(--core-semantic-motion-feedback);
-  animation-timing-function: ease-out;
-  animation-fill-mode: both;
-}
-
-.core-dialog-modal[data-entering] .core-dialog { animation-name: core-overlay-enter; }
-.core-dialog-modal[data-exiting] .core-dialog { animation-name: core-overlay-exit; }
-.core-dialog:focus-visible { outline: 2px solid var(--core-semantic-focus-ring); outline-offset: 2px; }
-.core-dialog-title { margin: 0; font: inherit; font-weight: var(--core-semantic-typography-heading-weight); }
-.core-dialog-content {
-  min-block-size: 0;
-  font-weight: var(--core-semantic-typography-body-weight);
-}
-.core-dialog-close { grid-row: 1; justify-self: end; border: 0; background: transparent; color: inherit; font: inherit; font-size: 1.25rem; cursor: pointer; }
-
-.core-popover {
-  z-index: 1001;
-  max-inline-size: 20rem;
-  padding: var(--core-semantic-layout-group-gap);
-  border: 1px solid var(--core-semantic-border-subtle);
-  border-radius: var(--core-semantic-control-radius);
-  background: var(--core-semantic-overlay-background);
-  color: var(--core-semantic-content-strong);
-  box-shadow: var(--core-semantic-elevation-overlay);
-  animation-duration: var(--core-semantic-motion-feedback);
-  animation-timing-function: ease-out;
-  animation-fill-mode: both;
-}
-
-.core-popover-positioner[data-entering] .core-popover { animation-name: core-overlay-enter; }
-.core-popover-positioner[data-exiting] .core-popover { animation-name: core-overlay-exit; }
-.core-popover:focus-visible { outline: 2px solid var(--core-semantic-focus-ring); outline-offset: 2px; }
-
-.core-preview-trigger {
-  z-index: 1001;
-  max-inline-size: 20rem;
-  padding: var(--core-semantic-layout-group-gap);
-  border: 1px solid var(--core-semantic-border-subtle);
-  border-radius: var(--core-semantic-shape-container-radius);
-  background: var(--core-semantic-overlay-background);
-  color: var(--core-semantic-content-strong);
-  box-shadow: var(--core-semantic-elevation-floating);
-  animation-duration: var(--core-semantic-motion-feedback);
-  animation-timing-function: ease-out;
-  animation-fill-mode: both;
-}
-
-.core-preview-trigger[data-entering] { animation-name: core-overlay-enter; }
-.core-preview-trigger[data-exiting] { animation-name: core-overlay-exit; }
-.core-preview-trigger:focus-visible { outline: 2px solid var(--core-semantic-focus-ring); outline-offset: 2px; }
-
-.core-tooltip {
-  z-index: 1002;
-  max-inline-size: 15rem;
-  padding: var(--core-semantic-layout-tight-inset) var(--core-semantic-layout-control-gap);
-  border-radius: var(--core-semantic-control-radius);
-  background: var(--core-semantic-overlay-background);
-  color: var(--core-semantic-content-strong);
-  font-size: var(--core-semantic-typography-small-size);
-  line-height: 1.3;
-  pointer-events: none;
-  box-shadow: var(--core-semantic-elevation-tooltip);
-  animation-duration: var(--core-semantic-motion-feedback);
-  animation-timing-function: ease-out;
-  animation-fill-mode: both;
-}
-
-.core-tooltip[data-entering] { animation-name: core-overlay-enter; }
-.core-tooltip[data-exiting] { animation-name: core-overlay-exit; }
-
-.core-toast-region {
-  position: fixed;
-  z-index: 1100;
-  inset-block-end: var(--core-semantic-layout-section-gap);
-  inset-inline-end: var(--core-semantic-layout-section-gap);
-  display: grid;
-  gap: var(--core-semantic-layout-group-gap);
-  inline-size: min(24rem, calc(100vw - 2 * var(--core-semantic-layout-section-gap)));
-}
-
-.core-toast {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: var(--core-semantic-layout-tight-inset) var(--core-semantic-layout-group-gap);
-  padding: var(--core-semantic-layout-group-gap);
-  border: 1px solid var(--core-semantic-border-subtle);
-  border-inline-start: 0.25rem solid var(--core-semantic-content-muted);
-  border-radius: var(--core-semantic-control-radius);
-  background: var(--core-semantic-overlay-background);
-  color: var(--core-semantic-content-strong);
-  box-shadow: var(--core-semantic-elevation-overlay);
-  animation-duration: var(--core-semantic-motion-feedback);
-  animation-timing-function: ease-out;
-  animation-fill-mode: both;
-}
-
-.core-toast[data-entering] { animation-name: core-overlay-enter; }
-.core-toast[data-exiting] { animation-name: core-overlay-exit; }
-.core-toast-title, .core-toast-message { grid-column: 1; }
-.core-toast-title { font-weight: var(--core-semantic-typography-heading-weight); }
-.core-toast-title-fallback { position: absolute; inline-size: 1px; block-size: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
-.core-toast-dismiss { grid-column: 2; grid-row: 1 / span 2; align-self: start; border: 0; background: transparent; color: inherit; font: inherit; cursor: pointer; }
-.core-toast[data-variant='success'] { border-inline-start-color: var(--core-semantic-status-success); }
-.core-toast[data-variant='warning'] { border-inline-start-color: var(--core-semantic-status-warning); }
-.core-toast[data-variant='danger'] { border-inline-start-color: var(--core-semantic-feedback-invalid); }
-.core-toast-dismiss:focus-visible, .core-dialog-close:focus-visible { outline: 2px solid var(--core-semantic-focus-ring); outline-offset: 2px; }
-
-@keyframes core-overlay-enter {
-  from { transform: scale(0.97); }
-  to { transform: scale(1); }
-}
-
-@keyframes core-overlay-exit {
-  from { transform: scale(1); }
-  to { transform: scale(0.97); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  :where(.core-drop-zone, .core-dialog, .core-popover, .core-preview-trigger, .core-tooltip, .core-toast) { animation: none; transition: none; }
 }
 
 @media (forced-colors: active) {
-  .core-file-trigger { border-color: ButtonText; background: ButtonFace; color: ButtonText; box-shadow: none; }
-  :where(.core-drop-zone, .core-dialog, .core-popover, .core-preview-trigger, .core-tooltip, .core-toast) { border-color: ButtonText; background: Canvas; color: CanvasText; box-shadow: none; }
-  .core-dialog-backdrop { background: Canvas; }
-  :where(.core-drop-zone, .core-dialog, .core-popover, .core-preview-trigger, .core-tooltip, .core-toast, .core-dialog-close, .core-toast-dismiss):focus-visible { outline-color: Highlight; }
-  .core-toast[data-variant] { border-inline-start-color: Highlight; }
+  :where(.core-dialog, .core-dialog-modal, .core-popover, .core-preview-trigger, .core-toast, .core-tooltip) {
+    border-color: CanvasText;
+    background: Canvas;
+    color: CanvasText;
+    box-shadow: none;
+  }
+
+  .core-dialog-backdrop {
+    background: CanvasText;
+    opacity: 0.48;
+  }
+
+  .core-file-trigger {
+    background: ButtonFace;
+    color: ButtonText;
+  }
 }
 
-@media (prefers-contrast: more) {
-  :where(.core-drop-zone, .core-dialog, .core-popover, .core-preview-trigger, .core-tooltip, .core-toast) { border-width: 2px; }
+:where([data-reduced-motion], [data-core-motion='reduced']) :where(.core-dialog, .core-popover, .core-preview-trigger, .core-toast, .core-tooltip, .core-drop-zone) {
+  animation: none !important;
+  transition-duration: 0s !important;
+}
+
+/* Lifecycle attributes can be placed on the RAC positioner or modal host. */
+.core-dialog-modal[data-entering] .core-dialog,
+.core-dialog-modal[data-exiting] .core-dialog {
+  animation-duration: var(--core-semantic-motion-feedback);
+  animation-timing-function: ease;
+}
+
+.core-dialog-modal[data-entering] .core-dialog,
+.core-popover-positioner[data-entering] .core-popover,
+.core-tooltip[data-entering] {
+  animation-name: core-overlay-enter;
+}
+
+.core-dialog-modal[data-exiting] .core-dialog,
+.core-popover-positioner[data-exiting] .core-popover,
+.core-tooltip[data-exiting],
+.core-toast[data-exiting] {
+  animation-name: core-overlay-exit;
+}
+
+@keyframes core-overlay-enter {
+  from { opacity: 0; transform: scale(0.97); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes core-overlay-exit {
+  from { opacity: 1; transform: scale(1); }
+  to { opacity: 0; transform: scale(0.97); }
 }
