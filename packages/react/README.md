@@ -1,5 +1,5 @@
 <!-- @generated-from: packages/react/src/generate.mjs -->
-<!-- @generated-content-sha256: sha256:276ad50f3f33ae084b548abefe1bdd9dc531f40efc0e10ff013b97c0d8a92af2 -->
+<!-- @generated-content-sha256: sha256:e40e345694d8d4bc1b60c72715f3a71c0ba1089c906d550e66dd2af8a29a71d4 -->
 # @core-ui/react
 
 R1.5 React breadth closure for the standalone Core UI renderer.
@@ -8,6 +8,15 @@ R1.5 React breadth closure for the standalone Core UI renderer.
 - React Aria Components 1.20.0 is an internal replaceable substrate.
 - Core owns the public APIs, tokens, selectors, styling, accessibility behavior, lifecycle, and prop names.
 - Tale UI is a pinned styling donor; generated styling results are Core-owned and Tale UI is not a dependency.
+
+## R1 exit publication candidate
+
+The exact R1 exit candidate is `@core-ui/react@0.1.0-rc.1`, for the `next`
+dist-tag on the npm registry. The candidate contains only the standalone
+`web.react` renderer and its two internal runtime dependencies. All 53
+Core-owned component exports remain experimental; no stable, secondary-renderer,
+or cross-platform support claim is made. Publication, dist-tag mutation, and
+post-publication verification are separate authorized operations.
 
 ## Local tarball usage
 

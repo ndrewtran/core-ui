@@ -569,6 +569,15 @@ const readmeComponentRows = componentArtifacts.map((artifact) => {
   return `| ${markdownCell(artifact.name)} | ${markdownCell(artifact.lifecycle)} | .core-${slug} | ${markdownCell(binding.api.props.join(', ') || 'none')} |`;
 }).join('\n');
 const readmeGuidance = `
+## R1 exit publication candidate
+
+The exact R1 exit candidate is \`@core-ui/react@0.1.0-rc.1\`, for the \`next\`
+dist-tag on the npm registry. The candidate contains only the standalone
+\`web.react\` renderer and its two internal runtime dependencies. All 53
+Core-owned component exports remain experimental; no stable, secondary-renderer,
+or cross-platform support claim is made. Publication, dist-tag mutation, and
+post-publication verification are separate authorized operations.
+
 ## Local tarball usage
 
 Install the versioned local candidate from the package directory:
@@ -619,6 +628,41 @@ const releaseRecord = {
   advisories: [], exceptions: [],
   publication: { status: 'disabled', requires: ['explicit external publish authorization'] },
   rollback: { status: 'candidate-branch-only-before-merge' },
+  packageDependencies: manifest.dependencies,
+  peerDependencies: manifest.peerDependencies,
+  packageExports: manifest.exports,
+  packageFiles: manifest.files,
+  publicationPreparation: {
+    schema: 'core-ui-r1-exit-publication-preparation-v1',
+    candidateVersion: '0.1.0-rc.1',
+    registry: 'https://registry.npmjs.org',
+    distTag: 'next',
+    preparationTool: 'tooling/audits/repository-policy/src/release-prepare.mjs',
+    publishCommand: 'npm publish <candidate-tarball> --tag next --access public --provenance --registry=https://registry.npmjs.org',
+    provenance: 'required-at-publication',
+    source: {
+      package: manifest.name,
+      version: manifest.version,
+      private: manifest.private,
+      generatedFrom: ['packages/react/src/generate.mjs', 'catalog/react-r1-5/closure.json'],
+    },
+    preflight: {
+      status: 'required-before-publication',
+      checks: [
+        'namespace ownership',
+        'version collision',
+        'next dist-tag collision',
+        'publish authorization drift',
+      ],
+    },
+    evidence: {
+      'E-R1-EXIT-01': 'candidate-preparation',
+      'E-R1-EXIT-02': 'candidate-integrity-prepared-registry-provenance-pending',
+      'E-R1-EXIT-03': 'pending-post-publication',
+      'E-R1-EXIT-04': 'pending-post-publication',
+    },
+    rollback: 'restore the previously verified next pointer through a separately authorized dist-tag mutation; retain the immutable rc.1 version and its manifest',
+  },
 };
 for (const rule of crosswalk.button.rules) {
   if (rule.core.includes('.') && !cssBody.includes(`--core-${rule.core.replaceAll('.', '-')}`)) throw new Error(`CORE_REACT_DONOR_RESULT_MISSING: ${rule.input}`);
