@@ -773,7 +773,9 @@ test('R1.3 Tree flattens nested items for keyboard collection semantics', async 
     assert.equal(content?.querySelector('.core-tree-item-label')?.textContent, 'Parent');
     assert.equal(toggle?.getAttribute('slot'), 'chevron');
     assert.equal(toggle?.getAttribute('aria-label'), 'Toggle');
-    assert.equal(toggle?.textContent, '▶');
+    assert.equal(toggle?.querySelector('svg')?.getAttribute('aria-hidden'), 'true');
+    assert.equal(toggle?.querySelector('svg')?.getAttribute('focusable'), 'false');
+    assert.equal(toggle?.querySelector('svg')?.classList.contains('lucide-chevron-right'), true);
     const styles = await readFile(resolve(import.meta.dirname, '../generated/styles.css'), 'utf8');
     assert.doesNotMatch(styles, /\.core-tree-item\[data-has-child-items\].*::before/u);
     assert.match(styles, /\.core-tree-toggle\s*\{[^}]*transform:|\.core-tree-item\[data-expanded\] \.core-tree-toggle/u);

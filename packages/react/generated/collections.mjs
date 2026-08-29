@@ -1,6 +1,10 @@
 // @generated-from: packages/react/src/collections.mjs
-// @generated-content-sha256: sha256:7be0f78e14dc36f450562cbd45109efff9031ad11bdbc57ee69233bc1cac7ef1
+// @generated-content-sha256: sha256:e5512d2e9062180418f7555aa47eb5a957816973cacdc226249bc07a6d343204
 import React from 'react';
+import ChevronDownIcon from 'lucide-react/dist/esm/icons/chevron-down.mjs';
+import ChevronLeftIcon from 'lucide-react/dist/esm/icons/chevron-left.mjs';
+import ChevronRightIcon from 'lucide-react/dist/esm/icons/chevron-right.mjs';
+import XIcon from 'lucide-react/dist/esm/icons/x.mjs';
 import {
   Calendar as AriaCalendar,
   CalendarCell as AriaCalendarCell,
@@ -167,9 +171,9 @@ function calendarGrid(cellClass = 'core-calendar-cell') {
 
 function calendarHeader() {
   return React.createElement('div', { className: 'core-calendar-header' },
-    React.createElement(AriaButton, { slot: 'previous', 'aria-label': 'Previous month', className: 'core-calendar-previous' }, '‹'),
+    React.createElement(AriaButton, { slot: 'previous', 'aria-label': 'Previous month', className: 'core-calendar-previous' }, React.createElement(ChevronLeftIcon, { 'aria-hidden': 'true', focusable: 'false', size: 16 })),
     React.createElement(AriaCalendarHeading, { className: 'core-calendar-heading' }),
-    React.createElement(AriaButton, { slot: 'next', 'aria-label': 'Next month', className: 'core-calendar-next' }, '›'));
+    React.createElement(AriaButton, { slot: 'next', 'aria-label': 'Next month', className: 'core-calendar-next' }, React.createElement(ChevronRightIcon, { 'aria-hidden': 'true', focusable: 'false', size: 16 })));
 }
 
 function calendarProps(props, name, labelId) {
@@ -365,8 +369,7 @@ export const ComboBox = React.forwardRef(function ComboBox({ label, description,
     React.createElement(AriaGroup, { className: 'core-combo-control' },
       React.createElement(AriaInput, { className: 'core-field-input', placeholder }),
       React.createElement(AriaButton, { className: 'core-combo-box-trigger', 'aria-label': 'Show options' },
-        React.createElement('svg', { className: 'core-combo-box-arrow', viewBox: '0 0 24 24', width: 16, height: 16, fill: 'none', stroke: 'currentColor', strokeWidth: 2, strokeLinecap: 'round', strokeLinejoin: 'round', 'aria-hidden': 'true', focusable: 'false' },
-          React.createElement('path', { d: 'm6 9 6 6 6-6' })))),
+        React.createElement(ChevronDownIcon, { className: 'core-combo-box-arrow', 'aria-hidden': 'true', focusable: 'false', size: 16 }))),
     description !== undefined ? React.createElement(AriaText, { slot: 'description', className: 'core-field-description' }, description) : null,
     errorMessage !== undefined ? React.createElement(AriaFieldError, { className: 'core-field-error' }, errorMessage) : null,
     React.createElement(AriaPopover, { className: 'core-combo-box-popover' }, React.createElement(AriaListBox, { items: normalized, className: 'core-combo-box-list' }, (item) => React.createElement(AriaListBoxItem, { id: item.id, textValue: item.textValue, className: 'core-combo-box-option' }, item.label))),
@@ -380,7 +383,7 @@ export const Select = React.forwardRef(function Select({ label, description, err
   const handleSelection = (key) => { if (!disabled && !readOnly) onChange?.(key == null ? undefined : String(key)); };
   return React.createElement(AriaSelect, { ...props, ref, selectedKey: value, defaultSelectedKey: defaultValue, onSelectionChange: handleSelection, isDisabled: disabled, isReadOnly: readOnly, isRequired: required, isInvalid: invalid || errorMessage !== undefined, name, className: classNames('core-select', className), 'aria-label': ariaLabel, 'aria-labelledby': ariaLabelledby },
     label !== undefined ? React.createElement(AriaLabel, { className: 'core-field-label' }, label) : null,
-    React.createElement(AriaButton, { className: 'core-select-trigger', 'data-disabled': disabled || undefined, 'aria-disabled': disabled || undefined }, React.createElement(AriaSelectValue, { className: 'core-select-value', children: ({ selectedText }) => selectedText || placeholder }), React.createElement('span', { className: 'core-select-arrow', 'aria-hidden': 'true' }, '⌄')),
+    React.createElement(AriaButton, { className: 'core-select-trigger', 'data-disabled': disabled || undefined, 'aria-disabled': disabled || undefined }, React.createElement(AriaSelectValue, { className: 'core-select-value', children: ({ selectedText }) => selectedText || placeholder }), React.createElement(ChevronDownIcon, { className: 'core-select-arrow', 'aria-hidden': 'true', focusable: 'false', size: 16 })),
     description !== undefined ? React.createElement(AriaText, { slot: 'description', className: 'core-field-description' }, description) : null,
     errorMessage !== undefined ? React.createElement(AriaFieldError, { className: 'core-field-error' }, errorMessage) : null,
     React.createElement(AriaPopover, { className: 'core-select-popover' }, React.createElement(AriaListBox, { items: normalized, className: 'core-select-list' }, (item) => React.createElement(AriaListBoxItem, { id: item.id, textValue: item.textValue, className: 'core-select-option' }, item.label))),
@@ -427,7 +430,7 @@ Tabs.displayName = 'Tabs';
 export const TagGroup = React.forwardRef(function TagGroup({ label, items = [], onRemove, onAction, disabled = false, className, 'aria-label': ariaLabel, 'aria-labelledby': ariaLabelledby }, ref) {
   const normalized = normalizeItems(items);
   accessibleName({ label, ariaLabel, ariaLabelledby }, 'TagGroup');
-  return React.createElement(AriaTagGroup, { ref, onRemove: (keys) => { if (!disabled) onRemove?.([...keys].map(String).map((id) => normalized.find((item) => item.id === id)).filter((item) => item && !item.disabled)); }, onAction: (key) => { const item = normalized.find((candidate) => candidate.id === String(key)); if (!disabled && !item?.disabled) onAction?.(item); }, isDisabled: disabled, 'aria-label': ariaLabel, 'aria-labelledby': ariaLabelledby, className: classNames('core-tag-group', className) }, label !== undefined ? React.createElement(AriaLabel, { className: 'core-field-label' }, label) : null, React.createElement(AriaTagList, { items: normalized, className: 'core-tag-list' }, (item) => React.createElement(AriaTag, { id: item.id, textValue: item.textValue, isDisabled: disabled || item.disabled, className: 'core-tag' }, item.label, onRemove ? React.createElement(AriaButton, { slot: 'remove', isDisabled: disabled || item.disabled, className: 'core-tag-remove' }, '×') : null)));
+  return React.createElement(AriaTagGroup, { ref, onRemove: (keys) => { if (!disabled) onRemove?.([...keys].map(String).map((id) => normalized.find((item) => item.id === id)).filter((item) => item && !item.disabled)); }, onAction: (key) => { const item = normalized.find((candidate) => candidate.id === String(key)); if (!disabled && !item?.disabled) onAction?.(item); }, isDisabled: disabled, 'aria-label': ariaLabel, 'aria-labelledby': ariaLabelledby, className: classNames('core-tag-group', className) }, label !== undefined ? React.createElement(AriaLabel, { className: 'core-field-label' }, label) : null, React.createElement(AriaTagList, { items: normalized, className: 'core-tag-list' }, (item) => React.createElement(AriaTag, { id: item.id, textValue: item.textValue, isDisabled: disabled || item.disabled, className: 'core-tag' }, item.label, onRemove ? React.createElement(AriaButton, { slot: 'remove', isDisabled: disabled || item.disabled, className: 'core-tag-remove' }, React.createElement(XIcon, { 'aria-hidden': 'true', focusable: 'false', size: 12 })) : null)));
 });
 TagGroup.displayName = 'TagGroup';
 
@@ -537,7 +540,7 @@ function treeItem(item) {
   return React.createElement(AriaTreeItem, { id: item.id, textValue: item.textValue, hasChildItems: nested.length > 0, isDisabled: item.disabled, className: 'core-tree-item' },
     React.createElement(AriaTreeItemContent, null,
       React.createElement('div', { className: 'core-tree-item-content' },
-        nested.length ? React.createElement(AriaButton, { slot: 'chevron', 'aria-label': 'Toggle', isDisabled: item.disabled, className: 'core-tree-toggle' }, '▶') : null,
+        nested.length ? React.createElement(AriaButton, { slot: 'chevron', 'aria-label': 'Toggle', isDisabled: item.disabled, className: 'core-tree-toggle' }, React.createElement(ChevronRightIcon, { 'aria-hidden': 'true', focusable: 'false', fill: 'currentColor', strokeWidth: 0, size: 16 })) : null,
         React.createElement('span', { className: 'core-tree-item-label' }, item.label)),
     ),
     nested.map((child) => React.cloneElement(treeItem(child), { key: child.id })));

@@ -1,5 +1,5 @@
 /* @generated-from: packages/react/src/generate.mjs
- * @generated-content-sha256: sha256:a198815e01ab47670ff3c9b815947963659a8ae952d0361ecdd146885758ac71
+ * @generated-content-sha256: sha256:9a09be83a1149f811e3f0d11e64f70b64033179c827a7a0f469664a8de822e45
  */
 :root {
   --core-component-button-background: #025768;
@@ -1269,8 +1269,6 @@
 .core-checkbox-label { line-height: 1.5; }
 .core-checkbox-indicator { display: inline-grid; place-items: center; inline-size: 1.125rem; block-size: 1.125rem; flex: 0 0 auto; border: 1.5px solid var(--core-semantic-content-faint); border-radius: var(--core-semantic-shape-indicator-radius); background: var(--core-semantic-surface-raised); color: var(--core-semantic-surface-canvas); font-size: var(--core-semantic-typography-tiny-size); font-weight: var(--core-semantic-typography-heading-weight); line-height: 1; }
 .core-checkbox-indicator[data-selected], .core-checkbox-indicator[data-indeterminate] { border-color: var(--core-semantic-selection-track); background: var(--core-semantic-selection-track); color: var(--core-semantic-action-foreground); }
-.core-checkbox-indicator[data-selected]::before { content: '✓'; }
-.core-checkbox-indicator[data-indeterminate]::before { content: '−'; }
 .core-checkbox input { accent-color: var(--core-semantic-selection-track); }
 .core-checkbox:focus-within, .core-checkbox[data-focus-visible] { outline: 2px solid var(--core-semantic-focus-ring); outline-offset: 2px; }
 .core-checkbox[data-invalid] .core-checkbox-indicator { border-color: var(--core-semantic-feedback-invalid); }
@@ -2918,6 +2916,10 @@
   border-left: 1px solid #cbc8c6;
   border-radius: 0 calc(10px - 1px) calc(10px - 1px) 0;
   background-color: #f2f1f0;
+}
+
+.core-date-trigger > svg {
+  transform: translateY(1px);
 }
 
 .core-date-range-control .core-date-trigger {
@@ -4775,6 +4777,12 @@
   position: relative;
   inset-inline-start: 0.25px;
   inset-block-start: 1px;
+}
+
+.core-tree-toggle > svg {
+  flex-shrink: 0;
+  transform: scaleX(2);
+  transform-origin: center;
 }
 
 .core-tree-item-label {

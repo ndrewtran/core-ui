@@ -1816,6 +1816,12 @@
   inset-block-start: 1px;
 }
 
+.core-tree-toggle > svg {
+  flex-shrink: 0;
+  transform: scaleX(2);
+  transform-origin: center;
+}
+
 .core-tree-item-label {
   position: relative;
   inset-inline-start: 0.5px;

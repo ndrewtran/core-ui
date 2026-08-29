@@ -24,6 +24,7 @@ test('R1.1 package has an exact standalone substrate identity', async () => {
   assert.equal(manifest.scripts.prepublishOnly, 'node src/publish-guard.mjs');
   assert.equal(manifest.dependencies['react-aria-components'], '1.20.0');
   assert.equal(manifest.dependencies['@internationalized/date'], '3.12.3');
+  assert.equal(manifest.dependencies['lucide-react'], '1.37.0');
   assert.equal(manifest.dependencies['@core-ui/web'], undefined);
 });
 
@@ -76,7 +77,10 @@ test('R1.1 packed package exposes a clean Core component surface', async () => {
     assert.doesNotMatch(publicTypes, /react-aria-components|react-stately|@internationalized\/date|isPending|isDisabled|isSelected|isExpanded|onPress/u);
   assert.match(publicTypes, /export (?:interface|type) (?:ButtonProps|BreadcrumbsProps|CheckboxProps|DisclosureProps|DisclosureGroupProps|GroupProps|LinkProps|MeterProps|ProgressBarProps|SeparatorProps|ToggleButtonProps|AutocompleteProps|CheckboxGroupProps|DateFieldProps|DatePickerProps|DateRangePickerProps|FormProps|NumberFieldProps|SearchFieldProps|SwitchProps|TextFieldProps|TimeFieldProps|CalendarProps|ColorAreaProps|ColorFieldProps|ColorPickerProps|ColorSliderProps|ColorSwatchProps|ColorSwatchPickerProps|ColorWheelProps|ComboBoxProps|GridListProps|ListBoxProps|MenuProps|RadioGroupProps|RangeCalendarProps|SelectProps|SliderProps|TableProps|TabsProps|TagGroupProps|ToggleButtonGroupProps|TokenFieldProps|ToolbarProps|TreeProps|VirtualizerProps)/u);
     assert.match(await readFile(join(consumerPackage, 'generated/styles.css'), 'utf8'), /\.core-(?:breadcrumbs|checkbox|disclosure|disclosure-group|group|link|meter|progress-bar|separator|toggle-button|autocomplete|checkbox-group|date-field|date-picker|date-range-picker|form|number-field|search-field|switch|text-field|time-field)/u);
-    assert.match(await readFile(join(consumerPackage, 'NOTICE'), 'utf8'), /Tale UI/u);
+    const consumerNotice = await readFile(join(consumerPackage, 'NOTICE'), 'utf8');
+    assert.match(consumerNotice, /Tale UI/u);
+    assert.match(consumerNotice, /Lucide ISC License/u);
+    assert.match(consumerNotice, /Copyright \(c\) 2013-present Cole Bemis/u);
   } finally {
     await Promise.all([
       rm(packRoot, { recursive: true, force: true }),
@@ -108,6 +112,7 @@ test('R1.2 public surface exports the Core component slice without upstream type
   assert.deepEqual(release.advisories, []);
   assert.deepEqual(release.exceptions, []);
   assert.match(await readFile(resolve(packageRoot, 'NOTICE'), 'utf8'), /Tale UI/);
+  assert.match(await readFile(resolve(packageRoot, 'NOTICE'), 'utf8'), /Lucide ISC License/);
   const componentDonorSource = await readFile(resolve(packageRoot, 'generated/component-donor-comparison.json'), 'utf8');
   const componentDonor = JSON.parse(componentDonorSource.replace(/^\/\/ @generated-from:.*\n\/\/ @generated-content-sha256:.*\n/u, ''));
   assert.deepEqual(componentDonor.components.map(({ component }) => component), componentNames);
@@ -250,6 +255,7 @@ test('R1.0 donor inputs are exact, fully crosswalked, licensed, and dependency-f
 test('R1.0 lockfile binds the accepted React Aria package integrity', async () => {
   const lockfile = await readFile(resolve(import.meta.dirname, '../../../pnpm-lock.yaml'), 'utf8');
   assert.match(lockfile, /react-aria-components@1\.20\.0:\n\s+resolution: \{integrity: sha512-BMbpIgoV9aELeBrB0Y120NgoigHb5OdcJwc\+4e7uSnbTbamea6lo\+gqcc4LAxzMaK3Jf\+7LI1oCDE6yANsmxIQ==\}/u);
+  assert.match(lockfile, /lucide-react@1\.37\.0:\n\s+resolution: \{integrity: sha512-LPsB4rD1TD6wZu1djKOf9vUnS1jTNaHbolXebXDgiTdb6jeA1agIJhJsIybCmjKmQClcOaal1o1OaiYahEftyQ==\}/u);
 });
 
 test('R1.0 binds current reusable token facts and keeps historical proof provenance-only', async () => {

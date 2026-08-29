@@ -88,6 +88,8 @@ test('R1.2 fields preserve Core labels, errors, SSR, hydration, and state callba
     assert.equal(document.querySelector('.core-switch input')?.checked, false);
     assert.equal(document.querySelector('.core-switch-field')?.getAttribute('data-invalid'), 'true');
     assert.match(document.querySelector('.core-switch-field')?.textContent ?? '', /Apply changes.*Choose a setting/u);
+    assert.equal(document.querySelector('.core-search-clear svg')?.getAttribute('aria-hidden'), 'true');
+    assert.equal(document.querySelector('.core-search-clear svg')?.getAttribute('focusable'), 'false');
     await act(async () => root.unmount());
   } finally {
     restore();
@@ -109,7 +111,8 @@ test('SearchField keeps its clear action in the input control grid with supporti
   assert.equal(control.querySelector('input')?.parentElement, control);
   const clear = control.querySelector('.core-search-clear');
   assert.equal(clear?.parentElement, control);
-  assert.equal(clear?.textContent, '×');
+  assert.equal(clear?.querySelector('svg')?.getAttribute('aria-hidden'), 'true');
+  assert.equal(clear?.querySelector('svg')?.getAttribute('focusable'), 'false');
   assert.equal(clear?.getAttribute('aria-label'), 'Clear search');
   assert.match(dom.window.document.querySelector('.core-search-field')?.textContent ?? '', /Find a result.*No result found/u);
   const css = await readFile(new URL('../generated/styles.css', import.meta.url), 'utf8');

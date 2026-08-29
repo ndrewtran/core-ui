@@ -704,6 +704,10 @@
   background-color: var(--core-reference-color-neutral-10);
 }
 
+.core-date-trigger > svg {
+  transform: translateY(1px);
+}
+
 .core-date-range-control .core-date-trigger {
   width: calc(var(--core-field-min-height) + 9px);
 }

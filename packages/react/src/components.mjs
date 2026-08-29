@@ -1,4 +1,6 @@
 import React from 'react';
+import CheckIcon from 'lucide-react/dist/esm/icons/check.mjs';
+import MinusIcon from 'lucide-react/dist/esm/icons/minus.mjs';
 import {
   Breadcrumb as AriaBreadcrumb,
   Breadcrumbs as AriaBreadcrumbs,
@@ -103,7 +105,9 @@ export const Checkbox = React.forwardRef(function Checkbox({
       'aria-hidden': 'true',
       'data-selected': isSelected || undefined,
       'data-indeterminate': isIndeterminate || undefined,
-    }),
+    }, isIndeterminate || isSelected
+      ? React.createElement(isIndeterminate ? MinusIcon : CheckIcon, { 'aria-hidden': 'true', focusable: 'false', size: 12 })
+      : null),
     React.createElement('span', { className: 'core-checkbox-label' }, children)));
 });
 

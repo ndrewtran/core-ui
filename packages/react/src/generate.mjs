@@ -370,7 +370,7 @@ const readmeGuidance = `
 
 The exact R1 exit candidate is \`@core-ui/react@0.1.0-rc.1\`, for the \`next\`
 dist-tag on the npm registry. The candidate contains only the standalone
-\`web.react\` renderer and its two internal runtime dependencies. All 53
+\`web.react\` renderer and its three internal runtime dependencies. All 53
 Core-owned component exports remain experimental; no stable, secondary-renderer,
 or cross-platform support claim is made. Publication, dist-tag mutation, and
 post-publication verification are separate authorized operations.

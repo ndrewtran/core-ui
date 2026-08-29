@@ -1,4 +1,5 @@
 import React from 'react';
+import XIcon from 'lucide-react/dist/esm/icons/x.mjs';
 import { Button as CoreButton } from './button.mjs';
 import {
   Button as AriaButton,
@@ -144,7 +145,7 @@ function DialogContent({ title, children, ariaLabel, dismissable, className, con
   return React.createElement(AriaDialog, { ...props, ref: contentRef, className: classNames('core-dialog', className), 'aria-label': ariaLabel, 'aria-modal': 'true' },
     hasRenderableLabel(title) ? React.createElement(AriaHeading, { slot: 'title', className: 'core-dialog-title' }, title) : null,
     React.createElement('div', { className: 'core-dialog-content' }, children),
-    dismissable ? React.createElement(AriaButton, { slot: 'close', className: 'core-dialog-close', 'aria-label': 'Close dialog' }, '×') : null);
+    dismissable ? React.createElement(AriaButton, { slot: 'close', className: 'core-dialog-close', 'aria-label': 'Close dialog' }, React.createElement(XIcon, { 'aria-hidden': 'true', focusable: 'false', size: 16 })) : null);
 }
 
 function DialogOverlay({ dismissable, children, ...props }) {
@@ -293,7 +294,7 @@ function ToastView({ toast }) {
     React.createElement(AriaToastContent, { className: 'core-toast-content' },
       React.createElement(AriaText, { slot: 'title', className: classNames('core-toast-title', !hasTitle && 'core-toast-title-fallback') }, hasTitle ? value.title : TOAST_FALLBACK_TITLE),
       React.createElement(AriaText, { slot: 'description', className: 'core-toast-message' }, value.message)),
-    React.createElement(AriaButton, { slot: 'close', className: 'core-toast-dismiss', 'aria-label': 'Dismiss notification' }, '×'));
+    React.createElement(AriaButton, { slot: 'close', className: 'core-toast-dismiss', 'aria-label': 'Dismiss notification' }, React.createElement(XIcon, { 'aria-hidden': 'true', focusable: 'false', size: 16 })));
 }
 
 /** Stable Core facade over RAC's unstable queue/region implementation. */

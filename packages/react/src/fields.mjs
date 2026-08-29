@@ -34,6 +34,12 @@ import {
   TimeField as AriaTimeField,
 } from 'react-aria-components';
 import { parseDate, parseTime } from '@internationalized/date';
+import CalendarIcon from 'lucide-react/dist/esm/icons/calendar.mjs';
+import ChevronLeftIcon from 'lucide-react/dist/esm/icons/chevron-left.mjs';
+import ChevronRightIcon from 'lucide-react/dist/esm/icons/chevron-right.mjs';
+import MinusIcon from 'lucide-react/dist/esm/icons/minus.mjs';
+import PlusIcon from 'lucide-react/dist/esm/icons/plus.mjs';
+import XIcon from 'lucide-react/dist/esm/icons/x.mjs';
 
 const ISO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/u;
 const ISO_TIME_PATTERN = /^(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?$/u;
@@ -63,21 +69,11 @@ function fieldError(errorMessage) {
 }
 
 function calendarGlyph() {
-  return React.createElement('svg', {
+  return React.createElement(CalendarIcon, {
     'aria-hidden': 'true',
-    viewBox: '0 0 24 24',
-    width: 16,
-    height: 16,
-    fill: 'none',
-    stroke: 'currentColor',
-    strokeWidth: 2,
-    strokeLinecap: 'round',
-    strokeLinejoin: 'round',
-  },
-  React.createElement('rect', { x: 3, y: 4, width: 18, height: 17, rx: 2 }),
-  React.createElement('line', { x1: 3, y1: 9, x2: 21, y2: 9 }),
-  React.createElement('line', { x1: 8, y1: 2, x2: 8, y2: 6 }),
-  React.createElement('line', { x1: 16, y1: 2, x2: 16, y2: 6 }));
+    focusable: 'false',
+    size: 16,
+  });
 }
 
 function fieldChildren({ label, description, errorMessage, children, input }) {
@@ -128,9 +124,9 @@ function calendarChildren(cellClass = 'core-calendar-cell') {
 
 function calendarHeader() {
   return React.createElement('div', { className: 'core-calendar-header' },
-    React.createElement(AriaButton, { slot: 'previous', 'aria-label': 'Previous month', className: 'core-calendar-previous' }, '‹'),
+    React.createElement(AriaButton, { slot: 'previous', 'aria-label': 'Previous month', className: 'core-calendar-previous' }, React.createElement(ChevronLeftIcon, { 'aria-hidden': 'true', focusable: 'false', size: 16 })),
     React.createElement(AriaCalendarHeading, { className: 'core-calendar-heading' }),
-    React.createElement(AriaButton, { slot: 'next', 'aria-label': 'Next month', className: 'core-calendar-next' }, '›'));
+    React.createElement(AriaButton, { slot: 'next', 'aria-label': 'Next month', className: 'core-calendar-next' }, React.createElement(ChevronRightIcon, { 'aria-hidden': 'true', focusable: 'false', size: 16 })));
 }
 
 function datePopover() {
@@ -295,7 +291,7 @@ export const SearchField = React.forwardRef(function SearchField({
     errorMessage,
     input: React.createElement('div', { className: 'core-search-control' },
       React.createElement(AriaInput, { className: 'core-field-input', placeholder }),
-      React.createElement(AriaButton, { slot: 'clear', type: 'button', className: 'core-search-clear', 'aria-label': 'Clear search', onPress: onClear }, '×')),
+      React.createElement(AriaButton, { slot: 'clear', type: 'button', className: 'core-search-clear', 'aria-label': 'Clear search', onPress: onClear }, React.createElement(XIcon, { 'aria-hidden': 'true', focusable: 'false', size: 14 }))),
   }));
 });
 
@@ -344,9 +340,9 @@ export const NumberField = React.forwardRef(function NumberField({
     description,
     errorMessage,
     input: React.createElement(AriaGroup, { className: 'core-number-control' },
-      React.createElement(AriaButton, { slot: 'decrement', type: 'button', className: 'core-number-stepper core-number-stepper-decrement' }, '−'),
+      React.createElement(AriaButton, { slot: 'decrement', type: 'button', className: 'core-number-stepper core-number-stepper-decrement' }, React.createElement(MinusIcon, { 'aria-hidden': 'true', focusable: 'false', size: 16 })),
       React.createElement(AriaInput, { className: 'core-field-input', inputMode: 'decimal' }),
-      React.createElement(AriaButton, { slot: 'increment', type: 'button', className: 'core-number-stepper core-number-stepper-increment' }, '+')),
+      React.createElement(AriaButton, { slot: 'increment', type: 'button', className: 'core-number-stepper core-number-stepper-increment' }, React.createElement(PlusIcon, { 'aria-hidden': 'true', focusable: 'false', size: 16 }))),
   }));
 });
 

@@ -185,6 +185,39 @@ test('PreviewTrigger keeps naming on one non-modal inner dialog and cleans up it
   }
 });
 
+test('Dialog and Toast close controls use decorative Lucide X icons', async () => {
+  const env = installDom();
+  const host = document.querySelector('#root');
+  const root = createRoot(host);
+  let manager;
+  function CaptureManager() {
+    manager = useToast();
+    return null;
+  }
+  try {
+    await act(async () => root.render(React.createElement(ToastProvider, null,
+      React.createElement(CaptureManager),
+      React.createElement(Dialog, { title: 'Details', defaultOpen: true }, 'Dialog body'))));
+    const dialogClose = document.body.querySelector('.core-dialog-close');
+    assert.ok(dialogClose);
+    assert.equal(dialogClose.getAttribute('aria-label'), 'Close dialog');
+    assert.equal(dialogClose.querySelector('svg')?.classList.contains('lucide-x'), true);
+    assert.equal(dialogClose.querySelector('svg')?.getAttribute('aria-hidden'), 'true');
+    assert.equal(dialogClose.querySelector('svg')?.getAttribute('focusable'), 'false');
+
+    await act(async () => manager.add('Saved', { duration: 60000 }));
+    const toastDismiss = document.body.querySelector('.core-toast-dismiss');
+    assert.ok(toastDismiss);
+    assert.equal(toastDismiss.getAttribute('aria-label'), 'Dismiss notification');
+    assert.equal(toastDismiss.querySelector('svg')?.classList.contains('lucide-x'), true);
+    assert.equal(toastDismiss.querySelector('svg')?.getAttribute('aria-hidden'), 'true');
+    assert.equal(toastDismiss.querySelector('svg')?.getAttribute('focusable'), 'false');
+  } finally {
+    await act(async () => root.unmount());
+    env.restore();
+  }
+});
+
 test('R1.4 label guards reject empty hosts, fragments, and arrays while preserving valid labels', () => {
   for (const empty of [React.createElement('span'), React.createElement(React.Fragment), []]) {
     assert.throws(() => renderToString(React.createElement(Dialog, { title: empty })), /Dialog requires a title or accessible name/u);
@@ -366,6 +399,9 @@ test('title-less useToast notifications have an accessible RAC name', async () =
     assert.equal(dismiss.parentElement, toast);
     assert.equal(content.contains(dismiss), false);
     assert.equal(dismiss.getAttribute('aria-label'), 'Dismiss notification');
+    assert.equal(dismiss.querySelector('svg')?.classList.contains('lucide-x'), true);
+    assert.equal(dismiss.querySelector('svg')?.getAttribute('aria-hidden'), 'true');
+    assert.equal(dismiss.querySelector('svg')?.getAttribute('focusable'), 'false');
     const styles = await readFile(resolve(import.meta.dirname, '../generated/styles.css'), 'utf8');
     assert.match(styles, /:where\([\s\S]*\.core-toast-dismiss[\s\S]*border:\s*1px solid transparent;[\s\S]*appearance:\s*none;/u);
     assert.match(styles, /\.core-toast-dismiss\s*\{[^}]*aspect-ratio:\s*1;[\s\S]*width:\s*calc\(1rem \+ var\(--core-semantic-layout-tight-inset\) \+ var\(--core-semantic-layout-tight-inset\) \+ 2px\);[\s\S]*height:\s*calc\(1rem \+ var\(--core-semantic-layout-tight-inset\) \+ var\(--core-semantic-layout-tight-inset\) \+ 2px\);[\s\S]*padding:\s*var\(--core-semantic-layout-tight-inset\);[\s\S]*border-radius:\s*var\(--core-semantic-shape-option-radius\)/u);
