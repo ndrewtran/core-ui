@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 import React, { act } from 'react';
 import { createRoot, hydrateRoot } from 'react-dom/client';
@@ -158,5 +159,35 @@ test('R1.1 Core labels, checkbox indicator states, and breadcrumb current normal
   } finally {
     restore();
     dom.window.close();
+  }
+});
+
+test('DisclosureGroup uses accordion trigger geometry without changing standalone Disclosure sizing', async () => {
+  const server = renderToString(React.createElement(React.Fragment, null,
+    React.createElement(Disclosure, { title: 'Standalone' }, 'Content'),
+    React.createElement(DisclosureGroup, null,
+      React.createElement(Disclosure, { id: 'grouped', title: 'Grouped' }, 'Content'))));
+  const dom = new JSDOM(`<!doctype html><div id="root">${server}</div>`);
+  const standalone = dom.window.document.querySelector('.core-disclosure:not(.core-disclosure-group) .core-disclosure-trigger')
+    ?? dom.window.document.querySelector('.core-disclosure-trigger');
+  const grouped = dom.window.document.querySelector('.core-disclosure-group .core-disclosure-trigger');
+  assert.ok(standalone);
+  assert.ok(grouped);
+  assert.equal(grouped.closest('.core-disclosure-group')?.classList.contains('core-disclosure-group'), true);
+  const styles = await readFile(new URL('../generated/styles.css', import.meta.url), 'utf8');
+  assert.match(styles, /\.core-disclosure-group \.core-disclosure-trigger\s*\{[^}]*width:\s*100%[\s\S]*padding:\s*var\(--core-semantic-control-padding-inline\)/u);
+  assert.match(styles, /\.core-disclosure-trigger\s*\{[\s\S]*width:\s*fit-content/u);
+  dom.window.close();
+});
+
+test('Group read-only state stays data-only for its supported roles', () => {
+  for (const role of ['group', 'region', 'presentation']) {
+    const markup = renderToString(React.createElement(Group, {
+      role,
+      readOnly: true,
+      'aria-label': `${role} actions`,
+    }, React.createElement('button', { type: 'button' }, 'Save')));
+    assert.match(markup, /data-readonly="true"/u, role);
+    assert.doesNotMatch(markup, /aria-readonly=/u, role);
   }
 });

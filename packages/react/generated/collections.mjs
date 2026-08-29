@@ -1,6 +1,10 @@
 // @generated-from: packages/react/src/collections.mjs
-// @generated-content-sha256: sha256:c3b0123f0c0892a955066e379e1e6c4bf746e05c0882b0463713ab3c28cbbd49
+// @generated-content-sha256: sha256:e5512d2e9062180418f7555aa47eb5a957816973cacdc226249bc07a6d343204
 import React from 'react';
+import ChevronDownIcon from 'lucide-react/dist/esm/icons/chevron-down.mjs';
+import ChevronLeftIcon from 'lucide-react/dist/esm/icons/chevron-left.mjs';
+import ChevronRightIcon from 'lucide-react/dist/esm/icons/chevron-right.mjs';
+import XIcon from 'lucide-react/dist/esm/icons/x.mjs';
 import {
   Calendar as AriaCalendar,
   CalendarCell as AriaCalendarCell,
@@ -59,6 +63,7 @@ import {
   Tree as AriaTree,
   TreeItem as AriaTreeItem,
   Virtualizer as AriaVirtualizer,
+  Group as AriaGroup,
   ListLayout,
   TreeItemContent as AriaTreeItemContent,
   Label as AriaLabel,
@@ -166,9 +171,9 @@ function calendarGrid(cellClass = 'core-calendar-cell') {
 
 function calendarHeader() {
   return React.createElement('div', { className: 'core-calendar-header' },
-    React.createElement(AriaButton, { slot: 'previous', 'aria-label': 'Previous month', className: 'core-calendar-previous' }, '‹'),
+    React.createElement(AriaButton, { slot: 'previous', 'aria-label': 'Previous month', className: 'core-calendar-previous' }, React.createElement(ChevronLeftIcon, { 'aria-hidden': 'true', focusable: 'false', size: 16 })),
     React.createElement(AriaCalendarHeading, { className: 'core-calendar-heading' }),
-    React.createElement(AriaButton, { slot: 'next', 'aria-label': 'Next month', className: 'core-calendar-next' }, '›'));
+    React.createElement(AriaButton, { slot: 'next', 'aria-label': 'Next month', className: 'core-calendar-next' }, React.createElement(ChevronRightIcon, { 'aria-hidden': 'true', focusable: 'false', size: 16 })));
 }
 
 function calendarProps(props, name, labelId) {
@@ -235,7 +240,7 @@ RangeCalendar.displayName = 'RangeCalendar';
 export const ColorSwatch = React.forwardRef(function ColorSwatch({ color, disabled = false, className, ...props }, ref) {
   const pickerState = React.useContext(ColorPickerContext);
   const effectiveDisabled = disabled || pickerState.disabled;
-  return React.createElement(AriaColorSwatch, { ...props, ref, color: colorValue(color, 'ColorSwatch'), isDisabled: effectiveDisabled, 'aria-disabled': effectiveDisabled || undefined, 'aria-readonly': pickerState.readOnly || undefined, 'data-disabled': effectiveDisabled || undefined, 'data-readonly': pickerState.readOnly || undefined, className: classNames('core-color-swatch', className) });
+  return React.createElement(AriaColorSwatch, { ...props, ref, color: colorValue(color, 'ColorSwatch'), isDisabled: effectiveDisabled, 'aria-disabled': effectiveDisabled || undefined, 'data-disabled': effectiveDisabled || undefined, 'data-readonly': pickerState.readOnly || undefined, className: classNames('core-color-swatch', className) });
 });
 ColorSwatch.displayName = 'ColorSwatch';
 
@@ -269,7 +274,7 @@ export const ColorArea = React.forwardRef(function ColorArea({ label, value, def
       event.stopPropagation();
     }
   };
-  return React.createElement('div', { className: 'core-color-area-field', 'data-disabled': effectiveDisabled || undefined, 'data-readonly': effectiveReadOnly || undefined, 'aria-disabled': effectiveDisabled || undefined, 'aria-readonly': effectiveReadOnly || undefined }, label !== undefined ? React.createElement('span', { id: labelId, className: 'core-field-label' }, label) : null, React.createElement(AriaColorArea, { ...props, ref: assignAreaRef, value: colorValue(value, 'ColorArea'), defaultValue: colorValue(defaultValue, 'ColorArea'), onChange: (next) => { if (!effectiveDisabled && !effectiveReadOnly) onChange?.(next.toString()); }, isDisabled: effectiveDisabled, 'aria-label': ariaLabel, 'aria-labelledby': labelledby, 'aria-readonly': effectiveReadOnly || undefined, onPointerDownCapture: preventReadOnlyInteraction, onMouseDownCapture: preventReadOnlyInteraction, onKeyDownCapture: preventReadOnlyInteraction, className: classNames('core-color-area', className) }, React.createElement(AriaColorThumb, { className: 'core-color-area-thumb' })));
+  return React.createElement('div', { className: 'core-color-area-field', 'data-disabled': effectiveDisabled || undefined, 'data-readonly': effectiveReadOnly || undefined, 'aria-disabled': effectiveDisabled || undefined }, label !== undefined ? React.createElement('span', { id: labelId, className: 'core-field-label' }, label) : null, React.createElement(AriaColorArea, { ...props, ref: assignAreaRef, value: colorValue(value, 'ColorArea'), defaultValue: colorValue(defaultValue, 'ColorArea'), onChange: (next) => { if (!effectiveDisabled && !effectiveReadOnly) onChange?.(next.toString()); }, isDisabled: effectiveDisabled, 'aria-label': ariaLabel, 'aria-labelledby': labelledby, 'aria-readonly': effectiveReadOnly || undefined, onPointerDownCapture: preventReadOnlyInteraction, onMouseDownCapture: preventReadOnlyInteraction, onKeyDownCapture: preventReadOnlyInteraction, className: classNames('core-color-area', className) }, React.createElement(AriaColorThumb, { className: 'core-color-area-thumb' })));
 });
 ColorArea.displayName = 'ColorArea';
 
@@ -285,7 +290,7 @@ export const ColorSlider = React.forwardRef(function ColorSlider({ label, value,
     }
   };
   const assignSliderRef = useReadOnlyTargets(ref, effectiveReadOnly, '[role="slider"], input[type="range"]:not([tabindex="-1"])');
-  return React.createElement('div', { 'aria-disabled': effectiveDisabled || undefined, 'aria-readonly': effectiveReadOnly || undefined, 'data-disabled': effectiveDisabled || undefined, 'data-readonly': effectiveReadOnly || undefined, onPointerDownCapture: preventReadOnlyInteraction, onMouseDownCapture: preventReadOnlyInteraction, onKeyDownCapture: preventReadOnlyInteraction }, React.createElement(AriaColorSlider, { ...props, ref: assignSliderRef, channel, colorSpace, value: colorValue(value, 'ColorSlider'), defaultValue: colorValue(defaultValue, 'ColorSlider'), onChange: (next) => { if (!effectiveDisabled && !effectiveReadOnly) onChange?.(next.toString()); }, isDisabled: effectiveDisabled, orientation, 'aria-readonly': effectiveReadOnly || undefined, className: classNames('core-color-slider', className), 'aria-label': ariaLabel, 'aria-labelledby': ariaLabelledby }, label !== undefined ? React.createElement(AriaLabel, { className: 'core-field-label' }, label) : null, React.createElement(AriaSliderTrack, { className: 'core-color-slider-track' }, React.createElement(AriaSliderFill, { className: 'core-color-slider-fill' }), React.createElement(AriaColorThumb, { className: 'core-color-slider-thumb' }))));
+  return React.createElement('div', { 'aria-disabled': effectiveDisabled || undefined, 'data-disabled': effectiveDisabled || undefined, 'data-readonly': effectiveReadOnly || undefined, onPointerDownCapture: preventReadOnlyInteraction, onMouseDownCapture: preventReadOnlyInteraction, onKeyDownCapture: preventReadOnlyInteraction }, React.createElement(AriaColorSlider, { ...props, ref: assignSliderRef, channel, colorSpace, value: colorValue(value, 'ColorSlider'), defaultValue: colorValue(defaultValue, 'ColorSlider'), onChange: (next) => { if (!effectiveDisabled && !effectiveReadOnly) onChange?.(next.toString()); }, isDisabled: effectiveDisabled, orientation, 'aria-readonly': effectiveReadOnly || undefined, className: classNames('core-color-slider', className), 'aria-label': ariaLabel, 'aria-labelledby': ariaLabelledby }, label !== undefined ? React.createElement(AriaLabel, { className: 'core-field-label' }, label) : null, React.createElement(AriaSliderTrack, { className: 'core-color-slider-track' }, React.createElement(AriaSliderFill, { className: 'core-color-slider-fill' }), React.createElement(AriaColorThumb, { className: 'core-color-slider-thumb' }))));
 });
 ColorSlider.displayName = 'ColorSlider';
 
@@ -301,12 +306,12 @@ export const ColorWheel = React.forwardRef(function ColorWheel({ value, defaultV
     }
   };
   const assignWheelRef = useReadOnlyTargets(ref, effectiveReadOnly, '[role="slider"], input[type="range"]:not([tabindex="-1"])');
-  return React.createElement('div', { 'aria-disabled': effectiveDisabled || undefined, 'aria-readonly': effectiveReadOnly || undefined, 'data-disabled': effectiveDisabled || undefined, 'data-readonly': effectiveReadOnly || undefined, onPointerDownCapture: preventReadOnlyInteraction, onMouseDownCapture: preventReadOnlyInteraction, onKeyDownCapture: preventReadOnlyInteraction }, React.createElement(AriaColorWheel, { ...props, ref: assignWheelRef, outerRadius, innerRadius, value: colorValue(value, 'ColorWheel'), defaultValue: colorValue(defaultValue, 'ColorWheel'), onChange: (next) => { if (!effectiveDisabled && !effectiveReadOnly) onChange?.(next.toString()); }, isDisabled: effectiveDisabled, 'aria-label': ariaLabel, 'aria-labelledby': ariaLabelledby, 'aria-readonly': effectiveReadOnly || undefined, className: classNames('core-color-wheel', className) }, React.createElement(AriaColorWheelTrack, { className: 'core-color-wheel-track' }), React.createElement(AriaColorThumb, { className: 'core-color-wheel-thumb' })));
+  return React.createElement('div', { 'aria-disabled': effectiveDisabled || undefined, 'data-disabled': effectiveDisabled || undefined, 'data-readonly': effectiveReadOnly || undefined, onPointerDownCapture: preventReadOnlyInteraction, onMouseDownCapture: preventReadOnlyInteraction, onKeyDownCapture: preventReadOnlyInteraction }, React.createElement(AriaColorWheel, { ...props, ref: assignWheelRef, outerRadius, innerRadius, value: colorValue(value, 'ColorWheel'), defaultValue: colorValue(defaultValue, 'ColorWheel'), onChange: (next) => { if (!effectiveDisabled && !effectiveReadOnly) onChange?.(next.toString()); }, isDisabled: effectiveDisabled, 'aria-label': ariaLabel, 'aria-labelledby': ariaLabelledby, 'aria-readonly': effectiveReadOnly || undefined, className: classNames('core-color-wheel', className) }, React.createElement(AriaColorWheelTrack, { className: 'core-color-wheel-track' }), React.createElement(AriaColorThumb, { className: 'core-color-wheel-thumb' })));
 });
 ColorWheel.displayName = 'ColorWheel';
 
 export const ColorPicker = React.forwardRef(function ColorPicker({ value, defaultValue, onChange, disabled = false, readOnly = false, children, className, ...props }, ref) {
-  return React.createElement('div', { ...props, ref, 'aria-disabled': disabled || undefined, 'aria-readonly': readOnly || undefined, 'data-disabled': disabled || undefined, 'data-readonly': readOnly || undefined, className: classNames('core-color-picker', className) }, React.createElement(AriaColorPicker, { value: colorValue(value, 'ColorPicker'), defaultValue: colorValue(defaultValue, 'ColorPicker'), onChange: (next) => { if (!disabled && !readOnly) onChange?.(next.toString()); } }, React.createElement(ColorPickerContext.Provider, { value: { disabled, readOnly } }, children)));
+  return React.createElement('div', { ...props, ref, 'aria-disabled': disabled || undefined, 'data-disabled': disabled || undefined, 'data-readonly': readOnly || undefined, className: classNames('core-color-picker', className) }, React.createElement(AriaColorPicker, { value: colorValue(value, 'ColorPicker'), defaultValue: colorValue(defaultValue, 'ColorPicker'), onChange: (next) => { if (!disabled && !readOnly) onChange?.(next.toString()); } }, React.createElement(ColorPickerContext.Provider, { value: { disabled, readOnly } }, children)));
 });
 ColorPicker.displayName = 'ColorPicker';
 
@@ -322,8 +327,8 @@ export const ColorSwatchPicker = React.forwardRef(function ColorSwatchPicker({ i
       event.stopPropagation();
     }
   };
-  const assignSwatchPickerRef = useReadOnlyTargets(ref, effectiveReadOnly, '[role="listbox"], [role="option"], [tabindex]:not([tabindex="-1"])');
-  return React.createElement('div', { 'aria-disabled': effectiveDisabled || undefined, 'aria-readonly': effectiveReadOnly || undefined, 'data-disabled': effectiveDisabled || undefined, 'data-readonly': effectiveReadOnly || undefined, onPointerDownCapture: preventReadOnlyInteraction, onMouseDownCapture: preventReadOnlyInteraction, onKeyDownCapture: preventReadOnlyInteraction }, React.createElement(AriaColorSwatchPicker, { ...props, ref: assignSwatchPickerRef, value: colorValue(value, 'ColorSwatchPicker'), defaultValue: colorValue(defaultValue, 'ColorSwatchPicker'), onChange: (next) => { if (!effectiveDisabled && !effectiveReadOnly) onChange?.(next.toString()); }, isDisabled: effectiveDisabled, 'aria-label': ariaLabel, 'aria-labelledby': ariaLabelledby, 'aria-readonly': effectiveReadOnly || undefined, className: classNames('core-color-swatch-picker', className) }, normalized.map((item) => React.createElement(AriaColorSwatchPickerItem, { key: item.id, color: colorValue(item.color ?? item.value, 'ColorSwatchPicker'), id: item.id, isDisabled: effectiveDisabled || item.disabled, className: 'core-color-swatch-picker-item' }, React.createElement(AriaColorSwatch, { color: colorValue(item.color ?? item.value, 'ColorSwatchPicker'), isDisabled: effectiveDisabled || item.disabled, 'aria-disabled': effectiveDisabled || item.disabled || undefined, 'data-disabled': effectiveDisabled || item.disabled || undefined, className: 'core-color-swatch' })))));
+  const assignSwatchPickerRef = useReadOnlyTargets(ref, effectiveReadOnly, '[role="listbox"]');
+  return React.createElement('div', { 'aria-disabled': effectiveDisabled || undefined, 'data-disabled': effectiveDisabled || undefined, 'data-readonly': effectiveReadOnly || undefined, onPointerDownCapture: preventReadOnlyInteraction, onMouseDownCapture: preventReadOnlyInteraction, onKeyDownCapture: preventReadOnlyInteraction }, React.createElement(AriaColorSwatchPicker, { ...props, ref: assignSwatchPickerRef, value: colorValue(value, 'ColorSwatchPicker'), defaultValue: colorValue(defaultValue, 'ColorSwatchPicker'), onChange: (next) => { if (!effectiveDisabled && !effectiveReadOnly) onChange?.(next.toString()); }, isDisabled: effectiveDisabled, 'aria-label': ariaLabel, 'aria-labelledby': ariaLabelledby, 'aria-readonly': effectiveReadOnly || undefined, className: classNames('core-color-swatch-picker', className) }, normalized.map((item) => React.createElement(AriaColorSwatchPickerItem, { key: item.id, color: colorValue(item.color ?? item.value, 'ColorSwatchPicker'), id: item.id, isDisabled: effectiveDisabled || item.disabled, className: 'core-color-swatch-picker-item' }, React.createElement(AriaColorSwatch, { color: colorValue(item.color ?? item.value, 'ColorSwatchPicker'), isDisabled: effectiveDisabled || item.disabled, 'aria-disabled': effectiveDisabled || item.disabled || undefined, 'data-disabled': effectiveDisabled || item.disabled || undefined, className: 'core-color-swatch' })))));
 });
 ColorSwatchPicker.displayName = 'ColorSwatchPicker';
 
@@ -337,7 +342,7 @@ function collectionProps(props, componentName) {
 
 export const ListBox = React.forwardRef(function ListBox(props, ref) {
   const { normalized, rest, selectedKeys, defaultSelectedKeys, onSelectionChange, onAction, selectionMode, className, disabled, disabledKeys } = collectionProps(props, 'list-box');
-  return React.createElement(AriaListBox, { ...rest, ref, items: normalized, selectionMode, selectedKeys, defaultSelectedKeys, disabledKeys, onSelectionChange, onAction: (key) => { const item = normalized.find((candidate) => candidate.id === String(key)); if (!disabled && !item?.disabled) onAction?.(item); }, isDisabled: disabled, 'aria-disabled': disabled || undefined, className }, (item) => React.createElement(AriaListBoxItem, { id: item.id, textValue: item.textValue, isDisabled: disabled || item.disabled, className: 'core-list-box-item' }, item.label));
+  return React.createElement(AriaListBox, { ...rest, ref, items: normalized, selectionMode, selectedKeys, defaultSelectedKeys, disabledKeys, onSelectionChange, onAction: (key) => { const item = normalized.find((candidate) => candidate.id === String(key)); if (!disabled && !item?.disabled) onAction?.(item); }, isDisabled: disabled, 'aria-disabled': disabled || undefined, className }, (item) => React.createElement(AriaListBoxItem, { id: item.id, textValue: item.textValue, isDisabled: disabled || item.disabled, 'data-disabled': disabled || item.disabled || undefined, 'aria-disabled': disabled || item.disabled || undefined, className: 'core-list-box-item' }, item.label));
 });
 ListBox.displayName = 'ListBox';
 
@@ -361,10 +366,12 @@ export const ComboBox = React.forwardRef(function ComboBox({ label, description,
   const handleSelection = (key) => { const item = normalized.find((candidate) => candidate.id === String(key)); if (item && !disabled && !readOnly) onSelect?.(item); };
   return React.createElement(AriaComboBox, { ...props, ref, items: normalized, ...(value === undefined ? {} : { inputValue: value }), defaultInputValue: defaultValue, selectedKey: selectedId, defaultSelectedKey: defaultSelectedId, onInputChange: (next) => { if (!disabled && !readOnly) onChange?.(next); }, onSelectionChange: handleSelection, isDisabled: disabled, isReadOnly: readOnly, isRequired: required, isInvalid: invalid || errorMessage !== undefined, name, className: classNames('core-combo-box', className), 'aria-label': ariaLabel, 'aria-labelledby': ariaLabelledby },
     label !== undefined ? React.createElement(AriaLabel, { className: 'core-field-label' }, label) : null,
-    React.createElement(AriaInput, { className: 'core-field-input', placeholder }),
+    React.createElement(AriaGroup, { className: 'core-combo-control' },
+      React.createElement(AriaInput, { className: 'core-field-input', placeholder }),
+      React.createElement(AriaButton, { className: 'core-combo-box-trigger', 'aria-label': 'Show options' },
+        React.createElement(ChevronDownIcon, { className: 'core-combo-box-arrow', 'aria-hidden': 'true', focusable: 'false', size: 16 }))),
     description !== undefined ? React.createElement(AriaText, { slot: 'description', className: 'core-field-description' }, description) : null,
     errorMessage !== undefined ? React.createElement(AriaFieldError, { className: 'core-field-error' }, errorMessage) : null,
-    React.createElement(AriaButton, { className: 'core-combo-box-trigger', 'aria-label': 'Show options' }, '⌄'),
     React.createElement(AriaPopover, { className: 'core-combo-box-popover' }, React.createElement(AriaListBox, { items: normalized, className: 'core-combo-box-list' }, (item) => React.createElement(AriaListBoxItem, { id: item.id, textValue: item.textValue, className: 'core-combo-box-option' }, item.label))),
   );
 });
@@ -376,7 +383,7 @@ export const Select = React.forwardRef(function Select({ label, description, err
   const handleSelection = (key) => { if (!disabled && !readOnly) onChange?.(key == null ? undefined : String(key)); };
   return React.createElement(AriaSelect, { ...props, ref, selectedKey: value, defaultSelectedKey: defaultValue, onSelectionChange: handleSelection, isDisabled: disabled, isReadOnly: readOnly, isRequired: required, isInvalid: invalid || errorMessage !== undefined, name, className: classNames('core-select', className), 'aria-label': ariaLabel, 'aria-labelledby': ariaLabelledby },
     label !== undefined ? React.createElement(AriaLabel, { className: 'core-field-label' }, label) : null,
-    React.createElement(AriaButton, { className: 'core-select-trigger' }, React.createElement(AriaSelectValue, { className: 'core-select-value', children: ({ selectedText }) => selectedText || placeholder }), '⌄'),
+    React.createElement(AriaButton, { className: 'core-select-trigger', 'data-disabled': disabled || undefined, 'aria-disabled': disabled || undefined }, React.createElement(AriaSelectValue, { className: 'core-select-value', children: ({ selectedText }) => selectedText || placeholder }), React.createElement(ChevronDownIcon, { className: 'core-select-arrow', 'aria-hidden': 'true', focusable: 'false', size: 16 })),
     description !== undefined ? React.createElement(AriaText, { slot: 'description', className: 'core-field-description' }, description) : null,
     errorMessage !== undefined ? React.createElement(AriaFieldError, { className: 'core-field-error' }, errorMessage) : null,
     React.createElement(AriaPopover, { className: 'core-select-popover' }, React.createElement(AriaListBox, { items: normalized, className: 'core-select-list' }, (item) => React.createElement(AriaListBoxItem, { id: item.id, textValue: item.textValue, className: 'core-select-option' }, item.label))),
@@ -392,7 +399,7 @@ RadioGroup.displayName = 'RadioGroup';
 
 export const Slider = React.forwardRef(function Slider({ label, value, defaultValue, onChange, min = 0, max = 100, step = 1, disabled = false, orientation = 'horizontal', className, 'aria-label': ariaLabel, 'aria-labelledby': ariaLabelledby, ...props }, ref) {
   accessibleName({ label, ariaLabel, ariaLabelledby }, 'Slider');
-  return React.createElement(AriaSlider, { ...props, ref, value, defaultValue, onChange: (next) => { if (!disabled) onChange?.(next); }, minValue: min, maxValue: max, step, isDisabled: disabled, orientation, className: classNames('core-slider', className), 'aria-label': ariaLabel, 'aria-labelledby': ariaLabelledby }, label !== undefined ? React.createElement(AriaLabel, { className: 'core-field-label' }, label) : null, React.createElement(AriaOutput, { className: 'core-slider-output' }), React.createElement(AriaSliderTrack, { className: 'core-slider-track' }, React.createElement(AriaSliderFill, { className: 'core-slider-fill' }), React.createElement(AriaSliderThumb, { className: 'core-slider-thumb' })));
+  return React.createElement(AriaSlider, { ...props, ref, value, defaultValue, onChange: (next) => { if (!disabled) onChange?.(next); }, minValue: min, maxValue: max, step, isDisabled: disabled, orientation, className: classNames('core-slider', className), 'aria-label': ariaLabel, 'aria-labelledby': ariaLabelledby }, React.createElement('div', { className: 'core-slider-header' }, label !== undefined ? React.createElement(AriaLabel, { className: 'core-field-label' }, label) : null, React.createElement(AriaOutput, { className: 'core-slider-output' })), React.createElement('div', { className: 'core-slider-control' }, React.createElement(AriaSliderTrack, { className: 'core-slider-track' }, React.createElement(AriaSliderFill, { className: 'core-slider-fill' }), React.createElement(AriaSliderThumb, { className: 'core-slider-thumb' }))));
 });
 Slider.displayName = 'Slider';
 
@@ -414,7 +421,7 @@ export const Tabs = React.forwardRef(function Tabs({ items = [], value, defaultV
   const normalized = normalizeItems(items);
   accessibleName({ ariaLabel, ariaLabelledby }, 'Tabs');
   return React.createElement(AriaTabs, { ...props, ref, selectedKey: value, defaultSelectedKey: defaultValue ?? normalized[0]?.id, onSelectionChange: (key) => { const item = normalized.find((candidate) => candidate.id === String(key)); if (!disabled && !item?.disabled) onChange?.(String(key)); }, orientation, isDisabled: disabled, 'aria-label': ariaLabel, 'aria-labelledby': ariaLabelledby, className: classNames('core-tabs', className) },
-    React.createElement(AriaTabList, { items: normalized, className: 'core-tab-list' }, (item) => React.createElement(AriaTab, { id: item.id, isDisabled: disabled || item.disabled, className: 'core-tab' }, item.label)),
+    React.createElement(AriaTabList, { items: normalized, className: 'core-tab-list' }, (item) => React.createElement(AriaTab, { id: item.id, isDisabled: disabled || item.disabled, 'data-disabled': disabled || item.disabled || undefined, 'aria-disabled': disabled || item.disabled || undefined, className: 'core-tab' }, item.label)),
     React.createElement(AriaTabPanels, { items: normalized, className: 'core-tab-panels' }, (item) => React.createElement(AriaTabPanel, { id: item.id, className: 'core-tab-panel' }, item.panel)),
   );
 });
@@ -423,7 +430,7 @@ Tabs.displayName = 'Tabs';
 export const TagGroup = React.forwardRef(function TagGroup({ label, items = [], onRemove, onAction, disabled = false, className, 'aria-label': ariaLabel, 'aria-labelledby': ariaLabelledby }, ref) {
   const normalized = normalizeItems(items);
   accessibleName({ label, ariaLabel, ariaLabelledby }, 'TagGroup');
-  return React.createElement(AriaTagGroup, { ref, onRemove: (keys) => { if (!disabled) onRemove?.([...keys].map(String).map((id) => normalized.find((item) => item.id === id)).filter((item) => item && !item.disabled)); }, onAction: (key) => { const item = normalized.find((candidate) => candidate.id === String(key)); if (!disabled && !item?.disabled) onAction?.(item); }, isDisabled: disabled, 'aria-label': ariaLabel, 'aria-labelledby': ariaLabelledby, className: classNames('core-tag-group', className) }, label !== undefined ? React.createElement(AriaLabel, { className: 'core-field-label' }, label) : null, React.createElement(AriaTagList, { items: normalized, className: 'core-tag-list' }, (item) => React.createElement(AriaTag, { id: item.id, textValue: item.textValue, isDisabled: disabled || item.disabled, className: 'core-tag' }, item.label, React.createElement(AriaButton, { slot: 'remove', isDisabled: disabled || item.disabled, className: 'core-tag-remove' }, '×'))));
+  return React.createElement(AriaTagGroup, { ref, onRemove: (keys) => { if (!disabled) onRemove?.([...keys].map(String).map((id) => normalized.find((item) => item.id === id)).filter((item) => item && !item.disabled)); }, onAction: (key) => { const item = normalized.find((candidate) => candidate.id === String(key)); if (!disabled && !item?.disabled) onAction?.(item); }, isDisabled: disabled, 'aria-label': ariaLabel, 'aria-labelledby': ariaLabelledby, className: classNames('core-tag-group', className) }, label !== undefined ? React.createElement(AriaLabel, { className: 'core-field-label' }, label) : null, React.createElement(AriaTagList, { items: normalized, className: 'core-tag-list' }, (item) => React.createElement(AriaTag, { id: item.id, textValue: item.textValue, isDisabled: disabled || item.disabled, className: 'core-tag' }, item.label, onRemove ? React.createElement(AriaButton, { slot: 'remove', isDisabled: disabled || item.disabled, className: 'core-tag-remove' }, React.createElement(XIcon, { 'aria-hidden': 'true', focusable: 'false', size: 12 })) : null)));
 });
 TagGroup.displayName = 'TagGroup';
 
@@ -532,8 +539,10 @@ function treeItem(item) {
   const nested = item.children ?? [];
   return React.createElement(AriaTreeItem, { id: item.id, textValue: item.textValue, hasChildItems: nested.length > 0, isDisabled: item.disabled, className: 'core-tree-item' },
     React.createElement(AriaTreeItemContent, null,
-      nested.length ? React.createElement(AriaButton, { slot: 'chevron', 'aria-label': 'Toggle', isDisabled: item.disabled, className: 'core-tree-toggle' }, '⌄') : null,
-      React.createElement('span', { className: 'core-tree-item-label' }, item.label)),
+      React.createElement('div', { className: 'core-tree-item-content' },
+        nested.length ? React.createElement(AriaButton, { slot: 'chevron', 'aria-label': 'Toggle', isDisabled: item.disabled, className: 'core-tree-toggle' }, React.createElement(ChevronRightIcon, { 'aria-hidden': 'true', focusable: 'false', fill: 'currentColor', strokeWidth: 0, size: 16 })) : null,
+        React.createElement('span', { className: 'core-tree-item-label' }, item.label)),
+    ),
     nested.map((child) => React.cloneElement(treeItem(child), { key: child.id })));
 }
 
@@ -562,7 +571,11 @@ export const Virtualizer = React.forwardRef(function Virtualizer({ items = [], r
   assertPositiveVirtualizerNumber(height, 'height');
   assertNonNegativeVirtualizerNumber(overscan, 'overscan');
   const normalized = normalizeItems(items);
-  const layoutOptions = { rowSize: itemHeight, padding: overscan * itemHeight };
+  // RAC manages the rendered window from the viewport and row size. The
+  // padding option is layout padding, not overscan, so passing it visibly
+  // offsets the first item and shifts the virtual content. Keep overscan in
+  // the public contract while leaving window placement to RAC.
+  const layoutOptions = { rowSize: itemHeight };
   return React.createElement(AriaVirtualizer, { layout: ListLayout, layoutOptions },
     React.createElement(AriaListBox, {
       ...props,

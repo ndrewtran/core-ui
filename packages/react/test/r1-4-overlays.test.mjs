@@ -6,18 +6,6 @@ import React, { act } from 'react';
 import { createRoot, hydrateRoot } from 'react-dom/client';
 import { renderToString } from 'react-dom/server';
 import { JSDOM } from 'jsdom';
-import { UNSTABLE_ToastQueue } from 'react-aria-components';
-import {
-  Dialog,
-  DropZone,
-  FileTrigger,
-  Popover,
-  PreviewTrigger,
-  Toast,
-  ToastProvider,
-  Tooltip,
-  useToast,
-} from '../src/overlays.mjs';
 import { EXPECTED_R14_COMPONENT_SLUGS, EXPECTED_R14_DONOR_CONTRACT } from '../src/r1-4-donor-contract.mjs';
 
 function installDom(markup = '<div id="root"></div>') {
@@ -86,6 +74,21 @@ function installDom(markup = '<div id="root"></div>') {
   };
 }
 
+const moduleEnvironment = installDom();
+const { UNSTABLE_ToastQueue } = await import('react-aria-components');
+const {
+  Dialog,
+  DropZone,
+  FileTrigger,
+  Popover,
+  PreviewTrigger,
+  Toast,
+  ToastProvider,
+  Tooltip,
+  useToast,
+} = await import('../src/overlays.mjs');
+moduleEnvironment.restore();
+
 function closedOverlayTree() {
   return React.createElement(ToastProvider, null,
     React.createElement('div', null,
@@ -133,6 +136,84 @@ test('R1.4 families are SSR and hydration safe and reject missing accessible con
     await Promise.resolve();
     assert.equal(document.querySelector('.core-toast'), null);
   } finally {
+    env.restore();
+  }
+});
+
+test('PreviewTrigger keeps naming on one non-modal inner dialog and cleans up its portal', async () => {
+  const env = installDom();
+  const host = document.querySelector('#root');
+  const root = createRoot(host);
+  const outerRef = React.createRef();
+  try {
+    await act(async () => root.render(React.createElement(PreviewTrigger, {
+      'aria-label': 'Preview details',
+      className: 'custom-preview',
+      defaultOpen: true,
+      ref: outerRef,
+      trigger: React.createElement('button', null, 'Show preview'),
+    }, 'Preview body')));
+
+    const outer = document.body.querySelector('.core-preview-trigger');
+    assert.ok(outer);
+    assert.equal(outerRef.current, outer);
+    assert.equal(outer.classList.contains('custom-preview'), true);
+    const dialogs = document.body.querySelectorAll('[role="dialog"]');
+    assert.equal(dialogs.length, 1);
+    assert.equal(dialogs[0].classList.contains('core-preview-content'), true);
+    assert.equal(dialogs[0].getAttribute('aria-label'), 'Preview details');
+    assert.equal(outer.hasAttribute('aria-label'), false);
+    assert.equal(dialogs[0].hasAttribute('aria-modal'), false);
+    assert.equal(document.body.querySelector('[data-testid="underlay"]'), null);
+
+    await act(async () => root.render(React.createElement(PreviewTrigger, {
+      'aria-labelledby': 'preview-heading',
+      defaultOpen: true,
+      trigger: React.createElement('button', null, 'Show preview'),
+    }, React.createElement('h2', { id: 'preview-heading' }, 'Preview heading'))));
+    const labelledDialog = document.body.querySelector('.core-preview-content');
+    assert.equal(labelledDialog.getAttribute('aria-labelledby'), 'preview-heading');
+    assert.equal(labelledDialog.hasAttribute('aria-label'), false);
+    assert.equal(document.body.querySelector('.core-preview-trigger').hasAttribute('aria-labelledby'), false);
+
+    await act(async () => root.unmount());
+    assert.equal(document.body.querySelector('.core-preview-trigger'), null);
+    assert.equal(document.body.querySelector('[role="dialog"]'), null);
+  } finally {
+    if (host.isConnected && host.hasChildNodes()) await act(async () => root.unmount());
+    env.restore();
+  }
+});
+
+test('Dialog and Toast close controls use decorative Lucide X icons', async () => {
+  const env = installDom();
+  const host = document.querySelector('#root');
+  const root = createRoot(host);
+  let manager;
+  function CaptureManager() {
+    manager = useToast();
+    return null;
+  }
+  try {
+    await act(async () => root.render(React.createElement(ToastProvider, null,
+      React.createElement(CaptureManager),
+      React.createElement(Dialog, { title: 'Details', defaultOpen: true }, 'Dialog body'))));
+    const dialogClose = document.body.querySelector('.core-dialog-close');
+    assert.ok(dialogClose);
+    assert.equal(dialogClose.getAttribute('aria-label'), 'Close dialog');
+    assert.equal(dialogClose.querySelector('svg')?.classList.contains('lucide-x'), true);
+    assert.equal(dialogClose.querySelector('svg')?.getAttribute('aria-hidden'), 'true');
+    assert.equal(dialogClose.querySelector('svg')?.getAttribute('focusable'), 'false');
+
+    await act(async () => manager.add('Saved', { duration: 60000 }));
+    const toastDismiss = document.body.querySelector('.core-toast-dismiss');
+    assert.ok(toastDismiss);
+    assert.equal(toastDismiss.getAttribute('aria-label'), 'Dismiss notification');
+    assert.equal(toastDismiss.querySelector('svg')?.classList.contains('lucide-x'), true);
+    assert.equal(toastDismiss.querySelector('svg')?.getAttribute('aria-hidden'), 'true');
+    assert.equal(toastDismiss.querySelector('svg')?.getAttribute('focusable'), 'false');
+  } finally {
+    await act(async () => root.unmount());
     env.restore();
   }
 });
@@ -310,6 +391,23 @@ test('title-less useToast notifications have an accessible RAC name', async () =
     assert.ok(title);
     assert.equal(title.classList.contains('core-toast-title-fallback'), true);
     assert.equal(title.textContent, 'Notification');
+    const content = toast.querySelector('.core-toast-content');
+    const dismiss = toast.querySelector('.core-toast-dismiss');
+    assert.ok(content);
+    assert.ok(dismiss);
+    assert.equal(content.parentElement, toast);
+    assert.equal(dismiss.parentElement, toast);
+    assert.equal(content.contains(dismiss), false);
+    assert.equal(dismiss.getAttribute('aria-label'), 'Dismiss notification');
+    assert.equal(dismiss.querySelector('svg')?.classList.contains('lucide-x'), true);
+    assert.equal(dismiss.querySelector('svg')?.getAttribute('aria-hidden'), 'true');
+    assert.equal(dismiss.querySelector('svg')?.getAttribute('focusable'), 'false');
+    const styles = await readFile(resolve(import.meta.dirname, '../generated/styles.css'), 'utf8');
+    assert.match(styles, /:where\([\s\S]*\.core-toast-dismiss[\s\S]*border:\s*1px solid transparent;[\s\S]*appearance:\s*none;/u);
+    assert.match(styles, /\.core-toast-dismiss\s*\{[^}]*aspect-ratio:\s*1;[\s\S]*width:\s*calc\(1rem \+ var\(--core-semantic-layout-tight-inset\) \+ var\(--core-semantic-layout-tight-inset\) \+ 2px\);[\s\S]*height:\s*calc\(1rem \+ var\(--core-semantic-layout-tight-inset\) \+ var\(--core-semantic-layout-tight-inset\) \+ 2px\);[\s\S]*padding:\s*var\(--core-semantic-layout-tight-inset\);[\s\S]*border-radius:\s*var\(--core-semantic-shape-option-radius\)/u);
+    assert.match(styles, /\.core-dialog-close\s*\{[^}]*aspect-ratio:\s*1;[\s\S]*width:\s*calc\(1rem \+ var\(--core-semantic-layout-tight-inset\) \+ var\(--core-semantic-layout-tight-inset\) \+ 2px\);[\s\S]*height:\s*calc\(1rem \+ var\(--core-semantic-layout-tight-inset\) \+ var\(--core-semantic-layout-tight-inset\) \+ 2px\);/u);
+    assert.match(styles, /\.core-toast\s*\{[^}]*grid-template-columns:\s*minmax\(0, 1fr\) auto/u);
+    assert.match(styles, /\.core-toast-content\s*\{[^}]*display:\s*grid/u);
   } finally {
     await act(async () => root.unmount());
     env.restore();

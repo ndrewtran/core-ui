@@ -1,0 +1,485 @@
+/* Core-owned overlay parity source. */
+/* Core component source: drop-zone.css */
+.core-drop-zone {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 5rem;
+  padding: var(--core-semantic-layout-section-gap);
+  font-family: Inter, sans-serif;
+  font-size: var(--core-semantic-typography-body-size);
+  color: var(--core-semantic-content-default);
+  background-color: var(--core-semantic-surface-canvas);
+  border: 2px dashed var(--core-semantic-border-strong);
+  border-radius: var(--core-semantic-layout-control-gap);
+  outline: none;
+  transition:
+    border-color 0.15s ease,
+    background-color 0.15s ease,
+    color 0.15s ease;
+}
+.core-drop-zone[data-focus-visible] {
+  box-shadow:
+    0 0 0 2px var(--core-focus-ring-inner),
+    0 0 0 4px var(--core-focus-ring-outer);
+}
+
+.core-drop-zone[data-drop-target] {
+  border-color: var(--core-semantic-selection-track);
+  background-color: color-mix(in srgb, var(--core-semantic-selection-track) 8%, transparent);
+  color: var(--core-semantic-selection-track);
+}
+
+.core-drop-zone[data-disabled] {
+  background-color: var(--core-semantic-surface-hover);
+  border-color: var(--core-semantic-border-strong);
+  color: var(--core-semantic-content-default);
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+[data-core-color-scheme='dark'] .core-drop-zone {
+  background-color: color-mix(in srgb, var(--core-reference-color-neutral-100) 85%, black);
+  border-color: var(--core-reference-color-neutral-84);
+  color: var(--core-reference-color-neutral-50);
+}
+
+[data-core-color-scheme='light'] .core-drop-zone:not([data-drop-target]) {
+  color: var(--core-reference-color-neutral-70);
+}
+
+[data-core-color-scheme='dark'] .core-drop-zone[data-drop-target] {
+  border-color: var(--core-reference-color-bluegreen-40);
+  background-color: color-mix(in srgb, var(--core-reference-color-bluegreen-40) 8%, transparent);
+  color: var(--core-reference-color-bluegreen-40);
+}
+/* Core component source: file-trigger.css */
+
+/* Core component source: dialog.css */
+.core-dialog {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 101;
+  width: min(90vw, 30rem);
+  max-height: min(90vh, 40rem);
+  overflow-y: auto;
+  background-color: var(--core-semantic-surface-raised);
+  border: 1px solid var(--core-semantic-border-subtle);
+  border-radius: calc(var(--core-semantic-shape-overlay-radius) - 4px);
+  box-shadow: var(--core-semantic-elevation-modal);
+  padding: var(--core-semantic-layout-section-gap);
+  display: flex;
+  flex-direction: column;
+  gap: var(--core-semantic-control-padding-inline);
+  outline: none;
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
+}
+
+.core-dialog[data-entering],
+.core-dialog[data-exiting] {
+  opacity: 0;
+  transform: translate(-50%, calc(-50% - 0.5rem));
+}
+
+.core-dialog-close {
+  aspect-ratio: 1;
+  width: calc(1rem + var(--core-semantic-layout-tight-inset) + var(--core-semantic-layout-tight-inset) + 2px);
+  height: calc(1rem + var(--core-semantic-layout-tight-inset) + var(--core-semantic-layout-tight-inset) + 2px);
+  min-height: auto;
+  padding: var(--core-semantic-layout-tight-inset);
+  border-radius: var(--core-semantic-shape-option-radius);
+  top: var(--core-semantic-layout-group-gap);
+  right: var(--core-semantic-control-padding-inline);
+}
+
+.core-dialog-content {
+  color: var(--core-semantic-content-default);
+  font-weight: var(--core-semantic-typography-body-weight);
+  font-size: var(--core-semantic-typography-body-size);
+  line-height: 1.6;
+}
+
+.core-dialog-content > p {
+  margin: 0;
+  font-size: var(--core-semantic-typography-body-size);
+  line-height: 1.6;
+}
+
+/* Match the retained Tale modal recipe while keeping Core's RAC dialog
+ * structure, focus scope, and close-button semantics intact. */
+.core-dialog {
+  box-shadow:
+    0 2.7px 3.6px -5px rgb(0 0 0 / 4%),
+    0 7.5px 10px -5px rgb(0 0 0 / 6%),
+    0 18px 24.1px -5px rgb(0 0 0 / 8%),
+    0 60px 80px -5px rgb(0 0 0 / 10%);
+}
+
+.core-dialog-title {
+  color: var(--core-reference-color-neutral-94);
+}
+
+.core-dialog-content,
+.core-dialog-content > p {
+  color: var(--core-reference-color-neutral-70);
+}
+
+.core-dialog-close {
+  color: var(--core-reference-color-neutral-60);
+}
+/* Core component source: popover.css */
+.core-popover {
+  position: relative;
+  padding: var(--core-semantic-layout-group-gap);
+  max-width: 20rem;
+  background-color: var(--core-semantic-content-strong);
+  border-color: var(--core-semantic-content-inverse);
+  color: var(--core-semantic-border-subtle);
+  font-family: Inter, sans-serif;
+  box-shadow:
+    0 4px 4px -10px rgb(0 0 0 / 4%),
+    0 13px 13px -10px rgb(0 0 0 / 6%),
+    0 40px 60px -10px rgb(0 0 0 / 8%);
+}
+
+.core-popover-title {
+  margin: 0 0 var(--core-reference-dimension-space-2xs);
+  padding-right: var(--core-reference-dimension-space-xl);
+  color: var(--core-reference-color-neutral-20);
+  font-size: var(--core-semantic-typography-body-size);
+  font-weight: var(--core-semantic-typography-control-weight);
+  line-height: 1.3;
+}
+
+.core-popover-description {
+  margin: 0;
+  color: var(--core-reference-color-neutral-40);
+  font-size: var(--core-semantic-typography-small-size);
+  font-weight: var(--core-semantic-typography-body-weight);
+  line-height: 1.5;
+}
+
+[data-core-color-scheme='dark'] .core-popover {
+  background-color: var(--core-reference-color-neutral-18);
+  border-color: var(--core-reference-color-neutral-5);
+}
+
+[data-core-color-scheme='dark'] .core-popover-title {
+  color: var(--core-reference-color-neutral-90);
+}
+
+[data-core-color-scheme='dark'] .core-popover-description {
+  color: var(--core-reference-color-neutral-60);
+}
+
+/* Core component source: preview-card.css */
+.core-preview-trigger {
+  box-sizing: border-box;
+  background-color: var(--core-reference-color-neutral-10);
+  border: 1px solid var(--core-reference-color-neutral-20);
+  border-radius: var(--core-reference-dimension-radius-l);
+  box-shadow:
+    0 4px 4px -10px rgb(0 0 0 / 4%),
+    0 13px 13px -10px rgb(0 0 0 / 6%),
+    0 40px 60px -10px rgb(0 0 0 / 8%);
+  padding: var(--core-reference-dimension-space-xs);
+  max-width: 20rem;
+  outline: none;
+  transition:
+    opacity 0.15s ease,
+    transform 0.15s ease;
+}
+
+.core-preview-trigger[data-placement='bottom'] {
+  margin-block-start: -1px;
+}
+
+.core-preview-trigger[data-entering],
+.core-preview-trigger[data-exiting] {
+  opacity: 0;
+  transform: scale(0.97);
+}
+
+.core-preview-content {
+  line-height: 1.5;
+  color-scheme: light;
+}
+
+/* Core component source: toast.css */
+.core-toast-region {
+  position: fixed;
+  z-index: 200;
+  display: flex;
+  width: min(24rem, calc(100vw - (2 * var(--core-semantic-layout-section-gap))));
+  max-height: calc(100vh - (2 * var(--core-semantic-layout-section-gap)));
+  gap: var(--core-semantic-layout-group-gap);
+  pointer-events: none;
+}
+
+.core-toast-list {
+  display: contents;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.core-toast-announcer {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.core-toast-region[data-placement^='top'] {
+  top: var(--core-semantic-layout-section-gap);
+  flex-direction: column;
+}
+
+.core-toast-region[data-placement^='bottom'] {
+  bottom: var(--core-semantic-layout-section-gap);
+  flex-direction: column-reverse;
+}
+
+.core-toast-region[data-placement$='start'] {
+  inset-inline-start: var(--core-semantic-layout-section-gap);
+}
+
+.core-toast-region[data-placement$='end'] {
+  inset-inline-end: var(--core-semantic-layout-section-gap);
+}
+
+.core-toast {
+  position: relative;
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--core-semantic-control-padding-inline);
+  align-items: start;
+  width: 100%;
+  padding: var(--core-semantic-control-padding-inline);
+  color: var(--core-semantic-content-strong);
+  font-family: Inter, sans-serif;
+  font-size: var(--core-semantic-typography-small-size);
+  line-height: var(--core-semantic-typography-body-line-height);
+  pointer-events: auto;
+  background-color: var(--core-popup-bg);
+  border: 1px solid var(--core-popup-border-color);
+  border-inline-start-width: 0.25rem;
+  border-radius: var(--core-popup-radius);
+  box-shadow: var(--core-semantic-elevation-modal);
+  outline: none;
+  transition:
+    opacity var(--core-popup-transition-duration) var(--core-popup-transition-easing),
+    transform var(--core-popup-transition-duration) var(--core-popup-transition-easing);
+}
+
+.core-toast[data-variant='neutral'] {
+  border-inline-start-color: var(--core-semantic-content-muted);
+}
+
+.core-toast[data-variant='success'] {
+  border-inline-start-color: var(--core-semantic-status-success);
+}
+
+.core-toast[data-variant='warning'] {
+  border-inline-start-color: var(--core-semantic-status-warning);
+}
+
+.core-toast[data-variant='danger'] {
+  border-inline-start-color: var(--core-semantic-feedback-invalid);
+}
+
+.core-toast[data-entering],
+.core-toast[data-exiting] {
+  opacity: 0;
+  transform: translateY(var(--core-semantic-layout-group-gap));
+}
+
+.core-toast-content {
+  display: grid;
+  min-width: 0;
+  gap: var(--core-semantic-layout-tight-inset);
+}
+
+.core-toast-title {
+  margin: 0;
+  color: var(--core-semantic-content-strong);
+  font-weight: var(--core-semantic-typography-label-weight);
+}
+
+.core-toast-title-fallback {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.core-toast-message {
+  margin: 0;
+  color: var(--core-semantic-content-default);
+}
+
+.core-toast-dismiss {
+  aspect-ratio: 1;
+  width: calc(1rem + var(--core-semantic-layout-tight-inset) + var(--core-semantic-layout-tight-inset) + 2px);
+  height: calc(1rem + var(--core-semantic-layout-tight-inset) + var(--core-semantic-layout-tight-inset) + 2px);
+  min-height: auto;
+  padding: var(--core-semantic-layout-tight-inset);
+  border-radius: var(--core-semantic-shape-option-radius);
+  flex: none;
+}
+
+@media (max-width: 30rem) {
+  .core-toast-region {
+    inset-inline: var(--core-semantic-layout-section-gap);
+    width: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .core-toast {
+    transition: none;
+  }
+}
+/* Core component source: tooltip.css */
+.core-tooltip {
+  background-color: var(--core-semantic-content-default);
+  color: var(--core-semantic-action-foreground);
+  font-family: Inter, sans-serif;
+  font-size: var(--core-semantic-typography-small-size);
+  font-weight: var(--core-semantic-typography-control-weight);
+  line-height: 1.4;
+  padding: var(--core-semantic-layout-tight-inset) var(--core-semantic-layout-control-gap);
+  border-radius: calc(var(--core-semantic-control-radius) - 2px);
+  max-width: 15rem;
+  overflow-wrap: anywhere;
+  box-shadow: 0 1.5px 3px rgb(0 0 0 / 15%);
+  transition:
+    opacity 0.1s ease,
+    transform 0.1s ease;
+  pointer-events: none;
+}
+
+.core-tooltip[data-entering],
+.core-tooltip[data-exiting] {
+  opacity: 0;
+  transform: scale(0.96);
+}
+
+.core-file-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.core-file-trigger[data-focus-visible],
+.core-file-trigger:focus-visible {
+  box-shadow:
+    0 0 0 2px var(--core-focus-ring-inner),
+    0 0 0 4px var(--core-focus-ring-outer);
+}
+
+/* Overlay surfaces follow Tale's neutral recipes in dark mode. */
+[data-core-color-scheme='dark'] .core-dialog,
+[data-core-color-scheme='dark'] .core-preview-trigger,
+[data-core-color-scheme='dark'] .core-toast {
+  background-color: var(--core-reference-color-neutral-100);
+  border-color: var(--core-reference-color-neutral-90);
+}
+
+[data-core-color-scheme='dark'] .core-toast {
+  color: var(--core-reference-color-neutral-20);
+}
+
+[data-core-color-scheme='dark'] .core-popover {
+  background-color: var(--core-reference-color-neutral-20);
+  border-color: var(--core-reference-color-neutral-10);
+  color: var(--core-reference-color-neutral-90);
+}
+
+[data-core-color-scheme='dark'] .core-tooltip {
+  background-color: var(--core-reference-color-neutral-30);
+  color: var(--core-reference-color-neutral-100);
+}
+
+[data-core-color-scheme='dark'] .core-dialog-title {
+  color: var(--core-reference-color-neutral-16);
+}
+
+[data-core-color-scheme='dark'] .core-dialog-content,
+[data-core-color-scheme='dark'] .core-dialog-content > p {
+  color: var(--core-reference-color-neutral-40);
+}
+
+[data-core-color-scheme='dark'] .core-dialog-close {
+  color: var(--core-reference-color-neutral-40);
+}
+
+@media (forced-colors: active) {
+  :where(.core-dialog, .core-dialog-modal, .core-popover, .core-preview-trigger, .core-toast, .core-tooltip) {
+    border-color: CanvasText;
+    background: Canvas;
+    color: CanvasText;
+    box-shadow: none;
+  }
+
+  .core-dialog-backdrop {
+    background: CanvasText;
+    opacity: 0.48;
+  }
+
+  .core-file-trigger {
+    background: ButtonFace;
+    color: ButtonText;
+  }
+}
+
+:where([data-reduced-motion], [data-core-motion='reduced']) :where(.core-dialog, .core-popover, .core-preview-trigger, .core-toast, .core-tooltip, .core-drop-zone) {
+  animation: none !important;
+  transition-duration: 0s !important;
+}
+
+/* Lifecycle attributes can be placed on the RAC positioner or modal host. */
+.core-dialog-modal[data-entering] .core-dialog,
+.core-dialog-modal[data-exiting] .core-dialog {
+  animation-duration: var(--core-semantic-motion-feedback);
+  animation-timing-function: ease;
+}
+
+.core-dialog-modal[data-entering] .core-dialog,
+.core-popover-positioner[data-entering] .core-popover,
+.core-tooltip[data-entering] {
+  animation-name: core-overlay-enter;
+}
+
+.core-dialog-modal[data-exiting] .core-dialog,
+.core-popover-positioner[data-exiting] .core-popover,
+.core-tooltip[data-exiting],
+.core-toast[data-exiting] {
+  animation-name: core-overlay-exit;
+}
+
+@keyframes core-overlay-enter {
+  from { opacity: 0; transform: scale(0.97); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes core-overlay-exit {
+  from { opacity: 1; transform: scale(1); }
+  to { opacity: 0; transform: scale(0.97); }
+}

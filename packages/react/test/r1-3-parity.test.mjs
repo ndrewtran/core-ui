@@ -37,7 +37,7 @@ test('R1.3 artifact declarations have a generated Core type and runtime surface'
   ]);
   assert.match(styles, /\.core-radio-indicator\b/u, 'RadioGroup needs a Core-owned visible indicator');
   assert.match(styles, /\.core-radio\[data-selected\] \.core-radio-indicator/u, 'RadioGroup needs selected indicator styling');
-  assert.match(styles, /\.core-radio:focus-within/u, 'RadioGroup needs a focus-visible affordance');
+  assert.match(styles, /\.core-radio\[data-focus-visible\]/u, 'RadioGroup needs a focus-visible affordance');
   assert.match(styles, /@media \(forced-colors: active\)[\s\S]*\.core-list-box-item\[data-focus-visible\][\s\S]*outline-color: Highlight/u, 'collection focus needs forced-colors treatment');
   assert.match(styles, /@media \(prefers-contrast: more\)[\s\S]*\.core-list-box-item\[data-focus-visible\][\s\S]*outline-width: 3px/u, 'collection focus needs high-contrast treatment');
   for (const slug of slugs) {
@@ -242,6 +242,22 @@ test('R1.3 temporal adapters preserve ISO values and calendar navigation', async
   }
 });
 
+test('embedded RAC button controls inherit the Core/Tale button chrome reset', async () => {
+  const styles = await readFile(resolve(import.meta.dirname, '../generated/styles.css'), 'utf8');
+  const resetStart = styles.indexOf('/* Bare RAC buttons need the same chrome reset as Tale\'s Button base.');
+  assert.notEqual(resetStart, -1);
+  const reset = styles.slice(resetStart, styles.indexOf('\n}\n', resetStart) + 3);
+  for (const className of [
+    'core-date-trigger', 'core-calendar-previous', 'core-calendar-next',
+    'core-combo-box-trigger', 'core-select-trigger', 'core-tag-remove',
+    'core-tree-toggle', 'core-disclosure-trigger', 'core-search-clear',
+  ]) assert.match(reset, new RegExp(`\\.${className}\\b`, 'u'));
+  assert.match(reset, /border:\s*1px solid transparent;/u);
+  assert.match(reset, /appearance:\s*none;/u);
+  assert.match(styles, /\.core-calendar-previous,\n\.core-calendar-next\s*\{[^}]*padding:\s*0;/u);
+  assert.match(styles, /\.core-combo-box-trigger\s*\{[^}]*border:\s*none;[\s\S]*background:\s*transparent;/u);
+});
+
 test('R1.3 color controls expose Core color strings, anatomy, and disabled guards', async () => {
   const env = installDom();
   const container = document.querySelector('#root');
@@ -314,14 +330,31 @@ test('R1.3 color controls expose Core color strings, anatomy, and disabled guard
     const readOnlyNestedArea = container.querySelector('.core-color-area');
     assert.equal(readOnlyNestedField.readOnly, true);
     const readOnlyNestedAreaField = readOnlyNestedArea.closest('.core-color-area-field');
-    assert.equal(readOnlyNestedAreaField.getAttribute('aria-readonly'), 'true');
+    assert.equal(readOnlyNestedAreaField.hasAttribute('aria-readonly'), false);
     assert.equal(readOnlyNestedAreaField.getAttribute('data-readonly'), 'true');
+    const readOnlyPicker = container.querySelector('.core-color-picker');
+    const readOnlySliderWrapper = container.querySelector('.core-color-slider')?.parentElement;
+    const readOnlyWheelWrapper = container.querySelector('.core-color-wheel')?.parentElement;
+    const readOnlySwatchPicker = container.querySelector('.core-color-swatch-picker');
+    const readOnlySwatchPickerWrapper = readOnlySwatchPicker?.parentElement;
+    const readOnlyColorSwatch = [...container.querySelectorAll('.core-color-swatch')]
+      .find((swatch) => swatch.getAttribute('data-readonly') === 'true');
+    for (const wrapper of [readOnlyPicker, readOnlySliderWrapper, readOnlyWheelWrapper, readOnlySwatchPickerWrapper, readOnlyColorSwatch]) {
+      assert.ok(wrapper);
+      assert.equal(wrapper.hasAttribute('aria-readonly'), false);
+      assert.equal(wrapper.getAttribute('data-readonly'), 'true');
+    }
     const readOnlyAreaTargets = [...container.querySelectorAll('.core-color-area input[type="range"]:not([tabindex="-1"])')];
     assert.ok(readOnlyAreaTargets.length > 0);
     assert.equal(readOnlyAreaTargets.every((target) => target.getAttribute('aria-readonly') === 'true'), true);
     const readOnlySlider = container.querySelector('.core-color-slider input');
     const readOnlyWheel = container.querySelector('.core-color-wheel input');
+    const readOnlySwatchList = container.querySelector('.core-color-swatch-picker[role="listbox"]');
     const readOnlySwatch = container.querySelector('.core-color-swatch-picker-item');
+    for (const target of [readOnlySlider, readOnlyWheel, readOnlySwatchList]) {
+      assert.equal(target?.getAttribute('aria-readonly'), 'true');
+    }
+    assert.equal(readOnlySwatch?.hasAttribute('aria-readonly'), false);
     for (const target of [readOnlySlider, readOnlyWheel, readOnlySwatch]) {
       const event = new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, cancelable: true });
       assert.equal(target?.dispatchEvent(event), false);
@@ -363,6 +396,10 @@ test('R1.3 scalar composites preserve string and numeric callbacks with disabled
     )));
     assert.ok(container.querySelector('.core-combo-box input'));
     assert.ok(container.querySelector('.core-combo-box-trigger'));
+    const comboArrow = container.querySelector('svg.core-combo-box-arrow');
+    assert.ok(comboArrow);
+    assert.equal(comboArrow.getAttribute('aria-hidden'), 'true');
+    assert.equal(comboArrow.querySelector('path')?.getAttribute('d'), 'm6 9 6 6 6-6');
     assert.equal(container.querySelectorAll('.core-radio').length, 2);
     assert.equal(container.querySelector('input[type="range"]').value, '1');
     assert.equal(container.querySelector('.core-radio input[value="pro"]').checked, true);
@@ -698,12 +735,12 @@ test('R1.3 Virtualizer uses RAC ListLayout to render and scroll a bounded window
     await act(async () => new Promise((resolve) => setTimeout(resolve, 0)));
     const viewport = container.querySelector('.core-virtualizer');
     assert.equal(viewport.getAttribute('data-layout'), 'stack');
-    assert.equal(viewport.querySelector('[role="presentation"]').style.height, '4160px');
+    assert.equal(viewport.querySelector('[role="presentation"]').style.height, '4000px');
     assert.equal(container.querySelector('[role="option"]').textContent, 'Item 0');
-    assert.deepEqual([...container.querySelectorAll('[role="option"]')].map((node) => node.textContent), ['Item 0', 'Item 1', 'Item 2']);
+    assert.deepEqual([...container.querySelectorAll('[role="option"]')].map((node) => node.textContent), ['Item 0', 'Item 1', 'Item 2', 'Item 3', 'Item 4']);
     viewport.scrollTop = 800;
     await act(async () => viewport.dispatchEvent(new Event('scroll', { bubbles: true })));
-    assert.deepEqual([...container.querySelectorAll('[role="option"]')].map((node) => node.textContent), ['Item 17', 'Item 18', 'Item 19', 'Item 20', 'Item 21', 'Item 22']);
+    assert.deepEqual([...container.querySelectorAll('[role="option"]')].map((node) => node.textContent), ['Item 19', 'Item 20', 'Item 21', 'Item 22', 'Item 23', 'Item 24']);
     assert.deepEqual(scrolls, [800]);
   } finally {
     await act(async () => root.unmount());
@@ -727,6 +764,21 @@ test('R1.3 Tree flattens nested items for keyboard collection semantics', async 
     assert.equal(container.querySelector('[role="row"] .core-tree-item-label').textContent, 'Parent');
     const child = [...container.querySelectorAll('[role="row"]')].find((row) => row.getAttribute('aria-label') === 'Child');
     assert.equal(child?.getAttribute('data-disabled'), 'true');
+    const parent = [...container.querySelectorAll('[role="row"]')].find((row) => row.getAttribute('aria-label') === 'Parent');
+    const toggle = parent?.querySelector('.core-tree-toggle');
+    const content = parent?.querySelector('.core-tree-item-content');
+    assert.equal(parent?.querySelectorAll('.core-tree-toggle').length, 1);
+    assert.ok(content);
+    assert.equal(content?.querySelector('.core-tree-toggle'), toggle);
+    assert.equal(content?.querySelector('.core-tree-item-label')?.textContent, 'Parent');
+    assert.equal(toggle?.getAttribute('slot'), 'chevron');
+    assert.equal(toggle?.getAttribute('aria-label'), 'Toggle');
+    assert.equal(toggle?.querySelector('svg')?.getAttribute('aria-hidden'), 'true');
+    assert.equal(toggle?.querySelector('svg')?.getAttribute('focusable'), 'false');
+    assert.equal(toggle?.querySelector('svg')?.classList.contains('lucide-chevron-right'), true);
+    const styles = await readFile(resolve(import.meta.dirname, '../generated/styles.css'), 'utf8');
+    assert.doesNotMatch(styles, /\.core-tree-item\[data-has-child-items\].*::before/u);
+    assert.match(styles, /\.core-tree-toggle\s*\{[^}]*transform:|\.core-tree-item\[data-expanded\] \.core-tree-toggle/u);
     await act(async () => child.click());
     assert.deepEqual(actions, []);
   } finally {

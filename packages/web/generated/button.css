@@ -1,12 +1,12 @@
 /* @generated-from: packages/catalog/catalog-sources.json
- * @generated-content-sha256: sha256:30501e52b1a1cf27df80504764bd80d231434630f1a3cb39c2dae15d3279c45f
+ * @generated-content-sha256: sha256:3db0238c9462727daead33454dad93fdeeafbdf70d8607d03a1000fbd8700e3e
  */
 :root {
-  --core-component-button-background: #2b2826;
-  --core-component-button-foreground: #f9f8f8;
-  --core-component-button-min-height: 39.6px;
+  --core-component-button-background: #025768;
+  --core-component-button-foreground: #e6f0f0;
+  --core-component-button-min-height: 36px;
   --core-component-button-padding-inline: 14px;
-  --core-component-button-radius: 5px;
+  --core-component-button-radius: 10px;
   --core-reference-color-amber-10: #f9e8d5;
   --core-reference-color-amber-100: #612300;
   --core-reference-color-amber-20: #f4d6b4;
@@ -303,34 +303,79 @@
   --core-reference-number-font-weight-regular: 400;
   --core-reference-number-font-weight-semibold: 600;
   --core-reference-number-line-height-relaxed: 1.5;
-  --core-semantic-action-background: #2b2826;
-  --core-semantic-action-foreground: #f9f8f8;
-  --core-semantic-control-min-height: 39.6px;
+  --core-semantic-action-background: #025768;
+  --core-semantic-action-background-hover: #2b7580;
+  --core-semantic-action-background-pressed: #539198;
+  --core-semantic-action-foreground: #e6f0f0;
+  --core-semantic-border-default: #d5d2d1;
+  --core-semantic-border-strong: #cbc8c6;
+  --core-semantic-border-subtle: #dad7d6;
+  --core-semantic-content-default: #45403d;
+  --core-semantic-content-faint: #a9a4a0;
+  --core-semantic-content-inverse: #11100f;
+  --core-semantic-content-link: #02485b;
+  --core-semantic-content-link-hover: #012334;
+  --core-semantic-content-link-pressed: #012e41;
+  --core-semantic-content-muted: #918b86;
+  --core-semantic-content-strong: #2b2826;
+  --core-semantic-control-min-height: 36px;
   --core-semantic-control-padding-inline: 14px;
-  --core-semantic-control-radius: 5px;
+  --core-semantic-control-radius: 10px;
+  --core-semantic-elevation-control: rgba(0, 0, 0, 0) 0 0 0 0, rgba(0, 0, 0, 0) 0 0 0 0, rgba(0, 0, 0, 0) 0 0 0 0, rgba(0, 0, 0, 0) 0 0 0 1px inset, rgba(10, 13, 18, 0.18) 0 0 0 1px inset, rgba(10, 13, 18, 0.05) 0 -2px 0 0 inset, rgba(10, 13, 18, 0.05) 0 1px 2px 0;
+  --core-semantic-elevation-floating: 0 0.25rem 1rem rgb(0 0 0 / 20%);
+  --core-semantic-elevation-indicator: 0 1px 3px rgb(0 0 0 / 24%);
+  --core-semantic-elevation-modal: 0 1rem 3rem rgb(0 0 0 / 35%);
+  --core-semantic-elevation-overlay: 0 0.5rem 1.5rem rgb(0 0 0 / 24%);
+  --core-semantic-elevation-tooltip: 0 0.25rem 0.75rem rgb(0 0 0 / 20%);
   --core-semantic-feedback-invalid: #cc3330;
   --core-semantic-field-background: #f9f8f8;
   --core-semantic-focus-ring: #5d5aeb;
+  --core-semantic-layout-control-gap: 7px;
+  --core-semantic-layout-group-gap: 9.9px;
+  --core-semantic-layout-section-gap: 19.8px;
+  --core-semantic-layout-tight-inset: 5.2px;
   --core-semantic-motion-feedback: 120ms;
   --core-semantic-overlay-background: #f9f8f8;
-  --core-semantic-selection-track: #2b2826;
+  --core-semantic-overlay-scrim: #11100f7a;
+  --core-semantic-selection-track: #025768;
+  --core-semantic-shape-container-radius: 15px;
+  --core-semantic-shape-indicator-radius: 5px;
+  --core-semantic-shape-option-radius: 7.5px;
+  --core-semantic-shape-overlay-radius: 20px;
+  --core-semantic-shape-pill-radius: 9999px;
+  --core-semantic-shape-thumb-radius: 2px;
+  --core-semantic-shape-wheel-radius: 30px;
+  --core-semantic-status-success: #3cbe7e;
+  --core-semantic-status-warning: #f79009;
+  --core-semantic-surface-canvas: #f9f8f8;
+  --core-semantic-surface-hover: #e8e7e6;
+  --core-semantic-surface-raised: #f2f1f0;
+  --core-semantic-surface-subtle: #edeceb;
+  --core-semantic-typography-body-line-height: 1.5;
+  --core-semantic-typography-body-size: 16px;
+  --core-semantic-typography-body-weight: 400;
+  --core-semantic-typography-control-weight: 500;
+  --core-semantic-typography-heading-weight: 700;
+  --core-semantic-typography-label-weight: 600;
+  --core-semantic-typography-small-size: 13.3px;
+  --core-semantic-typography-tiny-size: 12.3px;
 }
 
 @layer core.tokens, core.components, core.utilities;
 
 @layer core.components {
   .core-button {
-    --core-component-button-background: #2b2826;
-    --core-component-button-foreground: #f9f8f8;
+    --core-component-button-background: #025768;
+    --core-component-button-foreground: #e6f0f0;
     align-items: center;
     background: var(--core-component-button-background);
-    border: 2px solid #2b2826;
-    border-radius: 5px;
+    border: 2px solid #025768;
+    border-radius: 10px;
     color: var(--core-component-button-foreground);
     display: inline-flex;
     font: inherit;
     gap: 0.5em;
-    min-block-size: 39.6px;
+    min-block-size: 36px;
     padding-inline: 14px;
     text-align: start;
   }

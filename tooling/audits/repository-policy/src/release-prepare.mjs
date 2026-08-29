@@ -28,6 +28,7 @@ const deliveredExports = [
 const supportingExports = ['ToastProvider', 'useToast'];
 const expectedRuntimeDependencies = {
   '@internationalized/date': '3.12.3',
+  'lucide-react': '1.37.0',
   'react-aria-components': '1.20.0',
 };
 const expectedPeerDependencies = {
@@ -454,6 +455,8 @@ try {
   assertIncludes(readme, '@core-ui/react@0.1.0-rc.1', 'R1_EXIT_PACK_GUIDANCE_MISSING');
   assertIncludes(readme, 'next', 'R1_EXIT_PACK_GUIDANCE_MISSING');
   assertIncludes(notice, 'Tale UI', 'R1.5_PACK_NOTICE_INVALID');
+  assertIncludes(notice, 'Lucide', 'R1.5_PACK_NOTICE_INVALID');
+  assertIncludes(notice, 'Copyright (c) 2013-present Cole Bemis', 'R1.5_PACK_NOTICE_INVALID');
   for (const name of deliveredExports) {
     const slug = name.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
     assertIncludes(styles, `.core-${slug}`, 'R1.5_PACK_STYLE_MISSING');

@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { execFile as execFileCallback } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { promisify } from 'node:util';
-import { cp, lstat, mkdir, mkdtemp, readFile, readdir, rm, unlink, writeFile } from 'node:fs/promises';
+import { lstat, mkdir, mkdtemp, readFile, readdir, rm, unlink, writeFile } from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import { pathToFileURL } from 'node:url';
@@ -68,15 +68,18 @@ async function candidatePaths() {
 
 async function overlayCandidate(target) {
   for (const relativePath of await candidatePaths()) {
-    const source = join(repositoryRoot, relativePath);
     const destination = join(target, relativePath);
-    const metadata = await lstat(source).catch((error) => (error?.code === 'ENOENT' ? null : Promise.reject(error)));
-    if (metadata === null) {
+    const historical = await execFile('git', ['show', `${historicalBaseline}:${relativePath}`], {
+      cwd: repositoryRoot,
+      encoding: 'utf8',
+      maxBuffer: 16 * 1024 * 1024,
+    }).catch(() => null);
+    if (historical === null) {
       await rm(destination, { recursive: true, force: true });
       continue;
     }
     await mkdir(dirname(destination), { recursive: true });
-    await cp(source, destination, { recursive: true, force: true });
+    await writeFile(destination, historical.stdout);
   }
 }
 
@@ -156,8 +159,8 @@ test('TALE-TOKEN-C repository transition restores failed changes and replays ide
 
     assert.equal((await identity.runDefaultThemeIdentityMigration(worktree, { mode: 'rollback' })).changed, true);
     assert.equal((await identity.runDefaultThemeIdentityMigration(worktree, { mode: 'rollback' })).changed, false);
-    assert.equal((await identity.runDefaultThemeIdentityMigration(worktree)).changed, true);
-    assert.equal((await identity.runDefaultThemeIdentityMigration(worktree)).changed, false);
+    assert.equal((await identity.runDefaultThemeIdentityMigration(worktree, { mode: 'write' })).changed, true);
+    assert.equal((await identity.runDefaultThemeIdentityMigration(worktree, { mode: 'write' })).changed, false);
     assert.equal(await digestPaths(worktree), originalDigest, 'rollback and replay are exact and idempotent');
   } finally {
     await rm(parent, { recursive: true, force: true });

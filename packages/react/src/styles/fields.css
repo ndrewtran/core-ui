@@ -1,0 +1,748 @@
+/* Core-owned field parity source. */
+/* Core component source: autocomplete.css */
+.core-field-input {
+  display: block;
+  width: 100%;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+.core-field-input:hover {
+  border-color: var(--core-semantic-content-faint);
+}
+
+.core-autocomplete-search {
+  display: block;
+  width: 100%;
+  line-height: 1.5;
+}
+
+.core-autocomplete {
+  gap: 0;
+}
+
+.core-autocomplete-search > .core-field-label {
+  display: inline;
+}
+
+.core-autocomplete-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--core-semantic-layout-tight-inset);
+  padding: var(--core-semantic-layout-tight-inset);
+}
+
+/* Author styles otherwise override the user-agent [hidden] rule. The list is
+   a live suggestion region and must stay absent until the input opens it. */
+.core-autocomplete-list[hidden] {
+  display: none;
+}
+
+.core-autocomplete-option[data-selected] {
+  color: var(--core-semantic-selection-track);
+  font-weight: var(--core-semantic-typography-control-weight);
+}
+
+.core-autocomplete .core-autocomplete-search[data-invalid] .core-field-input:not(:focus, [data-focused]) {
+  border-color: var(--core-field-border-color);
+  box-shadow: none;
+}
+/* Core component source: date-field.css */
+.core-date-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--core-semantic-layout-control-gap);
+  width: max-content;
+}
+/* Core component source: date-picker.css */
+.core-date-picker {
+  display: flex;
+  flex-direction: column;
+  gap: var(--core-semantic-layout-control-gap);
+  width: max-content;
+}
+/* Core component source: date-range-picker.css */
+.core-date-range-picker {
+  display: flex;
+  flex-direction: column;
+  gap: var(--core-semantic-layout-control-gap);
+  width: max-content;
+}
+/* Core component source: form.css */
+.core-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--core-semantic-layout-section-gap);
+  width: 100%;
+}
+
+.core-form > .core-button {
+  margin-top: var(--core-semantic-control-padding-inline);
+  margin-bottom: -1px;
+  height: 38px;
+  min-height: 37px;
+}
+/* Core component source: number-field.css */
+.core-number-field {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--core-semantic-layout-control-gap);
+  width: var(--core-component-number-field-width, fit-content);
+}
+
+.core-number-control {
+  display: inline-flex;
+  align-items: stretch;
+  width: var(--core-component-number-field-group-width, 100%);
+  max-width: 100%;
+  border: 1px solid var(--core-semantic-border-strong);
+  border-radius: calc(var(--core-semantic-control-radius) - 2px);
+  overflow: hidden;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.core-number-control:focus-within {
+  border-color: var(--core-semantic-focus-ring);
+  box-shadow: 0 0 0 2px var(--core-semantic-content-inverse), 0 0 0 4px var(--core-semantic-focus-ring);
+}
+
+.core-number-control:hover:not(:focus-within) {
+  border-color: var(--core-semantic-content-faint);
+}
+
+.core-number-control > .core-field-input {
+  box-sizing: border-box;
+
+  flex: 1 1 3.75rem;
+  min-width: 0;
+  min-height: 2.25rem;
+  padding: var(--core-semantic-layout-control-gap) var(--core-semantic-control-padding-inline);
+  border: none;
+  background-color: transparent;
+  color: var(--core-semantic-content-strong);
+  font-family: Inter, sans-serif;
+  font-size: var(--core-semantic-typography-body-size);
+  text-align: center;
+  outline: none;
+}
+
+.core-number-control > .core-field-input::placeholder {
+  color: var(--core-semantic-content-muted);
+}
+
+.core-number-stepper {
+  width: 2rem;
+  min-height: 2.25rem;
+  border-radius: 0;
+  background-color: var(--core-semantic-surface-raised);
+  color: var(--core-semantic-content-default);
+  font-size: var(--core-semantic-typography-body-size);
+  font-family: Inter, sans-serif;
+}
+
+.core-number-stepper-decrement {
+  border-right: 1px solid var(--core-semantic-border-default);
+  border-radius: var(--core-semantic-control-radius) 0 0 var(--core-semantic-control-radius);
+}
+
+.core-number-stepper-increment {
+  border-left: 1px solid var(--core-semantic-border-default);
+  border-radius: 0 var(--core-semantic-control-radius) var(--core-semantic-control-radius) 0;
+}
+
+.core-number-stepper:hover:not(:disabled) {
+  background-color: var(--core-semantic-border-subtle);
+  color: var(--core-semantic-content-strong);
+}
+
+.core-number-stepper:active:not(:disabled) {
+  background-color: var(--core-semantic-border-strong);
+}
+
+.core-number-field[data-disabled] .core-number-control {
+  background-color: var(--core-semantic-surface-hover);
+  border-color: var(--core-semantic-border-strong);
+  color: var(--core-semantic-content-strong);
+  cursor: not-allowed;
+}
+
+.core-number-field[data-disabled] .core-number-stepper {
+  background-color: var(--core-semantic-surface-hover);
+  border-color: var(--core-semantic-border-strong);
+  color: var(--core-semantic-content-default);
+}
+
+.core-number-field[data-disabled] .core-number-control > .core-field-input,
+.core-number-field[data-disabled] .core-number-stepper {
+  pointer-events: none;
+}
+
+.core-number-field[data-invalid] .core-number-control {
+  border-color: var(--core-semantic-feedback-invalid);
+}
+
+.core-number-field[data-invalid] .core-number-control:focus-within {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--core-semantic-feedback-invalid) 20%, transparent);
+}
+/* Core component source: search-field.css */
+.core-search-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--core-semantic-layout-control-gap);
+  width: 100%;
+  position: relative;
+}
+
+.core-field-input {
+  display: block;
+  width: 100%;
+  line-height: 1.5;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    background-color 0.15s ease;
+}
+
+.core-field-input:hover:not(:focus, [data-disabled], [data-invalid]) {
+  border-color: var(--core-semantic-content-faint);
+}
+
+.core-field-input[data-invalid] {
+  border-color: var(--core-semantic-feedback-invalid);
+}
+
+.core-field-input[data-invalid]:focus,
+.core-field-input[data-invalid][data-focused] {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--core-semantic-feedback-invalid) 20%, transparent);
+}
+
+.core-field-input[data-disabled],
+.core-field-input:disabled {
+  border-color: var(--core-semantic-border-strong);
+  color: var(--core-semantic-content-strong);
+  cursor: not-allowed;
+  background-color: var(--core-semantic-surface-hover);
+}
+
+.core-search-control .core-field-input {
+  padding-inline-end: 2rem;
+}
+
+.core-search-clear {
+  position: static;
+  grid-column: 2;
+  grid-row: 1;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--core-semantic-content-muted);
+  font-size: var(--core-semantic-typography-body-size);
+  cursor: pointer;
+  outline: none;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
+  flex-shrink: 0;
+}
+
+.core-search-clear[data-hovered] {
+  background-color: var(--core-semantic-surface-hover);
+  color: var(--core-semantic-content-default);
+}
+
+.core-search-clear[data-pressed] {
+  background-color: var(--core-semantic-border-subtle);
+}
+
+.core-search-clear[data-focus-visible] {
+  box-shadow:
+    0 0 0 2px var(--core-semantic-content-inverse),
+    0 0 0 4px var(--core-semantic-focus-ring);
+}
+
+.core-search-clear[data-disabled] {
+  background-color: var(--core-semantic-surface-hover);
+  color: var(--core-semantic-content-default);
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.core-search-field[data-empty] .core-search-clear {
+  display: none;
+}
+
+/* The clear action shares the input's control grid in the pinned donor. */
+.core-search-control {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+}
+
+.core-search-control .core-field-input {
+  grid-column: 1 / -1;
+  grid-row: 1;
+  padding-inline-end: 2rem;
+}
+
+.core-field-description {
+  color: var(--core-semantic-content-default);
+  font-weight: var(--core-semantic-typography-body-weight);
+}
+/* Core component source: switch.css */
+.core-switch {
+  --core-component-switch-track-width: 2.5rem;
+  --core-component-switch-track-height: 1.375rem;
+  --core-component-switch-thumb-size: 0.875rem;
+  --core-component-switch-thumb-offset: 0.25rem;
+
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--core-semantic-layout-control-gap);
+  min-height: var(--core-component-switch-track-height);
+  padding-inline-start: calc(var(--core-component-switch-track-width) + var(--core-semantic-layout-control-gap));
+  color: var(--core-semantic-content-default);
+  font-family: Inter, sans-serif;
+  font-size: var(--core-semantic-typography-body-size);
+  font-weight: var(--core-semantic-typography-control-weight);
+  cursor: pointer;
+  outline: none;
+  flex-shrink: 0;
+}
+
+.core-switch::before {
+  content: '';
+  position: absolute;
+  inset-inline-start: 0;
+  inset-block-start: 50%;
+  width: var(--core-component-switch-track-width);
+  height: var(--core-component-switch-track-height);
+  border-radius: var(--core-semantic-shape-pill-radius);
+  border: 1.5px solid var(--core-semantic-content-faint);
+  background-color: var(--core-semantic-border-subtle);
+  transform: translateY(-50%);
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.core-switch[data-focus-visible]::before {
+  box-shadow:
+    0 0 0 2px var(--core-semantic-content-inverse),
+    0 0 0 4px var(--core-semantic-focus-ring);
+}
+
+.core-switch[data-selected]::before {
+  background-color: var(--core-semantic-selection-track);
+  border-color: var(--core-semantic-selection-track);
+}
+
+.core-switch[data-selected][data-hovered]:not([data-disabled])::before {
+  background-color: var(--core-semantic-action-background-hover);
+  border-color: var(--core-semantic-action-background-hover);
+}
+
+.core-switch[data-hovered]:not([data-disabled], [data-selected])::before {
+  border-color: var(--core-semantic-content-muted);
+  background-color: var(--core-semantic-border-strong);
+}
+
+.core-switch[data-invalid]::before {
+  border-color: var(--core-semantic-feedback-invalid);
+}
+
+.core-switch[data-disabled] {
+  color: var(--core-semantic-content-default);
+  cursor: not-allowed;
+}
+
+.core-switch[data-disabled]::before {
+  background-color: var(--core-semantic-surface-hover);
+  border-color: var(--core-semantic-content-default);
+}
+
+.core-switch[data-disabled][data-selected]::before {
+  background-color: var(--core-semantic-content-default);
+  border-color: var(--core-semantic-content-default);
+}
+
+.core-switch-indicator {
+  position: absolute;
+  inset-inline-start: var(--core-component-switch-thumb-offset);
+  inset-block-start: 50%;
+  width: var(--core-component-switch-thumb-size);
+  height: var(--core-component-switch-thumb-size);
+  border-radius: 50%;
+  background-color: var(--core-semantic-content-default);
+  box-shadow: var(--core-semantic-elevation-indicator);
+  transition:
+    transform 0.2s ease,
+    background-color 0.2s ease;
+  transform: translate(0, -50%);
+  z-index: 1;
+  flex-shrink: 0;
+  pointer-events: none;
+}
+
+.core-switch[data-selected] .core-switch-indicator,
+.core-switch-indicator[data-selected] {
+  transform: translate(
+    calc(
+      var(--core-component-switch-track-width) - (var(--core-component-switch-thumb-offset) * 1.2) -
+        var(--core-component-switch-thumb-size)
+    ),
+    -50%
+  );
+  background-color: var(--core-semantic-action-foreground);
+}
+/* Core component source: text-field.css */
+.core-field-input {
+  display: block;
+  width: 100%;
+  line-height: 1.5;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    background-color 0.15s ease;
+}
+
+.core-field-input:hover:not(:focus, [data-disabled], [data-invalid]) {
+  border-color: var(--core-semantic-content-faint);
+}
+
+.core-field-input[data-invalid] {
+  border-color: var(--core-semantic-feedback-invalid);
+}
+
+.core-field-input[data-invalid]:focus,
+.core-field-input[data-invalid][data-focused] {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--core-semantic-feedback-invalid) 20%, transparent);
+}
+
+.core-field-input[data-disabled],
+.core-field-input:disabled {
+  border-color: var(--core-semantic-border-strong);
+  color: var(--core-semantic-content-strong);
+  cursor: not-allowed;
+  background-color: var(--core-semantic-surface-hover);
+}
+/* Core component source: time-field.css */
+.core-time-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--core-semantic-layout-control-gap);
+  width: max-content;
+}
+
+/* Tale's dark field recipes use a neutral control surface distinct from the
+   Core canvas. These are ordinary component rules so consumers receive the
+   same field treatment as the migration fixture. */
+[data-core-color-scheme='dark'] :where(
+  .core-text-field,
+  .core-number-field,
+  .core-search-field,
+  .core-autocomplete,
+  .core-combo-box,
+  .core-select,
+  .core-date-field,
+  .core-date-picker,
+  .core-date-range-picker,
+  .core-time-field,
+  .core-color-field
+) .core-field-label {
+  color: var(--core-reference-color-neutral-40);
+}
+
+[data-core-color-scheme='dark'] .core-field-input {
+  background-color: color-mix(in srgb, var(--core-reference-color-neutral-100) 85%, black);
+  border-color: var(--core-reference-color-neutral-84);
+  color: var(--core-reference-color-neutral-20);
+}
+
+[data-core-color-scheme='dark'] .core-autocomplete-list {
+  background-color: var(--core-reference-color-neutral-100);
+  border-color: var(--core-reference-color-neutral-90);
+}
+
+[data-core-color-scheme='dark'] .core-autocomplete-option {
+  color: var(--core-reference-color-neutral-40);
+}
+
+[data-core-color-scheme='dark'] .core-autocomplete .core-autocomplete-search .core-field-input:is(:focus, [data-focused]) {
+  border-color: var(--core-reference-color-neutral-60);
+}
+
+[data-core-color-scheme='dark'] .core-autocomplete .core-autocomplete-search[data-invalid] .core-field-input:not(:focus, [data-focused]) {
+  border-color: var(--core-reference-color-neutral-84);
+}
+
+[data-core-color-scheme='dark'] .core-field-input::placeholder {
+  color: var(--core-reference-color-neutral-60);
+}
+
+[data-core-color-scheme='dark'] :where(
+  .core-date-input,
+  .core-number-control > .core-field-input
+) {
+  color: var(--core-reference-color-neutral-20);
+}
+
+[data-core-color-scheme='dark'] .core-date-segment {
+  color: var(--core-reference-color-neutral-20);
+}
+
+[data-core-color-scheme='dark'] :where(
+  .core-date-segment[data-type='literal'],
+  .core-date-segment[data-placeholder]
+) {
+  color: var(--core-reference-color-neutral-60);
+}
+
+[data-core-color-scheme='dark'] .core-number-control > .core-field-input::placeholder {
+  color: var(--core-reference-color-neutral-60);
+}
+
+[data-core-color-scheme='dark'] .core-number-control {
+  border-color: var(--core-reference-color-neutral-84);
+}
+
+[data-core-color-scheme='dark'] .core-number-stepper {
+  background-color: var(--core-reference-color-neutral-98);
+  color: var(--core-reference-color-neutral-30);
+}
+
+[data-core-color-scheme='dark'] :where(
+  .core-number-stepper-decrement,
+  .core-number-stepper-increment
+) {
+  border-color: var(--core-reference-color-neutral-84);
+}
+
+[data-core-color-scheme='dark'] .core-number-field .core-field-label {
+  color: var(--core-reference-color-neutral-30);
+}
+
+[data-core-color-scheme='dark'] .core-form .core-field-input {
+  border-radius: var(--core-reference-dimension-radius-s);
+}
+
+[data-core-color-scheme='dark'] .core-number-control {
+  border-color: var(--core-reference-color-neutral-82);
+  border-radius: var(--core-semantic-control-radius);
+}
+
+[data-core-color-scheme='dark'] .core-number-control > .core-field-input {
+  color: var(--core-reference-color-neutral-18);
+}
+
+[data-core-color-scheme='dark'] :where(
+  .core-number-stepper-decrement,
+  .core-number-stepper-increment
+) {
+  border-color: var(--core-reference-color-neutral-86);
+}
+
+[data-core-color-scheme] .core-number-field[data-invalid] .core-number-control {
+  border-color: var(--core-reference-color-red-60);
+}
+
+[data-core-color-scheme] .core-number-field :where(.core-number-control[data-invalid], [data-invalid] .core-number-control) {
+  border-color: var(--core-reference-color-red-60);
+}
+
+[data-core-color-scheme] .core-number-field[data-invalid] .core-number-control:focus-within {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--core-reference-color-red-60) 20%, transparent);
+}
+
+[data-core-color-scheme] .core-field-input[data-invalid] {
+  border-color: var(--core-reference-color-red-60);
+}
+
+/* Invalid field labels use the same consumer-facing red as Tale, including
+   fields whose invalid state is carried by the field root. */
+[data-core-color-scheme] :where(
+  .core-text-field,
+  .core-search-field,
+  .core-number-field,
+  .core-date-field,
+  .core-date-picker,
+  .core-date-range-picker,
+  .core-time-field
+)[data-invalid] .core-field-label {
+  color: var(--core-reference-color-red-60);
+}
+
+[data-core-color-scheme='dark'] :where(
+  .core-text-field,
+  .core-search-field,
+  .core-number-field,
+  .core-date-field,
+  .core-date-picker,
+  .core-date-range-picker,
+  .core-time-field
+)[data-invalid] .core-field-label {
+  color: var(--core-semantic-feedback-invalid);
+}
+
+[data-core-color-scheme='dark'] .core-date-field > .core-date-input,
+[data-core-color-scheme='dark'] .core-time-field > .core-date-input {
+  background-color: color-mix(in srgb, var(--core-reference-color-neutral-100) 85%, black);
+  border-color: var(--core-reference-color-neutral-84);
+}
+
+[data-core-color-scheme] :where(
+  .core-date-field,
+  .core-time-field
+) > .core-date-input[data-invalid],
+[data-core-color-scheme] :where(
+  .core-date-field,
+  .core-time-field
+)[data-invalid] > .core-date-input {
+  border-color: var(--core-reference-color-red-60);
+}
+
+.core-number-control {
+  border-radius: var(--core-semantic-control-radius);
+}
+
+[data-core-color-scheme] .core-number-control:focus-within {
+  box-shadow:
+    0 0 0 2px var(--core-focus-ring-inner),
+    0 0 0 4px var(--core-focus-ring-outer);
+}
+
+[data-core-color-scheme='dark'] .core-switch {
+  color: var(--core-reference-color-neutral-28);
+}
+
+[data-core-color-scheme='dark'] .core-switch-label {
+  color: var(--core-reference-color-neutral-28);
+}
+
+[data-core-color-scheme='dark'] .core-switch::before {
+  background-color: var(--core-reference-color-neutral-88);
+  border-color: var(--core-reference-color-neutral-70);
+}
+
+[data-core-color-scheme='dark'] .core-switch[data-selected]::before {
+  background-color: var(--core-reference-color-bluegreen-40);
+  border-color: var(--core-reference-color-bluegreen-40);
+}
+
+[data-core-color-scheme='dark'] .core-switch[data-selected][data-hovered]:not([data-disabled])::before {
+  background-color: var(--core-reference-color-bluegreen-50);
+  border-color: var(--core-reference-color-bluegreen-50);
+}
+
+[data-core-color-scheme='dark'] .core-switch[data-hovered]:not([data-disabled], [data-selected])::before {
+  background-color: var(--core-reference-color-neutral-82);
+  border-color: var(--core-reference-color-neutral-50);
+}
+
+[data-core-color-scheme='dark'] .core-switch-indicator {
+  background-color: var(--core-reference-color-neutral-28);
+}
+
+[data-core-color-scheme='dark'] .core-switch[data-selected] .core-switch-indicator,
+[data-core-color-scheme='dark'] .core-switch-indicator[data-selected] {
+  background-color: var(--core-reference-color-bluegreen-100);
+}
+
+.core-switch[data-focus-visible]::before,
+.core-switch:focus-visible::before {
+  box-shadow:
+    0 0 0 2px var(--core-focus-ring-inner),
+    0 0 0 4px var(--core-focus-ring-outer);
+}
+
+/* Picker controls own the field border. Their RAC date inputs are transparent
+   inner segments, not standalone fields, and must not add a second minimum
+   height, border, radius, or fill. */
+.core-date-control,
+.core-date-range-control {
+  min-height: var(--core-field-min-height);
+  padding: 0;
+  padding-inline-end: 0;
+  border-radius: var(--core-reference-dimension-radius-s);
+}
+
+.core-date-picker .core-date-control,
+.core-date-range-picker .core-date-range-control {
+  padding-inline-end: 0;
+}
+
+.core-date-control > .core-date-input,
+.core-date-range-control > .core-date-input {
+  min-height: 0;
+  border: 0;
+  border-radius: 0;
+  background-color: transparent;
+  padding: var(--core-semantic-layout-control-gap) var(--core-semantic-control-padding-inline);
+  padding-inline-end: var(--core-semantic-control-padding-inline);
+}
+
+.core-date-control .core-date-trigger,
+.core-date-range-control .core-date-trigger {
+  min-height: calc(var(--core-field-min-height) + 9px);
+  width: calc(var(--core-field-min-height) + 9px);
+  border-top: 0;
+  border-right: 0;
+  border-bottom: 0;
+  border-left: 1px solid var(--core-reference-color-neutral-26);
+  border-radius: 0 calc(var(--core-reference-dimension-radius-m) - 1px) calc(var(--core-reference-dimension-radius-m) - 1px) 0;
+  background-color: var(--core-reference-color-neutral-10);
+}
+
+.core-date-trigger > svg {
+  transform: translateY(1px);
+}
+
+.core-date-range-control .core-date-trigger {
+  width: calc(var(--core-field-min-height) + 9px);
+}
+
+.core-date-range-separator {
+  inline-size: 0;
+  flex-basis: 0;
+}
+
+[data-core-color-scheme='light'] .core-date-control,
+[data-core-color-scheme='light'] .core-date-range-control {
+  background-color: var(--core-reference-color-neutral-5);
+  border-color: var(--core-reference-color-neutral-26);
+}
+
+[data-core-color-scheme='light'] .core-date-control .core-date-trigger,
+[data-core-color-scheme='light'] .core-date-range-control .core-date-trigger {
+  border-left-color: var(--core-reference-color-neutral-26);
+  background-color: var(--core-reference-color-neutral-10);
+}
+
+[data-core-color-scheme='dark'] .core-date-control,
+[data-core-color-scheme='dark'] .core-date-range-control {
+  background-color: color-mix(in srgb, var(--core-reference-color-neutral-100) 85%, black);
+  border-color: var(--core-reference-color-neutral-84);
+}
+
+[data-core-color-scheme='dark'] .core-date-control .core-date-trigger,
+[data-core-color-scheme='dark'] .core-date-range-control .core-date-trigger {
+  border-left-color: var(--core-reference-color-neutral-84);
+  background-color: var(--core-reference-color-neutral-100);
+  color: var(--core-reference-color-neutral-30);
+}
+
+[data-core-color-scheme] .core-date-picker[data-invalid] .core-date-control,
+[data-core-color-scheme] .core-date-range-picker[data-invalid] .core-date-range-control {
+  border-color: var(--core-reference-color-red-60);
+}

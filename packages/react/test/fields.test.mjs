@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 import React, { act } from 'react';
 import { createRoot, hydrateRoot } from 'react-dom/client';
@@ -41,6 +42,19 @@ function OptionsWrapper() {
     React.createElement(Checkbox, { value: 'sms' }, 'SMS'));
 }
 
+function contrastRatio(foreground, background) {
+  const luminance = (hex) => {
+    const channels = [0, 1, 2].map((index) => Number.parseInt(hex.slice(index * 2 + 1, index * 2 + 3), 16) / 255);
+    return channels.reduce((total, channel, index) => {
+      const linear = channel <= 0.03928 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4;
+      return total + linear * [0.2126, 0.7152, 0.0722][index];
+    }, 0);
+  };
+  const lighter = Math.max(luminance(foreground), luminance(background));
+  const darker = Math.min(luminance(foreground), luminance(background));
+  return (lighter + 0.05) / (darker + 0.05);
+}
+
 function fields({ onText, onNumber, onSearch, onDate, onTime, onRange, onSwitch, onGroup, onSubmit, onReset } = {}) {
   return React.createElement(React.Fragment, null,
     React.createElement(TextField, { label: 'Name', description: 'Display name', errorMessage: 'Name is required', invalid: true, defaultValue: 'Andrew', onChange: onText }),
@@ -74,11 +88,94 @@ test('R1.2 fields preserve Core labels, errors, SSR, hydration, and state callba
     assert.equal(document.querySelector('.core-switch input')?.checked, false);
     assert.equal(document.querySelector('.core-switch-field')?.getAttribute('data-invalid'), 'true');
     assert.match(document.querySelector('.core-switch-field')?.textContent ?? '', /Apply changes.*Choose a setting/u);
+    assert.equal(document.querySelector('.core-search-clear svg')?.getAttribute('aria-hidden'), 'true');
+    assert.equal(document.querySelector('.core-search-clear svg')?.getAttribute('focusable'), 'false');
     await act(async () => root.unmount());
   } finally {
     restore();
     dom.window.close();
   }
+});
+
+test('SearchField keeps its clear action in the input control grid with supporting text', async () => {
+  const markup = renderToString(React.createElement(SearchField, {
+    label: 'Search',
+    description: 'Find a result',
+    errorMessage: 'No result found',
+    defaultValue: 'Core',
+    invalid: true,
+  }));
+  const dom = new JSDOM(`<!doctype html><div id="root">${markup}</div>`);
+  const control = dom.window.document.querySelector('.core-search-control');
+  assert.ok(control);
+  assert.equal(control.querySelector('input')?.parentElement, control);
+  const clear = control.querySelector('.core-search-clear');
+  assert.equal(clear?.parentElement, control);
+  assert.equal(clear?.querySelector('svg')?.getAttribute('aria-hidden'), 'true');
+  assert.equal(clear?.querySelector('svg')?.getAttribute('focusable'), 'false');
+  assert.equal(clear?.getAttribute('aria-label'), 'Clear search');
+  assert.match(dom.window.document.querySelector('.core-search-field')?.textContent ?? '', /Find a result.*No result found/u);
+  const css = await readFile(new URL('../generated/styles.css', import.meta.url), 'utf8');
+  assert.match(css, /\.core-search-control\s*\{[^}]*grid-template-columns:\s*minmax\(0, 1fr\)/u);
+  assert.match(css, /\.core-search-control \.core-field-input\s*\{[^}]*padding-inline-end:/u);
+  dom.window.close();
+});
+
+test('SearchField clear control keeps RAC clearing and the Core callback', async () => {
+  const dom = new JSDOM('<!doctype html><div id="root"></div>');
+  const env = installDom(dom);
+  const host = document.querySelector('#root');
+  const root = createRoot(host);
+  let clears = 0;
+  try {
+    await act(async () => root.render(React.createElement(SearchField, {
+      label: 'Search',
+      defaultValue: 'Core',
+      onClear: () => { clears += 1; },
+    })));
+    const input = host.querySelector('.core-search-field input');
+    const clear = host.querySelector('.core-search-clear');
+    assert.equal(input.value, 'Core');
+    await act(async () => clear.click());
+    assert.equal(input.value, '');
+    assert.equal(clears, 1);
+  } finally {
+    await act(async () => root.unmount());
+    env();
+    dom.window.close();
+  }
+});
+
+test('ComboBox input transitions stay scoped away from TextField', async () => {
+  const css = await readFile(new URL('../generated/styles.css', import.meta.url), 'utf8');
+  const comboStart = css.indexOf('/* Core component source: combobox.css */');
+  const comboEnd = css.indexOf('/* Core component source: grid-list.css */', comboStart);
+  const textStart = css.indexOf('/* Core component source: text-field.css */');
+  const textEnd = css.indexOf('/* Core component source: time-field.css */', textStart);
+  assert.ok(comboStart >= 0 && comboEnd > comboStart);
+  assert.ok(textStart >= 0 && textEnd > textStart);
+  const comboCss = css.slice(comboStart, comboEnd);
+  const textCss = css.slice(textStart, textEnd);
+  assert.match(comboCss, /\.core-combo-box \.core-field-input\s*\{[\s\S]*transition:/u);
+  assert.match(comboCss, /\.core-combo-box \.core-field-input:hover\s*\{/u);
+  assert.doesNotMatch(comboCss, /^\.core-field-input\s*\{/mu);
+  assert.match(textCss, /\.core-field-input\s*\{[\s\S]*background-color 0\.15s ease/u);
+});
+
+test('NumberField steppers expose stable direction hooks and Tale edge geometry', async () => {
+  const markup = renderToString(React.createElement(NumberField, { label: 'Quantity', defaultValue: 2 }));
+  const dom = new JSDOM(`<!doctype html><div id="root">${markup}</div>`);
+  const decrement = dom.window.document.querySelector('.core-number-stepper-decrement');
+  const increment = dom.window.document.querySelector('.core-number-stepper-increment');
+  assert.ok(decrement);
+  assert.ok(increment);
+  assert.equal(decrement.getAttribute('slot'), 'decrement');
+  assert.equal(increment.getAttribute('slot'), 'increment');
+  const css = await readFile(new URL('../generated/styles.css', import.meta.url), 'utf8');
+  assert.match(css, /:where\([\s\S]*\.core-number-stepper[\s\S]*border:\s*1px solid transparent;[\s\S]*appearance:\s*none;/u);
+  assert.match(css, /\.core-number-stepper-decrement\s*\{[^}]*border-right:[^}]*border-radius:\s*var\(--core-semantic-control-radius\) 0 0 var\(--core-semantic-control-radius\)/u);
+  assert.match(css, /\.core-number-stepper-increment\s*\{[^}]*border-left:[^}]*border-radius:\s*0 var\(--core-semantic-control-radius\) var\(--core-semantic-control-radius\) 0/u);
+  dom.window.close();
 });
 
 test('R1.2 form controls support controlled callbacks, keyboard-compatible input, and submit/reset', async () => {
@@ -120,6 +217,40 @@ test('R1.2 public date contracts are ISO strings and do not expose upstream date
   assert.match(source, /CoreDateValue = string/u);
   assert.match(source, /CoreDateRange/u);
   assert.doesNotMatch(source, /react-stately|@internationalized\/date|export type DateValue|export type TimeValue/u);
+});
+
+test('DateRangePicker popover uses range calendar cells for contiguous selection paint', async () => {
+  const dom = new JSDOM('<!doctype html><div id="root"></div>', { url: 'http://localhost/' });
+  const restore = installDom(dom);
+  let root;
+  try {
+    root = createRoot(document.querySelector('#root'));
+    await act(async () => root.render(React.createElement(DateRangePicker, {
+      label: 'Trip',
+      defaultValue: { start: '2026-08-26', end: '2026-09-01' },
+    })));
+    const trigger = document.querySelector('.core-date-range-picker .core-date-trigger');
+    assert.ok(trigger);
+    await act(async () => trigger.click());
+    const popup = document.body.querySelector('.core-date-popover');
+    assert.ok(popup);
+    assert.ok(popup.querySelector('.core-range-calendar-cell'));
+    assert.equal(popup.querySelector('.core-calendar-cell'), null);
+  } finally {
+    await act(async () => root?.unmount());
+    restore();
+    dom.window.close();
+  }
+});
+
+test('read-only date segments retain accessible semantic contrast', async () => {
+  const styles = await readFile(new URL('../generated/styles.css', import.meta.url), 'utf8');
+  assert.match(styles, /\.core-date-segment\[data-readonly\]\s*\{[^}]*color:\s*var\(--core-semantic-content-default\)/u);
+  const foreground = styles.match(/--core-semantic-content-default:\s*(#[0-9a-f]{6});/iu)?.[1];
+  const background = styles.match(/--core-semantic-surface-canvas:\s*(#[0-9a-f]{6});/iu)?.[1];
+  assert.ok(foreground);
+  assert.ok(background);
+  assert.ok(contrastRatio(foreground, background) >= 4.5, `${foreground} on ${background} lacks 4.5:1 contrast`);
 });
 
 test('R1.2 date ranges own paired FormData names and reset to their default', async () => {

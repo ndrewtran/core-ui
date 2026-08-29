@@ -1,4 +1,6 @@
 import React from 'react';
+import CheckIcon from 'lucide-react/dist/esm/icons/check.mjs';
+import MinusIcon from 'lucide-react/dist/esm/icons/minus.mjs';
 import {
   Breadcrumb as AriaBreadcrumb,
   Breadcrumbs as AriaBreadcrumbs,
@@ -9,7 +11,6 @@ import {
   Group as AriaGroup,
   Link as AriaLink,
   Label as AriaLabel,
-  Meter as AriaMeter,
   ProgressBar as AriaProgressBar,
   Separator as AriaSeparator,
   ToggleButton as AriaToggleButton,
@@ -42,7 +43,7 @@ export const Breadcrumbs = React.forwardRef(function Breadcrumbs({
   const resolvedAriaLabel = ariaLabel ?? 'Breadcrumbs';
   const navigate = (key) => {
     const item = collectionItems.find((candidate) => String(candidate.id) === String(key));
-    if (item) onNavigate?.(item);
+    if (item && !item.disabled) onNavigate?.(item);
   };
   return React.createElement('nav', {
     ...props,
@@ -58,10 +59,13 @@ export const Breadcrumbs = React.forwardRef(function Breadcrumbs({
       const current = item.id === collectionItems.at(-1)?.id;
       return React.createElement(AriaBreadcrumb, {
         id: item.id,
+        isDisabled: item.disabled,
+        'data-current': current || undefined,
+        'data-disabled': item.disabled || undefined,
         className: 'core-breadcrumbs-item',
       }, item.href && !current
-        ? React.createElement(AriaLink, { href: item.href, className: 'core-breadcrumbs-link' }, item.label)
-        : React.createElement('span', { className: 'core-breadcrumbs-current', 'aria-current': current ? 'page' : undefined }, item.label));
+        ? React.createElement(AriaLink, { href: item.href, isDisabled: item.disabled, 'data-disabled': item.disabled || undefined, className: 'core-breadcrumbs-link' }, item.label)
+        : React.createElement('span', { className: 'core-breadcrumbs-current', 'aria-current': current ? 'page' : undefined, 'data-disabled': item.disabled || undefined }, item.label));
     },
   }));
 });
@@ -101,7 +105,9 @@ export const Checkbox = React.forwardRef(function Checkbox({
       'aria-hidden': 'true',
       'data-selected': isSelected || undefined,
       'data-indeterminate': isIndeterminate || undefined,
-    }),
+    }, isIndeterminate || isSelected
+      ? React.createElement(isIndeterminate ? MinusIcon : CheckIcon, { 'aria-hidden': 'true', focusable: 'false', size: 12 })
+      : null),
     React.createElement('span', { className: 'core-checkbox-label' }, children)));
 });
 
@@ -176,7 +182,6 @@ export const Group = React.forwardRef(function Group({
     isReadOnly: readOnly,
     'aria-disabled': disabled || undefined,
     'aria-invalid': invalid || undefined,
-    'aria-readonly': readOnly || undefined,
   }, children);
 });
 
@@ -235,20 +240,12 @@ export const Meter = React.forwardRef(function Meter({
     'aria-valuemin': minValue,
     'aria-valuemax': maxValue,
     'aria-valuetext': valueText,
-  }, !externalLabel && !externalLabelledby
+  }, React.createElement('div', { className: 'core-meter-header' }, !externalLabel && !externalLabelledby
     ? React.createElement(AriaLabel, { id: labelId, elementType: 'span', className: 'core-value-label' }, label)
     : null,
+  React.createElement('span', { className: 'core-value-output' }, valueText)),
   React.createElement('div', { className: 'core-meter-track' }, React.createElement('div', { className: 'core-meter-fill', style: { inlineSize: `${percentage}%` } })),
-  React.createElement(AriaMeter, {
-    value,
-    minValue,
-    maxValue,
-    formatOptions,
-    hidden: true,
-    'aria-label': 'Meter visual',
-    className: 'core-meter-visual',
-    children: null,
-  }));
+  );
 });
 
 Meter.displayName = 'Meter';
@@ -271,7 +268,7 @@ export const ProgressBar = React.forwardRef(function ProgressBar({
     'data-indeterminate': value === undefined || undefined,
     className: classNames('core-progress-bar', className),
     children: ({ percentage }) => React.createElement(React.Fragment, null,
-      React.createElement(AriaLabel, { className: 'core-value-label' }, label),
+      React.createElement('div', { className: 'core-progress-bar-header' }, React.createElement(AriaLabel, { className: 'core-value-label' }, label), React.createElement('span', { className: 'core-value-output' }, value === undefined ? 'Loading' : `${percentage}%`)),
       React.createElement('div', { className: 'core-progress-bar-track' }, React.createElement('div', { className: 'core-progress-bar-fill', style: percentage === undefined ? undefined : { inlineSize: `${percentage}%` } }))),
   });
 });

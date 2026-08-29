@@ -1,5 +1,5 @@
 <!-- @generated-from: packages/react/src/generate.mjs -->
-<!-- @generated-content-sha256: sha256:e40e345694d8d4bc1b60c72715f3a71c0ba1089c906d550e66dd2af8a29a71d4 -->
+<!-- @generated-content-sha256: sha256:22b54094bb3be872c37c8a82308b79a46cc0538a10410692bdb54e85255cfdde -->
 # @core-ui/react
 
 R1.5 React breadth closure for the standalone Core UI renderer.
@@ -13,7 +13,7 @@ R1.5 React breadth closure for the standalone Core UI renderer.
 
 The exact R1 exit candidate is `@core-ui/react@0.1.0-rc.1`, for the `next`
 dist-tag on the npm registry. The candidate contains only the standalone
-`web.react` renderer and its two internal runtime dependencies. All 53
+`web.react` renderer and its three internal runtime dependencies. All 53
 Core-owned component exports remain experimental; no stable, secondary-renderer,
 or cross-platform support claim is made. Publication, dist-tag mutation, and
 post-publication verification are separate authorized operations.

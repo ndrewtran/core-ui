@@ -1,6 +1,7 @@
 // @generated-from: packages/react/src/overlays.mjs
-// @generated-content-sha256: sha256:d040e8a461e356d98ab3c5fe8bc5380249aee5596e391308fe86c53835df33d3
+// @generated-content-sha256: sha256:b6a13350c4115e2379769f31d95c0cd8d342d2295ea9067e5afeb69d3ab7abea
 import React from 'react';
+import XIcon from 'lucide-react/dist/esm/icons/x.mjs';
 import { Button as CoreButton } from './button.mjs';
 import {
   Button as AriaButton,
@@ -146,7 +147,7 @@ function DialogContent({ title, children, ariaLabel, dismissable, className, con
   return React.createElement(AriaDialog, { ...props, ref: contentRef, className: classNames('core-dialog', className), 'aria-label': ariaLabel, 'aria-modal': 'true' },
     hasRenderableLabel(title) ? React.createElement(AriaHeading, { slot: 'title', className: 'core-dialog-title' }, title) : null,
     React.createElement('div', { className: 'core-dialog-content' }, children),
-    dismissable ? React.createElement(AriaButton, { slot: 'close', className: 'core-dialog-close', 'aria-label': 'Close dialog' }, '×') : null);
+    dismissable ? React.createElement(AriaButton, { slot: 'close', className: 'core-dialog-close', 'aria-label': 'Close dialog' }, React.createElement(XIcon, { 'aria-hidden': 'true', focusable: 'false', size: 16 })) : null);
 }
 
 function DialogOverlay({ dismissable, children, ...props }) {
@@ -195,6 +196,7 @@ const PopupContent = React.forwardRef(function PopupContent({ children, classNam
     ...props,
     ref,
     placement,
+    className: 'core-popover-positioner',
     isKeyboardDismissDisabled: !dismissable,
     shouldCloseOnInteractOutside: dismissable ? undefined : () => false,
   }, React.createElement(AriaDialog, {
@@ -224,6 +226,15 @@ export const Popover = React.forwardRef(function Popover({
 
 Popover.displayName = 'Popover';
 
+const PreviewContent = React.forwardRef(function PreviewContent({ children, 'aria-label': ariaLabel, 'aria-labelledby': ariaLabelledby }, ref) {
+  return React.createElement(AriaDialog, {
+    ref,
+    className: 'core-preview-content',
+    'aria-label': ariaLabel,
+    'aria-labelledby': ariaLabelledby,
+  }, children);
+});
+
 /** RAC PreviewTrigger owns long press, warmup/cooldown timers, focus, Escape, and safe-area positioning. */
 export const PreviewTrigger = React.forwardRef(function PreviewTrigger({
   children,
@@ -235,13 +246,16 @@ export const PreviewTrigger = React.forwardRef(function PreviewTrigger({
   onOpenChange,
   placement = 'top',
   className,
+  'aria-label': ariaLabel,
+  'aria-labelledby': ariaLabelledby,
   ...props
 }, ref) {
   if (!React.isValidElement(trigger)) throw new Error('PreviewTrigger requires a focusable React element as trigger');
-  if (!hasAccessibleName(props['aria-label']) && !hasAccessibleName(props['aria-labelledby'])) throw new Error('PreviewTrigger requires an accessible name');
+  if (!hasAccessibleName(ariaLabel) && !hasAccessibleName(ariaLabelledby)) throw new Error('PreviewTrigger requires an accessible name');
   return React.createElement(AriaPreviewTrigger, { delay, closeDelay, isOpen: open, defaultOpen, onOpenChange },
     pressableTrigger(trigger),
-    React.createElement(AriaPopover, { ...props, ref, isNonModal: true, trigger: 'PreviewTrigger', placement, className: classNames('core-preview-trigger', className) }, children));
+    React.createElement(AriaPopover, { ...props, ref, isNonModal: true, trigger: 'PreviewTrigger', placement, className: classNames('core-preview-trigger', className) },
+      React.createElement(PreviewContent, { 'aria-label': ariaLabel, 'aria-labelledby': ariaLabelledby }, children)));
 });
 
 PreviewTrigger.displayName = 'PreviewTrigger';
@@ -279,14 +293,14 @@ function ToastView({ toast }) {
   const value = toast.content;
   const hasTitle = hasRenderableLabel(value.title);
   return React.createElement(AriaToast, { toast, className: classNames('core-toast', value.className), 'data-variant': value.variant },
-    React.createElement(AriaToastContent, null,
+    React.createElement(AriaToastContent, { className: 'core-toast-content' },
       React.createElement(AriaText, { slot: 'title', className: classNames('core-toast-title', !hasTitle && 'core-toast-title-fallback') }, hasTitle ? value.title : TOAST_FALLBACK_TITLE),
-      React.createElement(AriaText, { slot: 'description', className: 'core-toast-message' }, value.message),
-      React.createElement(AriaButton, { slot: 'close', className: 'core-toast-dismiss', 'aria-label': 'Dismiss notification' }, '×')));
+      React.createElement(AriaText, { slot: 'description', className: 'core-toast-message' }, value.message)),
+    React.createElement(AriaButton, { slot: 'close', className: 'core-toast-dismiss', 'aria-label': 'Dismiss notification' }, React.createElement(XIcon, { 'aria-hidden': 'true', focusable: 'false', size: 16 })));
 }
 
 /** Stable Core facade over RAC's unstable queue/region implementation. */
-export const ToastProvider = function ToastProvider({ children, maxVisible = 5, className }) {
+export const ToastProvider = function ToastProvider({ children, maxVisible = 5, className, placement = 'top-end' }) {
   const queueRef = React.useRef(null);
   if (!queueRef.current) queueRef.current = new UNSTABLE_ToastQueue({ maxVisibleToasts: normalizeMaxVisible(maxVisible) });
   const queue = queueRef.current;
@@ -329,7 +343,7 @@ export const ToastProvider = function ToastProvider({ children, maxVisible = 5, 
   const manager = React.useMemo(() => ({ add, remove }), [add, remove]);
   const value = React.useMemo(() => ({ manager, dispose }), [dispose, manager]);
   return React.createElement(ToastContext.Provider, { value }, children,
-    React.createElement(UNSTABLE_ToastRegion, { queue, className: classNames('core-toast-region', className), 'aria-label': 'Notifications' },
+    React.createElement(UNSTABLE_ToastRegion, { queue, placement, className: classNames('core-toast-region', className), 'aria-label': 'Notifications', 'data-placement': placement },
       ({ toast }) => React.createElement(ToastView, { toast })));
 };
 

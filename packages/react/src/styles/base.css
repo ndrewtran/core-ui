@@ -1,0 +1,842 @@
+/* Core-owned visual parity category hooks. */
+:root,
+[data-core-color-scheme],
+[data-core-contrast],
+[data-core-motion],
+[data-core-density],
+[data-core-direction] {
+  --core-focus-ring-color: var(--core-reference-color-neutral-50);
+  --core-focus-ring-inner: var(--core-reference-color-neutral-100);
+  --core-focus-ring-outer: var(--core-reference-color-neutral-50);
+  --core-focus-ring-glow: color-mix(in srgb, var(--core-reference-color-neutral-60) 30%, transparent);
+  --core-field-min-height: var(--core-semantic-control-min-height);
+  --core-field-padding-block: var(--core-semantic-layout-control-gap);
+  --core-field-padding-inline: var(--core-semantic-layout-group-gap);
+  --core-field-border-color: var(--core-semantic-border-strong);
+  --core-field-radius: calc(var(--core-semantic-shape-option-radius) - 1.5px);
+  --core-field-bg: var(--core-semantic-field-background);
+  --core-field-color: var(--core-semantic-content-strong);
+  --core-field-font-family: Inter, sans-serif;
+  --core-field-font-size: var(--core-semantic-typography-body-size);
+  --core-field-focus-border: var(--core-focus-ring-color);
+  --core-field-focus-glow: 0 0 0 0px var(--core-focus-ring-glow);
+  --core-field-placeholder-color: var(--core-semantic-content-muted);
+  --core-field-label-color: var(--core-semantic-content-default);
+  --core-field-label-font-size: var(--core-semantic-typography-small-size);
+  --core-field-label-font-weight: var(--core-semantic-typography-control-weight);
+  --core-field-description-color: var(--core-semantic-content-muted);
+  --core-field-error-color: var(--core-semantic-feedback-invalid);
+  --core-popup-bg: var(--core-semantic-surface-raised);
+  --core-popup-border-color: var(--core-semantic-border-subtle);
+  --core-popup-radius: calc(var(--core-semantic-control-radius) - 2px);
+  --core-popup-shadow: var(--core-semantic-elevation-overlay);
+  --core-popup-transition-duration: var(--core-semantic-motion-feedback);
+  --core-popup-transition-easing: ease;
+  --core-popup-enter-scale: 0.97;
+  --core-item-padding-block: var(--core-semantic-layout-tight-inset);
+  --core-item-padding-inline: var(--core-semantic-layout-group-gap);
+  --core-item-gap: var(--core-semantic-layout-group-gap);
+  --core-item-radius: calc(var(--core-semantic-shape-option-radius) - 1.5px);
+  --core-item-color: var(--core-semantic-content-default);
+  --core-item-font-size: var(--core-semantic-typography-small-size);
+  --core-item-focus-bg: var(--core-semantic-surface-hover);
+  --core-item-focus-color: var(--core-semantic-content-strong);
+  --core-group-label-color: var(--core-semantic-content-muted);
+  --core-group-label-font-size: var(--core-semantic-typography-tiny-size);
+  --core-modal-title-color: var(--core-semantic-content-strong);
+  --core-modal-title-font-size: 1.2rem;
+  --core-modal-description-color: var(--core-semantic-content-default);
+  --core-modal-description-font-size: var(--core-semantic-typography-body-size);
+  --core-modal-backdrop-bg: var(--core-semantic-overlay-scrim);
+  --core-modal-actions-gap: var(--core-semantic-control-padding-inline);
+  --core-progress-track-height: 0.5rem;
+  --core-progress-track-bg: var(--core-semantic-border-default);
+  --core-progress-track-radius: var(--core-semantic-shape-pill-radius);
+  --core-progress-indicator-bg: var(--core-semantic-selection-track);
+  --core-progress-label-color: var(--core-semantic-content-default);
+  --core-progress-value-color: var(--core-semantic-content-default);
+}
+
+[data-core-color-scheme='dark'] {
+  --core-focus-ring-color: var(--core-reference-color-neutral-60);
+  --core-focus-ring-inner: var(--core-reference-color-neutral-10);
+  --core-focus-ring-outer: var(--core-reference-color-neutral-60);
+  --core-focus-ring-glow: color-mix(in srgb, var(--core-reference-color-neutral-50) 30%, transparent);
+  --core-field-focus-border: var(--core-focus-ring-color);
+  --core-field-focus-glow: 0 0 0 0px var(--core-focus-ring-glow);
+}
+
+/* Bare RAC buttons need the same chrome reset as Tale's Button base. Component
+   rules below provide their own geometry, fills, and state treatments. */
+:where(
+  .core-number-stepper,
+  .core-toast-dismiss,
+  .core-dialog-close,
+  .core-date-trigger,
+  .core-calendar-previous,
+  .core-calendar-next,
+  .core-combo-box-trigger,
+  .core-select-trigger,
+  .core-tag-remove,
+  .core-tree-toggle,
+  .core-disclosure-trigger,
+  .core-search-clear
+) {
+  position: relative;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--core-semantic-layout-control-gap);
+  padding: var(--core-semantic-layout-control-gap) var(--core-semantic-control-padding-inline);
+  border: 1px solid transparent;
+  border-radius: var(--core-semantic-control-radius);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  line-height: 1;
+  text-decoration: none;
+  cursor: pointer;
+  outline: none;
+  appearance: none;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease,
+    box-shadow 0.15s ease;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.core-select-trigger,
+.core-field-input,
+.core-date-input {
+  box-sizing: border-box;
+  min-height: var(--core-field-min-height);
+  padding: var(--core-field-padding-block) var(--core-field-padding-inline);
+  border: 1px solid var(--core-field-border-color);
+  border-radius: var(--core-field-radius);
+  background-color: var(--core-field-bg);
+  color: var(--core-field-color);
+  font-family: var(--core-field-font-family);
+  font-size: var(--core-field-font-size);
+  outline: none;
+}
+.core-select-trigger[data-focus-visible],
+.core-select-trigger:focus-visible,
+.core-select-trigger[data-open],
+.core-field-input:focus,
+.core-field-input[data-open],
+.core-date-input[data-focused],
+.core-field-input[data-focused] {
+  border-color: var(--core-field-focus-border);
+  box-shadow: var(--core-field-focus-glow);
+}
+.core-field-input::placeholder {
+  color: var(--core-field-placeholder-color);
+}
+
+.core-combo-box-arrow,
+.core-select-arrow {
+  transition: transform 0.2s ease;
+}
+
+.core-combo-box-arrow,
+.core-select-arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.125rem;
+  height: 1.125rem;
+  font-size: var(--core-semantic-typography-body-size);
+  line-height: 1;
+  color: var(--core-semantic-content-default);
+  flex-shrink: 0;
+  transform: rotate(0deg);
+}
+
+.core-combo-box-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 2.25rem;
+  min-height: 2.25rem;
+  margin-inline-end: var(--core-semantic-layout-tight-inset);
+  border: none;
+  background: transparent;
+  color: var(--core-semantic-content-default);
+  font-size: 1.2em;
+  cursor: pointer;
+}
+
+.core-combo-box-trigger:focus-visible {
+  outline: none;
+}
+
+.core-select-trigger[data-open] .core-select-arrow,
+.core-select-trigger[aria-expanded='true'] .core-select-arrow,
+.core-combo-control[data-open] .core-combo-box-arrow,
+.core-combo-box-trigger[aria-expanded='true'] .core-combo-box-arrow {
+  transform: rotate(180deg);
+}
+
+.core-text-field,
+.core-combo-box,
+.core-select,
+.core-autocomplete {
+  display: flex;
+  flex-direction: column;
+  gap: var(--core-semantic-layout-control-gap);
+  width: 100%;
+}
+.core-field-label {
+  color: var(--core-field-label-color);
+  font-family: Inter, sans-serif;
+  font-size: var(--core-field-label-font-size);
+  font-weight: var(--core-field-label-font-weight);
+  line-height: 1.3;
+  cursor: default;
+}
+:where(.core-text-field, .core-search-field, .core-number-field, .core-date-field, .core-date-picker, .core-date-range-picker, .core-time-field, .core-combo-box, .core-select, .core-autocomplete, .core-color-field, .core-color-area-field, .core-color-slider, .core-color-wheel, .core-radio-group)[data-disabled] .core-field-label {
+  color: var(--core-semantic-content-default);
+}
+:where(.core-text-field, .core-search-field, .core-number-field, .core-date-field, .core-date-picker, .core-date-range-picker, .core-time-field, .core-combo-box, .core-select, .core-autocomplete, .core-color-field, .core-slider, .core-radio-group)[data-invalid] .core-field-label {
+  color: var(--core-semantic-feedback-invalid);
+}
+
+.core-slider > .core-field-label,
+.core-color-slider > .core-field-label {
+  display: inline-flex;
+  align-items: center;
+  font-family: Inter, sans-serif;
+  font-size: var(--core-semantic-typography-small-size);
+  font-weight: var(--core-semantic-typography-control-weight);
+  line-height: 1.3;
+  color: var(--core-semantic-content-default);
+  cursor: default;
+  margin-bottom: 0;
+}
+
+.core-select[data-required] > .core-field-label::after,
+.core-combo-box[data-required] > .core-field-label::after,
+.core-slider[data-required] > .core-field-label::after,
+.core-color-slider[data-required] > .core-field-label::after {
+  content: ' *';
+  color: var(--core-semantic-selection-track);
+}
+
+.core-slider[data-invalid] > .core-field-label,
+.core-color-slider[data-invalid] > .core-field-label {
+  color: var(--core-semantic-feedback-invalid);
+}
+
+.core-slider-output {
+  color: var(--core-semantic-content-muted);
+  font-family: Inter, sans-serif;
+  font-size: var(--core-semantic-typography-small-size);
+  text-align: right;
+}
+
+.core-slider[data-disabled] > .core-field-label,
+.core-slider[data-disabled] .core-slider-output {
+  color: var(--core-semantic-content-default);
+}
+
+.core-field-label {
+  display: block;
+  font-family: Inter, sans-serif;
+  font-size: var(--core-semantic-typography-small-size);
+  font-weight: var(--core-semantic-typography-control-weight);
+  color: var(--core-semantic-content-default);
+}
+
+.core-select-popover,
+.core-combo-box-popover,
+.core-autocomplete-list,
+.core-menu,
+.core-popover {
+  background-color: var(--core-popup-bg);
+  border: 1px solid var(--core-popup-border-color);
+  border-radius: var(--core-popup-radius);
+  box-shadow: var(--core-popup-shadow);
+  outline: none;
+  overflow: hidden;
+}
+
+.core-select-popover,
+.core-combo-box-popover,
+.core-autocomplete-list,
+.core-menu,
+.core-popover {
+  transition:
+    opacity var(--core-popup-transition-duration) var(--core-popup-transition-easing),
+    transform var(--core-popup-transition-duration) var(--core-popup-transition-easing);
+}
+
+.core-select-popover[data-entering],
+.core-select-popover[data-exiting],
+.core-combo-box-popover[data-entering],
+.core-combo-box-popover[data-exiting],
+.core-autocomplete-list[data-entering],
+.core-autocomplete-list[data-exiting],
+.core-menu[data-entering],
+.core-menu[data-exiting],
+.core-popover[data-entering],
+.core-popover[data-exiting] {
+  opacity: 0;
+  transform: scale(var(--core-popup-enter-scale));
+}
+
+.core-select-option,
+.core-combo-box-option,
+.core-autocomplete-option,
+.core-list-box-item,
+.core-menu-item {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: var(--core-item-gap);
+  padding: var(--core-item-padding-block) var(--core-item-padding-inline);
+  border-radius: var(--core-item-radius);
+  color: var(--core-item-color);
+  font-family: Inter, sans-serif;
+  font-size: var(--core-item-font-size);
+  line-height: 1.5;
+  cursor: pointer;
+  outline: none;
+  transition:
+    background-color 0.1s ease,
+    color 0.1s ease;
+  user-select: none;
+}
+
+.core-select-option[data-focused],
+.core-combo-box-option[data-focused],
+.core-autocomplete-option[data-focused],
+.core-list-box-item[data-focused],
+.core-menu-item[data-focused] {
+  background-color: var(--core-item-focus-bg);
+  color: var(--core-item-focus-color);
+}
+
+.core-select-option[data-disabled],
+.core-combo-box-option[data-disabled],
+.core-autocomplete-option[data-disabled],
+.core-list-box-item[data-disabled],
+.core-menu-item[data-disabled] {
+  background-color: var(--core-semantic-surface-hover);
+  color: var(--core-semantic-content-default);
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.core-disclosure-panel {
+  color: var(--core-semantic-content-default);
+  font-family: Inter, sans-serif;
+  font-size: var(--core-semantic-typography-body-size);
+  line-height: 1.6;
+  transition:
+    height 0.6s ease,
+    opacity 0.2s ease;
+}
+
+.core-disclosure-panel[data-entering],
+.core-disclosure-panel[data-exiting] {
+  height: 0;
+  opacity: 0;
+}
+
+.core-field-description {
+  color: var(--core-field-description-color);
+  font-family: Inter, sans-serif;
+  font-size: var(--core-semantic-typography-small-size);
+  line-height: 1.5;
+}
+
+.core-field-error {
+  color: var(--core-field-error-color);
+  font-family: Inter, sans-serif;
+  font-size: var(--core-semantic-typography-small-size);
+  line-height: 1.4;
+}
+
+.core-date-input,
+.core-field-input {
+  display: inline-flex;
+  align-items: center;
+  gap: 0;
+}
+
+.core-date-input[data-invalid],
+.core-field-input[data-invalid] {
+  border-color: var(--core-semantic-feedback-invalid);
+}
+
+.core-date-input[data-disabled],
+.core-field-input[data-disabled] {
+  background-color: var(--core-semantic-surface-hover);
+  color: var(--core-semantic-content-strong);
+  pointer-events: none;
+}
+
+.core-date-control,
+.core-date-range-control {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: calc(var(--core-field-min-height) + var(--core-semantic-layout-tight-inset));
+  border: 1px solid var(--core-field-border-color);
+  border-radius: var(--core-field-radius);
+  background-color: var(--core-field-bg);
+  padding-block: 1.5px;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.core-date-picker .core-date-control {
+  padding-inline-end: var(--core-semantic-layout-control-gap);
+}
+
+.core-date-range-separator {
+  display: inline-block;
+  inline-size: var(--core-semantic-layout-tight-inset);
+  overflow: hidden;
+  font-size: 0;
+  flex: 0 0 auto;
+}
+
+.core-date-control:focus-within,
+.core-date-range-control:focus-within {
+  border-color: var(--core-semantic-focus-ring);
+  box-shadow: 0 0 0 3px var(--core-focus-ring-glow);
+}
+
+.core-date-picker[data-invalid] .core-date-control,
+.core-date-range-picker[data-invalid] .core-date-range-control {
+  border-color: var(--core-semantic-feedback-invalid);
+}
+
+.core-date-picker[data-disabled] .core-date-control,
+.core-date-range-picker[data-disabled] .core-date-range-control {
+  background: var(--core-semantic-surface-hover);
+  border-color: var(--core-semantic-border-strong);
+  color: var(--core-semantic-content-strong);
+  pointer-events: none;
+}
+
+.core-date-input {
+  display: inline-flex;
+  align-items: center;
+  flex: 1 1 auto;
+  min-width: 0;
+  gap: 0;
+  padding: var(--core-semantic-layout-control-gap) var(--core-semantic-control-padding-inline);
+  background-color: transparent;
+  color: var(--core-semantic-content-strong);
+  font-family: Inter, sans-serif;
+  font-size: var(--core-semantic-typography-body-size);
+  line-height: 1.5;
+  outline: none;
+}
+
+.core-date-field > .core-date-input,
+.core-time-field > .core-date-input {
+  padding-inline: var(--core-field-padding-inline);
+}
+
+.core-date-input[data-disabled] {
+  background-color: var(--core-semantic-surface-hover);
+  color: var(--core-semantic-content-strong);
+  pointer-events: none;
+}
+
+.core-date-segment {
+  display: inline;
+  padding: 0.0625rem 0.09375rem;
+  border-radius: var(--core-semantic-shape-indicator-radius);
+  font-variant-numeric: tabular-nums;
+  text-align: end;
+  caret-color: transparent;
+  outline: none;
+}
+
+.core-date-segment[data-placeholder] {
+  color: var(--core-semantic-content-faint);
+  font-style: italic;
+}
+
+.core-date-segment[data-disabled] {
+  color: var(--core-semantic-content-strong);
+}
+
+.core-date-segment[data-readonly] {
+  color: var(--core-semantic-content-default);
+}
+
+.core-date-segment[data-type='literal'] {
+  padding: 0 0.03125rem;
+  color: var(--core-semantic-content-muted);
+}
+
+.core-date-segment[data-focused] {
+  background: var(--core-semantic-content-default);
+  color: var(--core-semantic-surface-canvas);
+}
+
+.core-date-trigger {
+  min-height: 2.25rem;
+  width: 2.25rem;
+  border: 1px solid var(--core-semantic-border-strong);
+  border-left: none;
+  border-radius: 0 var(--core-field-radius) var(--core-field-radius) 0;
+  background-color: var(--core-semantic-surface-raised);
+  color: var(--core-semantic-content-default);
+  font-size: var(--core-semantic-typography-body-size);
+}
+
+.core-date-trigger:hover:not([data-disabled]) {
+  background-color: var(--core-semantic-surface-hover);
+  color: var(--core-semantic-content-strong);
+}
+
+.core-date-trigger[data-focus-visible] {
+  border-color: var(--core-semantic-focus-ring);
+  box-shadow: 0 0 0 3px var(--core-focus-ring-glow);
+  z-index: 1;
+  position: relative;
+}
+
+.core-date-control .core-date-trigger,
+.core-date-range-control .core-date-trigger {
+  min-height: calc(2.25rem - 2px);
+  border-top: none;
+  border-right: none;
+  border-bottom: none;
+  border-left: 1px solid var(--core-semantic-border-strong);
+  border-radius: 0 var(--core-field-radius) var(--core-field-radius) 0;
+  background-color: var(--core-semantic-surface-raised);
+}
+
+.core-date-control .core-date-trigger:hover,
+.core-date-range-control .core-date-trigger:hover {
+  background-color: var(--core-semantic-surface-hover);
+}
+
+.core-date-popover {
+  background: var(--core-popup-bg);
+  border: 1px solid var(--core-semantic-surface-hover);
+  border-radius: var(--core-semantic-control-radius);
+  box-shadow: 0 4px 16px color-mix(in srgb, var(--core-semantic-content-inverse) 10%, transparent);
+  outline: none;
+}
+
+.core-date-popover[data-entering] {
+  animation: core-date-popover-fade-in 0.15s ease;
+}
+
+[data-core-color-scheme='dark'] :where(
+  .core-date-trigger,
+  .core-date-control .core-date-trigger,
+  .core-date-range-control .core-date-trigger
+) {
+  background-color: color-mix(in srgb, var(--core-reference-color-neutral-100) 85%, black);
+  border-color: var(--core-reference-color-neutral-84);
+  color: var(--core-reference-color-neutral-60);
+}
+
+.core-date-popover[data-exiting] {
+  animation: core-date-popover-fade-out 0.1s ease;
+}
+
+@keyframes core-date-popover-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes core-date-popover-fade-out {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  to {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+.core-date-dialog {
+  outline: none;
+}
+
+.core-calendar,
+.core-range-calendar {
+  --core-calendar-cell-size: 28px;
+  display: inline-flex;
+  flex-direction: column;
+  gap: var(--core-semantic-control-padding-inline);
+  line-height: 1.5;
+  padding: var(--core-semantic-layout-section-gap);
+  background: var(--core-semantic-surface-raised);
+  border: 1px solid var(--core-semantic-border-strong);
+  border-radius: var(--core-semantic-control-radius);
+  user-select: none;
+  width: max-content;
+}
+
+.core-calendar-header-cell {
+  text-align: center;
+  padding: var(--core-semantic-layout-group-gap) var(--core-semantic-layout-control-gap);
+  font-family: Inter, sans-serif;
+  font-size: var(--core-semantic-typography-tiny-size);
+  font-weight: var(--core-semantic-typography-control-weight);
+  color: var(--core-semantic-content-muted);
+}
+
+.core-calendar-cell,
+.core-range-calendar-cell {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--core-calendar-cell-size, 28px);
+  height: var(--core-calendar-cell-size, 28px);
+  border-radius: var(--core-semantic-shape-pill-radius);
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-family: Inter, sans-serif;
+  font-size: var(--core-semantic-typography-small-size);
+  color: var(--core-semantic-content-strong);
+  transition:
+    background 0.1s ease,
+    color 0.1s ease;
+}
+
+.core-calendar-cell:hover,
+.core-range-calendar-cell:hover {
+  background: var(--core-semantic-surface-subtle);
+}
+
+.core-calendar-cell[data-today],
+.core-range-calendar-cell[data-today] {
+  font-weight: var(--core-semantic-typography-control-weight);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.core-calendar-cell[data-outside-month],
+.core-range-calendar-cell[data-outside-month] {
+  color: var(--core-semantic-content-faint);
+}
+
+.core-calendar-cell[data-disabled],
+.core-calendar-cell[data-unavailable],
+.core-range-calendar-cell[data-disabled],
+.core-range-calendar-cell[data-unavailable] {
+  background-color: var(--core-semantic-surface-hover);
+  color: var(--core-semantic-content-default);
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.core-calendar-cell[data-focus-visible],
+.core-range-calendar-cell[data-focus-visible] {
+  box-shadow:
+    0 0 0 2px var(--core-semantic-content-inverse),
+    0 0 0 4px var(--core-semantic-focus-ring);
+}
+
+.core-calendar-previous,
+.core-calendar-next {
+  box-sizing: border-box;
+  width: 28px;
+  height: 28px;
+  min-height: 0;
+  padding: 0;
+  border-radius: var(--core-semantic-shape-option-radius);
+  border: 1px solid var(--core-semantic-content-strong);
+  background: var(--core-semantic-content-default);
+  color: var(--core-semantic-action-foreground);
+}
+
+.core-calendar-previous:hover:not([data-disabled]),
+.core-calendar-next:hover:not([data-disabled]) {
+  background: var(--core-semantic-action-background-hover);
+  border-color: var(--core-semantic-action-background-hover);
+  color: var(--core-semantic-action-foreground);
+}
+
+.core-calendar-heading {
+  margin: 0;
+  padding: 0;
+  text-align: center;
+  font-family: Inter, sans-serif;
+  font-size: var(--core-semantic-typography-body-size);
+  font-weight: var(--core-semantic-typography-control-weight);
+  line-height: inherit;
+  letter-spacing: inherit;
+  color: var(--core-semantic-content-default);
+  border: none;
+}
+
+.core-color-area-thumb,
+.core-color-slider-thumb,
+.core-color-wheel-thumb {
+  width: 0.78125rem;
+  height: 0.78125rem;
+  border-radius: 50%;
+  /* Tale's shared color-thumb primitive uses a white keyline in both themes. */
+  border: 2px solid white;
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.3),
+    inset 0 0 0 1px rgba(0, 0, 0, 0.3);
+  outline: none;
+  transition: box-shadow 0.15s ease;
+}
+
+.core-color-area-thumb[data-focus-visible],
+.core-color-slider-thumb[data-focus-visible],
+.core-color-wheel-thumb[data-focus-visible] {
+  box-shadow:
+    0 0 0 2px var(--core-focus-ring-inner),
+    0 0 0 4px var(--core-focus-ring-outer);
+}
+
+.core-color-slider-thumb[data-dragging],
+.core-color-wheel-thumb[data-dragging] {
+  cursor: grabbing;
+}
+
+.core-color-area[data-disabled],
+.core-color-slider[data-disabled],
+.core-color-wheel[data-disabled] {
+  cursor: not-allowed;
+  pointer-events: none;
+}
+.core-dialog-title {
+  margin: 0;
+  padding-right: calc(var(--core-semantic-layout-section-gap) * 1.414141);
+  color: var(--core-modal-title-color);
+  font-family: Inter, sans-serif;
+  font-size: var(--core-modal-title-font-size);
+  font-weight: var(--core-semantic-typography-control-weight);
+  line-height: 1.3;
+}
+.core-dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: var(--core-modal-backdrop-bg);
+  z-index: 100;
+  transition: opacity 0.2s ease;
+}
+.core-dialog-backdrop[data-entering],
+.core-dialog-backdrop[data-exiting] {
+  opacity: 0;
+}
+
+.core-dialog-close {
+  position: absolute;
+  color: var(--core-semantic-content-muted);
+  min-height: auto;
+}
+
+.core-progress-bar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--core-semantic-layout-tight-inset);
+  width: 100%;
+}
+
+.core-value-label {
+  color: var(--core-progress-label-color);
+  font-family: Inter, sans-serif;
+  font-size: var(--core-semantic-typography-body-size);
+  font-weight: var(--core-semantic-typography-control-weight);
+}
+
+.core-progress-bar-track,
+.core-meter-track {
+  position: relative;
+  width: 100%;
+  height: var(--core-progress-track-height);
+  border-radius: var(--core-progress-track-radius);
+  background-color: var(--core-progress-track-bg);
+  overflow: hidden;
+}
+
+.core-progress-bar-fill,
+.core-meter-fill {
+  height: 100%;
+  background-color: var(--core-progress-indicator-bg);
+  border-radius: var(--core-progress-track-radius);
+  transition: width 0.3s ease;
+}
+
+.core-checkbox-group,
+.core-radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--core-semantic-layout-control-gap);
+}
+
+.core-checkbox-group[data-orientation='horizontal'],
+.core-radio-group[data-orientation='horizontal'] {
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: calc(var(--core-semantic-layout-section-gap) * 1.414141);
+}
+
+.core-combo-control {
+  display: flex;
+  align-items: center;
+  position: relative;
+  box-sizing: border-box;
+  width: 100%;
+  border: 1px solid var(--core-field-border-color);
+  border-radius: var(--core-semantic-control-radius);
+  background: var(--core-field-bg);
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.core-combo-control:focus-within {
+  border-color: var(--core-semantic-focus-ring);
+  box-shadow: 0 0 0 3px var(--core-focus-ring-glow);
+}
+
+.core-combo-control[data-open] {
+  border-color: var(--core-semantic-focus-ring);
+}
+
+.core-combo-control[data-disabled] {
+  background: var(--core-semantic-surface-hover);
+  border-color: var(--core-semantic-border-strong);
+  color: var(--core-semantic-content-strong);
+  pointer-events: none;
+}
+
+.core-combo-box[data-disabled] .core-combo-control {
+  background: var(--core-semantic-surface-hover);
+  border-color: var(--core-semantic-border-strong);
+  color: var(--core-semantic-content-strong);
+  pointer-events: none;
+}
+
+.core-combo-control > .core-field-input {
+  border: none;
+  background: transparent;
+  box-shadow: none;
+  flex: 1;
+  min-width: 0;
+}

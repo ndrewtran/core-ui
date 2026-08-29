@@ -1,5 +1,5 @@
 // @generated-from: packages/react/src/fields.mjs
-// @generated-content-sha256: sha256:acd4fe633854c18e0676af40a58e00d31338d6cffa0debd400ac8201292e7277
+// @generated-content-sha256: sha256:d0c6b2e79fd5e826e29976591d6de870f7f8301a8484411833e1e9d1940ac732
 import React from 'react';
 import {
   Autocomplete as AriaAutocomplete,
@@ -7,6 +7,10 @@ import {
   Calendar as AriaCalendar,
   CalendarCell as AriaCalendarCell,
   CalendarGrid as AriaCalendarGrid,
+  CalendarGridBody as AriaCalendarGridBody,
+  CalendarGridHeader as AriaCalendarGridHeader,
+  CalendarHeaderCell as AriaCalendarHeaderCell,
+  CalendarHeading as AriaCalendarHeading,
   CheckboxGroup as AriaCheckboxGroup,
   DateField as AriaDateField,
   DateInput as AriaDateInput,
@@ -32,6 +36,12 @@ import {
   TimeField as AriaTimeField,
 } from 'react-aria-components';
 import { parseDate, parseTime } from '@internationalized/date';
+import CalendarIcon from 'lucide-react/dist/esm/icons/calendar.mjs';
+import ChevronLeftIcon from 'lucide-react/dist/esm/icons/chevron-left.mjs';
+import ChevronRightIcon from 'lucide-react/dist/esm/icons/chevron-right.mjs';
+import MinusIcon from 'lucide-react/dist/esm/icons/minus.mjs';
+import PlusIcon from 'lucide-react/dist/esm/icons/plus.mjs';
+import XIcon from 'lucide-react/dist/esm/icons/x.mjs';
 
 const ISO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/u;
 const ISO_TIME_PATTERN = /^(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?$/u;
@@ -58,6 +68,14 @@ function fieldDescription(description) {
 
 function fieldError(errorMessage) {
   return errorMessage === undefined ? null : React.createElement(AriaFieldError, { className: 'core-field-error' }, errorMessage);
+}
+
+function calendarGlyph() {
+  return React.createElement(CalendarIcon, {
+    'aria-hidden': 'true',
+    focusable: 'false',
+    size: 16,
+  });
 }
 
 function fieldChildren({ label, description, errorMessage, children, input }) {
@@ -97,16 +115,28 @@ function coreDateValue(value) {
   return value ? String(value) : undefined;
 }
 
-function calendarChildren() {
-  return React.createElement(AriaCalendarGrid, { className: 'core-calendar-grid' }, (date) => React.createElement(AriaCalendarCell, { date, className: 'core-calendar-cell' }));
+function calendarChildren(cellClass = 'core-calendar-cell') {
+  return React.createElement(AriaCalendarGrid, { className: 'core-calendar-grid' },
+    React.createElement(AriaCalendarGridHeader, { className: 'core-calendar-grid-header' },
+      (day) => React.createElement(AriaCalendarHeaderCell, { className: 'core-calendar-header-cell' }, day)),
+    React.createElement(AriaCalendarGridBody, { className: 'core-calendar-grid-body' },
+      (date) => React.createElement(AriaCalendarCell, { date, className: cellClass })),
+  );
+}
+
+function calendarHeader() {
+  return React.createElement('div', { className: 'core-calendar-header' },
+    React.createElement(AriaButton, { slot: 'previous', 'aria-label': 'Previous month', className: 'core-calendar-previous' }, React.createElement(ChevronLeftIcon, { 'aria-hidden': 'true', focusable: 'false', size: 16 })),
+    React.createElement(AriaCalendarHeading, { className: 'core-calendar-heading' }),
+    React.createElement(AriaButton, { slot: 'next', 'aria-label': 'Next month', className: 'core-calendar-next' }, React.createElement(ChevronRightIcon, { 'aria-hidden': 'true', focusable: 'false', size: 16 })));
 }
 
 function datePopover() {
-  return React.createElement(AriaPopover, { className: 'core-date-popover' }, React.createElement(AriaDialog, { className: 'core-date-dialog' }, React.createElement(AriaCalendar, { className: 'core-calendar' }, calendarChildren())));
+  return React.createElement(AriaPopover, { className: 'core-date-popover' }, React.createElement(AriaDialog, { className: 'core-date-dialog' }, React.createElement(AriaCalendar, { className: 'core-calendar' }, calendarHeader(), calendarChildren())));
 }
 
 function rangeDatePopover() {
-  return React.createElement(AriaPopover, { className: 'core-date-popover' }, React.createElement(AriaDialog, { className: 'core-date-dialog' }, React.createElement(AriaRangeCalendar, { className: 'core-calendar' }, calendarChildren())));
+  return React.createElement(AriaPopover, { className: 'core-date-popover' }, React.createElement(AriaDialog, { className: 'core-date-dialog' }, React.createElement(AriaRangeCalendar, { className: 'core-calendar' }, calendarHeader(), calendarChildren('core-range-calendar-cell'))));
 }
 
 function dateInput() {
@@ -261,8 +291,9 @@ export const SearchField = React.forwardRef(function SearchField({
     label,
     description,
     errorMessage,
-    input: React.createElement(AriaInput, { className: 'core-field-input', placeholder }),
-    children: React.createElement(AriaButton, { slot: 'clear', type: 'button', className: 'core-search-clear', onPress: onClear }, 'Clear'),
+    input: React.createElement('div', { className: 'core-search-control' },
+      React.createElement(AriaInput, { className: 'core-field-input', placeholder }),
+      React.createElement(AriaButton, { slot: 'clear', type: 'button', className: 'core-search-clear', 'aria-label': 'Clear search', onPress: onClear }, React.createElement(XIcon, { 'aria-hidden': 'true', focusable: 'false', size: 14 }))),
   }));
 });
 
@@ -311,9 +342,9 @@ export const NumberField = React.forwardRef(function NumberField({
     description,
     errorMessage,
     input: React.createElement(AriaGroup, { className: 'core-number-control' },
-      React.createElement(AriaButton, { slot: 'decrement', type: 'button', className: 'core-number-stepper' }, '−'),
+      React.createElement(AriaButton, { slot: 'decrement', type: 'button', className: 'core-number-stepper core-number-stepper-decrement' }, React.createElement(MinusIcon, { 'aria-hidden': 'true', focusable: 'false', size: 16 })),
       React.createElement(AriaInput, { className: 'core-field-input', inputMode: 'decimal' }),
-      React.createElement(AriaButton, { slot: 'increment', type: 'button', className: 'core-number-stepper' }, '+')),
+      React.createElement(AriaButton, { slot: 'increment', type: 'button', className: 'core-number-stepper core-number-stepper-increment' }, React.createElement(PlusIcon, { 'aria-hidden': 'true', focusable: 'false', size: 16 }))),
   }));
 });
 
@@ -565,7 +596,7 @@ export const DatePicker = React.forwardRef(function DatePicker({
     label,
     description,
     errorMessage,
-    input: React.createElement(AriaGroup, { className: 'core-date-control' }, dateInput(), React.createElement(AriaButton, { slot: 'button', type: 'button', className: 'core-date-trigger' }, 'Choose date')),
+    input: React.createElement(AriaGroup, { className: 'core-date-control' }, dateInput(), React.createElement(AriaButton, { slot: 'button', type: 'button', 'aria-label': 'Open calendar', className: 'core-date-trigger' }, calendarGlyph())),
     children: datePopover(),
   }));
 });
@@ -630,7 +661,7 @@ export const DateRangePicker = React.forwardRef(function DateRangePicker({
       React.createElement(AriaDateInput, { slot: 'start', className: 'core-date-input' }, (segment) => React.createElement(AriaDateSegment, { segment, className: 'core-date-segment' })),
       React.createElement('span', { className: 'core-date-range-separator', 'aria-hidden': 'true' }, '–'),
       React.createElement(AriaDateInput, { slot: 'end', className: 'core-date-input' }, (segment) => React.createElement(AriaDateSegment, { segment, className: 'core-date-segment' })),
-      React.createElement(AriaButton, { slot: 'button', type: 'button', className: 'core-date-trigger' }, 'Choose dates')),
+      React.createElement(AriaButton, { slot: 'button', type: 'button', 'aria-label': 'Open calendar', className: 'core-date-trigger' }, calendarGlyph())),
     children: React.createElement(React.Fragment, null,
       rangeDatePopover(),
       formResetAnchor(resetInputRef),
