@@ -976,6 +976,21 @@ ranges. No `@internationalized/date` or React Aria public type, value, import
 path, export, lifecycle, or ownership path may leak through the package; this
 is an internal, replaceable adapter dependency only.
 
+For existing R1 control affordances, `@core-ui/react` is also approved to
+directly use `lucide-react@1.37.0` as an exact internal, replaceable runtime
+dependency. Its npm integrity is
+`sha512-LPsB4rD1TD6wZu1djKOf9vUnS1jTNaHbolXebXDgiTdb6jeA1agIJhJsIybCmjKmQClcOaal1o1OaiYahEftyQ==`;
+its package license is ISC, its included Feather-derived artwork carries the
+MIT notice, and it is React peer-compatible with the existing React and React
+DOM peer boundary. Use is limited to `DatePicker`/`DateRangePicker` calendar
+triggers; `Calendar`/`RangeCalendar` previous/next controls;
+`ComboBox`/`Select` and `Tree` chevrons; `SearchField` clear;
+`NumberField` plus/minus; `Checkbox` check/indeterminate; `TagGroup` remove;
+and `Dialog`/`Toast` close. Core owns all labels and public contracts. No
+Lucide export, type, name, prop, or import path, and no public Icon API,
+catalog, or package, may cross the package boundary. Breadcrumb separators are
+text and no Search icon is added.
+
 #### Tale styling donor boundary
 
 The initial React visual implementation uses the matching component styling
@@ -1117,6 +1132,7 @@ flowchart TD
   react["@core-ui/react@0.1.0-alpha.N\nfirst public component package"]
   aria["react-aria-components@1.20.0\nexact internal runtime dependency"]
   temporal["@internationalized/date@3.12.3\napproved internal temporal adapter dependency"]
+  lucide["lucide-react@1.37.0\ninternal R1 control affordances only"]
   peers["react + react-dom\n>=19.2.0 <20 peers"]
   web["@core-ui/web\nlater W1 track"]
   native["@core-ui/react-native\nlater N1 track"]
@@ -1124,6 +1140,7 @@ flowchart TD
   canonical -. deterministic compilation .-> react
   aria --> react
   temporal --> react
+  lucide --> react
   peers --> react
   canonical -. later activation .-> web
   canonical -. later activation .-> native
@@ -1144,6 +1161,14 @@ ranges; neither `@internationalized/date` nor React Aria public type, value,
 import path, export, lifecycle, or ownership may leak. The packed tarball must
 contain no unresolved `workspace:` dependency, repository-only or source-tree
 import, undeclared file dependency, or `@core-ui/web` import.
+
+The same graph includes the exact direct internal runtime dependency
+`lucide-react@1.37.0` for the existing R1 control affordances only. Its npm
+integrity is
+`sha512-LPsB4rD1TD6wZu1djKOf9vUnS1jTNaHbolXebXDgiTdb6jeA1agIJhJsIybCmjKmQClcOaal1o1OaiYahEftyQ==`;
+the package is ISC with the Feather-derived MIT notice, and React
+peer-compatible. No Lucide export, type, name, prop, import path, or public
+Icon API/catalog/package is part of the Core surface.
 
 | Package | Responsibility | Must not own |
 | --- | --- | --- |
@@ -2465,3 +2490,57 @@ RSC/client-boundary support, framework-free web, React Native, React Native Web,
 cross-renderer equivalence, Scale, stable support, and `latest` remain later or
 separately admitted work. Npm publication, dist-tag changes, and the final
 R1-exit pull-request merge remain separate exact human stops.
+
+## R1 icon affordance dependency boundary
+
+Decision 0011 amendment 02 accepts `lucide-react@1.37.0` as an exact direct
+internal runtime dependency of `@core-ui/react`. Its npm integrity is
+`sha512-LPsB4rD1TD6wZu1djKOf9vUnS1jTNaHbolXebXDgiTdb6jeA1agIJhJsIybCmjKmQClcOaal1o1OaiYahEftyQ==`,
+its package license is ISC, its included Feather-derived artwork carries the
+MIT notice, and it is React peer-compatible with the existing React and React
+DOM peer boundary. The dependency is internal and replaceable only.
+
+The exact R1 dependency graph is:
+
+```text
+@core-ui/react@0.1.0-alpha.N
+├── dependency: react-aria-components@1.20.0
+├── dependency: @internationalized/date@3.12.3 (Core value adapters only)
+├── dependency: lucide-react@1.37.0 (internal control affordances only; ISC + Feather-derived MIT notices; exact npm integrity above)
+├── peer: react >=19.2.0 <20
+└── peer: react-dom >=19.2.0 <20
+```
+
+Lucide is permitted only for these existing R1 control affordances: the
+`DatePicker`/`DateRangePicker` calendar triggers; `Calendar`/`RangeCalendar`
+previous/next controls; `ComboBox`/`Select` and `Tree` chevrons;
+`SearchField` clear; `NumberField` plus/minus; `Checkbox` check/indeterminate;
+`TagGroup` remove; and `Dialog`/`Toast` close. Breadcrumb separators remain
+text, and no Search icon is added. Core owns every public contract. No Lucide
+export, type, name, prop, or import path may cross the package boundary, and
+there is no public Icon API, icon catalog, or icon package. This adds no
+component and no new decorative affordance.
+
+Accessible names, roles, states, relationships, keyboard behavior, and focus
+remain the Core binding obligations. Icons used in these affordances are
+decorative and non-focusable unless a Core binding explicitly requires a
+different semantic; an icon never supplies an undocumented accessible name.
+Icon-bearing controls retain their Core-owned accessible label and state
+semantics, including the check/indeterminate and close affordances.
+
+R1 proof must assert the exact direct dependency name, version, npm integrity,
+Lucide ISC notice and Feather-derived MIT notice, and React peer compatibility;
+absence of Lucide exports/types/names/props/paths and public Icon surfaces;
+correct tree-shaking of selected affordances; stable SSR and hydration; and
+exact packed-consumer resolution. Any distributed package containing the
+dependency must preserve both the Lucide ISC and Feather-derived MIT license
+notices. A Lucide version, icon
+mapping, affordance set, geometry, or accessibility-semantic change invalidates
+the affected visual-migration donor comparison and requires the affected R1
+visual, accessibility,
+SSR/hydration, tree-shaking, and packed-consumer proof to be rerun.
+
+This boundary has no React Native, `web.html`, or React Native Web implication,
+and changes no support, lifecycle, compatibility, package-publication, or
+release claim. It does not authorize npm publication, a dist-tag mutation, or
+the final R1-exit pull-request merge.

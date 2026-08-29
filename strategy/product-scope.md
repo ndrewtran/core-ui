@@ -1,5 +1,5 @@
 ---
-scopeVersion: 6.0.3
+scopeVersion: 6.0.4
 status: execution-baseline
 product: Core UI
 architecture: ./monorepo-architecture.md
@@ -34,15 +34,15 @@ tracker may reference scope and milestone IDs but cannot change product scope.
 This is not a status report. Git history records changes to product commitment;
 the tracker records delivery progress.
 
-Product Scope `6.0.3` is a patch clarification recording Decision 0011
-amendment 01's narrow internal temporal adapter dependency. It adds no Scope
-ID, commitment, family, tranche membership, public API, platform, package,
-lifecycle, support claim, release boundary, non-goal, or product meaning. The
-accepted 53-family table, immutable Stage 1 snapshot, and R1.0 baseline remain
-the existing R1 lock; ordinary component delivery does not require another
-lock, digest acceptance, or human evidence-acceptance gate. The package graph
-effect is internal and replaceable only, with no public package or consumer
-contract change.
+Product Scope `6.0.4` is a patch clarification recording Decision 0011
+amendments 01 and 02's narrow internal temporal-adapter and icon-affordance
+dependencies. It adds no Scope ID, commitment, family, tranche membership,
+public API, platform, package, lifecycle, support claim, release boundary,
+non-goal, or product meaning. The accepted 53-family table, immutable Stage 1
+snapshot, and R1.0 baseline remain the existing R1 lock; ordinary component
+delivery does not require another lock, digest acceptance, or human
+evidence-acceptance gate. The package graph effects are internal and
+replaceable only, with no public package or consumer contract change.
 
 ## Scope vocabulary
 
@@ -1378,13 +1378,22 @@ and runtime/effect lifecycle. Executable example code remains owned by its
 canonical example source.
 
 The approved R1 target graph is exactly `@core-ui/react@0.1.0-alpha.N` with
-direct internal runtime dependencies `react-aria-components@1.20.0` and
-`@internationalized/date@3.12.3`, React peer `>=19.2.0 <20`, and React DOM
-peer `>=19.2.0 <20`. The date dependency is limited to Core value adapters in
-`DateField`, `DatePicker`, `DateRangePicker`, `TimeField`, `Calendar`, and
-`RangeCalendar`; it exposes no upstream public contract. There is no Core
-workspace runtime edge or `@core-ui/web` dependency. Private Core packages may
-generate tarball contents but do not become runtime dependencies.
+direct internal runtime dependencies `react-aria-components@1.20.0`,
+`@internationalized/date@3.12.3`, and `lucide-react@1.37.0`; React peer
+`>=19.2.0 <20`, and React DOM peer `>=19.2.0 <20`. The date dependency is
+limited to Core value adapters in `DateField`, `DatePicker`, `DateRangePicker`,
+`TimeField`, `Calendar`, and `RangeCalendar`; it exposes no upstream public
+contract. The Lucide dependency has npm integrity
+`sha512-LPsB4rD1TD6wZu1djKOf9vUnS1jTNaHbolXebXDgiTdb6jeA1agIJhJsIybCmjKmQClcOaal1o1OaiYahEftyQ==`,
+ISC license, Feather-derived MIT notice, and React peer compatibility. It is
+limited to existing R1 `DatePicker`/`DateRangePicker` calendar triggers,
+`Calendar`/`RangeCalendar` previous/next, `ComboBox`/`Select` and `Tree`
+chevrons, `SearchField` clear, `NumberField` plus/minus, `Checkbox`
+check/indeterminate, `TagGroup` remove, and `Dialog`/`Toast` close. There is no
+Core workspace runtime edge or `@core-ui/web` dependency. Private Core
+packages may generate tarball contents but do not become runtime dependencies;
+Lucide exports, types, names, props, paths, or Icon API/catalog/package are
+not public.
 
 Every R1 tranche uses the fixed family allocation and common baseline, one
 deterministic closure, and risk-selected review appropriate to its exported
@@ -1706,3 +1715,59 @@ implementation, dependency installation, evidence, support claim, publication,
 or Project or consumer mutation. The reset-specific Project reconciliation
 already recorded for Product Scope `6.0.2` remains historical; this
 clarification does not authorize a Project write.
+
+## Product Scope 6.0.4 icon affordance dependency clarification
+
+Product Scope advances from `6.0.3` to `6.0.4` as a patch clarification for
+Decision 0011 amendment 02. Andrew approved `lucide-react` as an internal
+replaceable dependency and then approved the recommended exact pin
+`lucide-react@1.37.0`. The exact direct runtime dependency of `@core-ui/react`
+has npm integrity
+`sha512-LPsB4rD1TD6wZu1djKOf9vUnS1jTNaHbolXebXDgiTdb6jeA1agIJhJsIybCmjKmQClcOaal1o1OaiYahEftyQ==`,
+ISC license with its Feather-derived MIT notice, and React peer compatibility
+with the existing React and React DOM peer boundary.
+
+This is an internal, replaceable dependency for existing R1 control affordances
+only. The allowed boundary is: `DatePicker`/`DateRangePicker` calendar
+triggers; `Calendar`/`RangeCalendar` previous/next; `ComboBox`/`Select` and
+`Tree` chevrons; `SearchField` clear; `NumberField` plus/minus; `Checkbox`
+check/indeterminate; `TagGroup` remove; and `Dialog`/`Toast` close. Breadcrumb
+separators remain text, and no Search icon is added. Core owns all public
+contracts. No Lucide export, type, name, prop, or import path is public; no
+public Icon API, icon catalog, or icon package is added; no component or new
+decorative affordance is added.
+
+The affected existing Scope IDs remain `committed`, with no new Scope IDs and
+no commitment transitions: `SCOPE-COMP-CHECKBOX-REACT`,
+`SCOPE-COMP-SEARCHFIELD-REACT`, `SCOPE-COMP-NUMBERFIELD-REACT`,
+`SCOPE-COMP-DATEPICKER-REACT`, `SCOPE-COMP-DATERANGEPICKER-REACT`,
+`SCOPE-COMP-CALENDAR-REACT`, `SCOPE-COMP-RANGECALENDAR-REACT`,
+`SCOPE-COMP-COMBOBOX-REACT`, `SCOPE-COMP-SELECT-REACT`,
+`SCOPE-COMP-TREE-REACT`, `SCOPE-COMP-TAGGROUP-REACT`,
+`SCOPE-COMP-DIALOG-REACT`, and `SCOPE-COMP-TOAST-REACT`. The existing
+`SCOPE-REACT-BREADTH-001`, `SCOPE-PRODUCT-REACT-PRERELEASE`,
+`SCOPE-API-REACT-ERGONOMICS`, and `SCOPE-API-WEB-HOOKS`, plus related system,
+platform, package, proof, and package-guidance records, retain their existing
+states and boundaries. `SCOPE-COMP-BREADCRUMBS-REACT` is not affected; its
+separators remain text. No other scope item changes.
+
+Core-owned labels, roles, states, relationships, keyboard behavior, and focus
+remain the accessibility contract. These icons are decorative and
+non-focusable unless an existing Core binding explicitly requires another
+semantic; an icon never supplies an undocumented accessible name. The package
+license proof must retain both the Lucide ISC notice and the Feather-derived
+MIT notice.
+
+R1 proof must verify the exact dependency name/version/integrity, Lucide ISC
+notice and Feather-derived MIT notice, React peer compatibility, internal-only
+public-surface exclusion, accessible label/decorative semantics, SSR/hydration,
+tree-shaking, and exact packed-consumer resolution. A dependency-version,
+icon-mapping, geometry, or accessibility change invalidates the affected
+visual-migration comparison and requires the linked R1 visual, accessibility,
+SSR/hydration, tree-shaking, and packed-consumer proof to be rerun.
+
+This clarification has no React Native, `web.html`, or React Native Web
+implication and changes no support, lifecycle, compatibility, release,
+publication, or package-publication boundary. It authorizes no npm publication,
+dist-tag mutation, Project or consumer/production mutation, or final R1-exit
+pull-request merge.

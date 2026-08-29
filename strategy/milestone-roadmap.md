@@ -711,6 +711,20 @@ derived-guidance, release-prepare, and packed-consumer assertions are later
 implementation work and add no family, Scope ID, tranche, support/lifecycle,
 or release commitment.
 
+The approved R1 target graph also includes the exact direct internal,
+replaceable runtime dependency `lucide-react@1.37.0` for existing control
+affordances only. Its npm integrity is
+`sha512-LPsB4rD1TD6wZu1djKOf9vUnS1jTNaHbolXebXDgiTdb6jeA1agIJhJsIybCmjKmQClcOaal1o1OaiYahEftyQ==`;
+the package is ISC with its Feather-derived MIT notice and is React
+peer-compatible. The allowed use is `DatePicker`/`DateRangePicker` calendar
+triggers; `Calendar`/`RangeCalendar` previous/next; `ComboBox`/`Select` and
+`Tree` chevrons; `SearchField` clear; `NumberField` plus/minus; `Checkbox`
+check/indeterminate; `TagGroup` remove; and `Dialog`/`Toast` close. No Lucide
+export, type, name, prop, import path, public Icon API/catalog/package,
+component, or new decorative affordance is admitted. Breadcrumb separators
+remain text and no Search icon is added; Core-owned labels and decorative
+semantics remain binding.
+
 Each bounded pull request changes the earliest canonical owners, regenerates
 projections, keeps React Aria internal, migrates applicable Tale styling into
 Core-owned CSS and token hooks, and runs focused checks proportional to the
@@ -888,6 +902,13 @@ consumer verification; `E-R1-EXIT-04` dist-tag and rollback verification.
 **Exit:** only `@core-ui/react@0.1.0-rc.1` is published to `next`. No `latest`,
 stable, framework-free, native, React Native Web, parity, or equivalence claim
 is made.
+
+The R1 exit package graph includes the same exact internal,
+replaceable `lucide-react@1.37.0` edge and its ISC plus Feather-derived MIT
+notices. Exit proof must retain the Core-only public surface and verify exact
+SSR/hydration, tree-shaking, packed-consumer resolution, accessible labels and
+decorative semantics, and visual-migration invalidation. This does not add a
+publication authorization or change the final R1-exit merge stop.
 
 ### Later tracks and Productization
 
@@ -2458,10 +2479,10 @@ valid outcomes and do not make the core product incomplete.
 | ID | Milestone | Hard dependencies | Blocks |
 | --- | --- | --- | --- |
 | R1.0 | React package/substrate and Tale styling-donor baseline | Gate 0; accepted Product Scope 6.0.2, Decision 0010 amendments 01–03, and the accepted Stage 1 snapshot through the immutable committed-source route | R1.1–R1.5 |
-| R1.1 | Foundation and simple controls | Fixed R1.0 baseline and the fixed 53-family R1.1 allocation | R1.5, eligible alpha |
-| R1.2 | Forms and field controls | Fixed R1.0 baseline, Product Scope 6.0.3 temporal-adapter clarification, and the fixed 53-family R1.2 allocation | R1.5, eligible alpha |
-| R1.3 | Collections and composites | Fixed R1.0 baseline, Product Scope 6.0.3 temporal-adapter clarification, and the fixed 53-family R1.3 allocation | R1.5, eligible alpha |
-| R1.4 | Overlays and temporal interactions | Fixed R1.0 baseline and the fixed 53-family R1.4 allocation | R1.5, eligible alpha |
+| R1.1 | Foundation and simple controls | Fixed R1.0 baseline, Product Scope 6.0.4 icon-affordance clarification, and the fixed 53-family R1.1 allocation | R1.5, eligible alpha |
+| R1.2 | Forms and field controls | Fixed R1.0 baseline, Product Scope 6.0.4 temporal-adapter/icon-affordance clarifications, and the fixed 53-family R1.2 allocation | R1.5, eligible alpha |
+| R1.3 | Collections and composites | Fixed R1.0 baseline, Product Scope 6.0.4 temporal-adapter/icon-affordance clarifications, and the fixed 53-family R1.3 allocation | R1.5, eligible alpha |
+| R1.4 | Overlays and temporal interactions | Fixed R1.0 baseline, Product Scope 6.0.4 icon-affordance clarification, and the fixed 53-family R1.4 allocation | R1.5, eligible alpha |
 | R1.5 | React breadth closure | R1.1–R1.4 and the fixed 53-family 53/53 closure | R1 exit |
 | R1 exit | React prerelease publication | R1.5 and exact publish authorization | P2.1; optional W1/N1/S1 activation reviews |
 | P2.1 | React packages, catalog, CLI, compatibility | R1 exit and accepted public package graph | P2.2, P2.3, P2 exit |
@@ -2638,8 +2659,9 @@ tracking, not this long-lived roadmap.
 
 ## Recommended first execution sequence
 
-1. Use Product Scope `6.0.3`, Decision 0010 amendments 01–03, the accepted
-   Stage 1 snapshot, and the React-primary/Tale-donor Architecture/Roadmap
+1. Use Product Scope `6.0.4`, Decision 0010 amendments 01–03, Decision 0011
+   amendments 01–02, the accepted Stage 1 snapshot, and the React-primary/
+   Tale-donor Architecture/Roadmap
    authority as the existing R1 baseline. Do not interpret superseded G-series
    status or historical evidence as current R1 readiness.
 2. Activate R1.0 against exact reusable token/theme facts, the pinned Tale
@@ -2692,15 +2714,16 @@ failure.
 
 R1.0 remains the baseline milestone. The accepted fixed 53-family table,
 immutable Stage 1 snapshot, and R1.0 package/substrate baseline are the existing
-lock for all four implementation tranches. Product Scope 6.0.3 carries forward
+lock for all four implementation tranches. Product Scope 6.0.4 carries forward
 the 6.0.2 clarification that ordinary R1 implementation does not require
 another scope lock, digest acceptance, or human evidence-acceptance gate.
 Earlier Product Scope 5.0.1 or
 Decision 0010 amendment 01–02 wording retained elsewhere in this roadmap is a
 historical audit locator only; it is not a current R1 entry or completion rule.
 R1.0 remains historically complete against Product Scope 6.0.2; Product Scope
-6.0.3 is the successor input for the approved temporal dependency in R1.2 and
-R1.3 and does not retroactively change R1.0 evidence.
+6.0.3 remains the successor input for the approved temporal dependency, and
+Product Scope 6.0.4 adds the approved icon dependency for the affected R1.1–R1.4
+affordances. Neither clarification retroactively changes R1.0 evidence.
 
 The immutable tranche family sets are:
 
@@ -2736,9 +2759,58 @@ baseline failure is established; a shared baseline failure invalidates every
 affected tranche.
 
 R1 exit remains an exact prerelease of only `@core-ui/react` under `next`, with
-the already-authorized React/React DOM peer boundary and internal
-`react-aria-components@1.20.0` dependency plus the approved direct internal
-`@internationalized/date@3.12.3` temporal-adapter dependency limited to the six
-named value-adapter families above. Every registry mutation requires a
+the already-authorized React/React DOM peer boundary and exact internal runtime
+dependencies `react-aria-components@1.20.0`, `@internationalized/date@3.12.3`
+limited to the six named value-adapter families above, and
+`lucide-react@1.37.0` limited to the approved existing R1 control affordances.
+The Lucide edge carries npm integrity
+`sha512-LPsB4rD1TD6wZu1djKOf9vUnS1jTNaHbolXebXDgiTdb6jeA1agIJhJsIybCmjKmQClcOaal1o1OaiYahEftyQ==`,
+ISC license with its Feather-derived MIT notice, and React peer compatibility.
+Every registry mutation requires a
 separate exact publication authorization and a final registry/version/dist-tag
 collision and authorization-drift check. This authority publishes nothing.
+
+## R1 icon affordance dependency clarification
+
+Product Scope `6.0.4` and Decision 0011 amendment 02 add one exact direct
+internal runtime edge to the existing R1 React graph:
+`lucide-react@1.37.0`, npm integrity
+`sha512-LPsB4rD1TD6wZu1djKOf9vUnS1jTNaHbolXebXDgiTdb6jeA1agIJhJsIybCmjKmQClcOaal1o1OaiYahEftyQ==`,
+ISC license with its Feather-derived MIT notice, and React peer-compatible with
+the existing React/React DOM peer boundary. It is replaceable and limited to
+existing control affordances.
+
+The allowed affordance boundary follows the fixed tranches: R1.1
+`Checkbox` check/indeterminate; R1.2 `SearchField` clear, `NumberField`
+plus/minus, and `DatePicker`/`DateRangePicker` calendar triggers; R1.3
+`Calendar`/`RangeCalendar` previous/next, `ComboBox`/`Select` and `Tree`
+chevrons, and `TagGroup` remove; and R1.4 `Dialog`/`Toast` close. Breadcrumb
+separators remain text and no Search icon is added. No new component or
+decorative affordance is admitted. Core-owned labels, states, roles,
+relationships, keyboard behavior, and focus remain binding obligations; these
+icons are decorative/non-focusable unless an existing Core binding requires
+another explicit semantic.
+
+The affected existing Scope IDs remain `committed` with no new IDs or
+commitment transitions: `SCOPE-COMP-CHECKBOX-REACT`,
+`SCOPE-COMP-SEARCHFIELD-REACT`, `SCOPE-COMP-NUMBERFIELD-REACT`,
+`SCOPE-COMP-DATEPICKER-REACT`, `SCOPE-COMP-DATERANGEPICKER-REACT`,
+`SCOPE-COMP-CALENDAR-REACT`, `SCOPE-COMP-RANGECALENDAR-REACT`,
+`SCOPE-COMP-COMBOBOX-REACT`, `SCOPE-COMP-SELECT-REACT`,
+`SCOPE-COMP-TREE-REACT`, `SCOPE-COMP-TAGGROUP-REACT`,
+`SCOPE-COMP-DIALOG-REACT`, and `SCOPE-COMP-TOAST-REACT`. The existing
+`SCOPE-REACT-BREADTH-001`, `SCOPE-PRODUCT-REACT-PRERELEASE`,
+`SCOPE-API-REACT-ERGONOMICS`, and `SCOPE-API-WEB-HOOKS`, plus related system,
+platform, package, proof, and package-guidance records, retain their existing
+states and boundaries. `SCOPE-COMP-BREADCRUMBS-REACT` is not affected; its
+separators remain text.
+
+R1 tranche proof must verify the exact dependency tuple, integrity, Lucide ISC
+notice and Feather-derived MIT notice, React peer compatibility,
+internal-only public-surface exclusion, accessible label/decorative semantics,
+SSR/hydration, tree-shaking, and exact packed-consumer resolution. A
+dependency-version, icon-mapping, geometry, or accessibility change invalidates
+the affected visual-migration comparison and its linked tranche proof. The
+amendment has no React Native, `web.html`, or React Native
+Web implication and does not change support, lifecycle, release, publication,
+or final R1-exit-merge authority.
