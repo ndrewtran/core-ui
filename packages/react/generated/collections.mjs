@@ -1,5 +1,5 @@
 // @generated-from: packages/react/src/collections.mjs
-// @generated-content-sha256: sha256:2e8dfb39d420739512a1ef39a5fce5b9b06bbde09e35b6fb128e3213f95ef5ab
+// @generated-content-sha256: sha256:7be0f78e14dc36f450562cbd45109efff9031ad11bdbc57ee69233bc1cac7ef1
 import React from 'react';
 import {
   Calendar as AriaCalendar,
@@ -364,7 +364,9 @@ export const ComboBox = React.forwardRef(function ComboBox({ label, description,
     label !== undefined ? React.createElement(AriaLabel, { className: 'core-field-label' }, label) : null,
     React.createElement(AriaGroup, { className: 'core-combo-control' },
       React.createElement(AriaInput, { className: 'core-field-input', placeholder }),
-      React.createElement(AriaButton, { className: 'core-combo-box-trigger', 'aria-label': 'Show options' }, React.createElement('span', { className: 'core-combo-box-arrow', 'aria-hidden': 'true' }, '⌄'))),
+      React.createElement(AriaButton, { className: 'core-combo-box-trigger', 'aria-label': 'Show options' },
+        React.createElement('svg', { className: 'core-combo-box-arrow', viewBox: '0 0 24 24', width: 16, height: 16, fill: 'none', stroke: 'currentColor', strokeWidth: 2, strokeLinecap: 'round', strokeLinejoin: 'round', 'aria-hidden': 'true', focusable: 'false' },
+          React.createElement('path', { d: 'm6 9 6 6 6-6' })))),
     description !== undefined ? React.createElement(AriaText, { slot: 'description', className: 'core-field-description' }, description) : null,
     errorMessage !== undefined ? React.createElement(AriaFieldError, { className: 'core-field-error' }, errorMessage) : null,
     React.createElement(AriaPopover, { className: 'core-combo-box-popover' }, React.createElement(AriaListBox, { items: normalized, className: 'core-combo-box-list' }, (item) => React.createElement(AriaListBoxItem, { id: item.id, textValue: item.textValue, className: 'core-combo-box-option' }, item.label))),
@@ -394,7 +396,7 @@ RadioGroup.displayName = 'RadioGroup';
 
 export const Slider = React.forwardRef(function Slider({ label, value, defaultValue, onChange, min = 0, max = 100, step = 1, disabled = false, orientation = 'horizontal', className, 'aria-label': ariaLabel, 'aria-labelledby': ariaLabelledby, ...props }, ref) {
   accessibleName({ label, ariaLabel, ariaLabelledby }, 'Slider');
-  return React.createElement(AriaSlider, { ...props, ref, value, defaultValue, onChange: (next) => { if (!disabled) onChange?.(next); }, minValue: min, maxValue: max, step, isDisabled: disabled, orientation, className: classNames('core-slider', className), 'aria-label': ariaLabel, 'aria-labelledby': ariaLabelledby }, label !== undefined ? React.createElement(AriaLabel, { className: 'core-field-label' }, label) : null, React.createElement(AriaOutput, { className: 'core-slider-output' }), React.createElement(AriaSliderTrack, { className: 'core-slider-track' }, React.createElement(AriaSliderFill, { className: 'core-slider-fill' }), React.createElement(AriaSliderThumb, { className: 'core-slider-thumb' })));
+  return React.createElement(AriaSlider, { ...props, ref, value, defaultValue, onChange: (next) => { if (!disabled) onChange?.(next); }, minValue: min, maxValue: max, step, isDisabled: disabled, orientation, className: classNames('core-slider', className), 'aria-label': ariaLabel, 'aria-labelledby': ariaLabelledby }, React.createElement('div', { className: 'core-slider-header' }, label !== undefined ? React.createElement(AriaLabel, { className: 'core-field-label' }, label) : null, React.createElement(AriaOutput, { className: 'core-slider-output' })), React.createElement('div', { className: 'core-slider-control' }, React.createElement(AriaSliderTrack, { className: 'core-slider-track' }, React.createElement(AriaSliderFill, { className: 'core-slider-fill' }), React.createElement(AriaSliderThumb, { className: 'core-slider-thumb' }))));
 });
 Slider.displayName = 'Slider';
 
@@ -425,7 +427,7 @@ Tabs.displayName = 'Tabs';
 export const TagGroup = React.forwardRef(function TagGroup({ label, items = [], onRemove, onAction, disabled = false, className, 'aria-label': ariaLabel, 'aria-labelledby': ariaLabelledby }, ref) {
   const normalized = normalizeItems(items);
   accessibleName({ label, ariaLabel, ariaLabelledby }, 'TagGroup');
-  return React.createElement(AriaTagGroup, { ref, onRemove: (keys) => { if (!disabled) onRemove?.([...keys].map(String).map((id) => normalized.find((item) => item.id === id)).filter((item) => item && !item.disabled)); }, onAction: (key) => { const item = normalized.find((candidate) => candidate.id === String(key)); if (!disabled && !item?.disabled) onAction?.(item); }, isDisabled: disabled, 'aria-label': ariaLabel, 'aria-labelledby': ariaLabelledby, className: classNames('core-tag-group', className) }, label !== undefined ? React.createElement(AriaLabel, { className: 'core-field-label' }, label) : null, React.createElement(AriaTagList, { items: normalized, className: 'core-tag-list' }, (item) => React.createElement(AriaTag, { id: item.id, textValue: item.textValue, isDisabled: disabled || item.disabled, className: 'core-tag' }, item.label, React.createElement(AriaButton, { slot: 'remove', isDisabled: disabled || item.disabled, className: 'core-tag-remove' }, '×'))));
+  return React.createElement(AriaTagGroup, { ref, onRemove: (keys) => { if (!disabled) onRemove?.([...keys].map(String).map((id) => normalized.find((item) => item.id === id)).filter((item) => item && !item.disabled)); }, onAction: (key) => { const item = normalized.find((candidate) => candidate.id === String(key)); if (!disabled && !item?.disabled) onAction?.(item); }, isDisabled: disabled, 'aria-label': ariaLabel, 'aria-labelledby': ariaLabelledby, className: classNames('core-tag-group', className) }, label !== undefined ? React.createElement(AriaLabel, { className: 'core-field-label' }, label) : null, React.createElement(AriaTagList, { items: normalized, className: 'core-tag-list' }, (item) => React.createElement(AriaTag, { id: item.id, textValue: item.textValue, isDisabled: disabled || item.disabled, className: 'core-tag' }, item.label, onRemove ? React.createElement(AriaButton, { slot: 'remove', isDisabled: disabled || item.disabled, className: 'core-tag-remove' }, '×') : null)));
 });
 TagGroup.displayName = 'TagGroup';
 
@@ -566,7 +568,11 @@ export const Virtualizer = React.forwardRef(function Virtualizer({ items = [], r
   assertPositiveVirtualizerNumber(height, 'height');
   assertNonNegativeVirtualizerNumber(overscan, 'overscan');
   const normalized = normalizeItems(items);
-  const layoutOptions = { rowSize: itemHeight, padding: overscan * itemHeight };
+  // RAC manages the rendered window from the viewport and row size. The
+  // padding option is layout padding, not overscan, so passing it visibly
+  // offsets the first item and shifts the virtual content. Keep overscan in
+  // the public contract while leaving window placement to RAC.
+  const layoutOptions = { rowSize: itemHeight };
   return React.createElement(AriaVirtualizer, { layout: ListLayout, layoutOptions },
     React.createElement(AriaListBox, {
       ...props,

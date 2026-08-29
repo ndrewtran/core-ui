@@ -1,5 +1,5 @@
 // @generated-from: packages/react/src/generate.mjs
-// @generated-content-sha256: sha256:50285fd6dc829c888381dc2d351802f289328e844d223c5289af60a2bf8d052d
+// @generated-content-sha256: sha256:50f7cae7ca75e3c149ad804828578b7f0c2b605d93706d75dd2164dd09b62950
 import type * as React from 'react';
 
 export type ButtonPointerType = 'mouse' | 'pen' | 'touch' | 'keyboard' | 'virtual' | undefined;
@@ -160,7 +160,7 @@ export interface ToastProps { message: Exclude<React.ReactNode, null | undefined
 export declare const Toast: React.FC<ToastProps>;
 export interface ToastOptions { title?: React.ReactNode; variant?: 'neutral' | 'success' | 'warning' | 'danger'; duration?: number; onDismiss?: () => void; className?: string; }
 export interface ToastManager { add: (message: Exclude<React.ReactNode, null | undefined | boolean>, options?: ToastOptions) => string; remove: (key: string) => void; }
-export interface ToastProviderProps { children?: React.ReactNode; maxVisible?: number; className?: string; }
+export interface ToastProviderProps { children?: React.ReactNode; maxVisible?: number; placement?: 'top-start' | 'top-end' | 'bottom-start' | 'bottom-end'; className?: string; }
 export declare const ToastProvider: React.FC<ToastProviderProps>;
 export declare function useToast(): ToastManager;
 export type TooltipProps = { content: Exclude<React.ReactNode, null | undefined | boolean>; trigger: React.ReactElement; delay?: number; closeDelay?: number; placement?: 'top' | 'bottom' | 'start' | 'end'; open?: boolean; defaultOpen?: boolean; onOpenChange?: (open: boolean) => void; className?: string; };

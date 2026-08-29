@@ -518,6 +518,14 @@ test('lifecycle state coverage drives observable Core transitions', async () => 
             const visibleAgain = presence.findIndex((visible, index) => index > removedAfterVisible && visible);
             assert.ok(firstVisible >= 0 && removedAfterVisible >= 0 && visibleAgain >= 0,
               `${family}/${state} RAC queue close/reopen (${presence.join(',')})`);
+          } else if (family === 'PreviewTrigger') {
+            // RAC intentionally skips exit animations while preview warmup/cooldown
+            // swaps are active, so its observable contract is removal and reopen.
+            const firstVisible = presence.findIndex(Boolean);
+            const removedAfterVisible = presence.findIndex((visible, index) => index > firstVisible && !visible);
+            const visibleAgain = presence.findIndex((visible, index) => index > removedAfterVisible && visible);
+            assert.ok(firstVisible >= 0 && removedAfterVisible >= 0 && visibleAgain >= 0,
+              `${family}/${state} RAC preview close/reopen (${presence.join(',')})`);
           } else {
             assert.equal(
               racRecords.some(({ marker: recordMarker, attributeName }) => recordMarker.includes(marker)

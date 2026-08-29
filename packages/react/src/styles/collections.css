@@ -93,7 +93,7 @@
 .core-color-field {
   display: flex;
   flex-direction: column;
-  gap: var(--core-semantic-layout-control-gap);
+  gap: calc(var(--core-semantic-layout-control-gap) + 2px);
 }
 
 .core-color-field .core-field-input {
@@ -108,7 +108,7 @@
   color: var(--core-semantic-content-strong);
   background-color: var(--core-semantic-surface-canvas);
   border: 1px solid var(--core-semantic-border-strong);
-  border-radius: var(--core-semantic-layout-tight-inset);
+  border-radius: var(--core-field-radius);
   outline: none;
   transition:
     border-color 0.15s ease,
@@ -241,7 +241,7 @@
 
 }
 /* Core component source: combobox.css */
-.core-field-input {
+.core-combo-box .core-field-input {
   display: block;
   width: 100%;
   transition:
@@ -249,13 +249,13 @@
     box-shadow 0.15s ease;
 }
 
-.core-field-input:hover {
+.core-combo-box .core-field-input:hover {
   border-color: var(--core-semantic-content-faint);
 }
 
 .core-combo-box-popover {
   padding: var(--core-semantic-layout-tight-inset);
-  min-width: var(--trigger-width, 10rem);
+  min-width: var(--anchor-width);
   max-height: 17.5rem;
   overflow-y: auto;
 }
@@ -295,6 +295,7 @@
   padding: var(--core-semantic-layout-control-gap) var(--core-semantic-layout-group-gap);
   font-family: Inter, sans-serif;
   font-size: var(--core-semantic-typography-body-size);
+  line-height: 1.5;
   color: var(--core-semantic-content-strong);
   background-color: var(--core-semantic-surface-canvas);
   outline: none;
@@ -384,6 +385,7 @@
   display: inline-flex;
   align-items: center;
   gap: var(--core-semantic-layout-group-gap);
+  line-height: 1.5;
   cursor: pointer;
   outline: none;
   user-select: none;
@@ -423,12 +425,6 @@
 }
 
 .core-radio[data-focus-visible] .core-radio-indicator {
-  box-shadow:
-    0 0 0 2px var(--core-semantic-content-inverse),
-    0 0 0 4px var(--core-semantic-focus-ring);
-}
-
-.core-radio:focus-within {
   box-shadow:
     0 0 0 2px var(--core-semantic-content-inverse),
     0 0 0 4px var(--core-semantic-focus-ring);
@@ -574,7 +570,7 @@
 
 .core-select-popover {
   padding: var(--core-semantic-layout-tight-inset);
-  min-width: var(--trigger-width, 10rem);
+  min-width: var(--anchor-width, 10rem);
   max-height: 17.5rem;
   overflow-y: auto;
   overflow-x: hidden;
@@ -599,6 +595,38 @@
   gap: var(--core-semantic-layout-tight-inset);
   width: 100%;
   touch-action: none;
+}
+
+.core-slider-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin-bottom: var(--core-semantic-layout-group-gap);
+}
+
+.core-slider[data-orientation='vertical'] .core-slider-header {
+  width: max-content;
+  justify-content: flex-start;
+  gap: var(--core-semantic-control-padding-inline);
+}
+
+.core-slider-control {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 1.25rem;
+  cursor: pointer;
+}
+
+.core-slider[data-orientation='vertical'] .core-slider-control {
+  flex-direction: column;
+  width: 1.25rem;
+  height: 10rem;
+}
+
+.core-slider[data-disabled] .core-slider-control {
+  cursor: not-allowed;
 }
 
 .core-slider[data-orientation='vertical'] {
@@ -675,8 +703,8 @@
 
 .core-slider-thumb:focus-visible {
   box-shadow:
-    0 0 0 2px var(--core-semantic-content-inverse),
-    0 0 0 4px var(--core-semantic-focus-ring);
+    0 0 0 2px var(--core-focus-ring-inner),
+    0 0 0 4px var(--core-focus-ring-outer);
 }
 
 .core-slider-thumb[data-dragging] {
@@ -704,12 +732,37 @@
   font-size: var(--core-semantic-typography-small-size);
   line-height: 1.3;
 }
+
+[data-core-color-scheme='light'] .core-slider > .core-slider-header > .core-field-label {
+  color: var(--core-reference-color-neutral-70);
+}
+
+[data-core-color-scheme='light'] .core-slider > .core-slider-header > .core-slider-output {
+  color: var(--core-reference-color-neutral-60);
+}
+
+[data-core-color-scheme='dark'] .core-slider > .core-slider-header > .core-field-label {
+  color: var(--core-reference-color-neutral-70);
+}
+
+[data-core-color-scheme='dark'] .core-slider > .core-slider-header > .core-slider-output {
+  color: var(--core-reference-color-neutral-50);
+}
+
+[data-core-color-scheme='dark'] .core-slider-track {
+  background-color: var(--core-reference-color-neutral-88);
+}
+
+[data-core-color-scheme='dark'] .core-slider-thumb {
+  background-color: color-mix(in srgb, var(--core-reference-color-neutral-100) 85%, black);
+}
 /* Core component source: table.css */
 .core-table {
   width: 100%;
   border-collapse: collapse;
   font-family: Inter, sans-serif;
   font-size: var(--core-semantic-typography-body-size);
+  line-height: 1.5;
   color: var(--core-semantic-content-strong);
   outline: none;
 }
@@ -824,6 +877,7 @@
   color: var(--core-semantic-content-default);
   font-family: Inter, sans-serif;
   font-size: var(--core-semantic-typography-body-size);
+  line-height: 1.5;
   font-weight: var(--core-semantic-typography-control-weight);
   cursor: pointer;
   outline: none;
@@ -1005,12 +1059,48 @@
   border-radius: var(--core-semantic-shape-container-radius);
 }
 
+/* Direct button children use the compact neutral toolbar intent. */
+.core-toolbar > .core-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.5rem;
+  min-height: 2rem;
+  padding: var(--core-semantic-layout-tight-inset) var(--core-semantic-layout-control-gap);
+  border: 0;
+  border-radius: var(--core-reference-dimension-radius-m);
+  background: transparent;
+  color: var(--core-semantic-content-default);
+  font-family: Inter, sans-serif;
+  font-size: var(--core-semantic-typography-body-size);
+  font-weight: var(--core-semantic-typography-control-weight);
+  line-height: 1.5;
+  box-shadow: none;
+}
+
+.core-toolbar > .core-button:hover:not([data-disabled], [data-pending]) {
+  background: var(--core-semantic-surface-hover);
+}
+
+.core-toolbar > .core-button:active:not([data-disabled], [data-pending]),
+.core-toolbar > .core-button[data-pressed] {
+  background: var(--core-semantic-surface-hover);
+}
+
+.core-toolbar > .core-button:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 2px var(--core-focus-ring-inner),
+    0 0 0 4px var(--core-focus-ring-outer);
+}
+
 /* Core component source: tree.css */
 .core-tree {
   display: flex;
   flex-direction: column;
   font-family: Inter, sans-serif;
   font-size: var(--core-semantic-typography-body-size);
+  line-height: 1.5;
   color: var(--core-semantic-content-strong);
   outline: none;
 }
@@ -1076,9 +1166,9 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  flex: 0 0 1rem;
-  width: 1rem;
-  height: 1rem;
+  flex: 0 0 0.5rem;
+  width: 0.5rem;
+  height: 0.5rem;
   padding: 0;
   border: 0;
   border-radius: var(--core-semantic-shape-indicator-radius);
@@ -1103,10 +1193,10 @@
   color: var(--core-semantic-content-strong);
 }
 
-.core-tree-toggle[data-focus-visible] {
+.core-tree-toggle:focus-visible {
   box-shadow:
-    0 0 0 2px var(--core-semantic-content-inverse),
-    0 0 0 4px var(--core-semantic-focus-ring);
+    0 0 0 2px var(--core-focus-ring-inner),
+    0 0 0 4px var(--core-focus-ring-outer);
 }
 
 .core-tree-toggle[data-disabled] {
@@ -1137,8 +1227,9 @@
 
 .core-color-picker {
   display: flex;
-  flex-direction: column;
-  gap: var(--core-semantic-control-padding-inline);
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 0;
   width: fit-content;
 }
 
@@ -1231,4 +1322,764 @@
   .core-list-box-item[data-focus-visible] {
     outline-width: 3px;
   }
+}
+
+/* Ordinary dark collection recipes mirror Tale's neutral collection scale. */
+[data-core-color-scheme='light'] :where(.core-calendar, .core-range-calendar) {
+  background-color: var(--core-reference-color-neutral-90);
+  border-color: var(--core-reference-color-neutral-100);
+  color: var(--core-reference-color-neutral-20);
+}
+
+[data-core-color-scheme='light'] :where(.core-calendar, .core-range-calendar) > .core-field-label {
+  color: var(--core-reference-color-neutral-20);
+}
+
+[data-core-color-scheme='dark'] :where(.core-calendar, .core-range-calendar) {
+  background-color: var(--core-reference-color-neutral-18);
+  border-color: var(--core-reference-color-neutral-5);
+  color: var(--core-reference-color-neutral-88);
+}
+
+[data-core-color-scheme='dark'] :where(.core-calendar, .core-range-calendar) > .core-field-label {
+  color: var(--core-reference-color-neutral-88);
+}
+
+[data-core-color-scheme='light'] .core-calendar-header-cell {
+  color: var(--core-reference-color-neutral-50);
+}
+
+[data-core-color-scheme='light'] .core-calendar-heading {
+  color: var(--core-reference-color-neutral-20);
+}
+
+[data-core-color-scheme='dark'] .core-calendar-header-cell {
+  color: var(--core-reference-color-neutral-50);
+}
+
+[data-core-color-scheme='dark'] .core-calendar-heading {
+  color: var(--core-reference-color-neutral-88);
+}
+
+[data-core-color-scheme='light'] :where(.core-calendar-cell, .core-range-calendar-cell) {
+  color: var(--core-reference-color-neutral-20);
+}
+
+[data-core-color-scheme='dark'] :where(.core-calendar-cell, .core-range-calendar-cell) {
+  color: var(--core-reference-color-neutral-88);
+}
+
+[data-core-color-scheme='light'] :where(.core-calendar-previous, .core-calendar-next) {
+  background-color: var(--core-reference-color-neutral-80);
+  border-color: var(--core-reference-color-neutral-90);
+  color: var(--core-reference-color-neutral-20);
+}
+
+[data-core-color-scheme='dark'] :where(.core-calendar-previous, .core-calendar-next) {
+  background-color: var(--core-reference-color-neutral-28);
+  border-color: var(--core-reference-color-neutral-18);
+  color: var(--core-reference-color-neutral-88);
+}
+
+[data-core-color-scheme='light'] .core-range-calendar-cell[data-selected] {
+  background-color: var(--core-reference-color-bluegreen-30);
+  color: var(--core-reference-color-bluegreen-100);
+}
+
+[data-core-color-scheme='dark'] .core-range-calendar-cell[data-selected] {
+  background-color: var(--core-reference-color-bluegreen-70);
+  color: var(--core-reference-color-bluegreen-5);
+}
+
+[data-core-color-scheme='light'] .core-range-calendar-cell[data-selection-start],
+[data-core-color-scheme='light'] .core-range-calendar-cell[data-selection-end] {
+  background-color: var(--core-reference-color-bluegreen-20);
+}
+
+[data-core-color-scheme='dark'] .core-range-calendar-cell[data-selection-start],
+[data-core-color-scheme='dark'] .core-range-calendar-cell[data-selection-end] {
+  background-color: var(--core-reference-color-bluegreen-80);
+}
+
+/* Calendar cells keep Tale's transparent disabled/outside-month treatment. */
+[data-core-color-scheme='light'] .core-calendar-cell[data-disabled],
+[data-core-color-scheme='light'] .core-calendar-cell[data-outside-month],
+[data-core-color-scheme='light'] .core-calendar-cell[data-unavailable],
+[data-core-color-scheme='light'] .core-range-calendar-cell[data-disabled],
+[data-core-color-scheme='light'] .core-range-calendar-cell[data-outside-month],
+[data-core-color-scheme='light'] .core-range-calendar-cell[data-unavailable] {
+  background-color: transparent;
+  color: var(--core-reference-color-neutral-10);
+  opacity: 0.35;
+}
+
+[data-core-color-scheme='dark'] .core-calendar-cell[data-disabled],
+[data-core-color-scheme='dark'] .core-calendar-cell[data-outside-month],
+[data-core-color-scheme='dark'] .core-calendar-cell[data-unavailable],
+[data-core-color-scheme='dark'] .core-range-calendar-cell[data-disabled],
+[data-core-color-scheme='dark'] .core-range-calendar-cell[data-outside-month],
+[data-core-color-scheme='dark'] .core-range-calendar-cell[data-unavailable] {
+  background-color: transparent;
+  color: var(--core-reference-color-neutral-98);
+  opacity: 0.35;
+}
+
+[data-core-color-scheme='light'] .core-calendar-cell[data-selected] {
+  background-color: var(--core-reference-color-bluegreen-20);
+  color: var(--core-reference-color-bluegreen-100);
+}
+
+[data-core-color-scheme='dark'] .core-calendar-cell[data-selected] {
+  background-color: var(--core-reference-color-bluegreen-80);
+  color: var(--core-reference-color-bluegreen-5);
+}
+
+[data-core-color-scheme='light'] .core-calendar-cell:hover,
+[data-core-color-scheme='light'] .core-range-calendar-cell:hover {
+  background-color: var(--core-reference-color-neutral-80);
+}
+
+[data-core-color-scheme='dark'] .core-calendar-cell:hover,
+[data-core-color-scheme='dark'] .core-range-calendar-cell:hover {
+  background-color: var(--core-reference-color-neutral-30);
+}
+
+[data-core-color-scheme='light'] .core-calendar-cell[data-selected]:hover,
+[data-core-color-scheme='light'] .core-range-calendar-cell[data-selected]:hover,
+[data-core-color-scheme='light'] .core-range-calendar-cell[data-selection-start]:hover,
+[data-core-color-scheme='light'] .core-range-calendar-cell[data-selection-end]:hover {
+  background-color: var(--core-reference-color-bluegreen-70);
+}
+
+[data-core-color-scheme='dark'] .core-calendar-cell[data-selected]:hover,
+[data-core-color-scheme='dark'] .core-range-calendar-cell[data-selected]:hover,
+[data-core-color-scheme='dark'] .core-range-calendar-cell[data-selection-start]:hover,
+[data-core-color-scheme='dark'] .core-range-calendar-cell[data-selection-end]:hover {
+  background-color: var(--core-reference-color-bluegreen-70);
+}
+
+[data-core-color-scheme='light'] .core-menu {
+  background-color: var(--core-reference-color-neutral-90);
+  border-color: var(--core-reference-color-neutral-100);
+  color: var(--core-reference-color-neutral-20);
+}
+
+[data-core-color-scheme='dark'] .core-menu {
+  background-color: var(--core-reference-color-neutral-20);
+  border-color: var(--core-reference-color-neutral-10);
+  color: var(--core-reference-color-neutral-90);
+}
+
+[data-core-color-scheme='light'] .core-menu-item {
+  color: var(--core-reference-color-neutral-20);
+}
+
+[data-core-color-scheme='dark'] .core-menu-item {
+  color: var(--core-reference-color-neutral-90);
+}
+
+[data-core-color-scheme='light'] .core-menu-item[data-focused] {
+  background-color: var(--core-reference-color-neutral-80);
+  color: var(--core-reference-color-neutral-10);
+}
+
+[data-core-color-scheme='dark'] .core-menu-item[data-focused] {
+  background-color: var(--core-reference-color-neutral-30);
+  color: var(--core-reference-color-neutral-100);
+}
+
+[data-core-color-scheme='light'] .core-toolbar {
+  background-color: var(--core-reference-color-neutral-12);
+  border-color: var(--core-reference-color-neutral-20);
+}
+
+[data-core-color-scheme='dark'] .core-toolbar {
+  background-color: var(--core-reference-color-neutral-98);
+  border-color: var(--core-reference-color-neutral-90);
+}
+
+[data-core-color-scheme='light'] .core-toolbar > .core-button {
+  color: var(--core-reference-color-neutral-70);
+}
+
+[data-core-color-scheme='dark'] .core-toolbar > .core-button {
+  color: var(--core-reference-color-neutral-40);
+}
+
+[data-core-color-scheme='light'] .core-toolbar > .core-button:hover:not([data-disabled], [data-pending]),
+[data-core-color-scheme='light'] .core-toolbar > .core-button[data-pressed] {
+  background-color: var(--core-reference-color-neutral-18);
+}
+
+[data-core-color-scheme='dark'] .core-toolbar > .core-button:hover:not([data-disabled], [data-pending]),
+[data-core-color-scheme='dark'] .core-toolbar > .core-button[data-pressed] {
+  background-color: var(--core-reference-color-neutral-92);
+}
+
+[data-core-color-scheme='light'] .core-toolbar > .core-button[data-pressed],
+[data-core-color-scheme='dark'] .core-toolbar > .core-button[data-pressed] {
+  color: var(--core-reference-color-neutral-20);
+}
+
+[data-core-color-scheme='dark'] .core-toolbar > .core-button[data-pressed] {
+  color: var(--core-reference-color-neutral-90);
+}
+
+[data-core-color-scheme='dark'] .core-color-field .core-field-input {
+  background-color: color-mix(in srgb, var(--core-reference-color-neutral-100) 85%, black);
+  border-color: var(--core-reference-color-neutral-84);
+  color: var(--core-reference-color-neutral-20);
+  color-scheme: light;
+}
+
+[data-core-color-scheme='dark'] .core-color-field .core-field-input::placeholder {
+  color: var(--core-reference-color-neutral-60);
+}
+
+[data-core-color-scheme='dark'] .core-select-trigger,
+[data-core-color-scheme='dark'] .core-combo-control,
+[data-core-color-scheme='dark'] .core-combo-box .core-field-input {
+  background-color: color-mix(in srgb, var(--core-reference-color-neutral-100) 85%, black);
+  border-color: var(--core-reference-color-neutral-84);
+  color: var(--core-reference-color-neutral-20);
+}
+
+[data-core-color-scheme='dark'] .core-select-popover,
+[data-core-color-scheme='dark'] .core-combo-box-popover {
+  background-color: var(--core-reference-color-neutral-100);
+  border-color: var(--core-reference-color-neutral-90);
+}
+
+.core-combo-control {
+  border-color: var(--core-reference-color-neutral-20);
+}
+
+.core-combo-box-trigger {
+  color: var(--core-reference-color-neutral-60);
+}
+
+.core-combo-box-arrow {
+  color: var(--core-reference-color-neutral-60);
+  width: 1rem;
+  height: 1rem;
+}
+
+[data-core-color-scheme='light'] .core-combo-box > .core-field-label {
+  color: var(--core-reference-color-neutral-70);
+}
+
+[data-core-color-scheme='dark'] :where(
+  .core-select-value[data-placeholder],
+  .core-select-arrow,
+  .core-combo-box-trigger
+) {
+  color: var(--core-reference-color-neutral-60);
+}
+
+[data-core-color-scheme='dark'] .core-select-trigger[data-placeholder],
+[data-core-color-scheme='dark'] .core-select-trigger [data-placeholder] {
+  color: var(--core-reference-color-neutral-60);
+}
+
+[data-core-color-scheme='dark'] :where(
+  .core-select-trigger,
+  .core-select-arrow
+) {
+  color: var(--core-reference-color-neutral-50);
+}
+
+[data-core-color-scheme='dark'] :where(.core-select-option, .core-combo-box-option) {
+  color: var(--core-reference-color-neutral-30);
+}
+
+[data-core-color-scheme='dark'] :where(.core-select-option, .core-combo-box-option)[data-focused] {
+  background-color: var(--core-reference-color-neutral-96);
+  color: var(--core-reference-color-neutral-20);
+}
+
+[data-core-color-scheme='light'] .core-select-value[data-placeholder] {
+  color: var(--core-reference-color-neutral-70);
+}
+
+[data-core-color-scheme='dark'] .core-select-value[data-placeholder] {
+  color: var(--core-reference-color-neutral-50);
+}
+
+[data-core-color-scheme='light'] .core-select-arrow {
+  color: var(--core-reference-color-neutral-70);
+}
+
+[data-core-color-scheme='dark'] .core-tab-list {
+  border-color: var(--core-reference-color-neutral-92);
+}
+
+[data-core-color-scheme='light'] .core-tab-list {
+  border-color: var(--core-reference-color-neutral-18);
+}
+
+[data-core-color-scheme='dark'] .core-tab:not([data-selected='true'], [aria-selected='true']) {
+  color: var(--core-reference-color-neutral-50);
+}
+
+[data-core-color-scheme='dark'] .core-tab[aria-selected='true'],
+[data-core-color-scheme='dark'] .core-tab[data-selected='true'] {
+  color: var(--core-reference-color-neutral-20);
+}
+
+[data-core-color-scheme='dark'] .core-tab-panel {
+  color: var(--core-reference-color-neutral-30);
+}
+
+[data-core-color-scheme='light'] .core-tab:not([data-selected='true'], [aria-selected='true']),
+[data-core-color-scheme='light'] .core-table-column {
+  color: var(--core-reference-color-neutral-60);
+}
+
+[data-core-color-scheme='dark'] .core-table {
+  color: var(--core-reference-color-neutral-20);
+}
+
+[data-core-color-scheme='dark'] .core-table-column {
+  color: var(--core-reference-color-neutral-40);
+}
+
+[data-core-color-scheme='dark'] .core-table-header {
+  border-color: var(--core-reference-color-neutral-88);
+}
+
+[data-core-color-scheme='dark'] .core-table-row {
+  border-color: var(--core-reference-color-neutral-96);
+}
+
+[data-core-color-scheme='dark'] .core-grid-list {
+  border-color: var(--core-reference-color-neutral-88);
+}
+
+[data-core-color-scheme='dark'] .core-grid-list-item:not(
+  [data-selected],
+  [data-hovered],
+  [data-disabled],
+  [data-dragging],
+  [data-drop-target]
+) {
+  background-color: color-mix(in srgb, var(--core-reference-color-neutral-100) 85%, black);
+  color: var(--core-reference-color-neutral-20);
+}
+
+[data-core-color-scheme='dark'] .core-list-box {
+  background-color: color-mix(in srgb, var(--core-reference-color-neutral-100) 85%, black);
+  border-color: var(--core-reference-color-neutral-88);
+}
+
+[data-core-color-scheme='dark'] .core-list-box-item {
+  color: var(--core-reference-color-neutral-40);
+}
+
+[data-core-color-scheme='dark'] .core-color-slider > .core-field-label {
+  color: var(--core-reference-color-neutral-40);
+}
+
+[data-core-color-scheme='dark'] :where(
+  .core-color-slider > .core-slider-output,
+  .core-color-slider > .core-color-slider-output
+) {
+  color: var(--core-reference-color-neutral-60);
+}
+
+[data-core-color-scheme] .core-table[data-focus-visible],
+[data-core-color-scheme] .core-table-column[data-focus-visible],
+[data-core-color-scheme] .core-table-row[data-focus-visible],
+[data-core-color-scheme] .core-table-cell[data-focus-visible],
+[data-core-color-scheme] .core-tabs .core-tab:focus-visible,
+[data-core-color-scheme] .core-tabs .core-tab[data-focus-visible],
+[data-core-color-scheme] .core-grid-list[data-focus-visible],
+[data-core-color-scheme] .core-list-box[data-focus-visible] {
+  box-shadow:
+    0 0 0 2px var(--core-focus-ring-inner),
+    0 0 0 4px var(--core-focus-ring-outer);
+}
+
+[data-core-color-scheme] .core-color-field .core-field-input[data-focused] {
+  box-shadow:
+    0 0 0 2px var(--core-focus-ring-inner),
+    0 0 0 4px var(--core-focus-ring-outer);
+}
+
+[data-core-color-scheme='dark'] .core-radio {
+  color: var(--core-reference-color-neutral-20);
+}
+
+[data-core-color-scheme='dark'] .core-radio-indicator {
+  background-color: var(--core-reference-color-neutral-98);
+  border-color: var(--core-reference-color-neutral-60);
+}
+
+[data-core-color-scheme='dark'] .core-radio-indicator::after {
+  background-color: var(--core-reference-color-bluegreen-20);
+}
+
+[data-core-color-scheme='dark'] .core-radio[data-selected] .core-radio-indicator {
+  background-color: var(--core-reference-color-neutral-98);
+  border-color: var(--core-reference-color-bluegreen-40);
+}
+
+[data-core-color-scheme='dark'] .core-radio[data-hovered]:not([data-disabled], [data-selected]) .core-radio-indicator {
+  background-color: var(--core-reference-color-neutral-94);
+  border-color: var(--core-reference-color-neutral-40);
+}
+
+[data-core-color-scheme='dark'] .core-tree {
+  color: var(--core-reference-color-neutral-20);
+}
+
+[data-core-color-scheme='light'] :where(.core-list-box, .core-virtualizer) {
+  box-shadow:
+    0 4px 4px -10px rgb(0 0 0 / 4%),
+    0 13px 13px -10px rgb(0 0 0 / 6%),
+    0 40px 60px -10px rgb(0 0 0 / 8%);
+}
+
+/* Virtualizer renders the same RAC list item anatomy as ListBox. Keep the
+   fixed inline viewport supplied by the wrapper while reusing its consumer
+   surface and item recipe. */
+.core-virtualizer {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: var(--core-semantic-layout-tight-inset);
+  max-height: 17.5rem;
+  padding: var(--core-semantic-layout-tight-inset);
+  background-color: var(--core-popup-bg);
+  border: 1px solid var(--core-popup-border-color);
+  border-radius: var(--core-popup-radius);
+  box-shadow: var(--core-popup-shadow);
+}
+
+.core-virtualizer-item {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: var(--core-item-gap);
+  padding: var(--core-item-padding-block) var(--core-item-padding-inline);
+  border-radius: var(--core-item-radius);
+  color: var(--core-item-color);
+  font-family: Inter, sans-serif;
+  font-size: var(--core-item-font-size);
+  line-height: 1.5;
+  cursor: pointer;
+  outline: none;
+  transition:
+    background-color 0.1s ease,
+    color 0.1s ease;
+  user-select: none;
+}
+
+.core-virtualizer-item[data-focused] {
+  background-color: var(--core-item-focus-bg);
+  color: var(--core-item-focus-color);
+}
+
+[data-core-color-scheme='dark'] .core-virtualizer {
+  background-color: color-mix(in srgb, var(--core-reference-color-neutral-100) 85%, black);
+  border-color: var(--core-reference-color-neutral-88);
+}
+
+[data-core-color-scheme='dark'] .core-virtualizer-item {
+  color: var(--core-reference-color-neutral-40);
+}
+
+[data-core-color-scheme='dark'] .core-virtualizer-item[data-focused] {
+  background-color: var(--core-reference-color-neutral-94);
+  color: var(--core-reference-color-neutral-18);
+}
+
+[data-core-color-scheme='light'] :where(.core-list-box, .core-virtualizer) {
+  box-shadow:
+    0 4px 4px -10px rgb(0 0 0 / 4%),
+    0 13px 13px -10px rgb(0 0 0 / 6%),
+    0 40px 60px -10px rgb(0 0 0 / 8%);
+}
+
+.core-virtualizer[data-focus-visible] {
+  box-shadow:
+    0 0 0 2px var(--core-focus-ring-inner),
+    0 0 0 4px var(--core-focus-ring-outer);
+}
+
+/* Preserve the RAC chevron button while matching Tale's inherited triangle. */
+.core-tree-toggle {
+  appearance: none;
+  color: inherit;
+  font-family: inherit;
+  position: relative;
+  inset-inline-start: 0.25px;
+  inset-block-start: 1px;
+}
+
+.core-tree-item-label {
+  position: relative;
+  inset-inline-start: 0.5px;
+}
+
+/* The donor's expanded chevron and leaf label align to the integer grid while
+   preserving the fractional offset used by the other Tree states. */
+.core-tree-item[data-expanded] .core-tree-toggle {
+  inset-inline-start: 0;
+  inset-block-start: 0;
+}
+
+.core-tree-item:not([data-has-child-items]) .core-tree-item-label {
+  inset-inline-start: 0;
+}
+
+[data-core-color-scheme] .core-tree[data-focus-visible],
+[data-core-color-scheme] .core-tree-item[data-focus-visible] {
+  box-shadow:
+    0 0 0 2px var(--core-focus-ring-inner),
+    0 0 0 4px var(--core-focus-ring-outer);
+}
+
+/* Tale's pseudo-element chevron makes its focused item one device pixel wider.
+   Keep Core's real RAC chevron button and extend only the visual focus edge. */
+[data-core-color-scheme] .core-tree-item[data-focus-visible] {
+  box-sizing: border-box;
+  width: calc(100% + 1px);
+}
+
+/* Tale's light menu uses the low-alpha, long-tail popup shadow. Keep this
+   scoped to Menu because ListBox and other popups already match their donor. */
+[data-core-color-scheme='light'] .core-menu {
+  box-shadow:
+    0 4px 4px -10px rgb(0 0 0 / 4%),
+    0 13px 13px -10px rgb(0 0 0 / 6%),
+    0 40px 60px -10px rgb(0 0 0 / 8%);
+}
+
+.core-radio[data-focus-visible] .core-radio-indicator {
+  box-shadow:
+    0 0 0 2px var(--core-focus-ring-inner),
+    0 0 0 4px var(--core-focus-ring-outer);
+}
+
+.core-radio {
+  outline: none;
+}
+
+.core-combo-control:focus-within {
+  border-color: var(--core-reference-color-neutral-50);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--core-reference-color-neutral-60) 30%, transparent);
+}
+
+[data-core-color-scheme='dark'] .core-combo-control:focus-within {
+  border-color: var(--core-reference-color-neutral-60);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--core-reference-color-neutral-50) 30%, transparent);
+}
+
+[data-core-color-scheme='dark'] .core-select-trigger[data-focus-visible],
+[data-core-color-scheme='dark'] .core-select-trigger:focus-visible {
+  border-color: var(--core-reference-color-neutral-60);
+  box-shadow: var(--core-field-focus-glow);
+}
+
+[data-core-color-scheme='light'] .core-select[data-invalid] > .core-field-label {
+  color: var(--core-reference-color-neutral-70);
+}
+
+[data-core-color-scheme='dark'] .core-select[data-invalid] > .core-field-label {
+  color: var(--core-reference-color-neutral-40);
+}
+
+[data-core-color-scheme='light'] .core-radio {
+  color: var(--core-reference-color-neutral-90);
+}
+
+[data-core-color-scheme='light'] .core-radio-group .core-field-label {
+  color: var(--core-reference-color-neutral-70);
+}
+
+[data-core-color-scheme='light'] .core-radio-group[data-invalid] .core-field-label {
+  color: var(--core-reference-color-neutral-70);
+}
+
+[data-core-color-scheme] .core-radio[data-invalid] .core-radio-indicator {
+  border-color: var(--core-reference-color-red-60);
+}
+
+.core-color-swatch-picker-item[data-focus-visible],
+.core-color-swatch-picker-item:focus-visible {
+  box-shadow:
+    0 0 0 2px var(--core-focus-ring-inner),
+    0 0 0 4px var(--core-focus-ring-outer);
+}
+
+.core-color-swatch-picker-item[data-selected][data-focus-visible],
+.core-color-swatch-picker-item[data-selected]:focus-visible {
+  box-shadow:
+    0 0 0 2px var(--core-semantic-selection-track),
+    0 0 0 4px var(--core-focus-ring-outer);
+}
+
+.core-slider-header {
+  position: relative;
+  top: 1px;
+}
+
+[data-core-color-scheme='dark'] .core-slider > .core-slider-header > .core-field-label {
+  color: var(--core-reference-color-neutral-40);
+}
+
+[data-core-color-scheme='dark'] .core-slider-thumb {
+  border-color: var(--core-reference-color-neutral-70);
+}
+
+[data-core-color-scheme='dark'] .core-list-box-item[data-focused] {
+  background-color: var(--core-reference-color-neutral-94);
+  color: var(--core-reference-color-neutral-18);
+}
+
+[data-core-color-scheme='dark'] .core-color-swatch {
+  border-color: var(--core-reference-color-neutral-88);
+}
+
+[data-core-color-scheme='dark'] .core-tabs[data-orientation='vertical'] .core-tab-list {
+  border-right-color: var(--core-reference-color-neutral-92);
+}
+
+[data-core-color-scheme='dark'] .core-tag-group .core-field-label {
+  color: var(--core-reference-color-neutral-24);
+}
+
+[data-core-color-scheme='dark'] .core-tag {
+  border-color: var(--core-reference-color-neutral-82);
+  background-color: var(--core-reference-color-neutral-96);
+  color: var(--core-reference-color-neutral-28);
+}
+
+[data-core-color-scheme='dark'] .core-tag[data-hovered] {
+  background-color: var(--core-reference-color-neutral-92);
+  border-color: var(--core-reference-color-neutral-70);
+}
+
+[data-core-color-scheme='dark'] .core-tag[data-pressed] {
+  background-color: var(--core-reference-color-neutral-88);
+}
+
+[data-core-color-scheme='dark'] .core-tag[data-focused] {
+  border-color: var(--core-reference-color-neutral-50);
+}
+
+[data-core-color-scheme='dark'] .core-tag[data-selected] {
+  background-color: var(--core-reference-color-bluegreen-40);
+  border-color: var(--core-reference-color-bluegreen-40);
+  color: var(--core-reference-color-bluegreen-100);
+}
+
+[data-core-color-scheme='dark'] .core-tag[data-selected][data-hovered] {
+  background-color: var(--core-reference-color-bluegreen-50);
+  border-color: var(--core-reference-color-bluegreen-50);
+}
+
+.core-tag[data-focus-visible],
+.core-tag:focus-visible {
+  box-shadow:
+    0 0 0 2px var(--core-focus-ring-inner),
+    0 0 0 4px var(--core-focus-ring-outer);
+}
+
+.core-toolbar > .core-button:focus-visible {
+  box-shadow:
+    0 0 0 2px var(--core-focus-ring-inner),
+    0 0 0 4px var(--core-focus-ring-outer);
+}
+
+/* ColorField is the Tale field exception: its focused state uses the
+   three-pixel neutral glow instead of the control inner/outer ring. */
+[data-core-color-scheme='light'] .core-color-field .core-field-input[data-focused],
+[data-core-color-scheme='light'] .core-color-field .core-field-input:focus {
+  border-color: var(--core-reference-color-neutral-50);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--core-reference-color-neutral-60) 30%, transparent);
+}
+
+[data-core-color-scheme='dark'] .core-color-field .core-field-input[data-focused],
+[data-core-color-scheme='dark'] .core-color-field .core-field-input:focus {
+  border-color: var(--core-reference-color-neutral-60);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--core-reference-color-neutral-50) 30%, transparent);
+}
+
+[data-core-color-scheme] .core-color-field .core-field-input[data-invalid] {
+  border-color: var(--core-reference-color-red-60);
+}
+
+.core-color-field .core-field-input {
+  border-radius: var(--core-reference-dimension-space-4xs);
+  position: relative;
+  top: 1px;
+}
+
+[data-core-color-scheme='light'] .core-color-field > .core-field-label {
+  color: var(--core-reference-color-neutral-70);
+  position: relative;
+  top: 1px;
+}
+
+[data-core-color-scheme='dark'] .core-color-field > .core-field-label {
+  position: relative;
+  top: 1px;
+}
+
+[data-core-color-scheme] .core-color-field[data-invalid] .core-field-input {
+  border-color: var(--core-reference-color-red-60);
+}
+
+[data-core-color-scheme] .core-color-field[data-invalid] .core-field-input[data-focused] {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--core-reference-color-red-60) 20%, transparent);
+}
+
+/* Selection paint must win over the outside-month disabled recipe when a
+   range ends in the following month. */
+[data-core-color-scheme='light'] .core-range-calendar-cell[data-selection-start],
+[data-core-color-scheme='light'] .core-range-calendar-cell[data-selection-end] {
+  background-color: var(--core-reference-color-bluegreen-20);
+  color: var(--core-reference-color-bluegreen-100);
+}
+
+[data-core-color-scheme='dark'] .core-range-calendar-cell[data-selection-start],
+[data-core-color-scheme='dark'] .core-range-calendar-cell[data-selection-end] {
+  background-color: var(--core-reference-color-bluegreen-80);
+  color: var(--core-reference-color-bluegreen-5);
+}
+
+.core-range-calendar-cell[data-selection-start] {
+  border-radius: var(--core-semantic-shape-pill-radius) 0 0 var(--core-semantic-shape-pill-radius);
+}
+
+.core-range-calendar-cell[data-selection-end] {
+  border-radius: 0 var(--core-semantic-shape-pill-radius) var(--core-semantic-shape-pill-radius) 0;
+}
+
+.core-range-calendar-cell[data-selection-start][data-selection-end] {
+  border-radius: var(--core-semantic-shape-pill-radius);
+}
+
+[data-core-color-scheme='dark'] .core-radio {
+  color: var(--core-reference-color-neutral-20);
+}
+
+[data-core-color-scheme='dark'] .core-radio-indicator {
+  background-color: var(--core-reference-color-neutral-98);
+  border-color: var(--core-reference-color-neutral-60);
+}
+
+[data-core-color-scheme='dark'] .core-radio-indicator::after {
+  background-color: var(--core-reference-color-bluegreen-20);
+}
+
+[data-core-color-scheme='dark'] .core-radio[data-selected] .core-radio-indicator {
+  background-color: var(--core-reference-color-neutral-98);
+  border-color: var(--core-reference-color-bluegreen-40);
+}
+
+[data-core-color-scheme='dark'] .core-radio[data-hovered]:not([data-disabled], [data-selected]) .core-radio-indicator {
+  background-color: var(--core-reference-color-neutral-94);
+  border-color: var(--core-reference-color-neutral-40);
 }

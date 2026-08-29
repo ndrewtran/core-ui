@@ -142,6 +142,14 @@ function declarations(css) {
   return new Map([...css.matchAll(/^  (--[^:]+): (.+);$/gm)].map((match) => [match[1], match[2]]));
 }
 
+function resolveReferenceTokens(css, tokenDeclarations) {
+  return css.replace(/var\((--core-reference-[^)]+)\)/gu, (_match, name) => {
+    const value = tokenDeclarations.get(name);
+    if (!value) throw new Error(`CORE_REACT_REFERENCE_TOKEN_MISSING: ${name}`);
+    return value;
+  });
+}
+
 const axes = [['colorScheme', 'dark'], ['contrast', 'more'], ['motion', 'reduced'], ['density', 'compact']];
 const baseTheme = compileWebTheme(tokenSource);
 const baseDeclarations = declarations(baseTheme.css);
@@ -154,7 +162,7 @@ const modeBlocks = axes.map(([axis, value]) => {
 });
 
 const cssBody = `${baseTheme.css.trim()}\n\n${modeBlocks.join('\n\n')}\n\n[data-core-direction='rtl'] { direction: rtl; }`;
-const fullCssBody = `${cssBody}\n\n${authoredCss}`;
+const fullCssBody = `${cssBody}\n\n${resolveReferenceTokens(authoredCss, baseDeclarations)}`;
 
 const compatibility = {
   schema: 'core-ui-react-compatibility-v1',
@@ -342,7 +350,7 @@ export interface ToastProps { message: Exclude<React.ReactNode, null | undefined
 export declare const Toast: React.FC<ToastProps>;
 export interface ToastOptions { title?: React.ReactNode; variant?: 'neutral' | 'success' | 'warning' | 'danger'; duration?: number; onDismiss?: () => void; className?: string; }
 export interface ToastManager { add: (message: Exclude<React.ReactNode, null | undefined | boolean>, options?: ToastOptions) => string; remove: (key: string) => void; }
-export interface ToastProviderProps { children?: React.ReactNode; maxVisible?: number; className?: string; }
+export interface ToastProviderProps { children?: React.ReactNode; maxVisible?: number; placement?: 'top-start' | 'top-end' | 'bottom-start' | 'bottom-end'; className?: string; }
 export declare const ToastProvider: React.FC<ToastProviderProps>;
 export declare function useToast(): ToastManager;
 export type TooltipProps = { content: Exclude<React.ReactNode, null | undefined | boolean>; trigger: React.ReactElement; delay?: number; closeDelay?: number; placement?: 'top' | 'bottom' | 'start' | 'end'; open?: boolean; defaultOpen?: boolean; onOpenChange?: (open: boolean) => void; className?: string; };

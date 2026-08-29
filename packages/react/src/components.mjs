@@ -236,9 +236,10 @@ export const Meter = React.forwardRef(function Meter({
     'aria-valuemin': minValue,
     'aria-valuemax': maxValue,
     'aria-valuetext': valueText,
-  }, !externalLabel && !externalLabelledby
+  }, React.createElement('div', { className: 'core-meter-header' }, !externalLabel && !externalLabelledby
     ? React.createElement(AriaLabel, { id: labelId, elementType: 'span', className: 'core-value-label' }, label)
     : null,
+  React.createElement('span', { className: 'core-value-output' }, valueText)),
   React.createElement('div', { className: 'core-meter-track' }, React.createElement('div', { className: 'core-meter-fill', style: { inlineSize: `${percentage}%` } })),
   );
 });
@@ -263,7 +264,7 @@ export const ProgressBar = React.forwardRef(function ProgressBar({
     'data-indeterminate': value === undefined || undefined,
     className: classNames('core-progress-bar', className),
     children: ({ percentage }) => React.createElement(React.Fragment, null,
-      React.createElement(AriaLabel, { className: 'core-value-label' }, label),
+      React.createElement('div', { className: 'core-progress-bar-header' }, React.createElement(AriaLabel, { className: 'core-value-label' }, label), React.createElement('span', { className: 'core-value-output' }, value === undefined ? 'Loading' : `${percentage}%`)),
       React.createElement('div', { className: 'core-progress-bar-track' }, React.createElement('div', { className: 'core-progress-bar-fill', style: percentage === undefined ? undefined : { inlineSize: `${percentage}%` } }))),
   });
 });

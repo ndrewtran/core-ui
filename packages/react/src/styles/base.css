@@ -5,18 +5,20 @@
 [data-core-motion],
 [data-core-density],
 [data-core-direction] {
-  --core-focus-ring-color: var(--core-semantic-focus-ring);
-  --core-focus-ring-glow: color-mix(in srgb, var(--core-semantic-content-muted) 30%, transparent);
+  --core-focus-ring-color: var(--core-reference-color-neutral-50);
+  --core-focus-ring-inner: var(--core-reference-color-neutral-100);
+  --core-focus-ring-outer: var(--core-reference-color-neutral-50);
+  --core-focus-ring-glow: color-mix(in srgb, var(--core-reference-color-neutral-60) 30%, transparent);
   --core-field-min-height: var(--core-semantic-control-min-height);
   --core-field-padding-block: var(--core-semantic-layout-control-gap);
   --core-field-padding-inline: var(--core-semantic-layout-group-gap);
   --core-field-border-color: var(--core-semantic-border-strong);
-  --core-field-radius: var(--core-semantic-shape-option-radius);
+  --core-field-radius: calc(var(--core-semantic-shape-option-radius) - 1.5px);
   --core-field-bg: var(--core-semantic-field-background);
   --core-field-color: var(--core-semantic-content-strong);
   --core-field-font-family: Inter, sans-serif;
   --core-field-font-size: var(--core-semantic-typography-body-size);
-  --core-field-focus-border: var(--core-semantic-focus-ring);
+  --core-field-focus-border: var(--core-focus-ring-color);
   --core-field-focus-glow: 0 0 0 0px var(--core-focus-ring-glow);
   --core-field-placeholder-color: var(--core-semantic-content-muted);
   --core-field-label-color: var(--core-semantic-content-default);
@@ -26,7 +28,7 @@
   --core-field-error-color: var(--core-semantic-feedback-invalid);
   --core-popup-bg: var(--core-semantic-surface-raised);
   --core-popup-border-color: var(--core-semantic-border-subtle);
-  --core-popup-radius: var(--core-semantic-control-radius);
+  --core-popup-radius: calc(var(--core-semantic-control-radius) - 2px);
   --core-popup-shadow: var(--core-semantic-elevation-overlay);
   --core-popup-transition-duration: var(--core-semantic-motion-feedback);
   --core-popup-transition-easing: ease;
@@ -34,7 +36,7 @@
   --core-item-padding-block: var(--core-semantic-layout-tight-inset);
   --core-item-padding-inline: var(--core-semantic-layout-group-gap);
   --core-item-gap: var(--core-semantic-layout-group-gap);
-  --core-item-radius: var(--core-semantic-shape-option-radius);
+  --core-item-radius: calc(var(--core-semantic-shape-option-radius) - 1.5px);
   --core-item-color: var(--core-semantic-content-default);
   --core-item-font-size: var(--core-semantic-typography-small-size);
   --core-item-focus-bg: var(--core-semantic-surface-hover);
@@ -42,7 +44,7 @@
   --core-group-label-color: var(--core-semantic-content-muted);
   --core-group-label-font-size: var(--core-semantic-typography-tiny-size);
   --core-modal-title-color: var(--core-semantic-content-strong);
-  --core-modal-title-font-size: var(--core-semantic-typography-body-size);
+  --core-modal-title-font-size: 1.2rem;
   --core-modal-description-color: var(--core-semantic-content-default);
   --core-modal-description-font-size: var(--core-semantic-typography-body-size);
   --core-modal-backdrop-bg: var(--core-semantic-overlay-scrim);
@@ -52,7 +54,16 @@
   --core-progress-track-radius: var(--core-semantic-shape-pill-radius);
   --core-progress-indicator-bg: var(--core-semantic-selection-track);
   --core-progress-label-color: var(--core-semantic-content-default);
-  --core-progress-value-color: var(--core-semantic-content-muted);
+  --core-progress-value-color: var(--core-semantic-content-default);
+}
+
+[data-core-color-scheme='dark'] {
+  --core-focus-ring-color: var(--core-reference-color-neutral-60);
+  --core-focus-ring-inner: var(--core-reference-color-neutral-10);
+  --core-focus-ring-outer: var(--core-reference-color-neutral-60);
+  --core-focus-ring-glow: color-mix(in srgb, var(--core-reference-color-neutral-50) 30%, transparent);
+  --core-field-focus-border: var(--core-focus-ring-color);
+  --core-field-focus-glow: 0 0 0 0px var(--core-focus-ring-glow);
 }
 
 /* Bare RAC buttons need the same chrome reset as Tale's Button base. Component
@@ -111,6 +122,7 @@
   font-size: var(--core-field-font-size);
   outline: none;
 }
+.core-select-trigger[data-focus-visible],
 .core-select-trigger:focus-visible,
 .core-select-trigger[data-open],
 .core-field-input:focus,
@@ -154,6 +166,7 @@
   border: none;
   background: transparent;
   color: var(--core-semantic-content-default);
+  font-size: 1.2em;
   cursor: pointer;
 }
 
@@ -289,6 +302,7 @@
   color: var(--core-item-color);
   font-family: Inter, sans-serif;
   font-size: var(--core-item-font-size);
+  line-height: 1.5;
   cursor: pointer;
   outline: none;
   transition:
@@ -372,13 +386,26 @@
   display: flex;
   align-items: center;
   width: 100%;
-  min-height: var(--core-field-min-height);
+  min-height: calc(var(--core-field-min-height) + var(--core-semantic-layout-tight-inset));
   border: 1px solid var(--core-field-border-color);
   border-radius: var(--core-field-radius);
   background-color: var(--core-field-bg);
+  padding-block: 1.5px;
   transition:
     border-color 0.15s ease,
     box-shadow 0.15s ease;
+}
+
+.core-date-picker .core-date-control {
+  padding-inline-end: var(--core-semantic-layout-control-gap);
+}
+
+.core-date-range-separator {
+  display: inline-block;
+  inline-size: var(--core-semantic-layout-tight-inset);
+  overflow: hidden;
+  font-size: 0;
+  flex: 0 0 auto;
 }
 
 .core-date-control:focus-within,
@@ -411,7 +438,13 @@
   color: var(--core-semantic-content-strong);
   font-family: Inter, sans-serif;
   font-size: var(--core-semantic-typography-body-size);
+  line-height: 1.5;
   outline: none;
+}
+
+.core-date-field > .core-date-input,
+.core-time-field > .core-date-input {
+  padding-inline: var(--core-field-padding-inline);
 }
 
 .core-date-input[data-disabled] {
@@ -458,7 +491,7 @@
   width: 2.25rem;
   border: 1px solid var(--core-semantic-border-strong);
   border-left: none;
-  border-radius: 0 var(--core-semantic-control-radius) var(--core-semantic-control-radius) 0;
+  border-radius: 0 var(--core-field-radius) var(--core-field-radius) 0;
   background-color: var(--core-semantic-surface-raised);
   color: var(--core-semantic-content-default);
   font-size: var(--core-semantic-typography-body-size);
@@ -483,7 +516,7 @@
   border-right: none;
   border-bottom: none;
   border-left: 1px solid var(--core-semantic-border-strong);
-  border-radius: 0 calc(var(--core-semantic-control-radius) - 1px) calc(var(--core-semantic-control-radius) - 1px) 0;
+  border-radius: 0 var(--core-field-radius) var(--core-field-radius) 0;
   background-color: var(--core-semantic-surface-raised);
 }
 
@@ -502,6 +535,16 @@
 
 .core-date-popover[data-entering] {
   animation: core-date-popover-fade-in 0.15s ease;
+}
+
+[data-core-color-scheme='dark'] :where(
+  .core-date-trigger,
+  .core-date-control .core-date-trigger,
+  .core-date-range-control .core-date-trigger
+) {
+  background-color: color-mix(in srgb, var(--core-reference-color-neutral-100) 85%, black);
+  border-color: var(--core-reference-color-neutral-84);
+  color: var(--core-reference-color-neutral-60);
 }
 
 .core-date-popover[data-exiting] {
@@ -542,6 +585,7 @@
   display: inline-flex;
   flex-direction: column;
   gap: var(--core-semantic-control-padding-inline);
+  line-height: 1.5;
   padding: var(--core-semantic-layout-section-gap);
   background: var(--core-semantic-surface-raised);
   border: 1px solid var(--core-semantic-border-strong);
@@ -651,7 +695,8 @@
   width: 0.78125rem;
   height: 0.78125rem;
   border-radius: 50%;
-  border: 2px solid var(--core-semantic-content-inverse);
+  /* Tale's shared color-thumb primitive uses a white keyline in both themes. */
+  border: 2px solid white;
   box-shadow:
     0 0 0 1px rgba(0, 0, 0, 0.3),
     inset 0 0 0 1px rgba(0, 0, 0, 0.3);
@@ -663,8 +708,8 @@
 .core-color-slider-thumb[data-focus-visible],
 .core-color-wheel-thumb[data-focus-visible] {
   box-shadow:
-    0 0 0 2px var(--core-semantic-content-inverse),
-    0 0 0 4px var(--core-semantic-focus-ring);
+    0 0 0 2px var(--core-focus-ring-inner),
+    0 0 0 4px var(--core-focus-ring-outer);
 }
 
 .core-color-slider-thumb[data-dragging],
@@ -755,6 +800,7 @@
   display: flex;
   align-items: center;
   position: relative;
+  box-sizing: border-box;
   width: 100%;
   border: 1px solid var(--core-field-border-color);
   border-radius: var(--core-semantic-control-radius);

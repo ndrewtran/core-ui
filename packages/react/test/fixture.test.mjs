@@ -150,6 +150,8 @@ test('Core styles bind donor states and public theme hooks', async () => {
   assert.match(css, /\.core-button[\s\S]*box-shadow: var\(--core-semantic-elevation-control\)/u);
   assert.match(css, /\.core-button\[data-hovered\][\s\S]*var\(--core-semantic-action-background-hover\)/u);
   assert.match(css, /\.core-button\[data-pressed\][\s\S]*var\(--core-semantic-action-background-pressed\)/u);
+  assert.match(css, /\.core-button\[data-pressed\]:not\(\[data-disabled\], \[data-pending\], \[aria-expanded='true'\]\)/u);
+  assert.match(css, /\.core-button:active:not\(\[data-disabled\], \[data-pending\]\)/u);
 
   assert.match(css, /\.core-link\[data-hovered\][\s\S]*var\(--core-semantic-content-link-hover\)/u);
   assert.match(css, /\.core-link\[data-pressed\][\s\S]*var\(--core-semantic-content-link-pressed\)/u);

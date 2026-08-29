@@ -1,5 +1,7 @@
 import React from 'react';
 import * as Core from '@core-ui/react';
+import { isMigrationFixtureRequest } from '../src/visual-migration-contract.mjs';
+import { MigrationFixture } from '../src/migration-visual.fixture.mjs';
 import '@core-ui/react/styles.css';
 import './preview.css';
 
@@ -11,10 +13,17 @@ const colorSchemeItems = [
 function applyColorScheme(scheme) {
   if (typeof document !== 'undefined') {
     document.documentElement.setAttribute('data-core-color-scheme', scheme);
+    document.documentElement.style.setProperty('--core-migration-frame-background', scheme === 'dark' ? '#000000' : '#ffffff');
   }
 }
 
-function StorySurface({ children, scheme, viewMode }) {
+function applyMigrationHost(migration) {
+  if (typeof document === 'undefined' || !document.body) return;
+  if (migration) document.body.setAttribute('data-core-migration-host', 'true');
+  else document.body.removeAttribute('data-core-migration-host');
+}
+
+function StorySurface({ children, scheme, viewMode, migration }) {
   const surfaceRef = React.useRef(null);
 
   React.useEffect(() => {
@@ -64,6 +73,7 @@ function StorySurface({ children, scheme, viewMode }) {
       ref: surfaceRef,
       className: 'core-storybook-surface',
       'data-core-color-scheme': scheme,
+      'data-core-migration-host': migration ? 'true' : undefined,
     },
     children,
   );
@@ -86,11 +96,18 @@ export default {
   decorators: [
     (Story, context) => {
       const scheme = context.globals?.colorScheme === 'dark' ? 'dark' : 'light';
+      const migration = isMigrationFixtureRequest(context.id, window.location.search);
       applyColorScheme(scheme);
+      applyMigrationHost(migration);
+      const story = migration
+        ? React.createElement(MigrationFixture, {
+          runToken: import.meta.env.VITE_CORE_UI_MIGRATION_RUN_TOKEN,
+        })
+        : React.createElement(Story);
       return React.createElement(
         StorySurface,
-        { scheme, viewMode: context.viewMode },
-        React.createElement(Core.ToastProvider, null, React.createElement(Story)),
+        { scheme, viewMode: context.viewMode, migration },
+        React.createElement(Core.ToastProvider, { placement: migration ? 'bottom-end' : undefined }, story),
       );
     },
   ],

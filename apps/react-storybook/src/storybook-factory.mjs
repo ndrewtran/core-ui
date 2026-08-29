@@ -1,5 +1,7 @@
 import React from 'react';
 import * as Core from '@core-ui/react';
+import { migrationFixtureSymbol } from './visual-migration-contract.mjs';
+import { fixtureFieldPropsFor, fixtureRenderModel } from './visual-migration-fixture-map.mjs';
 
 const BOOLEAN_PROPS = new Set([
   'acceptDirectory', 'allowsMultiple', 'checked', 'current', 'defaultChecked',
@@ -161,24 +163,34 @@ function resetStateArgs(binding, sourceArgs) {
   return args;
 }
 
-function setSelectedState(args, props, family) {
+function fixtureDataFromInput(fixtureInput, name, defaultValue) {
+  return fixtureInput ? fixtureRenderModel(fixtureInput).data[name] ?? defaultValue : defaultValue;
+}
+
+function setSelectedState(args, props, family, fixtureInput) {
+  const model = fixtureInput ? fixtureRenderModel(fixtureInput) : undefined;
   if (props.has('checked')) return setControlledArg(args, props, 'checked', true);
   if (props.has('selected')) return setControlledArg(args, props, 'selected', true);
   if (props.has('selectedIds')) {
-    const selectedId = family === 'Tree' ? 'src'
-      : family === 'Table' ? 'ada'
-        : family === 'ToggleButtonGroup' ? 'bold' : 'One';
+    if (props.has('selectionMode')) args.selectionMode = 'single';
+    const selectedId = family === 'Tree'
+      ? model?.selected.treeId ?? 'src'
+      : family === 'Table'
+        ? model?.selected.rowId ?? 'ada'
+        : family === 'ToggleButtonGroup'
+          ? model?.selected.toggleId ?? 'bold'
+          : model?.selected.itemId ?? 'Melbourne';
     return setControlledArg(args, props, 'selectedIds', [selectedId]);
   }
-  if (props.has('selectedId')) return setControlledArg(args, props, 'selectedId', 'Melbourne');
+  if (props.has('selectedId')) return setControlledArg(args, props, 'selectedId', model?.selected.itemId ?? 'Melbourne');
   if (!props.has('value')) return undefined;
-  if (family === 'CheckboxGroup') return setControlledArg(args, props, 'value', ['email']);
-  if (family === 'RadioGroup') return setControlledArg(args, props, 'value', 's');
-  if (family === 'Tabs') return setControlledArg(args, props, 'value', 'overview');
-  if (family === 'Select') return setControlledArg(args, props, 'value', 'Melbourne');
-  if (family === 'Calendar') return setControlledArg(args, props, 'value', '2026-08-26');
-  if (family === 'RangeCalendar') return setControlledArg(args, props, 'value', { start: '2026-08-26', end: '2026-09-01' });
-  if (family === 'ColorSwatchPicker') return setControlledArg(args, props, 'value', '#ff0000');
+  if (family === 'CheckboxGroup') return setControlledArg(args, props, 'value', [model?.selected.choice ?? 'email']);
+  if (family === 'RadioGroup') return setControlledArg(args, props, 'value', model?.selected.option ?? 's');
+  if (family === 'Tabs') return setControlledArg(args, props, 'value', model?.selected.item ?? 'overview');
+  if (family === 'Select') return setControlledArg(args, props, 'value', model?.selected.item ?? 'Melbourne');
+  if (family === 'Calendar') return setControlledArg(args, props, 'value', fixtureDataFromInput(fixtureInput, 'date', '2026-08-26'));
+  if (family === 'RangeCalendar') return setControlledArg(args, props, 'value', fixtureDataFromInput(fixtureInput, 'dateRange', { start: '2026-08-26', end: '2026-09-01' }));
+  if (family === 'ColorSwatchPicker') return setControlledArg(args, props, 'value', model?.selected.color ?? '#ff0000');
   if (typeof args.value === 'number') return setControlledArg(args, props, 'value', args.max ?? args.maxValue ?? 72);
   return undefined;
 }
@@ -258,7 +270,7 @@ function stateIsSupported(binding, state, family) {
   }
 }
 
-function applyStateArgs(args, binding, state, family) {
+function applyStateArgs(args, binding, state, family, fixtureInput) {
   const props = new Set(binding.api.props);
   const normalizedState = state.toLowerCase().replaceAll('-', '');
   switch (normalizedState) {
@@ -275,7 +287,7 @@ function applyStateArgs(args, binding, state, family) {
       if (props.has('required')) args.required = true;
       break;
     case 'selected':
-      setSelectedState(args, props, family);
+      setSelectedState(args, props, family, fixtureInput);
       break;
     case 'indeterminate':
       if (props.has('indeterminate')) args.indeterminate = true;
@@ -283,7 +295,12 @@ function applyStateArgs(args, binding, state, family) {
       break;
     case 'expanded':
       if (props.has('expanded')) setControlledArg(args, props, 'expanded', true);
-      else if (props.has('expandedIds')) setControlledArg(args, props, 'expandedIds', family === 'Tree' ? ['src'] : ['one']);
+      else if (props.has('expandedIds')) {
+        const model = fixtureInput ? fixtureRenderModel(fixtureInput) : undefined;
+        setControlledArg(args, props, 'expandedIds', [family === 'Tree'
+          ? model?.selected.treeId ?? 'src'
+          : model?.selected.disclosureId ?? 'one']);
+      }
       break;
     case 'collapsed':
       if (props.has('expanded')) setControlledArg(args, props, 'expanded', false);
@@ -354,7 +371,7 @@ export function storyArgsForBinding(binding, variant, family) {
 }
 
 export function stateArgsForBinding(binding, state, family, sourceArgs = normalizeDefaultArgs(binding)) {
-  return applyStateArgs(resetStateArgs(binding, sourceArgs), binding, state, family);
+  return applyStateArgs(resetStateArgs(binding, sourceArgs), binding, state, family, sourceArgs[migrationFixtureSymbol]);
 }
 
 export function stateCoverageForBinding(binding, family) {
@@ -370,79 +387,163 @@ function fallback(value, defaultValue) {
   return value === undefined || value === null || value === '' ? defaultValue : value;
 }
 
+function fixtureCopy(args, defaultValue) {
+  const fixture = args[migrationFixtureSymbol];
+  return fixture ? fixtureRenderModel(fixture).copy ?? defaultValue : defaultValue;
+}
+
+function fixtureData(args, name, defaultValue) {
+  const fixture = args[migrationFixtureSymbol];
+  return fixture ? fixtureRenderModel(fixture).data[name] ?? defaultValue : defaultValue;
+}
+
+function fixtureChildren(args, name, defaultValue) {
+  const children = fixtureData(args, 'children', {});
+  return children?.[name] ?? defaultValue;
+}
+
+function fixtureFieldProps(args, family, defaults) {
+  const fixture = args[migrationFixtureSymbol];
+  if (!fixture) return defaults;
+  const fieldProps = fixtureFieldPropsFor(fixture, family);
+  // Tale's Select.Value documents "Select an item" as its empty-state copy;
+  // keep Core's migration adapter equivalent while preserving explicit fixture
+  // placeholder mutations for contract tests and consumer stories.
+  return family === 'Select' && fieldProps.placeholder === 'Enter a name'
+    ? { ...fieldProps, placeholder: 'Select an item' }
+    : fieldProps;
+}
+
 const ADAPTERS = {
-  Button: (args) => e(Core.Button, args, 'Save'),
-  Breadcrumbs: (args) => e(Core.Breadcrumbs, { ...args, items: fallback(args.items, [{ id: 'home', label: 'Home', href: '/' }, { id: 'docs', label: 'Docs' }]), 'aria-label': fallback(args['aria-label'], 'Breadcrumb') }),
-  Checkbox: (args) => e(Core.Checkbox, args, 'Enable notifications'),
-  Disclosure: (args) => e(Core.Disclosure, { ...args, title: 'Details' }, 'Expanded content'),
-  DisclosureGroup: (args) => e(Core.DisclosureGroup, args, e(Core.Disclosure, { id: 'one', title: 'One' }, 'First panel'), e(Core.Disclosure, { id: 'two', title: 'Two' }, 'Second panel')),
+  Button: (args) => e(Core.Button, args, fixtureCopy(args, 'Save')),
+  Breadcrumbs: (args) => e(Core.Breadcrumbs, {
+    ...args,
+    // Core's public Breadcrumbs contract uses item records; the canonical
+    // fixture intentionally keeps these as renderer-neutral labels.
+    items: fixtureData(args, 'items', fallback(args.items, ['Home', 'Docs'])).map((item, index) => typeof item === 'object'
+      ? item
+      : { id: String(index), label: String(item), href: '#' }),
+    'aria-label': fallback(args['aria-label'], fixtureCopy(args, 'Breadcrumb')),
+  }),
+  Checkbox: (args) => e(Core.Checkbox, args, fixtureCopy(args, 'Enable notifications')),
+  Disclosure: (args) => e(Core.Disclosure, { ...args, title: fixtureCopy(args, 'Details') }, fixtureCopy(args, 'Details') + ' content'),
+  DisclosureGroup: (args) => e(Core.DisclosureGroup, args, ...fixtureChildren(args, 'disclosureGroup', [{ id: 'one', title: 'One', content: 'First panel' }, { id: 'two', title: 'Two', content: 'Second panel' }]).map(({ id, title, content }) => e(Core.Disclosure, { key: id, id, title }, content))),
   Group: (args) => e(Core.Group, { ...args, 'aria-label': fallback(args['aria-label'], 'Actions') }, e(Core.Button, null, 'Save')),
-  Link: (args) => e(Core.Link, { ...args, href: fallback(args.href, '/settings') }, 'Settings'),
-  Meter: (args) => e(Core.Meter, { ...args, label: fallback(args.label, 'Storage'), value: args.value ?? 72 }),
-  ProgressBar: (args) => e(Core.ProgressBar, { ...args, label: fallback(args.label, 'Upload'), value: Object.hasOwn(args, 'value') ? args.value : 64 }),
+  Link: (args) => e(Core.Link, { ...args, href: fallback(args.href, '/settings') }, fixtureCopy(args, 'Settings')),
+  Meter: (args) => e(Core.Meter, { ...args, label: fallback(args.label, fixtureCopy(args, 'Storage')), value: fixtureData(args, 'values', {}).meter ?? args.value ?? 72 }),
+  ProgressBar: (args) => e(Core.ProgressBar, { ...args, label: fallback(args.label, fixtureCopy(args, 'Upload')), value: args.indeterminate || Object.hasOwn(args, 'value') && args.value === undefined ? undefined : (fixtureData(args, 'values', {}).progress ?? (Object.hasOwn(args, 'value') ? args.value : 64)) }),
   Separator: (args) => e(Core.Separator, args),
-  ToggleButton: (args) => e(Core.ToggleButton, args, 'Pin'),
-  Autocomplete: (args) => e(Core.Autocomplete, { ...args, label: fallback(args.label, 'City'), items: fallback(args.items, ['Melbourne', 'Sydney']), placeholder: fallback(args.placeholder, 'Choose a city') }),
-  CheckboxGroup: (args) => e(Core.CheckboxGroup, { ...args, label: fallback(args.label, 'Notifications') }, e(Core.Checkbox, { value: 'email' }, 'Email'), e(Core.Checkbox, { value: 'sms' }, 'SMS')),
-  DateField: (args) => e(Core.DateField, { ...args, label: fallback(args.label, 'Birthday'), defaultValue: args.value === undefined ? fallback(args.defaultValue, '2026-08-26') : args.defaultValue }),
-  DatePicker: (args) => e(Core.DatePicker, { ...args, label: fallback(args.label, 'Due date'), defaultValue: args.value === undefined ? fallback(args.defaultValue, '2026-08-26') : args.defaultValue }),
-  DateRangePicker: (args) => e(Core.DateRangePicker, { ...args, label: fallback(args.label, 'Trip dates'), defaultValue: args.value === undefined ? fallback(args.defaultValue, { start: '2026-08-26', end: '2026-09-01' }) : args.defaultValue }),
-  Form: (args) => e(Core.Form, args, e(Core.TextField, { label: 'Name', name: 'name' }), e(Core.Button, { type: 'submit' }, 'Save')),
-  NumberField: (args) => e(Core.NumberField, { ...args, label: fallback(args.label, 'Quantity'), defaultValue: args.value === undefined ? (args.defaultValue ?? 2) : args.defaultValue, minValue: args.minValue ?? 0 }),
-  SearchField: (args) => e(Core.SearchField, { ...args, label: fallback(args.label, 'Search'), placeholder: fallback(args.placeholder, 'Search') }),
-  Switch: (args) => e(Core.Switch, { ...args, label: fallback(args.label, 'Notifications') }),
-  TextField: (args) => e(Core.TextField, { ...args, label: fallback(args.label, 'Name'), placeholder: fallback(args.placeholder, 'Enter a name') }),
-  TimeField: (args) => e(Core.TimeField, { ...args, label: fallback(args.label, 'Start time'), defaultValue: args.value === undefined ? fallback(args.defaultValue, '09:30') : args.defaultValue }),
-  Calendar: (args) => e(Core.Calendar, { ...args, label: fallback(args.label, 'Date'), defaultValue: args.value === undefined ? fallback(args.defaultValue, '2026-08-26') : args.defaultValue }),
-  ColorArea: (args) => e(Core.ColorArea, { ...args, label: fallback(args.label, 'Color'), defaultValue: args.value === undefined ? fallback(args.defaultValue, '#ff0000') : args.defaultValue }),
-  ColorField: (args) => e(Core.ColorField, { ...args, label: fallback(args.label, 'Color'), defaultValue: args.value === undefined ? fallback(args.defaultValue, '#ff0000') : args.defaultValue }),
-  ColorPicker: (args) => e(Core.ColorPicker, { ...args, defaultValue: args.value === undefined ? fallback(args.defaultValue, '#ff0000') : args.defaultValue }, e(Core.ColorField, { label: 'Color' })),
-  ColorSlider: (args) => e(Core.ColorSlider, { ...args, label: fallback(args.label, 'Red'), channel: fallback(args.channel, 'red'), defaultValue: args.value === undefined ? fallback(args.defaultValue, '#ff0000') : args.defaultValue }),
-  ColorSwatch: (args) => e(Core.ColorSwatch, { ...args, color: fallback(args.color, '#ff0000') }),
-  ColorSwatchPicker: (args) => e(Core.ColorSwatchPicker, { ...args, 'aria-label': fallback(args['aria-label'], 'Palette'), items: fallback(args.items, [{ id: 'red', color: '#ff0000' }, { id: 'blue', color: '#0000ff' }]) }),
-  ColorWheel: (args) => e(Core.ColorWheel, { ...args, 'aria-label': fallback(args['aria-label'], 'Hue'), defaultValue: args.value === undefined ? fallback(args.defaultValue, '#ff0000') : args.defaultValue }),
-  ComboBox: (args) => e(Core.ComboBox, { ...args, label: fallback(args.label, 'City'), items: fallback(args.items, ['Melbourne', 'Sydney']), placeholder: fallback(args.placeholder, 'Choose a city') }),
-  GridList: (args) => e(Core.GridList, { ...args, 'aria-label': fallback(args['aria-label'], 'Grid'), items: fallback(args.items, ['One', 'Two']) }),
-  ListBox: (args) => e(Core.ListBox, { ...args, 'aria-label': fallback(args['aria-label'], 'List'), items: fallback(args.items, ['One', 'Two']) }),
-  Menu: (args) => e(Core.Menu, { ...args, 'aria-label': fallback(args['aria-label'], 'Actions'), items: fallback(args.items, ['Save', 'Delete']) }),
-  RadioGroup: (args) => e(Core.RadioGroup, { ...args, label: fallback(args.label, 'Size'), options: fallback(args.options, [{ value: 's', label: 'Small' }, { value: 'l', label: 'Large' }]) }),
-  RangeCalendar: (args) => e(Core.RangeCalendar, { ...args, label: fallback(args.label, 'Trip'), defaultValue: args.value === undefined ? fallback(args.defaultValue, { start: '2026-08-26', end: '2026-09-01' }) : args.defaultValue }),
-  Select: (args) => e(Core.Select, { ...args, label: fallback(args.label, 'City'), items: fallback(args.items, ['Melbourne', 'Sydney']), placeholder: fallback(args.placeholder, 'Choose a city') }),
-  Slider: (args) => e(Core.Slider, { ...args, label: fallback(args.label, 'Volume'), defaultValue: args.value === undefined ? (args.defaultValue ?? 60) : args.defaultValue }),
-  Table: (args) => e(Core.Table, { ...args, 'aria-label': fallback(args['aria-label'], 'People'), columns: fallback(args.columns, [{ id: 'name', label: 'Name', isRowHeader: true }, { id: 'role', label: 'Role' }]), rows: fallback(args.rows, [{ id: 'ada', values: { name: 'Ada', role: 'Engineer' } }, { id: 'grace', values: { name: 'Grace', role: 'Designer' } }]) }),
-  Tabs: (args) => e(Core.Tabs, { ...args, 'aria-label': fallback(args['aria-label'], 'Sections'), items: fallback(args.items, [{ id: 'overview', label: 'Overview', panel: 'Overview content' }, { id: 'details', label: 'Details', panel: 'Details content' }]) }),
-  TagGroup: (args) => e(Core.TagGroup, { ...args, label: fallback(args.label, 'Tags'), items: fallback(args.items, ['Design', 'Engineering']) }),
-  ToggleButtonGroup: (args) => e(Core.ToggleButtonGroup, { ...args, 'aria-label': fallback(args['aria-label'], 'Formatting') }, e(Core.ToggleButton, { id: 'bold' }, 'Bold'), e(Core.ToggleButton, { id: 'italic' }, 'Italic')),
-  TokenField: (args) => e(Core.TokenField, { ...args, label: fallback(args.label, 'Recipients'), defaultValue: args.value === undefined ? (args.defaultValue ?? ['Andrew', 'Core UI']) : args.defaultValue, placeholder: fallback(args.placeholder, 'Add recipient') }),
-  Toolbar: (args) => e(Core.Toolbar, { ...args, 'aria-label': fallback(args['aria-label'], 'Formatting') }, e(Core.Button, null, 'Bold'), e(Core.Button, null, 'Italic')),
-  Tree: (args) => e(Core.Tree, { ...args, 'aria-label': fallback(args['aria-label'], 'Files'), items: fallback(args.items, [{ id: 'src', label: 'src', children: [{ id: 'main', label: 'main.jsx' }] }]), defaultExpandedIds: args.expandedIds === undefined ? (args.defaultExpandedIds ?? ['src']) : args.defaultExpandedIds }),
-  Virtualizer: (args) => e(Core.Virtualizer, { ...args, 'aria-label': fallback(args['aria-label'], 'Results'), items: fallback(args.items, ['Result 1', 'Result 2', 'Result 3']), height: args.height ?? 180 }),
-  DropZone: (args) => e(Core.DropZone, { ...args, 'aria-label': fallback(args['aria-label'], 'Upload files') }, fallback(args.children, 'Drop files here')),
-  FileTrigger: (args) => e(Core.FileTrigger, { ...args }, fallback(args.children, e(Core.Button, null, 'Choose files'))),
+  ToggleButton: (args) => e(Core.ToggleButton, args, fixtureCopy(args, 'Pin')),
+  Autocomplete: (args) => e(Core.Autocomplete, { ...args, ...fixtureFieldProps(args, 'Autocomplete', { label: fallback(args.label, fixtureCopy(args, 'Choose a city')), placeholder: fallback(args.placeholder, fixtureCopy(args, 'Choose a city')) }), items: fixtureData(args, 'items', fallback(args.items, ['Melbourne', 'Sydney'])) }),
+  CheckboxGroup: (args) => e(Core.CheckboxGroup, { ...args, label: fallback(args.label, fixtureCopy(args, 'Notifications')) }, ...fixtureData(args, 'choices', [{ value: 'email', label: 'Email' }, { value: 'sms', label: 'SMS' }]).map(({ value, label }) => e(Core.Checkbox, { key: value, value }, label))),
+  DateField: (args) => e(Core.DateField, { ...args, label: fallback(args.label, fixtureCopy(args, 'Birthday')), defaultValue: args.value === undefined ? fixtureData(args, 'date', fallback(args.defaultValue, '2026-08-26')) : args.defaultValue }),
+  DatePicker: (args) => e(Core.DatePicker, { ...args, label: fallback(args.label, fixtureCopy(args, 'Due date')), defaultValue: args.value === undefined ? fixtureData(args, 'date', fallback(args.defaultValue, '2026-08-26')) : args.defaultValue }),
+  DateRangePicker: (args) => e(Core.DateRangePicker, { ...args, label: fallback(args.label, fixtureCopy(args, 'Trip dates')), defaultValue: args.value === undefined ? fixtureData(args, 'dateRange', fallback(args.defaultValue, { start: '2026-08-26', end: '2026-09-01' })) : args.defaultValue }),
+  Form: (args) => e(Core.Form, args, e(Core.TextField, { label: fixtureChildren(args, 'form', { fieldLabel: 'Name' }).fieldLabel, name: 'name' }), e(Core.Button, { type: 'submit' }, fixtureChildren(args, 'form', { submit: 'Save' }).submit)),
+  NumberField: (args) => e(Core.NumberField, { ...args, label: fallback(args.label, fixtureCopy(args, 'Quantity')), defaultValue: args.value === undefined ? (fixtureData(args, 'values', {}).number ?? args.defaultValue ?? 2) : args.defaultValue, minValue: args.minValue ?? 0 }),
+  SearchField: (args) => e(Core.SearchField, { ...args, ...fixtureFieldProps(args, 'SearchField', { label: fallback(args.label, fixtureCopy(args, 'Search')), placeholder: fallback(args.placeholder, fixtureCopy(args, 'Search')) }) }),
+  Switch: (args) => e(Core.Switch, { ...args, label: fallback(args.label, fixtureCopy(args, 'Notifications')) }),
+  TextField: (args) => e(Core.TextField, { ...args, label: fixtureData(args, 'label', fallback(args.label, fixtureCopy(args, 'Name'))), placeholder: fixtureData(args, 'placeholder', fallback(args.placeholder, fixtureCopy(args, 'Enter a name'))) }),
+  TimeField: (args) => e(Core.TimeField, { ...args, label: fallback(args.label, fixtureCopy(args, 'Start time')), defaultValue: args.value === undefined ? fixtureData(args, 'time', fallback(args.defaultValue, '09:30')) : args.defaultValue }),
+  Calendar: (args) => e(Core.Calendar, {
+    ...args,
+    // The shared migration fixture gives calendars an accessible name, while
+    // ordinary stories retain their existing visible-label default.
+    label: args[migrationFixtureSymbol] ? undefined : fallback(args.label, fixtureCopy(args, 'Date')),
+    'aria-label': args[migrationFixtureSymbol] ? fixtureCopy(args, 'Date') : args['aria-label'],
+    defaultValue: args.value === undefined ? fixtureData(args, 'date', fallback(args.defaultValue, '2026-08-26')) : args.defaultValue,
+  }),
+  ColorArea: (args) => e(Core.ColorArea, {
+    ...args,
+    'aria-label': fallback(args['aria-label'], fixtureCopy(args, 'Color')),
+    defaultValue: args.value === undefined ? fixtureData(args, 'color', fallback(args.defaultValue, '#ff0000')) : args.defaultValue,
+  }),
+  ColorField: (args) => e(Core.ColorField, { ...args, label: fallback(args.label, fixtureCopy(args, 'Color')), defaultValue: args.value === undefined ? fixtureData(args, 'color', fallback(args.defaultValue, '#ff0000')) : args.defaultValue }),
+  ColorPicker: (args) => e(Core.ColorPicker, { ...args, defaultValue: args.value === undefined ? fixtureData(args, 'color', fallback(args.defaultValue, '#ff0000')) : args.defaultValue },
+    e(Core.ColorArea, { 'aria-label': fixtureCopy(args, 'Color'), defaultValue: args.value === undefined ? fixtureData(args, 'color', fallback(args.defaultValue, '#ff0000')) : args.defaultValue }),
+    e(Core.ColorField, { label: fixtureCopy(args, 'Color'), defaultValue: args.value === undefined ? fixtureData(args, 'color', fallback(args.defaultValue, '#ff0000')) : args.defaultValue })),
+  ColorSlider: (args) => e(Core.ColorSlider, { ...args, label: fallback(args.label, fixtureCopy(args, 'Red')), channel: fallback(args.channel, 'red'), defaultValue: args.value === undefined ? fixtureData(args, 'color', fallback(args.defaultValue, '#ff0000')) : args.defaultValue }),
+  ColorSwatch: (args) => e(Core.ColorSwatch, { ...args, color: fixtureData(args, 'color', fallback(args.color, '#ff0000')) }),
+  ColorSwatchPicker: (args) => e(Core.ColorSwatchPicker, { ...args, 'aria-label': fallback(args['aria-label'], fixtureCopy(args, 'Palette')), items: fixtureData(args, 'items', fallback(args.items, [{ id: 'red', color: '#ff0000' }, { id: 'blue', color: '#0000ff' }])) }),
+  ColorWheel: (args) => e(Core.ColorWheel, { ...args, 'aria-label': fallback(args['aria-label'], fixtureCopy(args, 'Hue')), outerRadius: args.outerRadius ?? 12, innerRadius: args.innerRadius ?? 8, defaultValue: args.value === undefined ? fixtureData(args, 'color', fallback(args.defaultValue, '#ff0000')) : args.defaultValue }),
+  ComboBox: (args) => e(Core.ComboBox, { ...args, ...fixtureFieldProps(args, 'ComboBox', { label: fallback(args.label, fixtureCopy(args, 'Choose a city')), placeholder: fallback(args.placeholder, fixtureCopy(args, 'Choose a city')) }), items: fixtureData(args, 'items', fallback(args.items, ['Melbourne', 'Sydney'])) }),
+  GridList: (args) => e(Core.GridList, { ...args, 'aria-label': fallback(args['aria-label'], fixtureCopy(args, 'Grid')), items: fixtureData(args, 'items', fallback(args.items, ['One', 'Two'])) }),
+  ListBox: (args) => e(Core.ListBox, { ...args, 'aria-label': fallback(args['aria-label'], fixtureCopy(args, 'List')), items: fixtureData(args, 'items', fallback(args.items, ['One', 'Two'])) }),
+  Menu: (args) => e(Core.Menu, { ...args, 'aria-label': fallback(args['aria-label'], fixtureCopy(args, 'Actions')), items: fixtureData(args, 'items', fallback(args.items, ['Save', 'Delete'])) }),
+  RadioGroup: (args) => e(Core.RadioGroup, { ...args, label: fallback(args.label, fixtureCopy(args, 'Size')), options: fixtureData(args, 'options', fallback(args.options, [{ value: 's', label: 'Small' }, { value: 'l', label: 'Large' }])) }),
+  RangeCalendar: (args) => e(Core.RangeCalendar, {
+    ...args,
+    label: args[migrationFixtureSymbol] ? undefined : fallback(args.label, fixtureCopy(args, 'Trip')),
+    'aria-label': args[migrationFixtureSymbol] ? fixtureCopy(args, 'Trip') : args['aria-label'],
+    defaultValue: args.value === undefined ? fixtureData(args, 'dateRange', fallback(args.defaultValue, { start: '2026-08-26', end: '2026-09-01' })) : args.defaultValue,
+  }),
+  Select: (args) => e(Core.Select, { ...args, ...fixtureFieldProps(args, 'Select', { label: fallback(args.label, fixtureCopy(args, 'Choose a city')), placeholder: fallback(args.placeholder, fixtureCopy(args, 'Choose a city')) }), items: fixtureData(args, 'items', fallback(args.items, ['Melbourne', 'Sydney'])) }),
+  Slider: (args) => e(Core.Slider, { ...args, label: fallback(args.label, fixtureCopy(args, 'Volume')), defaultValue: args.value === undefined ? (fixtureData(args, 'values', {}).slider ?? args.defaultValue ?? 60) : args.defaultValue }),
+  Table: (args) => e(Core.Table, { ...args, 'aria-label': fallback(args['aria-label'], fixtureCopy(args, 'People')), columns: fixtureData(args, 'columns', fallback(args.columns, [{ id: 'name', label: 'Name', isRowHeader: true }, { id: 'role', label: 'Role' }])), rows: fixtureData(args, 'rows', fallback(args.rows, [{ id: 'ada', values: { name: 'Ada', role: 'Engineer' } }, { id: 'grace', values: { name: 'Grace', role: 'Designer' } }])) }),
+  Tabs: (args) => e(Core.Tabs, { ...args, 'aria-label': fallback(args['aria-label'], fixtureCopy(args, 'Sections')), items: fixtureData(args, 'items', fallback(args.items, [{ id: 'overview', label: 'Overview', panel: 'Overview content' }, { id: 'details', label: 'Details', panel: 'Details content' }])) }),
+  TagGroup: (args) => e(Core.TagGroup, { ...args, label: fallback(args.label, fixtureCopy(args, 'Tags')), items: fixtureData(args, 'items', fallback(args.items, ['Design', 'Engineering'])) }),
+  ToggleButtonGroup: (args) => e(Core.ToggleButtonGroup, { ...args, 'aria-label': fallback(args['aria-label'], fixtureCopy(args, 'Formatting')) }, ...fixtureChildren(args, 'toggleButtonGroup', [{ id: 'bold', label: 'Bold' }, { id: 'italic', label: 'Italic' }]).map(({ id, label }) => e(Core.ToggleButton, { key: id, id }, label))),
+  TokenField: (args) => e(Core.TokenField, { ...args, label: fallback(args.label, fixtureCopy(args, 'Recipients')), defaultValue: args.value === undefined ? (args.defaultValue ?? ['Andrew', 'Core UI']) : args.defaultValue, placeholder: fallback(args.placeholder, 'Add recipient') }),
+  Toolbar: (args) => e(Core.Toolbar, { ...args, 'aria-label': fallback(args['aria-label'], fixtureCopy(args, 'Formatting')) }, ...fixtureChildren(args, 'toolbar', ['Bold', 'Italic']).map((label) => e(Core.Button, { key: label }, label))),
+  Tree: (args) => e(Core.Tree, { ...args, 'aria-label': fallback(args['aria-label'], fixtureCopy(args, 'Files')), items: fixtureData(args, 'items', fallback(args.items, [{ id: 'src', label: 'src', children: [{ id: 'main', label: 'main.jsx' }] }])), defaultExpandedIds: args.expandedIds === undefined ? (args.defaultExpandedIds ?? (args[migrationFixtureSymbol] ? undefined : ['src'])) : args.defaultExpandedIds }),
+  Virtualizer: (args) => {
+    const viewport = args[migrationFixtureSymbol]?.frame?.virtualizer;
+    const height = viewport?.height ?? args.height ?? 180;
+    if (!Number.isFinite(height) || height <= 0) throw new Error('Core migration Virtualizer requires a finite positive height');
+    const items = fixtureData(args, 'items', fallback(args.items, ['Result 1', 'Result 2', 'Result 3']));
+    const migration = Boolean(viewport);
+    const virtualizer = e(Core.Virtualizer, {
+      ...args,
+      'aria-label': fallback(args['aria-label'], fixtureCopy(args, 'Results')),
+      items,
+      height: migration ? 76 : height,
+      itemHeight: migration ? 32 : args.itemHeight ?? 32,
+    });
+    return migration
+      ? e('div', {
+        style: {
+          boxSizing: 'border-box',
+          width: `${viewport.width}px`,
+          height: `${viewport.height}px`,
+          overflow: 'auto',
+        },
+      }, virtualizer)
+      : virtualizer;
+  },
+  DropZone: (args) => e(Core.DropZone, { ...args, 'aria-label': fallback(args['aria-label'], fixtureCopy(args, 'Upload files')) }, fallback(args.children, fixtureCopy(args, 'Drop files here'))),
+  FileTrigger: (args) => e(Core.FileTrigger, { ...args }, fallback(args.children, e(Core.Button, null, fixtureCopy(args, 'Choose files')))),
   Dialog: (args) => e(Core.Dialog, {
     ...args,
-    title: fallback(args.title, 'Delete draft'),
-    trigger: fallback(args.trigger, e(Core.Button, null, 'Open dialog')),
-  }, fallback(args.children, e('p', null, 'This dialog traps focus and closes with Escape.'))),
+    title: fallback(args.title, fixtureCopy(args, 'Delete draft')),
+    trigger: fallback(args.trigger, e(Core.Button, null, fixtureCopy(args, 'Open dialog'))),
+  }, fallback(args.children, e('p', null, `${fixtureCopy(args, 'Delete draft')} content.`))),
   Popover: (args) => e(Core.Popover, {
     ...args,
-    'aria-label': fallback(args['aria-label'], 'More actions'),
-    trigger: fallback(args.trigger, e(Core.Button, null, 'More actions')),
-  }, fallback(args.children, e('p', null, 'Additional actions appear next to the trigger.'))),
+    'aria-label': fallback(args['aria-label'], fixtureCopy(args, 'More actions')),
+    trigger: fallback(args.trigger, e(Core.Button, null, fixtureCopy(args, 'More actions'))),
+  }, fallback(args.children, args[migrationFixtureSymbol]
+    ? e(React.Fragment, null,
+      e('h2', { className: 'core-popover-title' }, fixtureCopy(args, 'More actions')),
+      e('p', { className: 'core-popover-description' }, `${fixtureCopy(args, 'More actions')} content.`),
+    )
+    : e('p', null, `${fixtureCopy(args, 'More actions')} content.`))),
   PreviewTrigger: (args) => e(Core.PreviewTrigger, {
     ...args,
-    'aria-label': fallback(args['aria-label'], 'Document preview'),
+    'aria-label': fallback(args['aria-label'], fixtureCopy(args, 'Document preview')),
     delay: args.delay ?? 0,
     closeDelay: args.closeDelay ?? 0,
-    trigger: fallback(args.trigger, e(Core.Button, null, 'Preview document')),
-  }, fallback(args.children, e('p', null, 'A quick preview is available on focus or hover.'))),
-  Toast: (args) => e(Core.Toast, { ...args, message: fallback(args.message, 'Your changes are saved.'), title: fallback(args.title, 'Saved') }),
+    placement: args.placement ?? (args[migrationFixtureSymbol] ? 'bottom' : undefined),
+    trigger: fallback(args.trigger, e(Core.Button, null, args[migrationFixtureSymbol] ? fixtureCopy(args, 'Document preview') : 'Preview document')),
+  }, fallback(args.children, args[migrationFixtureSymbol]
+    ? `${fixtureCopy(args, 'Document preview')} content.`
+    : e('p', null, `${fixtureCopy(args, 'Document preview')} content.`))),
+  Toast: (args) => e(Core.Toast, { ...args, message: fallback(args.message, fixtureCopy(args, 'Saved')), title: fallback(args.title, fixtureCopy(args, 'Saved')) }),
   Tooltip: (args) => e(Core.Tooltip, {
     ...args,
-    content: fallback(args.content, 'Keyboard shortcut: ⌘K'),
+    content: fallback(args.content, fixtureCopy(args, 'Keyboard shortcut: ⌘K')),
     delay: args.delay ?? 0,
     closeDelay: args.closeDelay ?? 0,
-    trigger: fallback(args.trigger, e(Core.Button, null, 'Keyboard help')),
+    trigger: fallback(args.trigger, e(Core.Button, null, fixtureCopy(args, 'Keyboard help'))),
   }),
 };
 

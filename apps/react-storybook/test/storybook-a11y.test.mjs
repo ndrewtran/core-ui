@@ -207,13 +207,14 @@ async function waitForStory(page, scheme) {
 
 async function waitForDocumentAnimations(page) {
   await page.evaluate(async () => {
+    document.documentElement.setAttribute('data-reduced-motion', 'true');
+    await document.fonts.ready;
     await new Promise((resolveFrame) => requestAnimationFrame(resolveFrame));
-    let animations = document.getAnimations();
-    while (animations.length > 0) {
-      await Promise.all(animations.map((animation) => animation.finished.catch(() => undefined)));
-      await new Promise((resolveFrame) => requestAnimationFrame(resolveFrame));
-      animations = document.getAnimations();
-    }
+    // Indeterminate components intentionally animate forever. Axe needs the
+    // settled DOM and computed styles, not an unbounded wait for decorative
+    // motion, so cancel the current visual animations before evaluation.
+    document.getAnimations().forEach((animation) => animation.cancel());
+    await new Promise((resolveFrame) => requestAnimationFrame(resolveFrame));
   });
 }
 

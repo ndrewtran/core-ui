@@ -143,6 +143,22 @@ test('SearchField clear control keeps RAC clearing and the Core callback', async
   }
 });
 
+test('ComboBox input transitions stay scoped away from TextField', async () => {
+  const css = await readFile(new URL('../generated/styles.css', import.meta.url), 'utf8');
+  const comboStart = css.indexOf('/* Core component source: combobox.css */');
+  const comboEnd = css.indexOf('/* Core component source: grid-list.css */', comboStart);
+  const textStart = css.indexOf('/* Core component source: text-field.css */');
+  const textEnd = css.indexOf('/* Core component source: time-field.css */', textStart);
+  assert.ok(comboStart >= 0 && comboEnd > comboStart);
+  assert.ok(textStart >= 0 && textEnd > textStart);
+  const comboCss = css.slice(comboStart, comboEnd);
+  const textCss = css.slice(textStart, textEnd);
+  assert.match(comboCss, /\.core-combo-box \.core-field-input\s*\{[\s\S]*transition:/u);
+  assert.match(comboCss, /\.core-combo-box \.core-field-input:hover\s*\{/u);
+  assert.doesNotMatch(comboCss, /^\.core-field-input\s*\{/mu);
+  assert.match(textCss, /\.core-field-input\s*\{[\s\S]*background-color 0\.15s ease/u);
+});
+
 test('NumberField steppers expose stable direction hooks and Tale edge geometry', async () => {
   const markup = renderToString(React.createElement(NumberField, { label: 'Quantity', defaultValue: 2 }));
   const dom = new JSDOM(`<!doctype html><div id="root">${markup}</div>`);
@@ -198,6 +214,30 @@ test('R1.2 public date contracts are ISO strings and do not expose upstream date
   assert.match(source, /CoreDateValue = string/u);
   assert.match(source, /CoreDateRange/u);
   assert.doesNotMatch(source, /react-stately|@internationalized\/date|export type DateValue|export type TimeValue/u);
+});
+
+test('DateRangePicker popover uses range calendar cells for contiguous selection paint', async () => {
+  const dom = new JSDOM('<!doctype html><div id="root"></div>', { url: 'http://localhost/' });
+  const restore = installDom(dom);
+  let root;
+  try {
+    root = createRoot(document.querySelector('#root'));
+    await act(async () => root.render(React.createElement(DateRangePicker, {
+      label: 'Trip',
+      defaultValue: { start: '2026-08-26', end: '2026-09-01' },
+    })));
+    const trigger = document.querySelector('.core-date-range-picker .core-date-trigger');
+    assert.ok(trigger);
+    await act(async () => trigger.click());
+    const popup = document.body.querySelector('.core-date-popover');
+    assert.ok(popup);
+    assert.ok(popup.querySelector('.core-range-calendar-cell'));
+    assert.equal(popup.querySelector('.core-calendar-cell'), null);
+  } finally {
+    await act(async () => root?.unmount());
+    restore();
+    dom.window.close();
+  }
 });
 
 test('read-only date segments retain accessible semantic contrast', async () => {

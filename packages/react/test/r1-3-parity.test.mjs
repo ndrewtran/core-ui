@@ -37,7 +37,7 @@ test('R1.3 artifact declarations have a generated Core type and runtime surface'
   ]);
   assert.match(styles, /\.core-radio-indicator\b/u, 'RadioGroup needs a Core-owned visible indicator');
   assert.match(styles, /\.core-radio\[data-selected\] \.core-radio-indicator/u, 'RadioGroup needs selected indicator styling');
-  assert.match(styles, /\.core-radio:focus-within/u, 'RadioGroup needs a focus-visible affordance');
+  assert.match(styles, /\.core-radio\[data-focus-visible\]/u, 'RadioGroup needs a focus-visible affordance');
   assert.match(styles, /@media \(forced-colors: active\)[\s\S]*\.core-list-box-item\[data-focus-visible\][\s\S]*outline-color: Highlight/u, 'collection focus needs forced-colors treatment');
   assert.match(styles, /@media \(prefers-contrast: more\)[\s\S]*\.core-list-box-item\[data-focus-visible\][\s\S]*outline-width: 3px/u, 'collection focus needs high-contrast treatment');
   for (const slug of slugs) {
@@ -396,6 +396,10 @@ test('R1.3 scalar composites preserve string and numeric callbacks with disabled
     )));
     assert.ok(container.querySelector('.core-combo-box input'));
     assert.ok(container.querySelector('.core-combo-box-trigger'));
+    const comboArrow = container.querySelector('svg.core-combo-box-arrow');
+    assert.ok(comboArrow);
+    assert.equal(comboArrow.getAttribute('aria-hidden'), 'true');
+    assert.equal(comboArrow.querySelector('path')?.getAttribute('d'), 'm6 9 6 6 6-6');
     assert.equal(container.querySelectorAll('.core-radio').length, 2);
     assert.equal(container.querySelector('input[type="range"]').value, '1');
     assert.equal(container.querySelector('.core-radio input[value="pro"]').checked, true);
@@ -731,12 +735,12 @@ test('R1.3 Virtualizer uses RAC ListLayout to render and scroll a bounded window
     await act(async () => new Promise((resolve) => setTimeout(resolve, 0)));
     const viewport = container.querySelector('.core-virtualizer');
     assert.equal(viewport.getAttribute('data-layout'), 'stack');
-    assert.equal(viewport.querySelector('[role="presentation"]').style.height, '4160px');
+    assert.equal(viewport.querySelector('[role="presentation"]').style.height, '4000px');
     assert.equal(container.querySelector('[role="option"]').textContent, 'Item 0');
-    assert.deepEqual([...container.querySelectorAll('[role="option"]')].map((node) => node.textContent), ['Item 0', 'Item 1', 'Item 2']);
+    assert.deepEqual([...container.querySelectorAll('[role="option"]')].map((node) => node.textContent), ['Item 0', 'Item 1', 'Item 2', 'Item 3', 'Item 4']);
     viewport.scrollTop = 800;
     await act(async () => viewport.dispatchEvent(new Event('scroll', { bubbles: true })));
-    assert.deepEqual([...container.querySelectorAll('[role="option"]')].map((node) => node.textContent), ['Item 17', 'Item 18', 'Item 19', 'Item 20', 'Item 21', 'Item 22']);
+    assert.deepEqual([...container.querySelectorAll('[role="option"]')].map((node) => node.textContent), ['Item 19', 'Item 20', 'Item 21', 'Item 22', 'Item 23', 'Item 24']);
     assert.deepEqual(scrolls, [800]);
   } finally {
     await act(async () => root.unmount());

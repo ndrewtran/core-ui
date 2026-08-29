@@ -1,5 +1,5 @@
 // @generated-from: packages/react/src/fields.mjs
-// @generated-content-sha256: sha256:40b58f5c399cc2f6ecb462a310f9f09759d572f08ce548860f12e15ff54d542c
+// @generated-content-sha256: sha256:85a50446def5a4486de03c2e7eb4c772e4bef8db9f6776499af08e92c54cb822
 import React from 'react';
 import {
   Autocomplete as AriaAutocomplete,
@@ -7,6 +7,10 @@ import {
   Calendar as AriaCalendar,
   CalendarCell as AriaCalendarCell,
   CalendarGrid as AriaCalendarGrid,
+  CalendarGridBody as AriaCalendarGridBody,
+  CalendarGridHeader as AriaCalendarGridHeader,
+  CalendarHeaderCell as AriaCalendarHeaderCell,
+  CalendarHeading as AriaCalendarHeading,
   CheckboxGroup as AriaCheckboxGroup,
   DateField as AriaDateField,
   DateInput as AriaDateInput,
@@ -60,6 +64,24 @@ function fieldError(errorMessage) {
   return errorMessage === undefined ? null : React.createElement(AriaFieldError, { className: 'core-field-error' }, errorMessage);
 }
 
+function calendarGlyph() {
+  return React.createElement('svg', {
+    'aria-hidden': 'true',
+    viewBox: '0 0 24 24',
+    width: 16,
+    height: 16,
+    fill: 'none',
+    stroke: 'currentColor',
+    strokeWidth: 2,
+    strokeLinecap: 'round',
+    strokeLinejoin: 'round',
+  },
+  React.createElement('rect', { x: 3, y: 4, width: 18, height: 17, rx: 2 }),
+  React.createElement('line', { x1: 3, y1: 9, x2: 21, y2: 9 }),
+  React.createElement('line', { x1: 8, y1: 2, x2: 8, y2: 6 }),
+  React.createElement('line', { x1: 16, y1: 2, x2: 16, y2: 6 }));
+}
+
 function fieldChildren({ label, description, errorMessage, children, input }) {
   return React.createElement(React.Fragment, null,
     fieldLabel(label),
@@ -97,16 +119,28 @@ function coreDateValue(value) {
   return value ? String(value) : undefined;
 }
 
-function calendarChildren() {
-  return React.createElement(AriaCalendarGrid, { className: 'core-calendar-grid' }, (date) => React.createElement(AriaCalendarCell, { date, className: 'core-calendar-cell' }));
+function calendarChildren(cellClass = 'core-calendar-cell') {
+  return React.createElement(AriaCalendarGrid, { className: 'core-calendar-grid' },
+    React.createElement(AriaCalendarGridHeader, { className: 'core-calendar-grid-header' },
+      (day) => React.createElement(AriaCalendarHeaderCell, { className: 'core-calendar-header-cell' }, day)),
+    React.createElement(AriaCalendarGridBody, { className: 'core-calendar-grid-body' },
+      (date) => React.createElement(AriaCalendarCell, { date, className: cellClass })),
+  );
+}
+
+function calendarHeader() {
+  return React.createElement('div', { className: 'core-calendar-header' },
+    React.createElement(AriaButton, { slot: 'previous', 'aria-label': 'Previous month', className: 'core-calendar-previous' }, '‹'),
+    React.createElement(AriaCalendarHeading, { className: 'core-calendar-heading' }),
+    React.createElement(AriaButton, { slot: 'next', 'aria-label': 'Next month', className: 'core-calendar-next' }, '›'));
 }
 
 function datePopover() {
-  return React.createElement(AriaPopover, { className: 'core-date-popover' }, React.createElement(AriaDialog, { className: 'core-date-dialog' }, React.createElement(AriaCalendar, { className: 'core-calendar' }, calendarChildren())));
+  return React.createElement(AriaPopover, { className: 'core-date-popover' }, React.createElement(AriaDialog, { className: 'core-date-dialog' }, React.createElement(AriaCalendar, { className: 'core-calendar' }, calendarHeader(), calendarChildren())));
 }
 
 function rangeDatePopover() {
-  return React.createElement(AriaPopover, { className: 'core-date-popover' }, React.createElement(AriaDialog, { className: 'core-date-dialog' }, React.createElement(AriaRangeCalendar, { className: 'core-calendar' }, calendarChildren())));
+  return React.createElement(AriaPopover, { className: 'core-date-popover' }, React.createElement(AriaDialog, { className: 'core-date-dialog' }, React.createElement(AriaRangeCalendar, { className: 'core-calendar' }, calendarHeader(), calendarChildren('core-range-calendar-cell'))));
 }
 
 function dateInput() {
@@ -566,7 +600,7 @@ export const DatePicker = React.forwardRef(function DatePicker({
     label,
     description,
     errorMessage,
-    input: React.createElement(AriaGroup, { className: 'core-date-control' }, dateInput(), React.createElement(AriaButton, { slot: 'button', type: 'button', className: 'core-date-trigger' }, 'Choose date')),
+    input: React.createElement(AriaGroup, { className: 'core-date-control' }, dateInput(), React.createElement(AriaButton, { slot: 'button', type: 'button', 'aria-label': 'Open calendar', className: 'core-date-trigger' }, calendarGlyph())),
     children: datePopover(),
   }));
 });
@@ -631,7 +665,7 @@ export const DateRangePicker = React.forwardRef(function DateRangePicker({
       React.createElement(AriaDateInput, { slot: 'start', className: 'core-date-input' }, (segment) => React.createElement(AriaDateSegment, { segment, className: 'core-date-segment' })),
       React.createElement('span', { className: 'core-date-range-separator', 'aria-hidden': 'true' }, '–'),
       React.createElement(AriaDateInput, { slot: 'end', className: 'core-date-input' }, (segment) => React.createElement(AriaDateSegment, { segment, className: 'core-date-segment' })),
-      React.createElement(AriaButton, { slot: 'button', type: 'button', className: 'core-date-trigger' }, 'Choose dates')),
+      React.createElement(AriaButton, { slot: 'button', type: 'button', 'aria-label': 'Open calendar', className: 'core-date-trigger' }, calendarGlyph())),
     children: React.createElement(React.Fragment, null,
       rangeDatePopover(),
       formResetAnchor(resetInputRef),
