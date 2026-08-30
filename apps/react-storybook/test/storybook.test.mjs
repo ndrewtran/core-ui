@@ -460,13 +460,42 @@ function markerForTest(family, state) {
 }
 
 function isInspectableOverlay(marker) {
-  const target = document.querySelector(`.${marker}`);
-  if (!target?.isConnected) return false;
+  return isInspectableOverlayTarget(document.querySelector(`.${marker}`));
+}
+
+function isInspectableOverlayTarget(target, requireConnected = true) {
+  if (!target || requireConnected && !target.isConnected) return false;
   for (let element = target; element; element = element.parentElement) {
     if (element.getAttribute('aria-hidden') === 'true' || element.hasAttribute('inert')) return false;
   }
   const style = getComputedStyle(target);
   return style.visibility !== 'hidden' && style.opacity !== '0';
+}
+
+function observeInitialOverlay(marker) {
+  let observed = false;
+  const recordVisibility = (records) => {
+    for (const record of records) {
+      for (const node of record.addedNodes) {
+        if (!(node instanceof Element)) continue;
+        const target = node.matches(`.${marker}`) ? node : node.querySelector(`.${marker}`);
+        if (isInspectableOverlayTarget(target, false)) {
+          observed = true;
+          return;
+        }
+      }
+    }
+  };
+  const observer = new MutationObserver((records) => {
+    recordVisibility(records);
+  });
+  observer.observe(document.body, { childList: true, subtree: true });
+  if (isInspectableOverlay(marker)) observed = true;
+  return () => {
+    recordVisibility(observer.takeRecords());
+    observer.disconnect();
+    return observed || isInspectableOverlay(marker);
+  };
 }
 
 test('lifecycle state coverage drives observable Core transitions', async () => {
@@ -541,11 +570,17 @@ test('lifecycle state coverage drives observable Core transitions', async () => 
         });
         const transitionStart = transitionHistory.length;
         const racStart = racLifecycleRecords.length;
+        const closing = state === 'closing' || state === 'exiting';
+        const initialOverlayObservation = family === 'Toast' && closing
+          ? observeInitialOverlay(marker)
+          : undefined;
         await act(async () => {
           lifecycleSelect.value = state;
           lifecycleSelect.dispatchEvent(new Event('change', { bubbles: true }));
         });
-        const initialOverlayState = isInspectableOverlay(marker);
+        const initialOverlayState = initialOverlayObservation
+          ? initialOverlayObservation()
+          : isInspectableOverlay(marker);
         const overlayHistory = [initialOverlayState];
         const recordCurrentRacAttributes = () => {
           const target = document.querySelector(`.${marker}`);
@@ -569,7 +604,6 @@ test('lifecycle state coverage drives observable Core transitions', async () => 
         assert.ok(section, `${family}/${state} section`);
         const overlay = document.querySelector(`.${marker}`);
         assert.ok(overlay, `${family}/${state} overlay`);
-        const closing = state === 'closing' || state === 'exiting';
         const expectedPhaseStart = closing ? 'open' : 'closed';
         const presence = overlayHistory;
         assert.equal(initialOverlayState, closing, `${family}/${state} initial overlay visibility`);
