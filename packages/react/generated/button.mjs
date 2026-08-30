@@ -1,5 +1,5 @@
 // @generated-from: packages/react/src/button.mjs
-// @generated-content-sha256: sha256:d4d5a96d6a25c76c34d536cce595392b132a532ba316f95d4c8250a2e4e8ccee
+// @generated-content-sha256: sha256:68bb98f34279cf1505936b82ba434ac3efca1235e568a36c649a4b6d05250ea3
 import React from 'react';
 import { Button as AriaButton } from 'react-aria-components';
 
@@ -27,6 +27,19 @@ export const Button = React.forwardRef(function Button({
     onActivate?.(activation);
   };
 
+  const content = React.createElement('span', {
+    className: 'core-button-content',
+  }, children);
+  const spinner = pending ? React.createElement('svg', {
+    className: 'core-button-spinner',
+    viewBox: '0 0 24 24',
+    fill: 'none',
+    'aria-hidden': 'true',
+  }, React.createElement('circle', {
+    className: 'core-button-spinner-track', cx: '12', cy: '12', r: '10', strokeWidth: '3',
+  }), React.createElement('circle', {
+    className: 'core-button-spinner-arc', cx: '12', cy: '12', r: '10', strokeWidth: '3', strokeLinecap: 'round',
+  })) : null;
   return React.createElement(AriaButton, {
     ...props,
     ref,
@@ -39,7 +52,7 @@ export const Button = React.forwardRef(function Button({
       'aria-busy': pending || ariaBusy || undefined,
     }),
     onPress: handlePress,
-  }, children);
+  }, content, spinner);
 });
 
 Button.displayName = 'Button';

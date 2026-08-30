@@ -21,6 +21,7 @@ import {
   sha256,
   baselineRootDirectory,
   coreCaptureProvenancePath,
+  coreCaptureRunnerSourcePath,
   fixtureMapSourcePath,
   expectedCaptureInventory,
   materializeSnapshotDirectory,
@@ -30,6 +31,7 @@ import {
   validateSealedComparison,
   validateManifest,
   validateSnapshotFiles,
+  expectedSettling,
 } from '../src/visual-migration.mjs';
 import { migrationCases } from '../src/visual-migration-contract.mjs';
 
@@ -256,8 +258,8 @@ async function waitForStory(page, scheme, runToken) {
 async function settleAnimations(page) {
   await page.evaluate(async () => {
     await document.fonts.ready;
-    await new Promise((resolvePromise) => requestAnimationFrame(resolvePromise));
     document.getAnimations().forEach((animation) => animation.cancel());
+    await new Promise((resolvePromise) => requestAnimationFrame(() => requestAnimationFrame(resolvePromise)));
   });
 }
 
@@ -537,6 +539,7 @@ async function buildCoreCaptureProvenance(manifest, captures) {
   const fixtureSourceSha256 = sha256(await readFile(resolve(appRoot, 'src/migration-visual.fixture.mjs')));
   const factorySourceSha256 = sha256(await readFile(resolve(appRoot, 'src/storybook-factory.mjs')));
   const fixtureMapSourceSha256 = sha256(await readFile(resolve(appRoot, fixtureMapSourcePath)));
+  const coreCaptureRunnerSourceSha256 = sha256(await readFile(resolve(appRoot, coreCaptureRunnerSourcePath)));
   const captureRecords = expectedCaptureInventory.map(([captureId, caseId, component, state, mode]) => {
     const entry = manifest.cases.find(({ id }) => id === caseId);
     const captured = captures.get(`${caseId}--${mode}`);
@@ -581,6 +584,8 @@ async function buildCoreCaptureProvenance(manifest, captures) {
     coreFixtureSourceSha256: fixtureSourceSha256,
     coreFactorySourceSha256: factorySourceSha256,
     coreFixtureMapSourceSha256: fixtureMapSourceSha256,
+    coreCaptureRunnerSourceSha256,
+    settling: expectedSettling,
     captureEnvironment: manifest.capture,
     captures: captureRecords,
   };

@@ -79,9 +79,16 @@ function normalizeDropEvent(event) {
   };
 }
 
-function pressableTrigger(trigger, disabled = false) {
-  if (!React.isValidElement(trigger) || typeof trigger.type !== 'string') return trigger;
-  return React.createElement(AriaPressable, { isDisabled: disabled }, trigger);
+function pressableTrigger(trigger, disabled = false, className) {
+  if (!React.isValidElement(trigger)) return trigger;
+  const normalizedTrigger = className
+    ? React.cloneElement(trigger, { className: classNames(trigger.props.className, className) })
+    : trigger;
+  // RAC trigger components (including Core Button) consume DialogTrigger's
+  // PressResponder context directly. Wrapping them in a second Pressable
+  // shadows that context and prevents keyboard-triggered opening.
+  if (typeof trigger.type !== 'string') return normalizedTrigger;
+  return React.createElement(AriaPressable, { isDisabled: disabled }, normalizedTrigger);
 }
 
 /**
@@ -101,9 +108,17 @@ export const DropZone = React.forwardRef(function DropZone({
   const handleDropActivate = React.useCallback((event) => {
     onActivate?.({ type: 'activate', x: event.x, y: event.y });
   }, [onActivate]);
+  const assignDropZoneRef = React.useCallback((node) => {
+    if (node) {
+      if (disabled) node.setAttribute('aria-disabled', 'true');
+      else node.removeAttribute('aria-disabled');
+    }
+    if (typeof ref === 'function') ref(node);
+    else if (ref) ref.current = node;
+  }, [disabled, ref]);
   return React.createElement(AriaDropZone, {
     ...props,
-    ref,
+    ref: assignDropZoneRef,
     isDisabled: disabled,
     onDrop: handleDrop,
     onDropActivate: handleDropActivate,
@@ -175,7 +190,7 @@ export const Dialog = React.forwardRef(function Dialog({
   const content = React.createElement(DialogOverlay, { dismissable },
     React.createElement(DialogContent, { ...props, contentRef: ref, title, ariaLabel, dismissable, className }, children));
   if (React.isValidElement(trigger)) {
-    return React.createElement(AriaDialogTrigger, { isOpen: open, defaultOpen, onOpenChange }, pressableTrigger(trigger), content);
+    return React.createElement(AriaDialogTrigger, { isOpen: open, defaultOpen, onOpenChange }, pressableTrigger(trigger, false, 'core-dialog-trigger'), content);
   }
   return React.createElement(AriaModalOverlay, {
     isOpen: open,
@@ -219,7 +234,7 @@ export const Popover = React.forwardRef(function Popover({
   if (!React.isValidElement(trigger)) throw new Error('Popover requires a focusable React element as trigger');
   if (!hasAccessibleName(props['aria-label']) && !hasAccessibleName(props['aria-labelledby'])) throw new Error('Popover requires an accessible name');
   const content = React.createElement(PopupContent, { ...props, ref, placement, className, dismissable }, children);
-  return React.createElement(AriaDialogTrigger, { isOpen: open, defaultOpen, onOpenChange }, pressableTrigger(trigger), content);
+  return React.createElement(AriaDialogTrigger, { isOpen: open, defaultOpen, onOpenChange }, pressableTrigger(trigger, false, 'core-overlay-pop-trigger'), content);
 });
 
 Popover.displayName = 'Popover';

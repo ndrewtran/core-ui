@@ -169,9 +169,9 @@ function calendarGrid(cellClass = 'core-calendar-cell') {
 
 function calendarHeader() {
   return React.createElement('div', { className: 'core-calendar-header' },
-    React.createElement(AriaButton, { slot: 'previous', 'aria-label': 'Previous month', className: 'core-calendar-previous' }, React.createElement(ChevronLeftIcon, { 'aria-hidden': 'true', focusable: 'false', size: 16 })),
+    React.createElement(AriaButton, { slot: 'previous', 'aria-label': 'Previous month', className: 'core-calendar-previous' }, React.createElement(ChevronLeftIcon, { className: 'core-icon core-icon--sm', 'aria-hidden': 'true', focusable: 'false' })),
     React.createElement(AriaCalendarHeading, { className: 'core-calendar-heading' }),
-    React.createElement(AriaButton, { slot: 'next', 'aria-label': 'Next month', className: 'core-calendar-next' }, React.createElement(ChevronRightIcon, { 'aria-hidden': 'true', focusable: 'false', size: 16 })));
+    React.createElement(AriaButton, { slot: 'next', 'aria-label': 'Next month', className: 'core-calendar-next' }, React.createElement(ChevronRightIcon, { className: 'core-icon core-icon--sm', 'aria-hidden': 'true', focusable: 'false' })));
 }
 
 function calendarProps(props, name, labelId) {
@@ -397,7 +397,15 @@ RadioGroup.displayName = 'RadioGroup';
 
 export const Slider = React.forwardRef(function Slider({ label, value, defaultValue, onChange, min = 0, max = 100, step = 1, disabled = false, orientation = 'horizontal', className, 'aria-label': ariaLabel, 'aria-labelledby': ariaLabelledby, ...props }, ref) {
   accessibleName({ label, ariaLabel, ariaLabelledby }, 'Slider');
-  return React.createElement(AriaSlider, { ...props, ref, value, defaultValue, onChange: (next) => { if (!disabled) onChange?.(next); }, minValue: min, maxValue: max, step, isDisabled: disabled, orientation, className: classNames('core-slider', className), 'aria-label': ariaLabel, 'aria-labelledby': ariaLabelledby }, React.createElement('div', { className: 'core-slider-header' }, label !== undefined ? React.createElement(AriaLabel, { className: 'core-field-label' }, label) : null, React.createElement(AriaOutput, { className: 'core-slider-output' })), React.createElement('div', { className: 'core-slider-control' }, React.createElement(AriaSliderTrack, { className: 'core-slider-track' }, React.createElement(AriaSliderFill, { className: 'core-slider-fill' }), React.createElement(AriaSliderThumb, { className: 'core-slider-thumb' }))));
+  const assignSliderRef = React.useCallback((node) => {
+    if (node) {
+      if (disabled) node.setAttribute('aria-disabled', 'true');
+      else node.removeAttribute('aria-disabled');
+    }
+    if (typeof ref === 'function') ref(node);
+    else if (ref) ref.current = node;
+  }, [disabled, ref]);
+  return React.createElement(AriaSlider, { ...props, ref: assignSliderRef, value, defaultValue, onChange: (next) => { if (!disabled) onChange?.(next); }, minValue: min, maxValue: max, step, isDisabled: disabled, orientation, className: classNames('core-slider', className), 'aria-label': ariaLabel, 'aria-labelledby': ariaLabelledby }, React.createElement('div', { className: 'core-slider-header' }, label !== undefined ? React.createElement(AriaLabel, { className: 'core-field-label' }, label) : null, React.createElement(AriaOutput, { className: 'core-slider-output' })), React.createElement('div', { className: 'core-slider-control' }, React.createElement(AriaSliderTrack, { className: 'core-slider-track' }, React.createElement(AriaSliderFill, { className: 'core-slider-fill' }), React.createElement(AriaSliderThumb, { className: 'core-slider-thumb' }))));
 });
 Slider.displayName = 'Slider';
 

@@ -97,7 +97,7 @@
   width: var(--core-component-number-field-group-width, 100%);
   max-width: 100%;
   border: 1px solid var(--core-semantic-border-strong);
-  border-radius: calc(var(--core-semantic-control-radius) - 2px);
+  border-radius: var(--core-reference-dimension-radius-m);
   overflow: hidden;
   transition:
     border-color 0.15s ease,
@@ -138,19 +138,27 @@
   min-height: 2.25rem;
   border-radius: 0;
   background-color: var(--core-semantic-surface-raised);
-  color: var(--core-semantic-content-default);
+  color: var(--core-reference-color-neutral-70);
   font-size: var(--core-semantic-typography-body-size);
   font-family: Inter, sans-serif;
 }
 
+.core-number-stepper > svg {
+  flex-shrink: 0;
+}
+
+.core-number-stepper[data-disabled] {
+  opacity: 0.45;
+}
+
 .core-number-stepper-decrement {
-  border-right: 1px solid var(--core-semantic-border-default);
-  border-radius: var(--core-semantic-control-radius) 0 0 var(--core-semantic-control-radius);
+  border-right: 1px solid var(--core-reference-color-neutral-22);
+  border-radius: var(--core-reference-dimension-radius-m) 0 0 var(--core-reference-dimension-radius-m);
 }
 
 .core-number-stepper-increment {
-  border-left: 1px solid var(--core-semantic-border-default);
-  border-radius: 0 var(--core-semantic-control-radius) var(--core-semantic-control-radius) 0;
+  border-left: 1px solid var(--core-reference-color-neutral-22);
+  border-radius: 0 var(--core-reference-dimension-radius-m) var(--core-reference-dimension-radius-m) 0;
 }
 
 .core-number-stepper:hover:not(:disabled) {
@@ -163,16 +171,8 @@
 }
 
 .core-number-field[data-disabled] .core-number-control {
-  background-color: var(--core-semantic-surface-hover);
-  border-color: var(--core-semantic-border-strong);
-  color: var(--core-semantic-content-strong);
+  opacity: 0.45;
   cursor: not-allowed;
-}
-
-.core-number-field[data-disabled] .core-number-stepper {
-  background-color: var(--core-semantic-surface-hover);
-  border-color: var(--core-semantic-border-strong);
-  color: var(--core-semantic-content-default);
 }
 
 .core-number-field[data-disabled] .core-number-control > .core-field-input,
@@ -219,10 +219,11 @@
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--core-semantic-feedback-invalid) 20%, transparent);
 }
 
-.core-field-input[data-disabled],
-.core-field-input:disabled {
-  border-color: var(--core-semantic-border-strong);
-  color: var(--core-semantic-content-strong);
+.core-text-field .core-field-input[data-disabled],
+.core-text-field .core-field-input:disabled,
+.core-search-field .core-field-input[data-disabled],
+.core-search-field .core-field-input:disabled {
+  opacity: 0.45;
   cursor: not-allowed;
   background-color: var(--core-semantic-surface-hover);
 }
@@ -253,6 +254,12 @@
     background-color 0.15s ease,
     color 0.15s ease;
   flex-shrink: 0;
+  transform: translateX(calc(-1 * var(--core-semantic-layout-tight-inset)));
+}
+
+.core-search-clear > svg {
+  width: 1rem;
+  height: 1rem;
 }
 
 .core-search-clear[data-hovered] {
@@ -271,8 +278,7 @@
 }
 
 .core-search-clear[data-disabled] {
-  background-color: var(--core-semantic-surface-hover);
-  color: var(--core-semantic-content-default);
+  opacity: 0.45;
   cursor: not-allowed;
   pointer-events: none;
 }
@@ -363,18 +369,9 @@
 }
 
 .core-switch[data-disabled] {
+  opacity: 0.45;
   color: var(--core-semantic-content-default);
   cursor: not-allowed;
-}
-
-.core-switch[data-disabled]::before {
-  background-color: var(--core-semantic-surface-hover);
-  border-color: var(--core-semantic-content-default);
-}
-
-.core-switch[data-disabled][data-selected]::before {
-  background-color: var(--core-semantic-content-default);
-  border-color: var(--core-semantic-content-default);
 }
 
 .core-switch-indicator {
@@ -430,10 +427,11 @@
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--core-semantic-feedback-invalid) 20%, transparent);
 }
 
-.core-field-input[data-disabled],
-.core-field-input:disabled {
-  border-color: var(--core-semantic-border-strong);
-  color: var(--core-semantic-content-strong);
+.core-text-field .core-field-input[data-disabled],
+.core-text-field .core-field-input:disabled,
+.core-search-field .core-field-input[data-disabled],
+.core-search-field .core-field-input:disabled {
+  opacity: 0.45;
   cursor: not-allowed;
   background-color: var(--core-semantic-surface-hover);
 }
@@ -443,6 +441,13 @@
   flex-direction: column;
   gap: var(--core-semantic-layout-control-gap);
   width: max-content;
+}
+
+/* Date picker labels use the same neutral roles as Tale's picker recipes;
+   keep the override scoped so shared field labels retain their own contract. */
+.core-date-picker:not([data-disabled]):not([data-invalid]) .core-field-label,
+.core-date-range-picker:not([data-disabled]):not([data-invalid]) .core-field-label {
+  color: var(--core-reference-color-neutral-70);
 }
 
 /* Tale's dark field recipes use a neutral control surface distinct from the
@@ -464,10 +469,27 @@
   color: var(--core-reference-color-neutral-40);
 }
 
+[data-core-color-scheme='dark'] .core-date-picker:not([data-disabled]):not([data-invalid]) .core-field-label,
+[data-core-color-scheme='dark'] .core-date-range-picker:not([data-disabled]):not([data-invalid]) .core-field-label {
+  color: var(--core-reference-color-neutral-30);
+}
+
 [data-core-color-scheme='dark'] .core-field-input {
   background-color: color-mix(in srgb, var(--core-reference-color-neutral-100) 85%, black);
   border-color: var(--core-reference-color-neutral-84);
   color: var(--core-reference-color-neutral-20);
+}
+
+[data-core-color-scheme='dark'] .core-text-field .core-field-input[data-disabled],
+[data-core-color-scheme='dark'] .core-text-field .core-field-input:disabled,
+[data-core-color-scheme='dark'] .core-search-field .core-field-input[data-disabled],
+[data-core-color-scheme='dark'] .core-search-field .core-field-input:disabled {
+  background-color: var(--core-reference-color-neutral-96);
+}
+
+[data-core-color-scheme='dark'] .core-select[data-disabled] > .core-select-trigger[data-disabled] {
+  background-color: color-mix(in srgb, var(--core-reference-color-neutral-100) 85%, black);
+  border-color: var(--core-reference-color-neutral-84);
 }
 
 [data-core-color-scheme='dark'] .core-autocomplete-list {
@@ -502,10 +524,12 @@
   color: var(--core-reference-color-neutral-20);
 }
 
-[data-core-color-scheme='dark'] :where(
-  .core-date-segment[data-type='literal'],
-  .core-date-segment[data-placeholder]
-) {
+[data-core-color-scheme='dark'] .core-date-segment[data-readonly]:not([data-type='literal']) {
+  color: var(--core-reference-color-neutral-50);
+}
+
+[data-core-color-scheme='dark'] .core-date-segment[data-type='literal'],
+[data-core-color-scheme='dark'] .core-date-segment[data-placeholder] {
   color: var(--core-reference-color-neutral-60);
 }
 
@@ -518,15 +542,27 @@
 }
 
 [data-core-color-scheme='dark'] .core-number-stepper {
-  background-color: var(--core-reference-color-neutral-98);
-  color: var(--core-reference-color-neutral-30);
+  background-color: var(--core-reference-color-neutral-100);
+  color: var(--core-reference-color-neutral-40);
 }
 
-[data-core-color-scheme='dark'] :where(
-  .core-number-stepper-decrement,
-  .core-number-stepper-increment
-) {
-  border-color: var(--core-reference-color-neutral-84);
+[data-core-color-scheme='dark'] .core-number-control > .core-field-input {
+  background-color: transparent;
+}
+
+[data-core-color-scheme='dark'] .core-number-stepper-decrement {
+  border-right-color: var(--core-reference-color-neutral-88);
+}
+
+[data-core-color-scheme='dark'] .core-number-stepper-increment {
+  border-left-color: var(--core-reference-color-neutral-88);
+}
+
+[data-core-color-scheme='dark'] .core-date-picker[data-disabled] .core-date-control,
+[data-core-color-scheme='dark'] .core-date-range-picker[data-disabled] .core-date-range-control,
+[data-core-color-scheme='dark'] .core-combo-control[data-disabled],
+[data-core-color-scheme='dark'] .core-combo-box[data-disabled] .core-combo-control {
+  background-color: var(--core-reference-color-neutral-96);
 }
 
 [data-core-color-scheme='dark'] .core-number-field .core-field-label {
@@ -538,19 +574,20 @@
 }
 
 [data-core-color-scheme='dark'] .core-number-control {
-  border-color: var(--core-reference-color-neutral-82);
-  border-radius: var(--core-semantic-control-radius);
+  border-color: var(--core-reference-color-neutral-84);
+  border-radius: var(--core-reference-dimension-radius-m);
 }
 
 [data-core-color-scheme='dark'] .core-number-control > .core-field-input {
   color: var(--core-reference-color-neutral-18);
 }
 
-[data-core-color-scheme='dark'] :where(
-  .core-number-stepper-decrement,
-  .core-number-stepper-increment
-) {
-  border-color: var(--core-reference-color-neutral-86);
+[data-core-color-scheme='dark'] .core-number-stepper-decrement {
+  border-right-color: var(--core-reference-color-neutral-88);
+}
+
+[data-core-color-scheme='dark'] .core-number-stepper-increment {
+  border-left-color: var(--core-reference-color-neutral-88);
 }
 
 [data-core-color-scheme] .core-number-field[data-invalid] .core-number-control {
@@ -613,7 +650,7 @@
 }
 
 .core-number-control {
-  border-radius: var(--core-semantic-control-radius);
+  border-radius: var(--core-reference-dimension-radius-m);
 }
 
 [data-core-color-scheme] .core-number-control:focus-within {
@@ -704,10 +741,6 @@
   background-color: var(--core-reference-color-neutral-10);
 }
 
-.core-date-trigger > svg {
-  transform: translateY(1px);
-}
-
 .core-date-range-control .core-date-trigger {
   width: calc(var(--core-field-min-height) + 9px);
 }
@@ -729,6 +762,11 @@
   background-color: var(--core-reference-color-neutral-10);
 }
 
+[data-core-color-scheme='light'] .core-date-picker .core-date-trigger > svg,
+[data-core-color-scheme='light'] .core-date-range-picker .core-date-trigger > svg {
+  color: var(--core-reference-color-neutral-70);
+}
+
 [data-core-color-scheme='dark'] .core-date-control,
 [data-core-color-scheme='dark'] .core-date-range-control {
   background-color: color-mix(in srgb, var(--core-reference-color-neutral-100) 85%, black);
@@ -739,10 +777,47 @@
 [data-core-color-scheme='dark'] .core-date-range-control .core-date-trigger {
   border-left-color: var(--core-reference-color-neutral-84);
   background-color: var(--core-reference-color-neutral-100);
-  color: var(--core-reference-color-neutral-30);
+  color: var(--core-reference-color-neutral-40);
+}
+
+[data-core-color-scheme='dark'] .core-search-clear {
+  color: var(--core-reference-color-neutral-60);
 }
 
 [data-core-color-scheme] .core-date-picker[data-invalid] .core-date-control,
 [data-core-color-scheme] .core-date-range-picker[data-invalid] .core-date-range-control {
   border-color: var(--core-reference-color-red-60);
+}
+
+/* Forced colors supplies its own disabled GrayText treatment. Opacity would
+   otherwise dim the system colors and reduce their contrast. */
+@media (forced-colors: active) {
+  .core-select-trigger[data-disabled],
+  .core-text-field[data-disabled] .core-field-label,
+  .core-search-field[data-disabled] .core-field-label,
+  .core-number-field[data-disabled] .core-field-label,
+  .core-date-field[data-disabled] .core-field-label,
+  .core-date-picker[data-disabled] .core-field-label,
+  .core-date-range-picker[data-disabled] .core-field-label,
+  .core-time-field[data-disabled] .core-field-label,
+  .core-combo-box[data-disabled] .core-field-label,
+  .core-select[data-disabled] .core-field-label,
+  .core-date-input[data-disabled],
+  .core-date-picker[data-disabled] .core-date-control,
+  .core-date-range-picker[data-disabled] .core-date-range-control,
+  .core-date-segment[data-disabled],
+  .core-combo-control[data-disabled],
+  .core-combo-box[data-disabled] .core-combo-control,
+  .core-number-field[data-disabled] .core-number-control,
+  .core-text-field .core-field-input[data-disabled],
+  .core-text-field .core-field-input:disabled,
+  .core-search-field .core-field-input[data-disabled],
+  .core-search-field .core-field-input:disabled,
+  .core-search-clear[data-disabled] {
+    opacity: 1;
+  }
+
+  .core-switch[data-disabled] {
+    opacity: 1;
+  }
 }

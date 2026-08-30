@@ -5,16 +5,21 @@ import pixelmatch from 'pixelmatch';
 import { PNG } from 'pngjs';
 import {
   applicableMigrationRecords,
+  canonicalStateCoverage,
+  compatibilityStateCoverage,
   fixtureContractFor,
   migrationCases,
   migrationFrame,
   migrationQuery,
   migrationStoryId,
   noApplicableDonorFamilies,
+  stateCoverage,
+  supplementalStateCoverage,
   equivalentPartSelectorsFor,
   sharedFixtureInput,
 } from './visual-migration-contract.mjs';
 import { fixtureMapSourcePath } from './visual-migration-fixture-map.mjs';
+import { taleStyleInventory, validateTaleStyleInventory } from './tale-style-inventory.mjs';
 
 export const appRoot = resolve(import.meta.dirname, '..');
 export const manifestPath = resolve(appRoot, 'visual-migration/manifest.json');
@@ -22,20 +27,32 @@ export const resultPath = resolve(appRoot, 'visual-migration/results');
 export const donorAdapterSourcePath = 'visual-migration/bootstrap/donor-adapter.mjs';
 export const donorEntrySourcePath = 'visual-migration/bootstrap/donor-entry.mjs';
 export const donorRenderPlanSourcePath = 'visual-migration/bootstrap/donor-render-plan.mjs';
+export const coreCaptureRunnerSourcePath = 'test/run-visual-migration.mjs';
 export const coreCaptureProvenancePath = 'visual-migration/results/core-capture-provenance.json';
 export const baselineRootDirectory = 'visual-migration/baselines';
 export const donorRootDirectory = 'visual-migration/donors';
+export const taleStyleInventoryPath = 'visual-migration/tale-style-inventory.json';
+export const taleStyleInventorySha256 = jsonSha256(taleStyleInventory);
 export const expectedCaseInventory = Object.freeze(migrationCases.map(({ id, component, state }) => [id, component, state]));
 export const expectedCaptureInventory = Object.freeze(migrationCases.flatMap(({ id, component, state }) => (
   ['light', 'dark'].map((mode) => [`${id}--${mode}`, id, component, state, mode])
 )));
+export const expectedStateCoverage = Object.freeze(stateCoverage.map(({ family, state, disposition, check }) => ({ family, state, disposition, check })));
+export const expectedStateDispositionCounts = Object.freeze(Object.fromEntries([...new Set(expectedStateCoverage.map(({ disposition }) => disposition))].sort().map((disposition) => [disposition, expectedStateCoverage.filter((entry) => entry.disposition === disposition).length])));
+export const expectedDescriptorStateCount = canonicalStateCoverage.length;
+export const expectedCompatibilityStateCount = compatibilityStateCoverage.length;
+export const expectedSupplementalStateCount = supplementalStateCoverage.length;
+export const expectedSettling = Object.freeze({
+  donor: 'document.fonts.ready plus two consecutive byte-identical screenshots (maximum 8 attempts)',
+  core: 'document.fonts.ready plus animation cancellation and two requestAnimationFrame ticks',
+});
 
 const expectedDonorRepository = 'https://github.com/Tale-UI/tale-ui';
 const expectedDonorCommit = '94bf62a26c02605c8928dfeb24f0ddc4be1c92fd';
 export const expectedStoryId = migrationStoryId;
 export const expectedStoryQuery = migrationQuery;
-export const expectedDonorBindingSha256 = 'sha256:7365e5d062ac0b5e9ff8c34244564a4e9963c3fe13d89649cd9114926add5f32';
-export const expectedThresholds = Object.freeze({ maxDiffPixelRatio: 0.003, pixelThreshold: 0.1 });
+export const expectedDonorBindingSha256 = 'sha256:6565fb6fcfe2196f17b483dcadab0d792d658330bbf6fb1579df1dbc4026a3dc';
+export const expectedThresholds = Object.freeze({ maxDiffPixelRatio: 0, pixelThreshold: 0.1 });
 const safeCaseIdPattern = /^[a-z0-9]+(?:-+[a-z0-9]+)*$/u;
 const safeResultSuffixPattern = /^[a-z0-9-]+\.[a-z0-9]+$/u;
 const safeSnapshotDirectoryPattern = /^visual-migration\/(?:baselines|donors)\/sha256-[0-9a-f]{64}$/u;
@@ -490,9 +507,11 @@ async function validateCoreCaptureProvenance(manifest, { root = appRoot, provena
   const fixtureSource = await readFile(resolve(root, 'src/migration-visual.fixture.mjs'));
   const factorySource = await readFile(resolve(root, 'src/storybook-factory.mjs'));
   const fixtureMapSource = await readFile(resolve(root, fixtureMapSourcePath));
+  const coreCaptureRunnerSource = await readFile(resolve(root, coreCaptureRunnerSourcePath));
   const fixtureSourceSha256 = sha256(fixtureSource);
   const factorySourceSha256 = sha256(factorySource);
   const fixtureMapSourceSha256 = sha256(fixtureMapSource);
+  const coreCaptureRunnerSourceSha256 = sha256(coreCaptureRunnerSource);
   if (provenance?.schema !== 'core-ui-react-visual-migration-core-capture-v1'
     || provenance.directory !== manifest.baselineDirectory
     || provenance.caseCount !== migrationCases.length
@@ -501,6 +520,8 @@ async function validateCoreCaptureProvenance(manifest, { root = appRoot, provena
     || provenance.coreFixtureSourceSha256 !== fixtureSourceSha256
     || provenance.coreFactorySourceSha256 !== factorySourceSha256
     || provenance.coreFixtureMapSourceSha256 !== fixtureMapSourceSha256
+    || provenance.coreCaptureRunnerSourceSha256 !== coreCaptureRunnerSourceSha256
+    || JSON.stringify(provenance.settling) !== JSON.stringify(expectedSettling)
     || JSON.stringify(provenance.captureEnvironment) !== JSON.stringify(manifest.capture)
     || !Array.isArray(provenance.captures)
     || provenance.captures.length !== expectedCaptureInventory.length) {
@@ -540,6 +561,7 @@ async function validateCoreCaptureProvenance(manifest, { root = appRoot, provena
 }
 
 export async function validateManifest(manifest, { root = appRoot, allowMissingCoreCaptureProvenance = false, coreCaptureProvenance: suppliedCoreCaptureProvenance } = {}) {
+  validateTaleStyleInventory();
   if (manifest?.schema !== 'core-ui-react-visual-migration-manifest-v2' || manifest.version !== 2) throw new Error('visual migration manifest has an unknown schema or version');
   assertManifestIdentity(manifest);
   if (!manifest.donor || typeof manifest.donor !== 'object' || !/^https:\/\//u.test(manifest.donor.repository) || !/^[0-9a-f]{40}$/u.test(manifest.donor.commit)) throw new Error('manifest.donor must pin an HTTPS repository and a full commit');
@@ -555,7 +577,10 @@ export async function validateManifest(manifest, { root = appRoot, allowMissingC
     const source = await readFile(resolve(root, sourcePath));
     if (sha256(source) !== manifest.bootstrap[field]) throw new Error(`visual migration ${field} does not match its retained source`);
   }
-  if (!manifest.bootstrap.tale || manifest.bootstrap.tale.commit !== expectedDonorCommit || !/^[0-9a-f]{40}$/u.test(manifest.bootstrap.tale.tree) || !/^sha256:[0-9a-f]{64}$/u.test(manifest.bootstrap.tale.sourceSha256)) throw new Error('visual migration manifest must retain the pinned Tale source identity');
+  if (!/^sha256:[0-9a-f]{64}$/u.test(manifest.bootstrap.coreCaptureRunnerSourceSha256)) throw new Error('visual migration manifest must retain the Core capture runner identity');
+  const coreCaptureRunnerSource = await readFile(resolve(root, coreCaptureRunnerSourcePath));
+  if (sha256(coreCaptureRunnerSource) !== manifest.bootstrap.coreCaptureRunnerSourceSha256) throw new Error('visual migration Core capture runner source SHA-256 does not match its content');
+  if (!manifest.bootstrap.tale || manifest.bootstrap.tale.commit !== expectedDonorCommit || !/^[0-9a-f]{40}$/u.test(manifest.bootstrap.tale.tree) || !/^sha256:[0-9a-f]{64}$/u.test(manifest.bootstrap.tale.sourceSha256) || manifest.bootstrap.tale.styleInventoryPath !== taleStyleInventoryPath || manifest.bootstrap.tale.styleInventorySha256 !== taleStyleInventorySha256) throw new Error('visual migration manifest must retain the pinned Tale source and complete style-inventory identity');
   if (!manifest.bootstrap.captureProvenance || manifest.bootstrap.captureProvenance.path !== 'visual-migration/results/donor-capture-provenance.json' || !/^sha256:[0-9a-f]{64}$/u.test(manifest.bootstrap.captureProvenance.sha256)) throw new Error('visual migration manifest must retain immutable donor capture provenance');
   const provenanceAbsolutePath = resolve(root, manifest.bootstrap.captureProvenance.path);
   await assertNoSymlinkEscape(root, provenanceAbsolutePath, 'manifest.bootstrap.captureProvenance');
@@ -564,20 +589,20 @@ export async function validateManifest(manifest, { root = appRoot, allowMissingC
   const provenance = JSON.parse(provenanceBytes);
   const fixtureMapSource = await readFile(resolve(root, fixtureMapSourcePath));
   const fixtureMapSourceSha256 = sha256(fixtureMapSource);
-  if (provenance?.schema !== 'core-ui-react-visual-migration-donor-capture-v2' || provenance.donor?.commit !== expectedDonorCommit || provenance.directory !== manifest.donorArtifactDirectory || provenance.caseCount !== migrationCases.length || provenance.captureCount !== expectedCaptureInventory.length || provenance.fixtureContractSha256 !== manifest.fixtureContract.caseSha256 || provenance.adapterSourceSha256 !== manifest.bootstrap.adapterSourceSha256 || provenance.entrySourceSha256 !== manifest.bootstrap.entrySourceSha256 || provenance.renderPlanSourceSha256 !== manifest.bootstrap.renderPlanSourceSha256 || provenance.captureSourceSha256 !== manifest.bootstrap.captureSourceSha256 || provenance.fixtureMapSourceSha256 !== fixtureMapSourceSha256 || provenance.fixtureMapSourceSha256 !== manifest.bootstrap.fixtureMapSourceSha256 || provenance.tale?.tree !== manifest.bootstrap.tale?.tree || provenance.tale?.sourceSha256 !== manifest.bootstrap.tale?.sourceSha256 || !Array.isArray(provenance.captures) || provenance.captures.length !== expectedCaptureInventory.length) throw new Error('visual migration donor capture provenance does not match the canonical contract');
+  if (provenance?.schema !== 'core-ui-react-visual-migration-donor-capture-v2' || provenance.donor?.commit !== expectedDonorCommit || provenance.directory !== manifest.donorArtifactDirectory || provenance.caseCount !== migrationCases.length || provenance.captureCount !== expectedCaptureInventory.length || provenance.fixtureContractSha256 !== manifest.fixtureContract.caseSha256 || provenance.adapterSourceSha256 !== manifest.bootstrap.adapterSourceSha256 || provenance.entrySourceSha256 !== manifest.bootstrap.entrySourceSha256 || provenance.renderPlanSourceSha256 !== manifest.bootstrap.renderPlanSourceSha256 || provenance.captureSourceSha256 !== manifest.bootstrap.captureSourceSha256 || provenance.fixtureMapSourceSha256 !== fixtureMapSourceSha256 || provenance.fixtureMapSourceSha256 !== manifest.bootstrap.fixtureMapSourceSha256 || provenance.tale?.tree !== manifest.bootstrap.tale?.tree || provenance.tale?.sourceSha256 !== manifest.bootstrap.tale?.sourceSha256 || JSON.stringify(provenance.settling) !== JSON.stringify(expectedSettling) || !Array.isArray(provenance.captures) || provenance.captures.length !== expectedCaptureInventory.length) throw new Error('visual migration donor capture provenance does not match the canonical contract');
   const provenanceCaptures = new Map(provenance.captures.map((capture) => [capture.captureId, capture]));
   for (const [captureId, caseId, , , mode] of expectedCaptureInventory) {
     const capture = provenanceCaptures.get(captureId);
     const entry = manifest.cases.find(({ id }) => id === caseId);
     if (!capture || capture.caseId !== caseId || capture.mode !== mode || capture.sha256 !== entry.donor.artifacts[mode].sha256 || capture.fixtureContractSha256 !== entry.fixtureContractSha256 || capture.runtimeFixtureSha256 !== entry.runtimeFixtureSha256 || capture.donorSource !== donorEntrySourcePath || JSON.stringify(capture.semanticRegion) !== JSON.stringify(entry.donor.artifacts[mode].semanticRegion) || JSON.stringify(capture.equivalentPart) !== JSON.stringify(entry.donor.artifacts[mode].equivalentPart)) throw new Error(`${captureId} donor provenance must bind the canonical fixture, donor source, semantic parts, runtimeFixtureSha256, and emitted PNG`);
   }
-  if (!manifest.capture || manifest.capture.viewport?.width !== 1000 || manifest.capture.viewport?.height !== 700 || manifest.capture.deviceScaleFactor !== 1 || JSON.stringify(manifest.capture.modes) !== JSON.stringify(['light', 'dark']) || manifest.capture.reducedMotion !== true) throw new Error('manifest.capture must pin the shared 1000x700 light/dark reduced-motion capture contract');
+  if (!manifest.capture || manifest.capture.viewport?.width !== 1000 || manifest.capture.viewport?.height !== 700 || manifest.capture.deviceScaleFactor !== 1 || JSON.stringify(manifest.capture.modes) !== JSON.stringify(['light', 'dark']) || manifest.capture.reducedMotion !== true || JSON.stringify(manifest.capture.settling) !== JSON.stringify(expectedSettling)) throw new Error('manifest.capture must pin the shared 1000x700 light/dark reduced-motion capture and settling contract');
   if (!manifest.capture.background || manifest.capture.background.light !== '#ffffff' || manifest.capture.background.dark !== '#000000') throw new Error('manifest.capture must pin light/dark frame backgrounds');
   if (!manifest.capture.browser || typeof manifest.capture.browser.name !== 'string' || typeof manifest.capture.browser.version !== 'string' || !/^sha256:[0-9a-f]{64}$/u.test(manifest.capture.browser.executableSha256) || manifest.capture.platform !== 'darwin' || manifest.capture.architecture !== 'arm64' || typeof manifest.capture.osVersion !== 'string' || typeof manifest.capture.osBuildVersion !== 'string') throw new Error('manifest.capture must record the pinned browser and macOS environment');
   assertSafeSnapshotDirectory(manifest.baselineDirectory, 'manifest.baselineDirectory');
   assertSafeSnapshotDirectory(manifest.donorArtifactDirectory, 'manifest.donorArtifactDirectory');
   if (!manifest.thresholds || manifest.thresholds.maxDiffPixelRatio !== expectedThresholds.maxDiffPixelRatio || manifest.thresholds.pixelThreshold !== expectedThresholds.pixelThreshold) throw new Error('manifest.thresholds must retain the pinned fail-closed pixel thresholds');
-  if (!manifest.coverage || manifest.coverage.caseCount !== migrationCases.length || manifest.coverage.comparisonCount !== expectedCaptureInventory.length || manifest.coverage.applicableFamilyCount !== 51 || JSON.stringify(manifest.coverage.noApplicableDonor) !== JSON.stringify(noApplicableDonorFamilies) || !Array.isArray(manifest.coverage.families) || manifest.coverage.families.length !== 51) throw new Error('visual migration coverage metadata must describe all 51 applicable families and two exact no-donor families');
+  if (!manifest.coverage || manifest.coverage.caseCount !== migrationCases.length || manifest.coverage.comparisonCount !== expectedCaptureInventory.length || manifest.coverage.applicableFamilyCount !== 51 || JSON.stringify(manifest.coverage.noApplicableDonor) !== JSON.stringify(noApplicableDonorFamilies) || !Array.isArray(manifest.coverage.families) || manifest.coverage.families.length !== 51 || manifest.coverage.canonicalStateCount !== expectedDescriptorStateCount || manifest.coverage.compatibilityStateCount !== expectedCompatibilityStateCount || manifest.coverage.supplementalStateCount !== expectedSupplementalStateCount || manifest.coverage.stateCoverageCount !== expectedStateCoverage.length || JSON.stringify(manifest.coverage.stateDispositions) !== JSON.stringify(expectedStateDispositionCounts) || JSON.stringify(manifest.coverage.stateCoverage) !== JSON.stringify(expectedStateCoverage)) throw new Error('visual migration coverage metadata must describe every canonical state, explicit disposition, and all 51 applicable families');
   const ids = new Set();
   const baselineEntries = [];
   const canonicalCases = new Map(migrationCases.map((entry) => [entry.id, entry]));
@@ -688,7 +713,7 @@ export async function validateSealedComparison(manifest, { root = appRoot, repor
   }
   const expectedCounts = { families: 51, noApplicableDonor: 2, semanticCases: migrationCases.length, comparisons: expectedPairs.length, pass, failed };
   if (JSON.stringify(report.counts) !== JSON.stringify(expectedCounts)) throw new Error('sealed visual migration comparison aggregate counts do not match independently recomputed pairs');
-  if (report.coverage?.applicableFamilyCount !== 51 || report.coverage?.caseCount !== migrationCases.length || report.coverage?.comparisonCount !== expectedPairs.length || JSON.stringify(report.coverage?.noApplicableDonor) !== JSON.stringify(noApplicableDonorFamilies)) throw new Error('sealed visual migration comparison coverage is not canonical');
+  if (report.coverage?.applicableFamilyCount !== 51 || report.coverage?.caseCount !== migrationCases.length || report.coverage?.comparisonCount !== expectedPairs.length || JSON.stringify(report.coverage?.noApplicableDonor) !== JSON.stringify(noApplicableDonorFamilies) || report.coverage?.canonicalStateCount !== expectedDescriptorStateCount || report.coverage?.compatibilityStateCount !== expectedCompatibilityStateCount || report.coverage?.supplementalStateCount !== expectedSupplementalStateCount || report.coverage?.stateCoverageCount !== expectedStateCoverage.length || JSON.stringify(report.coverage?.stateDispositions) !== JSON.stringify(expectedStateDispositionCounts) || JSON.stringify(report.coverage?.stateCoverage) !== JSON.stringify(expectedStateCoverage)) throw new Error('sealed visual migration comparison coverage is not canonical');
   const expectedStatus = failed === 0 ? 'passed' : 'genuine-component-region-mismatches-require-review';
   if (report.status !== expectedStatus) throw new Error(`sealed visual migration comparison status must be ${expectedStatus}`);
   return { report, counts: expectedCounts };
@@ -797,7 +822,7 @@ export async function buildComparisonReport(manifest, { root = appRoot } = {}) {
     fixture: { frame: manifest.fixtureContract.frame, modes: manifest.fixtureContract.modes, copyData: manifest.fixtureContract.copyData, caseSha256: manifest.fixtureContract.caseSha256 },
     capture: manifest.capture,
     thresholds: manifest.thresholds,
-    coverage: { bounded: true, applicableFamilyCount: 51, families: manifest.coverage.families, noApplicableDonor: manifest.coverage.noApplicableDonor, caseCount: manifest.coverage.caseCount, comparisonCount: manifest.coverage.comparisonCount, comparableCaseCount: manifest.coverage.caseCount, nonComparableCases: [], modes: manifest.coverage.modes, states: manifest.coverage.states, stateCounts: manifest.coverage.stateCounts },
+    coverage: { bounded: true, applicableFamilyCount: 51, families: manifest.coverage.families, noApplicableDonor: manifest.coverage.noApplicableDonor, caseCount: manifest.coverage.caseCount, comparisonCount: manifest.coverage.comparisonCount, comparableCaseCount: manifest.coverage.caseCount, nonComparableCases: expectedStateCoverage.filter(({ disposition }) => disposition !== 'visual'), canonicalStateCount: expectedDescriptorStateCount, compatibilityStateCount: expectedCompatibilityStateCount, supplementalStateCount: expectedSupplementalStateCount, stateCoverageCount: expectedStateCoverage.length, stateDispositions: expectedStateDispositionCounts, stateCoverage: expectedStateCoverage, modes: manifest.coverage.modes, states: manifest.coverage.states, stateCounts: manifest.coverage.stateCounts },
     counts: { families: 51, noApplicableDonor: 2, semanticCases: manifest.coverage.caseCount, comparisons: comparisons.length, pass, failed },
     adaptations,
     comparisons,

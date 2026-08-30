@@ -187,6 +187,15 @@ function deleteBeforeInput(node) {
   }));
 }
 
+test('R1.3 collection source preserves donor glyph alignment state selectors', async () => {
+  const styles = await readFile(resolve(import.meta.dirname, '../src/styles/collections.css'), 'utf8');
+  assert.match(styles, /\.core-calendar\[data-disabled\] \.core-calendar-(?:previous|next) > svg[\s\S]*?opacity: 0\.45;/u);
+  assert.match(styles, /\.core-range-calendar\[data-disabled\] \.core-calendar-(?:previous|next) > svg[\s\S]*?opacity: 0\.45;/u);
+  assert.match(styles, /\.core-tab\s*\{[\s\S]*?padding: var\(--core-semantic-layout-group-gap\) var\(--core-reference-dimension-space-m\);/u);
+  assert.match(styles, /\.core-tree-item\[data-expanded\] \.core-tree-toggle::before\s*\{[\s\S]*?inset-inline-start: -0\.25px;/u);
+  assert.match(styles, /\[data-core-color-scheme='dark'\] :where\(\.core-calendar, \.core-range-calendar\) \{\s*background-color: var\(--core-reference-color-neutral-20\);\s*border-color: var\(--core-reference-color-neutral-10\);/u);
+});
+
 test('R1.3 temporal adapters preserve ISO values and calendar navigation', async () => {
   const server = renderToString(React.createElement(Calendar, { label: 'Start date', defaultValue: '2025-01-15' }));
   assert.match(server, /January 2025/u);
@@ -419,6 +428,35 @@ test('R1.3 scalar composites preserve string and numeric callbacks with disabled
     assert.equal(disabledSlider.disabled, true);
   } finally {
     document.activeElement?.blur();
+    await act(async () => root.unmount());
+    env.restore();
+  }
+});
+
+test('Slider exposes disabled state on its labelled group while preserving thumb semantics', async () => {
+  const env = installDom();
+  const container = document.querySelector('#root');
+  const root = createRoot(container);
+  try {
+    await act(async () => root.render(React.createElement(Slider, {
+      label: 'Disabled volume', disabled: true, defaultValue: 1, min: 0, max: 3,
+    })));
+    const slider = container.querySelector('.core-slider');
+    const input = slider?.querySelector('input[type="range"]');
+    assert.equal(slider?.getAttribute('role'), 'group');
+    assert.equal(slider?.getAttribute('aria-disabled'), 'true');
+    assert.equal(slider?.getAttribute('data-disabled'), 'true');
+    assert.equal(slider?.querySelector('.core-field-label')?.textContent, 'Disabled volume');
+    assert.equal(slider?.querySelector('.core-slider-output')?.textContent, '1');
+    assert.equal(input?.disabled, true);
+    assert.equal(input?.getAttribute('aria-labelledby')?.includes(slider?.querySelector('.core-field-label')?.id ?? ''), true);
+
+    await act(async () => root.render(React.createElement(Slider, {
+      label: 'Enabled volume', defaultValue: 1, min: 0, max: 3,
+    })));
+    assert.equal(container.querySelector('.core-slider')?.hasAttribute('aria-disabled'), false);
+    assert.equal(container.querySelector('input[type="range"]')?.disabled, false);
+  } finally {
     await act(async () => root.unmount());
     env.restore();
   }

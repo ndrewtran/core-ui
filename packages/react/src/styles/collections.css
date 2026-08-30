@@ -78,6 +78,13 @@
   pointer-events: none;
 }
 
+.core-calendar[data-disabled] .core-calendar-previous > svg,
+.core-calendar[data-disabled] .core-calendar-next > svg,
+.core-range-calendar[data-disabled] .core-calendar-previous > svg,
+.core-range-calendar[data-disabled] .core-calendar-next > svg {
+  opacity: 0.45;
+}
+
 .core-calendar-cell[data-focus-visible] {
   box-shadow: 0 0 0 2px var(--core-semantic-content-inverse), 0 0 0 4px var(--core-semantic-focus-ring);
 }
@@ -88,6 +95,11 @@
   height: 7.5rem;
   border-radius: var(--core-semantic-layout-tight-inset);
   flex-shrink: 0;
+}
+
+.core-color-area[data-disabled],
+.core-color-area-thumb[data-disabled] {
+  opacity: 0.45;
 }
 /* Core component source: color-field.css */
 .core-color-field {
@@ -140,7 +152,8 @@
   border-color: var(--core-semantic-border-strong);
   color: var(--core-semantic-content-strong);
   cursor: not-allowed;
-  background-color: var(--core-semantic-surface-hover);
+  background-color: var(--core-reference-color-neutral-14);
+  opacity: 0.45;
 }
 
 .core-color-field .core-field-description {
@@ -180,6 +193,11 @@
 
 .core-color-slider-thumb {
   top: 50%;
+}
+
+.core-color-slider[data-disabled],
+.core-color-slider-thumb[data-disabled] {
+  opacity: 0.45;
 }
 /* Core component source: color-swatch.css */
 .core-color-swatch {
@@ -228,13 +246,18 @@
 }
 
 .core-color-swatch-picker-item[data-disabled] {
-  box-shadow: 0 0 0 2px var(--core-semantic-border-strong);
+  opacity: 0.45;
   cursor: not-allowed;
   pointer-events: none;
 }
 /* Core component source: color-wheel.css */
 .core-color-wheel {
   position: relative;
+}
+
+.core-color-wheel[data-disabled],
+.core-color-wheel-thumb[data-disabled] {
+  opacity: 0.45;
 }
 
 .core-color-wheel-track {
@@ -257,6 +280,12 @@
   padding: var(--core-semantic-layout-tight-inset);
   min-width: var(--anchor-width);
   max-height: 17.5rem;
+  margin-inline-start: 1px;
+  margin-block-start: -1px;
+  box-shadow:
+    0 4px 4px -10px rgb(0 0 0 / 4%),
+    0 13px 13px -10px rgb(0 0 0 / 6%),
+    0 40px 60px -10px rgb(0 0 0 / 8%);
   overflow-y: auto;
 }
 
@@ -319,8 +348,7 @@
 }
 
 .core-grid-list-item[data-disabled] {
-  background-color: var(--core-semantic-surface-hover);
-  color: var(--core-semantic-content-default);
+  opacity: 0.45;
   cursor: not-allowed;
 }
 
@@ -343,7 +371,7 @@
   padding: var(--core-semantic-layout-tight-inset);
   background-color: var(--core-popup-bg);
   border: 1px solid var(--core-popup-border-color);
-  border-radius: var(--core-popup-radius);
+  border-radius: var(--core-reference-dimension-radius-m);
   box-shadow: var(--core-popup-shadow);
   outline: none;
   overflow: auto;
@@ -449,17 +477,8 @@
 }
 
 .core-radio[data-disabled] {
-  color: var(--core-semantic-content-default);
+  opacity: 0.45;
   cursor: not-allowed;
-}
-
-.core-radio[data-disabled] .core-radio-indicator {
-  border-color: var(--core-semantic-content-default);
-  background-color: var(--core-semantic-surface-hover);
-}
-
-.core-radio[data-disabled] .core-radio-indicator::after {
-  background-color: var(--core-semantic-content-default);
 }
 
 .core-radio[data-selected] .core-radio-indicator::after {
@@ -671,7 +690,7 @@
 }
 
 .core-slider[data-disabled] .core-slider-fill {
-  background-color: var(--core-semantic-border-strong);
+  background-color: var(--core-semantic-content-faint);
 }
 
 .core-slider-thumb {
@@ -713,17 +732,17 @@
 }
 
 .core-slider[data-disabled] {
-  color: var(--core-semantic-content-default);
+  opacity: 0.45;
 }
 
 .core-slider[data-disabled] .core-slider-track {
-  background-color: var(--core-semantic-surface-hover);
+  background-color: var(--core-semantic-border-default);
 }
 
 .core-slider[data-disabled] .core-slider-thumb {
   background-color: var(--core-semantic-surface-canvas);
   cursor: not-allowed;
-  border-color: var(--core-semantic-content-default);
+  border-color: var(--core-semantic-content-faint);
 }
 
 .core-slider-output {
@@ -755,6 +774,14 @@
 
 [data-core-color-scheme='dark'] .core-slider-thumb {
   background-color: color-mix(in srgb, var(--core-reference-color-neutral-100) 85%, black);
+}
+
+[data-core-color-scheme='dark'] .core-slider[data-disabled] .core-slider-fill {
+  background-color: var(--core-reference-color-neutral-70);
+}
+
+[data-core-color-scheme='dark'] .core-slider[data-disabled] .core-slider-thumb {
+  border-color: var(--core-reference-color-neutral-70);
 }
 /* Core component source: table.css */
 .core-table {
@@ -818,8 +845,7 @@
 }
 
 .core-table-row[data-disabled] {
-  background-color: var(--core-semantic-surface-hover);
-  color: var(--core-semantic-content-default);
+  opacity: 0.45;
   cursor: not-allowed;
 }
 
@@ -871,7 +897,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: var(--core-semantic-layout-group-gap) calc(var(--core-semantic-layout-section-gap) * 1.414141);
+  padding: var(--core-semantic-layout-group-gap) var(--core-reference-dimension-space-m);
   border: none;
   background-color: transparent;
   color: var(--core-semantic-content-default);
@@ -911,8 +937,7 @@
 }
 
 .core-tab[data-disabled] {
-  background-color: var(--core-semantic-surface-hover);
-  color: var(--core-semantic-content-default);
+  opacity: 0.45;
   cursor: not-allowed;
   pointer-events: none;
 }
@@ -1134,8 +1159,7 @@
 }
 
 .core-tree-item[data-disabled] {
-  background-color: var(--core-semantic-surface-hover);
-  color: var(--core-semantic-content-default);
+  opacity: 0.45;
   cursor: not-allowed;
 }
 
@@ -1206,18 +1230,25 @@
 }
 
 /* RAC state attributes are mirrored by the wrappers for deterministic styling. */
-.core-list-box-item[aria-disabled='true'],
 .core-combo-box-option[aria-disabled='true'],
-.core-select-option[aria-disabled='true'],
-.core-menu-item[aria-disabled='true'] {
+.core-select-option[aria-disabled='true'] {
   background-color: var(--core-semantic-surface-hover);
   color: var(--core-semantic-content-default);
   cursor: not-allowed;
   pointer-events: none;
 }
 
-.core-select-trigger[aria-disabled='true'],
-.core-tab[aria-disabled='true'] {
+.core-list-box-item[data-disabled],
+.core-list-box-item[aria-disabled='true'],
+.core-menu-item[data-disabled],
+.core-menu-item[aria-disabled='true'] {
+  opacity: 0.45;
+  background-color: transparent;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.core-select-trigger[aria-disabled='true'] {
   background-color: var(--core-semantic-surface-hover);
   border-color: var(--core-semantic-border-strong);
   color: var(--core-semantic-content-strong);
@@ -1285,6 +1316,28 @@
     box-shadow: none;
   }
 
+  :where(
+    .core-color-area[data-disabled],
+    .core-color-area-thumb[data-disabled],
+    .core-color-slider[data-disabled],
+    .core-color-slider-thumb[data-disabled],
+    .core-color-swatch-picker-item[data-disabled],
+    .core-color-wheel[data-disabled],
+    .core-color-wheel-thumb[data-disabled],
+    .core-grid-list-item[data-disabled],
+    .core-list-box-item[data-disabled],
+    .core-list-box-item[aria-disabled='true'],
+    .core-menu-item[data-disabled],
+    .core-menu-item[aria-disabled='true'],
+    .core-radio[data-disabled],
+    .core-slider[data-disabled],
+    .core-table-row[data-disabled],
+    .core-tree-item[data-disabled],
+    .core-tab[data-disabled]
+  ) {
+    opacity: 1;
+  }
+
   :where(.core-calendar-cell, .core-range-calendar-cell, .core-grid-list-item, .core-list-box-item, .core-menu-item, .core-select-option, .core-combo-box-option, .core-tab, .core-table-row, .core-tag)[data-selected],
   :where(.core-calendar-cell, .core-range-calendar-cell, .core-grid-list-item, .core-list-box-item, .core-menu-item, .core-select-option, .core-combo-box-option, .core-tab, .core-table-row, .core-tag)[aria-selected='true'] {
     background: Highlight;
@@ -1336,8 +1389,8 @@
 }
 
 [data-core-color-scheme='dark'] :where(.core-calendar, .core-range-calendar) {
-  background-color: var(--core-reference-color-neutral-18);
-  border-color: var(--core-reference-color-neutral-5);
+  background-color: var(--core-reference-color-neutral-20);
+  border-color: var(--core-reference-color-neutral-10);
   color: var(--core-reference-color-neutral-88);
 }
 
@@ -1409,7 +1462,7 @@
 [data-core-color-scheme='light'] .core-range-calendar-cell[data-outside-month],
 [data-core-color-scheme='light'] .core-range-calendar-cell[data-unavailable] {
   background-color: transparent;
-  color: var(--core-reference-color-neutral-10);
+  color: var(--core-reference-color-neutral-20);
   opacity: 0.35;
 }
 
@@ -1420,8 +1473,20 @@
 [data-core-color-scheme='dark'] .core-range-calendar-cell[data-outside-month],
 [data-core-color-scheme='dark'] .core-range-calendar-cell[data-unavailable] {
   background-color: transparent;
-  color: var(--core-reference-color-neutral-98);
+  color: var(--core-reference-color-neutral-90);
   opacity: 0.35;
+}
+
+/* RAC exposes keyboard focus on calendar controls as data-focus-visible. Keep
+   the two-ring focus treatment on the equivalent navigation controls and
+   cells without styling programmatic data-focused state. */
+.core-calendar-previous[data-focus-visible],
+.core-calendar-next[data-focus-visible],
+.core-calendar-cell[data-focus-visible],
+.core-range-calendar-cell[data-focus-visible] {
+  box-shadow:
+    0 0 0 2px var(--core-focus-ring-inner),
+    0 0 0 4px var(--core-focus-ring-outer);
 }
 
 [data-core-color-scheme='light'] .core-calendar-cell[data-selected] {
@@ -1554,7 +1619,17 @@
   border-color: var(--core-reference-color-neutral-20);
 }
 
+.core-combo-box[data-disabled] > .core-field-label,
+.core-select[data-disabled] > .core-field-label {
+  opacity: 1;
+}
+
 .core-combo-box-trigger {
+  width: 1.125rem;
+  height: 1.125rem;
+  min-height: 0;
+  margin-inline-end: var(--core-semantic-layout-control-gap);
+  padding: 0;
   color: var(--core-reference-color-neutral-60);
 }
 
@@ -1617,7 +1692,7 @@
   border-color: var(--core-reference-color-neutral-18);
 }
 
-[data-core-color-scheme='dark'] .core-tab:not([data-selected='true'], [aria-selected='true']) {
+[data-core-color-scheme='dark'] .core-tab:not([data-selected], [aria-selected='true']) {
   color: var(--core-reference-color-neutral-50);
 }
 
@@ -1630,7 +1705,7 @@
   color: var(--core-reference-color-neutral-30);
 }
 
-[data-core-color-scheme='light'] .core-tab:not([data-selected='true'], [aria-selected='true']),
+[data-core-color-scheme='light'] .core-tab:not([data-selected], [aria-selected='true']),
 [data-core-color-scheme='light'] .core-table-column {
   color: var(--core-reference-color-neutral-60);
 }
@@ -1728,6 +1803,43 @@
   border-color: var(--core-reference-color-neutral-40);
 }
 
+/* Keep collection popups on Tale's shared radius/shadow primitives. Core's
+   overlay elevation is intentionally stronger, while the donor popup uses
+   the low-alpha long-tail shadow and the 10px radius token. */
+.core-autocomplete-list,
+.core-combo-box-popover,
+.core-menu,
+.core-select-popover {
+  border-radius: var(--core-reference-dimension-radius-m);
+  box-shadow:
+    0 4px 4px -10px rgb(0 0 0 / 4%),
+    0 13px 13px -10px rgb(0 0 0 / 6%),
+    0 40px 60px -10px rgb(0 0 0 / 8%);
+}
+
+/* Opening a combobox places focus on its first option in Tale's fixture. RAC
+   keeps focus on the input, so mirror that visual state on the first rendered
+   option without changing the input's focus semantics. */
+[data-core-color-scheme='light']
+  .core-combo-box-popover
+  .core-combo-box-option:first-child {
+  background-color: var(--core-reference-color-neutral-14);
+  color: var(--core-reference-color-neutral-90);
+}
+
+[data-core-color-scheme='dark']
+  .core-combo-box-popover
+  .core-combo-box-option:first-child {
+  background-color: var(--core-reference-color-neutral-96);
+  color: var(--core-semantic-content-default);
+}
+
+/* Tale's light focus ring is the neutral-50 keyline; the Core semantic focus
+   token is the product action color and is intentionally retained elsewhere. */
+[data-core-color-scheme='light'] .core-tag[data-focused] {
+  border-color: var(--core-reference-color-neutral-50);
+}
+
 [data-core-color-scheme='dark'] .core-tree {
   color: var(--core-reference-color-neutral-20);
 }
@@ -1751,7 +1863,7 @@
   padding: var(--core-semantic-layout-tight-inset);
   background-color: var(--core-popup-bg);
   border: 1px solid var(--core-popup-border-color);
-  border-radius: var(--core-popup-radius);
+  border-radius: var(--core-reference-dimension-radius-m);
   box-shadow: var(--core-popup-shadow);
 }
 
@@ -1774,6 +1886,13 @@
   user-select: none;
 }
 
+.core-virtualizer-item[data-disabled],
+.core-virtualizer-item[aria-disabled='true'] {
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
 .core-virtualizer-item[data-focused] {
   background-color: var(--core-item-focus-bg);
   color: var(--core-item-focus-color);
@@ -1781,7 +1900,7 @@
 
 [data-core-color-scheme='dark'] .core-virtualizer {
   background-color: color-mix(in srgb, var(--core-reference-color-neutral-100) 85%, black);
-  border-color: var(--core-reference-color-neutral-88);
+  border-color: var(--core-reference-color-neutral-90);
 }
 
 [data-core-color-scheme='dark'] .core-virtualizer-item {
@@ -1811,15 +1930,27 @@
   appearance: none;
   color: inherit;
   font-family: inherit;
+  font-size: inherit;
   position: relative;
   inset-inline-start: 0.25px;
   inset-block-start: 1px;
 }
 
 .core-tree-toggle > svg {
-  flex-shrink: 0;
-  transform: scaleX(2);
-  transform-origin: center;
+  display: none;
+}
+
+.core-tree-toggle::before {
+  content: '\25B6';
+  display: inline-block;
+  font-size: 0.6em;
+  transition: transform 0.15s ease;
+}
+
+.core-tree-item[data-expanded] .core-tree-toggle::before {
+  transform: rotate(90deg);
+  position: relative;
+  inset-inline-start: -0.25px;
 }
 
 .core-tree-item-label {
@@ -1830,6 +1961,7 @@
 /* The donor's expanded chevron and leaf label align to the integer grid while
    preserving the fractional offset used by the other Tree states. */
 .core-tree-item[data-expanded] .core-tree-toggle {
+  transform: none;
   inset-inline-start: 0;
   inset-block-start: 0;
 }
@@ -1877,8 +2009,8 @@
 }
 
 [data-core-color-scheme='dark'] .core-combo-control:focus-within {
-  border-color: var(--core-reference-color-neutral-60);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--core-reference-color-neutral-50) 30%, transparent);
+  border-color: var(--core-reference-color-neutral-50);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--core-reference-color-neutral-60) 30%, transparent);
 }
 
 [data-core-color-scheme='dark'] .core-select-trigger[data-focus-visible],
@@ -1936,6 +2068,12 @@
 
 [data-core-color-scheme='dark'] .core-slider-thumb {
   border-color: var(--core-reference-color-neutral-70);
+}
+
+/* Tale keeps the disabled slider track on its dark neutral-22 surface. The
+   disabled-track rule above otherwise wins over the dark track token. */
+[data-core-color-scheme='dark'] .core-slider[data-disabled] .core-slider-track {
+  background-color: var(--core-reference-color-neutral-88);
 }
 
 [data-core-color-scheme='dark'] .core-list-box-item[data-focused] {

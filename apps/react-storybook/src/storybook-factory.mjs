@@ -141,6 +141,7 @@ function stateVariantNames(binding, family) {
   const props = new Set(binding.api.props);
   if (props.has('placement')) names.push('placement');
   if (family === 'DropZone') names.push('dragging');
+  if (family === 'TagGroup') names.push('removable');
   if (OVERLAY_FAMILIES.has(family)) names.push('entering', 'exiting');
   return [...new Set(names)];
 }
@@ -259,6 +260,8 @@ function stateIsSupported(binding, state, family) {
       return props.has('duration');
     case 'current':
       return props.has('current');
+    case 'removable':
+      return family === 'TagGroup';
     // Pressed and dismissed are transient lifecycle results without a Core
     // prop or reliable public interaction that can hold the state in a story.
     case 'pressed':
@@ -359,6 +362,9 @@ function applyStateArgs(args, binding, state, family, fixtureInput) {
     case 'timed':
       if (props.has('duration')) args.duration = 1_000;
       break;
+    case 'removable':
+      if (family === 'TagGroup') args.onRemove = () => {};
+      break;
     default:
       break;
   }
@@ -397,6 +403,10 @@ function fixtureData(args, name, defaultValue) {
   return fixture ? fixtureRenderModel(fixture).data[name] ?? defaultValue : defaultValue;
 }
 
+function fixtureState(args) {
+  return args[migrationFixtureSymbol]?.state;
+}
+
 function fixtureChildren(args, name, defaultValue) {
   const children = fixtureData(args, 'children', {});
   return children?.[name] ?? defaultValue;
@@ -430,8 +440,12 @@ const ADAPTERS = {
   DisclosureGroup: (args) => e(Core.DisclosureGroup, args, ...fixtureChildren(args, 'disclosureGroup', [{ id: 'one', title: 'One', content: 'First panel' }, { id: 'two', title: 'Two', content: 'Second panel' }]).map(({ id, title, content }) => e(Core.Disclosure, { key: id, id, title }, content))),
   Group: (args) => e(Core.Group, { ...args, 'aria-label': fallback(args['aria-label'], 'Actions') }, e(Core.Button, null, 'Save')),
   Link: (args) => e(Core.Link, { ...args, href: fallback(args.href, '/settings') }, fixtureCopy(args, 'Settings')),
-  Meter: (args) => e(Core.Meter, { ...args, label: fallback(args.label, fixtureCopy(args, 'Storage')), value: fixtureData(args, 'values', {}).meter ?? args.value ?? 72 }),
-  ProgressBar: (args) => e(Core.ProgressBar, { ...args, label: fallback(args.label, fixtureCopy(args, 'Upload')), value: args.indeterminate || Object.hasOwn(args, 'value') && args.value === undefined ? undefined : (fixtureData(args, 'values', {}).progress ?? (Object.hasOwn(args, 'value') ? args.value : 64)) }),
+  Meter: (args) => {
+    const state = fixtureState(args);
+    const fixtureValue = state === 'low' ? 24 : state === 'high' ? 88 : fixtureData(args, 'values', {}).meter ?? args.value ?? 72;
+    return e(Core.Meter, { ...args, label: fallback(args.label, fixtureCopy(args, 'Storage')), value: fixtureValue });
+  },
+  ProgressBar: (args) => e(Core.ProgressBar, { ...args, label: fallback(args.label, fixtureCopy(args, 'Upload')), value: args.indeterminate || Object.hasOwn(args, 'value') && args.value === undefined ? undefined : fixtureState(args) === 'complete' ? 100 : (fixtureData(args, 'values', {}).progress ?? (Object.hasOwn(args, 'value') ? args.value : 64)) }),
   Separator: (args) => e(Core.Separator, args),
   ToggleButton: (args) => e(Core.ToggleButton, args, fixtureCopy(args, 'Pin')),
   Autocomplete: (args) => e(Core.Autocomplete, { ...args, ...fixtureFieldProps(args, 'Autocomplete', { label: fallback(args.label, fixtureCopy(args, 'Choose a city')), placeholder: fallback(args.placeholder, fixtureCopy(args, 'Choose a city')) }), items: fixtureData(args, 'items', fallback(args.items, ['Melbourne', 'Sydney'])) }),
@@ -441,7 +455,11 @@ const ADAPTERS = {
   DateRangePicker: (args) => e(Core.DateRangePicker, { ...args, label: fallback(args.label, fixtureCopy(args, 'Trip dates')), defaultValue: args.value === undefined ? fixtureData(args, 'dateRange', fallback(args.defaultValue, { start: '2026-08-26', end: '2026-09-01' })) : args.defaultValue }),
   Form: (args) => e(Core.Form, args, e(Core.TextField, { label: fixtureChildren(args, 'form', { fieldLabel: 'Name' }).fieldLabel, name: 'name' }), e(Core.Button, { type: 'submit' }, fixtureChildren(args, 'form', { submit: 'Save' }).submit)),
   NumberField: (args) => e(Core.NumberField, { ...args, label: fallback(args.label, fixtureCopy(args, 'Quantity')), defaultValue: args.value === undefined ? (fixtureData(args, 'values', {}).number ?? args.defaultValue ?? 2) : args.defaultValue, minValue: args.minValue ?? 0 }),
-  SearchField: (args) => e(Core.SearchField, { ...args, ...fixtureFieldProps(args, 'SearchField', { label: fallback(args.label, fixtureCopy(args, 'Search')), placeholder: fallback(args.placeholder, fixtureCopy(args, 'Search')) }) }),
+  SearchField: (args) => e(Core.SearchField, {
+    ...args,
+    ...fixtureFieldProps(args, 'SearchField', { label: fallback(args.label, fixtureCopy(args, 'Search')), placeholder: fallback(args.placeholder, fixtureCopy(args, 'Search')) }),
+    onClear: args.onClear ?? (args[migrationFixtureSymbol] && args.value ? () => {} : undefined),
+  }),
   Switch: (args) => e(Core.Switch, { ...args, label: fallback(args.label, fixtureCopy(args, 'Notifications')) }),
   TextField: (args) => e(Core.TextField, { ...args, label: fixtureData(args, 'label', fallback(args.label, fixtureCopy(args, 'Name'))), placeholder: fixtureData(args, 'placeholder', fallback(args.placeholder, fixtureCopy(args, 'Enter a name'))) }),
   TimeField: (args) => e(Core.TimeField, { ...args, label: fallback(args.label, fixtureCopy(args, 'Start time')), defaultValue: args.value === undefined ? fixtureData(args, 'time', fallback(args.defaultValue, '09:30')) : args.defaultValue }),
@@ -467,8 +485,8 @@ const ADAPTERS = {
   ColorSwatchPicker: (args) => e(Core.ColorSwatchPicker, { ...args, 'aria-label': fallback(args['aria-label'], fixtureCopy(args, 'Palette')), items: fixtureData(args, 'items', fallback(args.items, [{ id: 'red', color: '#ff0000' }, { id: 'blue', color: '#0000ff' }])) }),
   ColorWheel: (args) => e(Core.ColorWheel, { ...args, 'aria-label': fallback(args['aria-label'], fixtureCopy(args, 'Hue')), outerRadius: args.outerRadius ?? 12, innerRadius: args.innerRadius ?? 8, defaultValue: args.value === undefined ? fixtureData(args, 'color', fallback(args.defaultValue, '#ff0000')) : args.defaultValue }),
   ComboBox: (args) => e(Core.ComboBox, { ...args, ...fixtureFieldProps(args, 'ComboBox', { label: fallback(args.label, fixtureCopy(args, 'Choose a city')), placeholder: fallback(args.placeholder, fixtureCopy(args, 'Choose a city')) }), items: fixtureData(args, 'items', fallback(args.items, ['Melbourne', 'Sydney'])) }),
-  GridList: (args) => e(Core.GridList, { ...args, 'aria-label': fallback(args['aria-label'], fixtureCopy(args, 'Grid')), items: fixtureData(args, 'items', fallback(args.items, ['One', 'Two'])) }),
-  ListBox: (args) => e(Core.ListBox, { ...args, 'aria-label': fallback(args['aria-label'], fixtureCopy(args, 'List')), items: fixtureData(args, 'items', fallback(args.items, ['One', 'Two'])) }),
+  GridList: (args) => e(Core.GridList, { ...args, 'aria-label': fallback(args['aria-label'], fixtureCopy(args, 'Grid')), items: fixtureState(args) === 'empty' ? [] : fixtureData(args, 'items', fallback(args.items, ['One', 'Two'])) }),
+  ListBox: (args) => e(Core.ListBox, { ...args, 'aria-label': fallback(args['aria-label'], fixtureCopy(args, 'List')), items: fixtureState(args) === 'empty' ? [] : fixtureData(args, 'items', fallback(args.items, ['One', 'Two'])) }),
   Menu: (args) => e(Core.Menu, { ...args, 'aria-label': fallback(args['aria-label'], fixtureCopy(args, 'Actions')), items: fixtureData(args, 'items', fallback(args.items, ['Save', 'Delete'])) }),
   RadioGroup: (args) => e(Core.RadioGroup, { ...args, label: fallback(args.label, fixtureCopy(args, 'Size')), options: fixtureData(args, 'options', fallback(args.options, [{ value: 's', label: 'Small' }, { value: 'l', label: 'Large' }])) }),
   RangeCalendar: (args) => e(Core.RangeCalendar, {
@@ -479,25 +497,32 @@ const ADAPTERS = {
   }),
   Select: (args) => e(Core.Select, { ...args, ...fixtureFieldProps(args, 'Select', { label: fallback(args.label, fixtureCopy(args, 'Choose a city')), placeholder: fallback(args.placeholder, fixtureCopy(args, 'Choose a city')) }), items: fixtureData(args, 'items', fallback(args.items, ['Melbourne', 'Sydney'])) }),
   Slider: (args) => e(Core.Slider, { ...args, label: fallback(args.label, fixtureCopy(args, 'Volume')), defaultValue: args.value === undefined ? (fixtureData(args, 'values', {}).slider ?? args.defaultValue ?? 60) : args.defaultValue }),
-  Table: (args) => e(Core.Table, { ...args, 'aria-label': fallback(args['aria-label'], fixtureCopy(args, 'People')), columns: fixtureData(args, 'columns', fallback(args.columns, [{ id: 'name', label: 'Name', isRowHeader: true }, { id: 'role', label: 'Role' }])), rows: fixtureData(args, 'rows', fallback(args.rows, [{ id: 'ada', values: { name: 'Ada', role: 'Engineer' } }, { id: 'grace', values: { name: 'Grace', role: 'Designer' } }])) }),
+  Table: (args) => e(Core.Table, { ...args, 'aria-label': fallback(args['aria-label'], fixtureCopy(args, 'People')), columns: fixtureData(args, 'columns', fallback(args.columns, [{ id: 'name', label: 'Name', isRowHeader: true }, { id: 'role', label: 'Role' }])), rows: fixtureState(args) === 'empty' ? [] : fixtureData(args, 'rows', fallback(args.rows, [{ id: 'ada', values: { name: 'Ada', role: 'Engineer' } }, { id: 'grace', values: { name: 'Grace', role: 'Designer' } }])) }),
   Tabs: (args) => e(Core.Tabs, { ...args, 'aria-label': fallback(args['aria-label'], fixtureCopy(args, 'Sections')), items: fixtureData(args, 'items', fallback(args.items, [{ id: 'overview', label: 'Overview', panel: 'Overview content' }, { id: 'details', label: 'Details', panel: 'Details content' }])) }),
-  TagGroup: (args) => e(Core.TagGroup, { ...args, label: fallback(args.label, fixtureCopy(args, 'Tags')), items: fixtureData(args, 'items', fallback(args.items, ['Design', 'Engineering'])) }),
+  TagGroup: (args) => e(Core.TagGroup, { ...args, label: fallback(args.label, fixtureCopy(args, 'Tags')), items: fixtureState(args) === 'empty' ? [] : fixtureData(args, 'items', fallback(args.items, ['Design', 'Engineering'])), onRemove: args.onRemove ?? (args[migrationFixtureSymbol] && args.removable ? () => {} : undefined) }),
   ToggleButtonGroup: (args) => e(Core.ToggleButtonGroup, { ...args, 'aria-label': fallback(args['aria-label'], fixtureCopy(args, 'Formatting')) }, ...fixtureChildren(args, 'toggleButtonGroup', [{ id: 'bold', label: 'Bold' }, { id: 'italic', label: 'Italic' }]).map(({ id, label }) => e(Core.ToggleButton, { key: id, id }, label))),
   TokenField: (args) => e(Core.TokenField, { ...args, label: fallback(args.label, fixtureCopy(args, 'Recipients')), defaultValue: args.value === undefined ? (args.defaultValue ?? ['Andrew', 'Core UI']) : args.defaultValue, placeholder: fallback(args.placeholder, 'Add recipient') }),
   Toolbar: (args) => e(Core.Toolbar, { ...args, 'aria-label': fallback(args['aria-label'], fixtureCopy(args, 'Formatting')) }, ...fixtureChildren(args, 'toolbar', ['Bold', 'Italic']).map((label) => e(Core.Button, { key: label }, label))),
-  Tree: (args) => e(Core.Tree, { ...args, 'aria-label': fallback(args['aria-label'], fixtureCopy(args, 'Files')), items: fixtureData(args, 'items', fallback(args.items, [{ id: 'src', label: 'src', children: [{ id: 'main', label: 'main.jsx' }] }])), defaultExpandedIds: args.expandedIds === undefined ? (args.defaultExpandedIds ?? (args[migrationFixtureSymbol] ? undefined : ['src'])) : args.defaultExpandedIds }),
+  Tree: (args) => e(Core.Tree, { ...args, 'aria-label': fallback(args['aria-label'], fixtureCopy(args, 'Files')), items: fixtureState(args) === 'empty' ? [] : fixtureData(args, 'items', fallback(args.items, [{ id: 'src', label: 'src', children: [{ id: 'main', label: 'main.jsx' }] }])), defaultExpandedIds: args.expandedIds === undefined ? (args.defaultExpandedIds ?? (args[migrationFixtureSymbol] ? undefined : ['src'])) : args.defaultExpandedIds }),
   Virtualizer: (args) => {
     const viewport = args[migrationFixtureSymbol]?.frame?.virtualizer;
     const height = viewport?.height ?? args.height ?? 180;
     if (!Number.isFinite(height) || height <= 0) throw new Error('Core migration Virtualizer requires a finite positive height');
-    const items = fixtureData(args, 'items', fallback(args.items, ['Result 1', 'Result 2', 'Result 3']));
+    const items = fixtureState(args) === 'empty' ? [] : fixtureData(args, 'items', fallback(args.items, ['Result 1', 'Result 2', 'Result 3']));
     const migration = Boolean(viewport);
     const virtualizer = e(Core.Virtualizer, {
       ...args,
       'aria-label': fallback(args['aria-label'], fixtureCopy(args, 'Results')),
       items,
-      height: migration ? 76 : height,
+      // Tale's virtualizer contracts its empty list to its border while the
+      // populated fixture uses a 76px inner viewport inside the 340x180 host.
+      // Keep the host dimensions stable but map the empty state to the same
+      // deterministic inner geometry instead of forcing an empty 76px panel.
+      height: migration ? (fixtureState(args) === 'empty' ? 12 : 76) : height,
       itemHeight: migration ? 32 : args.itemHeight ?? 32,
+      style: migration && fixtureState(args) === 'empty'
+        ? { ...(args.style ?? {}), marginBlockStart: '1px' }
+        : args.style,
     });
     return migration
       ? e('div', {

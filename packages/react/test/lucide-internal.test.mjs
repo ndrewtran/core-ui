@@ -33,8 +33,9 @@ test('Lucide stays an exact internal, tree-shakeable dependency with no public l
   const sourceByFile = await Promise.all(['components.mjs', 'fields.mjs', 'collections.mjs', 'overlays.mjs']
     .map(async (file) => [file, await readFile(resolve(packageRoot, 'src', file), 'utf8')]));
   const source = sourceByFile.map(([, content]) => content).join('\n');
-  const iconModules = ['calendar', 'check', 'chevron-down', 'chevron-left', 'chevron-right', 'minus', 'plus', 'x'];
+  const iconModules = ['check', 'chevron-down', 'chevron-left', 'chevron-right', 'minus', 'plus', 'x'];
   for (const icon of iconModules) assert.match(source, new RegExp(`from 'lucide-react/dist/esm/icons/${icon}\\.mjs'`));
+  assert.doesNotMatch(source, /from 'lucide-react\/dist\/esm\/icons\/calendar\.mjs'/u);
   assert.doesNotMatch(source, /from ['"]lucide-react['"]/u);
 
   const publicEntry = await readFile(resolve(packageRoot, 'generated/index.mjs'), 'utf8');
@@ -71,7 +72,7 @@ test('Core affordances render the accepted Lucide glyph mapping as decorative SV
     ['.core-search-clear svg', 'lucide-x', 'Clear search'],
     ['.core-number-stepper-decrement svg', 'lucide-minus', 'Decrease'],
     ['.core-number-stepper-increment svg', 'lucide-plus', 'Increase'],
-    ['.core-date-trigger svg', 'lucide-calendar', 'Open calendar'],
+    ['.core-date-trigger svg', 'core-icon--sm', 'Open calendar'],
     ['.core-calendar-previous svg', 'lucide-chevron-left', 'Previous month'],
     ['.core-calendar-next svg', 'lucide-chevron-right', 'Next month'],
     ['.core-combo-box-arrow', 'lucide-chevron-down', 'Show options'],
@@ -87,10 +88,33 @@ test('Core affordances render the accepted Lucide glyph mapping as decorative SV
     assert.equal(icon.getAttribute('focusable'), 'false');
     if (label !== null) assert.equal(icon.closest('button')?.getAttribute('aria-label'), label);
   }
+  for (const selector of ['.core-calendar-previous svg', '.core-calendar-next svg']) {
+    const icon = dom.window.document.querySelector(selector);
+    assert.equal(icon?.classList.contains('core-icon'), true);
+    assert.equal(icon?.classList.contains('core-icon--sm'), true);
+  }
   const treeIcon = dom.window.document.querySelector('.core-tree-toggle svg');
   assert.equal(treeIcon?.getAttribute('fill'), 'currentColor');
   assert.equal(treeIcon?.getAttribute('stroke-width'), '0');
-  assert.equal(dom.window.document.querySelectorAll('.core-date-trigger svg.lucide-calendar').length, 2);
+  const calendarIcons = dom.window.document.querySelectorAll('.core-date-trigger svg');
+  assert.equal(calendarIcons.length, 2);
+  for (const icon of calendarIcons) {
+    assert.equal(icon.classList.contains('lucide-calendar'), false);
+    assert.deepEqual([...icon.children].map((child) => [
+      child.tagName.toLowerCase(),
+      child.getAttribute('d'),
+      child.getAttribute('width'),
+      child.getAttribute('height'),
+      child.getAttribute('x'),
+      child.getAttribute('y'),
+      child.getAttribute('rx'),
+    ]), [
+      ['path', 'M8 2v4', null, null, null, null, null],
+      ['path', 'M16 2v4', null, null, null, null, null],
+      ['rect', null, '18', '18', '3', '4', '2'],
+      ['path', 'M3 10h18', null, null, null, null, null],
+    ]);
+  }
   assert.equal(dom.window.document.querySelector('.core-breadcrumbs svg'), null);
   assert.equal(dom.window.document.querySelector('.core-search-field .lucide-search'), null);
   dom.window.close();

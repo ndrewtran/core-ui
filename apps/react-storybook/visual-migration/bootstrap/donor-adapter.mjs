@@ -2,11 +2,15 @@ import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import {
   applicableMigrationRecords,
+  canonicalStateCoverage,
+  compatibilityStateCoverage,
   equivalentPartSelectorsFor,
   migrationCases,
   migrationFrame,
   migrationQuery,
   migrationStoryId,
+  stateCoverage,
+  supplementalStateCoverage,
   sharedFixtureInput,
 } from '../../src/visual-migration-contract.mjs';
 import { fixtureMapSourcePath } from '../../src/visual-migration-fixture-map.mjs';
@@ -36,6 +40,11 @@ export const donorAdapterProvenance = Object.freeze({
   frame: migrationFrame,
   familyCount: applicableMigrationRecords.length,
   caseCount: migrationCases.length,
+  canonicalStateCount: canonicalStateCoverage.length,
+  compatibilityStateCount: compatibilityStateCoverage.length,
+  supplementalStateCount: supplementalStateCoverage.length,
+  stateCoverageCount: stateCoverage.length,
+  stateDispositions: Object.fromEntries([...new Set(stateCoverage.map(({ disposition }) => disposition))].sort().map((disposition) => [disposition, stateCoverage.filter((entry) => entry.disposition === disposition).length])),
   taleImportBoundary: 'vite aliases @tale-ui/react/* and @tale-ui/react-styles to the supplied --tale-root only',
   renderPlanSource: donorRenderPlanSourcePath,
   mapping: Object.freeze(applicableMigrationRecords.map(({ family, slug, binding }) => Object.freeze({
