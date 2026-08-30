@@ -212,11 +212,13 @@ export function assertManifestIdentity(manifest) {
   if (identity !== expectedDonorBindingSha256) throw new Error('visual migration donor binding does not match the pinned donor artifact contract');
 }
 
-export function updateManifestIdentity(manifest, { baselineSha256, capture } = {}) {
+export function updateManifestIdentity(manifest, { baselineSha256, capture, coreCaptureRunnerSourceSha256 } = {}) {
   assertManifestIdentity(manifest);
   if (!Array.isArray(baselineSha256) || baselineSha256.length !== expectedCaptureInventory.length) throw new Error('visual migration update requires one SHA-256 identity for each light/dark capture');
+  if (coreCaptureRunnerSourceSha256 !== undefined && !/^sha256:[0-9a-f]{64}$/u.test(coreCaptureRunnerSourceSha256)) throw new Error('visual migration update requires a valid Core capture runner source SHA-256');
   const next = structuredClone(manifest);
   if (capture) next.capture = { ...next.capture, ...structuredClone(capture) };
+  if (coreCaptureRunnerSourceSha256 !== undefined) next.bootstrap.coreCaptureRunnerSourceSha256 = coreCaptureRunnerSourceSha256;
   for (const [index, [, caseId, , , mode]] of expectedCaptureInventory.entries()) {
     const entry = next.cases.find(({ id }) => id === caseId);
     entry.baseline[mode].sha256 = baselineSha256[index];
@@ -560,7 +562,8 @@ async function validateCoreCaptureProvenance(manifest, { root = appRoot, provena
   return provenance;
 }
 
-export async function validateManifest(manifest, { root = appRoot, allowMissingCoreCaptureProvenance = false, coreCaptureProvenance: suppliedCoreCaptureProvenance } = {}) {
+export async function validateManifest(manifest, { root = appRoot, allowMissingCoreCaptureProvenance = false, allowCoreCaptureRunnerSourceDrift = false, coreCaptureProvenance: suppliedCoreCaptureProvenance } = {}) {
+  if (allowCoreCaptureRunnerSourceDrift && !allowMissingCoreCaptureProvenance) throw new Error('Core capture runner source drift is available only during update-only validation');
   validateTaleStyleInventory();
   if (manifest?.schema !== 'core-ui-react-visual-migration-manifest-v2' || manifest.version !== 2) throw new Error('visual migration manifest has an unknown schema or version');
   assertManifestIdentity(manifest);
@@ -579,7 +582,7 @@ export async function validateManifest(manifest, { root = appRoot, allowMissingC
   }
   if (!/^sha256:[0-9a-f]{64}$/u.test(manifest.bootstrap.coreCaptureRunnerSourceSha256)) throw new Error('visual migration manifest must retain the Core capture runner identity');
   const coreCaptureRunnerSource = await readFile(resolve(root, coreCaptureRunnerSourcePath));
-  if (sha256(coreCaptureRunnerSource) !== manifest.bootstrap.coreCaptureRunnerSourceSha256) throw new Error('visual migration Core capture runner source SHA-256 does not match its content');
+  if (!allowCoreCaptureRunnerSourceDrift && sha256(coreCaptureRunnerSource) !== manifest.bootstrap.coreCaptureRunnerSourceSha256) throw new Error('visual migration Core capture runner source SHA-256 does not match its content');
   if (!manifest.bootstrap.tale || manifest.bootstrap.tale.commit !== expectedDonorCommit || !/^[0-9a-f]{40}$/u.test(manifest.bootstrap.tale.tree) || !/^sha256:[0-9a-f]{64}$/u.test(manifest.bootstrap.tale.sourceSha256) || manifest.bootstrap.tale.styleInventoryPath !== taleStyleInventoryPath || manifest.bootstrap.tale.styleInventorySha256 !== taleStyleInventorySha256) throw new Error('visual migration manifest must retain the pinned Tale source and complete style-inventory identity');
   if (!manifest.bootstrap.captureProvenance || manifest.bootstrap.captureProvenance.path !== 'visual-migration/results/donor-capture-provenance.json' || !/^sha256:[0-9a-f]{64}$/u.test(manifest.bootstrap.captureProvenance.sha256)) throw new Error('visual migration manifest must retain immutable donor capture provenance');
   const provenanceAbsolutePath = resolve(root, manifest.bootstrap.captureProvenance.path);

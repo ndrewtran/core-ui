@@ -45,6 +45,7 @@ import { renderFamily, stateArgsForBinding, storyArgsForBinding } from '../src/s
 import { migrationFixtureSymbol, sharedFixtureInput } from '../src/visual-migration-contract.mjs';
 import { fixtureFieldPropsFor, fixtureRenderModel } from '../src/visual-migration-fixture-map.mjs';
 import { renderFamilyPlan } from '../visual-migration/bootstrap/donor-render-plan.mjs';
+import { visualMigrationStoryReady } from './run-visual-migration.mjs';
 import * as visualMigrationModule from '../src/visual-migration.mjs';
 import { taleStyleInventory, validateTaleStyleInventory } from '../src/tale-style-inventory.mjs';
 
@@ -742,6 +743,22 @@ test('update identity preserves the expanded case inventory and all donor proven
   assert.throws(() => updateManifestIdentity(manifest, { baselineSha256: hashes.slice(1) }), /one SHA-256 identity/);
 });
 
+test('Core capture runner drift is update-only and update identity binds the current source', async () => {
+  const hashes = expectedCaptureInventory.map(([, id, , , mode]) => manifest.cases.find((entry) => entry.id === id).baseline[mode].sha256);
+  const currentRunnerSource = await readFile(resolve(appRoot, 'test/run-visual-migration.mjs'));
+  const currentRunnerHash = sha256(currentRunnerSource);
+  const drifted = structuredClone(manifest);
+  drifted.bootstrap.coreCaptureRunnerSourceSha256 = `sha256:${'0'.repeat(64)}`;
+  await assert.rejects(validateManifest(drifted, { allowMissingCoreCaptureProvenance: true }), /Core capture runner source SHA-256 does not match/);
+  await assert.rejects(validateManifest(drifted, { allowCoreCaptureRunnerSourceDrift: true }), /available only during update-only validation/);
+  await assert.doesNotReject(validateManifest(drifted, {
+    allowMissingCoreCaptureProvenance: true,
+    allowCoreCaptureRunnerSourceDrift: true,
+  }));
+  const rebound = updateManifestIdentity(manifest, { baselineSha256: hashes, coreCaptureRunnerSourceSha256: currentRunnerHash });
+  assert.equal(rebound.bootstrap.coreCaptureRunnerSourceSha256, currentRunnerHash);
+});
+
 test('semantic negative cases fail closed: portal omission, no-op action, fixture/report substitution, and pixel exclusion', async () => {
   const portalOmission = structuredClone(manifest);
   portalOmission.cases.find(({ id }) => id === 'dialog-open').region.requiredSelectors = ['.core-dialog'];
@@ -801,6 +818,44 @@ test('capture environment mismatches fail before routine comparison', () => {
   assert.ok(mismatches.some((value) => value.startsWith('platform')));
   assert.ok(mismatches.some((value) => value.startsWith('architecture')));
   assert.throws(() => assertCaptureEnvironment(actual, manifest.capture), /capture environment mismatch/);
+});
+
+test('Core capture readiness waits for the requested case and fails closed for stale or invalid DOM', () => {
+  const expectedCaseSelector = '[data-core-migration-case="color-swatch-picker-selected"]';
+  const expected = {
+    expectedScheme: 'light',
+    expectedToken: 'run-token',
+    expectedCaseSelector,
+  };
+  const makeDocument = ({ caseCount = 1, errorVisible = false, preparingVisible = false } = {}) => {
+    const visibleElement = (visible) => ({
+      style: {
+        display: visible ? 'block' : 'none',
+        visibility: 'visible',
+        opacity: '1',
+      },
+    });
+    const caseMarkers = Array.from({ length: caseCount }, () => ({}));
+    return {
+      defaultView: { getComputedStyle: (element) => element.style },
+      documentElement: { getAttribute: (name) => name === 'data-core-color-scheme' ? 'light' : null },
+      querySelector(selector) {
+        if (selector === '#storybook-root') return { firstElementChild: {} };
+        if (selector === '.core-storybook-surface') return {};
+        if (selector === '[data-core-migration-run-token]') return { getAttribute: () => 'run-token' };
+        if (selector === '.sb-errordisplay') return errorVisible ? visibleElement(true) : null;
+        if (selector === '.sb-preparing-story') return preparingVisible ? visibleElement(true) : null;
+        return null;
+      },
+      querySelectorAll: (selector) => selector === expectedCaseSelector ? caseMarkers : [],
+    };
+  };
+
+  assert.equal(visualMigrationStoryReady({ ...expected, documentRoot: makeDocument() }), true);
+  assert.equal(visualMigrationStoryReady({ ...expected, documentRoot: makeDocument({ caseCount: 0 }) }), false, 'stale or absent case must not satisfy run-token readiness');
+  assert.equal(visualMigrationStoryReady({ ...expected, documentRoot: makeDocument({ caseCount: 2 }) }), false, 'duplicate case markers must not satisfy readiness');
+  assert.equal(visualMigrationStoryReady({ ...expected, documentRoot: makeDocument({ errorVisible: true }) }), false, 'runtime errors must not be masked by a matching case');
+  assert.equal(visualMigrationStoryReady({ ...expected, documentRoot: makeDocument({ preparingVisible: true }) }), false, 'Storybook preparation must not be treated as a settled capture');
 });
 
 test('routine checker and fixture contain no Tale runtime, dependency, path, or external override', async () => {

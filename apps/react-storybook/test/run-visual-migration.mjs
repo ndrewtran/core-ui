@@ -4,6 +4,7 @@ import { access, lstat, mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/
 import { tmpdir } from 'node:os';
 import { createServer } from 'node:net';
 import { join, resolve } from 'node:path';
+import { pathToFileURL } from 'node:url';
 import { promisify } from 'node:util';
 import { chromium } from 'playwright-core';
 import {
@@ -224,34 +225,44 @@ async function startStorybook(port, runToken) {
   }
 }
 
-async function waitForStory(page, scheme, runToken) {
+export function visualMigrationStoryReady({ expectedScheme, expectedToken, expectedCaseSelector, documentRoot = document }) {
+  const root = documentRoot.querySelector('#storybook-root');
+  const surface = documentRoot.querySelector('.core-storybook-surface');
+  const migrationRoot = documentRoot.querySelector('[data-core-migration-run-token]');
+  const error = documentRoot.querySelector('.sb-errordisplay');
+  const preparing = documentRoot.querySelector('.sb-preparing-story');
+  const visible = (element) => {
+    if (!element) return false;
+    const style = documentRoot.defaultView?.getComputedStyle?.(element) ?? getComputedStyle(element);
+    return style.display !== 'none' && style.visibility !== 'hidden' && style.opacity !== '0';
+  };
+  return Boolean(root?.firstElementChild)
+    && Boolean(surface)
+    && migrationRoot?.getAttribute('data-core-migration-run-token') === expectedToken
+    && documentRoot.documentElement.getAttribute('data-core-color-scheme') === expectedScheme
+    && documentRoot.querySelectorAll(expectedCaseSelector).length === 1
+    && !visible(error)
+    && !visible(preparing);
+}
+
+async function waitForStory(page, scheme, runToken, caseSelector) {
   try {
-    await page.waitForFunction(({ expectedScheme, expectedToken }) => {
-    const root = document.querySelector('#storybook-root');
-    const surface = document.querySelector('.core-storybook-surface');
-    const migrationRoot = document.querySelector('[data-core-migration-run-token]');
-    const error = document.querySelector('.sb-errordisplay');
-    const preparing = document.querySelector('.sb-preparing-story');
-    const visible = (element) => {
-      if (!element) return false;
-      const style = getComputedStyle(element);
-      return style.display !== 'none' && style.visibility !== 'hidden' && style.opacity !== '0';
-    };
-    return Boolean(root?.firstElementChild)
-      && Boolean(surface)
-      && migrationRoot?.getAttribute('data-core-migration-run-token') === expectedToken
-      && document.documentElement.getAttribute('data-core-color-scheme') === expectedScheme
-      && !visible(error)
-      && !visible(preparing);
-    }, { expectedScheme: scheme, expectedToken: runToken }, { timeout: storyTimeoutMs });
+    await page.waitForFunction(visualMigrationStoryReady, {
+      expectedScheme: scheme,
+      expectedToken: runToken,
+      expectedCaseSelector: caseSelector,
+    }, { timeout: storyTimeoutMs });
   } catch (error) {
-    const diagnostic = await page.evaluate(() => ({
+    const diagnostic = await page.evaluate((expectedCaseSelector) => ({
       token: document.querySelector('[data-core-migration-run-token]')?.getAttribute('data-core-migration-run-token'),
       scheme: document.documentElement.getAttribute('data-core-color-scheme'),
+      caseCount: document.querySelectorAll(expectedCaseSelector).length,
+      cases: [...document.querySelectorAll('[data-core-migration-case]')].map((element) => element.getAttribute('data-core-migration-case')),
       error: document.querySelector('#error-message')?.textContent,
       stack: document.querySelector('#error-stack')?.textContent,
-    })).catch(() => ({}));
-    throw new Error(`${error instanceof Error ? error.message : String(error)}${diagnostic.error || diagnostic.stack ? ` (${diagnostic.error ?? diagnostic.stack})` : ''}`);
+    }), caseSelector).catch(() => ({}));
+    const observedCases = diagnostic.cases?.length > 0 ? `; observed cases: ${diagnostic.cases.join(', ')}` : '';
+    throw new Error(`${error instanceof Error ? error.message : String(error)} (expected case count: ${diagnostic.caseCount ?? 'unknown'}${observedCases})${diagnostic.error || diagnostic.stack ? ` (${diagnostic.error ?? diagnostic.stack})` : ''}`);
   }
 }
 
@@ -396,7 +407,7 @@ async function captureCase(page, baseUrl, manifest, entry, mode, runToken) {
   }, { scheme: mode, frame: manifest.fixtureContract.frame });
   const viewport = page.viewportSize();
   if (viewport?.width !== manifest.capture.viewport.width || viewport?.height !== manifest.capture.viewport.height) throw new Error(`${entry.id}: capture viewport does not match the shared frame`);
-  await waitForStory(page, mode, runToken);
+  await waitForStory(page, mode, runToken, canonical.selector);
   if (entry.region.capture === 'viewport') {
     // Match the pinned donor's standalone document frame for portal captures.
     // Component captures clip their semantic root, so their Storybook host
@@ -463,7 +474,7 @@ async function compareCase(page, baseUrl, manifest, entry, mode, runToken, diagn
   return { pass: true, message: `${pixels.mismatchedPixels} differing pixels` };
 }
 
-async function prepareUpdatedSnapshot(manifest, captures, captureEnvironment) {
+async function prepareUpdatedSnapshot(manifest, captures, captureEnvironment, coreCaptureRunnerSourceSha256) {
   const hashes = [];
   for (const entry of manifest.cases) {
     for (const mode of manifest.capture.modes) {
@@ -478,6 +489,7 @@ async function prepareUpdatedSnapshot(manifest, captures, captureEnvironment) {
   const nextManifest = updateManifestIdentity(manifest, {
     baselineSha256: hashes,
     capture: captureEnvironment,
+    coreCaptureRunnerSourceSha256,
   });
   nextManifest.baselineDirectory = snapshotDirectory;
   nextManifest.cases = nextManifest.cases.map((entry) => ({
@@ -605,7 +617,8 @@ async function updateBaselines(page, baseUrl, manifest, captureEnvironment, runT
       captures.set(`${entry.id}--${mode}`, captured);
     }
   }
-  const prepared = await prepareUpdatedSnapshot(manifest, captures, captureEnvironment);
+  const coreCaptureRunnerSourceSha256 = sha256(await readFile(resolve(appRoot, coreCaptureRunnerSourcePath)));
+  const prepared = await prepareUpdatedSnapshot(manifest, captures, captureEnvironment, coreCaptureRunnerSourceSha256);
   prepared.nextManifest.cases = prepared.nextManifest.cases.map((entry) => {
     const light = captures.get(`${entry.id}--light`);
     const dark = captures.get(`${entry.id}--dark`);
@@ -647,7 +660,10 @@ async function main() {
   if (unknownArguments.length > 0) throw new Error(`unknown visual migration argument: ${unknownArguments[0]}`);
   await recoverVisualMigrationActivation();
   const manifest = await readManifest();
-  await validateManifest(manifest, { allowMissingCoreCaptureProvenance: updateMode });
+  await validateManifest(manifest, {
+    allowMissingCoreCaptureProvenance: updateMode,
+    allowCoreCaptureRunnerSourceDrift: updateMode,
+  });
   if (!updateMode) await validateSealedComparison(manifest);
   const executablePath = await findBrowser();
   if (!executablePath) throw new Error('Chrome or Chromium is required (set CORE_UI_CHROME_EXECUTABLE to override)');
@@ -716,11 +732,13 @@ async function main() {
   }
 }
 
-try {
-  await main();
-} catch (error) {
-  console.error(`Visual migration check failed: ${error instanceof Error ? error.message : String(error)}`);
-  if (process.env.CORE_UI_VISUAL_DEBUG && error instanceof Error) console.error(error.stack);
-  if (error?.cause) console.error(error.cause);
-  process.exitCode = 1;
+if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
+  try {
+    await main();
+  } catch (error) {
+    console.error(`Visual migration check failed: ${error instanceof Error ? error.message : String(error)}`);
+    if (process.env.CORE_UI_VISUAL_DEBUG && error instanceof Error) console.error(error.stack);
+    if (error?.cause) console.error(error.cause);
+    process.exitCode = 1;
+  }
 }
