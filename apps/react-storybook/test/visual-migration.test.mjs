@@ -20,6 +20,11 @@ import {
   donorBindingSha256,
   expectedCaseInventory,
   expectedCaptureInventory,
+  expectedDescriptorStateCount,
+  expectedCompatibilityStateCount,
+  expectedSupplementalStateCount,
+  expectedStateCoverage,
+  expectedStateDispositionCounts,
   expectedDonorBindingSha256,
   expectedStoryId,
   expectedStoryQuery,
@@ -35,12 +40,13 @@ import {
   validateManifest,
   validateSnapshotFiles,
 } from '../src/visual-migration.mjs';
-import { isMigrationFixtureRequest } from '../src/visual-migration-contract.mjs';
+import { isMigrationFixtureRequest, stateCoverage } from '../src/visual-migration-contract.mjs';
 import { renderFamily, stateArgsForBinding, storyArgsForBinding } from '../src/storybook-factory.mjs';
 import { migrationFixtureSymbol, sharedFixtureInput } from '../src/visual-migration-contract.mjs';
 import { fixtureFieldPropsFor, fixtureRenderModel } from '../src/visual-migration-fixture-map.mjs';
 import { renderFamilyPlan } from '../visual-migration/bootstrap/donor-render-plan.mjs';
 import * as visualMigrationModule from '../src/visual-migration.mjs';
+import { taleStyleInventory, validateTaleStyleInventory } from '../src/tale-style-inventory.mjs';
 
 const recordsByFamily = new Map(applicableMigrationRecords.map((record) => [record.family, record]));
 
@@ -68,29 +74,50 @@ test('the canonical closure proves 51 applicable families and two exact no-donor
   assert.equal(manifest.coverage.applicableFamilyCount, 51);
   assert.deepEqual(manifest.coverage.noApplicableDonor, noApplicableDonorFamilies);
   assert.deepEqual(manifest.cases.map(({ id, component, state }) => [id, component, state]), expectedCaseInventory);
-  assert.equal(manifest.coverage.caseCount, 132);
-  assert.equal(manifest.coverage.comparisonCount, 264);
+  assert.equal(manifest.coverage.caseCount, migrationCases.length);
+  assert.equal(manifest.coverage.comparisonCount, expectedCaptureInventory.length);
+  assert.equal(manifest.coverage.canonicalStateCount, expectedDescriptorStateCount);
+  assert.equal(manifest.coverage.compatibilityStateCount, expectedCompatibilityStateCount);
+  assert.equal(manifest.coverage.supplementalStateCount, expectedSupplementalStateCount);
+  assert.equal(manifest.coverage.stateCoverageCount, expectedStateCoverage.length);
+  assert.deepEqual(manifest.coverage.stateDispositions, expectedStateDispositionCounts);
   await validateSealedComparison(manifest);
   assert.deepEqual(manifest.capture.modes, ['light', 'dark']);
   assert.deepEqual(comparison.counts, {
     families: 51,
     noApplicableDonor: 2,
-    semanticCases: 132,
-    comparisons: 264,
+    semanticCases: migrationCases.length,
+    comparisons: expectedCaptureInventory.length,
     pass: comparison.comparisons.filter(({ pass }) => pass).length,
     failed: comparison.comparisons.filter(({ pass }) => !pass).length,
   });
   assert.equal(comparison.status, 'passed');
-  assert.equal(comparison.counts.pass, 264);
+  assert.equal(comparison.counts.pass, expectedCaptureInventory.length);
   assert.equal(comparison.counts.failed, 0);
   assert.equal(comparison.mismatchInventory.every(({ failed }) => failed === 0), true);
   assert.equal(comparison.comparisons.filter(({ pass }) => pass).length, comparison.counts.pass);
   assert.equal(comparison.comparisons.filter(({ pass }) => !pass).length, comparison.counts.failed);
   assert.equal(comparison.mismatchInventory.length, 51);
-  assert.equal(comparison.comparisons.length, 264);
+  assert.equal(comparison.comparisons.length, expectedCaptureInventory.length);
   assert.equal(snapshotDirectoryForHashes(expectedCaptureInventory.map(([, id, , , mode]) => manifest.cases.find((entry) => entry.id === id).baseline[mode].sha256)), manifest.baselineDirectory);
   assertManifestIdentity(manifest);
   assert.equal(manifest.donorBindingSha256, expectedDonorBindingSha256);
+});
+
+test('the Tale style ledger accounts for every pinned stylesheet and state coverage is explicit', () => {
+  assert.equal(validateTaleStyleInventory().fileCount, 125);
+  assert.equal(taleStyleInventory.donor.fileCount, 125);
+  assert.equal(stateCoverage.length, expectedStateCoverage.length);
+  assert.equal(expectedStateCoverage.filter(({ disposition }) => disposition === 'visual').length, migrationCases.length);
+  assert.ok(expectedStateCoverage.every(({ check }) => check?.type));
+  assert.equal(expectedStateCoverage.find(({ family, state }) => family === 'TagGroup' && state === 'removable')?.check?.type, 'dom');
+  assert.equal(migrationCases.some(({ id }) => id === 'search-field-filled'), true);
+  const behaviorRecords = expectedStateCoverage.filter(({ disposition }) => disposition === 'behavior-only');
+  assert.equal(behaviorRecords.length, 10);
+  assert.ok(behaviorRecords.every(({ check }) => check?.type === 'behavior' && check.selector && check.interaction && check.assertion));
+  const unsupportedRecords = expectedStateCoverage.filter(({ disposition }) => disposition === 'unsupported');
+  assert.equal(unsupportedRecords.length, 8);
+  assert.ok(unsupportedRecords.every(({ check }) => check?.type === 'dom' && check.rationale));
 });
 
 test('the pinned Storybook fixture requires the canonical story and private query', () => {
@@ -121,6 +148,13 @@ test('migration host resets stay private and expanded triggers are not pressed b
   assert.match(previewStyles, /body\[data-core-migration-host='true'\][\s\S]*margin: 0 !important;/u);
 });
 
+test('disabled tab opacity wins over semantic recoloring and resets in forced colors', async () => {
+  const collectionStyles = await readFile(resolve(appRoot, '../../packages/react/src/styles/collections.css'), 'utf8');
+  assert.match(collectionStyles, /\.core-tab\[data-disabled\]\s*\{\s*opacity: 0\.45;/u);
+  assert.doesNotMatch(collectionStyles, /\.core-select-trigger\[aria-disabled='true'\],\s*\.core-tab\[aria-disabled='true'\]/u);
+  assert.match(collectionStyles, /@media \(forced-colors: active\)[\s\S]*\.core-tab\[data-disabled\][\s\S]*opacity: 1;/u);
+});
+
 test('donor capture accessibility normalization stays bounded to the migration fixture', async () => {
   const captureSource = await readFile(resolve(appRoot, 'visual-migration/bootstrap/capture.mjs'), 'utf8');
   const escapeRegExp = (value) => value.replace(/[.*+?^${}()|[\]\\]/gu, '\\$&');
@@ -144,7 +178,7 @@ test('donor capture accessibility normalization stays bounded to the migration f
 test('manifest identity rejects inventory, donor, and query drift', () => {
   const removed = structuredClone(manifest);
   removed.cases.pop();
-  assert.throws(() => assertManifestIdentity(removed), /exact 132 semantic cases/);
+  assert.throws(() => assertManifestIdentity(removed), new RegExp(`exact ${migrationCases.length} semantic cases`));
   const substituted = structuredClone(manifest);
   substituted.cases[0] = { ...substituted.cases[0], id: 'switch-idle', component: 'Switch', state: 'idle' };
   assert.throws(() => assertManifestIdentity(substituted), /inventory drift/);
@@ -216,6 +250,11 @@ function fakeElement(type, props, ...children) {
 
 function fakeDonorRuntime() {
   const packages = new Proxy({}, { get: () => fakeNamespace() });
+  const renderFakeTreeItem = (item, _treePackage, key, itemProps = {}) => fakeElement(
+    'tree-item',
+    { ...itemProps, id: item.id, key },
+    [item.label, (item.children ?? []).map((child) => renderFakeTreeItem(child, _treePackage, child.id, itemProps))],
+  );
   return {
     h: fakeElement,
     packages,
@@ -231,7 +270,7 @@ function fakeDonorRuntime() {
     parseFixtureDate: (value) => value,
     renderCalendar: (_packageNamespace, model, props, range = false) => fakeElement('calendar', { ...props, value: range ? { start: model.data.dateRange.start, end: model.data.dateRange.end } : model.data.date }, []),
     renderField: (_packageNamespace, model, props, kind) => fakeElement('field', { ...props, defaultValue: kind === 'time' ? model.data.time : model.data.date, label: model.copy }, []),
-    renderTreeItem: (item) => fakeElement('tree-item', { id: item.id }, [item.label]),
+    renderTreeItem: renderFakeTreeItem,
     ToastHarness: fakeComponent,
     textItem: (value) => fakeElement('text', {}, [typeof value === 'object' ? value.label : value]),
     colorValue: (value) => value,
@@ -288,6 +327,8 @@ test('the retained Tale render plan consumes the complete shared fixture contrac
   assert.deepEqual(planFor('range-calendar-idle', (data) => { data.dateRange = { start: '2031-04-05', end: '2031-04-12' }; }).props.value, { start: '2031-04-05', end: '2031-04-12' });
   assert.equal(planFor('color-field-idle', (data) => { data.color = '#123456'; }).props.defaultValue, '#123456');
   assert.equal(planFor('meter-idle', (data) => { data.values.meter = 13; }).props.value, 13);
+  assert.equal(planFor('meter-low').props.value, 24);
+  assert.equal(planFor('meter-high').props.value, 88);
   assert.equal(planFor('progress-bar-idle', (data) => { data.values.progress = 17; }).props.value, 17);
   assert.equal(planFor('number-field-idle', (data) => { data.values.number = 19; }).props.defaultValue, 19);
   assert.equal(planFor('slider-idle', (data) => { data.values.slider = 23; }).props.defaultValue, 23);
@@ -298,6 +339,59 @@ test('the retained Tale render plan consumes the complete shared fixture contrac
   assert.equal(planContains(planFor('form-idle', (data) => { data.children.form = { fieldLabel: 'Fixture field', submit: 'Fixture submit' }; }), 'Fixture submit'), true);
   assert.equal(planContains(planFor('toolbar-idle', (data) => { data.children.toolbar = ['Fixture toolbar']; }), 'Fixture toolbar'), true);
   assert.equal(planContains(planFor('toggle-button-group-idle', (data) => { data.children.toggleButtonGroup = [{ id: 'fixture', label: 'Fixture toggle' }]; }), 'Fixture toggle'), true);
+  assert.equal(planFor('link-current').props['aria-current'], 'page');
+  assert.equal(planFor('link-current').props['data-current'], 'true');
+  assert.equal(planFor('virtualizer-empty').props.style.height, '180px');
+  assert.equal(planFor('virtualizer-idle').props.style.height, '180px');
+});
+
+test('dark current Link styling covers the Core and donor state markers', async () => {
+  const componentStyles = await readFile(resolve(appRoot, '../../packages/react/src/styles/components.css'), 'utf8');
+  assert.match(componentStyles, /\.core-link:not\(\.core-button\):is\(\[aria-current='page'\], \[data-current\]\)\s*\{[\s\S]*?color: var\(--core-reference-color-neutral-20\);/u);
+});
+
+test('disabled Tale donor plans forward disabled state to nested parts and items', () => {
+  const assertDisabled = (element, label) => {
+    assert.equal(element.props.isDisabled, true, `${label} must receive isDisabled`);
+    assert.equal(element.props.disabled, true, `${label} must receive disabled`);
+  };
+
+  assertDisabled(planFor('file-trigger-disabled').props.children, 'FileTrigger button');
+
+  const colorPickerParts = planFor('color-picker-disabled').props.children;
+  for (const [index, part] of colorPickerParts.entries()) assertDisabled(part, `ColorPicker nested part ${index}`);
+
+  const swatches = planFor('color-swatch-picker-disabled').props.children;
+  for (const [index, item] of swatches.entries()) {
+    assertDisabled(item, `ColorSwatchPicker item ${index}`);
+    assertDisabled(item.props.children, `ColorSwatchPicker swatch ${index}`);
+  }
+
+  for (const family of ['GridList', 'ListBox']) {
+    const item = planFor(`${family.replaceAll(/([a-z])([A-Z])/gu, '$1-$2').toLowerCase()}-disabled`).props.children[0];
+    assertDisabled(item, `${family} item`);
+  }
+
+  const menuItem = planFor('menu-disabled').props.children.props.children[0];
+  assertDisabled(menuItem, 'Menu item');
+
+  const tableRow = planFor('table-disabled').props.children[1].props.children[0];
+  assertDisabled(tableRow, 'Table row');
+
+  const tab = planFor('tabs-disabled').props.children[0].props.children[0];
+  assertDisabled(tab, 'Tabs tab');
+
+  const treeRoot = planFor('tree-disabled').props.children.props.children;
+  const treeItem = treeRoot[0];
+  assertDisabled(treeItem, 'Tree root item');
+  assertDisabled(treeItem.props.children[1][0], 'Tree nested item');
+
+  const virtualizerItem = planFor('virtualizer-disabled').props.children.props.children.props.children[0];
+  assertDisabled(virtualizerItem, 'Virtualizer item');
+
+  const idleGridItem = planFor('grid-list-idle').props.children[0];
+  assert.equal(idleGridItem.props.isDisabled, undefined);
+  assert.equal(idleGridItem.props.disabled, undefined);
 });
 
 test('migration adapters pass mutated fixture data into Core runtime props', () => {
@@ -639,7 +733,7 @@ test('diagnostic capture never writes through the retained results tree', async 
   }
 });
 
-test('update identity preserves the exact 132-case inventory and all donor provenance', () => {
+test('update identity preserves the expanded case inventory and all donor provenance', () => {
   const hashes = expectedCaptureInventory.map(([, id, , , mode]) => manifest.cases.find((entry) => entry.id === id).baseline[mode].sha256);
   const next = updateManifestIdentity(manifest, { baselineSha256: hashes, capture: { runtime: manifest.capture.runtime } });
   assert.deepEqual(next.cases.map(({ id, component, state }) => [id, component, state]), expectedCaseInventory);
@@ -654,7 +748,8 @@ test('semantic negative cases fail closed: portal omission, no-op action, fixtur
   await assert.rejects(validateManifest(portalOmission), /region must equal the canonical semantic-region contract/);
 
   const noOpAction = structuredClone(manifest);
-  noOpAction.cases.find(({ id }) => id === 'button-pressed').action = { type: 'focus', selector: '.missing-action-target' };
+  const actionCase = noOpAction.cases.find(({ action }) => action?.type === 'open');
+  actionCase.action = { type: 'focus', selector: '.missing-action-target' };
   await assert.rejects(validateManifest(noOpAction), /action must equal the canonical matched state action/);
 
   const fixtureSubstitution = structuredClone(manifest);

@@ -282,6 +282,26 @@ test('DropZone and FileTrigger normalize browser inputs to Core-owned values', a
   }
 });
 
+test('DropZone mirrors disabled state on its public root for assistive technology', async () => {
+  const env = installDom();
+  const host = document.querySelector('#root');
+  const root = createRoot(host);
+  try {
+    await act(async () => root.render(React.createElement(DropZone, { 'aria-label': 'Upload', disabled: true }, 'Drop here')));
+    const dropZone = host.querySelector('.core-drop-zone');
+    assert.ok(dropZone);
+    assert.equal(dropZone.getAttribute('data-disabled'), 'true');
+    assert.equal(dropZone.getAttribute('aria-disabled'), 'true');
+
+    await act(async () => root.render(React.createElement(DropZone, { 'aria-label': 'Upload' }, 'Drop here')));
+    assert.equal(dropZone.getAttribute('data-disabled'), null);
+    assert.equal(dropZone.getAttribute('aria-disabled'), null);
+  } finally {
+    await act(async () => root.unmount());
+    env.restore();
+  }
+});
+
 test('Popover dismissable false prevents Escape and outside-press dismissal', async () => {
   const env = installDom();
   const host = document.querySelector('#root');

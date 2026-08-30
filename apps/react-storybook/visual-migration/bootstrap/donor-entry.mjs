@@ -53,6 +53,8 @@ import * as PopoverPackage from '@tale-ui/react/popover';
 import * as PreviewCardPackage from '@tale-ui/react/preview-card';
 import * as ToastPackage from '@tale-ui/react/toast';
 import * as TooltipPackage from '@tale-ui/react/tooltip';
+import * as IconPackage from '@tale-ui/react/icon';
+import { Check as CheckIcon, Minus as MinusIcon, X as XIcon } from 'lucide-react';
 import { equivalentPartSelectorsFor, migrationCases, migrationFrame, sharedFixtureInput } from '../../src/visual-migration-contract.mjs';
 import { renderFamilyPlan } from './donor-render-plan.mjs';
 
@@ -119,6 +121,21 @@ const packages = {
 function propsFor(entry) {
   const props = { className: 'migration-tale-root' };
   switch (entry.state) {
+    case 'disabled':
+      if (entry.component !== 'Breadcrumbs') {
+        props.isDisabled = true;
+        props.disabled = true;
+      }
+      break;
+    case 'readonly':
+    case 'read-only':
+      props.isReadOnly = true;
+      props.readOnly = true;
+      break;
+    case 'required':
+      props.isRequired = true;
+      props.required = true;
+      break;
     case 'selected':
       props.isSelected = true;
       props.defaultSelected = true;
@@ -138,6 +155,18 @@ function propsFor(entry) {
         props.expandedKeys = ['src'];
         props.defaultExpandedKeys = ['src'];
       }
+      break;
+    case 'collapsed':
+      props.isExpanded = false;
+      props.defaultExpanded = false;
+      break;
+    case 'pending':
+      props.isPending = true;
+      props.pending = true;
+      break;
+    case 'current':
+      props.isCurrent = true;
+      props.current = true;
       break;
     case 'vertical':
       props.orientation = 'vertical';
@@ -163,9 +192,9 @@ function colorValue(value, packageNamespace) {
   return packageNamespace.parseColor ? packageNamespace.parseColor(value) : value;
 }
 
-function renderTreeItem(item, treePackage, key) {
-  const children = item.children?.map((child) => renderTreeItem(child, treePackage, child.id));
-  return h(treePackage.Item, { key, id: item.id, textValue: item.label },
+function renderTreeItem(item, treePackage, key, itemProps = {}) {
+  const children = item.children?.map((child) => renderTreeItem(child, treePackage, child.id, itemProps));
+  return h(treePackage.Item, { ...itemProps, key, id: item.id, textValue: item.label },
     h(treePackage.ItemContent, null, item.label),
     children,
   );
@@ -202,6 +231,10 @@ function renderFamily(entry, fixture) {
     ColorSwatchPackage,
     ToggleButtonPackage,
     RadioFieldPackage,
+    IconPackage,
+    CheckIcon,
+    MinusIcon,
+    XIcon,
     SearchFieldPackage: SearchFieldPackage.SearchField,
     FieldPackage: FieldPackage.Field,
     CalendarPackage,

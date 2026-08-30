@@ -7,13 +7,17 @@ import { chromium } from 'playwright-core';
 import { createServer } from 'vite';
 import {
   applicableMigrationRecords,
+  canonicalStateCoverage,
+  compatibilityStateCoverage,
   migrationCases,
   migrationFrame,
   migrationStoryId,
   noApplicableDonorFamilies,
   sharedFixtureInput,
+  stateCoverage,
+  supplementalStateCoverage,
 } from '../../src/visual-migration-contract.mjs';
-import { canonicalize, fixtureContractSha256, sha256 } from '../../src/visual-migration.mjs';
+import { canonicalize, fixtureContractSha256, sha256, taleStyleInventoryPath, taleStyleInventorySha256 } from '../../src/visual-migration.mjs';
 import {
   donorActionFor,
   donorAdapterSourcePath,
@@ -130,6 +134,7 @@ function taleAliases(taleRoot) {
   const internationalizedDatePath = resolve(dirname(taleRequire.resolve('@internationalized/date')), 'index.mjs');
   const taleReactSource = resolve(taleRoot, 'packages/react/src');
   const utilsPath = resolve(taleRoot, 'packages/utils/src');
+  const lucidePath = taleRequire.resolve('lucide-react');
   const coreReactPath = appRequire.resolve('react');
   const coreReactDomClientPath = appRequire.resolve('react-dom/client');
   return [
@@ -141,6 +146,7 @@ function taleAliases(taleRoot) {
     { find: /^@tale-ui\/css$/, replacement: resolve(taleRoot, 'packages/css/src/index.css') },
     { find: /^@tale-ui\/utils\/(.*)$/, replacement: `${utilsPath}/$1.ts` },
     { find: /^@internationalized\/date$/, replacement: internationalizedDatePath },
+    { find: /^lucide-react$/, replacement: lucidePath },
   ];
 }
 
@@ -354,7 +360,8 @@ async function main() {
       donor: pinnedDonor,
       tale: { rootSupplied: true, commit: taleIdentity.commit, tree: taleIdentity.tree, sourceSha256: taleIdentity.sourceSha256 },
       frame: migrationFrame,
-      coverage: { applicableFamilyCount: applicableMigrationRecords.length, noApplicableDonor: noApplicableDonorFamilies, caseCount: entries.length, captureCount: captures.length, complete: !selectedCaseId },
+      coverage: { applicableFamilyCount: applicableMigrationRecords.length, noApplicableDonor: noApplicableDonorFamilies, caseCount: entries.length, captureCount: captures.length, complete: !selectedCaseId, canonicalStateCount: canonicalStateCoverage.length, compatibilityStateCount: compatibilityStateCoverage.length, supplementalStateCount: supplementalStateCoverage.length, stateCoverageCount: stateCoverage.length, stateDispositions: Object.fromEntries([...new Set(stateCoverage.map(({ disposition }) => disposition))].sort().map((disposition) => [disposition, stateCoverage.filter((entry) => entry.disposition === disposition).length])) },
+      styleInventory: { path: taleStyleInventoryPath, sha256: taleStyleInventorySha256 },
       fixtureContractSha256: fixtureCaseSha256,
       adapterSourceSha256: sha256(adapterSource),
       entrySourceSha256: sha256(entrySource),

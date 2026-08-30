@@ -31,9 +31,6 @@
 }
 
 .core-drop-zone[data-disabled] {
-  background-color: var(--core-semantic-surface-hover);
-  border-color: var(--core-semantic-border-strong);
-  color: var(--core-semantic-content-default);
   cursor: not-allowed;
   pointer-events: none;
 }
@@ -67,7 +64,7 @@
   overflow-y: auto;
   background-color: var(--core-semantic-surface-raised);
   border: 1px solid var(--core-semantic-border-subtle);
-  border-radius: calc(var(--core-semantic-shape-overlay-radius) - 4px);
+  border-radius: var(--core-reference-dimension-radius-xl);
   box-shadow: var(--core-semantic-elevation-modal);
   padding: var(--core-semantic-layout-section-gap);
   display: flex;
@@ -98,6 +95,7 @@
 
 .core-dialog-content {
   color: var(--core-semantic-content-default);
+  font-family: Inter, sans-serif;
   font-weight: var(--core-semantic-typography-body-weight);
   font-size: var(--core-semantic-typography-body-size);
   line-height: 1.6;
@@ -105,6 +103,7 @@
 
 .core-dialog-content > p {
   margin: 0;
+  font-family: Inter, sans-serif;
   font-size: var(--core-semantic-typography-body-size);
   line-height: 1.6;
 }
@@ -136,6 +135,7 @@
   position: relative;
   padding: var(--core-semantic-layout-group-gap);
   max-width: 20rem;
+  border-radius: var(--core-reference-dimension-radius-m);
   background-color: var(--core-semantic-content-strong);
   border-color: var(--core-semantic-content-inverse);
   color: var(--core-semantic-border-subtle);
@@ -144,6 +144,11 @@
     0 4px 4px -10px rgb(0 0 0 / 4%),
     0 13px 13px -10px rgb(0 0 0 / 6%),
     0 40px 60px -10px rgb(0 0 0 / 8%);
+}
+
+/* RAC positions bottom popovers one pixel lower than Tale's popup recipe. */
+.core-popover-positioner[data-placement='bottom'] .core-popover {
+  margin-block-start: -1px;
 }
 
 .core-popover-title {
@@ -173,7 +178,11 @@
 }
 
 [data-core-color-scheme='dark'] .core-popover-description {
-  color: var(--core-reference-color-neutral-60);
+  color: var(--core-reference-color-neutral-70);
+}
+
+[data-core-color-scheme='dark'] .core-preview-content {
+  color: var(--core-reference-color-neutral-20);
 }
 
 /* Core component source: preview-card.css */
@@ -274,8 +283,14 @@
   background-color: var(--core-popup-bg);
   border: 1px solid var(--core-popup-border-color);
   border-inline-start-width: 0.25rem;
-  border-radius: var(--core-popup-radius);
-  box-shadow: var(--core-semantic-elevation-modal);
+  border-radius: var(--core-reference-dimension-radius-m);
+  box-shadow:
+    2.8px 2.8px 2.2px rgb(0 0 0 / 2%),
+    0 6.7px 5.3px -5px rgb(0 0 0 / 4%),
+    0 12.5px 10px -5px rgb(0 0 0 / 6%),
+    0 22.3px 17.9px -5px rgb(0 0 0 / 8%),
+    0 41.8px 33.4px -5px rgb(0 0 0 / 10%),
+    0 80px 80px -5px rgb(0 0 0 / 10.5%);
   outline: none;
   transition:
     opacity var(--core-popup-transition-duration) var(--core-popup-transition-easing),
@@ -365,10 +380,11 @@
   font-weight: var(--core-semantic-typography-control-weight);
   line-height: 1.4;
   padding: var(--core-semantic-layout-tight-inset) var(--core-semantic-layout-control-gap);
-  border-radius: calc(var(--core-semantic-control-radius) - 2px);
+  border-radius: var(--core-reference-dimension-radius-m);
   max-width: 15rem;
   overflow-wrap: anywhere;
   box-shadow: 0 1.5px 3px rgb(0 0 0 / 15%);
+  margin-block-start: -1px;
   transition:
     opacity 0.1s ease,
     transform 0.1s ease;
@@ -379,6 +395,15 @@
 .core-tooltip[data-exiting] {
   opacity: 0;
   transform: scale(0.96);
+}
+
+.core-dialog-trigger:focus-visible,
+.core-dialog-trigger[data-focus-visible],
+.core-overlay-pop-trigger:focus-visible,
+.core-overlay-pop-trigger[data-focus-visible] {
+  box-shadow:
+    0 0 0 2px var(--core-focus-ring-inner),
+    0 0 0 4px var(--core-focus-ring-outer);
 }
 
 .core-file-trigger {
@@ -394,6 +419,14 @@
     0 0 0 4px var(--core-focus-ring-outer);
 }
 
+/* FileTrigger delegates its visible paint to the caller's trigger. Mirror
+   Tale's root-disabled dimming for both Core and native trigger elements. */
+.core-file-trigger[data-disabled],
+.core-file-trigger[disabled],
+.core-drop-zone[data-disabled] {
+  opacity: 0.45;
+}
+
 /* Overlay surfaces follow Tale's neutral recipes in dark mode. */
 [data-core-color-scheme='dark'] .core-dialog,
 [data-core-color-scheme='dark'] .core-preview-trigger,
@@ -404,6 +437,18 @@
 
 [data-core-color-scheme='dark'] .core-toast {
   color: var(--core-reference-color-neutral-20);
+}
+
+[data-core-color-scheme='dark'] .core-toast[data-variant='neutral'] {
+  border-inline-start-color: var(--core-reference-color-neutral-50);
+}
+
+[data-core-color-scheme='dark'] .core-toast-title {
+  color: var(--core-reference-color-neutral-20);
+}
+
+[data-core-color-scheme='dark'] .core-toast-message {
+  color: var(--core-reference-color-neutral-40);
 }
 
 [data-core-color-scheme='dark'] .core-popover {
@@ -446,6 +491,16 @@
   .core-file-trigger {
     background: ButtonFace;
     color: ButtonText;
+  }
+
+  /* Opacity would hide the system disabled/GrayText contrast treatment. */
+  :is(.core-button, .core-r1-button, .core-toggle-button, .core-checkbox, .core-radio, .core-switch)[data-disabled],
+  .core-disclosure[data-disabled] .core-disclosure-trigger,
+  .core-disclosure-trigger[data-disabled],
+  .core-file-trigger[data-disabled],
+  .core-file-trigger[disabled],
+  .core-drop-zone[data-disabled] {
+    opacity: 1;
   }
 }
 

@@ -34,7 +34,6 @@ import {
   TimeField as AriaTimeField,
 } from 'react-aria-components';
 import { parseDate, parseTime } from '@internationalized/date';
-import CalendarIcon from 'lucide-react/dist/esm/icons/calendar.mjs';
 import ChevronLeftIcon from 'lucide-react/dist/esm/icons/chevron-left.mjs';
 import ChevronRightIcon from 'lucide-react/dist/esm/icons/chevron-right.mjs';
 import MinusIcon from 'lucide-react/dist/esm/icons/minus.mjs';
@@ -68,12 +67,26 @@ function fieldError(errorMessage) {
   return errorMessage === undefined ? null : React.createElement(AriaFieldError, { className: 'core-field-error' }, errorMessage);
 }
 
+// Keep the approved Tale-era calendar geometry Core-owned instead of importing the 1.37 glyph.
 function calendarGlyph() {
-  return React.createElement(CalendarIcon, {
+  return React.createElement('svg', {
+    className: 'core-icon core-icon--sm',
     'aria-hidden': 'true',
     focusable: 'false',
-    size: 16,
-  });
+    xmlns: 'http://www.w3.org/2000/svg',
+    viewBox: '0 0 24 24',
+    width: 24,
+    height: 24,
+    fill: 'none',
+    stroke: 'currentColor',
+    strokeWidth: 2,
+    strokeLinecap: 'round',
+    strokeLinejoin: 'round',
+  },
+  React.createElement('path', { d: 'M8 2v4' }),
+  React.createElement('path', { d: 'M16 2v4' }),
+  React.createElement('rect', { width: 18, height: 18, x: 3, y: 4, rx: 2 }),
+  React.createElement('path', { d: 'M3 10h18' }));
 }
 
 function fieldChildren({ label, description, errorMessage, children, input }) {
@@ -124,9 +137,9 @@ function calendarChildren(cellClass = 'core-calendar-cell') {
 
 function calendarHeader() {
   return React.createElement('div', { className: 'core-calendar-header' },
-    React.createElement(AriaButton, { slot: 'previous', 'aria-label': 'Previous month', className: 'core-calendar-previous' }, React.createElement(ChevronLeftIcon, { 'aria-hidden': 'true', focusable: 'false', size: 16 })),
+    React.createElement(AriaButton, { slot: 'previous', 'aria-label': 'Previous month', className: 'core-calendar-previous' }, React.createElement(ChevronLeftIcon, { className: 'core-icon core-icon--sm', 'aria-hidden': 'true', focusable: 'false' })),
     React.createElement(AriaCalendarHeading, { className: 'core-calendar-heading' }),
-    React.createElement(AriaButton, { slot: 'next', 'aria-label': 'Next month', className: 'core-calendar-next' }, React.createElement(ChevronRightIcon, { 'aria-hidden': 'true', focusable: 'false', size: 16 })));
+    React.createElement(AriaButton, { slot: 'next', 'aria-label': 'Next month', className: 'core-calendar-next' }, React.createElement(ChevronRightIcon, { className: 'core-icon core-icon--sm', 'aria-hidden': 'true', focusable: 'false' })));
 }
 
 function datePopover() {

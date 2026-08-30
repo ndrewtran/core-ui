@@ -169,7 +169,8 @@ test('Core styles bind donor states and public theme hooks', async () => {
   assert.match(css, /\.core-dialog-backdrop\s*\{[\s\S]*position: fixed;[\s\S]*inset: 0;/u);
   assert.match(css, /\.core-dialog-content\s*\{[\s\S]*font-weight: var\(--core-semantic-typography-body-weight\)/u);
   assert.match(css, /\.core-field-description\s*\{[\s\S]*color: var\(--core-semantic-content-default\)/u);
-  assert.match(css, /\.core-button\[data-pending\]::after[\s\S]*content: '…';/u);
+  assert.match(css, /\.core-button\[data-pending\] \.core-button-content\s*\{[^}]*opacity:\s*0;/u);
+  assert.match(css, /\.core-button\[data-pending\]::after[\s\S]*content: none;/u);
   assert.match(css, /\.core-progress-bar\[data-indeterminate\] \.core-progress-bar-fill[\s\S]*margin-inline-start: 30%;/u);
   assert.doesNotMatch(css, /core-control-spin|core-progress-indeterminate|animation:[^;]*infinite/u);
 

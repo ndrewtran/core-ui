@@ -13,7 +13,7 @@
   --core-field-padding-block: var(--core-semantic-layout-control-gap);
   --core-field-padding-inline: var(--core-semantic-layout-group-gap);
   --core-field-border-color: var(--core-semantic-border-strong);
-  --core-field-radius: calc(var(--core-semantic-shape-option-radius) - 1.5px);
+  --core-field-radius: var(--core-reference-dimension-radius-s);
   --core-field-bg: var(--core-semantic-field-background);
   --core-field-color: var(--core-semantic-content-strong);
   --core-field-font-family: Inter, sans-serif;
@@ -122,6 +122,14 @@
   font-size: var(--core-field-font-size);
   outline: none;
 }
+.core-select-trigger[data-disabled] {
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+.core-select[data-disabled] > .core-select-trigger[data-disabled] {
+  background-color: var(--core-field-bg);
+}
 .core-select-trigger[data-focus-visible],
 .core-select-trigger:focus-visible,
 .core-select-trigger[data-open],
@@ -200,6 +208,9 @@
 }
 :where(.core-text-field, .core-search-field, .core-number-field, .core-date-field, .core-date-picker, .core-date-range-picker, .core-time-field, .core-combo-box, .core-select, .core-autocomplete, .core-color-field, .core-color-area-field, .core-color-slider, .core-color-wheel, .core-radio-group)[data-disabled] .core-field-label {
   color: var(--core-semantic-content-default);
+}
+:where(.core-text-field, .core-search-field, .core-number-field, .core-date-field, .core-date-picker, .core-date-range-picker, .core-time-field, .core-combo-box, .core-select)[data-disabled] .core-field-label {
+  opacity: 0.45;
 }
 :where(.core-text-field, .core-search-field, .core-number-field, .core-date-field, .core-date-picker, .core-date-range-picker, .core-time-field, .core-combo-box, .core-select, .core-autocomplete, .core-color-field, .core-slider, .core-radio-group)[data-invalid] .core-field-label {
   color: var(--core-semantic-feedback-invalid);
@@ -373,10 +384,9 @@
   border-color: var(--core-semantic-feedback-invalid);
 }
 
-.core-date-input[data-disabled],
-.core-field-input[data-disabled] {
-  background-color: var(--core-semantic-surface-hover);
-  color: var(--core-semantic-content-strong);
+.core-date-input[data-disabled] {
+  background-color: var(--core-field-bg);
+  opacity: 0.45;
   pointer-events: none;
 }
 
@@ -421,9 +431,8 @@
 
 .core-date-picker[data-disabled] .core-date-control,
 .core-date-range-picker[data-disabled] .core-date-range-control {
-  background: var(--core-semantic-surface-hover);
-  border-color: var(--core-semantic-border-strong);
-  color: var(--core-semantic-content-strong);
+  background: var(--core-reference-color-neutral-14);
+  opacity: 0.45;
   pointer-events: none;
 }
 
@@ -434,7 +443,7 @@
   min-width: 0;
   gap: 0;
   padding: var(--core-semantic-layout-control-gap) var(--core-semantic-control-padding-inline);
-  background-color: transparent;
+  background-color: var(--core-field-bg);
   color: var(--core-semantic-content-strong);
   font-family: Inter, sans-serif;
   font-size: var(--core-semantic-typography-body-size);
@@ -445,12 +454,6 @@
 .core-date-field > .core-date-input,
 .core-time-field > .core-date-input {
   padding-inline: var(--core-field-padding-inline);
-}
-
-.core-date-input[data-disabled] {
-  background-color: var(--core-semantic-surface-hover);
-  color: var(--core-semantic-content-strong);
-  pointer-events: none;
 }
 
 .core-date-segment {
@@ -469,11 +472,11 @@
 }
 
 .core-date-segment[data-disabled] {
-  color: var(--core-semantic-content-strong);
+  opacity: 0.45;
 }
 
 .core-date-segment[data-readonly] {
-  color: var(--core-semantic-content-default);
+  color: var(--core-reference-color-neutral-60);
 }
 
 .core-date-segment[data-type='literal'] {
@@ -493,8 +496,28 @@
   border-left: none;
   border-radius: 0 var(--core-field-radius) var(--core-field-radius) 0;
   background-color: var(--core-semantic-surface-raised);
-  color: var(--core-semantic-content-default);
+  color: var(--core-reference-color-neutral-70);
   font-size: var(--core-semantic-typography-body-size);
+}
+
+.core-date-trigger[data-disabled] {
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.core-icon {
+  display: inline-block;
+  flex-shrink: 0;
+  width: 1.5rem;
+  height: 1.5rem;
+  color: currentcolor;
+  vertical-align: middle;
+}
+
+.core-icon--sm {
+  width: 1rem;
+  height: 1rem;
 }
 
 .core-date-trigger:hover:not([data-disabled]) {
@@ -529,8 +552,12 @@
   background: var(--core-popup-bg);
   border: 1px solid var(--core-semantic-surface-hover);
   border-radius: var(--core-semantic-control-radius);
-  box-shadow: 0 4px 16px color-mix(in srgb, var(--core-semantic-content-inverse) 10%, transparent);
+  box-shadow: 0 4px 16px color-mix(in srgb, var(--core-reference-color-neutral-100) 10%, transparent);
   outline: none;
+}
+
+[data-core-color-scheme='dark'] .core-date-popover {
+  border-color: var(--core-reference-color-neutral-96);
 }
 
 .core-date-popover[data-entering] {
@@ -544,7 +571,7 @@
 ) {
   background-color: color-mix(in srgb, var(--core-reference-color-neutral-100) 85%, black);
   border-color: var(--core-reference-color-neutral-84);
-  color: var(--core-reference-color-neutral-60);
+  color: var(--core-reference-color-neutral-40);
 }
 
 .core-date-popover[data-exiting] {
@@ -694,7 +721,7 @@
 .core-color-wheel-thumb {
   width: 0.78125rem;
   height: 0.78125rem;
-  border-radius: 50%;
+  border-radius: var(--core-reference-dimension-radius-full);
   /* Tale's shared color-thumb primitive uses a white keyline in both themes. */
   border: 2px solid white;
   box-shadow:
@@ -820,16 +847,14 @@
 }
 
 .core-combo-control[data-disabled] {
-  background: var(--core-semantic-surface-hover);
-  border-color: var(--core-semantic-border-strong);
-  color: var(--core-semantic-content-strong);
+  background: var(--core-reference-color-neutral-14);
+  opacity: 0.45;
   pointer-events: none;
 }
 
 .core-combo-box[data-disabled] .core-combo-control {
-  background: var(--core-semantic-surface-hover);
-  border-color: var(--core-semantic-border-strong);
-  color: var(--core-semantic-content-strong);
+  background: var(--core-reference-color-neutral-14);
+  opacity: 0.45;
   pointer-events: none;
 }
 

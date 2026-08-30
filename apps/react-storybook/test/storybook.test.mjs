@@ -282,16 +282,21 @@ test('default and state stories use uncontrolled pairs without collapsing state 
 
 test('state coverage metadata exposes isolated supported states with canonical args', () => {
   const byFamily = new Map(descriptor.bindings.map((binding) => [binding.export, binding]));
+  const comparableCoverage = (coverage) => coverage.map(({ name, args }) => ({
+    name,
+    args: Object.fromEntries(Object.entries(args).map(([prop, value]) => [prop, typeof value === 'function' ? '[callback]' : value])),
+  }));
   for (const record of manifest.families) {
     const binding = byFamily.get(record.family);
     const coverage = stateCoverageForBinding(binding, record.family);
     assert.ok(coverage.length >= record.states.length, record.family);
     assert.deepEqual(coverage.slice(0, record.states.length).map(({ name }) => name), record.states, record.family);
     for (const { name, args } of coverage) {
-      assert.ok(Object.keys(args).every((prop) => binding.api.props.includes(prop)), `${record.family}/${name} leaked a non-Core prop`);
+      assert.ok(Object.keys(args).every((prop) => binding.api.props.includes(prop)
+        || record.family === 'TagGroup' && name === 'removable' && prop === 'onRemove'), `${record.family}/${name} leaked a non-Core prop`);
     }
     const story = createStory({ family: record.family, tranche: record.tranche, binding }, 'states');
-    assert.deepEqual(story.parameters.coreStateCoverage, coverage, `${record.family} metadata`);
+    assert.deepEqual(comparableCoverage(story.parameters.coreStateCoverage), comparableCoverage(coverage), `${record.family} metadata`);
     assert.deepEqual(Object.keys(story.argTypes).sort(), binding.api.props.slice().sort(), `${record.family} controls`);
   }
 
@@ -351,6 +356,71 @@ test('unsupported state coverage is explicit while supported state args remain o
   assert.match(toggle, /aria-pressed="true"/u);
 });
 
+test('behavior-only state evidence executes the focused Core interactions', async () => {
+  const env = installRuntimeDom();
+  const host = document.querySelector('#root');
+  const root = createRoot(host);
+  const settle = async (milliseconds = 0) => {
+    if (milliseconds > 0) await act(async () => new Promise((resolvePromise) => setTimeout(resolvePromise, milliseconds)));
+  };
+  try {
+    let linkActivations = 0;
+    await act(async () => root.render(renderFamily('Link', { href: '#', onActivate: () => { linkActivations += 1; } })));
+    const link = host.querySelector('.core-link');
+    assert.ok(link, 'Link behavior target');
+    await act(async () => link.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, button: 0, pointerType: 'mouse' })));
+    assert.equal(link.hasAttribute('data-pressed'), true, 'Link exposes the pressed interaction state');
+    await act(async () => link.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, button: 0, pointerType: 'mouse' })));
+    await act(async () => link.click());
+    assert.equal(linkActivations, 1, 'Link activation callback');
+
+    let toggleActivations = 0;
+    await act(async () => root.render(renderFamily('ToggleButton', { onActivate: () => { toggleActivations += 1; } })));
+    const toggle = host.querySelector('.core-toggle-button');
+    assert.ok(toggle, 'ToggleButton behavior target');
+    await act(async () => toggle.click());
+    assert.equal(toggle.getAttribute('aria-pressed'), 'true', 'ToggleButton pressed state');
+    assert.equal(toggleActivations, 1, 'ToggleButton activation callback');
+
+    let formSubmissions = 0;
+    await act(async () => root.render(renderFamily('Form', { onSubmit: () => { formSubmissions += 1; } })));
+    const form = host.querySelector('.core-form');
+    assert.ok(form, 'Form behavior target');
+    await act(async () => form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true })));
+    assert.equal(formSubmissions, 1, 'Form submit callback');
+
+    const dialogDismissals = [];
+    await act(async () => root.render(renderFamily('Dialog', { open: true, title: 'Delete draft', onOpenChange: (open) => dialogDismissals.push(open) })));
+    await settle(20);
+    const dialogClose = document.querySelector('.core-dialog-close');
+    assert.ok(dialogClose, 'Dialog dismiss target');
+    await act(async () => dialogClose.click());
+    assert.deepEqual(dialogDismissals, [false], 'Dialog dismissal callback');
+
+    const popoverDismissals = [];
+    await act(async () => root.render(renderFamily('Popover', { open: true, onOpenChange: (open) => popoverDismissals.push(open) })));
+    await settle(20);
+    const popoverTrigger = host.querySelector('.core-button');
+    assert.ok(document.querySelector('.core-popover'), 'Popover behavior target');
+    await act(async () => popoverTrigger.click());
+    assert.deepEqual(popoverDismissals, [false], 'Popover dismissal callback');
+
+    let toastDismissals = 0;
+    await act(async () => root.render(React.createElement(ToastProvider, null, renderFamily('Toast', { onDismiss: () => { toastDismissals += 1; } }))));
+    await settle(100);
+    const toastClose = document.querySelector('.core-toast-dismiss');
+    assert.ok(toastClose, 'Toast dismiss target');
+    await act(async () => toastClose.click());
+    await settle(40);
+    assert.equal(toastDismissals, 1, 'Toast dismissal callback');
+    assert.equal(document.querySelector('.core-toast'), null, 'Toast leaves the DOM after dismissal');
+  } finally {
+    await act(async () => root.unmount());
+    env.resolveAnimations();
+    env.restore();
+  }
+});
+
 test('interaction-open coverage opens the public field and collection triggers', async () => {
   const bindings = new Map(descriptor.bindings.map((binding) => [binding.export, binding]));
   const families = [
@@ -390,13 +460,42 @@ function markerForTest(family, state) {
 }
 
 function isInspectableOverlay(marker) {
-  const target = document.querySelector(`.${marker}`);
-  if (!target?.isConnected) return false;
+  return isInspectableOverlayTarget(document.querySelector(`.${marker}`));
+}
+
+function isInspectableOverlayTarget(target, requireConnected = true) {
+  if (!target || requireConnected && !target.isConnected) return false;
   for (let element = target; element; element = element.parentElement) {
     if (element.getAttribute('aria-hidden') === 'true' || element.hasAttribute('inert')) return false;
   }
   const style = getComputedStyle(target);
   return style.visibility !== 'hidden' && style.opacity !== '0';
+}
+
+function observeInitialOverlay(marker) {
+  let observed = false;
+  const recordVisibility = (records) => {
+    for (const record of records) {
+      for (const node of record.addedNodes) {
+        if (!(node instanceof Element)) continue;
+        const target = node.matches(`.${marker}`) ? node : node.querySelector(`.${marker}`);
+        if (isInspectableOverlayTarget(target, false)) {
+          observed = true;
+          return;
+        }
+      }
+    }
+  };
+  const observer = new MutationObserver((records) => {
+    recordVisibility(records);
+  });
+  observer.observe(document.body, { childList: true, subtree: true });
+  if (isInspectableOverlay(marker)) observed = true;
+  return () => {
+    recordVisibility(observer.takeRecords());
+    observer.disconnect();
+    return observed || isInspectableOverlay(marker);
+  };
 }
 
 test('lifecycle state coverage drives observable Core transitions', async () => {
@@ -471,11 +570,17 @@ test('lifecycle state coverage drives observable Core transitions', async () => 
         });
         const transitionStart = transitionHistory.length;
         const racStart = racLifecycleRecords.length;
+        const closing = state === 'closing' || state === 'exiting';
+        const initialOverlayObservation = family === 'Toast' && closing
+          ? observeInitialOverlay(marker)
+          : undefined;
         await act(async () => {
           lifecycleSelect.value = state;
           lifecycleSelect.dispatchEvent(new Event('change', { bubbles: true }));
         });
-        const initialOverlayState = isInspectableOverlay(marker);
+        const initialOverlayState = initialOverlayObservation
+          ? initialOverlayObservation()
+          : isInspectableOverlay(marker);
         const overlayHistory = [initialOverlayState];
         const recordCurrentRacAttributes = () => {
           const target = document.querySelector(`.${marker}`);
@@ -499,7 +604,6 @@ test('lifecycle state coverage drives observable Core transitions', async () => 
         assert.ok(section, `${family}/${state} section`);
         const overlay = document.querySelector(`.${marker}`);
         assert.ok(overlay, `${family}/${state} overlay`);
-        const closing = state === 'closing' || state === 'exiting';
         const expectedPhaseStart = closing ? 'open' : 'closed';
         const presence = overlayHistory;
         assert.equal(initialOverlayState, closing, `${family}/${state} initial overlay visibility`);

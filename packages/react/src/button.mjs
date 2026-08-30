@@ -25,6 +25,19 @@ export const Button = React.forwardRef(function Button({
     onActivate?.(activation);
   };
 
+  const content = React.createElement('span', {
+    className: 'core-button-content',
+  }, children);
+  const spinner = pending ? React.createElement('svg', {
+    className: 'core-button-spinner',
+    viewBox: '0 0 24 24',
+    fill: 'none',
+    'aria-hidden': 'true',
+  }, React.createElement('circle', {
+    className: 'core-button-spinner-track', cx: '12', cy: '12', r: '10', strokeWidth: '3',
+  }), React.createElement('circle', {
+    className: 'core-button-spinner-arc', cx: '12', cy: '12', r: '10', strokeWidth: '3', strokeLinecap: 'round',
+  })) : null;
   return React.createElement(AriaButton, {
     ...props,
     ref,
@@ -37,7 +50,7 @@ export const Button = React.forwardRef(function Button({
       'aria-busy': pending || ariaBusy || undefined,
     }),
     onPress: handlePress,
-  }, children);
+  }, content, spinner);
 });
 
 Button.displayName = 'Button';

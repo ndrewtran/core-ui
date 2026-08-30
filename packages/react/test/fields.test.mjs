@@ -173,8 +173,8 @@ test('NumberField steppers expose stable direction hooks and Tale edge geometry'
   assert.equal(increment.getAttribute('slot'), 'increment');
   const css = await readFile(new URL('../generated/styles.css', import.meta.url), 'utf8');
   assert.match(css, /:where\([\s\S]*\.core-number-stepper[\s\S]*border:\s*1px solid transparent;[\s\S]*appearance:\s*none;/u);
-  assert.match(css, /\.core-number-stepper-decrement\s*\{[^}]*border-right:[^}]*border-radius:\s*var\(--core-semantic-control-radius\) 0 0 var\(--core-semantic-control-radius\)/u);
-  assert.match(css, /\.core-number-stepper-increment\s*\{[^}]*border-left:[^}]*border-radius:\s*0 var\(--core-semantic-control-radius\) var\(--core-semantic-control-radius\) 0/u);
+  assert.match(css, /\.core-number-stepper-decrement\s*\{[^}]*border-right:\s*1px solid #d5d2d1;[^}]*border-radius:\s*10px 0 0 10px/u);
+  assert.match(css, /\.core-number-stepper-increment\s*\{[^}]*border-left:\s*1px solid #d5d2d1;[^}]*border-radius:\s*0 10px 10px 0/u);
   dom.window.close();
 });
 
@@ -243,9 +243,53 @@ test('DateRangePicker popover uses range calendar cells for contiguous selection
   }
 });
 
+test('date picker calendar triggers retain Tale icon wrapper sizing and scoped popover border tokens', async () => {
+  const markup = renderToString(React.createElement(React.Fragment, null,
+    React.createElement(DatePicker, { label: 'Due date', defaultValue: '2026-08-26' }),
+    React.createElement(DateRangePicker, { label: 'Trip', defaultValue: { start: '2026-08-26', end: '2026-09-01' } }),
+  ));
+  const dom = new JSDOM(`<!doctype html>${markup}`);
+  for (const selector of ['.core-date-picker .core-date-trigger', '.core-date-range-picker .core-date-trigger']) {
+    const trigger = dom.window.document.querySelector(selector);
+    assert.ok(trigger);
+    assert.equal(trigger.getAttribute('aria-label'), 'Open calendar');
+    const icon = trigger.querySelector('svg');
+    assert.ok(icon);
+    assert.equal(icon.classList.contains('core-icon'), true);
+    assert.equal(icon.classList.contains('core-icon--sm'), true);
+    assert.equal(icon.getAttribute('width'), '24');
+    assert.equal(icon.getAttribute('height'), '24');
+    assert.equal(icon.getAttribute('aria-hidden'), 'true');
+    assert.equal(icon.getAttribute('focusable'), 'false');
+    assert.equal(icon.classList.contains('lucide-calendar'), false);
+    assert.deepEqual([...icon.children].map((child) => [
+      child.tagName.toLowerCase(),
+      child.getAttribute('d'),
+      child.getAttribute('width'),
+      child.getAttribute('height'),
+      child.getAttribute('x'),
+      child.getAttribute('y'),
+      child.getAttribute('rx'),
+    ]), [
+      ['path', 'M8 2v4', null, null, null, null, null],
+      ['path', 'M16 2v4', null, null, null, null, null],
+      ['rect', null, '18', '18', '3', '4', '2'],
+      ['path', 'M3 10h18', null, null, null, null, null],
+    ]);
+  }
+  dom.window.close();
+
+  const styles = await readFile(new URL('../src/styles/base.css', import.meta.url), 'utf8');
+  assert.match(styles, /\.core-icon\s*\{[^}]*width:\s*1\.5rem;[^}]*height:\s*1\.5rem;/u);
+  assert.match(styles, /\.core-icon--sm\s*\{[^}]*width:\s*1rem;[^}]*height:\s*1rem;/u);
+  assert.match(styles, /\.core-date-popover\s*\{[^}]*border:\s*1px solid var\(--core-semantic-surface-hover\)/u);
+  assert.match(styles, /\[data-core-color-scheme='dark'\] \.core-date-popover\s*\{[^}]*border-color:\s*var\(--core-reference-color-neutral-96\)/u);
+});
+
 test('read-only date segments retain accessible semantic contrast', async () => {
   const styles = await readFile(new URL('../generated/styles.css', import.meta.url), 'utf8');
-  assert.match(styles, /\.core-date-segment\[data-readonly\]\s*\{[^}]*color:\s*var\(--core-semantic-content-default\)/u);
+  assert.match(styles, /\.core-date-segment\[data-readonly\]\s*\{[^}]*color:\s*#79716b;/u);
+  assert.match(styles, /\[data-core-color-scheme='dark'\] \.core-date-segment\[data-readonly\]:not\(\[data-type='literal'\]\)\s*\{[^}]*color:\s*#918b86;/u);
   const foreground = styles.match(/--core-semantic-content-default:\s*(#[0-9a-f]{6});/iu)?.[1];
   const background = styles.match(/--core-semantic-surface-canvas:\s*(#[0-9a-f]{6});/iu)?.[1];
   assert.ok(foreground);

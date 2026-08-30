@@ -93,12 +93,16 @@ const familyCopy = Object.freeze({
 });
 
 /** The semantic copy/data contract is shared by the Core and donor adapters. */
-export function fixtureContractFor(record) {
+export function fixtureContractFor(record, state = 'idle') {
   const { family } = record;
+  const breadcrumbItems = state === 'disabled'
+    ? [{ id: 'home', label: 'Home', href: '#', disabled: true }, { id: 'docs', label: 'Docs', href: '#' }]
+    : undefined;
   return {
     copy: familyCopy[family] ?? family,
     data: {
       ...commonData,
+      ...(family === 'Breadcrumbs' && breadcrumbItems ? { items: breadcrumbItems } : {}),
       ...(family === 'TagGroup' ? { items: Object.freeze(['Design', 'Engineering']) } : {}),
       ...(family === 'ColorSwatchPicker' ? { items: Object.freeze([{ id: 'red', color: '#ff0000' }, { id: 'blue', color: '#0000ff' }]) } : {}),
       ...(family === 'Tree' ? { items: Object.freeze([{ id: 'src', label: 'src', children: [{ id: 'main', label: 'main.jsx' }] }]) } : {}),
@@ -108,9 +112,40 @@ export function fixtureContractFor(record) {
   };
 }
 
-const highSignalStateNames = Object.freeze(['selected', 'pressed', 'focused', 'invalid', 'open', 'expanded', 'drop-target', 'indeterminate', 'vertical']);
 const portalFamilies = new Set(['Dialog', 'Popover', 'PreviewTrigger', 'Toast', 'Tooltip']);
 const openPortalFamilies = new Set(['DatePicker', 'DateRangePicker', 'ComboBox', 'Select']);
+const behaviorOnlyStates = new Set(['pressed', 'dismissed', 'submitting', 'opening', 'closing', 'entering', 'exiting']);
+
+// These states are intentionally not rasterized: they are transient or have
+// no public Core state prop. Keep the proof target explicit so a future state
+// cannot silently fall back to a generic unsupported claim.
+const behaviorStateEvidence = Object.freeze({
+  'Link/pressed': { selector: '.core-link', interaction: 'press', assertion: 'The focused Link is pressed through the existing Storybook interaction harness.' },
+  'ToggleButton/pressed': { selector: '.core-toggle-button', interaction: 'press', assertion: 'The focused ToggleButton is pressed through the existing Storybook interaction harness.' },
+  'Form/submitting': { selector: '.core-form', interaction: 'submit', assertion: 'The Form submit event is exercised by the existing Storybook interaction harness.' },
+  'Dialog/dismissed': { selector: '.core-dialog', interaction: 'dismiss', assertion: 'The open Dialog is dismissed through its close button or Escape interaction in the existing Storybook harness.' },
+  'Popover/dismissed': { selector: '.core-popover', interaction: 'dismiss', assertion: 'The open Popover is dismissed through outside or Escape interaction in the existing Storybook harness.' },
+  'PreviewTrigger/opening': { selector: '.core-preview-trigger', interaction: 'lifecycle', assertion: 'PreviewTrigger opening is observed by the existing lifecycle harness.' },
+  'PreviewTrigger/closing': { selector: '.core-preview-trigger', interaction: 'lifecycle', assertion: 'PreviewTrigger closing is observed by the existing lifecycle harness.' },
+  'Toast/dismissed': { selector: '.core-toast-dismiss', interaction: 'dismiss', assertion: 'The Toast dismiss control and timeout lifecycle are exercised by the existing Storybook harness.' },
+  'Tooltip/opening': { selector: '.core-tooltip', interaction: 'lifecycle', assertion: 'Tooltip opening is observed by the existing lifecycle harness.' },
+  'Tooltip/closing': { selector: '.core-tooltip', interaction: 'lifecycle', assertion: 'Tooltip closing is observed by the existing lifecycle harness.' },
+});
+
+const unsupportedStateRationales = Object.freeze({
+  'Form/invalid': 'The public Form API exposes validationBehavior but no invalid prop; field-level invalid state is covered by the field families.',
+  'ColorArea/invalid': 'The public ColorArea API has no invalid prop or validation event; invalid color text is covered by ColorField.',
+  'ColorSlider/read-only': 'The public ColorSlider API has no readOnly prop; its value and disabled state remain covered visually.',
+  'ColorWheel/read-only': 'The public ColorWheel API has no readOnly prop; its value and disabled state remain covered visually.',
+  'Menu/open': 'The public Menu API is the already-mounted collection surface and has no open prop; overlay ownership is covered by Select, ComboBox, and the overlay families.',
+  'Slider/read-only': 'The public Slider API has no readOnly prop; its value, focus, and disabled states remain covered visually.',
+  'Slider/selected': 'The public Slider API has no selected prop; its value state is represented by the canonical idle/focused visual cases.',
+  'TagGroup/selected': 'The public TagGroup API has no selection prop; removable anatomy is separately recorded as Core-only because the pinned Tale donor has no remove part.',
+});
+
+function normalizedState(state) {
+  return state.toLowerCase().replaceAll('-', '').replaceAll(' ', '');
+}
 
 export function semanticRegionFor(family, state) {
   if (!portalFamilies.has(family) && !(state === 'open' && openPortalFamilies.has(family))) {
@@ -141,16 +176,27 @@ export function semanticRegionFor(family, state) {
 function hasState(record, state) {
   const { binding, family } = record;
   const props = new Set(binding.api.props);
-  const states = new Set(binding.states.map((value) => value.toLowerCase().replaceAll('-', '')));
-  if (state === 'focused') return states.has('focused');
-  if (state === 'pressed') return family === 'Button' || family === 'ToggleButton';
-  if (state === 'drop-target') return family === 'DropZone';
-  if (state === 'vertical') return props.has('orientation');
-  if (state === 'selected') return props.has('checked') || props.has('selected') || props.has('selectedIds') || props.has('selectedId') || props.has('value') && ['Calendar', 'RangeCalendar', 'Select', 'Tabs', 'ColorSwatchPicker', 'CheckboxGroup', 'RadioGroup'].includes(family);
-  if (state === 'invalid') return props.has('invalid');
-  if (state === 'open') return props.has('open') || ['DatePicker', 'DateRangePicker', 'ComboBox', 'Select', 'Dialog', 'Popover', 'PreviewTrigger', 'Tooltip'].includes(family);
-  if (state === 'expanded') return props.has('expanded') || props.has('expandedIds');
-  if (state === 'indeterminate') return props.has('indeterminate') || family === 'ProgressBar';
+  const normalized = normalizedState(state);
+  if (['idle', 'visible', 'closed', 'collapsed'].includes(normalized)) return true;
+  if (normalized === 'focused') return true;
+  if (normalized === 'drop target' || normalized === 'droptarget' || normalized === 'dragging') return family === 'DropZone';
+  if (normalized === 'vertical' || normalized === 'horizontal') return props.has('orientation');
+  if (normalized === 'selected') return props.has('checked') || props.has('selected') || props.has('selectedIds') || props.has('selectedId') || props.has('value') && ['Calendar', 'RangeCalendar', 'Select', 'Tabs', 'ColorSwatchPicker', 'CheckboxGroup', 'RadioGroup'].includes(family);
+  if (normalized === 'invalid') return props.has('invalid');
+  if (normalized === 'open' || normalized === 'opening' || normalized === 'closing') return props.has('open') || ['DatePicker', 'DateRangePicker', 'ComboBox', 'Select', 'Dialog', 'Popover', 'PreviewTrigger', 'Tooltip'].includes(family);
+  if (normalized === 'expanded') return props.has('expanded') || props.has('expandedIds');
+  if (normalized === 'indeterminate') return props.has('indeterminate') || family === 'ProgressBar';
+  if (normalized === 'disabled') return family === 'Breadcrumbs' || props.has('disabled');
+  if (normalized === 'readonly') return props.has('readOnly');
+  if (normalized === 'required') return props.has('required');
+  if (normalized === 'pending') return props.has('pending');
+  if (normalized === 'low' || normalized === 'high') return family === 'Meter' && props.has('value');
+  if (normalized === 'progress' || normalized === 'complete') return family === 'ProgressBar' && props.has('value');
+  if (normalized === 'filled') return family === 'SearchField' && props.has('value');
+  if (normalized === 'empty') return props.has('items') || props.has('rows');
+  if (normalized === 'placement') return props.has('placement');
+  if (normalized === 'timed') return family === 'Toast' && props.has('duration');
+  if (normalized === 'current') return family === 'Breadcrumbs' || props.has('current');
   return false;
 }
 
@@ -168,8 +214,61 @@ function actionFor(family, state) {
   return undefined;
 }
 
+function stateDisposition(record, state) {
+  if (record.disposition === 'no-applicable-donor') return 'no-applicable-donor';
+  if (record.family === 'TagGroup' && state === 'removable') return 'core-only';
+  if (behaviorOnlyStates.has(normalizedState(state))) return 'behavior-only';
+  return hasState(record, state) ? 'visual' : 'unsupported';
+}
+
+function stateCheck(record, state, disposition) {
+  if (disposition === 'visual') return { type: 'visual', assertion: 'paired Tale/Core semantic-region PNG comparison' };
+  if (disposition === 'no-applicable-donor') return { type: 'evidence', assertion: 'Core-owned behavior is covered by the canonical Storybook state and has no pinned Tale family donor.' };
+  if (disposition === 'core-only') return { type: 'dom', selector: '.core-tag-remove', assertion: 'Core removable TagGroup anatomy is checked in the Core DOM; pinned Tale TagGroup exposes no remove part.' };
+  if (disposition === 'behavior-only') {
+    const evidence = behaviorStateEvidence[`${record.family}/${state}`];
+    if (!evidence) throw new Error(`missing focused behavior evidence for ${record.family}/${state}`);
+    return { type: 'behavior', ...evidence };
+  }
+  const rationale = unsupportedStateRationales[`${record.family}/${state}`];
+  if (!rationale) throw new Error(`missing public-API rationale for unsupported ${record.family}/${state}`);
+  return { type: 'dom', rationale, assertion: `The ${record.family} ${state} state has no supported Core prop or deterministic interaction in this contract.` };
+}
+
+const canonicalCoverageRecords = Object.freeze(allRecords.flatMap((record) => record.binding.states.map((state) => {
+  const disposition = stateDisposition(record, state);
+  return {
+    family: record.family,
+    slug: record.slug,
+    state,
+    disposition,
+    check: stateCheck(record, state, disposition),
+  };
+})));
+const compatibilityCoverageRecords = Object.freeze(allRecords
+  .filter(({ disposition }) => disposition === 'adapt')
+  .flatMap((record) => {
+    const states = [];
+    if (!record.binding.states.includes('idle') && ['Dialog', 'Popover', 'PreviewTrigger', 'Toast', 'Tooltip'].includes(record.family)) states.push('idle');
+    if (['ComboBox', 'CheckboxGroup'].includes(record.family)) states.push('selected');
+    return states.map((state) => ({
+      family: record.family,
+      slug: record.slug,
+      state,
+      disposition: 'visual',
+      source: 'compatibility-case',
+      check: { type: 'visual', assertion: 'retained compatibility comparison for the pre-expansion high-signal fixture' },
+    }));
+  }));
+const extraCoverageRecords = Object.freeze([{ family: 'TagGroup', slug: 'tag-group', state: 'removable', disposition: 'core-only', check: stateCheck({ family: 'TagGroup' }, 'removable', 'core-only') }]);
+export const canonicalStateCoverage = canonicalCoverageRecords;
+export const compatibilityStateCoverage = compatibilityCoverageRecords;
+export const supplementalStateCoverage = extraCoverageRecords;
+export const stateCoverage = Object.freeze([...canonicalCoverageRecords, ...compatibilityCoverageRecords, ...extraCoverageRecords]);
+export const visualCoverage = Object.freeze(stateCoverage.filter(({ disposition }) => disposition === 'visual'));
+
 export const migrationCases = Object.freeze(applicableMigrationRecords.flatMap((record) => {
-  const states = ['idle', ...highSignalStateNames.filter((state) => hasState(record, state))];
+  const states = visualCoverage.filter(({ family }) => family === record.family).map(({ state }) => state);
   return states.map((state) => ({
     id: `${record.slug}-${state}`,
     component: record.family,
@@ -178,7 +277,7 @@ export const migrationCases = Object.freeze(applicableMigrationRecords.flatMap((
     state,
     selector: `[data-core-migration-case="${record.slug}-${state}"]`,
     action: actionFor(record.family, state),
-    fixture: fixtureContractFor(record),
+    fixture: fixtureContractFor(record, state),
     region: semanticRegionFor(record.family, state),
   }));
 }));
