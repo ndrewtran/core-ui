@@ -45,7 +45,7 @@ async function commitApplicabilitySource(root, path, message) {
 }
 
 async function g12TopologyFixture({ extraEvidencePath = false, preexistingRootPayload = false } = {}) {
-  const root = await mkdtemp(join(tmpdir(), 'core-ui-g12-topology-'));
+  const root = await mkdtemp(join(tmpdir(), 'muxui-g12-topology-'));
   await git(root, 'init', '-q', '-b', 'main');
   await git(root, 'config', 'user.name', 'Fixture');
   await git(root, 'config', 'user.email', 'fixture@example.invalid');
@@ -135,36 +135,36 @@ test('authority decision receipts admit truthful bounded task provenance without
 });
 
 test('evidence output privacy recognizes canonical token IDs without accepting credentials', () => {
-  const root = '/workspace/core-ui';
+  const root = '/workspace/muxui';
   assert.equal(hasUnsanitizedEvidenceOutput(
-    '{"artifactId":"core:token:default-theme"}',
+    '{"artifactId":"muxui:token:default-theme"}',
     root,
   ), false);
   assert.equal(hasUnsanitizedEvidenceOutput('token=secret-value', root), true);
   assert.equal(hasUnsanitizedEvidenceOutput('foo:token=secret-value', root), true);
-  assert.equal(hasUnsanitizedEvidenceOutput('core:token=secret-value', root), true);
+  assert.equal(hasUnsanitizedEvidenceOutput('muxui:token=secret-value', root), true);
   assert.equal(hasUnsanitizedEvidenceOutput('auth:token: secret-value', root), true);
   assert.equal(hasUnsanitizedEvidenceOutput('x:token:secret-value', root), true);
-  assert.equal(hasUnsanitizedEvidenceOutput('"core:token:default--theme"', root), true);
-  assert.equal(hasUnsanitizedEvidenceOutput('"core:token:default.theme"', root), true);
-  assert.equal(hasUnsanitizedEvidenceOutput('"core:token:default/theme"', root), true);
-  assert.equal(hasUnsanitizedEvidenceOutput('"core:token:default-theme:secret"', root), true);
+  assert.equal(hasUnsanitizedEvidenceOutput('"muxui:token:default--theme"', root), true);
+  assert.equal(hasUnsanitizedEvidenceOutput('"muxui:token:default.theme"', root), true);
+  assert.equal(hasUnsanitizedEvidenceOutput('"muxui:token:default/theme"', root), true);
+  assert.equal(hasUnsanitizedEvidenceOutput('"muxui:token:default-theme:secret"', root), true);
   assert.equal(hasUnsanitizedEvidenceOutput('authorization: Bearer-secret', root), true);
   assert.equal(hasUnsanitizedEvidenceOutput('api-key=secret-value', root), true);
   assert.equal(hasUnsanitizedEvidenceOutput('/Users/example/private.txt', root), true);
   assert.equal(hasUnsanitizedEvidenceOutput('/private/var/folders/example/private.txt', root), true);
-  assert.equal(hasUnsanitizedEvidenceOutput('/private/tmp/core-ui-evidence/private.txt', root), true);
+  assert.equal(hasUnsanitizedEvidenceOutput('/private/tmp/muxui-evidence/private.txt', root), true);
   assert.equal(hasUnsanitizedEvidenceOutput('/var/folders/example/private.txt', root), true);
-  assert.equal(hasUnsanitizedEvidenceOutput('/tmp/core-ui-evidence/private.txt', root), true);
+  assert.equal(hasUnsanitizedEvidenceOutput('/tmp/muxui-evidence/private.txt', root), true);
   assert.equal(hasUnsanitizedEvidenceOutput('C:\\Users\\example\\private.txt', root), true);
   assert.equal(hasUnsanitizedEvidenceOutput(`${root}/packages/tokens`, root), true);
 });
 
 test('evidence verification rejects an in-progress G1.2 publication journal', async () => {
-  const root = await mkdtemp(join(tmpdir(), 'core-ui-evidence-transaction-'));
+  const root = await mkdtemp(join(tmpdir(), 'muxui-evidence-transaction-'));
   await mkdir(join(root, 'tests/evidence'), { recursive: true });
   await writeFile(join(root, 'tests/evidence/.g1-2-transaction.json'), canonicalJson({
-    profile: 'core-ui-g1-2-evidence-transaction-v1',
+    profile: 'muxui-g1-2-evidence-transaction-v1',
     roots: ['tests/evidence/authority-11-g1-2-applicability-v1', 'tests/evidence/g1.2'],
     transactionPath: 'tests/.g1-2-transaction-fixture',
   }));
@@ -255,7 +255,7 @@ async function fixture({
   validation = false,
   recordOnlyValidation = false,
 } = {}) {
-  const root = await mkdtemp(join(tmpdir(), 'core-ui-evidence-'));
+  const root = await mkdtemp(join(tmpdir(), 'muxui-evidence-'));
   await mkdir(join(root, 'tests/evidence/g0.0/artifacts'), { recursive: true });
   await mkdir(join(root, 'tests/evidence/g0.0/records'), { recursive: true });
   const artifactPath = 'tests/evidence/g0.0/artifacts/E-G0.0-01.json';

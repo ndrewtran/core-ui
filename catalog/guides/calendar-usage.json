@@ -1,1 +1,1 @@
-{"schemaVersion":"1.0.0","id":"core:guide:calendar-usage","kind":"guide","name":"Calendar usage","summary":"Portable usage guidance for Calendar.","lifecycle":"experimental","keywords":["calendar","date","react"],"platforms":["web.react"],"source":"catalog/guides/calendar-usage.md"}
+{"schemaVersion":"1.0.0","id":"muxui:guide:calendar-usage","kind":"guide","name":"Calendar usage","summary":"Portable usage guidance for Calendar.","lifecycle":"experimental","keywords":["calendar","date","react"],"platforms":["web.react"],"source":"catalog/guides/calendar-usage.md"}

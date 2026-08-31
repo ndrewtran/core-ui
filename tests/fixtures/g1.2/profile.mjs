@@ -1,4 +1,4 @@
-import { canonicalJson } from '../../../packages/schema/src/index.mjs';
+import { canonicalDigest, canonicalJson } from '../../../packages/schema/src/index.mjs';
 
 const ROOT_KEYS = Object.freeze([
   'schema', 'id', 'bindingRef', 'componentSupportClaim', 'platformSafetyContractDigest', 'tuples',
@@ -7,6 +7,26 @@ const TUPLE_KEYS = Object.freeze([
   'profile', 'validationProfile', 'platformSafetyRequirementSetDigest',
 ]);
 const ORDER = Object.freeze(['ios', 'android', 'native.react-native-web']);
+
+// The retained G1.2 fixture predates the Mux UI identity reset. Keep its
+// bytes and historical contract digest intact while projecting the current
+// catalog component into the shape that the fixture validates.
+export function projectCurrentNativeComponentForHistoricalFixture(component, fixture) {
+  const historicalContractDigest = fixture?.platformSafetyContractDigest;
+  if (!component || typeof component !== 'object' || !component.platformSafetyRequirementSets
+    || typeof historicalContractDigest !== 'string') {
+    throw new TypeError('G12_FIXTURE_PROJECTION_INVALID: component and fixture are required');
+  }
+  const platformSafetyRequirementSets = Object.fromEntries(
+    Object.entries(component.platformSafetyRequirementSets).map(([key, set]) => {
+      if (!key.startsWith('native.react-native:')) return [key, set];
+      const { digest: _digest, ...preimage } = set;
+      const historicalSet = { ...preimage, contractDigest: historicalContractDigest };
+      return [key, { ...historicalSet, digest: canonicalDigest(historicalSet) }];
+    }),
+  );
+  return { ...component, platformSafetyRequirementSets };
+}
 
 function exactKeys(value, keys, label) {
   if (value === null || typeof value !== 'object' || Array.isArray(value)

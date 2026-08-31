@@ -1,1 +1,1 @@
-{"schemaVersion":"1.0.0","id":"core:guide:select-usage","kind":"guide","name":"Select usage","summary":"Portable usage guidance for Select.","lifecycle":"experimental","keywords":["select","react","accessibility"],"platforms":["web.react"],"source":"catalog/guides/select-usage.md"}
+{"schemaVersion":"1.0.0","id":"muxui:guide:select-usage","kind":"guide","name":"Select usage","summary":"Portable usage guidance for Select.","lifecycle":"experimental","keywords":["select","react","accessibility"],"platforms":["web.react"],"source":"catalog/guides/select-usage.md"}

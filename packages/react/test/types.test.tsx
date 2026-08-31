@@ -54,10 +54,10 @@ import {
   Tree,
   Tooltip,
   Virtualizer,
-  type CoreDropEvent,
+  type MuxUIDropEvent,
   reactCompatibility,
   useToast,
-} from '@core-ui/react';
+} from '@muxui/react';
 
 const schema: Readonly<Record<string, unknown>> = reactCompatibility;
 void schema;
@@ -80,11 +80,11 @@ const button = (
 );
 void button;
 
-// React Aria names remain internal implementation details of Core Button.
-// @ts-expect-error Core owns `disabled`, not the upstream `isDisabled` prop.
+// React Aria names remain internal implementation details of MuxUI Button.
+// @ts-expect-error MuxUI owns `disabled`, not the upstream `isDisabled` prop.
 const upstreamDisabled = <Button isDisabled>Save</Button>;
 void upstreamDisabled;
-// @ts-expect-error Core owns `pending`, not the upstream `isPending` prop.
+// @ts-expect-error MuxUI owns `pending`, not the upstream `isPending` prop.
 const upstreamPending = <Button isPending>Save</Button>;
 void upstreamPending;
 // @ts-expect-error Button is an action control, not a navigation element.
@@ -112,7 +112,7 @@ void componentSlice;
 const fields = (
   <Form onSubmit={(event) => event.preventDefault()}>
     <TextField label="Name" value="Andrew" onChange={(value) => { const text: string = value; void text; }} />
-    <SearchField label="Search" defaultValue="Core" onSubmit={(value) => { const text: string = value; void text; }} />
+    <SearchField label="Search" defaultValue="MuxUI" onSubmit={(value) => { const text: string = value; void text; }} />
     <NumberField label="Quantity" defaultValue={2} onChange={(value) => { const amount: number = value; void amount; }} />
     <CheckboxGroup label="Alerts" defaultValue={['email']}><Checkbox value="email">Email</Checkbox></CheckboxGroup>
     <Switch label="Enabled" selected onChange={(selected) => { const value: boolean = selected; void value; }} />
@@ -134,11 +134,11 @@ const fields = (
 );
 void fields;
 
-// Core's public field contracts do not expose RAC prop names or temporal objects.
-// @ts-expect-error Core owns `disabled`, not the upstream `isDisabled` prop.
+// Mux UI's public field contracts do not expose RAC prop names or temporal objects.
+// @ts-expect-error MuxUI owns `disabled`, not the upstream `isDisabled` prop.
 const upstreamFieldProp = <TextField label="Name" isDisabled />;
 void upstreamFieldProp;
-// @ts-expect-error Date fields accept Core ISO strings, not upstream date objects.
+// @ts-expect-error Date fields accept MuxUI ISO strings, not upstream date objects.
 const upstreamDateValue = <DateField label="Birthday" value={{ year: 2026, month: 8, day: 26 }} />;
 void upstreamDateValue;
 
@@ -146,10 +146,10 @@ const ariaNamedField = <TextField aria-label="Name" />;
 const labelledByField = <TextField aria-labelledby="name-heading" />;
 void ariaNamedField;
 void labelledByField;
-// @ts-expect-error Every Core field requires label, aria-label, or aria-labelledby.
+// @ts-expect-error Every MuxUI field requires label, aria-label, or aria-labelledby.
 const unnamedTextField = <TextField />;
 void unnamedTextField;
-// @ts-expect-error Switch uses the same Core accessible-name contract.
+// @ts-expect-error Switch uses the same MuxUI accessible-name contract.
 const unnamedSwitch = <Switch>Enabled</Switch>;
 void unnamedSwitch;
 // Switch's canonical contract intentionally excludes field validation props.
@@ -163,8 +163,8 @@ void switchInvalid;
 const fieldValidationBehavior = <TextField label="Name" validationBehavior="native" />;
 void fieldValidationBehavior;
 
-// Breadcrumb landmarks require a Core-owned accessible name; JS callers receive the safe fallback.
-// @ts-expect-error Breadcrumbs requires Core's explicit accessible name.
+// Breadcrumb landmarks require a Mux UI-owned accessible name; JS callers receive the safe fallback.
+// @ts-expect-error Breadcrumbs requires Mux UI's explicit accessible name.
 const unnamedBreadcrumbs = <Breadcrumbs items={[{ label: 'Home' }]} />;
 void unnamedBreadcrumbs;
 // @ts-expect-error Breadcrumb current state is derived from the final item, not a public item prop.
@@ -172,22 +172,22 @@ const publicCurrentBreadcrumb = <Breadcrumbs aria-label="Breadcrumb" items={[{ l
 void publicCurrentBreadcrumb;
 
 // Upstream RAC prop names remain private implementation details.
-// @ts-expect-error Core owns `disabled`, not the upstream `isDisabled` prop.
+// @ts-expect-error MuxUI owns `disabled`, not the upstream `isDisabled` prop.
 const upstreamCheckbox = <Checkbox isDisabled>Accept</Checkbox>;
 void upstreamCheckbox;
-// @ts-expect-error Core owns `expanded`, not the upstream `isExpanded` prop.
+// @ts-expect-error MuxUI owns `expanded`, not the upstream `isExpanded` prop.
 const upstreamDisclosure = <Disclosure title="Details" isExpanded>Content</Disclosure>;
 void upstreamDisclosure;
-// @ts-expect-error Core owns `selected`, not the upstream `isSelected` prop.
+// @ts-expect-error MuxUI owns `selected`, not the upstream `isSelected` prop.
 const upstreamToggle = <ToggleButton isSelected>Bold</ToggleButton>;
 void upstreamToggle;
-// @ts-expect-error Core owns `onActivate`, not the upstream `onPress` prop.
+// @ts-expect-error MuxUI owns `onActivate`, not the upstream `onPress` prop.
 const upstreamLink = <Link href="/settings" onPress={() => undefined}>Settings</Link>;
 void upstreamLink;
 
 const unsupportedCancellation = (
   <Button onActivate={(event) => {
-    // @ts-expect-error Core activation events intentionally do not expose cancellation.
+    // @ts-expect-error MuxUI activation events intentionally do not expose cancellation.
     event.preventDefault();
   }} />
 );
@@ -223,7 +223,7 @@ const r13Collections = (
 );
 void r13Collections;
 
-// R1.3 public collection contracts intentionally keep naming and item rendering Core-owned.
+// R1.3 public collection contracts intentionally keep naming and item rendering Mux UI-owned.
 // @ts-expect-error ARIA-only controls do not expose a `label` prop.
 const colorWheelLabel = <ColorWheel label="Hue" aria-label="Hue" />;
 void colorWheelLabel;
@@ -257,16 +257,16 @@ void tableLabelledBy;
 // @ts-expect-error Virtualizer's canonical API supports only `aria-label`.
 const virtualizerLabelledBy = <Virtualizer aria-labelledby="results-heading" />;
 void virtualizerLabelledBy;
-// @ts-expect-error Core wraps collection item labels; a public render-prop child is not supported.
+// @ts-expect-error MuxUI wraps collection item labels; a public render-prop child is not supported.
 const listBoxChildren = <ListBox aria-label="Files" items={[]}>{(item) => item.label}</ListBox>;
 void listBoxChildren;
-// @ts-expect-error Core wraps menu item labels; a public render-prop child is not supported.
+// @ts-expect-error MuxUI wraps menu item labels; a public render-prop child is not supported.
 const menuChildren = <Menu aria-label="Actions" items={[]}>{(item) => item.label}</Menu>;
 void menuChildren;
-// @ts-expect-error Core wraps Select item labels; a public render-prop child is not supported.
+// @ts-expect-error MuxUI wraps Select item labels; a public render-prop child is not supported.
 const selectChildren = <Select label="Color" items={[]}>{(item) => item.label}</Select>;
 void selectChildren;
-// @ts-expect-error Core wraps ComboBox item labels; a public render-prop child is not supported.
+// @ts-expect-error MuxUI wraps ComboBox item labels; a public render-prop child is not supported.
 const comboBoxChildren = <ComboBox label="City" items={[]}>{(item) => item.label}</ComboBox>;
 void comboBoxChildren;
 // @ts-expect-error RadioGroup does not expose generic field descriptions.
@@ -305,13 +305,13 @@ void tokenFieldRequired;
 // @ts-expect-error TokenField does not expose invalid.
 const tokenFieldInvalid = <TokenField label="Tags" invalid />;
 void tokenFieldInvalid;
-// @ts-expect-error Tree item content is always rendered from CoreTreeItem.label.
+// @ts-expect-error Tree item content is always rendered from MuxUITreeItem.label.
 const treeChildren = <Tree aria-label="Navigation" items={[]}>{(item) => item.label}</Tree>;
 void treeChildren;
 // @ts-expect-error Virtualizer item content is always rendered from the normalized item.
 const virtualizerRenderItem = <Virtualizer aria-label="Results" items={[]} renderItem={(item) => item.label} />;
 void virtualizerRenderItem;
-// Calendar contracts expose Core date/validation state, but not field messaging props.
+// Calendar contracts expose Mux UI date/validation state, but not field messaging props.
 // @ts-expect-error Calendar does not expose description.
 const calendarDescription = <Calendar label="Date" description="Unsupported" />;
 void calendarDescription;
@@ -328,7 +328,7 @@ void rangeCalendarErrorMessage;
 const r14Overlays = (
   <>
     <DropZone aria-label="Upload" onDrop={(event) => {
-      const drop: CoreDropEvent = event;
+      const drop: MuxUIDropEvent = event;
       const operation: 'copy' | 'link' | 'move' | 'cancel' = drop.dropOperation;
       for (const item of drop.items) {
         if (item.kind === 'file') void item.getFile();
@@ -362,7 +362,7 @@ function ToastAction() {
 }
 void ToastAction;
 
-// @ts-expect-error DropZone exposes a Core drop event, not a native DragEvent.
+// @ts-expect-error DropZone exposes a MuxUI drop event, not a native DragEvent.
 const nativeDropEvent = <DropZone onDrop={(event) => event.dataTransfer.files} />;
 void nativeDropEvent;
 // @ts-expect-error FileTrigger uses the exact acceptedFileTypes array contract.
@@ -389,6 +389,6 @@ void emptyTooltip;
 // @ts-expect-error Tooltip has one explicit trigger prop rather than an ambiguous children alias.
 const childTooltip = <Tooltip content="Help"><button type="button">Help</button></Tooltip>;
 void childTooltip;
-// @ts-expect-error Core owns `open`, not the upstream `isOpen` prop.
+// @ts-expect-error MuxUI owns `open`, not the upstream `isOpen` prop.
 const upstreamPopoverState = <Popover aria-label="Details" trigger={<button type="button">Details</button>} isOpen>Content</Popover>;
 void upstreamPopoverState;

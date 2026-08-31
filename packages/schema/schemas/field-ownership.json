@@ -1204,10 +1204,10 @@
     },
     {
       "class": "derived",
-      "name": "coreVersion",
+      "name": "muxuiVersion",
       "owner": "query-envelope-contract",
       "schema": "query-envelope.schema.json",
-      "schemaPointer": "#/$defs/responseMeta/properties/coreVersion"
+      "schemaPointer": "#/$defs/responseMeta/properties/muxuiVersion"
     },
     {
       "class": "derived",
@@ -2632,10 +2632,10 @@
     },
     {
       "class": "derived",
-      "name": "coreTokenId",
+      "name": "muxuiTokenId",
       "owner": "query-envelope-contract",
       "schema": "section-page.schema.json",
-      "schemaPointer": "#/$defs/admittedCrosswalkEntry/properties/coreTokenId"
+      "schemaPointer": "#/$defs/admittedCrosswalkEntry/properties/muxuiTokenId"
     },
     {
       "class": "derived",
@@ -3425,8 +3425,8 @@
       "class": "derived",
       "owner": "query-envelope-contract",
       "schema": "section-page.schema.json",
-      "name": "coreTokenId",
-      "schemaPointer": "#/$defs/normalizedCrosswalkGroup/properties/coreTokenId"
+      "name": "muxuiTokenId",
+      "schemaPointer": "#/$defs/normalizedCrosswalkGroup/properties/muxuiTokenId"
     },
     {
       "class": "derived",
@@ -3481,8 +3481,8 @@
       "class": "authored",
       "owner": "token-source-contract",
       "schema": "token-source.schema.json",
-      "name": "coreTokenId",
-      "schemaPointer": "#/$defs/admittedCrosswalkEntry/properties/coreTokenId"
+      "name": "muxuiTokenId",
+      "schemaPointer": "#/$defs/admittedCrosswalkEntry/properties/muxuiTokenId"
     },
     {
       "class": "authored",
@@ -3586,8 +3586,8 @@
       "class": "authored",
       "owner": "token-source-contract",
       "schema": "token-source.schema.json",
-      "name": "coreTokenId",
-      "schemaPointer": "#/$defs/crosswalkGroup/properties/coreTokenId"
+      "name": "muxuiTokenId",
+      "schemaPointer": "#/$defs/crosswalkGroup/properties/muxuiTokenId"
     },
     {
       "class": "authored",

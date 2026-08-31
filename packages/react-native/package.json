@@ -1,5 +1,5 @@
 {
-  "name": "@core-ui/react-native",
+  "name": "@muxui/react-native",
   "version": "1.0.0",
   "private": true,
   "type": "module",
@@ -34,16 +34,16 @@
     "generate:check": "node src/generate.mjs --check"
   },
   "dependencies": {
-    "@core-ui/foundation": "workspace:*"
+    "@muxui/foundation": "workspace:*"
   },
   "peerDependencies": {
     "react": "^19.2.3",
     "react-native": "^0.87.0"
   },
   "devDependencies": {
-    "@core-ui/catalog": "workspace:*",
-    "@core-ui/schema": "workspace:*",
-    "@core-ui/tokens": "workspace:*",
+    "@muxui/catalog": "workspace:*",
+    "@muxui/schema": "workspace:*",
+    "@muxui/tokens": "workspace:*",
     "@react-native/babel-preset": "0.87.0",
     "@types/react": "19.2.18",
     "babel-jest": "30.4.1",

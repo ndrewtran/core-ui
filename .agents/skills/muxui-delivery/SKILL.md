@@ -1,12 +1,12 @@
 ---
-name: core-ui-delivery
-description: Triage Core UI repository work through canonical owners, the active milestone, focused proof, protected pull requests, and risk-based review. Use automatically for Core UI planning, implementation, evidence, PR, merge, tracker, or release-adjacent tasks.
+name: muxui-delivery
+description: Triage Mux UI repository work through canonical owners, the active milestone, focused proof, protected pull requests, and risk-based review. Use automatically for Mux UI planning, implementation, evidence, PR, merge, tracker, or release-adjacent tasks.
 ---
 
-# Core UI Delivery
+# Mux UI Delivery
 
-Use this repository skill after the global `core-ui-delivery-guard` for every
-Core UI task. It routes work to canonical owners and owns no commands, mutable
+Use this repository skill after the global `muxui-delivery-guard` for every
+Mux UI task. It routes work to canonical owners and owns no commands, mutable
 state, reviewer decisions, GitHub writes, or Project writes. The root agent
 remains accountable for task decomposition, difficult reasoning, escalation,
 delegation, and final decisions.

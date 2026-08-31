@@ -1,12 +1,12 @@
 {
   "schemaVersion": "1.0.0",
-  "id": "core:example:link-basic-react",
+  "id": "muxui:example:link-basic-react",
   "kind": "example",
   "name": "Basic React Link",
   "summary": "The minimum React Link example.",
   "lifecycle": "experimental",
   "binding": {
-    "ref": "core:component:link#web.react",
+    "ref": "muxui:component:link#web.react",
     "guidanceImpact": "normative",
     "purposes": [
       "generation",

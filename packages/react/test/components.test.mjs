@@ -88,15 +88,15 @@ test('R1.1 RAC-backed component slice preserves SSR, hydration, semantics, and i
     await act(async () => { hydrated = hydrateRoot(root, allComponents()); });
     assert.equal(root.querySelector('nav[aria-label="Breadcrumb"]') !== null, true);
     assert.equal(root.querySelector('input[type="checkbox"]').checked, true);
-    assert.equal(root.querySelector('.core-checkbox-indicator[data-selected]') !== null, true);
-    assert.equal(root.querySelector('.core-disclosure > button').getAttribute('aria-expanded'), 'true');
-    assert.equal(root.querySelector('.core-disclosure-panel[role="region"]') !== null, true);
-    assert.equal(root.querySelector('.core-group').getAttribute('aria-disabled'), 'true');
-    assert.equal(root.querySelector('.core-link[href="/next"]') !== null, true);
+    assert.equal(root.querySelector('.muxui-checkbox-indicator[data-selected]') !== null, true);
+    assert.equal(root.querySelector('.muxui-disclosure > button').getAttribute('aria-expanded'), 'true');
+    assert.equal(root.querySelector('.muxui-disclosure-panel[role="region"]') !== null, true);
+    assert.equal(root.querySelector('.muxui-group').getAttribute('aria-disabled'), 'true');
+    assert.equal(root.querySelector('.muxui-link[href="/next"]') !== null, true);
     assert.equal(root.querySelector('[role~="meter"]') !== null, true);
-    assert.equal(root.querySelectorAll('.core-progress-bar[role~="progressbar"]').length, 2);
-    assert.equal(root.querySelector('.core-separator-vertical').tagName, 'DIV');
-    assert.equal(root.querySelector('.core-toggle-button').getAttribute('aria-pressed'), 'false');
+    assert.equal(root.querySelectorAll('.muxui-progress-bar[role~="progressbar"]').length, 2);
+    assert.equal(root.querySelector('.muxui-separator-vertical').tagName, 'DIV');
+    assert.equal(root.querySelector('.muxui-toggle-button').getAttribute('aria-pressed'), 'false');
     await act(async () => hydrated.unmount());
     hydrated = undefined;
 
@@ -110,11 +110,11 @@ test('R1.1 RAC-backed component slice preserves SSR, hydration, semantics, and i
       React.createElement(ToggleButton, { onChange: (value) => changes.push(['toggle', value]) }, 'Bold'),
       React.createElement(Link, { href: '/next', onActivate: (event) => changes.push(['link', event]) }, 'Next'))));
     await act(async () => interactionRoot.querySelector('input[type="checkbox"]').click());
-    await act(async () => interactionRoot.querySelector('.core-disclosure > button').click());
-    await act(async () => interactionRoot.querySelector('.core-toggle-button').click());
-    await act(async () => interactionRoot.querySelector('.core-link').click());
+    await act(async () => interactionRoot.querySelector('.muxui-disclosure > button').click());
+    await act(async () => interactionRoot.querySelector('.muxui-toggle-button').click());
+    await act(async () => interactionRoot.querySelector('.muxui-link').click());
     assert.deepEqual(changes.slice(0, 3), [['checkbox', true], ['toggle', true], ['link', changes[2]?.[1]]]);
-    assert.equal(interactionRoot.querySelector('.core-disclosure > button').getAttribute('aria-expanded'), 'true');
+    assert.equal(interactionRoot.querySelector('.muxui-disclosure > button').getAttribute('aria-expanded'), 'true');
     assert.equal(changes[2][1].type, 'activate');
     assert.equal(changes[2][1].target instanceof dom.window.HTMLAnchorElement, true);
     await act(async () => rootHandle.unmount());
@@ -126,7 +126,7 @@ test('R1.1 RAC-backed component slice preserves SSR, hydration, semantics, and i
   }
 });
 
-test('R1.1 Core labels, checkbox indicator states, and breadcrumb current normalization are accessible', async () => {
+test('R1.1 MuxUI labels, checkbox indicator states, and breadcrumb current normalization are accessible', async () => {
   const dom = new JSDOM('<!doctype html><div id="root"></div>');
   const restore = installDom(dom);
   try {
@@ -147,10 +147,10 @@ test('R1.1 Core labels, checkbox indicator states, and breadcrumb current normal
     assert.equal(root.querySelector('nav[aria-label="Breadcrumbs"]') !== null, true);
     assert.equal(root.querySelectorAll('[aria-current="page"]').length, 1);
     assert.equal(root.querySelector('[aria-current="page"]').textContent, 'Docs');
-    assert.equal(root.querySelector('.core-checkbox-indicator[data-indeterminate]') !== null, true);
-    assert.equal(root.querySelector('.core-checkbox[data-invalid]') !== null, true);
-    assert.equal(root.querySelector('.core-checkbox[data-disabled]') !== null, true);
-    const labelledComponents = [...root.querySelectorAll('.core-meter, .core-progress-bar')];
+    assert.equal(root.querySelector('.muxui-checkbox-indicator[data-indeterminate]') !== null, true);
+    assert.equal(root.querySelector('.muxui-checkbox[data-invalid]') !== null, true);
+    assert.equal(root.querySelector('.muxui-checkbox[data-disabled]') !== null, true);
+    const labelledComponents = [...root.querySelectorAll('.muxui-meter, .muxui-progress-bar')];
     assert.deepEqual(labelledComponents.map((component) => component.getAttribute('aria-label')), [null, null, null, null]);
     assert.deepEqual(labelledComponents.map((component) => {
       const id = component.getAttribute('aria-labelledby');
@@ -168,15 +168,15 @@ test('DisclosureGroup uses accordion trigger geometry without changing standalon
     React.createElement(DisclosureGroup, null,
       React.createElement(Disclosure, { id: 'grouped', title: 'Grouped' }, 'Content'))));
   const dom = new JSDOM(`<!doctype html><div id="root">${server}</div>`);
-  const standalone = dom.window.document.querySelector('.core-disclosure:not(.core-disclosure-group) .core-disclosure-trigger')
-    ?? dom.window.document.querySelector('.core-disclosure-trigger');
-  const grouped = dom.window.document.querySelector('.core-disclosure-group .core-disclosure-trigger');
+  const standalone = dom.window.document.querySelector('.muxui-disclosure:not(.muxui-disclosure-group) .muxui-disclosure-trigger')
+    ?? dom.window.document.querySelector('.muxui-disclosure-trigger');
+  const grouped = dom.window.document.querySelector('.muxui-disclosure-group .muxui-disclosure-trigger');
   assert.ok(standalone);
   assert.ok(grouped);
-  assert.equal(grouped.closest('.core-disclosure-group')?.classList.contains('core-disclosure-group'), true);
+  assert.equal(grouped.closest('.muxui-disclosure-group')?.classList.contains('muxui-disclosure-group'), true);
   const styles = await readFile(new URL('../generated/styles.css', import.meta.url), 'utf8');
-  assert.match(styles, /\.core-disclosure-group \.core-disclosure-trigger\s*\{[^}]*width:\s*100%[\s\S]*padding:\s*var\(--core-semantic-control-padding-inline\)/u);
-  assert.match(styles, /\.core-disclosure-trigger\s*\{[\s\S]*width:\s*fit-content/u);
+  assert.match(styles, /\.muxui-disclosure-group \.muxui-disclosure-trigger\s*\{[^}]*width:\s*100%[\s\S]*padding:\s*var\(--muxui-semantic-control-padding-inline\)/u);
+  assert.match(styles, /\.muxui-disclosure-trigger\s*\{[\s\S]*width:\s*fit-content/u);
   dom.window.close();
 });
 

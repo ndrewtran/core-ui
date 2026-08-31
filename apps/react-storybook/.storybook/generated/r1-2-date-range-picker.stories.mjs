@@ -1,6 +1,6 @@
 // @generated-from: apps/react-storybook/src/generate-stories.mjs
-// @generated-content-sha256: sha256:1fddd65cfa73d171897e1bd1685ef858099d2c68e762fe25812a5a36a446987c
-import * as Core from '@core-ui/react';
+// @generated-content-sha256: sha256:cea2b1f05fe1f58bf10af60c189bf68652f694ddb1239f5e97be0779bc2dbc95
+import * as MuxUI from '@muxui/react';
 import { argTypesForBinding, createStory } from '../../src/storybook-factory.mjs';
 
 const binding = {
@@ -41,12 +41,12 @@ const binding = {
       "endName"
     ]
   },
-  "binding": "core:component:date-range-picker#web.react",
+  "binding": "muxui:component:date-range-picker#web.react",
   "export": "DateRangePicker",
   "lifecycle": "experimental",
   "module": ".",
   "runtimeProfile": "web.react",
-  "selector": ".core-date-range-picker",
+  "selector": ".muxui-date-range-picker",
   "states": [
     "idle",
     "open",
@@ -60,8 +60,9 @@ const binding = {
 const record = { family: 'DateRangePicker', tranche: 'R1.2', binding };
 
 export default {
-  title: 'Core React/R1.2/DateRangePicker',
-  component: Core.DateRangePicker,
+  title: 'Mux UI React/R1.2/DateRangePicker',
+  id: 'muxui-react-r1-2-date-range-picker',
+  component: MuxUI.DateRangePicker,
   tags: ['autodocs'],
   parameters: {
     controls: {
@@ -69,7 +70,7 @@ export default {
     },
     docs: {
       description: {
-        component: 'Private development showcase for the Core-owned DateRangePicker family.',
+        component: 'Private development showcase for the Mux UI-owned DateRangePicker family.',
       },
     },
   },

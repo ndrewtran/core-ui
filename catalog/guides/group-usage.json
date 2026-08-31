@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "id": "core:guide:group-usage",
+  "id": "muxui:guide:group-usage",
   "kind": "guide",
   "name": "Group usage",
   "summary": "Portable usage guidance for Group.",

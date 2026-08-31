@@ -1,6 +1,6 @@
 // @generated-from: apps/react-storybook/src/generate-stories.mjs
-// @generated-content-sha256: sha256:e15302788a403eefa3651b4f46dfd1fb10de6582c0f6da36f61550785ce6e0da
-import * as Core from '@core-ui/react';
+// @generated-content-sha256: sha256:1baab737d49ccf0434ec9a4dc1ffd19e8fae4fd224967f361221c9d93dee88c0
+import * as MuxUI from '@muxui/react';
 import { argTypesForBinding, createStory } from '../../src/storybook-factory.mjs';
 
 const binding = {
@@ -31,12 +31,12 @@ const binding = {
       "selectionMode"
     ]
   },
-  "binding": "core:component:table#web.react",
+  "binding": "muxui:component:table#web.react",
   "export": "Table",
   "lifecycle": "experimental",
   "module": ".",
   "runtimeProfile": "web.react",
-  "selector": ".core-table",
+  "selector": ".muxui-table",
   "states": [
     "idle",
     "focused",
@@ -49,8 +49,9 @@ const binding = {
 const record = { family: 'Table', tranche: 'R1.3', binding };
 
 export default {
-  title: 'Core React/R1.3/Table',
-  component: Core.Table,
+  title: 'Mux UI React/R1.3/Table',
+  id: 'muxui-react-r1-3-table',
+  component: MuxUI.Table,
   tags: ['autodocs'],
   parameters: {
     controls: {
@@ -58,7 +59,7 @@ export default {
     },
     docs: {
       description: {
-        component: 'Private development showcase for the Core-owned Table family.',
+        component: 'Private development showcase for the Mux UI-owned Table family.',
       },
     },
   },

@@ -1,5 +1,5 @@
 {
-  "schema": "core-ui-react-r1-5-closure-v1",
+  "schema": "muxui-react-r1-5-closure-v1",
   "tranche": "R1.5",
   "compatibility": {
     "runtimeProfile": "web.react",

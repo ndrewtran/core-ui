@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://core-ui.dev/schema/relation.schema.json",
+  "$id": "https://muxui.dev/schema/relation.schema.json",
   "title": "G0.1 minimal relation registry",
   "schemaVersion": "1.0.0",
   "type": "object",
@@ -30,7 +30,7 @@
       }
     }
   },
-  "x-core-ui-registry": [
+  "x-muxui-registry": [
     { "type": "implemented-by", "source": "component", "target": "binding", "owner": "component.binding", "minimum": 1, "maximum": "many", "guidanceImpact": "normative", "consumer": ["schema-validation", "spec-revision"] },
     { "type": "example-of", "source": "example", "target": "binding", "owner": "binding-example-relation", "minimum": 1, "maximum": 1, "guidanceImpact": "normative", "consumer": ["example-selection", "spec-revision"] },
     { "type": "uses", "source": "binding", "target": "token", "owner": "binding.tokenSources", "minimum": 0, "maximum": "many", "guidanceImpact": "normative", "consumer": ["schema-validation", "spec-revision"] },

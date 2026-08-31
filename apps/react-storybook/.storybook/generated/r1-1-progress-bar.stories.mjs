@@ -1,6 +1,6 @@
 // @generated-from: apps/react-storybook/src/generate-stories.mjs
-// @generated-content-sha256: sha256:600554dcc85c514e6f2b7093e26812444cb034322ee61fa889148832feaa41a7
-import * as Core from '@core-ui/react';
+// @generated-content-sha256: sha256:b5580d8147adbde2e07b6771f69d6ce392b41af29e01dbce4eb9876d6a3e3433
+import * as MuxUI from '@muxui/react';
 import { argTypesForBinding, createStory } from '../../src/storybook-factory.mjs';
 
 const binding = {
@@ -23,12 +23,12 @@ const binding = {
       "label"
     ]
   },
-  "binding": "core:component:progress-bar#web.react",
+  "binding": "muxui:component:progress-bar#web.react",
   "export": "ProgressBar",
   "lifecycle": "experimental",
   "module": ".",
   "runtimeProfile": "web.react",
-  "selector": ".core-progress-bar",
+  "selector": ".muxui-progress-bar",
   "states": [
     "idle",
     "progress",
@@ -40,8 +40,9 @@ const binding = {
 const record = { family: 'ProgressBar', tranche: 'R1.1', binding };
 
 export default {
-  title: 'Core React/R1.1/ProgressBar',
-  component: Core.ProgressBar,
+  title: 'Mux UI React/R1.1/ProgressBar',
+  id: 'muxui-react-r1-1-progress-bar',
+  component: MuxUI.ProgressBar,
   tags: ['autodocs'],
   parameters: {
     controls: {
@@ -49,7 +50,7 @@ export default {
     },
     docs: {
       description: {
-        component: 'Private development showcase for the Core-owned ProgressBar family.',
+        component: 'Private development showcase for the Mux UI-owned ProgressBar family.',
       },
     },
   },

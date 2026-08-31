@@ -11,7 +11,7 @@ const completeBody = `
 - Affected Scope IDs / commitment transitions: all accepted IDs; no commitment transitions
 - Roadmap / evidence effect: no semantic changes; tracker references are reconciled
 - Release additions / removals: None — accepted release boundary remains unchanged
-- Open tracker migration: issues #1–#19 and the Core UI Delivery Project
+- Open tracker migration: issues #1–#19 and the Mux UI Delivery Project
 `;
 
 test('ignores pull requests outside authority sources', () => {
@@ -70,7 +70,7 @@ test('rejects incomplete Product Scope change metadata', () => {
 
 test('routes repository-policy and skill changes through ordinary governance metadata', () => {
   assert.deepEqual(validatePlanningPullRequest({
-    files: ['.agents/skills/core-ui-delivery/agents/openai.yaml'],
+    files: ['.agents/skills/muxui-delivery/agents/openai.yaml'],
     labels: ['type:decision'],
     body: completeBody,
   }), []);

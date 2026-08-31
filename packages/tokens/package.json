@@ -1,5 +1,5 @@
 {
-  "name": "@core-ui/tokens",
+  "name": "@muxui/tokens",
   "version": "2.0.0",
   "private": true,
   "type": "module",
@@ -12,7 +12,7 @@
     "./materialization": "./src/tale-token-materialization.mjs"
   },
   "dependencies": {
-    "@core-ui/schema": "workspace:*"
+    "@muxui/schema": "workspace:*"
   },
   "scripts": {
     "check": "node src/generate.mjs --check && node --test test/*.test.mjs",

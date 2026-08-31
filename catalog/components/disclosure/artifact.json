@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "id": "core:component:disclosure",
+  "id": "muxui:component:disclosure",
   "kind": "component",
   "name": "Disclosure",
   "summary": "Reveals or hides a related content panel.",
@@ -64,7 +64,7 @@
         "Expose a labelled button with expanded state and a controlled panel relationship"
       ],
       "tokenRecipe": {
-        "source": "core:token:default-theme",
+        "source": "muxui:token:default-theme",
         "requirements": [
           {
             "token": "semantic.control.padding-inline",
@@ -148,7 +148,7 @@
         "Expose a labelled button with expanded state and a controlled panel relationship"
       ],
       "tokenRecipe": {
-        "source": "core:token:default-theme",
+        "source": "muxui:token:default-theme",
         "requirements": [
           {
             "token": "semantic.control.padding-inline",

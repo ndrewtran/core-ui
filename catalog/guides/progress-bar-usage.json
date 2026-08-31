@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "id": "core:guide:progress-bar-usage",
+  "id": "muxui:guide:progress-bar-usage",
   "kind": "guide",
   "name": "ProgressBar usage",
   "summary": "Portable usage guidance for ProgressBar.",

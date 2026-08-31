@@ -6,7 +6,7 @@ import {
   canonicalJson,
   parseJsonStrict,
   validateFamily,
-} from '@core-ui/schema';
+} from '@muxui/schema';
 import { validateSourceCrosswalk } from './index.mjs';
 import {
   assertDefaultThemeIdentityAuthority,
@@ -74,6 +74,33 @@ function strict(bytes, label) {
   } catch (error) {
     fail('CORE_TALE_RESET_BASE_DRIFT', `${label}: ${error.message}`);
   }
+}
+
+// The accepted Tale reconstruction predates the product identity reset. Keep
+// its emitted bytes and digests unchanged, but validate a transient current
+// schema projection because the active validator now owns the Mux UI fields.
+function currentValidationSource(source) {
+  const current = structuredClone(source);
+  if (typeof current.id === 'string' && current.id.startsWith('core:')) {
+    current.id = `muxui:${current.id.slice('core:'.length)}`;
+  }
+  if (current.sourceCrosswalk) {
+    current.sourceCrosswalk.entries = current.sourceCrosswalk.entries.map((entry) => {
+      const { coreTokenId, ...rest } = entry;
+      return {
+        ...rest,
+        ...(coreTokenId === undefined ? {} : { muxuiTokenId: coreTokenId }),
+      };
+    });
+    current.sourceCrosswalk.groups = current.sourceCrosswalk.groups.map((group) => {
+      const { coreTokenId, ...rest } = group;
+      return {
+        ...rest,
+        ...(coreTokenId === undefined ? {} : { muxuiTokenId: coreTokenId }),
+      };
+    });
+  }
+  return current;
 }
 
 function suffixFromId(id, prefix, label) {
@@ -256,8 +283,9 @@ export function materializeTaleTokenSource({ phaseBSource, parentDecision, reset
     else token.modes = structuredClone(mapping.modes);
   }
   source.tokenContractVersion = resetDecision.versions.tokenContractVersion.to;
-  validateFamily('token-source', source);
-  validateSourceCrosswalk(source, { baselineOccurrences: projectTaleBaselineOccurrences(parentDecision) });
+  const validationSource = currentValidationSource(source);
+  validateFamily('token-source', validationSource);
+  validateSourceCrosswalk(validationSource, { baselineOccurrences: projectTaleBaselineOccurrences(parentDecision) });
   const finalIds = Object.keys(source.tokens).sort(bytewise);
   if (
     finalIds.length !== resetDecision.summary.finalTokenCount

@@ -1,3 +1,3 @@
 # Table usage
 
-Use the Core Table contract and provide an accessible name.
+Use the Mux UI Table contract and provide an accessible name.

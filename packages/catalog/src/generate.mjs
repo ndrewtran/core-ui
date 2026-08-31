@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
-import { canonicalJson, parseJsonStrict } from '@core-ui/schema';
+import { canonicalJson, parseJsonStrict } from '@muxui/schema';
 import { generatedText } from '../../../tooling/audits/repository-policy/src/policy.mjs';
 import { compileCatalog } from './compiler.mjs';
 
@@ -56,7 +56,7 @@ const platformSafetyDescriptors = bundle.artifacts
     })))
   .sort((left, right) => left.key.localeCompare(right.key));
 const releaseManifest = {
-  id: `core-ui-release:${packageManifest.version}:${bundle.sourceRevision}`,
+  id: `muxui-release:${packageManifest.version}:${bundle.sourceRevision}`,
   releaseVersion: packageManifest.version,
   schemaVersion: bundle.schemaVersion,
   queryApiVersion: bundle.apiVersion,
@@ -70,7 +70,7 @@ const releaseManifest = {
   bindings: [],
 };
 const packageData = {
-  schema: 'core-ui-catalog-package-v2',
+  schema: 'muxui-catalog-package-v2',
   name: packageManifest.name,
   version: packageManifest.version,
   catalogVersion: bundle.catalogVersion,

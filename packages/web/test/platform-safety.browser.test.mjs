@@ -6,7 +6,7 @@ import { chromium } from 'playwright-core';
 import { platformSafetyFixture } from '../src/testing.mjs';
 
 const chromeCandidates = [
-  process.env.CORE_UI_CHROME_EXECUTABLE,
+  process.env.MUXUI_CHROME_EXECUTABLE,
   '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
 ].filter(Boolean);
 
@@ -16,10 +16,10 @@ async function launchChrome() {
 }
 
 function pageMarkup() {
-  return `<!doctype html><html lang="en"><head><title>Core UI platform safety fixture</title><style>${platformSafetyFixture.stylesheet}</style></head><body>
-    <main><h1>Platform safety substrate</h1><button class="core-button" type="button"
-      style="--core-component-button-background: rgb(0, 0, 0); --core-component-button-foreground: rgb(255, 255, 255)">
-      <span data-core-fixture-direction-marker aria-hidden="true">•</span><span data-core-slot="label">Synthetic action</span></button></main></body></html>`;
+  return `<!doctype html><html lang="en"><head><title>Mux UI platform safety fixture</title><style>${platformSafetyFixture.stylesheet}</style></head><body>
+    <main><h1>Platform safety substrate</h1><button class="muxui-button" type="button"
+      style="--muxui-component-button-background: rgb(0, 0, 0); --muxui-component-button-foreground: rgb(255, 255, 255)">
+      <span data-muxui-fixture-direction-marker aria-hidden="true">•</span><span data-muxui-slot="label">Synthetic action</span></button></main></body></html>`;
 }
 
 test('E-G1.1-01 progressive fixture keeps native semantics with JavaScript disabled', async () => {
@@ -81,11 +81,11 @@ test('E-G1.1-06 binds two exact safety sets and proves web-owned browser adaptat
     await page.emulateMedia({ forcedColors: 'none' });
 
     await page.locator('html').evaluate((element) => { element.dir = 'ltr'; });
-    const ltr = await page.locator('[data-core-fixture-direction-marker]').evaluate((element) => {
+    const ltr = await page.locator('[data-muxui-fixture-direction-marker]').evaluate((element) => {
       const style = getComputedStyle(element); return { left: style.marginLeft, right: style.marginRight };
     });
     await page.locator('html').evaluate((element) => { element.dir = 'rtl'; });
-    const rtl = await page.locator('[data-core-fixture-direction-marker]').evaluate((element) => {
+    const rtl = await page.locator('[data-muxui-fixture-direction-marker]').evaluate((element) => {
       const style = getComputedStyle(element); return { left: style.marginLeft, right: style.marginRight };
     });
     assert.deepEqual(ltr, { left: '2px', right: '10px' });

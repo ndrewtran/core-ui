@@ -1,3 +1,3 @@
 # Select usage
 
-Use the Core Select contract and provide an accessible name.
+Use the Mux UI Select contract and provide an accessible name.

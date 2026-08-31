@@ -1,5 +1,5 @@
 {
-  "schema": "core-ui-g0.5-authoring-corpus-v1",
+  "schema": "muxui-g0.5-authoring-corpus-v1",
   "semanticCases": [
     {
       "id": "editorial-summary",

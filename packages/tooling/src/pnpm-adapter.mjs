@@ -2,17 +2,17 @@ import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { existsSync, readFileSync, statSync } from 'node:fs';
 import { dirname, isAbsolute, join, relative, resolve } from 'node:path';
-import { createCatalogApi, createCatalogDiagnostic } from '@core-ui/catalog';
+import { createCatalogApi, createCatalogDiagnostic } from '@muxui/catalog';
 import {
   QUERY_API_VERSIONS,
   canonicalDigest,
   canonicalJson,
   parseJsonStrict,
-} from '@core-ui/schema';
+} from '@muxui/schema';
 import { valid, validRange } from 'semver';
 import { resolveCatalogGraph } from './local-resolver.mjs';
 
-const CATALOG_PACKAGE = '@core-ui/catalog';
+const CATALOG_PACKAGE = '@muxui/catalog';
 const TOOLING_VERSION = '1.0.0';
 
 function sha256(value) {
@@ -161,7 +161,7 @@ function loadCatalogCandidate(packageRoot) {
   let releaseManifest = null;
   try {
     packageManifest = readJson(join(packageRoot, 'package.json'));
-    const identityPointer = packageManifest.coreUi?.catalogPackage;
+    const identityPointer = packageManifest.muxUi?.catalogPackage;
     if (!isSafeRelative(identityPointer)) throw new Error('unsafe catalog pointer');
     const identityPath = resolve(packageRoot, identityPointer);
     const identityBytes = readFileSync(identityPath, 'utf8');
@@ -173,7 +173,7 @@ function loadCatalogCandidate(packageRoot) {
       'platformSafetyRequirementSets', 'version',
     ];
     identityValid = (
-      identity.schema !== 'core-ui-catalog-package-v2'
+      identity.schema !== 'muxui-catalog-package-v2'
       ? false
       : hasExactFields(identity, identityFields)
         && hasExactFields(identity.provenance, ['kind', 'value'])
@@ -306,14 +306,14 @@ function loadCatalogCandidate(packageRoot) {
 function loadRendererCandidate(packageRoot, expectedDescriptorId) {
   try {
     const packageManifest = readJson(join(packageRoot, 'package.json'));
-    const pointer = packageManifest.coreUi?.rendererDescriptor;
+    const pointer = packageManifest.muxUi?.rendererDescriptor;
     if (!isSafeRelative(pointer)) return null;
     const descriptorPath = resolve(packageRoot, pointer);
     const bytes = readFileSync(descriptorPath, 'utf8');
     const descriptor = parseJsonStrict(bytes);
     if (!parseProjectionSidecar(
       descriptorPath,
-      `packages/${packageManifest.name.replace(/^@core-ui\//u, '')}/generated/renderer-descriptor.json`,
+      `packages/${packageManifest.name.replace(/^@muxui\//u, '')}/generated/renderer-descriptor.json`,
       bytes,
     )) return null;
     if (
@@ -335,7 +335,7 @@ function loadRendererCandidate(packageRoot, expectedDescriptorId) {
 function cacheRoot(projectPath, cache) {
   return join(
     projectPath,
-    '.cache/core-ui/catalogs',
+    '.cache/muxui/catalogs',
     cache.version,
     cache.digest.replace(/^sha256:/u, ''),
   );
@@ -363,7 +363,7 @@ function projectFailure(packageManager = 'pnpm@0.0.0') {
 
 function cacheIdentityFailure(workspacePath, packageManager, declaredRange, cache) {
   return createCatalogDiagnostic({
-    code: 'CORE_CATALOG_INTEGRITY_MISMATCH',
+    code: 'MUXUI_CATALOG_INTEGRITY_MISMATCH',
     ruleId: 'resolver.catalog.cache-identity',
     message: 'The explicit cache identity is not an exact version and SHA-256 digest.',
     retryable: true,
@@ -428,19 +428,21 @@ export function resolvePnpmProjectCatalog({
     || typeof filterBindings !== 'boolean'
     || (queryApiVersion !== null && !QUERY_API_VERSIONS.includes(queryApiVersion))
     || (project !== null && !isSafeRelative(project))
-  ) return projectFailure();
+  ) return projectFailure('pnpm@0.0.0');
   const selectedPath = resolve(process.cwd(), project ?? '.');
   try {
-    if (!existsSync(selectedPath) || !statSync(selectedPath).isDirectory()) return projectFailure();
+    if (!existsSync(selectedPath) || !statSync(selectedPath).isDirectory()) {
+      return projectFailure('pnpm@0.0.0');
+    }
   } catch {
-    return projectFailure();
+    return projectFailure('pnpm@0.0.0');
   }
 
   let projectManifest;
   try {
     projectManifest = readJson(join(selectedPath, 'package.json'));
   } catch {
-    return projectFailure();
+    return projectFailure('pnpm@0.0.0');
   }
   const pnpmRoot = findPnpmRoot(selectedPath);
   if (!pnpmRoot || pnpmRoot.packageManager !== 'pnpm@10.33.0') {
@@ -452,14 +454,21 @@ export function resolvePnpmProjectCatalog({
     cache !== null
     && (valid(cache.version) === null || !/^sha256:[a-f0-9]{64}$/u.test(cache.digest ?? ''))
   ) {
-    return cacheIdentityFailure(workspacePath, pnpmRoot.packageManager, declaredRange, cache);
+    return cacheIdentityFailure(
+      workspacePath,
+      pnpmRoot.packageManager,
+      declaredRange,
+      cache,
+    );
   }
 
   const installedCatalog = pnpmList(selectedPath, CATALOG_PACKAGE, false);
   const lockedCatalog = pnpmList(selectedPath, CATALOG_PACKAGE, true);
   const installedVersion = resolvedVersion(installedCatalog);
   const lockedVersion = resolvedVersion(lockedCatalog);
-  const candidateRoot = cache ? cacheRoot(selectedPath, cache) : installedCatalog?.path;
+  const candidateRoot = cache
+    ? cacheRoot(selectedPath, cache)
+    : installedCatalog?.path;
   const candidate = candidateRoot
     ? loadCatalogCandidate(candidateRoot)
     : { identity: null, bundle: null, failures: ['catalog-package-metadata-missing'] };
@@ -581,13 +590,14 @@ export function resolvePnpmProjectCatalog({
     caches,
   };
   function resolveBindings(requested, id = 'pnpm-project') {
-    return resolveCatalogGraph({
+    const input = {
       packageManager,
       catalogs,
       rendererDescriptors,
       releaseManifests,
       graph: { id, ...graphBase, request: { bindings: requested, cache, queryApiVersion } },
-    });
+    };
+    return resolveCatalogGraph(input);
   }
   let finalResolution;
   let availableBindings;
@@ -610,12 +620,13 @@ export function resolvePnpmProjectCatalog({
     finalResolution = resolved.resolution;
     availableBindings = bindingRequests.length > 0 ? bindingRequests : undefined;
   }
+  const api = createCatalogApi(candidate.bundle, {
+    resolution: finalResolution,
+    ...(availableBindings === undefined ? {} : { availableBindings }),
+  });
   return {
     type: 'success',
-    api: createCatalogApi(candidate.bundle, {
-      resolution: finalResolution,
-      ...(availableBindings === undefined ? {} : { availableBindings }),
-    }),
+    api,
     package: {
       name: CATALOG_PACKAGE,
       version: identity.version,

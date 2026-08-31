@@ -1,1 +1,1 @@
-{"schemaVersion":"1.0.0","id":"core:guide:combo-box-usage","kind":"guide","name":"ComboBox usage","summary":"Portable usage guidance for ComboBox.","lifecycle":"experimental","keywords":["combo","box","react"],"platforms":["web.react"],"source":"catalog/guides/combo-box-usage.md"}
+{"schemaVersion":"1.0.0","id":"muxui:guide:combo-box-usage","kind":"guide","name":"ComboBox usage","summary":"Portable usage guidance for ComboBox.","lifecycle":"experimental","keywords":["combo","box","react"],"platforms":["web.react"],"source":"catalog/guides/combo-box-usage.md"}

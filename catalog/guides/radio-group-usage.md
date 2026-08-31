@@ -1,3 +1,3 @@
 # RadioGroup usage
 
-Use the Core RadioGroup contract and provide an accessible name.
+Use the Mux UI RadioGroup contract and provide an accessible name.

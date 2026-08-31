@@ -1,3 +1,3 @@
 # RangeCalendar usage
 
-Use the Core RangeCalendar contract and provide an accessible name.
+Use the Mux UI RangeCalendar contract and provide an accessible name.

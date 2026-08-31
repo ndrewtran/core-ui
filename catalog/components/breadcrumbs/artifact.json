@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "id": "core:component:breadcrumbs",
+  "id": "muxui:component:breadcrumbs",
   "kind": "component",
   "name": "Breadcrumbs",
   "summary": "Shows the current location within a navigation hierarchy.",
@@ -63,7 +63,7 @@
         "Expose a navigation landmark, accessible name, and current page"
       ],
       "tokenRecipe": {
-        "source": "core:token:default-theme",
+        "source": "muxui:token:default-theme",
         "requirements": [
           {
             "token": "semantic.control.padding-inline",
@@ -141,7 +141,7 @@
         "Expose a navigation landmark, accessible name, and current page"
       ],
       "tokenRecipe": {
-        "source": "core:token:default-theme",
+        "source": "muxui:token:default-theme",
         "requirements": [
           {
             "token": "semantic.control.padding-inline",

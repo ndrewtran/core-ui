@@ -1,6 +1,6 @@
 // @generated-from: apps/react-storybook/src/generate-stories.mjs
-// @generated-content-sha256: sha256:d0443330d9ccefe5d7d6e68296c627b4687b27cb7bf530b116ce5392f938f74f
-import * as Core from '@core-ui/react';
+// @generated-content-sha256: sha256:14fffaa117bb2db748ba002dd8b1c00d9a587b8c6149d9c4ffe470b0dcff3901
+import * as MuxUI from '@muxui/react';
 import { argTypesForBinding, createStory } from '../../src/storybook-factory.mjs';
 
 const binding = {
@@ -21,12 +21,12 @@ const binding = {
       "pending"
     ]
   },
-  "binding": "core:component:button#web.react",
+  "binding": "muxui:component:button#web.react",
   "export": "Button",
   "lifecycle": "experimental",
   "module": ".",
   "runtimeProfile": "web.react",
-  "selector": ".core-button",
+  "selector": ".muxui-button",
   "states": [
     "idle",
     "pending",
@@ -37,8 +37,9 @@ const binding = {
 const record = { family: 'Button', tranche: 'R1.1', binding };
 
 export default {
-  title: 'Core React/R1.1/Button',
-  component: Core.Button,
+  title: 'Mux UI React/R1.1/Button',
+  id: 'muxui-react-r1-1-button',
+  component: MuxUI.Button,
   tags: ['autodocs'],
   parameters: {
     controls: {
@@ -46,7 +47,7 @@ export default {
     },
     docs: {
       description: {
-        component: 'Private development showcase for the Core-owned Button family.',
+        component: 'Private development showcase for the Mux UI-owned Button family.',
       },
     },
   },

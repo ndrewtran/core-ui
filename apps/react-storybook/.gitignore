@@ -4,6 +4,6 @@ visual-migration/results/
 visual-migration/results/*
 !visual-migration/results/comparison.json
 !visual-migration/results/donor-capture-provenance.json
-!visual-migration/results/core-capture-provenance.json
+!visual-migration/results/muxui-capture-provenance.json
 visual-migration/.manifest.update-*
 visual-migration/baselines/.snapshot-*

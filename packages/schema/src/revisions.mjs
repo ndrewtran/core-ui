@@ -5,7 +5,7 @@ export function contentRevisionPreimage(family, record, { sourceBytes, schemas, 
   validateFamily(family, record, { schemas, ownership });
   if (family === 'example') {
     if (typeof sourceBytes !== 'string' && !Buffer.isBuffer(sourceBytes)) {
-      throw new Error(`CORE_RELATION_INVALID: missing executable source bytes for ${record.id}`);
+      throw new Error(`MUXUI_RELATION_INVALID: missing executable source bytes for ${record.id}`);
     }
     return { record, sourceDigest: sha256Digest(sourceBytes) };
   }
@@ -40,7 +40,7 @@ export function bindingSpecRevisionPreimage({
   const binding = Object.hasOwn(component.bindings, bindingId)
     ? component.bindings[bindingId]
     : undefined;
-  if (!binding) throw new Error(`CORE_RELATION_INVALID: missing ${component.id}#${bindingId}`);
+  if (!binding) throw new Error(`MUXUI_RELATION_INVALID: missing ${component.id}#${bindingId}`);
   const bindingRef = `${component.id}#${bindingId}`;
   const normativeExamples = examples
     .filter((example) => (
@@ -60,7 +60,7 @@ export function bindingSpecRevisionPreimage({
   let tokenRequirements;
   if (binding.strategy !== 'unsupported') {
     const tokenSource = tokenSources.find((record) => record.id === binding.tokenRecipe.source);
-    if (!tokenSource) throw new Error(`CORE_RELATION_INVALID: missing ${binding.tokenRecipe.source}`);
+    if (!tokenSource) throw new Error(`MUXUI_RELATION_INVALID: missing ${binding.tokenRecipe.source}`);
     tokenRequirements = {
       source: tokenSource.id,
       tokenContractVersion: tokenSource.tokenContractVersion,

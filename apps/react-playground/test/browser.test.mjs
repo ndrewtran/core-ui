@@ -15,7 +15,7 @@ const candidates = [
 ].filter(Boolean);
 const expectedComponents = ['breadcrumbs', 'checkbox', 'autocomplete', 'checkbox-group', 'date-field', 'date-picker', 'date-range-picker', 'form', 'number-field', 'search-field', 'switch', 'text-field', 'time-field', 'disclosure', 'disclosure-group', 'group', 'link', 'meter', 'progress-bar', 'separator', 'toggle-button', 'calendar', 'color-area', 'color-field', 'color-picker', 'color-slider', 'color-swatch', 'color-swatch-picker', 'color-wheel', 'combo-box', 'grid-list', 'list-box', 'menu', 'radio-group', 'range-calendar', 'select', 'slider', 'table', 'tabs', 'tag-group', 'toggle-button-group', 'token-field', 'toolbar', 'tree', 'virtualizer', 'drop-zone', 'file-trigger', 'dialog', 'popover', 'preview-trigger', 'toast', 'tooltip'];
 const documentAnimationSettleTimeoutMs = 2000;
-const port = Number(process.env.CORE_UI_PLAYGROUND_PORT ?? 4174);
+const port = Number(process.env.MUXUI_PLAYGROUND_PORT ?? 4174);
 let executablePath;
 for (const candidate of candidates) {
   try { await access(candidate); executablePath = candidate; break; } catch {}
@@ -137,50 +137,50 @@ test('R1.4 React component browser and axe matrix', async () => {
       const overlaySection = profile.locator('[data-r1-4-section]');
       if (await overlaySection.count() !== 1) throw new Error(`${expected} must expose exactly one R1.4 section`);
       await assertNoAxeViolations(overlaySection, `${expected} R1.4`);
-      const idleFixture = profile.locator('[data-core-fixture-state="idle"]');
+      const idleFixture = profile.locator('[data-muxui-fixture-state="idle"]');
       await idleFixture.locator('button').click();
-      if (await idleFixture.getAttribute('data-core-press-count') !== '1') throw new Error(`${expected} idle Button must activate exactly once`);
-      const pendingFixture = profile.locator('[data-core-fixture-state="pending"]');
+      if (await idleFixture.getAttribute('data-muxui-press-count') !== '1') throw new Error(`${expected} idle Button must activate exactly once`);
+      const pendingFixture = profile.locator('[data-muxui-fixture-state="pending"]');
       const pending = pendingFixture.locator('button');
       await pending.focus();
       if (!await pending.evaluate((node) => document.activeElement === node)) throw new Error(`${expected} pending Button must remain focusable`);
       if (await pending.evaluate((node) => node.disabled)) throw new Error(`${expected} pending Button must not become HTML-disabled`);
       await pending.evaluate((node) => node.click());
-      if (await pendingFixture.getAttribute('data-core-press-count') !== '0') throw new Error(`${expected} pending Button must suppress activation`);
-      const disabledFixture = profile.locator('[data-core-fixture-state="disabled"]');
+      if (await pendingFixture.getAttribute('data-muxui-press-count') !== '0') throw new Error(`${expected} pending Button must suppress activation`);
+      const disabledFixture = profile.locator('[data-muxui-fixture-state="disabled"]');
       const disabled = disabledFixture.locator('button');
       await disabled.evaluate((node) => node.click());
-      if (await disabledFixture.getAttribute('data-core-press-count') !== '0') throw new Error(`${expected} disabled Button must suppress activation`);
+      if (await disabledFixture.getAttribute('data-muxui-press-count') !== '0') throw new Error(`${expected} disabled Button must suppress activation`);
       await disabled.focus();
       if (await disabled.evaluate((node) => document.activeElement === node)) throw new Error(`${expected} disabled Button must not be focusable`);
       if (expected === expectedProfiles[0]) {
-        const autocompleteInput = profile.locator('[data-component="autocomplete"] .core-autocomplete input');
+        const autocompleteInput = profile.locator('[data-component="autocomplete"] .muxui-autocomplete input');
         await autocompleteInput.fill('');
         await autocompleteInput.focus();
-        if (await profile.locator('.core-autocomplete-list').getAttribute('hidden') !== null) throw new Error('Autocomplete must show matching options while focused');
+        if (await profile.locator('.muxui-autocomplete-list').getAttribute('hidden') !== null) throw new Error('Autocomplete must show matching options while focused');
         await autocompleteInput.press('ArrowDown');
         const activeDescendant = await autocompleteInput.getAttribute('aria-activedescendant');
         if (!activeDescendant) throw new Error('Autocomplete ArrowDown must expose an active descendant');
         if (await profile.locator(`#${activeDescendant}`).count() !== 1) throw new Error('Autocomplete active descendant must identify an option');
         await autocompleteInput.press('Enter');
         if (await autocompleteInput.inputValue() !== 'Melbourne') throw new Error('Autocomplete Enter must select the active option');
-        if (await profile.locator('.core-autocomplete-list').getAttribute('hidden') === null) throw new Error('Autocomplete Enter selection must dismiss suggestions');
+        if (await profile.locator('.muxui-autocomplete-list').getAttribute('hidden') === null) throw new Error('Autocomplete Enter selection must dismiss suggestions');
         await autocompleteInput.fill('');
         await autocompleteInput.focus();
         await autocompleteInput.press('Escape');
         if (await autocompleteInput.getAttribute('aria-activedescendant') !== null) throw new Error('Autocomplete Escape must clear the active descendant');
-        if (await profile.locator('.core-autocomplete-list').getAttribute('hidden') === null) throw new Error('Autocomplete Escape must dismiss suggestions');
+        if (await profile.locator('.muxui-autocomplete-list').getAttribute('hidden') === null) throw new Error('Autocomplete Escape must dismiss suggestions');
         await autocompleteInput.evaluate((node) => node.blur());
         await autocompleteInput.focus();
-        if (await profile.locator('.core-autocomplete-list').getAttribute('hidden') !== null) throw new Error('Autocomplete input focus must reopen suggestions');
+        if (await profile.locator('.muxui-autocomplete-list').getAttribute('hidden') !== null) throw new Error('Autocomplete input focus must reopen suggestions');
         await autocompleteInput.fill('Syd');
-        if (await profile.locator('.core-autocomplete-option').count() !== 1) throw new Error('Autocomplete input must filter options');
-        await profile.locator('.core-autocomplete-option').click();
-        if (await autocompleteInput.inputValue() !== 'Sydney') throw new Error('Autocomplete click selection must update the Core input value');
-        if (await profile.locator('.core-autocomplete-list').getAttribute('hidden') === null) throw new Error('Autocomplete click selection must dismiss suggestions');
+        if (await profile.locator('.muxui-autocomplete-option').count() !== 1) throw new Error('Autocomplete input must filter options');
+        await profile.locator('.muxui-autocomplete-option').click();
+        if (await autocompleteInput.inputValue() !== 'Sydney') throw new Error('Autocomplete click selection must update the Mux UI input value');
+        if (await profile.locator('.muxui-autocomplete-list').getAttribute('hidden') === null) throw new Error('Autocomplete click selection must dismiss suggestions');
         await autocompleteInput.evaluate((node) => node.blur());
         await autocompleteInput.focus();
-        if (await profile.locator('.core-autocomplete-list').getAttribute('hidden') !== null) throw new Error('Autocomplete focus after selection must reopen suggestions');
+        if (await profile.locator('.muxui-autocomplete-list').getAttribute('hidden') !== null) throw new Error('Autocomplete focus after selection must reopen suggestions');
 
         const dropZone = profile.locator('[data-r1-4-control="drop-zone"]');
         await dropZone.hover();
@@ -229,17 +229,17 @@ test('R1.4 React component browser and axe matrix', async () => {
 
         const toastTrigger = profile.locator('[data-r1-4-control="toast-add"]');
         await toastTrigger.click();
-        const toast = page.locator('.core-toast').filter({ hasText: 'Your changes are saved.' });
+        const toast = page.locator('.muxui-toast').filter({ hasText: 'Your changes are saved.' });
         if (await toast.count() !== 1 || !await toast.isVisible()) throw new Error('useToast must announce a visible toast');
         if (await toast.locator('[role="alert"]').count() !== 1) throw new Error('Toast must expose an announcement region');
-        await toast.locator('.core-toast-dismiss').click();
+        await toast.locator('.muxui-toast-dismiss').click();
         if (await toast.count() !== 0) throw new Error('Toast dismiss must remove the notification');
 
         const declarativeToastTrigger = profile.locator('[data-r1-4-control="toast-declarative"]');
         await declarativeToastTrigger.click();
-        const declarativeToast = page.locator('.core-toast').filter({ hasText: 'A declarative notification is visible.' });
+        const declarativeToast = page.locator('.muxui-toast').filter({ hasText: 'A declarative notification is visible.' });
         if (await declarativeToast.count() !== 1 || !await declarativeToast.isVisible()) throw new Error('Toast component must render through ToastProvider');
-        await declarativeToast.locator('.core-toast-dismiss').click();
+        await declarativeToast.locator('.muxui-toast-dismiss').click();
         if (await declarativeToast.count() !== 0) throw new Error('Declarative Toast dismiss must remove the notification');
       }
     }

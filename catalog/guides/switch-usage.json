@@ -1,1 +1,1 @@
-{"schemaVersion":"1.0.0","id":"core:guide:switch-usage","kind":"guide","name":"Switch usage","summary":"Use Switch through the Core React binding.","lifecycle":"experimental","keywords":["switch","react","forms"],"platforms":["web.react"],"source":"catalog/guides/switch-usage.md"}
+{"schemaVersion":"1.0.0","id":"muxui:guide:switch-usage","kind":"guide","name":"Switch usage","summary":"Use Switch through the Mux UI React binding.","lifecycle":"experimental","keywords":["switch","react","forms"],"platforms":["web.react"],"source":"catalog/guides/switch-usage.md"}

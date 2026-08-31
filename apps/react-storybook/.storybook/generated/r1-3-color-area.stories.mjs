@@ -1,6 +1,6 @@
 // @generated-from: apps/react-storybook/src/generate-stories.mjs
-// @generated-content-sha256: sha256:f6ad46e204db7d5d0166e0c208bed6d7a37d010ea43cd7587cde60d8ba0d653c
-import * as Core from '@core-ui/react';
+// @generated-content-sha256: sha256:3c6ce2f4e4999f5925d8d414584b45669a68df1f9c2f14b4034dac3f05f8f495
+import * as MuxUI from '@muxui/react';
 import { argTypesForBinding, createStory } from '../../src/storybook-factory.mjs';
 
 const binding = {
@@ -27,12 +27,12 @@ const binding = {
       "readOnly"
     ]
   },
-  "binding": "core:component:color-area#web.react",
+  "binding": "muxui:component:color-area#web.react",
   "export": "ColorArea",
   "lifecycle": "experimental",
   "module": ".",
   "runtimeProfile": "web.react",
-  "selector": ".core-color-area",
+  "selector": ".muxui-color-area",
   "states": [
     "idle",
     "focused",
@@ -45,8 +45,9 @@ const binding = {
 const record = { family: 'ColorArea', tranche: 'R1.3', binding };
 
 export default {
-  title: 'Core React/R1.3/ColorArea',
-  component: Core.ColorArea,
+  title: 'Mux UI React/R1.3/ColorArea',
+  id: 'muxui-react-r1-3-color-area',
+  component: MuxUI.ColorArea,
   tags: ['autodocs'],
   parameters: {
     controls: {
@@ -54,7 +55,7 @@ export default {
     },
     docs: {
       description: {
-        component: 'Private development showcase for the Core-owned ColorArea family.',
+        component: 'Private development showcase for the Mux UI-owned ColorArea family.',
       },
     },
   },

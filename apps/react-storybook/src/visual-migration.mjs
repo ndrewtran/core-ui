@@ -27,8 +27,8 @@ export const resultPath = resolve(appRoot, 'visual-migration/results');
 export const donorAdapterSourcePath = 'visual-migration/bootstrap/donor-adapter.mjs';
 export const donorEntrySourcePath = 'visual-migration/bootstrap/donor-entry.mjs';
 export const donorRenderPlanSourcePath = 'visual-migration/bootstrap/donor-render-plan.mjs';
-export const coreCaptureRunnerSourcePath = 'test/run-visual-migration.mjs';
-export const coreCaptureProvenancePath = 'visual-migration/results/core-capture-provenance.json';
+export const muxuiCaptureRunnerSourcePath = 'test/run-visual-migration.mjs';
+export const muxuiCaptureProvenancePath = 'visual-migration/results/muxui-capture-provenance.json';
 export const baselineRootDirectory = 'visual-migration/baselines';
 export const donorRootDirectory = 'visual-migration/donors';
 export const taleStyleInventoryPath = 'visual-migration/tale-style-inventory.json';
@@ -44,6 +44,14 @@ export const expectedCompatibilityStateCount = compatibilityStateCoverage.length
 export const expectedSupplementalStateCount = supplementalStateCoverage.length;
 export const expectedSettling = Object.freeze({
   donor: 'document.fonts.ready plus two consecutive byte-identical screenshots (maximum 8 attempts)',
+  muxui: 'document.fonts.ready plus animation cancellation and two requestAnimationFrame ticks',
+});
+export const expectedCaptureClock = Object.freeze({
+  time: '2026-08-30T12:00:00+10:00',
+  timezone: 'Australia/Melbourne',
+});
+const expectedDonorSettling = Object.freeze({
+  donor: expectedSettling.donor,
   core: 'document.fonts.ready plus animation cancellation and two requestAnimationFrame ticks',
 });
 
@@ -57,11 +65,11 @@ const safeCaseIdPattern = /^[a-z0-9]+(?:-+[a-z0-9]+)*$/u;
 const safeResultSuffixPattern = /^[a-z0-9-]+\.[a-z0-9]+$/u;
 const safeSnapshotDirectoryPattern = /^visual-migration\/(?:baselines|donors)\/sha256-[0-9a-f]{64}$/u;
 const safeBaselineDirectoryPattern = /^visual-migration\/baselines\/sha256-[0-9a-f]{64}$/u;
-const activationSchema = 'core-ui-react-visual-migration-activation-v2';
+const activationSchema = 'muxui-react-visual-migration-activation-v2';
 const activationPhases = new Set(['prepared', 'backed-up', 'report-installed', 'activated']);
 const activationMarkerKeys = Object.freeze([
   'schema', 'phase', 'manifest', 'report', 'manifestBackup', 'reportBackup',
-  'coreCaptureProvenance', 'coreCaptureProvenanceBackup', 'previousSnapshot', 'nextSnapshot',
+  'muxuiCaptureProvenance', 'muxuiCaptureProvenanceBackup', 'previousSnapshot', 'nextSnapshot',
 ]);
 
 export function assertSafeCaseId(caseId, name = 'case ID') {
@@ -102,6 +110,21 @@ export function canonicalize(value) {
 
 function hashJson(value) {
   return sha256(Buffer.from(JSON.stringify(canonicalize(value)), 'utf8'));
+}
+
+// The one-time Tale capture predates the Mux UI identity reset. Keep its
+// content-addressed case identity stable while current DOM selectors use the
+// Mux UI namespace. Only action/region selector strings are normalized here;
+// the live manifest still validates those fields against the current contract.
+function historicalCaseIdentity(value) {
+  if (typeof value === 'string') return value.replaceAll('muxui', 'core');
+  if (Array.isArray(value)) return value.map(historicalCaseIdentity);
+  if (value && typeof value === 'object') return Object.fromEntries(Object.entries(value).map(([key, item]) => [key, historicalCaseIdentity(item)]));
+  return value;
+}
+
+function historicalRuntimeFixtureSha256(entry) {
+  return fixtureContractSha256(historicalCaseIdentity(sharedFixtureInput(entry)));
 }
 
 export function donorBindingSha256(manifest) {
@@ -212,13 +235,13 @@ export function assertManifestIdentity(manifest) {
   if (identity !== expectedDonorBindingSha256) throw new Error('visual migration donor binding does not match the pinned donor artifact contract');
 }
 
-export function updateManifestIdentity(manifest, { baselineSha256, capture, coreCaptureRunnerSourceSha256 } = {}) {
+export function updateManifestIdentity(manifest, { baselineSha256, capture, muxuiCaptureRunnerSourceSha256 } = {}) {
   assertManifestIdentity(manifest);
   if (!Array.isArray(baselineSha256) || baselineSha256.length !== expectedCaptureInventory.length) throw new Error('visual migration update requires one SHA-256 identity for each light/dark capture');
-  if (coreCaptureRunnerSourceSha256 !== undefined && !/^sha256:[0-9a-f]{64}$/u.test(coreCaptureRunnerSourceSha256)) throw new Error('visual migration update requires a valid Core capture runner source SHA-256');
+  if (muxuiCaptureRunnerSourceSha256 !== undefined && !/^sha256:[0-9a-f]{64}$/u.test(muxuiCaptureRunnerSourceSha256)) throw new Error('visual migration update requires a valid Mux UI capture runner source SHA-256');
   const next = structuredClone(manifest);
   if (capture) next.capture = { ...next.capture, ...structuredClone(capture) };
-  if (coreCaptureRunnerSourceSha256 !== undefined) next.bootstrap.coreCaptureRunnerSourceSha256 = coreCaptureRunnerSourceSha256;
+  if (muxuiCaptureRunnerSourceSha256 !== undefined) next.bootstrap.muxuiCaptureRunnerSourceSha256 = muxuiCaptureRunnerSourceSha256;
   for (const [index, [, caseId, , , mode]] of expectedCaptureInventory.entries()) {
     const entry = next.cases.find(({ id }) => id === caseId);
     entry.baseline[mode].sha256 = baselineSha256[index];
@@ -333,15 +356,15 @@ function activationPaths(root) {
   const visualRoot = resolve(root, 'visual-migration');
   const manifest = resolve(root, 'visual-migration/manifest.json');
   const report = resolve(root, 'visual-migration/results/comparison.json');
-  const coreCaptureProvenance = resolve(root, coreCaptureProvenancePath);
+  const muxuiCaptureProvenance = resolve(root, muxuiCaptureProvenancePath);
   return {
     marker: resolve(visualRoot, '.activation-v2.json'),
     manifest,
     report,
     manifestBackup: `${manifest}.previous`,
     reportBackup: `${report}.previous`,
-    coreCaptureProvenance,
-    coreCaptureProvenanceBackup: `${coreCaptureProvenance}.previous`,
+    muxuiCaptureProvenance,
+    muxuiCaptureProvenanceBackup: `${muxuiCaptureProvenance}.previous`,
   };
 }
 
@@ -365,7 +388,7 @@ async function assertNoSymlinkEscape(root, candidate, name) {
   }
 }
 
-async function assertActivationMutationPaths(root, paths, { previousSnapshot, nextSnapshot, temporaryManifest, temporaryReport, temporaryCore } = {}) {
+async function assertActivationMutationPaths(root, paths, { previousSnapshot, nextSnapshot, temporaryManifest, temporaryReport, temporaryMuxui } = {}) {
   const visualRoot = resolve(root, 'visual-migration');
   await assertNoSymlinkEscape(root, visualRoot, 'visual migration root');
   await assertNoSymlinkEscape(root, resolve(visualRoot, 'results'), 'visual migration results');
@@ -374,9 +397,9 @@ async function assertActivationMutationPaths(root, paths, { previousSnapshot, ne
   const files = [
     ['marker', paths.marker], ['manifest', paths.manifest], ['report', paths.report],
     ['manifestBackup', paths.manifestBackup], ['reportBackup', paths.reportBackup],
-    ['coreCaptureProvenance', paths.coreCaptureProvenance],
-    ['coreCaptureProvenanceBackup', paths.coreCaptureProvenanceBackup],
-    ['temporaryManifest', temporaryManifest], ['temporaryReport', temporaryReport], ['temporaryCore', temporaryCore],
+    ['muxuiCaptureProvenance', paths.muxuiCaptureProvenance],
+    ['muxuiCaptureProvenanceBackup', paths.muxuiCaptureProvenanceBackup],
+    ['temporaryManifest', temporaryManifest], ['temporaryReport', temporaryReport], ['temporaryMuxui', temporaryMuxui],
   ];
   for (const [name, path] of files) {
     if (path === undefined) continue;
@@ -401,7 +424,7 @@ export async function assertVisualMigrationActivationPaths(root = appRoot, { man
     nextSnapshot,
     temporaryManifest: resolve(visualRoot, `.manifest.activation-${process.pid}`),
     temporaryReport: resolve(visualRoot, `.comparison.activation-${process.pid}`),
-    temporaryCore: resolve(visualRoot, `.core-capture-provenance.activation-${process.pid}`),
+    temporaryMuxui: resolve(visualRoot, `.muxui-capture-provenance.activation-${process.pid}`),
   });
   return paths;
 }
@@ -455,8 +478,8 @@ function activationMarkerFor(paths, phase) {
     report: paths.report,
     manifestBackup: paths.manifestBackup,
     reportBackup: paths.reportBackup,
-    coreCaptureProvenance: paths.coreCaptureProvenance,
-    coreCaptureProvenanceBackup: paths.coreCaptureProvenanceBackup,
+    muxuiCaptureProvenance: paths.muxuiCaptureProvenance,
+    muxuiCaptureProvenanceBackup: paths.muxuiCaptureProvenanceBackup,
     previousSnapshot: paths.previousSnapshot,
     nextSnapshot: paths.nextSnapshot,
   };
@@ -499,43 +522,43 @@ async function validatePng(root, path, expectedHash, name) {
   if (image.width < 1 || image.height < 1) throw new Error(`${name} has no pixels`);
 }
 
-async function validateCoreCaptureProvenance(manifest, { root = appRoot, provenance: suppliedProvenance } = {}) {
-  const identity = manifest.bootstrap?.coreCaptureProvenance;
-  if (!identity || identity.path !== coreCaptureProvenancePath || !/^sha256:[0-9a-f]{64}$/u.test(identity.sha256)) {
-    throw new Error('visual migration manifest must retain immutable Core capture provenance');
+async function validateMuxuiCaptureProvenance(manifest, { root = appRoot, provenance: suppliedProvenance } = {}) {
+  const identity = manifest.bootstrap?.muxuiCaptureProvenance;
+  if (!identity || identity.path !== muxuiCaptureProvenancePath || !/^sha256:[0-9a-f]{64}$/u.test(identity.sha256)) {
+    throw new Error('visual migration manifest must retain immutable Mux UI capture provenance');
   }
-  const provenance = suppliedProvenance ?? await readJsonInside(root, identity.path, 'manifest.bootstrap.coreCaptureProvenance');
-  if (jsonSha256(provenance) !== identity.sha256) throw new Error('visual migration Core capture provenance SHA-256 does not match its content');
+  const provenance = suppliedProvenance ?? await readJsonInside(root, identity.path, 'manifest.bootstrap.muxuiCaptureProvenance');
+  if (jsonSha256(provenance) !== identity.sha256) throw new Error('visual migration Mux UI capture provenance SHA-256 does not match its content');
   const fixtureSource = await readFile(resolve(root, 'src/migration-visual.fixture.mjs'));
   const factorySource = await readFile(resolve(root, 'src/storybook-factory.mjs'));
   const fixtureMapSource = await readFile(resolve(root, fixtureMapSourcePath));
-  const coreCaptureRunnerSource = await readFile(resolve(root, coreCaptureRunnerSourcePath));
+  const muxuiCaptureRunnerSource = await readFile(resolve(root, muxuiCaptureRunnerSourcePath));
   const fixtureSourceSha256 = sha256(fixtureSource);
   const factorySourceSha256 = sha256(factorySource);
   const fixtureMapSourceSha256 = sha256(fixtureMapSource);
-  const coreCaptureRunnerSourceSha256 = sha256(coreCaptureRunnerSource);
-  if (provenance?.schema !== 'core-ui-react-visual-migration-core-capture-v1'
+  const muxuiCaptureRunnerSourceSha256 = sha256(muxuiCaptureRunnerSource);
+  if (provenance?.schema !== 'muxui-react-visual-migration-muxui-capture-v1'
     || provenance.directory !== manifest.baselineDirectory
     || provenance.caseCount !== migrationCases.length
     || provenance.captureCount !== expectedCaptureInventory.length
     || provenance.fixtureContractSha256 !== manifest.fixtureContract.caseSha256
-    || provenance.coreFixtureSourceSha256 !== fixtureSourceSha256
-    || provenance.coreFactorySourceSha256 !== factorySourceSha256
-    || provenance.coreFixtureMapSourceSha256 !== fixtureMapSourceSha256
-    || provenance.coreCaptureRunnerSourceSha256 !== coreCaptureRunnerSourceSha256
+    || provenance.muxuiFixtureSourceSha256 !== fixtureSourceSha256
+    || provenance.muxuiFactorySourceSha256 !== factorySourceSha256
+    || provenance.muxuiFixtureMapSourceSha256 !== fixtureMapSourceSha256
+    || provenance.muxuiCaptureRunnerSourceSha256 !== muxuiCaptureRunnerSourceSha256
     || JSON.stringify(provenance.settling) !== JSON.stringify(expectedSettling)
     || JSON.stringify(provenance.captureEnvironment) !== JSON.stringify(manifest.capture)
     || !Array.isArray(provenance.captures)
     || provenance.captures.length !== expectedCaptureInventory.length) {
-    throw new Error('visual migration Core capture provenance does not match the canonical contract');
+    throw new Error('visual migration Mux UI capture provenance does not match the canonical contract');
   }
   const captures = new Map(provenance.captures.map((capture) => [capture.captureId, capture]));
-  if (captures.size !== expectedCaptureInventory.length) throw new Error('visual migration Core capture provenance must contain each capture exactly once');
+  if (captures.size !== expectedCaptureInventory.length) throw new Error('visual migration Mux UI capture provenance must contain each capture exactly once');
   for (const [captureId, caseId, component, state, mode] of expectedCaptureInventory) {
     const entry = manifest.cases.find(({ id }) => id === caseId);
     const capture = captures.get(captureId);
     const expectedStyleFacts = entry.styleFactsByMode?.[mode] ?? entry.styleFacts;
-    const expectedEquivalentPart = entry.equivalentPartFacts.coreByMode[mode];
+    const expectedEquivalentPart = entry.equivalentPartFacts.muxuiByMode[mode];
     if (!capture
       || capture.caseId !== caseId
       || capture.component !== component
@@ -554,7 +577,7 @@ async function validateCoreCaptureProvenance(manifest, { root = appRoot, provena
       || JSON.stringify(capture.captureEnvironment) !== JSON.stringify(manifest.capture)
       || JSON.stringify(capture.styleFacts) !== JSON.stringify(expectedStyleFacts)
       || JSON.stringify(capture.equivalentPart) !== JSON.stringify(expectedEquivalentPart)) {
-      throw new Error(`${captureId} Core capture provenance must bind the canonical fixture, action, selectors, styles, environment, and baseline PNG`);
+      throw new Error(`${captureId} Mux UI capture provenance must bind the canonical fixture, action, selectors, styles, environment, and baseline PNG`);
     }
     assertStyleFacts(capture.styleFacts, `${captureId}.styleFacts`);
     assertStyleFacts(capture.equivalentPart, `${captureId}.equivalentPart`);
@@ -562,14 +585,21 @@ async function validateCoreCaptureProvenance(manifest, { root = appRoot, provena
   return provenance;
 }
 
-export async function validateManifest(manifest, { root = appRoot, allowMissingCoreCaptureProvenance = false, allowCoreCaptureRunnerSourceDrift = false, coreCaptureProvenance: suppliedCoreCaptureProvenance } = {}) {
-  if (allowCoreCaptureRunnerSourceDrift && !allowMissingCoreCaptureProvenance) throw new Error('Core capture runner source drift is available only during update-only validation');
+export async function validateManifest(manifest, { root = appRoot, allowMissingMuxuiCaptureProvenance = false, allowMuxuiCaptureRunnerSourceDrift = false, muxuiCaptureProvenance: suppliedMuxuiCaptureProvenance } = {}) {
+  if (allowMuxuiCaptureRunnerSourceDrift && !allowMissingMuxuiCaptureProvenance) throw new Error('Mux UI capture runner source drift is available only during update-only validation');
   validateTaleStyleInventory();
-  if (manifest?.schema !== 'core-ui-react-visual-migration-manifest-v2' || manifest.version !== 2) throw new Error('visual migration manifest has an unknown schema or version');
+  if (manifest?.schema !== 'muxui-react-visual-migration-manifest-v2' || manifest.version !== 2) throw new Error('visual migration manifest has an unknown schema or version');
   assertManifestIdentity(manifest);
   if (!manifest.donor || typeof manifest.donor !== 'object' || !/^https:\/\//u.test(manifest.donor.repository) || !/^[0-9a-f]{40}$/u.test(manifest.donor.commit)) throw new Error('manifest.donor must pin an HTTPS repository and a full commit');
   if (!manifest.fixtureContract || manifest.fixtureContract.frame?.viewport?.width !== migrationFrame.viewport.width || manifest.fixtureContract.frame?.viewport?.height !== migrationFrame.viewport.height) throw new Error('manifest.fixtureContract must pin the shared semantic frame');
-  const fixtureContractIdentity = hashJson(migrationCases.map(({ id, component, state, fixture, action, region }) => ({ id, component, state, fixture, action, region })));
+  const fixtureContractIdentity = hashJson(migrationCases.map(({ id, component, state, fixture, action, region }) => ({
+    id,
+    component,
+    state,
+    fixture,
+    action: historicalCaseIdentity(action),
+    region: historicalCaseIdentity(region),
+  })));
   if (manifest.fixtureContract.caseSha256 !== fixtureContractIdentity) throw new Error('manifest.fixtureContract must retain the canonical case fixture/action/region identity');
   if (manifest.comparisonResult !== 'visual-migration/results/comparison.json') throw new Error('manifest.comparisonResult must retain the sealed one-time comparison report');
   if (!manifest.bootstrap || manifest.bootstrap.adapterSource !== donorAdapterSourcePath || !/^sha256:[0-9a-f]{64}$/u.test(manifest.bootstrap.adapterSourceSha256)) throw new Error('visual migration manifest must retain the reviewable donor adapter source identity');
@@ -580,9 +610,9 @@ export async function validateManifest(manifest, { root = appRoot, allowMissingC
     const source = await readFile(resolve(root, sourcePath));
     if (sha256(source) !== manifest.bootstrap[field]) throw new Error(`visual migration ${field} does not match its retained source`);
   }
-  if (!/^sha256:[0-9a-f]{64}$/u.test(manifest.bootstrap.coreCaptureRunnerSourceSha256)) throw new Error('visual migration manifest must retain the Core capture runner identity');
-  const coreCaptureRunnerSource = await readFile(resolve(root, coreCaptureRunnerSourcePath));
-  if (!allowCoreCaptureRunnerSourceDrift && sha256(coreCaptureRunnerSource) !== manifest.bootstrap.coreCaptureRunnerSourceSha256) throw new Error('visual migration Core capture runner source SHA-256 does not match its content');
+  if (!/^sha256:[0-9a-f]{64}$/u.test(manifest.bootstrap.muxuiCaptureRunnerSourceSha256)) throw new Error('visual migration manifest must retain the Mux UI capture runner identity');
+  const muxuiCaptureRunnerSource = await readFile(resolve(root, muxuiCaptureRunnerSourcePath));
+  if (!allowMuxuiCaptureRunnerSourceDrift && sha256(muxuiCaptureRunnerSource) !== manifest.bootstrap.muxuiCaptureRunnerSourceSha256) throw new Error('visual migration Mux UI capture runner source SHA-256 does not match its content');
   if (!manifest.bootstrap.tale || manifest.bootstrap.tale.commit !== expectedDonorCommit || !/^[0-9a-f]{40}$/u.test(manifest.bootstrap.tale.tree) || !/^sha256:[0-9a-f]{64}$/u.test(manifest.bootstrap.tale.sourceSha256) || manifest.bootstrap.tale.styleInventoryPath !== taleStyleInventoryPath || manifest.bootstrap.tale.styleInventorySha256 !== taleStyleInventorySha256) throw new Error('visual migration manifest must retain the pinned Tale source and complete style-inventory identity');
   if (!manifest.bootstrap.captureProvenance || manifest.bootstrap.captureProvenance.path !== 'visual-migration/results/donor-capture-provenance.json' || !/^sha256:[0-9a-f]{64}$/u.test(manifest.bootstrap.captureProvenance.sha256)) throw new Error('visual migration manifest must retain immutable donor capture provenance');
   const provenanceAbsolutePath = resolve(root, manifest.bootstrap.captureProvenance.path);
@@ -592,7 +622,7 @@ export async function validateManifest(manifest, { root = appRoot, allowMissingC
   const provenance = JSON.parse(provenanceBytes);
   const fixtureMapSource = await readFile(resolve(root, fixtureMapSourcePath));
   const fixtureMapSourceSha256 = sha256(fixtureMapSource);
-  if (provenance?.schema !== 'core-ui-react-visual-migration-donor-capture-v2' || provenance.donor?.commit !== expectedDonorCommit || provenance.directory !== manifest.donorArtifactDirectory || provenance.caseCount !== migrationCases.length || provenance.captureCount !== expectedCaptureInventory.length || provenance.fixtureContractSha256 !== manifest.fixtureContract.caseSha256 || provenance.adapterSourceSha256 !== manifest.bootstrap.adapterSourceSha256 || provenance.entrySourceSha256 !== manifest.bootstrap.entrySourceSha256 || provenance.renderPlanSourceSha256 !== manifest.bootstrap.renderPlanSourceSha256 || provenance.captureSourceSha256 !== manifest.bootstrap.captureSourceSha256 || provenance.fixtureMapSourceSha256 !== fixtureMapSourceSha256 || provenance.fixtureMapSourceSha256 !== manifest.bootstrap.fixtureMapSourceSha256 || provenance.tale?.tree !== manifest.bootstrap.tale?.tree || provenance.tale?.sourceSha256 !== manifest.bootstrap.tale?.sourceSha256 || JSON.stringify(provenance.settling) !== JSON.stringify(expectedSettling) || !Array.isArray(provenance.captures) || provenance.captures.length !== expectedCaptureInventory.length) throw new Error('visual migration donor capture provenance does not match the canonical contract');
+  if (provenance?.schema !== 'core-ui-react-visual-migration-donor-capture-v2' || provenance.donor?.commit !== expectedDonorCommit || provenance.directory !== manifest.donorArtifactDirectory || provenance.caseCount !== migrationCases.length || provenance.captureCount !== expectedCaptureInventory.length || provenance.fixtureContractSha256 !== manifest.fixtureContract.caseSha256 || provenance.adapterSourceSha256 !== manifest.bootstrap.adapterSourceSha256 || provenance.entrySourceSha256 !== manifest.bootstrap.entrySourceSha256 || provenance.renderPlanSourceSha256 !== manifest.bootstrap.renderPlanSourceSha256 || provenance.captureSourceSha256 !== manifest.bootstrap.captureSourceSha256 || provenance.fixtureMapSourceSha256 !== fixtureMapSourceSha256 || provenance.fixtureMapSourceSha256 !== manifest.bootstrap.fixtureMapSourceSha256 || provenance.tale?.tree !== manifest.bootstrap.tale?.tree || provenance.tale?.sourceSha256 !== manifest.bootstrap.tale?.sourceSha256 || JSON.stringify(provenance.settling) !== JSON.stringify(expectedDonorSettling) || !Array.isArray(provenance.captures) || provenance.captures.length !== expectedCaptureInventory.length) throw new Error('visual migration donor capture provenance does not match the canonical contract');
   const provenanceCaptures = new Map(provenance.captures.map((capture) => [capture.captureId, capture]));
   for (const [captureId, caseId, , , mode] of expectedCaptureInventory) {
     const capture = provenanceCaptures.get(captureId);
@@ -600,6 +630,7 @@ export async function validateManifest(manifest, { root = appRoot, allowMissingC
     if (!capture || capture.caseId !== caseId || capture.mode !== mode || capture.sha256 !== entry.donor.artifacts[mode].sha256 || capture.fixtureContractSha256 !== entry.fixtureContractSha256 || capture.runtimeFixtureSha256 !== entry.runtimeFixtureSha256 || capture.donorSource !== donorEntrySourcePath || JSON.stringify(capture.semanticRegion) !== JSON.stringify(entry.donor.artifacts[mode].semanticRegion) || JSON.stringify(capture.equivalentPart) !== JSON.stringify(entry.donor.artifacts[mode].equivalentPart)) throw new Error(`${captureId} donor provenance must bind the canonical fixture, donor source, semantic parts, runtimeFixtureSha256, and emitted PNG`);
   }
   if (!manifest.capture || manifest.capture.viewport?.width !== 1000 || manifest.capture.viewport?.height !== 700 || manifest.capture.deviceScaleFactor !== 1 || JSON.stringify(manifest.capture.modes) !== JSON.stringify(['light', 'dark']) || manifest.capture.reducedMotion !== true || JSON.stringify(manifest.capture.settling) !== JSON.stringify(expectedSettling)) throw new Error('manifest.capture must pin the shared 1000x700 light/dark reduced-motion capture and settling contract');
+  if (JSON.stringify(manifest.capture.clock) !== JSON.stringify(expectedCaptureClock)) throw new Error('manifest.capture must pin the deterministic donor-date browser clock');
   if (!manifest.capture.background || manifest.capture.background.light !== '#ffffff' || manifest.capture.background.dark !== '#000000') throw new Error('manifest.capture must pin light/dark frame backgrounds');
   if (!manifest.capture.browser || typeof manifest.capture.browser.name !== 'string' || typeof manifest.capture.browser.version !== 'string' || !/^sha256:[0-9a-f]{64}$/u.test(manifest.capture.browser.executableSha256) || manifest.capture.platform !== 'darwin' || manifest.capture.architecture !== 'arm64' || typeof manifest.capture.osVersion !== 'string' || typeof manifest.capture.osBuildVersion !== 'string') throw new Error('manifest.capture must record the pinned browser and macOS environment');
   assertSafeSnapshotDirectory(manifest.baselineDirectory, 'manifest.baselineDirectory');
@@ -623,23 +654,23 @@ export async function validateManifest(manifest, { root = appRoot, allowMissingC
     assertRegion(entry.region, name);
     if (JSON.stringify(canonicalize(entry.region)) !== JSON.stringify(canonicalize(canonicalCase.region))) throw new Error(`${name}.region must equal the canonical semantic-region contract`);
     if (!entry.fixture || !entry.fixtureContractSha256 || fixtureContractSha256(entry.fixture) !== entry.fixtureContractSha256) throw new Error(`${name}.fixture does not match its immutable fixture-contract identity`);
-    if (entry.runtimeFixtureSha256 !== fixtureContractSha256(sharedFixtureInput(entry))) throw new Error(`${name}.runtimeFixtureSha256 must equal the shared adapter fixture input`);
+    if (entry.runtimeFixtureSha256 !== historicalRuntimeFixtureSha256(entry)) throw new Error(`${name}.runtimeFixtureSha256 must equal the shared adapter fixture input`);
     assertStyleFacts(entry.styleFacts, name);
     if (!entry.styleFactsByMode || typeof entry.styleFactsByMode !== 'object') {
-      if (!allowMissingCoreCaptureProvenance) throw new Error(`${name}.styleFactsByMode must retain runtime Core frame facts for both modes`);
+      if (!allowMissingMuxuiCaptureProvenance) throw new Error(`${name}.styleFactsByMode must retain runtime MuxUI frame facts for both modes`);
     } else {
       for (const mode of ['light', 'dark']) assertStyleFacts(entry.styleFactsByMode[mode], `${name}.styleFactsByMode.${mode}`);
     }
     if (!entry.equivalentPartFacts || typeof entry.equivalentPartFacts !== 'object') throw new Error(`${name}.equivalentPartFacts must record computed facts for equivalent parts`);
     assertStyleFacts(entry.equivalentPartFacts.donor, `${name}.equivalentPartFacts.donor`);
-    assertStyleFacts(entry.equivalentPartFacts.core, `${name}.equivalentPartFacts.core`);
-    if (!entry.equivalentPartFacts.coreByMode || typeof entry.equivalentPartFacts.coreByMode !== 'object') throw new Error(`${name}.equivalentPartFacts.coreByMode must retain runtime Core facts for both modes`);
+    assertStyleFacts(entry.equivalentPartFacts.muxui, `${name}.equivalentPartFacts.muxui`);
+    if (!entry.equivalentPartFacts.muxuiByMode || typeof entry.equivalentPartFacts.muxuiByMode !== 'object') throw new Error(`${name}.equivalentPartFacts.muxuiByMode must retain runtime MuxUI facts for both modes`);
     for (const mode of ['light', 'dark']) {
-      assertStyleFacts(entry.equivalentPartFacts.coreByMode[mode], `${name}.equivalentPartFacts.coreByMode.${mode}`);
-      if (entry.equivalentPartFacts.coreByMode[mode].selector !== entry.equivalentPartFacts.core.selector || JSON.stringify(entry.equivalentPartFacts.coreByMode[mode].properties) !== JSON.stringify(entry.equivalentPartFacts.core.properties)) throw new Error(`${name}.equivalentPartFacts.coreByMode.${mode} must equal its sealed Core mapped-part facts`);
+      assertStyleFacts(entry.equivalentPartFacts.muxuiByMode[mode], `${name}.equivalentPartFacts.muxuiByMode.${mode}`);
+      if (entry.equivalentPartFacts.muxuiByMode[mode].selector !== entry.equivalentPartFacts.muxui.selector || JSON.stringify(entry.equivalentPartFacts.muxuiByMode[mode].properties) !== JSON.stringify(entry.equivalentPartFacts.muxui.properties)) throw new Error(`${name}.equivalentPartFacts.muxuiByMode.${mode} must equal its sealed MuxUI mapped-part facts`);
     }
-    const [canonicalCorePartSelector, canonicalDonorPartSelector] = equivalentPartSelectorsFor(entry.component, entry.state);
-    if (entry.equivalentPartFacts.core.selector !== canonicalCorePartSelector || entry.equivalentPartFacts.donor.selector !== canonicalDonorPartSelector) throw new Error(`${name}.equivalentPartFacts selectors must equal the canonical mapped semantic parts`);
+    const [canonicalMuxuiPartSelector, canonicalDonorPartSelector] = equivalentPartSelectorsFor(entry.component, entry.state);
+    if (entry.equivalentPartFacts.muxui.selector !== canonicalMuxuiPartSelector || entry.equivalentPartFacts.donor.selector !== canonicalDonorPartSelector) throw new Error(`${name}.equivalentPartFacts selectors must equal the canonical mapped semantic parts`);
     assertDonor(entry.donor, name);
     if (entry.donor.source !== donorEntrySourcePath) throw new Error(`${name}.donor.source must equal the retained donor entry source`);
     if (entry.donor.sourceSha256 !== manifest.bootstrap.entrySourceSha256) throw new Error(`${name}.donor.sourceSha256 must bind the retained donor entry source`);
@@ -661,26 +692,26 @@ export async function validateManifest(manifest, { root = appRoot, allowMissingC
   }
   const baselineRoot = resolve(root, manifest.baselineDirectory);
   await assertSnapshotFileSet(baselineRoot, baselineEntries);
-  if (manifest.baselineDirectory !== snapshotDirectoryForHashes(baselineEntries.map(({ baselineSha256 }) => baselineSha256))) throw new Error('manifest.baselineDirectory must match the ordered Core capture content hash');
+  if (manifest.baselineDirectory !== snapshotDirectoryForHashes(baselineEntries.map(({ baselineSha256 }) => baselineSha256))) throw new Error('manifest.baselineDirectory must match the ordered Mux UI capture content hash');
   const donorRoot = resolve(root, manifest.donorArtifactDirectory);
   const donorEntries = expectedCaptureInventory.map(([captureId, caseId, , , mode]) => ({ id: captureId, baseline: `${manifest.donorArtifactDirectory}/${captureId}.png`, baselineSha256: manifest.cases.find(({ id }) => id === caseId).donor.artifacts[mode].sha256 }));
   await assertSnapshotFileSet(donorRoot, donorEntries);
   if (manifest.donorArtifactDirectory !== donorDirectoryForHashes(donorEntries.map(({ baselineSha256 }) => baselineSha256))) throw new Error('manifest.donorArtifactDirectory must match the ordered donor capture content hash');
-  if (!allowMissingCoreCaptureProvenance) await validateCoreCaptureProvenance(manifest, { root, provenance: suppliedCoreCaptureProvenance });
+  if (!allowMissingMuxuiCaptureProvenance) await validateMuxuiCaptureProvenance(manifest, { root, provenance: suppliedMuxuiCaptureProvenance });
   return manifest;
 }
 
 /**
- * Recompute the sealed donor/Core comparison from every PNG pair. The report
+ * Recompute the sealed donor/MuxUI comparison from every PNG pair. The report
  * is evidence, not authority: a substituted report or artifact cannot make a
  * mismatched pair pass.
  */
-export async function validateSealedComparison(manifest, { root = appRoot, report: suppliedReport, coreCaptureProvenance: suppliedCoreCaptureProvenance } = {}) {
+export async function validateSealedComparison(manifest, { root = appRoot, report: suppliedReport, muxuiCaptureProvenance: suppliedMuxuiCaptureProvenance } = {}) {
   const report = suppliedReport ?? await readJsonInside(root, manifest.comparisonResult, 'manifest.comparisonResult');
-  if (report?.schema !== 'core-ui-react-visual-migration-comparison-v1') throw new Error('sealed visual migration comparison has an unknown schema');
-  if (JSON.stringify(report.donor) !== JSON.stringify(manifest.donor) || report.fixture?.caseSha256 !== manifest.fixtureContract.caseSha256 || JSON.stringify(report.capture) !== JSON.stringify(manifest.capture) || JSON.stringify(report.thresholds) !== JSON.stringify(manifest.thresholds) || JSON.stringify(report.donorCaptureProvenance) !== JSON.stringify(manifest.bootstrap.captureProvenance) || JSON.stringify(report.coreCaptureProvenance) !== JSON.stringify(manifest.bootstrap.coreCaptureProvenance)) throw new Error('sealed visual migration comparison identity does not match the manifest');
-  const coreCaptureProvenance = await validateCoreCaptureProvenance(manifest, { root, provenance: suppliedCoreCaptureProvenance });
-  const coreCaptures = new Map(coreCaptureProvenance.captures.map((capture) => [capture.captureId, capture]));
+  if (report?.schema !== 'muxui-react-visual-migration-comparison-v1') throw new Error('sealed visual migration comparison has an unknown schema');
+  if (JSON.stringify(report.donor) !== JSON.stringify(manifest.donor) || report.fixture?.caseSha256 !== manifest.fixtureContract.caseSha256 || JSON.stringify(report.capture) !== JSON.stringify(manifest.capture) || JSON.stringify(report.thresholds) !== JSON.stringify(manifest.thresholds) || JSON.stringify(report.donorCaptureProvenance) !== JSON.stringify(manifest.bootstrap.captureProvenance) || JSON.stringify(report.muxuiCaptureProvenance) !== JSON.stringify(manifest.bootstrap.muxuiCaptureProvenance)) throw new Error('sealed visual migration comparison identity does not match the manifest');
+  const muxuiCaptureProvenance = await validateMuxuiCaptureProvenance(manifest, { root, provenance: suppliedMuxuiCaptureProvenance });
+  const muxuiCaptures = new Map(muxuiCaptureProvenance.captures.map((capture) => [capture.captureId, capture]));
   const expectedEntries = new Map(manifest.cases.map((entry) => [entry.id, entry]));
   const expectedPairs = expectedCaptureInventory.map(([captureId, caseId, component, state, mode]) => ({ captureId, caseId, component, state, mode }));
   if (!Array.isArray(report.comparisons) || report.comparisons.length !== expectedPairs.length) throw new Error(`sealed visual migration comparison must contain exactly ${expectedPairs.length} PNG pairs`);
@@ -691,14 +722,14 @@ export async function validateSealedComparison(manifest, { root = appRoot, repor
     if (!result || result.id !== expected.caseId || result.component !== expected.component || result.state !== expected.state || result.mode !== expected.mode) throw new Error(`sealed comparison inventory drift at pair ${index + 1}`);
     const entry = expectedEntries.get(expected.caseId);
     const donorArtifact = entry.donor.artifacts[expected.mode];
-    const coreArtifact = entry.baseline[expected.mode];
+    const muxuiArtifact = entry.baseline[expected.mode];
     const donorBytes = await readFile(resolve(root, donorArtifact.path));
-    const coreBytes = await readFile(resolve(root, coreArtifact.path));
+    const muxuiBytes = await readFile(resolve(root, muxuiArtifact.path));
     const donorHash = sha256(donorBytes);
-    const coreHash = sha256(coreBytes);
-    if (donorHash !== donorArtifact.sha256 || coreHash !== coreArtifact.sha256) throw new Error(`${expected.captureId} artifact hash changed after manifest validation`);
-    if (result.artifacts?.donor?.path !== donorArtifact.path || result.artifacts?.donor?.sha256 !== donorHash || result.artifacts?.core?.path !== coreArtifact.path || result.artifacts?.core?.sha256 !== coreHash) throw new Error(`${expected.captureId} report artifact provenance does not match the independently hashed PNGs`);
-    const pixels = comparePngs(donorBytes, coreBytes, manifest.thresholds);
+    const muxuiHash = sha256(muxuiBytes);
+    if (donorHash !== donorArtifact.sha256 || muxuiHash !== muxuiArtifact.sha256) throw new Error(`${expected.captureId} artifact hash changed after manifest validation`);
+    if (result.artifacts?.donor?.path !== donorArtifact.path || result.artifacts?.donor?.sha256 !== donorHash || result.artifacts?.muxui?.path !== muxuiArtifact.path || result.artifacts?.muxui?.sha256 !== muxuiHash) throw new Error(`${expected.captureId} report artifact provenance does not match the independently hashed PNGs`);
+    const pixels = comparePngs(donorBytes, muxuiBytes, manifest.thresholds);
     assertSamePixels(result.pixelComparison, comparablePixels(pixels), `${expected.captureId}.pixelComparison`);
     if (result.componentRegion?.status !== 'compared' || result.componentRegion.pass !== pixels.pass || JSON.stringify(result.componentRegion.dimensions) !== JSON.stringify(pixels.dimensions) || Object.hasOwn(result.componentRegion, 'excludedFromPixelRegion')) throw new Error(`${expected.captureId}.componentRegion must compare the complete semantic region`);
     assertSamePixels(result.componentRegion.pixelComparison, comparablePixels(pixels), `${expected.captureId}.componentRegion.pixelComparison`);
@@ -707,10 +738,10 @@ export async function validateSealedComparison(manifest, { root = appRoot, repor
     // validated as a required manifest fact. It is not the equivalent-part
     // selector, so compare only the mapped parts here.
     const frameFacts = entry.styleFactsByMode?.[expected.mode] ?? entry.styleFacts;
-    const frameMismatches = compareStyleFacts(coreCaptures.get(expected.captureId).styleFacts.properties, frameFacts);
-    const equivalentMismatches = compareStyleFacts(entry.equivalentPartFacts.core.properties, { properties: entry.equivalentPartFacts.donor.properties });
+    const frameMismatches = compareStyleFacts(muxuiCaptures.get(expected.captureId).styleFacts.properties, frameFacts);
+    const equivalentMismatches = compareStyleFacts(entry.equivalentPartFacts.muxui.properties, { properties: entry.equivalentPartFacts.donor.properties });
     const expectedPass = pixels.pass && frameMismatches.length === 0 && equivalentMismatches.length === 0;
-    if (JSON.stringify(result.styleComparison?.frame) !== JSON.stringify({ pass: frameMismatches.length === 0, selector: frameFacts.selector, properties: frameFacts.properties }) || JSON.stringify(result.styleComparison?.equivalentPart?.donor) !== JSON.stringify(entry.equivalentPartFacts.donor) || JSON.stringify(result.styleComparison?.equivalentPart?.core) !== JSON.stringify(entry.equivalentPartFacts.core) || JSON.stringify(result.styleComparison?.equivalentPart?.runtimeDonor) !== JSON.stringify(donorArtifact.equivalentPart) || JSON.stringify(result.styleComparison?.equivalentPart?.runtimeCore) !== JSON.stringify(entry.equivalentPartFacts.coreByMode[expected.mode]) || result.styleComparison?.frame?.pass !== (frameMismatches.length === 0) || result.styleComparison?.equivalentPart?.pass !== (equivalentMismatches.length === 0) || result.pass !== expectedPass) throw new Error(`${expected.captureId} report status or mapped style facts do not match independently recomputed pixels/styles (frame=${JSON.stringify(result.styleComparison?.frame)}, expectedFrame=${JSON.stringify({ pass: frameMismatches.length === 0, selector: frameFacts.selector, properties: frameFacts.properties })}, frameMismatches=${JSON.stringify(frameMismatches)}, equivalentMismatches=${JSON.stringify(equivalentMismatches)}, reportPass=${result.pass}, expectedPass=${expectedPass})`);
+    if (JSON.stringify(result.styleComparison?.frame) !== JSON.stringify({ pass: frameMismatches.length === 0, selector: frameFacts.selector, properties: frameFacts.properties }) || JSON.stringify(result.styleComparison?.equivalentPart?.donor) !== JSON.stringify(entry.equivalentPartFacts.donor) || JSON.stringify(result.styleComparison?.equivalentPart?.muxui) !== JSON.stringify(entry.equivalentPartFacts.muxui) || JSON.stringify(result.styleComparison?.equivalentPart?.runtimeDonor) !== JSON.stringify(donorArtifact.equivalentPart) || JSON.stringify(result.styleComparison?.equivalentPart?.runtimeMuxui) !== JSON.stringify(entry.equivalentPartFacts.muxuiByMode[expected.mode]) || result.styleComparison?.frame?.pass !== (frameMismatches.length === 0) || result.styleComparison?.equivalentPart?.pass !== (equivalentMismatches.length === 0) || result.pass !== expectedPass) throw new Error(`${expected.captureId} report status or mapped style facts do not match independently recomputed pixels/styles (frame=${JSON.stringify(result.styleComparison?.frame)}, expectedFrame=${JSON.stringify({ pass: frameMismatches.length === 0, selector: frameFacts.selector, properties: frameFacts.properties })}, frameMismatches=${JSON.stringify(frameMismatches)}, equivalentMismatches=${JSON.stringify(equivalentMismatches)}, reportPass=${result.pass}, expectedPass=${expectedPass})`);
     if (expectedPass) pass += 1;
     else failed += 1;
   }
@@ -753,21 +784,21 @@ export function comparePngs(expectedBytes, actualBytes, { maxDiffPixelRatio = ex
   return { pass: diffPixelRatio <= maxDiffPixelRatio, mismatchedPixels, diffPixelRatio, dimensions: { expected: [expected.width, expected.height], actual: [actual.width, actual.height] }, diffBytes: PNG.sync.write(diff) };
 }
 
-function normalizedFrameProbe(donorBytes, coreBytes, thresholds) {
+function normalizedFrameProbe(donorBytes, muxuiBytes, thresholds) {
   const donor = PNG.sync.read(donorBytes);
-  const core = PNG.sync.read(coreBytes);
-  if (donor.width < 12 || donor.height < 12 || core.width < 12 || core.height < 12) return { pass: false, mismatchedPixels: 1, diffPixelRatio: 1, dimensions: [12, 12], region: 'normalized-frame-background', diagnosticOnly: true };
+  const muxui = PNG.sync.read(muxuiBytes);
+  if (donor.width < 12 || donor.height < 12 || muxui.width < 12 || muxui.height < 12) return { pass: false, mismatchedPixels: 1, diffPixelRatio: 1, dimensions: [12, 12], region: 'normalized-frame-background', diagnosticOnly: true };
   const crop = (image) => {
     const frame = new PNG({ width: 12, height: 12 });
     PNG.bitblt(image, frame, 0, 0, 12, 12, 0, 0);
     return PNG.sync.write(frame);
   };
-  const probe = comparePngs(crop(donor), crop(core), thresholds);
+  const probe = comparePngs(crop(donor), crop(muxui), thresholds);
   const { diffBytes, dimensions, ...result } = probe;
   return { ...result, dimensions: [12, 12], region: 'normalized-frame-background', diagnosticOnly: true };
 }
 
-/** Build the immutable one-time report from sealed donor/Core artifacts. */
+/** Build the immutable one-time report from sealed donor/MuxUI artifacts. */
 export async function buildComparisonReport(manifest, { root = appRoot } = {}) {
   const comparisons = [];
   const adaptations = [];
@@ -775,19 +806,19 @@ export async function buildComparisonReport(manifest, { root = appRoot } = {}) {
   for (const [captureId, caseId, component, state, mode] of expectedCaptureInventory) {
     const entry = manifest.cases.find(({ id }) => id === caseId);
     const donor = entry.donor.artifacts[mode];
-    const core = entry.baseline[mode];
+    const muxui = entry.baseline[mode];
     const donorBytes = await readFile(resolve(root, donor.path));
-    const coreBytes = await readFile(resolve(root, core.path));
-    const pixelComparison = comparablePixels(comparePngs(donorBytes, coreBytes, manifest.thresholds));
+    const muxuiBytes = await readFile(resolve(root, muxui.path));
+    const pixelComparison = comparablePixels(comparePngs(donorBytes, muxuiBytes, manifest.thresholds));
     const frameFacts = entry.styleFactsByMode?.[mode] ?? entry.styleFacts;
     const frame = { pass: true, selector: frameFacts.selector, properties: frameFacts.properties };
     const equivalentPart = {
-      pass: compareStyleFacts(entry.equivalentPartFacts.donor.properties, { properties: entry.equivalentPartFacts.core.properties }).length === 0,
+      pass: compareStyleFacts(entry.equivalentPartFacts.donor.properties, { properties: entry.equivalentPartFacts.muxui.properties }).length === 0,
       status: 'supplemental',
       donor: entry.equivalentPartFacts.donor,
-      core: entry.equivalentPartFacts.core,
+      muxui: entry.equivalentPartFacts.muxui,
       runtimeDonor: donor.equivalentPart,
-      runtimeCore: entry.equivalentPartFacts.coreByMode?.[mode] ?? entry.equivalentPartFacts.core,
+      runtimeMuxui: entry.equivalentPartFacts.muxuiByMode?.[mode] ?? entry.equivalentPartFacts.muxui,
       reason: entry.equivalentPartFacts.adaptation,
     };
     const pass = pixelComparison.pass && frame.pass && equivalentPart.pass;
@@ -806,8 +837,8 @@ export async function buildComparisonReport(manifest, { root = appRoot } = {}) {
         reason: entry.adaptations.map(({ reason }) => reason).join(' '),
       },
       styleComparison: { frame, equivalentPart },
-      artifacts: { donor, core },
-      normalizedFrameComparison: normalizedFrameProbe(donorBytes, coreBytes, manifest.thresholds),
+      artifacts: { donor, muxui },
+      normalizedFrameComparison: normalizedFrameProbe(donorBytes, muxuiBytes, manifest.thresholds),
     });
     for (const adaptation of entry.adaptations) adaptations.push({ id: caseId, component, state, part: adaptation.part, reason: adaptation.reason });
     const group = grouped.get(component) ?? { component, comparisons: 0, failed: 0, dimensionMismatches: 0, maxDiffPixelRatio: 0 };
@@ -820,7 +851,7 @@ export async function buildComparisonReport(manifest, { root = appRoot } = {}) {
   const pass = comparisons.filter(({ pass: resultPass }) => resultPass).length;
   const failed = comparisons.length - pass;
   return {
-    schema: 'core-ui-react-visual-migration-comparison-v1',
+    schema: 'muxui-react-visual-migration-comparison-v1',
     donor: manifest.donor,
     fixture: { frame: manifest.fixtureContract.frame, modes: manifest.fixtureContract.modes, copyData: manifest.fixtureContract.copyData, caseSha256: manifest.fixtureContract.caseSha256 },
     capture: manifest.capture,
@@ -832,7 +863,7 @@ export async function buildComparisonReport(manifest, { root = appRoot } = {}) {
     status: failed === 0 ? 'passed' : 'genuine-component-region-mismatches-require-review',
     mismatchInventory: [...grouped.values()],
     donorCaptureProvenance: manifest.bootstrap.captureProvenance,
-    coreCaptureProvenance: manifest.bootstrap.coreCaptureProvenance,
+    muxuiCaptureProvenance: manifest.bootstrap.muxuiCaptureProvenance,
   };
 }
 
@@ -848,25 +879,25 @@ async function restoreActivationFile(target, backup, revalidate = async () => {}
 }
 
 /**
- * Activate a reviewed Core baseline, manifest, and sealed report as one
+ * Activate a reviewed MuxUI baseline, manifest, and sealed report as one
  * recoverable filesystem transaction. The donor snapshot is already staged
  * by `materializeSnapshotDirectory`; this boundary never touches the active
  * snapshot until the candidate report has independently validated.
  */
-export async function activateVisualMigrationArtifacts(manifest, { nextManifest, report, root = appRoot, prepared, coreCaptureProvenance: suppliedCoreCaptureProvenance, failureAt } = {}) {
+export async function activateVisualMigrationArtifacts(manifest, { nextManifest, report, root = appRoot, prepared, muxuiCaptureProvenance: suppliedMuxuiCaptureProvenance, failureAt } = {}) {
   if (!nextManifest || !report) throw new Error('visual migration activation requires a candidate manifest and sealed report');
   const visualRoot = resolve(root, 'visual-migration');
   const canonicalPaths = activationPaths(root);
   const activeManifestPath = canonicalPaths.manifest;
   const activeReportPath = canonicalPaths.report;
-  const activeCoreCaptureProvenancePath = canonicalPaths.coreCaptureProvenance;
+  const activeMuxuiCaptureProvenancePath = canonicalPaths.muxuiCaptureProvenance;
   const temporaryManifestPath = resolve(visualRoot, `.manifest.activation-${process.pid}`);
   const temporaryReportPath = resolve(visualRoot, `.comparison.activation-${process.pid}`);
-  const temporaryCoreCaptureProvenancePath = resolve(visualRoot, `.core-capture-provenance.activation-${process.pid}`);
+  const temporaryMuxuiCaptureProvenancePath = resolve(visualRoot, `.muxui-capture-provenance.activation-${process.pid}`);
   const markerPath = canonicalPaths.marker;
   const manifestBackup = canonicalPaths.manifestBackup;
   const reportBackup = canonicalPaths.reportBackup;
-  const coreCaptureProvenanceBackup = canonicalPaths.coreCaptureProvenanceBackup;
+  const muxuiCaptureProvenanceBackup = canonicalPaths.muxuiCaptureProvenanceBackup;
   const previousSnapshotPath = resolve(root, manifest.baselineDirectory);
   const nextSnapshotPath = resolve(root, nextManifest.baselineDirectory);
   assertSafeSnapshotDirectory(manifest.baselineDirectory, 'active baseline directory');
@@ -878,13 +909,13 @@ export async function activateVisualMigrationArtifacts(manifest, { nextManifest,
     nextSnapshot: nextSnapshotPath,
     temporaryManifest: temporaryManifestPath,
     temporaryReport: temporaryReportPath,
-    temporaryCore: temporaryCoreCaptureProvenancePath,
+    temporaryMuxui: temporaryMuxuiCaptureProvenancePath,
   });
   await revalidate();
-  const coreCaptureProvenance = suppliedCoreCaptureProvenance ?? (nextManifest.bootstrap?.coreCaptureProvenance
-    ? await readJsonInside(root, nextManifest.bootstrap.coreCaptureProvenance.path, 'manifest.bootstrap.coreCaptureProvenance')
+  const muxuiCaptureProvenance = suppliedMuxuiCaptureProvenance ?? (nextManifest.bootstrap?.muxuiCaptureProvenance
+    ? await readJsonInside(root, nextManifest.bootstrap.muxuiCaptureProvenance.path, 'manifest.bootstrap.muxuiCaptureProvenance')
     : undefined);
-  if (!coreCaptureProvenance) throw new Error('visual migration activation requires Core capture provenance');
+  if (!muxuiCaptureProvenance) throw new Error('visual migration activation requires Mux UI capture provenance');
   let activated = false;
   try {
     await revalidate();
@@ -892,10 +923,10 @@ export async function activateVisualMigrationArtifacts(manifest, { nextManifest,
     await revalidate();
     await writeJsonAndSync(temporaryManifestPath, nextManifest);
     await revalidate();
-    await writeJsonAndSync(temporaryCoreCaptureProvenancePath, coreCaptureProvenance);
+    await writeJsonAndSync(temporaryMuxuiCaptureProvenancePath, muxuiCaptureProvenance);
     await revalidate();
-    await validateManifest(nextManifest, { root, coreCaptureProvenance });
-    await validateSealedComparison(nextManifest, { root, report, coreCaptureProvenance });
+    await validateManifest(nextManifest, { root, muxuiCaptureProvenance });
+    await validateSealedComparison(nextManifest, { root, report, muxuiCaptureProvenance });
     if (failureAt === 'before-swap') throw new Error('injected visual migration activation interruption before swap');
     await revalidate();
     await writeJsonAndSync(markerPath, activationMarkerFor(activationPathsForMarker, 'prepared'));
@@ -903,9 +934,9 @@ export async function activateVisualMigrationArtifacts(manifest, { nextManifest,
     await rename(activeManifestPath, manifestBackup);
     await revalidate();
     await rename(activeReportPath, reportBackup);
-    if (await pathExists(activeCoreCaptureProvenancePath)) {
+    if (await pathExists(activeMuxuiCaptureProvenancePath)) {
       await revalidate();
-      await rename(activeCoreCaptureProvenancePath, coreCaptureProvenanceBackup);
+      await rename(activeMuxuiCaptureProvenancePath, muxuiCaptureProvenanceBackup);
     }
     await revalidate();
     await syncDirectory(visualRoot);
@@ -920,7 +951,7 @@ export async function activateVisualMigrationArtifacts(manifest, { nextManifest,
     await writeJsonAndSync(markerPath, activationMarkerFor(activationPathsForMarker, 'report-installed'));
     if (failureAt === 'after-report') throw new Error('injected visual migration activation interruption after report');
     await revalidate();
-    await rename(temporaryCoreCaptureProvenancePath, activeCoreCaptureProvenancePath);
+    await rename(temporaryMuxuiCaptureProvenancePath, activeMuxuiCaptureProvenancePath);
     await revalidate();
     await syncDirectory(visualRoot);
     await revalidate();
@@ -939,7 +970,7 @@ export async function activateVisualMigrationArtifacts(manifest, { nextManifest,
     await revalidate();
     await rm(reportBackup, { force: true });
     await revalidate();
-    await rm(coreCaptureProvenanceBackup, { force: true });
+    await rm(muxuiCaptureProvenanceBackup, { force: true });
     await revalidate();
     await rm(markerPath, { force: true });
     await revalidate();
@@ -961,13 +992,13 @@ export async function activateVisualMigrationArtifacts(manifest, { nextManifest,
       await revalidate();
       await restoreActivationFile(activeManifestPath, manifestBackup, revalidate);
       await restoreActivationFile(activeReportPath, reportBackup, revalidate);
-      await restoreActivationFile(activeCoreCaptureProvenancePath, coreCaptureProvenanceBackup, revalidate);
+      await restoreActivationFile(activeMuxuiCaptureProvenancePath, muxuiCaptureProvenanceBackup, revalidate);
       await revalidate();
       await rm(temporaryManifestPath, { force: true });
       await revalidate();
       await rm(temporaryReportPath, { force: true });
       await revalidate();
-      await rm(temporaryCoreCaptureProvenancePath, { force: true });
+      await rm(temporaryMuxuiCaptureProvenancePath, { force: true });
       if (!sameSnapshot && nextSnapshotPath !== previousSnapshotPath && await pathExists(nextSnapshotPath)) {
         await revalidate();
         await rm(nextSnapshotPath, { recursive: true, force: true });
@@ -994,11 +1025,11 @@ export async function recoverVisualMigrationActivation({ root = appRoot } = {}) 
     await revalidate();
     await rm(trustedPaths.reportBackup, { force: true });
     await revalidate();
-    await rm(trustedPaths.coreCaptureProvenanceBackup, { force: true });
+    await rm(trustedPaths.muxuiCaptureProvenanceBackup, { force: true });
   } else {
     await restoreActivationFile(trustedPaths.manifest, trustedPaths.manifestBackup, revalidate);
     await restoreActivationFile(trustedPaths.report, trustedPaths.reportBackup, revalidate);
-    await restoreActivationFile(trustedPaths.coreCaptureProvenance, trustedPaths.coreCaptureProvenanceBackup, revalidate);
+    await restoreActivationFile(trustedPaths.muxuiCaptureProvenance, trustedPaths.muxuiCaptureProvenanceBackup, revalidate);
     if (trustedPaths.nextSnapshot !== trustedPaths.previousSnapshot && await pathExists(trustedPaths.nextSnapshot)) {
       await revalidate();
       await rm(trustedPaths.nextSnapshot, { recursive: true, force: true });

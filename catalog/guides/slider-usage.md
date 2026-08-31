@@ -1,3 +1,3 @@
 # Slider usage
 
-Use the Core Slider contract and provide an accessible name.
+Use the Mux UI Slider contract and provide an accessible name.

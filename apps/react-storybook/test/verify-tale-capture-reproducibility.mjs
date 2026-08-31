@@ -42,7 +42,7 @@ async function capture(taleRoot, outputDir) {
 
 const taleRoot = argument('--tale-root');
 if (!taleRoot) throw new Error('usage: verify-tale-capture-reproducibility.mjs --tale-root <pinned-checkout>');
-const temporaryRoot = await mkdtemp('/tmp/core-ui-tale-visual-repro-');
+const temporaryRoot = await mkdtemp('/tmp/muxui-tale-visual-repro-');
 try {
   const firstOutput = resolve(temporaryRoot, 'first');
   const secondOutput = resolve(temporaryRoot, 'second');

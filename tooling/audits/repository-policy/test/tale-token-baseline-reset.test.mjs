@@ -40,18 +40,18 @@ async function acceptance(overrides = {}) {
     productScopeSha256: acceptedProductScopeSha256,
   });
   return {
-    schema: 'core-ui-authority-decision-v1',
-    decisionId: 'core-ui:decision:0004',
+    schema: 'muxui-authority-decision-v1',
+    decisionId: 'muxui:decision:0004',
     outcome: 'accepted',
     owner: 'ndrewtran',
     ownerNodeId: 'MDQ6VXNlcjc0MzE0OTg0',
     provider: 'github',
-    repository: 'ndrewtran/core-ui',
+    repository: 'ndrewtran/muxui',
     issueNumber: 39,
     commentId: 1,
     commentNodeId: 'IC_test',
     createdAt: '2026-08-10T00:00:00Z',
-    url: 'https://github.com/ndrewtran/core-ui/issues/39#issuecomment-1',
+    url: 'https://github.com/ndrewtran/muxui/issues/39#issuecomment-1',
     bodySha256: `sha256:${sha256(body)}`,
     ...overrides,
   };
@@ -73,7 +73,7 @@ test('rejects unknown decision fields', async () => {
 
 test('rejects an unknown classification-delta profile', async () => {
   await rejects('TALE_RESET_CLASSIFICATION_MISMATCH', (value) => {
-    value.classificationDelta.profile = 'core-ui-tale-reference-family-correction-v9';
+    value.classificationDelta.profile = 'muxui-tale-reference-family-correction-v9';
   });
 });
 
@@ -91,13 +91,13 @@ test('rejects overlapping classification ranges', async () => {
 
 test('rejects a classification range disconnected from the accepted parent IDs', async () => {
   await rejects('TALE_RESET_CLASSIFICATION_MISMATCH', (value) => {
-    value.classificationDelta.deferrals[0].previousCoreIdPrefix = 'reference.color.neutral-missing-';
+    value.classificationDelta.deferrals[0].previousMuxuiIdPrefix = 'reference.color.neutral-missing-';
   });
 });
 
 test('rejects retaining the obsolete adoption reason for deferred families', async () => {
   await rejects('TALE_RESET_CLASSIFICATION_MISMATCH', (value) => {
-    value.classificationDelta.deferralReason = 'Admit the literal neutral palette value under a normalized Core reference ID.';
+    value.classificationDelta.deferralReason = 'Admit the literal neutral palette value under a normalized MuxUI reference ID.';
   });
 });
 
@@ -109,14 +109,14 @@ test('rejects target emission for a deferred neutral family', async () => {
 
 test('rejects an incomplete authored meaning template', async () => {
   await rejects('TALE_RESET_MEANING_MISMATCH', (value) => {
-    value.classificationDelta.renames[0].meaningTemplate = 'Core error palette.';
+    value.classificationDelta.renames[0].meaningTemplate = 'MuxUI error palette.';
   });
 });
 
 test('rejects duplicate rename families and result prefixes', async () => {
   await rejects('TALE_RESET_CLASSIFICATION_MISMATCH', (value) => {
     value.classificationDelta.renames[1].family = 'error';
-    value.classificationDelta.renames[1].resultCoreIdPrefix = 'reference.color.error-';
+    value.classificationDelta.renames[1].resultMuxuiIdPrefix = 'reference.color.error-';
   });
 });
 
@@ -150,7 +150,7 @@ test('rejects version-plan drift', async () => {
 
 test('rejects a package version key outside affected package scope', async () => {
   await rejects('TALE_RESET_VERSION_MISMATCH', (value) => {
-    value.versions.packages['@core-ui/unknown'] = { from: '0.0.0', to: '1.0.0', effect: 'unknown growth' };
+    value.versions.packages['@muxui/unknown'] = { from: '0.0.0', to: '1.0.0', effect: 'unknown growth' };
   });
 });
 
@@ -160,24 +160,24 @@ test('rejects query-version growth outside the accepted query grammar', async ()
 
 test('rejects a renderer range without an affected platform owner', async () => {
   await rejects('TALE_RESET_COMPATIBILITY_MISMATCH', (value) => {
-    value.compatibility.rendererTokenContractRanges['@core-ui/unknown'] = '^2.0.0';
+    value.compatibility.rendererTokenContractRanges['@muxui/unknown'] = '^2.0.0';
   });
 });
 
 test('rejects a renderer range disconnected from the token-contract transition', async () => {
   await rejects('TALE_RESET_COMPATIBILITY_MISMATCH', (value) => {
-    value.compatibility.rendererTokenContractRanges['@core-ui/web'] = '^9.0.0';
+    value.compatibility.rendererTokenContractRanges['@muxui/web'] = '^9.0.0';
   });
 });
 
 test('rejects lifecycle qualifiers that invert current and future renderer packages', async () => {
   await rejects('TALE_RESET_COMPATIBILITY_MISMATCH', (value) => {
-    value.compatibility.rendererTokenContractRanges['future @core-ui/web'] = value.compatibility.rendererTokenContractRanges['@core-ui/web'];
-    delete value.compatibility.rendererTokenContractRanges['@core-ui/web'];
+    value.compatibility.rendererTokenContractRanges['future @muxui/web'] = value.compatibility.rendererTokenContractRanges['@muxui/web'];
+    delete value.compatibility.rendererTokenContractRanges['@muxui/web'];
   });
   await rejects('TALE_RESET_COMPATIBILITY_MISMATCH', (value) => {
-    value.compatibility.rendererTokenContractRanges['@core-ui/react-native'] = value.compatibility.rendererTokenContractRanges['future @core-ui/react-native'];
-    delete value.compatibility.rendererTokenContractRanges['future @core-ui/react-native'];
+    value.compatibility.rendererTokenContractRanges['@muxui/react-native'] = value.compatibility.rendererTokenContractRanges['future @muxui/react-native'];
+    delete value.compatibility.rendererTokenContractRanges['future @muxui/react-native'];
   });
 });
 
@@ -215,7 +215,7 @@ test('rejects a supersession pointer that does not resolve in decision 0003', as
 
 test('rejects ancestor and descendant overlap across superseded and preserved pointers', async () => {
   await rejects('TALE_RESET_SUPERSESSION_MISMATCH', (value) => {
-    value.supersession.preservedPointers[0] = '/versions/phaseC/packages/@core-ui~1catalog';
+    value.supersession.preservedPointers[0] = '/versions/phaseC/packages/@muxui~1catalog';
     value.supersession.preservedPointers.sort();
   });
 });

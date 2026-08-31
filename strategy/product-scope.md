@@ -1,16 +1,16 @@
 ---
-scopeVersion: 6.0.4
+scopeVersion: 7.0.0
 status: execution-baseline
-product: Core UI
+product: Mux UI
 architecture: ./monorepo-architecture.md
 roadmap: ./milestone-roadmap.md
 ---
 
-# Core UI product scope
+# Mux UI product scope
 
 ## Purpose and authority
 
-This document defines **what Core UI is intended to ship**. It turns the
+This document defines **what Mux UI is intended to ship**. It turns the
 architecture and milestone roadmap into a product portfolio with stable scope
 IDs, release commitments, platform coverage, public surfaces, and explicit
 non-goals.
@@ -34,15 +34,17 @@ tracker may reference scope and milestone IDs but cannot change product scope.
 This is not a status report. Git history records changes to product commitment;
 the tracker records delivery progress.
 
-Product Scope `6.0.4` is a patch clarification recording Decision 0011
-amendments 01 and 02's narrow internal temporal-adapter and icon-affordance
-dependencies. It adds no Scope ID, commitment, family, tranche membership,
-public API, platform, package, lifecycle, support claim, release boundary,
-non-goal, or product meaning. The accepted 53-family table, immutable Stage 1
-snapshot, and R1.0 baseline remain the existing R1 lock; ordinary component
-delivery does not require another lock, digest acceptance, or human
-evidence-acceptance gate. The package graph effects are internal and
-replaceable only, with no public package or consumer contract change.
+Product Scope `7.0.0` records Decision 0012's pre-publication reset from the
+predecessor display, machine, and package identities to Mux UI / `muxui` /
+`@muxui/*`.
+The major increment reflects the repository, package, namespace, CLI, and
+public styling-hook rename. It adds no Scope ID, commitment, family, tranche
+membership, public behavior, platform, lifecycle, support claim, release
+boundary, non-goal, or product meaning. The accepted 53-family table,
+immutable Stage 1 snapshot, and R1.0 baseline remain the existing R1 lock;
+ordinary component delivery does not require another lock, digest acceptance,
+or human evidence-acceptance gate. Historical decisions, acceptance records,
+evidence, and URLs retain their original bytes and identities.
 
 ## Scope vocabulary
 
@@ -54,7 +56,7 @@ replaceable only, with no public package or consumer contract change.
 | `admitted` | The product direction is approved and bounded, but activation conditions or release commitment are not yet satisfied. |
 | `committed` | The item is required for its named release boundary. It can be removed only through an explicit product-scope change. |
 | `deferred` | The item is intentionally unavailable until its named trigger is proved. |
-| `rejected` | The item conflicts with Core UI's authority, safety, platform, or product boundaries. |
+| `rejected` | The item conflicts with Mux UI's authority, safety, platform, or product boundaries. |
 
 Commitment state is not implementation status and is not artifact lifecycle.
 For example, a component can be `committed` to the `0.1` scope while its
@@ -65,7 +67,7 @@ binding lifecycle remains `experimental` until promotion evidence passes.
 | Boundary | Meaning |
 | --- | --- |
 | Foundation | Internal Gate 0 operability spine; no public product-completeness claim. |
-| React `0.1` | Package-only `@core-ui/react` prereleases under `next`, with generated version-bound tarball guidance and no secondary-renderer or stable claim. |
+| React `0.1` | Package-only `@muxui/react` prereleases under `next`, with generated version-bound tarball guidance and no secondary-renderer or stable claim. |
 | Productization | Compatible public catalog/tooling, CLI-as-documentation, local authority, consumer validation, React documentation surfaces, and enabled safe operations. |
 | Secondary renderer | Separately activated framework-free web or native package/profile delivery after the React prerelease boundary. |
 | Capability release | Independently admitted Gate 3 breadth or integration; there is no global “all Gate 3 complete” state. |
@@ -89,14 +91,14 @@ the change that updates this document.
 
 ## Product definition
 
-Core UI is an AI-ready design system and component library whose primary
+Mux UI is an AI-ready design system and component library whose primary
 component product and first public component-package boundary is React.
-`@core-ui/react` uses React Aria Components internally while Core UI owns every
+`@muxui/react` uses React Aria Components internally while Mux UI owns every
 public identity, semantic, API, type, behavior, accessibility, styling,
 lifecycle, compatibility, support, documentation, and inventory contract.
 
 Framework-free web and React Native are later secondary tracks. React Native
-implements renderer-neutral Core UI semantic contracts through its own binding
+implements renderer-neutral Mux UI semantic contracts through its own binding
 specs and native primitives; it does not distill React APIs or React Aria.
 
 The first package-only React prerelease contains generated, version-bound
@@ -105,7 +107,7 @@ primary exact-version documentation interface. Human, dense, typed JSON, MCP,
 site, explorer, and agent-context views remain projections of the same
 canonical graph and query engine.
 
-Core UI is AI-ready only when agents can discover capabilities, retrieve exact
+Mux UI is AI-ready only when agents can discover capabilities, retrieve exact
 installed-version guidance, select deterministic examples, compose bounded
 patterns, validate results, and recover from structured diagnostics without
 scraping prose or guessing unsupported APIs.
@@ -115,9 +117,9 @@ scraping prose or guessing unsupported APIs.
 | Scope ID | Commitment | Outcome |
 | --- | --- | --- |
 | `SCOPE-OUTCOME-001` | `deferred` | A consumer can implement supported UI on web, React, iOS, and Android from one shared semantic system with explicit platform binding differences after the relevant secondary tracks complete. |
-| `SCOPE-OUTCOME-REACT-PRIMARY` | `committed` | A consumer can install the published React prerelease and use Core-owned experimental React bindings with generated version-bound package guidance. |
+| `SCOPE-OUTCOME-REACT-PRIMARY` | `committed` | A consumer can install the published React prerelease and use Mux UI-owned experimental React bindings with generated version-bound package guidance. |
 | `SCOPE-OUTCOME-MULTIPLATFORM-SECONDARY` | `deferred` | Framework-free and native consumers later receive platform-correct adaptations from the renderer-neutral semantic system. |
-| `SCOPE-OUTCOME-002` | `committed` | A human, agent, or tool can discover and retrieve exact locally compatible Core UI guidance through a self-describing CLI without repository crawling. |
+| `SCOPE-OUTCOME-002` | `committed` | A human, agent, or tool can discover and retrieve exact locally compatible Mux UI guidance through a self-describing CLI without repository crawling. |
 | `SCOPE-OUTCOME-003` | `committed` | Every public fact has one canonical owner and every package, documentation surface, example, and proof projection can be regenerated and verified against it. |
 | `SCOPE-OUTCOME-004` | `committed` | Maintainers can add and evolve components through owner-linked scaffolds, semantic diffs, revision explanations, affected closures, and structured proof. |
 | `SCOPE-OUTCOME-005` | `committed` | Stable releases expose exact package, catalog, binding, token, runtime-profile, evidence, and exception identity. |
@@ -127,16 +129,16 @@ scraping prose or guessing unsupported APIs.
 
 ## Primary users and jobs
 
-| Scope ID | User | Core job |
+| Scope ID | User | Mux UI job |
 | --- | --- | --- |
-| `SCOPE-USER-001` | Framework-free web consumer | Install Core UI, retrieve compatible HTML/CSS/JS guidance, implement accessible UI, and validate supported source without adopting React. |
-| `SCOPE-USER-002` | React consumer | Use typed React bindings that preserve the applicable Core web styling and observable semantics without learning a second visual system. |
+| `SCOPE-USER-001` | Framework-free web consumer | Install Mux UI, retrieve compatible HTML/CSS/JS guidance, implement accessible UI, and validate supported source without adopting React. |
+| `SCOPE-USER-002` | React consumer | Use typed React bindings that preserve the applicable Mux UI web styling and observable semantics without learning a second visual system. |
 | `SCOPE-USER-003` | React Native consumer | Use platform-appropriate native components, tokens, accessibility obligations, and alternatives without importing CSS or DOM assumptions. |
 | `SCOPE-USER-004` | Product engineer working with an agent | Give intent, let the agent discover exact capabilities and examples, generate compatible code, validate it, and repair it from structured diagnostics. |
 | `SCOPE-USER-005` | Design-system maintainer | Author one canonical fact, see its semantic and compatibility effects, implement affected bindings, and produce the required evidence without repairing projections manually. |
 | `SCOPE-USER-006` | Release and evidence steward | Verify package/catalog identity, compatibility, support claims, evidence retention, advisories, exceptions, and rollback before publication. |
 | `SCOPE-USER-007` | Documentation consumer | Read human-oriented guidance generated from the same catalog responses and canonical guides available to agents. |
-| `SCOPE-USER-008` | Future adapter author | Add a demanded framework, design-tool, protocol, or extension only through an admitted binding/capability that cannot fork Core UI truth. |
+| `SCOPE-USER-008` | Future adapter author | Add a demanded framework, design-tool, protocol, or extension only through an admitted binding/capability that cannot fork Mux UI truth. |
 
 ## Product boundary
 
@@ -168,7 +170,7 @@ scraping prose or guessing unsupported APIs.
 | `SCOPE-NONGOAL-005` | `rejected` | Generated projections repaired directly or accepted as independent authoring inputs. |
 | `SCOPE-NONGOAL-006` | `rejected` | Arbitrary LLM-generated repository, consumer-project, migration, or design-tool patches. |
 | `SCOPE-NONGOAL-007` | `rejected` | A universal prompt-only design-intent object, free-standing interpretation graph, or model-selected example ranking. |
-| `SCOPE-NONGOAL-008` | `rejected` | Application-owned routes, navigation flows, business state, analytics, product content, or screen-specific logic represented as Core UI truth. |
+| `SCOPE-NONGOAL-008` | `rejected` | Application-owned routes, navigation flows, business state, analytics, product content, or screen-specific logic represented as Mux UI truth. |
 | `SCOPE-NONGOAL-009` | `rejected` | A static full-catalog context file as the primary agent interface. |
 | `SCOPE-NONGOAL-010` | `rejected` | Multi-framework abstraction before a second demanded framework binding proves repeated shape. |
 | `SCOPE-NONGOAL-011` | `rejected` | Hosted execution of consumer code, project mutation, migration, extensions, or local-filesystem diagnostics. |
@@ -196,7 +198,7 @@ hosted services, design-tool integration, or another framework.
 ### React `0.1` prerelease boundary
 
 The current `0.1` product commitment is a package-only React prerelease. Each
-R1 tranche may publish `@core-ui/react@0.1.0-alpha.N` under `next` once its
+R1 tranche may publish `@muxui/react@0.1.0-alpha.N` under `next` once its
 breadth closure may propose `0.1.0-rc.1`. No `latest` tag, stable `0.1.0`,
 framework-free package, native package/profile, public catalog/tooling/CLI,
 cross-platform equivalence, or secondary-renderer support claim belongs to this
@@ -204,10 +206,10 @@ boundary.
 
 | Scope ID | Commitment | Product deliverable | Roadmap |
 | --- | --- | --- | --- |
-| `SCOPE-OUTCOME-REACT-PRIMARY` | `committed` | Installable React prerelease using Core-owned experimental bindings and generated package guidance. | R1.0–R1 exit |
-| `SCOPE-SYSTEM-REACT` | `committed` | Standalone React substrate, CSS/runtime ownership, exact React Aria baseline, pinned one-time Tale styling donor with Core-owned crosswalk, and tranche delivery. | R1.0–R1.5 |
-| `SCOPE-REACT-BREADTH-001` | `committed` | Disposition-complete Core UI coverage of the applicable pinned React Aria component surface. | R1.1–R1.5 |
-| `SCOPE-PRODUCT-REACT-PRERELEASE` | `committed` | Exact `@core-ui/react@0.1.0-alpha.N`/`rc.1` tarball and release manifest under `next`. | R1 tranche exits and R1 exit |
+| `SCOPE-OUTCOME-REACT-PRIMARY` | `committed` | Installable React prerelease using Mux UI-owned experimental bindings and generated package guidance. | R1.0–R1 exit |
+| `SCOPE-SYSTEM-REACT` | `committed` | Standalone React substrate, CSS/runtime ownership, exact React Aria baseline, pinned one-time Tale styling donor with Mux UI-owned crosswalk, and tranche delivery. | R1.0–R1.5 |
+| `SCOPE-REACT-BREADTH-001` | `committed` | Disposition-complete Mux UI coverage of the applicable pinned React Aria component surface. | R1.1–R1.5 |
+| `SCOPE-PRODUCT-REACT-PRERELEASE` | `committed` | Exact `@muxui/react@0.1.0-alpha.N`/`rc.1` tarball and release manifest under `next`. | R1 tranche exits and R1 exit |
 | `SCOPE-SURFACE-REACT-PACKAGE-GUIDANCE` | `committed` | Generated version-bound install, API, export/component, styling, and compatibility guidance in the tarball. | R1.0 and every tranche |
 
 The React-specific component and pattern commitments are
@@ -280,7 +282,7 @@ The `0.1` boundary also commits:
 | `SCOPE-SYSTEM-NATIVE` | `deferred` | Native substrate, iOS/Android behavior, native token output, and explicit React Native Web profile semantics. | N1 |
 | `SCOPE-SYSTEM-CURRICULUM` | `committed` | Deterministic example selection by compatibility, binding/profile, purpose, prerequisites, preference, and complexity. | R1.1–R1.5 for React; later tracks extend it |
 | `SCOPE-SYSTEM-PROOF` | `committed` | Reproducible release manifests and complete proof/evidence views for the exact enabled boundary. | R1.5/R1 exit for React; later tracks extend it |
-| `SCOPE-SYSTEM-VALIDATE-SOURCE` | `committed` | `core validate` for Core UI-owned catalog and canonical example sources only. | R1.5 for React-enabled sources |
+| `SCOPE-SYSTEM-VALIDATE-SOURCE` | `committed` | `muxui validate` for Mux UI-owned catalog and canonical example sources only. | R1.5 for React-enabled sources |
 | `SCOPE-SYSTEM-MCP-PROBE` | `committed` | Internal local MCP parity probe; not yet a public product and not an R1 blocker. | P2.3 |
 | `SCOPE-SYSTEM-AGENT-BASELINE` | `committed` | Informational cold-start and generation evaluations tied to canonical IDs. | R1.5; later tracks extend it |
 
@@ -309,8 +311,8 @@ surface.
 | `SCOPE-PRODUCT-001` | `committed` | Publishable public packages, packed compatibility descriptors, version policy, historical catalogs, and verifiable release manifests. | P2.1 |
 | `SCOPE-PRODUCT-002` | `committed` | Official install profiles, real packed project-local resolution, offline guidance, and bounded consumer validation. | P2.2 |
 | `SCOPE-PRODUCT-003` | `committed` | React documentation site/explorer, small agent bootstrap files, and public installed-local MCP; secondary projections wait for W1/N1. | P2.3 |
-| `SCOPE-PRODUCT-004` | `admitted` | Grounded read-only `core plan` over stable bounded patterns. | G2.4 |
-| `SCOPE-PRODUCT-005` | `admitted` | Read-only `core doctor` and safe, previewed, confirmed, journalled `core init`. | G2.5 |
+| `SCOPE-PRODUCT-004` | `admitted` | Grounded read-only `muxui plan` over stable bounded patterns. | G2.4 |
+| `SCOPE-PRODUCT-005` | `admitted` | Read-only `muxui doctor` and safe, previewed, confirmed, journalled `muxui init`. | G2.5 |
 | `SCOPE-PRODUCT-006` | `admitted` | Four allowlisted agent-safe canonical proposal operations. | G2.6 |
 | `SCOPE-PRODUCT-007` | `committed` | Productization release manifest, capability manifest, evidence index, install/rollback proof, and honest disabled-capability reporting. | P2 exit |
 
@@ -319,7 +321,7 @@ surface.
 | Scope ID | Commitment | Platform/binding | Product commitment |
 | --- | --- | --- | --- |
 | `SCOPE-PLATFORM-WEB-HTML` | `deferred` | `web.html` | Later W1 HTML binding spec, CSS, semantic markup, progressive enhancement, and optional controllers. |
-| `SCOPE-PLATFORM-WEB-REACT` | `committed` | `web.react` | Primary typed React bindings with Core-owned DOM, behavior, accessibility, styling-hook, and compatibility contracts. |
+| `SCOPE-PLATFORM-WEB-REACT` | `committed` | `web.react` | Primary typed React bindings with Mux UI-owned DOM, behavior, accessibility, styling-hook, and compatibility contracts. |
 | `SCOPE-PLATFORM-NATIVE-RN` | `deferred` | `native.react-native` | Later N1 React Native renderer using native primitives and platform-appropriate bindings. |
 | `SCOPE-PROFILE-IOS` | `deferred` | iOS | N1 validation profile, lifecycle/strategy, native evidence, and adaptations. |
 | `SCOPE-PROFILE-ANDROID` | `deferred` | Android | N1 validation profile, lifecycle/strategy, native evidence, and adaptations. |
@@ -337,18 +339,18 @@ behavior, or implementation across platforms. No parity claim exists at R1.
 | --- | --- | --- |
 | `SCOPE-API-NAMING` | `committed` | One preferred public concept name and consistent semantic state/variant names; convenience aliases and stringly typed modes are exceptional. |
 | `SCOPE-API-DEFAULTS` | `committed` | Defaults are finite, deterministic, and present in the binding spec, query response, generated types where applicable, and canonical executable examples. |
-| `SCOPE-API-BINDING` | `committed` | Each binding owns its exact Core UI props/attributes, events, slots/parts, defaults, behavior, deviations, validation profile, and example relations. |
+| `SCOPE-API-BINDING` | `committed` | Each binding owns its exact Mux UI props/attributes, events, slots/parts, defaults, behavior, deviations, validation profile, and example relations. |
 | `SCOPE-API-COMPOSITION` | `committed` | Compound components expose explicit named parts, allowed parent/child relations, required labels/providers, and mutually exclusive structures without magical child inspection. |
 | `SCOPE-API-WEB-HOOKS` | `committed` | Public web root classes, semantic slots, state attributes, events, custom properties, and cascade layers are enumerated; undocumented topology stays internal. |
-| `SCOPE-API-REACT-ERGONOMICS` | `committed` | The `web.react` binding owns typed Core composition, public ref semantics, controlled/uncontrolled observable state, and the public React contract. `@core-ui/react` source owns host-type refinements, runtime state, effects, portals, and implementation while preserving those binding-owned semantics and styles. |
+| `SCOPE-API-REACT-ERGONOMICS` | `committed` | The `web.react` binding owns typed Mux UI composition, public ref semantics, controlled/uncontrolled observable state, and the public React contract. `@muxui/react` source owns host-type refinements, runtime state, effects, portals, and implementation while preserving those binding-owned semantics and styles. |
 | `SCOPE-API-NATIVE-ERGONOMICS` | `deferred` | When N1 activates, native bindings may use platform-appropriate APIs and alternatives while preserving shared intent, tokens, applicable states, and accessibility obligations. |
-| `SCOPE-API-PASSTHROUGH` | `committed` | Renderer host passthrough uses named supported profiles and hand-authored type refinements; it cannot introduce undocumented Core UI semantics. |
+| `SCOPE-API-PASSTHROUGH` | `committed` | Renderer host passthrough uses named supported profiles and hand-authored type refinements; it cannot introduce undocumented Mux UI semantics. |
 | `SCOPE-API-ESCAPE-HATCH` | `committed` | Every styling, validation, suppression, or composition escape hatch is named, typed, bounded, documented, and excluded from canonical defaults. |
 | `SCOPE-API-RUNTIME-OWNERSHIP` | `committed` | Controllers, adapters, providers, focus restoration, dismissal, portals, global listeners, inert/background state, and scroll locks have one explicit lifecycle owner. |
 | `SCOPE-API-A11Y` | `committed` | Accessible naming, roles, states, values, relationships, keyboard/input behavior, announcements, and platform deviations are binding obligations with risk-proportionate proof. |
 | `SCOPE-API-DEPRECATION` | `committed` | Deprecation names a replacement or explicit no-replacement reason, notice window, version effect, retained retrieval, diagnostic, and migration path. Query API v1.2 retains inline token responses for one complete accepted notice release before v2 removal. |
 
-Generated Core-owned types may represent serializable binding fields. Renderer
+Generated Mux UI-owned types may represent serializable binding fields. Renderer
 source remains responsible for host-language inference, generic constraints,
 refs, narrowed events, and platform-owned props, with conformance checks
 preventing those refinements from becoming undocumented product API.
@@ -397,16 +399,16 @@ the site.
 
 | Scope ID | Commitment | Package | Public responsibility | Must not own |
 | --- | --- | --- | --- | --- |
-| `SCOPE-PKG-SCHEMA` | `committed` | `@core-ui/schema` | Versioned source/response schemas, generated types, platform IDs, authoring helpers, token-source `sourceCrosswalk` grammar, and bounded sectional query shapes. | Product semantics, renderer implementation, or site content. |
-| `SCOPE-PKG-TOKENS` | `committed` | `@core-ui/tokens` | Canonical Core-owned token data, Tale-source classification validation, and deterministic web/native/design-tool transforms. | Component behavior, documentation rendering, or Tale UI as a live owner. |
-| `SCOPE-PKG-FOUNDATION` | `committed` | `@core-ui/foundation` | Enforced semantic, pure-logic, and optional portable-interaction boundaries. | Selectors, React hooks, browser globals, native views, or mandatory transitions. |
-| `SCOPE-PKG-WEB` | `deferred` | `@core-ui/web` | Later W1 HTML/CSS/controller implementation for `web.html` binding specs. | React or native implementation; a React prerequisite, shared React runtime, or shared React CSS owner. |
-| `SCOPE-PKG-REACT` | `committed` | `@core-ui/react` | Standalone React rendering, Core-owned CSS adapted from the pinned Tale donor where applicable, required donor license/notice material, SSR/hydration, effects, exports, descriptors, and generated package guidance for `web.react` contracts. | Canonical component metadata, React Aria public API, Tale UI or another Core workspace runtime/build dependency, or a second style registry. |
-| `SCOPE-PKG-REACT-NATIVE` | `deferred` | `@core-ui/react-native` | Later N1 native primitive/runtime implementation and explicit platform files. | React/React Aria authority, CSS parsing, DOM, Expo, or explorer hosts. |
-| `SCOPE-PKG-CATALOG` | `committed` | `@core-ui/catalog` | Immutable compiled catalog, search index, pure discovery/query/planning API, canonical page-budget profiles/page selection, response-version negotiation/historical semantics, bounded token/crosswalk sections, and package-level catalog identity. | CLI parsing, MCP transport, renderer runtime, or project mutation. |
-| `SCOPE-PKG-TOOLING` | `committed` | `@core-ui/tooling` | CLI, adapters, installed catalog/version selection, explicit query-version forwarding, response rendering, local validation, maintainer authoring, change-intent previews, and enabled safe operations. | A second artifact index, product/query-response decisions, page-boundary selection, or renderer implementation. |
+| `SCOPE-PKG-SCHEMA` | `committed` | `@muxui/schema` | Versioned source/response schemas, generated types, platform IDs, authoring helpers, token-source `sourceCrosswalk` grammar, and bounded sectional query shapes. | Product semantics, renderer implementation, or site content. |
+| `SCOPE-PKG-TOKENS` | `committed` | `@muxui/tokens` | Canonical Mux UI-owned token data, Tale-source classification validation, and deterministic web/native/design-tool transforms. | Component behavior, documentation rendering, or Tale UI as a live owner. |
+| `SCOPE-PKG-FOUNDATION` | `committed` | `@muxui/foundation` | Enforced semantic, pure-logic, and optional portable-interaction boundaries. | Selectors, React hooks, browser globals, native views, or mandatory transitions. |
+| `SCOPE-PKG-WEB` | `deferred` | `@muxui/web` | Later W1 HTML/CSS/controller implementation for `web.html` binding specs. | React or native implementation; a React prerequisite, shared React runtime, or shared React CSS owner. |
+| `SCOPE-PKG-REACT` | `committed` | `@muxui/react` | Standalone React rendering, Mux UI-owned CSS adapted from the pinned Tale donor where applicable, required donor license/notice material, SSR/hydration, effects, exports, descriptors, and generated package guidance for `web.react` contracts. | Canonical component metadata, React Aria public API, Tale UI or another Mux UI workspace runtime/build dependency, or a second style registry. |
+| `SCOPE-PKG-REACT-NATIVE` | `deferred` | `@muxui/react-native` | Later N1 native primitive/runtime implementation and explicit platform files. | React/React Aria authority, CSS parsing, DOM, Expo, or explorer hosts. |
+| `SCOPE-PKG-CATALOG` | `committed` | `@muxui/catalog` | Immutable compiled catalog, search index, pure discovery/query/planning API, canonical page-budget profiles/page selection, response-version negotiation/historical semantics, bounded token/crosswalk sections, and package-level catalog identity. | CLI parsing, MCP transport, renderer runtime, or project mutation. |
+| `SCOPE-PKG-TOOLING` | `committed` | `@muxui/tooling` | CLI, adapters, installed catalog/version selection, explicit query-version forwarding, response rendering, local validation, maintainer authoring, change-intent previews, and enabled safe operations. | A second artifact index, product/query-response decisions, page-boundary selection, or renderer implementation. |
 
-At R1, only `@core-ui/react` is publishable; schema, tokens, foundation,
+At R1, only `@muxui/react` is publishable; schema, tokens, foundation,
 catalog, and tooling remain private build/proof authorities and are not runtime
 edges. Productization later publishes the compatible portfolio. Renderer
 packages do not depend on the catalog at runtime.
@@ -430,16 +432,16 @@ packages do not depend on the catalog at runtime.
 
 | Scope ID | Commitment | Command | Earliest boundary | Availability rule |
 | --- | --- | --- | --- | --- |
-| `SCOPE-CMD-MANIFEST` | `committed` | `core manifest` | Foundation | Cold-start capability, schema, grammar, platform, output, and version discovery. |
-| `SCOPE-CMD-LIST` | `committed` | `core list` | Foundation | Bounded deterministic artifact listing. |
-| `SCOPE-CMD-SEARCH` | `committed` | `core search` | Foundation | Deterministic explainable local search with match reasons. |
-| `SCOPE-CMD-GET` | `committed` | `core get` | Foundation | Exact artifact/binding/example/guidance retrieval with compatibility provenance plus bounded `tokens` / `source-crosswalk` sections and deterministic continuation. |
-| `SCOPE-CMD-VALIDATE-SOURCE` | `committed` | `core validate` | `0.1` | Core UI-owned catalog/example validation first. |
-| `SCOPE-CMD-VALIDATE-CONSUMER` | `committed` | `core validate` | Productization | Bounded supported consumer syntax/version analysis with false-positive policy. |
-| `SCOPE-CMD-PLAN` | `admitted` | `core plan` | Productization | Read-only grounded composition over proved patterns; unavailable until G2.4. |
-| `SCOPE-CMD-DOCTOR` | `admitted` | `core doctor` | Productization | Read-only project health before any setup operation; unavailable until G2.5. |
-| `SCOPE-CMD-INIT` | `admitted` | `core init` | Productization | Previewed, confirmed, confined, atomic/journalled, idempotent, recoverable setup. |
-| `SCOPE-CMD-MIGRATE` | `deferred` | `core migrate` | Capability release | Enabled only for a real version-bounded deterministic migration need. |
+| `SCOPE-CMD-MANIFEST` | `committed` | `muxui manifest` | Foundation | Cold-start capability, schema, grammar, platform, output, and version discovery. |
+| `SCOPE-CMD-LIST` | `committed` | `muxui list` | Foundation | Bounded deterministic artifact listing. |
+| `SCOPE-CMD-SEARCH` | `committed` | `muxui search` | Foundation | Deterministic explainable local search with match reasons. |
+| `SCOPE-CMD-GET` | `committed` | `muxui get` | Foundation | Exact artifact/binding/example/guidance retrieval with compatibility provenance plus bounded `tokens` / `source-crosswalk` sections and deterministic continuation. |
+| `SCOPE-CMD-VALIDATE-SOURCE` | `committed` | `muxui validate` | `0.1` | Mux UI-owned catalog/example validation first. |
+| `SCOPE-CMD-VALIDATE-CONSUMER` | `committed` | `muxui validate` | Productization | Bounded supported consumer syntax/version analysis with false-positive policy. |
+| `SCOPE-CMD-PLAN` | `admitted` | `muxui plan` | Productization | Read-only grounded composition over proved patterns; unavailable until G2.4. |
+| `SCOPE-CMD-DOCTOR` | `admitted` | `muxui doctor` | Productization | Read-only project health before any setup operation; unavailable until G2.5. |
+| `SCOPE-CMD-INIT` | `admitted` | `muxui init` | Productization | Previewed, confirmed, confined, atomic/journalled, idempotent, recoverable setup. |
+| `SCOPE-CMD-MIGRATE` | `deferred` | `muxui migrate` | Capability release | Enabled only for a real version-bounded deterministic migration need. |
 
 Every enabled query supports the applicable platform, detail, section,
 example-purpose, limit, and cursor selectors. JSON writes one value to stdout;
@@ -449,11 +451,11 @@ section-selectable, token-budgeted, and round-trippable to the response object.
 Token-source retrieval follows a staged compatibility contract. Query API
 `1.2.0` retains v1.1's complete inline `tokens`, adds bounded `tokens` and
 `source-crosswalk` sections, and emits
-`CORE_QUERY_INLINE_TOKENS_DEPRECATED` with replacement guidance. After one
+`MUXUI_QUERY_INLINE_TOKENS_DEPRECATED` with replacement guidance. After one
 complete retained and human-accepted v1.2 notice release, query API `2.0.0` may
 replace inline tokens with counts, digests, provenance, and available-section
-metadata. `@core-ui/schema` owns each versioned request/response and
-`TokenSectionPageBudgetProfile` grammar. `@core-ui/catalog` owns historical
+metadata. `@muxui/schema` owns each versioned request/response and
+`TokenSectionPageBudgetProfile` grammar. `@muxui/catalog` owns historical
 response negotiation, the canonical profile values, and page selection;
 tooling only selects a compatible installed catalog, forwards explicit version
 intent, renders the returned page, and rejects unsupported tuples without
@@ -465,7 +467,7 @@ section returns typed `absent` for a token-source 2.0 record and for a 2.1
 record that omits the authored field. The profile fixes the query API and lexer versions, canonical
 entry-cost/order rule, normalized worst-case envelope preimage/reserve,
 default/max limits, minimum progress, 2,048-token dense-page budget, and
-`CORE_QUERY_PAGE_ENTRY_TOO_LARGE`. Its canonical JSON enters the catalog
+`MUXUI_QUERY_PAGE_ENTRY_TOO_LARGE`. Its canonical JSON enters the catalog
 digest, adding no revision axis. Each v2 page uses canonical ordering and a
 cursor bound to query version, that catalog digest, token-source revision,
 section, selector state, and position. `limit` is an item ceiling; the catalog
@@ -476,7 +478,7 @@ without truncation.
 
 | Scope ID | Commitment | Deliverable | Boundary |
 | --- | --- | --- | --- |
-| `SCOPE-THEME-DEFAULT` | `committed` | First-party brand-agnostic default theme whose Core-owned reference baseline is classified from the pinned Tale UI source | `0.1` |
+| `SCOPE-THEME-DEFAULT` | `committed` | First-party brand-agnostic default theme whose Mux UI-owned reference baseline is classified from the pinned Tale UI source | `0.1` |
 | `SCOPE-TOKEN-LAYERS` | `committed` | Reference, semantic, and component token layers with acyclic allowed alias direction | `0.1` |
 | `SCOPE-TOKEN-MODES` | `committed` | Applicable typed color-scheme, contrast, motion, density, and direction axes | `0.1` |
 | `SCOPE-TOKEN-TRANSFORMS` | `committed` | Static React CSS output at R1; native theme-object transforms remain retained historical/later N1 input and become current only when N1 activates | R1 now; N1 later |
@@ -489,7 +491,7 @@ without truncation.
 | `SCOPE-DESIGN-TOOL` | `admitted` | One named design-tool interchange profile and proposal-only round-trip | Capability release through G3.5 |
 
 CSS-derived values never become native authority. Consumer themes can assign
-only permitted existing roles and cannot change Core token identity, type,
+only permitted existing roles and cannot change Mux UI token identity, type,
 meaning, required modes, or canonical alias topology.
 
 The migration baseline is Tale UI commit
@@ -499,7 +501,7 @@ The migration baseline is Tale UI commit
 693 declaration occurrences, including 692 custom-property occurrences, 644
 unique custom-property names, and one ordinary declaration. Every occurrence
 is classified `adopt`, `adapt`, `defer`, or `reject`; repeated names require
-explicit logical-token/mode grouping. The accepted subset receives Core IDs,
+explicit logical-token/mode grouping. The accepted subset receives Mux UI IDs,
 types/units, meanings, modes, override policies, platform dispositions, and
 pinned provenance in the existing `reference` layer. Tale names and CSS are
 inputs only: Tale UI is not a runtime dependency, ongoing synchronization
@@ -511,10 +513,10 @@ The same pinned commit is the one-time React styling donor. Its
 `d93f7c0a555066d8abbaff75cb8bd216938bcb2f`, and CSS foundation tree
 `aa2a2d95214918794e9f463e063ceee0df3b4b1e` provide visual and structural
 inputs for admitted R1 components. Every consumed rule and custom property is
-classified through a Core-owned per-component disposition/crosswalk; Tale
+classified through a Mux UI-owned per-component disposition/crosswalk; Tale
 selectors, package/API identities, token aliases, registries, and stories do
-not become Core contracts. There is no Tale dependency, ambient-checkout build
-input, automatic synchronization, or requirement to ship a component that Core
+not become Mux UI contracts. There is no Tale dependency, ambient-checkout build
+input, automatic synchronization, or requirement to ship a component that Mux UI
 has not admitted.
 
 The existing token source under `catalog/tokens/` owns that classification and
@@ -525,13 +527,13 @@ derive a typed `absent` status. Each occurrence key includes file, selector,
 name, value, and stable source-order ordinal and occurs exactly once. Every
 entry has one disposition and non-empty reason. An occurrence joins at most one
 duplicate-free group of at least two members with complete mode/member mapping.
-`adopt`/`adapt` require one Core token ID; `defer`/`reject` forbid one. The
+`adopt`/`adapt` require one Mux UI token ID; `defer`/`reject` forbid one. The
 canonical preimage is the pinned baseline identity, occurrence entries in
 stable occurrence order, and groups in stable group-ID order; its SHA-256 is
 the derived `sourceCrosswalkDigest`. Token-level provenance and catalog/package
 digests derive from that owner. The field affects source content/provenance
 identity but not token IDs, semantic closure, requirement sets, search ranking,
-default summaries, or runtime output except through admitted Core token facts.
+default summaries, or runtime output except through admitted Mux UI token facts.
 Removing or incompatibly changing it requires a schema major, migration
 guidance, affected proof, and retained historical retrieval.
 
@@ -619,7 +621,7 @@ unconfirmed mutation.
 
 Gate 3 is not a monolithic commitment. Each scope item remains unavailable
 until its activation conditions and evidence pass. An item can close with an
-explicit no-activation decision without making Core UI incomplete.
+explicit no-activation decision without making Mux UI incomplete.
 
 | Scope ID | State | Capability | Activation trigger | Roadmap |
 | --- | --- | --- | --- | --- |
@@ -640,7 +642,7 @@ explicit no-activation decision without making Core UI incomplete.
 Tale's Scale application at pinned tree
 `85d594c05b32e473af4734ec18447a1d8df8ebdd` is a deferred donor candidate for
 the existing additional-theme/design-tool capability, not an R1 deliverable or
-dependency. Reuse requires a later admission that names the Core theme schema,
+dependency. Reuse requires a later admission that names the Mux UI theme schema,
 public surface, package/application boundary, import/export loss policy,
 consumer validation, accessibility, privacy, security, lifecycle, and release
 evidence. R1 may preserve compatible static theme outputs but does not port or
@@ -649,7 +651,7 @@ publish Scale.
 `SCOPE-CAP-BREADTH` remains the later cross-platform breadth capability and
 does not commit an unnamed inventory. React-primary breadth is instead owned by
 `SCOPE-REACT-BREADTH-001`: the fixed family table names the exact upstream
-snapshot items, Core IDs, and dispositions. No per-family Product Scope
+snapshot items, Mux UI IDs, and dispositions. No per-family Product Scope
 amendment is required inside that committed inventory. Each family record has:
 
 - the user workflow and unmet intent;
@@ -740,22 +742,22 @@ accessibility, package, compatibility, integrity, or generation failures.
 ### React `0.1` is product-complete only when
 
 - the exact pinned React Aria Components surface is disposition-complete and
-  every applicable item maps to a delivered Core component or an accepted
+  every applicable item maps to a delivered Mux UI component or an accepted
   `defer`, `exclude`, or `not-a-component` disposition;
-- every exported `web.react` binding has one Core-owned canonical component,
+- every exported `web.react` binding has one Mux UI-owned canonical component,
   binding contract, implementation, CSS, canonical example, descriptor,
   generated package guidance, and risk-proportionate proof closure;
 - every exported binding with an applicable Tale counterpart has an exact
-  pinned donor-style disposition, complete donor-to-Core token/style crosswalk,
-  Core-owned CSS, and visual comparison; routine export permits only `adopt` or
+  pinned donor-style disposition, complete donor-to-Mux UI token/style crosswalk,
+  Mux UI-owned CSS, and visual comparison; routine export permits only `adopt` or
   `adapt`, while `defer`/`reject` requires a separately accepted exception and
   remains unexported until reconciled; absence of a donor is explicit and never
-  blocks a responsible Core implementation;
-- the standalone `@core-ui/react` tarball has exact React/React DOM peers,
+  blocks a responsible Mux UI implementation;
+- the standalone `@muxui/react` tarball has exact React/React DOM peers,
   `react-aria-components@1.20.0`, and the approved direct internal
-  `@internationalized/date@3.12.3` dependency limited to Core value adapters
+  `@internationalized/date@3.12.3` dependency limited to Mux UI value adapters
   in `DateField`, `DatePicker`, `DateRangePicker`, `TimeField`, `Calendar`, and
-  `RangeCalendar`, with no Core workspace runtime edge or upstream public API
+  `RangeCalendar`, with no Mux UI workspace runtime edge or upstream public API
   leak;
 - the first-party default token/theme system satisfies every applicable React
   requirement and accessibility adaptation;
@@ -851,10 +853,10 @@ tracker decision and does not require this document to change.
 ### Accepted Tale foundation-token amendment (`2.0.0`)
 
 Architecture-maintenance issue #39 records the observed workflow and the
-designated human decision accepted on 2026-08-09. Core UI's `0.1` default theme
+designated human decision accepted on 2026-08-09. Mux UI's `0.1` default theme
 is materially broadened from the minimum fixed-slice substrate to include the
 human-classified `adopt`/`adapt` subset of the pinned Tale UI non-semantic token
-baseline as Core-owned reference tokens. This is a major scope change from
+baseline as Mux UI-owned reference tokens. This is a major scope change from
 `1.0.1` to `2.0.0`.
 
 Affected immutable IDs are
@@ -884,7 +886,7 @@ Roadmap and evidence effect: Phase A reactivates G0.1–G0.5 and Gate 0 for the
 `TALE-TOKEN-A` query API v1.2 deprecation/typed-absence profile; Phase B expires
 and preserves Phase A and repeats the complete Gate 0 proof under the
 `TALE-TOKEN-B` query API v2/schema/query-infrastructure profile;
-G1.0 then owns the real crosswalk and Core inventory; Phase C expires and
+G1.0 then owns the real crosswalk and Mux UI inventory; Phase C expires and
 preserves Phase B and repeats the complete Gate 0 proof under the
 `TALE-TOKEN-C` profile at that exact final G1.0 source. Only then may all
 `E-G1.0-01` through `E-G1.0-08` be accepted,
@@ -894,19 +896,19 @@ expiry is represented by digest-bound internal applicability-supersession
 certificates that close, but never recertify, the historical chains; every
 replacement generation begins a new immutable evidence index.
 
-Release additions are the exact accepted Core reference-token identities, the
+Release additions are the exact accepted Mux UI reference-token identities, the
 optional stable token-source `sourceCrosswalk` member in schema `2.1.0`, query
 API v1.2 bounded sections/deprecation diagnostic, and query API v2 sectional
 response. Query API v2 removes inline full-response `tokens` only after the
 accepted v1.2 notice release and replaces it with summary metadata plus the
 bounded `tokens` section. Historical v1.1 and v1.2 retrieval remains available.
 The classification/compatibility annex must enumerate the exact token additions
-and classify catalog, command-registry, and `@core-ui/schema`,
-`@core-ui/catalog`, `@core-ui/tokens`, and `@core-ui/tooling` version effects
+and classify catalog, command-registry, and `@muxui/schema`,
+`@muxui/catalog`, `@muxui/tokens`, and `@muxui/tooling` version effects
 before implementation. No package, platform, public command, theme count,
 component, or capability is added.
 
-Platform and migration rules preserve Core ownership and explicit target
+Platform and migration rules preserve Mux UI ownership and explicit target
 dispositions: CSS-only values require a native adaptation or reasoned
 defer/reject result, and native never parses CSS. Authoring support must cover
 scaffold, diagnostics, semantic diff, revision explanation, affected closure,
@@ -917,8 +919,8 @@ parity, generation identity, target transforms, affected consumers, and
 renderer conformance. No consumer data is required; any later capture remains
 subject to the existing privacy/disclosure/retention contract. Security and
 integrity remain installed-local, version/digest-bound, fail-closed, and
-network-independent. Rollback selects the last accepted Core token/catalog
-tuple and its retained evidence without rewriting Tale or Core history.
+network-independent. Rollback selects the last accepted Mux UI token/catalog
+tuple and its retained evidence without rewriting Tale or Mux UI history.
 
 Open tracker migration covers issues #3 through #19, including Gate 0 exit #8,
 and every affected retained-evidence locator. Completed issues and evidence are
@@ -927,26 +929,26 @@ not reactivate or complete a roadmap milestone.
 
 ### Tale-only reference-baseline correction (`3.0.0`)
 
-Architecture-maintenance issue #39 records the observed workflow: Core UI is to
+Architecture-maintenance issue #39 records the observed workflow: Mux UI is to
 begin its reference-token baseline with the accepted Tale-derived inventory,
 rather than preserve the ten provisional reference IDs introduced for the
-original fixed button slice. The product outcome is one Core-owned baseline of
+original fixed button slice. The product outcome is one Mux UI-owned baseline of
 296 reference tokens: 295 exact Tale-derived additions plus the byte-identical
 `reference.duration.fast` reuse. It uses the 27 pinned Tale `neutral-warm`
-values as Core's sole neutral family under generic
+values as Mux UI's sole neutral family under generic
 `reference.color.neutral-*` IDs. The Tale `neutral-cool`, `neutral-slate`,
 `neutral-gray`, `neutral-onyx`, and `neutral-mono` families are deferred and
-create no Core token. Products may represent those or other neutral families
-only as private reference values before assigning a permitted Core semantic or
+create no Mux UI token. Products may represent those or other neutral families
+only as private reference values before assigning a permitted Mux UI semantic or
 component role.
 
 The pinned Tale error, warning, and success values remain admitted under the
-closed Core reference families `reference.color.error-*`,
+closed Mux UI reference families `reference.color.error-*`,
 `reference.color.warning-*`, and `reference.color.success-*`. This is the sole
 system-status reference-family exception admitted by architecture. Components
 and binding recipes never consume those references directly; target compilers
 may emit their typed values, and semantic/component aliases remain the only
-Core component-consumption path. Only the existing
+Mux UI component-consumption path. Only the existing
 `semantic.feedback.invalid` role uses a status family in this correction,
 aliasing `reference.color.error-60`. Warning/success semantic roles remain
 unadmitted until a separately observed slice requires them.
@@ -955,9 +957,9 @@ Decision annex `decisions/0004-tale-only-reference-baseline-annex.json` is the
 sole machine-readable owner of the reset and classification delta. It preserves
 decision 0003's pinned Tale source, 41 groups, query/page grammar,
 target-profile vocabulary, Phase A/B history, and unchanged schema facts. It
-supersedes the exact entry, Core-token, release-inventory, Phase C migration,
+supersedes the exact entry, Mux UI-token, release-inventory, Phase C migration,
 rollback, summary, and version pointers listed in its `supersession` member.
-The delta binds the exact 135 neutral-family deferrals, 60 Core-ID and meaning
+The delta binds the exact 135 neutral-family deferrals, 60 Mux UI-ID and meaning
 renames, all 11 semantic mappings, and every target disposition; no tool or
 model selects those decisions heuristically.
 
@@ -968,19 +970,19 @@ annex owns the exact 67 affected immutable Scope IDs, including
 `SCOPE-API-NAMING`, and the reason each cross-cutting proof owner is included.
 Every affected item remains `committed`; there is no commitment transition and
 no new Scope ID. Architecture is amended narrowly for the three designated
-system-status reference families. All other canonical facts remain Core-owned
+system-status reference families. All other canonical facts remain Mux UI-owned
 once, Tale is pinned input and provenance rather than a runtime or release
 dependency, token layers remain acyclic, components still consume no reference
 token directly, and platform transforms remain typed and CSS-independent on
 native.
 
 The exact version effects are Product Scope `2.0.0` to `3.0.0`, token contract
-`1.1.0` to `2.0.0`, catalog `0.2.0` to `1.0.0`, `@core-ui/catalog` `0.2.0` to
-`1.0.0`, `@core-ui/tokens` `0.1.0` to `1.0.0`, `@core-ui/tooling` `0.2.0` to
-`0.3.0`, and the private experimental `@core-ui/web` and `@core-ui/react`
+`1.1.0` to `2.0.0`, catalog `0.2.0` to `1.0.0`, `@muxui/catalog` `0.2.0` to
+`1.0.0`, `@muxui/tokens` `0.1.0` to `1.0.0`, `@muxui/tooling` `0.2.0` to
+`0.3.0`, and the private experimental `@muxui/web` and `@muxui/react`
 packages from `0.0.0` to `1.0.0`. Query API `2.0.0`, token-source schema
 `2.1.0`, command-registry schema `1.0.0`, catalog-package schema v2, and
-`@core-ui/schema` `0.2.0` remain unchanged. `@core-ui/react-native` does not
+`@muxui/schema` `0.2.0` remain unchanged. `@muxui/react-native` does not
 yet exist, so it has no current package transition; its future compatibility
 must bind token contract `^2.0.0`. Web and React compatibility must likewise
 bind `^2.0.0`. These are implementation and compatibility identities, not a
@@ -988,11 +990,11 @@ package-publication claim.
 
 Release removals are exactly the ten IDs in the annex. Each has explicit
 replacement or no-replacement guidance, and no compatibility alias preserves
-the removed public name. Release additions are the annex-derived exact 295 Core
+the removed public name. Release additions are the annex-derived exact 295 Mux UI
 reference-token IDs; `reference.duration.fast` is reused byte-for-byte,
 including its reduced-motion mode. Five neutral families account for 135 former
 decision-0003 additions that are now deferred. Sixty retained Tale references
-receive final Core names: 27 `neutral-warm` values become
+receive final Mux UI names: 27 `neutral-warm` values become
 `reference.color.neutral-*`; the 33 Tale status values become
 `reference.color.error-*`, `reference.color.warning-*`, and
 `reference.color.success-*`. The eleven semantic IDs and five component IDs are
@@ -1049,12 +1051,12 @@ remain historical; automation never infers milestone acceptance.
 
 Architecture-maintenance issue #39 records the observed naming defect and the
 designated human decision. The accepted Tale-only reference baseline is the
-complete Core UI default theme, but its current canonical path and artifact ID
+complete Mux UI default theme, but its current canonical path and artifact ID
 still describe the original Button-only G1.0 proof slice. Decision
-`core-ui:decision:0005` replaces only that misleading current identity:
+`muxui:decision:0005` replaces only that misleading current identity:
 
 - `catalog/tokens/button-minimum.json` becomes `catalog/tokens/default-theme.json`;
-- `core:token:button-minimum` becomes `core:token:default-theme`.
+- `muxui:token:button-minimum` becomes `muxui:token:default-theme`.
 
 This is a major scope change from `3.0.0` to `4.0.0` because a committed public
 catalog artifact identity is removed and replaced. It changes no Scope ID or
@@ -1068,11 +1070,11 @@ override policy, crosswalk entry, group, target disposition, requirement
 membership, query grammar, schema fact, or renderer behavior. The final
 contract remains 312 tokens: 296 reference, 11 semantic, and five component.
 Token contract `2.0.0`, query API `2.0.0`, token-source schema `2.1.0`, and
-`@core-ui/schema` `0.2.0` remain unchanged.
+`@muxui/schema` `0.2.0` remain unchanged.
 
-Catalog and `@core-ui/catalog` move from `1.0.0` to `2.0.0`;
-`@core-ui/tokens` moves from `1.0.0` to `2.0.0`; `@core-ui/tooling` moves from
-`0.3.0` to `1.0.0`; `@core-ui/web` and `@core-ui/react` move from `1.0.0` to
+Catalog and `@muxui/catalog` move from `1.0.0` to `2.0.0`;
+`@muxui/tokens` moves from `1.0.0` to `2.0.0`; `@muxui/tooling` moves from
+`0.3.0` to `1.0.0`; `@muxui/web` and `@muxui/react` move from `1.0.0` to
 `1.0.1` for compatibility/provenance identity only. No package is published.
 The renderer public CSS, React surface, native typed values, and token-contract
 ranges remain unchanged.
@@ -1082,15 +1084,15 @@ private unpublished candidate packages and catalogs. It has never entered a
 release, so the stable-release deprecation notice window is not activated.
 The major change packet still supplies replacement guidance, exact migration
 and rollback, current-catalog denial, and retained historical retrieval. The
-corrected current catalog returns `CORE_ARTIFACT_NOT_FOUND` for
-`core:token:button-minimum`; it does not retain a current compatibility alias.
+corrected current catalog returns `MUXUI_ARTIFACT_NOT_FOUND` for
+`muxui:token:button-minimum`; it does not retain a current compatibility alias.
 Exact historical catalogs and evidence keep the old artifact ID and path
 byte-for-byte and remain selectable only through their retained
 package/version/digest tuples. Query-version negotiation never selects token
 history.
 
 The exact current installed-local tuple is tooling `1.0.0`, catalog package and
-catalog `2.0.0`, token source `core:token:default-theme`, token contract
+catalog `2.0.0`, token source `muxui:token:default-theme`, token contract
 `2.0.0`, query API `2.0.0`, and supported query requests `1.1.0`, `1.2.0`, and
 `2.0.0`. The sole accepted current-tooling historical positive tuple is tooling
 `1.0.0` selecting retained catalog package/catalog `0.2.0`, token contract
@@ -1101,7 +1103,7 @@ and catalog source revision
 The installed-local resolver retains the accepted declaration, integrity,
 ambiguity, query-version, and compatibility failure precedence.
 
-`@core-ui/tokens` owns one closed path/ID migration module. It accepts only the
+`@muxui/tokens` owns one closed path/ID migration module. It accepts only the
 exact decision-0004 current source bytes/digest at the old path with the new
 path absent, or the exact corrected source at the new path with the old path
 absent. Write, check, dry-run, repeated-write, rollback, and repeated-rollback
@@ -1164,7 +1166,7 @@ Phase-A terminal chains, but no accepted owner was assigned to those successors.
 Architecture requires those stale terminal manifests to fail closed; a status,
 name, path, or pending-replacement bypass is prohibited.
 
-Decision `core-ui:decision:0006` is the sole machine-readable owner of the
+Decision `muxui:decision:0006` is the sole machine-readable owner of the
 correction. It defines two append-only generations. Before the authority PR may
 merge, one zero-record authority-stage root continues all twenty exact
 decision-0005 terminal certificates at the authority source commit. After the
@@ -1252,7 +1254,7 @@ authority or evidence acceptance.
 Issue #54 records the observed workflow: repeated broad verification, packet
 reconstruction, review redispatch, disclosure handling, and invalidation
 dominated bounded renderer-proof tasks after G1.1. Decision
-`core-ui:decision:0007` admits the exact plan
+`muxui:decision:0007` admits the exact plan
 `sha256:b8ca578a368e9010133f76beb16a1499262c85b18e699a791d0715d40001f4c9`
 only as the private adjacent repository control defined by Architecture and the
 roadmap. The reviewed source commit `3026adc082861cb5f096193b8c2ca384d368aac1`
@@ -1293,7 +1295,7 @@ candidate at SHA-256
 The observed workflow was that simultaneous multi-platform component delivery
 and repeated per-component proof/authorization consumed more time than
 implementation and prevented React breadth. The accepted outcome is a coherent
-React-first public library while preserving Core ownership, platform honesty,
+React-first public library while preserving Mux UI ownership, platform honesty,
 claim-proportionate proof, and separately activated secondary renderers.
 
 #### Exact transition ledger
@@ -1313,7 +1315,7 @@ claim-proportionate proof, and separately activated secondary renderers.
 | `SCOPE-SYSTEM-NATIVE` | `committed` → `deferred`; existing evidence remains audit history. |
 | `SCOPE-SYSTEM-CURRICULUM`, `SCOPE-SYSTEM-PROOF`, `SCOPE-SYSTEM-VALIDATE-SOURCE`, `SCOPE-SYSTEM-AGENT-BASELINE` | Remain `committed`, applying at R1 to React-enabled records/surfaces; later tracks extend them. |
 | `SCOPE-SYSTEM-MCP-PROBE` | Remains `committed` but moves to Productization and does not block R1 publication. |
-| `SCOPE-PLATFORM-WEB-REACT` | Remains `committed`, becomes primary, and no longer depends on shared `@core-ui/web` styles. |
+| `SCOPE-PLATFORM-WEB-REACT` | Remains `committed`, becomes primary, and no longer depends on shared `@muxui/web` styles. |
 | `SCOPE-PLATFORM-WEB-HTML`, `SCOPE-PLATFORM-NATIVE-RN`, `SCOPE-PROFILE-IOS`, `SCOPE-PROFILE-ANDROID`, `SCOPE-PROFILE-RNW` | `committed` → `deferred` secondary activation; this product state does not rewrite binding strategy, lifecycle, or availability. |
 | `SCOPE-API-NAMING`, `SCOPE-API-DEFAULTS`, `SCOPE-API-BINDING`, `SCOPE-API-COMPOSITION`, `SCOPE-API-WEB-HOOKS`, `SCOPE-API-REACT-ERGONOMICS`, `SCOPE-API-PASSTHROUGH`, `SCOPE-API-ESCAPE-HATCH`, `SCOPE-API-RUNTIME-OWNERSHIP`, `SCOPE-API-A11Y`, `SCOPE-API-DEPRECATION` | Remain `committed` at R1 under concept/`web.react`/React-source ownership. |
 | `SCOPE-API-NATIVE-ERGONOMICS` | `committed` → `deferred` until N1. |
@@ -1341,47 +1343,47 @@ claim-proportionate proof, and separately activated secondary renderers.
 
 #### New immutable Scope IDs
 
-Every record below is owned by Core UI Product Scope. Removal or replacement
+Every record below is owned by Mux UI Product Scope. Removal or replacement
 requires a major scope amendment that preserves this ID and historical
 releases. Existing evidence/privacy/integrity rules apply, with no consumer
 context captured by default.
 
 | Scope ID | State | Outcome and boundary | Platform/package | Roadmap/evidence | Activation and exclusions |
 | --- | --- | --- | --- | --- | --- |
-| `SCOPE-OUTCOME-REACT-PRIMARY` | `committed` | Consumer installs the React prerelease and uses Core-owned experimental React bindings with generated package guidance; R1 exit. | `web.react`; `@core-ui/react` | R1.0–R1 exit; `E-R1.*` | Accepted 5.0.0, exact baselines/tranches, npm authorization; no CLI/catalog product, stable, secondary renderer, or equivalence. |
+| `SCOPE-OUTCOME-REACT-PRIMARY` | `committed` | Consumer installs the React prerelease and uses Mux UI-owned experimental React bindings with generated package guidance; R1 exit. | `web.react`; `@muxui/react` | R1.0–R1 exit; `E-R1.*` | Accepted 5.0.0, exact baselines/tranches, npm authorization; no CLI/catalog product, stable, secondary renderer, or equivalence. |
 | `SCOPE-OUTCOME-MULTIPLATFORM-SECONDARY` | `deferred` | Framework-free/native consumers later receive platform-correct adaptations from the renderer-neutral semantic system. | `web.html`, native RN/iOS/Android/RNW | W1/N1/X1 | R1 exit, demand, accepted lock, explicit activation; never blocks or inherits React. |
-| `SCOPE-SYSTEM-REACT` | `committed` | Standalone React substrate, CSS/runtime ownership, React Aria baseline, and tranche delivery. | `web.react`; `@core-ui/react` | R1.0 and every R1 tranche | Exact baseline; no secondary implementation or canonical inventory ownership. |
-| `SCOPE-SYSTEM-WEB-HTML-SECONDARY` | `deferred` | Future framework-free binding/package system. | `web.html`; `@core-ui/web` | W1.0 and W1 tranches | R1 exit, demand, accepted lock/activation; no React dependency or automatic API equivalence. |
-| `SCOPE-REACT-BREADTH-001` | `committed` | Disposition-complete Core React coverage of the 53-family fixed inventory from the pinned React Aria component surface. | `web.react`; `@core-ui/react` | R1.1–R1.5; `E-R1.5-01…06` | Fixed family table, immutable Stage 1 snapshot, and R1.0 baseline; not a raw count/export shortcut. |
-| `SCOPE-COMP-BUTTON-REACT` | `committed` | React Button action, pending, disabled, name, and first complete React addition path. | `web.react`; `@core-ui/react` | R1.0/R1.1 | Fixed family allocation and baseline; no secondary counterpart or stable claim. |
-| `SCOPE-COMP-TEXTFIELD-REACT` | `committed` | React TextField value, validation, label, description, error, and form relations. | `web.react`; `@core-ui/react` | R1.2 `E-R1.2-01…04` | Fixed family allocation and baseline; no secondary binding claim. |
-| `SCOPE-COMP-SWITCH-REACT` | `committed` | React Switch state, group, and control semantics. | `web.react`; `@core-ui/react` | R1.2 `E-R1.2-01…04` | Fixed family allocation and baseline; no secondary binding claim. |
+| `SCOPE-SYSTEM-REACT` | `committed` | Standalone React substrate, CSS/runtime ownership, React Aria baseline, and tranche delivery. | `web.react`; `@muxui/react` | R1.0 and every R1 tranche | Exact baseline; no secondary implementation or canonical inventory ownership. |
+| `SCOPE-SYSTEM-WEB-HTML-SECONDARY` | `deferred` | Future framework-free binding/package system. | `web.html`; `@muxui/web` | W1.0 and W1 tranches | R1 exit, demand, accepted lock/activation; no React dependency or automatic API equivalence. |
+| `SCOPE-REACT-BREADTH-001` | `committed` | Disposition-complete Mux UI React coverage of the 53-family fixed inventory from the pinned React Aria component surface. | `web.react`; `@muxui/react` | R1.1–R1.5; `E-R1.5-01…06` | Fixed family table, immutable Stage 1 snapshot, and R1.0 baseline; not a raw count/export shortcut. |
+| `SCOPE-COMP-BUTTON-REACT` | `committed` | React Button action, pending, disabled, name, and first complete React addition path. | `web.react`; `@muxui/react` | R1.0/R1.1 | Fixed family allocation and baseline; no secondary counterpart or stable claim. |
+| `SCOPE-COMP-TEXTFIELD-REACT` | `committed` | React TextField value, validation, label, description, error, and form relations. | `web.react`; `@muxui/react` | R1.2 `E-R1.2-01…04` | Fixed family allocation and baseline; no secondary binding claim. |
+| `SCOPE-COMP-SWITCH-REACT` | `committed` | React Switch state, group, and control semantics. | `web.react`; `@muxui/react` | R1.2 `E-R1.2-01…04` | Fixed family allocation and baseline; no secondary binding claim. |
 | `SCOPE-PATTERN-FORM-REACT` | `committed` | React Form composition, validation, submission, and deterministic examples. | `web.react`; React package/examples | R1.2 `E-R1.2-01…04` | Fixed family allocation/component prerequisites; no planner or native composition claim. |
-| `SCOPE-COMP-SELECT-REACT` | `committed` | React Select selection, focus, keyboard, and form contract. | `web.react`; `@core-ui/react` | R1.3 `E-R1.3-01…05` | Fixed family allocation/baseline and required manual proof; no native picker/equivalence claim. |
-| `SCOPE-COMP-TABS-REACT` | `committed` | React Tabs orientation, focus/selection, and panel relations. | `web.react`; `@core-ui/react` | R1.3 `E-R1.3-01…05` | Fixed family allocation/baseline/risk proof; no native disposition claim. |
-| `SCOPE-COMP-DIALOG-REACT` | `committed` | React Dialog overlay, focus, dismissal, effects, and accessibility. | `web.react`; `@core-ui/react` | R1.4 `E-R1.4-01…06` | Fixed family allocation/baseline and required manual/AT proof before export; no native equivalence. |
-| `SCOPE-COMP-TOAST-REACT` | `committed` | React Toast host, ordering, timing, announcements, teardown, and concurrency. | `web.react`; `@core-ui/react` | R1.4 `E-R1.4-01…06` | Fixed family allocation/baseline and required manual/AT proof before export; no native equivalence. |
-| `SCOPE-PRODUCT-REACT-PRERELEASE` | `committed` | Publish exact React alpha/RC tarball and manifest under `next`. | Public npm `@core-ui/react` | R1 tranche releases; `E-R1-EXIT-01…04` | Namespace control, tarball/provenance/checks, explicit publish authorization; no stable/catalog/tooling/secondary package. |
-| `SCOPE-SURFACE-REACT-PACKAGE-GUIDANCE` | `committed` | Generated version-bound README, API, export/component, styling, and compatibility guidance inside the tarball. | `@core-ui/react` | R1.0 package fixture and every tranche | Exact canonical/binding/package identities; no query/history/dense/MCP/authoring and never canonical. |
+| `SCOPE-COMP-SELECT-REACT` | `committed` | React Select selection, focus, keyboard, and form contract. | `web.react`; `@muxui/react` | R1.3 `E-R1.3-01…05` | Fixed family allocation/baseline and required manual proof; no native picker/equivalence claim. |
+| `SCOPE-COMP-TABS-REACT` | `committed` | React Tabs orientation, focus/selection, and panel relations. | `web.react`; `@muxui/react` | R1.3 `E-R1.3-01…05` | Fixed family allocation/baseline/risk proof; no native disposition claim. |
+| `SCOPE-COMP-DIALOG-REACT` | `committed` | React Dialog overlay, focus, dismissal, effects, and accessibility. | `web.react`; `@muxui/react` | R1.4 `E-R1.4-01…06` | Fixed family allocation/baseline and required manual/AT proof before export; no native equivalence. |
+| `SCOPE-COMP-TOAST-REACT` | `committed` | React Toast host, ordering, timing, announcements, teardown, and concurrency. | `web.react`; `@muxui/react` | R1.4 `E-R1.4-01…06` | Fixed family allocation/baseline and required manual/AT proof before export; no native equivalence. |
+| `SCOPE-PRODUCT-REACT-PRERELEASE` | `committed` | Publish exact React alpha/RC tarball and manifest under `next`. | Public npm `@muxui/react` | R1 tranche releases; `E-R1-EXIT-01…04` | Namespace control, tarball/provenance/checks, explicit publish authorization; no stable/catalog/tooling/secondary package. |
+| `SCOPE-SURFACE-REACT-PACKAGE-GUIDANCE` | `committed` | Generated version-bound README, API, export/component, styling, and compatibility guidance inside the tarball. | `@muxui/react` | R1.0 package fixture and every tranche | Exact canonical/binding/package identities; no query/history/dense/MCP/authoring and never canonical. |
 | `SCOPE-METRIC-REACT-COVERAGE` | `committed` | Pinned-upstream disposition coverage plus exported React contract/proof coverage by risk. | R1 | R1.5 evidence policy | Snapshot/threshold fixed before measurement; raw count alone cannot pass. |
 
 #### Ownership, package, proof, and release effect
 
 The canonical component record owns renderer-neutral identity, intent, states,
 anatomy, portable obligations, tokens, artifact lifecycle, risk, and
-alternatives. The `web.react` binding spec owns the Core React DOM/API/types,
+alternatives. The `web.react` binding spec owns the Mux UI React DOM/API/types,
 observable behavior, accessibility, events, slots, styling hooks, defaults,
 binding lifecycle/strategy, validation profile, canonical-example relations,
-platform-safety declarations, and compatibility promises. `@core-ui/react`
+platform-safety declarations, and compatibility promises. `@muxui/react`
 source owns React/CSS implementation, SSR/hydration, effects, host refinements,
 and runtime/effect lifecycle. Executable example code remains owned by its
 canonical example source.
 
-The approved R1 target graph is exactly `@core-ui/react@0.1.0-alpha.N` with
+The approved R1 target graph is exactly `@muxui/react@0.1.0-alpha.N` with
 direct internal runtime dependencies `react-aria-components@1.20.0`,
 `@internationalized/date@3.12.3`, and `lucide-react@1.37.0`; React peer
 `>=19.2.0 <20`, and React DOM peer `>=19.2.0 <20`. The date dependency is
-limited to Core value adapters in `DateField`, `DatePicker`, `DateRangePicker`,
+limited to Mux UI value adapters in `DateField`, `DatePicker`, `DateRangePicker`,
 `TimeField`, `Calendar`, and `RangeCalendar`; it exposes no upstream public
 contract. The Lucide dependency has npm integrity
 `sha512-LPsB4rD1TD6wZu1djKOf9vUnS1jTNaHbolXebXDgiTdb6jeA1agIJhJsIybCmjKmQClcOaal1o1OaiYahEftyQ==`,
@@ -1390,7 +1392,7 @@ limited to existing R1 `DatePicker`/`DateRangePicker` calendar triggers,
 `Calendar`/`RangeCalendar` previous/next, `ComboBox`/`Select` and `Tree`
 chevrons, `SearchField` clear, `NumberField` plus/minus, `Checkbox`
 check/indeterminate, `TagGroup` remove, and `Dialog`/`Toast` close. There is no
-Core workspace runtime edge or `@core-ui/web` dependency. Private Core
+Mux UI workspace runtime edge or `@muxui/web` dependency. Private Mux UI
 packages may generate tarball contents but do not become runtime dependencies;
 Lucide exports, types, names, props, paths, or Icon API/catalog/package are
 not public.
@@ -1407,7 +1409,7 @@ graph, styling/runtime ownership, SSR/hydration, catalog/compiler,
 accessibility harness, compatibility profile, and packed-consumer contracts
 remain bound to the accepted baseline digest.
 
-React prerelease eligibility adds only exact `@core-ui/react` alpha/RC versions
+React prerelease eligibility adds only exact `@muxui/react` alpha/RC versions
 under `next` and tarball-local generated guidance. It removes framework-free
 web, native/RNW, cross-platform comparison/equivalence, public catalog/tooling/
 CLI/search/history/MCP, stable lifecycle, and `latest` from the R1 boundary.
@@ -1442,8 +1444,8 @@ tranche delta; native dependencies remain later per-component N1 decisions.
 ### Tale React styling donor clarification (`5.0.1`)
 
 Andrew / `ndrewtran` approved the semantic choice on 2026-08-16 that every
-admitted Core React component starts from the applicable styling in the exact
-pinned Tale UI snapshot, while Core owns every resulting selector, token
+admitted Mux UI React component starts from the applicable styling in the exact
+pinned Tale UI snapshot, while Mux UI owns every resulting selector, token
 mapping, CSS rule, public hook, package surface, compatibility promise, and
 release claim. Decision 0010 amendment 02 records the exact donor identity,
 private-playground boundary, deferred Scale disposition, and Andrew /
@@ -1459,7 +1461,7 @@ for the existing React package boundary, not a dependency or new public API.
 This is a patch clarification from `5.0.0` to `5.0.1`. It changes no Scope ID,
 commitment, product outcome, platform, package, public surface, release
 boundary, non-goal, artifact kind, durable relation, or compatibility promise.
-It adds no Tale or Core runtime/build dependency and no automatic donor sync.
+It adds no Tale or Mux UI runtime/build dependency and no automatic donor sync.
 
 Affected IDs retain their exact states: `SCOPE-SYSTEM-REACT`,
 `SCOPE-REACT-BREADTH-001`, `SCOPE-PKG-REACT`,
@@ -1534,6 +1536,11 @@ If any statement becomes false, stop the affected scope item, retain the
 failure evidence, and correct the earliest authoritative document or source.
 ## Product Scope 6.0.0
 
+The following Product Scope 6.0.x amendment record is retained as historical
+authority. Its references to Decision 0011, the 6.0.x versions, and the
+reset-specific Project reconciliation describe the accepted pre-rename state;
+Product Scope 7.0.0 and Decision 0012 now govern the current Mux UI identity.
+
 Product Scope advances from `5.0.1` to `6.0.0` because this amendment changes
 the committed React breadth from disposition-complete coverage with permitted
 exclusions to all 53 exact family outcomes by React `0.1`.
@@ -1547,7 +1554,7 @@ existing exact outcome IDs are reused without renaming or repurposing:
 - `Form` -> `SCOPE-PATTERN-FORM-REACT`;
 - `Select` -> `SCOPE-COMP-SELECT-REACT`;
 - `Tabs` -> `SCOPE-COMP-TABS-REACT`;
-- upstream `Modal`, whose Core public family is `Dialog`, ->
+- upstream `Modal`, whose Mux UI public family is `Dialog`, ->
   `SCOPE-COMP-DIALOG-REACT`; and
 - `Toast` -> `SCOPE-COMP-TOAST-REACT`.
 
@@ -1555,7 +1562,7 @@ The following table is the complete immutable 53-family Scope registry for
 this decision. `new` means Product Scope 6.0.0 adds the ID; `existing` means
 the exact previously committed ID is retained.
 
-| Upstream family | Core public family | Immutable Scope ID | ID treatment | Tranche |
+| Upstream family | Mux UI public family | Immutable Scope ID | ID treatment | Tranche |
 | --- | --- | --- | --- | --- |
 | `Autocomplete` | `Autocomplete` | `SCOPE-COMP-AUTOCOMPLETE-REACT` | new | R1.2 |
 | `Breadcrumbs` | `Breadcrumbs` | `SCOPE-COMP-BREADCRUMBS-REACT` | new | R1.1 |
@@ -1611,9 +1618,9 @@ the exact previously committed ID is retained.
 | `Tree` | `Tree` | `SCOPE-COMP-TREE-REACT` | new | R1.3 |
 | `Virtualizer` | `Virtualizer` | `SCOPE-COMP-VIRTUALIZER-REACT` | new | R1.3 |
 
-Each row is `committed`; its package/platform is `@core-ui/react` / `web.react`;
+Each row is `committed`; its package/platform is `@muxui/react` / `web.react`;
 its activation uses the fixed 53-family table, immutable Stage 1/R1.0
-baseline, Core-owned contract, applicable Tale donor disposition,
+baseline, Mux UI-owned contract, applicable Tale donor disposition,
 risk-selected deterministic and manual proof, and the unchanged React
 prerelease release boundary. No row commits
 a React Aria public name, raw helper/type export, secondary renderer,
@@ -1623,7 +1630,7 @@ The existing `SCOPE-REACT-BREADTH-001` outcome is recorded in the accepted
 6.0.0 authority as
 disposition-complete applicable coverage with permitted exclusions to complete
 delivery of all 53 exact snapshot families. `SCOPE-METRIC-REACT-COVERAGE`
-measures exact 53-of-53 Core contract/export/proof closure plus complete raw
+measures exact 53-of-53 Mux UI contract/export/proof closure plus complete raw
 disposition and cannot be satisfied by upstream name or raw export count.
 Other existing Product Scope commitments, deferred items, admitted items,
 packages, platforms, surfaces, release boundaries, and non-goals retain their
@@ -1671,7 +1678,7 @@ authorize repository, Git, Project, package, publication, or release mutations.
 
 It does not rewrite historical evidence or reuse historical Scope IDs for new
 outcomes. It does not allow a count-only completion claim. It does not permit
-an upstream or Tale contract to replace a Core-owned public contract.
+an upstream or Tale contract to replace a Mux UI-owned public contract.
 
 ## Acceptance effect
 
@@ -1684,24 +1691,24 @@ and the final R1-exit PR merge remain separate authorization boundaries.
 
 Product Scope advances from `6.0.2` to `6.0.3` as a patch clarification for
 the accepted Decision 0011 amendment 01. It records one direct internal
-runtime dependency of `@core-ui/react`: `@internationalized/date@3.12.3`, used
-only by Core value adapters in exactly `DateField`, `DatePicker`,
+runtime dependency of `@muxui/react`: `@internationalized/date@3.12.3`, used
+only by Mux UI value adapters in exactly `DateField`, `DatePicker`,
 `DateRangePicker`, `TimeField`, `Calendar`, and `RangeCalendar`.
 
 The approved exact React target package graph is:
 
 ```text
-@core-ui/react@0.1.0-alpha.N
+@muxui/react@0.1.0-alpha.N
 ├── dependency: react-aria-components@1.20.0
-├── dependency: @internationalized/date@3.12.3 (direct internal runtime; Core value adapters only in DateField, DatePicker, DateRangePicker, TimeField, Calendar, RangeCalendar)
+├── dependency: @internationalized/date@3.12.3 (direct internal runtime; Mux UI value adapters only in DateField, DatePicker, DateRangePicker, TimeField, Calendar, RangeCalendar)
 ├── peer: react >=19.2.0 <20
 └── peer: react-dom >=19.2.0 <20
 ```
 
 `@internationalized/date@3.12.3` is already the single resolved `3.12.3`
 instance in the pinned `react-aria-components@1.20.0` closure, so its direct
-declaration adds no installed package or version. Core public contracts remain
-ISO dates `YYYY-MM-DD`, local times `HH:mm[:ss[.fraction]]`, and Core-owned
+declaration adds no installed package or version. Mux UI public contracts remain
+ISO dates `YYYY-MM-DD`, local times `HH:mm[:ss[.fraction]]`, and Mux UI-owned
 `{start,end}` ranges. No `@internationalized/date` or React Aria public type,
 value, import path, export, lifecycle, or ownership path leaks through the
 package; this dependency is internal and replaceable only.
@@ -1721,7 +1728,7 @@ clarification does not authorize a Project write.
 Product Scope advances from `6.0.3` to `6.0.4` as a patch clarification for
 Decision 0011 amendment 02. Andrew approved `lucide-react` as an internal
 replaceable dependency and then approved the recommended exact pin
-`lucide-react@1.37.0`. The exact direct runtime dependency of `@core-ui/react`
+`lucide-react@1.37.0`. The exact direct runtime dependency of `@muxui/react`
 has npm integrity
 `sha512-LPsB4rD1TD6wZu1djKOf9vUnS1jTNaHbolXebXDgiTdb6jeA1agIJhJsIybCmjKmQClcOaal1o1OaiYahEftyQ==`,
 ISC license with its Feather-derived MIT notice, and React peer compatibility
@@ -1732,7 +1739,7 @@ only. The allowed boundary is: `DatePicker`/`DateRangePicker` calendar
 triggers; `Calendar`/`RangeCalendar` previous/next; `ComboBox`/`Select` and
 `Tree` chevrons; `SearchField` clear; `NumberField` plus/minus; `Checkbox`
 check/indeterminate; `TagGroup` remove; and `Dialog`/`Toast` close. Breadcrumb
-separators remain text, and no Search icon is added. Core owns all public
+separators remain text, and no Search icon is added. Mux UI owns all public
 contracts. No Lucide export, type, name, prop, or import path is public; no
 public Icon API, icon catalog, or icon package is added; no component or new
 decorative affordance is added.
@@ -1751,9 +1758,9 @@ platform, package, proof, and package-guidance records, retain their existing
 states and boundaries. `SCOPE-COMP-BREADCRUMBS-REACT` is not affected; its
 separators remain text. No other scope item changes.
 
-Core-owned labels, roles, states, relationships, keyboard behavior, and focus
+Mux UI-owned labels, roles, states, relationships, keyboard behavior, and focus
 remain the accessibility contract. These icons are decorative and
-non-focusable unless an existing Core binding explicitly requires another
+non-focusable unless an existing Mux UI binding explicitly requires another
 semantic; an icon never supplies an undocumented accessible name. The package
 license proof must retain both the Lucide ISC notice and the Feather-derived
 MIT notice.

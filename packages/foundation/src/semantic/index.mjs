@@ -1,7 +1,7 @@
 const INTENTS = new Set(['action', 'field', 'selection', 'overlay', 'form']);
 
 export function assertSemanticIntent(value) {
-  if (!INTENTS.has(value)) throw new TypeError(`CORE_SEMANTIC_INTENT_INVALID: ${value}`);
+  if (!INTENTS.has(value)) throw new TypeError(`MUXUI_SEMANTIC_INTENT_INVALID: ${value}`);
   return value;
 }
 

@@ -73,9 +73,9 @@ function fields({ onText, onNumber, onSearch, onDate, onTime, onRange, onSwitch,
   );
 }
 
-test('R1.2 fields preserve Core labels, errors, SSR, hydration, and state callbacks', async () => {
+test('R1.2 fields preserve MuxUI labels, errors, SSR, hydration, and state callbacks', async () => {
   const server = renderToString(fields());
-  for (const marker of ['core-text-field', 'core-number-field', 'core-search-field', 'core-autocomplete', 'core-checkbox-group', 'core-switch', 'core-date-field', 'core-date-picker', 'core-date-range-picker', 'core-time-field', 'core-form']) assert.match(server, new RegExp(marker));
+  for (const marker of ['muxui-text-field', 'muxui-number-field', 'muxui-search-field', 'muxui-autocomplete', 'muxui-checkbox-group', 'muxui-switch', 'muxui-date-field', 'muxui-date-picker', 'muxui-date-range-picker', 'muxui-time-field', 'muxui-form']) assert.match(server, new RegExp(marker));
   assert.match(server, /Display name/u);
   assert.match(server, /Name is required/u);
   const dom = new JSDOM(`<!doctype html><div id="root">${server}</div>`);
@@ -85,11 +85,11 @@ test('R1.2 fields preserve Core labels, errors, SSR, hydration, and state callba
     await act(async () => { root = hydrateRoot(document.querySelector('#root'), fields()); });
     assert.equal(document.querySelectorAll('label').length >= 7, true);
     assert.equal(document.querySelector('[data-invalid]') !== null, true);
-    assert.equal(document.querySelector('.core-switch input')?.checked, false);
-    assert.equal(document.querySelector('.core-switch-field')?.getAttribute('data-invalid'), 'true');
-    assert.match(document.querySelector('.core-switch-field')?.textContent ?? '', /Apply changes.*Choose a setting/u);
-    assert.equal(document.querySelector('.core-search-clear svg')?.getAttribute('aria-hidden'), 'true');
-    assert.equal(document.querySelector('.core-search-clear svg')?.getAttribute('focusable'), 'false');
+    assert.equal(document.querySelector('.muxui-switch input')?.checked, false);
+    assert.equal(document.querySelector('.muxui-switch-field')?.getAttribute('data-invalid'), 'true');
+    assert.match(document.querySelector('.muxui-switch-field')?.textContent ?? '', /Apply changes.*Choose a setting/u);
+    assert.equal(document.querySelector('.muxui-search-clear svg')?.getAttribute('aria-hidden'), 'true');
+    assert.equal(document.querySelector('.muxui-search-clear svg')?.getAttribute('focusable'), 'false');
     await act(async () => root.unmount());
   } finally {
     restore();
@@ -102,26 +102,26 @@ test('SearchField keeps its clear action in the input control grid with supporti
     label: 'Search',
     description: 'Find a result',
     errorMessage: 'No result found',
-    defaultValue: 'Core',
+    defaultValue: 'MuxUI',
     invalid: true,
   }));
   const dom = new JSDOM(`<!doctype html><div id="root">${markup}</div>`);
-  const control = dom.window.document.querySelector('.core-search-control');
+  const control = dom.window.document.querySelector('.muxui-search-control');
   assert.ok(control);
   assert.equal(control.querySelector('input')?.parentElement, control);
-  const clear = control.querySelector('.core-search-clear');
+  const clear = control.querySelector('.muxui-search-clear');
   assert.equal(clear?.parentElement, control);
   assert.equal(clear?.querySelector('svg')?.getAttribute('aria-hidden'), 'true');
   assert.equal(clear?.querySelector('svg')?.getAttribute('focusable'), 'false');
   assert.equal(clear?.getAttribute('aria-label'), 'Clear search');
-  assert.match(dom.window.document.querySelector('.core-search-field')?.textContent ?? '', /Find a result.*No result found/u);
+  assert.match(dom.window.document.querySelector('.muxui-search-field')?.textContent ?? '', /Find a result.*No result found/u);
   const css = await readFile(new URL('../generated/styles.css', import.meta.url), 'utf8');
-  assert.match(css, /\.core-search-control\s*\{[^}]*grid-template-columns:\s*minmax\(0, 1fr\)/u);
-  assert.match(css, /\.core-search-control \.core-field-input\s*\{[^}]*padding-inline-end:/u);
+  assert.match(css, /\.muxui-search-control\s*\{[^}]*grid-template-columns:\s*minmax\(0, 1fr\)/u);
+  assert.match(css, /\.muxui-search-control \.muxui-field-input\s*\{[^}]*padding-inline-end:/u);
   dom.window.close();
 });
 
-test('SearchField clear control keeps RAC clearing and the Core callback', async () => {
+test('SearchField clear control keeps RAC clearing and the MuxUI callback', async () => {
   const dom = new JSDOM('<!doctype html><div id="root"></div>');
   const env = installDom(dom);
   const host = document.querySelector('#root');
@@ -130,12 +130,12 @@ test('SearchField clear control keeps RAC clearing and the Core callback', async
   try {
     await act(async () => root.render(React.createElement(SearchField, {
       label: 'Search',
-      defaultValue: 'Core',
+      defaultValue: 'MuxUI',
       onClear: () => { clears += 1; },
     })));
-    const input = host.querySelector('.core-search-field input');
-    const clear = host.querySelector('.core-search-clear');
-    assert.equal(input.value, 'Core');
+    const input = host.querySelector('.muxui-search-field input');
+    const clear = host.querySelector('.muxui-search-clear');
+    assert.equal(input.value, 'MuxUI');
     await act(async () => clear.click());
     assert.equal(input.value, '');
     assert.equal(clears, 1);
@@ -148,33 +148,33 @@ test('SearchField clear control keeps RAC clearing and the Core callback', async
 
 test('ComboBox input transitions stay scoped away from TextField', async () => {
   const css = await readFile(new URL('../generated/styles.css', import.meta.url), 'utf8');
-  const comboStart = css.indexOf('/* Core component source: combobox.css */');
-  const comboEnd = css.indexOf('/* Core component source: grid-list.css */', comboStart);
-  const textStart = css.indexOf('/* Core component source: text-field.css */');
-  const textEnd = css.indexOf('/* Core component source: time-field.css */', textStart);
+  const comboStart = css.indexOf('/* MuxUI component source: combobox.css */');
+  const comboEnd = css.indexOf('/* MuxUI component source: grid-list.css */', comboStart);
+  const textStart = css.indexOf('/* MuxUI component source: text-field.css */');
+  const textEnd = css.indexOf('/* MuxUI component source: time-field.css */', textStart);
   assert.ok(comboStart >= 0 && comboEnd > comboStart);
   assert.ok(textStart >= 0 && textEnd > textStart);
   const comboCss = css.slice(comboStart, comboEnd);
   const textCss = css.slice(textStart, textEnd);
-  assert.match(comboCss, /\.core-combo-box \.core-field-input\s*\{[\s\S]*transition:/u);
-  assert.match(comboCss, /\.core-combo-box \.core-field-input:hover\s*\{/u);
-  assert.doesNotMatch(comboCss, /^\.core-field-input\s*\{/mu);
-  assert.match(textCss, /\.core-field-input\s*\{[\s\S]*background-color 0\.15s ease/u);
+  assert.match(comboCss, /\.muxui-combo-box \.muxui-field-input\s*\{[\s\S]*transition:/u);
+  assert.match(comboCss, /\.muxui-combo-box \.muxui-field-input:hover\s*\{/u);
+  assert.doesNotMatch(comboCss, /^\.muxui-field-input\s*\{/mu);
+  assert.match(textCss, /\.muxui-field-input\s*\{[\s\S]*background-color 0\.15s ease/u);
 });
 
 test('NumberField steppers expose stable direction hooks and Tale edge geometry', async () => {
   const markup = renderToString(React.createElement(NumberField, { label: 'Quantity', defaultValue: 2 }));
   const dom = new JSDOM(`<!doctype html><div id="root">${markup}</div>`);
-  const decrement = dom.window.document.querySelector('.core-number-stepper-decrement');
-  const increment = dom.window.document.querySelector('.core-number-stepper-increment');
+  const decrement = dom.window.document.querySelector('.muxui-number-stepper-decrement');
+  const increment = dom.window.document.querySelector('.muxui-number-stepper-increment');
   assert.ok(decrement);
   assert.ok(increment);
   assert.equal(decrement.getAttribute('slot'), 'decrement');
   assert.equal(increment.getAttribute('slot'), 'increment');
   const css = await readFile(new URL('../generated/styles.css', import.meta.url), 'utf8');
-  assert.match(css, /:where\([\s\S]*\.core-number-stepper[\s\S]*border:\s*1px solid transparent;[\s\S]*appearance:\s*none;/u);
-  assert.match(css, /\.core-number-stepper-decrement\s*\{[^}]*border-right:\s*1px solid #d5d2d1;[^}]*border-radius:\s*10px 0 0 10px/u);
-  assert.match(css, /\.core-number-stepper-increment\s*\{[^}]*border-left:\s*1px solid #d5d2d1;[^}]*border-radius:\s*0 10px 10px 0/u);
+  assert.match(css, /:where\([\s\S]*\.muxui-number-stepper[\s\S]*border:\s*1px solid transparent;[\s\S]*appearance:\s*none;/u);
+  assert.match(css, /\.muxui-number-stepper-decrement\s*\{[^}]*border-right:\s*1px solid #d5d2d1;[^}]*border-radius:\s*10px 0 0 10px/u);
+  assert.match(css, /\.muxui-number-stepper-increment\s*\{[^}]*border-left:\s*1px solid #d5d2d1;[^}]*border-radius:\s*0 10px 10px 0/u);
   dom.window.close();
 });
 
@@ -196,10 +196,10 @@ test('R1.2 form controls support controlled callbacks, keyboard-compatible input
       onSubmit: (event) => { event.preventDefault(); submits.push([event.type, new dom.window.FormData(event.currentTarget).get('startTime')]); },
       onReset: (event) => { event.preventDefault(); resets.push(event.type); },
     })));
-    const textInput = host.querySelector('.core-text-field input');
+    const textInput = host.querySelector('.muxui-text-field input');
     textInput.value = 'Updated';
     await act(async () => textInput.dispatchEvent(new Event('input', { bubbles: true })));
-    await act(async () => host.querySelector('.core-switch input').click());
+    await act(async () => host.querySelector('.muxui-switch input').click());
     await act(async () => host.querySelector('form').dispatchEvent(new Event('submit', { bubbles: true, cancelable: true })));
     await act(async () => host.querySelector('form').dispatchEvent(new Event('reset', { bubbles: true, cancelable: true })));
     assert.equal(changes.some(([kind, value]) => kind === 'switch' && value === true), true);
@@ -214,8 +214,8 @@ test('R1.2 form controls support controlled callbacks, keyboard-compatible input
 
 test('R1.2 public date contracts are ISO strings and do not expose upstream date types', async () => {
   const source = await import('node:fs/promises').then(({ readFile }) => readFile(new URL('../generated/index.d.ts', import.meta.url), 'utf8'));
-  assert.match(source, /CoreDateValue = string/u);
-  assert.match(source, /CoreDateRange/u);
+  assert.match(source, /MuxUIDateValue = string/u);
+  assert.match(source, /MuxUIDateRange/u);
   assert.doesNotMatch(source, /react-stately|@internationalized\/date|export type DateValue|export type TimeValue/u);
 });
 
@@ -229,13 +229,13 @@ test('DateRangePicker popover uses range calendar cells for contiguous selection
       label: 'Trip',
       defaultValue: { start: '2026-08-26', end: '2026-09-01' },
     })));
-    const trigger = document.querySelector('.core-date-range-picker .core-date-trigger');
+    const trigger = document.querySelector('.muxui-date-range-picker .muxui-date-trigger');
     assert.ok(trigger);
     await act(async () => trigger.click());
-    const popup = document.body.querySelector('.core-date-popover');
+    const popup = document.body.querySelector('.muxui-date-popover');
     assert.ok(popup);
-    assert.ok(popup.querySelector('.core-range-calendar-cell'));
-    assert.equal(popup.querySelector('.core-calendar-cell'), null);
+    assert.ok(popup.querySelector('.muxui-range-calendar-cell'));
+    assert.equal(popup.querySelector('.muxui-calendar-cell'), null);
   } finally {
     await act(async () => root?.unmount());
     restore();
@@ -249,14 +249,14 @@ test('date picker calendar triggers retain Tale icon wrapper sizing and scoped p
     React.createElement(DateRangePicker, { label: 'Trip', defaultValue: { start: '2026-08-26', end: '2026-09-01' } }),
   ));
   const dom = new JSDOM(`<!doctype html>${markup}`);
-  for (const selector of ['.core-date-picker .core-date-trigger', '.core-date-range-picker .core-date-trigger']) {
+  for (const selector of ['.muxui-date-picker .muxui-date-trigger', '.muxui-date-range-picker .muxui-date-trigger']) {
     const trigger = dom.window.document.querySelector(selector);
     assert.ok(trigger);
     assert.equal(trigger.getAttribute('aria-label'), 'Open calendar');
     const icon = trigger.querySelector('svg');
     assert.ok(icon);
-    assert.equal(icon.classList.contains('core-icon'), true);
-    assert.equal(icon.classList.contains('core-icon--sm'), true);
+    assert.equal(icon.classList.contains('muxui-icon'), true);
+    assert.equal(icon.classList.contains('muxui-icon--sm'), true);
     assert.equal(icon.getAttribute('width'), '24');
     assert.equal(icon.getAttribute('height'), '24');
     assert.equal(icon.getAttribute('aria-hidden'), 'true');
@@ -280,18 +280,18 @@ test('date picker calendar triggers retain Tale icon wrapper sizing and scoped p
   dom.window.close();
 
   const styles = await readFile(new URL('../src/styles/base.css', import.meta.url), 'utf8');
-  assert.match(styles, /\.core-icon\s*\{[^}]*width:\s*1\.5rem;[^}]*height:\s*1\.5rem;/u);
-  assert.match(styles, /\.core-icon--sm\s*\{[^}]*width:\s*1rem;[^}]*height:\s*1rem;/u);
-  assert.match(styles, /\.core-date-popover\s*\{[^}]*border:\s*1px solid var\(--core-semantic-surface-hover\)/u);
-  assert.match(styles, /\[data-core-color-scheme='dark'\] \.core-date-popover\s*\{[^}]*border-color:\s*var\(--core-reference-color-neutral-96\)/u);
+  assert.match(styles, /\.muxui-icon\s*\{[^}]*width:\s*1\.5rem;[^}]*height:\s*1\.5rem;/u);
+  assert.match(styles, /\.muxui-icon--sm\s*\{[^}]*width:\s*1rem;[^}]*height:\s*1rem;/u);
+  assert.match(styles, /\.muxui-date-popover\s*\{[^}]*border:\s*1px solid var\(--muxui-semantic-surface-hover\)/u);
+  assert.match(styles, /\[data-muxui-color-scheme='dark'\] \.muxui-date-popover\s*\{[^}]*border-color:\s*var\(--muxui-reference-color-neutral-96\)/u);
 });
 
 test('read-only date segments retain accessible semantic contrast', async () => {
   const styles = await readFile(new URL('../generated/styles.css', import.meta.url), 'utf8');
-  assert.match(styles, /\.core-date-segment\[data-readonly\]\s*\{[^}]*color:\s*#79716b;/u);
-  assert.match(styles, /\[data-core-color-scheme='dark'\] \.core-date-segment\[data-readonly\]:not\(\[data-type='literal'\]\)\s*\{[^}]*color:\s*#918b86;/u);
-  const foreground = styles.match(/--core-semantic-content-default:\s*(#[0-9a-f]{6});/iu)?.[1];
-  const background = styles.match(/--core-semantic-surface-canvas:\s*(#[0-9a-f]{6});/iu)?.[1];
+  assert.match(styles, /\.muxui-date-segment\[data-readonly\]\s*\{[^}]*color:\s*#79716b;/u);
+  assert.match(styles, /\[data-muxui-color-scheme='dark'\] \.muxui-date-segment\[data-readonly\]:not\(\[data-type='literal'\]\)\s*\{[^}]*color:\s*#918b86;/u);
+  const foreground = styles.match(/--muxui-semantic-content-default:\s*(#[0-9a-f]{6});/iu)?.[1];
+  const background = styles.match(/--muxui-semantic-surface-canvas:\s*(#[0-9a-f]{6});/iu)?.[1];
   assert.ok(foreground);
   assert.ok(background);
   assert.ok(contrastRatio(foreground, background) >= 4.5, `${foreground} on ${background} lacks 4.5:1 contrast`);
@@ -342,11 +342,11 @@ test('R1.2 date ranges own paired FormData names and reset to their default', as
         segment.dispatchEvent(new InputEvent('input', { bubbles: true, inputType: 'insertText', data: nextValue }));
       });
     };
-    const firstRangeDay = form.querySelector('.core-date-range-picker [data-type="day"]');
-    const firstTimeHour = form.querySelector('.core-time-field [data-type="hour"]');
-    const secondRangeDay = secondForm.querySelector('.core-date-range-picker [data-type="day"]');
-    const unnamedRangeDay = unnamedForm.querySelector('.core-date-range-picker [data-type="day"]');
-    const unnamedTimeHour = unnamedForm.querySelector('.core-time-field [data-type="hour"]');
+    const firstRangeDay = form.querySelector('.muxui-date-range-picker [data-type="day"]');
+    const firstTimeHour = form.querySelector('.muxui-time-field [data-type="hour"]');
+    const secondRangeDay = secondForm.querySelector('.muxui-date-range-picker [data-type="day"]');
+    const unnamedRangeDay = unnamedForm.querySelector('.muxui-date-range-picker [data-type="day"]');
+    const unnamedTimeHour = unnamedForm.querySelector('.muxui-time-field [data-type="hour"]');
     await editSegment(firstRangeDay, '27');
     await editSegment(firstTimeHour, '10');
     await editSegment(secondRangeDay, '2');
@@ -376,7 +376,7 @@ test('R1.2 date ranges own paired FormData names and reset to their default', as
     await act(async () => root.render(React.createElement(Form, null,
       React.createElement(DateRangePicker, { label: 'Trip', startName: 'tripStart', endName: 'tripEnd', value: { start: '2026-10-01', end: '2026-10-05' } }))));
     const controlledForm = host.querySelector('form');
-    const controlledStartDay = controlledForm.querySelector('.core-date-range-picker [data-type="day"]');
+    const controlledStartDay = controlledForm.querySelector('.muxui-date-range-picker [data-type="day"]');
     await editSegment(controlledStartDay, '2');
     await act(async () => controlledForm.reset());
     const controlled = new dom.window.FormData(controlledForm);
@@ -419,8 +419,8 @@ test('R1.2 temporal fields honor cancelled form resets and reset normally', asyn
         segment.dispatchEvent(new InputEvent('input', { bubbles: true, inputType: 'insertText', data: nextValue }));
       });
     };
-    const cancelledRangeDay = cancelledForm.querySelector('.core-date-range-picker [data-type="day"]');
-    const cancelledTimeHour = cancelledForm.querySelector('.core-time-field [data-type="hour"]');
+    const cancelledRangeDay = cancelledForm.querySelector('.muxui-date-range-picker [data-type="day"]');
+    const cancelledTimeHour = cancelledForm.querySelector('.muxui-time-field [data-type="hour"]');
     await editSegment(cancelledRangeDay, '27');
     await editSegment(cancelledTimeHour, '10');
     assert.equal(new dom.window.FormData(cancelledForm).get('cancelStart'), '2026-08-27');
@@ -433,8 +433,8 @@ test('R1.2 temporal fields honor cancelled form resets and reset normally', asyn
     assert.equal(cancelledRangeDay.textContent, '27');
     assert.equal(cancelledTimeHour.textContent, '10');
 
-    const normalRangeDay = normalForm.querySelector('.core-date-range-picker [data-type="day"]');
-    const normalTimeHour = normalForm.querySelector('.core-time-field [data-type="hour"]');
+    const normalRangeDay = normalForm.querySelector('.muxui-date-range-picker [data-type="day"]');
+    const normalTimeHour = normalForm.querySelector('.muxui-time-field [data-type="hour"]');
     await editSegment(normalRangeDay, '27');
     await editSegment(normalTimeHour, '10');
     await act(async () => normalForm.reset());
@@ -449,7 +449,7 @@ test('R1.2 temporal fields honor cancelled form resets and reset normally', asyn
   }
 });
 
-test('R1.2 autocomplete is closed on SSR, filters while focused, and selects Core items', async () => {
+test('R1.2 autocomplete is closed on SSR, filters while focused, and selects MuxUI items', async () => {
   const server = renderToString(React.createElement(Autocomplete, { label: 'City', items: ['Melbourne', 'Sydney'] }));
   assert.match(server, /type="search"/u);
   assert.doesNotMatch(server, /role="combobox"/u);
@@ -463,12 +463,12 @@ test('R1.2 autocomplete is closed on SSR, filters while focused, and selects Cor
     const host = document.querySelector('#root');
     root = createRoot(host);
     await act(async () => root.render(React.createElement(Autocomplete, { label: 'City', items: ['Melbourne', 'Sydney'], onSelect: (item) => { selected.push(item?.value); selectedItems.push(item); } })));
-    const input = host.querySelector('.core-autocomplete input');
+    const input = host.querySelector('.muxui-autocomplete input');
     await act(async () => input.focus());
-    assert.equal(host.querySelector('.core-autocomplete-list').hidden, false);
+    assert.equal(host.querySelector('.muxui-autocomplete-list').hidden, false);
     await act(async () => root.render(React.createElement(Autocomplete, { label: 'City', value: 'Mel', items: ['Melbourne', 'Sydney'], onSelect: (item) => { selected.push(item?.value); selectedItems.push(item); } })));
-    assert.equal(host.querySelectorAll('.core-autocomplete-option').length, 1);
-    await act(async () => host.querySelector('.core-autocomplete-option').click());
+    assert.equal(host.querySelectorAll('.muxui-autocomplete-option').length, 1);
+    await act(async () => host.querySelector('.muxui-autocomplete-option').click());
     assert.deepEqual(selected, ['Melbourne']);
     assert.deepEqual(selectedItems, [{ id: 'Melbourne', label: 'Melbourne', value: 'Melbourne' }]);
     await act(async () => root.unmount());
@@ -490,7 +490,7 @@ test('R1.2 autocomplete preserves rich labels for SSR and text filtering', async
     const host = document.querySelector('#root');
     root = createRoot(host);
     await act(async () => root.render(React.createElement(Autocomplete, { label: 'City', value: 'Mel', items })));
-    const option = host.querySelector('.core-autocomplete-option');
+    const option = host.querySelector('.muxui-autocomplete-option');
     assert.ok(option);
     assert.match(option.innerHTML, /<strong>Melbourne<\/strong>/u);
   } finally {
@@ -518,16 +518,16 @@ test('R1.2 readonly autocomplete only permits viewing suggestions', async () => 
       onSelect: (item) => selected.push(item),
     });
     await act(async () => root.render(renderAutocomplete()));
-    const input = host.querySelector('.core-autocomplete input');
+    const input = host.querySelector('.muxui-autocomplete input');
     await act(async () => input.focus());
     assert.equal(input.readOnly, true);
-    assert.equal(host.querySelector('.core-autocomplete-list').hidden, false);
+    assert.equal(host.querySelector('.muxui-autocomplete-list').hidden, false);
     input.value = 'Sydney';
     await act(async () => input.dispatchEvent(new Event('input', { bubbles: true })));
-    await act(async () => host.querySelector('.core-autocomplete-option').click());
+    await act(async () => host.querySelector('.muxui-autocomplete-option').click());
     assert.deepEqual(changes, []);
     assert.deepEqual(selected, []);
-    assert.equal(host.querySelector('.core-autocomplete-list').hidden, false);
+    assert.equal(host.querySelector('.muxui-autocomplete-list').hidden, false);
     await act(async () => root.render(renderAutocomplete()));
     assert.equal(input.value, 'Melbourne');
     await act(async () => root.unmount());

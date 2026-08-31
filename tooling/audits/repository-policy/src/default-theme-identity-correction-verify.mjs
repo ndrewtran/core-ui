@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 import { access, readFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
-import { canonicalJson, parseJsonStrict } from '@core-ui/schema';
+import { canonicalJson, parseJsonStrict } from '@muxui/schema';
 import { sha256 } from './policy.mjs';
 import { verifyPhaseCApplicabilityTopologyCorrection } from './phase-c-applicability-topology-correction-verify.mjs';
 

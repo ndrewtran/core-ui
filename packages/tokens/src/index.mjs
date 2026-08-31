@@ -1,4 +1,4 @@
-import { canonicalDigest, canonicalJson, validateFamily } from '@core-ui/schema';
+import { canonicalDigest, canonicalJson, validateFamily } from '@muxui/schema';
 
 const LAYER_RANK = Object.freeze({ reference: 0, semantic: 1, component: 2 });
 const UNIT_BY_TYPE = Object.freeze({
@@ -50,35 +50,35 @@ function assertCrosswalkTargets(entry, path) {
   const values = CROSSWALK_TARGETS.map((profile) => entry.targets[profile]);
   if (['adopt', 'adapt'].includes(entry.disposition)) {
     if (!values.includes('direct') || values.some((value) => !['direct', 'deferred'].includes(value))) {
-      fail('CORE_TOKEN_CROSSWALK_TARGET_INVALID', `${path} admitted targets require direct output and no rejection`, { path });
+      fail('MUXUI_TOKEN_CROSSWALK_TARGET_INVALID', `${path} admitted targets require direct output and no rejection`, { path });
     }
   } else if (entry.disposition === 'defer' && values.some((value) => value !== 'deferred')) {
-    fail('CORE_TOKEN_CROSSWALK_TARGET_INVALID', `${path} deferred targets must all be deferred`, { path });
+    fail('MUXUI_TOKEN_CROSSWALK_TARGET_INVALID', `${path} deferred targets must all be deferred`, { path });
   } else if (entry.disposition === 'reject' && values.some((value) => value !== 'rejected')) {
-    fail('CORE_TOKEN_CROSSWALK_TARGET_INVALID', `${path} rejected targets must all be rejected`, { path });
+    fail('MUXUI_TOKEN_CROSSWALK_TARGET_INVALID', `${path} rejected targets must all be rejected`, { path });
   }
 }
 
 function assertGroupSemantics(group, path) {
   const ordinals = group.members.map(({ ordinal }) => ordinal);
   if (new Set(ordinals).size !== ordinals.length || ordinals.some((ordinal, index) => index > 0 && ordinal <= ordinals[index - 1])) {
-    fail('CORE_TOKEN_CROSSWALK_GROUP_INVALID', `${path} members must use unique ascending ordinals`, { path });
+    fail('MUXUI_TOKEN_CROSSWALK_GROUP_INVALID', `${path} members must use unique ascending ordinals`, { path });
   }
   for (const [index, member] of group.members.entries()) {
     const memberPath = `${path}/members/${index}`;
     if (group.relationship === 'equivalent-source-values') {
       if (member.role !== 'equivalent-source-value' || member.mode !== undefined) {
-        fail('CORE_TOKEN_CROSSWALK_GROUP_INVALID', `${memberPath} must be an unmoded equivalent source value`, { path: memberPath });
+        fail('MUXUI_TOKEN_CROSSWALK_GROUP_INVALID', `${memberPath} must be an unmoded equivalent source value`, { path: memberPath });
       }
     } else if (group.relationship === 'selector-variants') {
       if (!['base', 'web-responsive'].includes(member.role) || member.mode !== undefined) {
-        fail('CORE_TOKEN_CROSSWALK_GROUP_INVALID', `${memberPath} must be an unmoded selector variant`, { path: memberPath });
+        fail('MUXUI_TOKEN_CROSSWALK_GROUP_INVALID', `${memberPath} must be an unmoded selector variant`, { path: memberPath });
       }
     } else {
       const expectedMode = member.role === 'default' ? 'motion.full'
         : ['reduced-system', 'reduced-explicit'].includes(member.role) ? 'motion.reduced' : null;
       if (member.mode !== expectedMode) {
-        fail('CORE_TOKEN_CROSSWALK_GROUP_INVALID', `${memberPath} has an invalid motion role/mode`, { path: memberPath });
+        fail('MUXUI_TOKEN_CROSSWALK_GROUP_INVALID', `${memberPath} has an invalid motion role/mode`, { path: memberPath });
       }
     }
   }
@@ -98,7 +98,7 @@ function assertBaselineSemantics(baseline, occurrences) {
     || baseline.uniqueCustomPropertyNames > baseline.customPropertyOccurrences
   ) {
     fail(
-      'CORE_TOKEN_CROSSWALK_BASELINE_INVALID',
+      'MUXUI_TOKEN_CROSSWALK_BASELINE_INVALID',
       'baseline counts must exactly describe the explicitly supplied occurrences',
       {
         expected: {
@@ -117,18 +117,18 @@ function assertRelationshipClosure(group, memberEntries, path) {
   if (group.relationship === 'equivalent-source-values') {
     const values = new Set(memberEntries.map(({ occurrence }) => occurrence.value));
     const dispositions = new Set(memberEntries.map(({ disposition }) => disposition));
-    const coreTokenIds = new Set(memberEntries.map(({ coreTokenId }) => coreTokenId ?? null));
-    if (values.size !== 1 || dispositions.size !== 1 || coreTokenIds.size !== 1) {
+    const muxuiTokenIds = new Set(memberEntries.map(({ muxuiTokenId }) => muxuiTokenId ?? null));
+    if (values.size !== 1 || dispositions.size !== 1 || muxuiTokenIds.size !== 1) {
       fail(
-        'CORE_TOKEN_CROSSWALK_GROUP_INVALID',
-        `${path} equivalent members must share value, disposition, and Core-token identity`,
+        'MUXUI_TOKEN_CROSSWALK_GROUP_INVALID',
+        `${path} equivalent members must share value, disposition, and MuxUI-token identity`,
         { path },
       );
     }
-    const coreTokenId = memberEntries[0].coreTokenId;
-    if ((coreTokenId === undefined) !== (group.coreTokenId === undefined)
-      || (coreTokenId !== undefined && group.coreTokenId !== coreTokenId)) {
-      fail('CORE_TOKEN_CROSSWALK_GROUP_INVALID', `${path} must bind its members' exact Core token`, { path });
+    const muxuiTokenId = memberEntries[0].muxuiTokenId;
+    if ((muxuiTokenId === undefined) !== (group.muxuiTokenId === undefined)
+      || (muxuiTokenId !== undefined && group.muxuiTokenId !== muxuiTokenId)) {
+      fail('MUXUI_TOKEN_CROSSWALK_GROUP_INVALID', `${path} must bind its members' exact Mux UI token`, { path });
     }
     return;
   }
@@ -139,14 +139,14 @@ function assertRelationshipClosure(group, memberEntries, path) {
       baseEntries.length !== 1
       || responsiveEntries.length < 1
       || !['adopt', 'adapt'].includes(baseEntries[0].disposition)
-      || baseEntries[0].coreTokenId === undefined
-      || group.coreTokenId !== baseEntries[0].coreTokenId
-      || responsiveEntries.some(({ disposition, coreTokenId }) => (
-        disposition !== 'defer' || coreTokenId !== undefined
+      || baseEntries[0].muxuiTokenId === undefined
+      || group.muxuiTokenId !== baseEntries[0].muxuiTokenId
+      || responsiveEntries.some(({ disposition, muxuiTokenId }) => (
+        disposition !== 'defer' || muxuiTokenId !== undefined
       ))
     ) {
       fail(
-        'CORE_TOKEN_CROSSWALK_GROUP_INVALID',
+        'MUXUI_TOKEN_CROSSWALK_GROUP_INVALID',
         `${path} requires one admitted base and one or more deferred responsive variants`,
         { path },
       );
@@ -157,13 +157,13 @@ function assertRelationshipClosure(group, memberEntries, path) {
   if (
     roles.length !== expectedRoles.length
     || expectedRoles.some((role) => roles.filter((candidate) => candidate === role).length !== 1)
-    || group.coreTokenId !== undefined
-    || memberEntries.some(({ disposition, coreTokenId }) => (
-      disposition !== 'defer' || coreTokenId !== undefined
+    || group.muxuiTokenId !== undefined
+    || memberEntries.some(({ disposition, muxuiTokenId }) => (
+      disposition !== 'defer' || muxuiTokenId !== undefined
     ))
   ) {
     fail(
-      'CORE_TOKEN_CROSSWALK_GROUP_INVALID',
+      'MUXUI_TOKEN_CROSSWALK_GROUP_INVALID',
       `${path} requires one deferred default and both deferred reduced-motion variants`,
       { path },
     );
@@ -175,12 +175,12 @@ export function validateSourceCrosswalk(source, { baselineOccurrences } = {}) {
   const crosswalk = source.sourceCrosswalk;
   if (crosswalk === undefined) {
     if (baselineOccurrences !== undefined) {
-      fail('CORE_TOKEN_CROSSWALK_BASELINE_INVALID', 'an omitted crosswalk cannot consume a baseline');
+      fail('MUXUI_TOKEN_CROSSWALK_BASELINE_INVALID', 'an omitted crosswalk cannot consume a baseline');
     }
     return Object.freeze({ status: 'absent', digest: null, crosswalk: null });
   }
   if (!Array.isArray(baselineOccurrences)) {
-    fail('CORE_TOKEN_CROSSWALK_BASELINE_INVALID', 'semantic validation requires explicit baseline occurrences');
+    fail('MUXUI_TOKEN_CROSSWALK_BASELINE_INVALID', 'semantic validation requires explicit baseline occurrences');
   }
   assertBaselineSemantics(crosswalk.baseline, baselineOccurrences);
   const entries = crosswalk.entries;
@@ -188,7 +188,7 @@ export function validateSourceCrosswalk(source, { baselineOccurrences } = {}) {
     baselineOccurrences.length !== crosswalk.baseline.declarationOccurrences
     || entries.length !== baselineOccurrences.length
   ) {
-    fail('CORE_TOKEN_CROSSWALK_COVERAGE_INVALID', 'crosswalk must cover the complete supplied baseline', {
+    fail('MUXUI_TOKEN_CROSSWALK_COVERAGE_INVALID', 'crosswalk must cover the complete supplied baseline', {
       baseline: baselineOccurrences.length,
       entries: entries.length,
     });
@@ -197,18 +197,18 @@ export function validateSourceCrosswalk(source, { baselineOccurrences } = {}) {
   for (const [index, entry] of entries.entries()) {
     const ordinal = entry.occurrence.ordinal;
     if (entryByOrdinal.has(ordinal) || ordinal !== index + 1) {
-      fail('CORE_TOKEN_CROSSWALK_COVERAGE_INVALID', 'entries must use each contiguous baseline ordinal exactly once', { ordinal, index });
+      fail('MUXUI_TOKEN_CROSSWALK_COVERAGE_INVALID', 'entries must use each contiguous baseline ordinal exactly once', { ordinal, index });
     }
     if (canonicalJson(entry.occurrence) !== canonicalJson(baselineOccurrences[index])) {
-      fail('CORE_TOKEN_CROSSWALK_BASELINE_INVALID', 'entry occurrence differs from the supplied baseline', { ordinal });
+      fail('MUXUI_TOKEN_CROSSWALK_BASELINE_INVALID', 'entry occurrence differs from the supplied baseline', { ordinal });
     }
     if (['adopt', 'adapt'].includes(entry.disposition)) {
-      const target = source.tokens[entry.coreTokenId];
+      const target = source.tokens[entry.muxuiTokenId];
       if (!target || target.layer !== 'reference') {
-        fail('CORE_TOKEN_CROSSWALK_TARGET_INVALID', `${entry.coreTokenId} must be an existing reference token`, { ordinal });
+        fail('MUXUI_TOKEN_CROSSWALK_TARGET_INVALID', `${entry.muxuiTokenId} must be an existing reference token`, { ordinal });
       }
-    } else if (Object.hasOwn(entry, 'coreTokenId')) {
-      fail('CORE_TOKEN_CROSSWALK_TARGET_INVALID', `${entry.disposition} cannot claim a Core token`, { ordinal });
+    } else if (Object.hasOwn(entry, 'muxuiTokenId')) {
+      fail('MUXUI_TOKEN_CROSSWALK_TARGET_INVALID', `${entry.disposition} cannot claim a Mux UI token`, { ordinal });
     }
     assertCrosswalkTargets(entry, `sourceCrosswalk/entries/${index}`);
     entryByOrdinal.set(ordinal, entry);
@@ -218,25 +218,25 @@ export function validateSourceCrosswalk(source, { baselineOccurrences } = {}) {
   for (const [index, group] of crosswalk.groups.entries()) {
     const path = `sourceCrosswalk/groups/${index}`;
     if (groupById.has(group.id)) {
-      fail('CORE_TOKEN_CROSSWALK_GROUP_INVALID', `${group.id} is duplicated`, { path });
+      fail('MUXUI_TOKEN_CROSSWALK_GROUP_INVALID', `${group.id} is duplicated`, { path });
     }
     if (index > 0 && group.id <= crosswalk.groups[index - 1].id) {
-      fail('CORE_TOKEN_CROSSWALK_GROUP_INVALID', 'groups must use strict bytewise ID order', { path });
+      fail('MUXUI_TOKEN_CROSSWALK_GROUP_INVALID', 'groups must use strict bytewise ID order', { path });
     }
     assertGroupSemantics(group, path);
     const memberEntries = [];
     for (const member of group.members) {
       const entry = entryByOrdinal.get(member.ordinal);
       if (!entry || entry.groupId !== group.id || groupedOrdinals.has(member.ordinal)) {
-        fail('CORE_TOKEN_CROSSWALK_GROUP_INVALID', `${group.id} membership is incomplete or duplicated`, { ordinal: member.ordinal });
+        fail('MUXUI_TOKEN_CROSSWALK_GROUP_INVALID', `${group.id} membership is incomplete or duplicated`, { ordinal: member.ordinal });
       }
       memberEntries.push(entry);
       if (
         group.relationship === 'equivalent-source-values'
-        && group.coreTokenId !== undefined
-        && entry.coreTokenId !== group.coreTokenId
+        && group.muxuiTokenId !== undefined
+        && entry.muxuiTokenId !== group.muxuiTokenId
       ) {
-        fail('CORE_TOKEN_CROSSWALK_GROUP_INVALID', `${group.id} Core token differs from its member`, { ordinal: member.ordinal });
+        fail('MUXUI_TOKEN_CROSSWALK_GROUP_INVALID', `${group.id} Mux UI token differs from its member`, { ordinal: member.ordinal });
       }
       groupedOrdinals.set(member.ordinal, group.id);
     }
@@ -245,24 +245,24 @@ export function validateSourceCrosswalk(source, { baselineOccurrences } = {}) {
   }
   for (const entry of entries) {
     if (entry.groupId !== undefined && groupedOrdinals.get(entry.occurrence.ordinal) !== entry.groupId) {
-      fail('CORE_TOKEN_CROSSWALK_GROUP_INVALID', `${entry.groupId} lacks the reciprocal group member`, { ordinal: entry.occurrence.ordinal });
+      fail('MUXUI_TOKEN_CROSSWALK_GROUP_INVALID', `${entry.groupId} lacks the reciprocal group member`, { ordinal: entry.occurrence.ordinal });
     }
   }
   const ordinalsByCoreToken = new Map();
   for (const entry of entries) {
-    if (entry.coreTokenId === undefined) continue;
-    const ordinals = ordinalsByCoreToken.get(entry.coreTokenId) ?? [];
+    if (entry.muxuiTokenId === undefined) continue;
+    const ordinals = ordinalsByCoreToken.get(entry.muxuiTokenId) ?? [];
     ordinals.push(entry.occurrence.ordinal);
-    ordinalsByCoreToken.set(entry.coreTokenId, ordinals);
+    ordinalsByCoreToken.set(entry.muxuiTokenId, ordinals);
   }
-  for (const [coreTokenId, ordinals] of ordinalsByCoreToken) {
+  for (const [muxuiTokenId, ordinals] of ordinalsByCoreToken) {
     if (ordinals.length < 2) continue;
     const groupIds = new Set(ordinals.map((ordinal) => entryByOrdinal.get(ordinal).groupId));
     if (groupIds.size !== 1 || groupIds.has(undefined) || !groupById.has([...groupIds][0])) {
       fail(
-        'CORE_TOKEN_CROSSWALK_GROUP_INVALID',
-        `${coreTokenId} repeated mappings require one explicit complete group`,
-        { coreTokenId, ordinals },
+        'MUXUI_TOKEN_CROSSWALK_GROUP_INVALID',
+        `${muxuiTokenId} repeated mappings require one explicit complete group`,
+        { muxuiTokenId, ordinals },
       );
     }
   }
@@ -276,13 +276,13 @@ export function validateSourceCrosswalk(source, { baselineOccurrences } = {}) {
 function validateLiteral(type, unit, value, path) {
   const expected = ['dimension', 'duration', 'number'].includes(type) ? 'number' : 'string';
   if (typeof value !== expected || (typeof value === 'number' && !Number.isFinite(value))) {
-    fail('CORE_TOKEN_TYPE_MISMATCH', `${path} must be a ${expected}`, { path, type, unit });
+    fail('MUXUI_TOKEN_TYPE_MISMATCH', `${path} must be a ${expected}`, { path, type, unit });
   }
   if (!UNIT_BY_TYPE[type]?.has(unit)) {
-    fail('CORE_TOKEN_UNIT_MISMATCH', `${path} has incompatible unit ${unit}`, { path, type, unit });
+    fail('MUXUI_TOKEN_UNIT_MISMATCH', `${path} has incompatible unit ${unit}`, { path, type, unit });
   }
   if (type === 'color' && !/^#[a-fA-F0-9]{6}(?:[a-fA-F0-9]{2})?$/.test(value)) {
-    fail('CORE_TOKEN_TYPE_MISMATCH', `${path} must be a six- or eight-digit hex color`, { path });
+    fail('MUXUI_TOKEN_TYPE_MISMATCH', `${path} must be a six- or eight-digit hex color`, { path });
   }
 }
 
@@ -300,7 +300,7 @@ function assertModes(source, modes) {
     const values = source.theme.modeAxes[axis];
     const value = modes?.[axis] ?? source.theme.defaultModes[axis];
     if (!values.includes(value)) {
-      fail('CORE_TOKEN_MODE_INVALID', `${axis}.${value} is not declared`, { axis, value });
+      fail('MUXUI_TOKEN_MODE_INVALID', `${axis}.${value} is not declared`, { axis, value });
     }
     selected[axis] = value;
   }
@@ -309,7 +309,7 @@ function assertModes(source, modes) {
 
 function assertThemeContract(source) {
   if (source.theme.runtimeSwitching !== 'unavailable') {
-    fail('CORE_THEME_RUNTIME_UNAVAILABLE', 'G1.0 permits static theme output only', {
+    fail('MUXUI_THEME_RUNTIME_UNAVAILABLE', 'G1.0 permits static theme output only', {
       runtimeSwitching: source.theme.runtimeSwitching,
     });
   }
@@ -317,30 +317,30 @@ function assertThemeContract(source) {
     const values = source.theme.modeAxes[axis];
     const defaultValue = source.theme.defaultModes[axis];
     if (!Array.isArray(values) || values.length === 0 || new Set(values).size !== values.length) {
-      fail('CORE_TOKEN_MODE_INVALID', `${axis} must declare unique values`, { axis });
+      fail('MUXUI_TOKEN_MODE_INVALID', `${axis} must declare unique values`, { axis });
     }
     if (!values.includes(defaultValue)) {
-      fail('CORE_TOKEN_MODE_INVALID', `${axis} default is not declared`, { axis, defaultValue });
+      fail('MUXUI_TOKEN_MODE_INVALID', `${axis} default is not declared`, { axis, defaultValue });
     }
   }
 }
 
 function normalizeOverrides(source, overrides = {}) {
   if (!isObject(overrides)) {
-    fail('CORE_TOKEN_OVERRIDE_UNAUTHORIZED', 'consumer overrides must be an object');
+    fail('MUXUI_TOKEN_OVERRIDE_UNAUTHORIZED', 'consumer overrides must be an object');
   }
   const normalized = {};
   for (const tokenId of Object.keys(overrides).sort(compareText)) {
     const definition = source.tokens[tokenId];
     if (!definition || definition.layer === 'reference' || definition.overridePolicy === 'fixed') {
-      fail('CORE_TOKEN_OVERRIDE_UNAUTHORIZED', `${tokenId} cannot be overridden`, { tokenId });
+      fail('MUXUI_TOKEN_OVERRIDE_UNAUTHORIZED', `${tokenId} cannot be overridden`, { tokenId });
     }
     const override = overrides[tokenId];
     if (!isObject(override) || Object.keys(override).some((key) => !['type', 'unit', 'value'].includes(key))) {
-      fail('CORE_TOKEN_OVERRIDE_UNAUTHORIZED', `${tokenId} override must be a typed literal`, { tokenId });
+      fail('MUXUI_TOKEN_OVERRIDE_UNAUTHORIZED', `${tokenId} override must be a typed literal`, { tokenId });
     }
     if (override.type !== definition.type || override.unit !== definition.unit) {
-      fail('CORE_TOKEN_TYPE_MISMATCH', `${tokenId} override changes type or unit`, { tokenId });
+      fail('MUXUI_TOKEN_TYPE_MISMATCH', `${tokenId} override changes type or unit`, { tokenId });
     }
     validateLiteral(override.type, override.unit, override.value, `overrides/${tokenId}`);
     normalized[tokenId] = structuredClone(override);
@@ -353,7 +353,7 @@ export function compileTokenGraph(source, options = {}) {
     !isObject(options)
     || Object.keys(options).some((key) => !['modes', 'overrides'].includes(key))
   ) {
-    fail('CORE_TOKEN_OPTIONS_INVALID', 'token compilation options must be closed', {
+    fail('MUXUI_TOKEN_OPTIONS_INVALID', 'token compilation options must be closed', {
       fields: isObject(options) ? Object.keys(options).sort(compareText) : [],
     });
   }
@@ -369,9 +369,9 @@ export function compileTokenGraph(source, options = {}) {
   function resolveToken(tokenId) {
     if (resolved.has(tokenId)) return resolved.get(tokenId);
     const definition = source.tokens[tokenId];
-    if (!definition) fail('CORE_TOKEN_ALIAS_MISSING', `${tokenId} does not exist`, { tokenId });
+    if (!definition) fail('MUXUI_TOKEN_ALIAS_MISSING', `${tokenId} does not exist`, { tokenId });
     if (visiting.includes(tokenId)) {
-      fail('CORE_TOKEN_ALIAS_CYCLE', `token alias cycle: ${[...visiting, tokenId].join(' -> ')}`, {
+      fail('MUXUI_TOKEN_ALIAS_CYCLE', `token alias cycle: ${[...visiting, tokenId].join(' -> ')}`, {
         cycle: [...visiting, tokenId],
       });
     }
@@ -397,15 +397,15 @@ export function compileTokenGraph(source, options = {}) {
     if (Object.hasOwn(branch, 'alias')) {
       const targetId = branch.alias;
       const target = source.tokens[targetId];
-      if (!target) fail('CORE_TOKEN_ALIAS_MISSING', `${tokenId} aliases missing ${targetId}`, { tokenId, targetId });
+      if (!target) fail('MUXUI_TOKEN_ALIAS_MISSING', `${tokenId} aliases missing ${targetId}`, { tokenId, targetId });
       if (LAYER_RANK[target.layer] > LAYER_RANK[definition.layer]) {
-        fail('CORE_TOKEN_LAYER_DIRECTION', `${tokenId} cannot alias forward to ${targetId}`, { tokenId, targetId });
+        fail('MUXUI_TOKEN_LAYER_DIRECTION', `${tokenId} cannot alias forward to ${targetId}`, { tokenId, targetId });
       }
       if (target.layer === definition.layer && definition.equivalence !== 'semantic-equivalence' && definition.equivalence !== 'deprecation-bridge') {
-        fail('CORE_TOKEN_LAYER_DIRECTION', `${tokenId} same-layer alias requires an explicit equivalence`, { tokenId, targetId });
+        fail('MUXUI_TOKEN_LAYER_DIRECTION', `${tokenId} same-layer alias requires an explicit equivalence`, { tokenId, targetId });
       }
       if (target.type !== definition.type || target.unit !== definition.unit) {
-        fail('CORE_TOKEN_TYPE_MISMATCH', `${tokenId} and ${targetId} have incompatible type or unit`, { tokenId, targetId });
+        fail('MUXUI_TOKEN_TYPE_MISMATCH', `${tokenId} and ${targetId} have incompatible type or unit`, { tokenId, targetId });
       }
       value = resolveToken(targetId).value;
       dependencies.set(tokenId, [targetId]);
@@ -456,7 +456,7 @@ function validateFallback(fallback, source, requirement, profile) {
   if (fallback === undefined) return undefined;
   if (!fallback.profiles.includes(profile)) return undefined;
   if (!fallback.evidenceIds?.length) {
-    fail('CORE_TOKEN_FALLBACK_UNPROVED', `${requirement.token} fallback lacks evidence`, {
+    fail('MUXUI_TOKEN_FALLBACK_UNPROVED', `${requirement.token} fallback lacks evidence`, {
       tokenId: requirement.token,
       profile,
     });
@@ -465,7 +465,7 @@ function validateFallback(fallback, source, requirement, profile) {
   if (fallback.kind === 'token') {
     const target = source.tokens[fallback.token];
     if (!target || target.layer === 'reference' || target.type !== definition.type || target.unit !== definition.unit) {
-      fail('CORE_TOKEN_FALLBACK_INVALID', `${requirement.token} fallback token is incompatible`, {
+      fail('MUXUI_TOKEN_FALLBACK_INVALID', `${requirement.token} fallback token is incompatible`, {
         tokenId: requirement.token,
         fallbackToken: fallback.token,
         profile,
@@ -473,7 +473,7 @@ function validateFallback(fallback, source, requirement, profile) {
     }
   } else {
     if (fallback.type !== definition.type || fallback.unit !== definition.unit) {
-      fail('CORE_TOKEN_FALLBACK_INVALID', `${requirement.token} fallback literal is incompatible`, {
+      fail('MUXUI_TOKEN_FALLBACK_INVALID', `${requirement.token} fallback literal is incompatible`, {
         tokenId: requirement.token,
         profile,
       });
@@ -484,9 +484,9 @@ function validateFallback(fallback, source, requirement, profile) {
 }
 
 export function compileTokenRequirementSet({ source, recipe, bindingId, profile, modes }) {
-  if (!PROFILE_IDS.has(profile)) fail('CORE_TOKEN_PROFILE_INVALID', `${profile} is not supported`, { profile });
+  if (!PROFILE_IDS.has(profile)) fail('MUXUI_TOKEN_PROFILE_INVALID', `${profile} is not supported`, { profile });
   if (!recipe || recipe.source !== source.id || !Array.isArray(recipe.requirements)) {
-    fail('CORE_TOKEN_RECIPE_INVALID', `${bindingId} must reference ${source.id}`, { bindingId, profile });
+    fail('MUXUI_TOKEN_RECIPE_INVALID', `${bindingId} must reference ${source.id}`, { bindingId, profile });
   }
   const graph = compileTokenGraph(source, { modes });
   const requirements = recipe.requirements
@@ -494,7 +494,7 @@ export function compileTokenRequirementSet({ source, recipe, bindingId, profile,
     .map((requirement) => {
       const definition = source.tokens[requirement.token];
       if (!definition || definition.layer === 'reference') {
-        fail('CORE_TOKEN_RECIPE_INVALID', `${bindingId} consumes invalid ${requirement.token}`, {
+        fail('MUXUI_TOKEN_RECIPE_INVALID', `${bindingId} consumes invalid ${requirement.token}`, {
           bindingId,
           profile,
           tokenId: requirement.token,
@@ -567,7 +567,7 @@ export function validateThemeForRequirementSet({ requirementSet, values }) {
         requirement.fallback.kind === 'token'
         && !Object.hasOwn(values, requirement.fallback.token)
       ) {
-        fail('CORE_TOKEN_REQUIRED_MISSING', `${requirement.fallback.token} fallback is missing`, {
+        fail('MUXUI_TOKEN_REQUIRED_MISSING', `${requirement.fallback.token} fallback is missing`, {
           bindingId: requirementSet.bindingId,
           fallbackToken: requirement.fallback.token,
           profile: requirementSet.profile,
@@ -588,7 +588,7 @@ export function validateThemeForRequirementSet({ requirementSet, values }) {
       );
       resolved[requirement.token] = fallbackValue;
       diagnostics.push(Object.freeze({
-        code: 'CORE_TOKEN_FALLBACK_USED',
+        code: 'MUXUI_TOKEN_FALLBACK_USED',
         bindingId: requirementSet.bindingId,
         profile: requirementSet.profile,
         token: requirement.token,
@@ -597,7 +597,7 @@ export function validateThemeForRequirementSet({ requirementSet, values }) {
       continue;
     }
     if (requirement.requirement === 'required') {
-      fail('CORE_TOKEN_REQUIRED_MISSING', `${requirement.token} is required`, {
+      fail('MUXUI_TOKEN_REQUIRED_MISSING', `${requirement.token} is required`, {
         bindingId: requirementSet.bindingId,
         profile: requirementSet.profile,
         tokenId: requirement.token,
@@ -612,7 +612,7 @@ function publicTokenEntries(graph) {
 }
 
 function cssName(tokenId) {
-  return `--core-${tokenId.replaceAll('.', '-')}`;
+  return `--muxui-${tokenId.replaceAll('.', '-')}`;
 }
 
 function cssValue(token) {
@@ -628,7 +628,7 @@ export function compileWebTheme(source, options = {}) {
     .join('\n');
   return Object.freeze({
     kind: 'web.css.static',
-    format: 'core-ui-web-theme-v1',
+    format: 'muxui-web-theme-v1',
     sourceId: graph.sourceId,
     sourceRevision: graph.sourceRevision,
     tokenContractVersion: graph.tokenContractVersion,
@@ -641,12 +641,12 @@ export function compileWebTheme(source, options = {}) {
 
 export function compileNativeTheme(source, { profile, ...options } = {}) {
   if (!['native.ios', 'native.android'].includes(profile)) {
-    fail('CORE_TOKEN_PROFILE_INVALID', `${profile} has no native transform`, { profile });
+    fail('MUXUI_TOKEN_PROFILE_INVALID', `${profile} has no native transform`, { profile });
   }
   const graph = compileTokenGraph(source, options);
   return Object.freeze({
     kind: 'native.theme.static',
-    format: 'core-ui-native-theme-v1',
+    format: 'muxui-native-theme-v1',
     profile,
     sourceId: graph.sourceId,
     sourceRevision: graph.sourceRevision,

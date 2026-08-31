@@ -1,2 +1,2 @@
-import { Select } from '@core-ui/react';
+import { Select } from '@muxui/react';
 export function BasicSelectExample() { return <Select label="City" items={['Melbourne', 'Sydney']} />; }

@@ -1,6 +1,6 @@
 // @generated-from: apps/react-storybook/src/generate-stories.mjs
-// @generated-content-sha256: sha256:ae9c14d8eb750e832eab74b05d5fc58db1b60a5256d28e66682a8e8ec05583fb
-import * as Core from '@core-ui/react';
+// @generated-content-sha256: sha256:66b63689bfbc84af1b9c0cf9fa2a134b239dff9f679d4129775f1916c374e92b
+import * as MuxUI from '@muxui/react';
 import { argTypesForBinding, createStory } from '../../src/storybook-factory.mjs';
 
 const binding = {
@@ -23,12 +23,12 @@ const binding = {
       "aria-label"
     ]
   },
-  "binding": "core:component:breadcrumbs#web.react",
+  "binding": "muxui:component:breadcrumbs#web.react",
   "export": "Breadcrumbs",
   "lifecycle": "experimental",
   "module": ".",
   "runtimeProfile": "web.react",
-  "selector": ".core-breadcrumbs",
+  "selector": ".muxui-breadcrumbs",
   "states": [
     "idle",
     "disabled",
@@ -39,8 +39,9 @@ const binding = {
 const record = { family: 'Breadcrumbs', tranche: 'R1.1', binding };
 
 export default {
-  title: 'Core React/R1.1/Breadcrumbs',
-  component: Core.Breadcrumbs,
+  title: 'Mux UI React/R1.1/Breadcrumbs',
+  id: 'muxui-react-r1-1-breadcrumbs',
+  component: MuxUI.Breadcrumbs,
   tags: ['autodocs'],
   parameters: {
     controls: {
@@ -48,7 +49,7 @@ export default {
     },
     docs: {
       description: {
-        component: 'Private development showcase for the Core-owned Breadcrumbs family.',
+        component: 'Private development showcase for the Mux UI-owned Breadcrumbs family.',
       },
     },
   },

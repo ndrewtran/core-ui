@@ -5,14 +5,14 @@ export const nativeProfiles = nativeProfileProjection.profiles;
 
 export function queryNativeProfile(profile) {
   const result = nativeProfiles[profile];
-  if (!result) throw new TypeError(`CORE_REACT_NATIVE_PROFILE_INVALID: ${profile}`);
+  if (!result) throw new TypeError(`MUXUI_REACT_NATIVE_PROFILE_INVALID: ${profile}`);
   return result;
 }
 
 export function assertNativeProfileSupported(profile) {
   const result = queryNativeProfile(profile);
   if (result.strategy === 'unsupported') {
-    throw new TypeError(`CORE_REACT_NATIVE_PROFILE_UNSUPPORTED: ${profile}`);
+    throw new TypeError(`MUXUI_REACT_NATIVE_PROFILE_UNSUPPORTED: ${profile}`);
   }
   return result;
 }

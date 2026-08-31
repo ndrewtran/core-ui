@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "id": "core:guide:disclosure-group-usage",
+  "id": "muxui:guide:disclosure-group-usage",
   "kind": "guide",
   "name": "DisclosureGroup usage",
   "summary": "Portable usage guidance for DisclosureGroup.",

@@ -1,14 +1,18 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { test } from 'node:test';
-import { catalogJson } from '@core-ui/catalog/bundle';
-import { assertG12PlatformSafetyFixture } from './profile.mjs';
+import { catalogJson } from '@muxui/catalog/bundle';
+import {
+  assertG12PlatformSafetyFixture,
+  projectCurrentNativeComponentForHistoricalFixture,
+} from './profile.mjs';
 
 const fixture = JSON.parse(await readFile(new URL('./platform-safety-native.json', import.meta.url), 'utf8'));
-const component = JSON.parse(catalogJson).artifacts.find(({ id }) => id === 'core:component:button');
+const component = JSON.parse(catalogJson).artifacts.find(({ id }) => id === 'muxui:component:button');
+const historicalComponent = projectCurrentNativeComponentForHistoricalFixture(component, fixture);
 
 test('G1.2 native safety fixture is an exact catalog-derived three-profile matrix', () => {
-  assert.doesNotThrow(() => assertG12PlatformSafetyFixture(fixture, component));
+  assert.doesNotThrow(() => assertG12PlatformSafetyFixture(fixture, historicalComponent));
 });
 
 for (const [name, mutate] of [
@@ -24,5 +28,5 @@ for (const [name, mutate] of [
 ]) test(`G1.2 native safety fixture rejects ${name}`, () => {
   const value = structuredClone(fixture);
   mutate(value);
-  assert.throws(() => assertG12PlatformSafetyFixture(value, component), /G12_FIXTURE_INVALID/u);
+  assert.throws(() => assertG12PlatformSafetyFixture(value, historicalComponent), /G12_FIXTURE_INVALID/u);
 });

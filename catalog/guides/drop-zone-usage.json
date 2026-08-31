@@ -1,1 +1,1 @@
-{"schemaVersion":"1.0.0","id":"core:guide:drop-zone-usage","kind":"guide","name":"DropZone usage","summary":"Portable usage guidance for DropZone.","lifecycle":"experimental","keywords":["drop-zone","files","react"],"platforms":["web.react"],"source":"catalog/guides/drop-zone-usage.md"}
+{"schemaVersion":"1.0.0","id":"muxui:guide:drop-zone-usage","kind":"guide","name":"DropZone usage","summary":"Portable usage guidance for DropZone.","lifecycle":"experimental","keywords":["drop-zone","files","react"],"platforms":["web.react"],"source":"catalog/guides/drop-zone-usage.md"}

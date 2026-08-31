@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "id": "core:component:meter",
+  "id": "muxui:component:meter",
   "kind": "component",
   "name": "Meter",
   "summary": "Displays a scalar measurement within a known range.",
@@ -64,7 +64,7 @@
         "Expose meter role, value range, value text, and accessible name"
       ],
       "tokenRecipe": {
-        "source": "core:token:default-theme",
+        "source": "muxui:token:default-theme",
         "requirements": [
           {
             "token": "semantic.control.radius",
@@ -144,7 +144,7 @@
         "Expose meter role, value range, value text, and accessible name"
       ],
       "tokenRecipe": {
-        "source": "core:token:default-theme",
+        "source": "muxui:token:default-theme",
         "requirements": [
           {
             "token": "semantic.control.radius",

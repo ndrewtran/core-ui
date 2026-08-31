@@ -1,9 +1,9 @@
 import { createHash } from 'node:crypto';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
-import { catalogJson } from '@core-ui/catalog/bundle';
-import { canonicalDigest, canonicalJson } from '@core-ui/schema';
-import { compileNativeTheme } from '@core-ui/tokens';
+import { catalogJson } from '@muxui/catalog/bundle';
+import { canonicalDigest, canonicalJson } from '@muxui/schema';
+import { compileNativeTheme } from '@muxui/tokens';
 import { selectReactNativeGenerationInputs } from './generation-inputs.mjs';
 
 const packageRoot = resolve(import.meta.dirname, '..');
@@ -13,7 +13,7 @@ const bundle = JSON.parse(catalogJson);
 
 const { component, tokenArtifact } = selectReactNativeGenerationInputs(bundle);
 const binding = component.record.bindings['native.react-native'];
-if (!binding) throw new Error('CORE_REACT_NATIVE_GENERATION_INPUT_MISSING: native.react-native binding');
+if (!binding) throw new Error('MUXUI_REACT_NATIVE_GENERATION_INPUT_MISSING: native.react-native binding');
 
 const sourcePath = 'packages/catalog/catalog-sources.json';
 const profiles = [
@@ -22,14 +22,14 @@ const profiles = [
 ];
 const runtimeProfiles = Object.fromEntries(Object.entries(binding.runtimeProfiles).map(([profile, value]) => {
   const safety = binding.platformSafety.find((entry) => entry.profile === profile);
-  if (!safety) throw new Error(`CORE_REACT_NATIVE_GENERATION_INPUT_MISSING: ${profile} platform safety`);
+  if (!safety) throw new Error(`MUXUI_REACT_NATIVE_GENERATION_INPUT_MISSING: ${profile} platform safety`);
   return [profile, { ...value, profile, validationProfile: safety.validationProfile }];
 }));
 if (canonicalJson(Object.keys(runtimeProfiles)) !== canonicalJson(['android', 'ios', 'native.react-native-web'])) {
-  throw new Error('CORE_REACT_NATIVE_GENERATION_INPUT_INVALID: runtime profiles');
+  throw new Error('MUXUI_REACT_NATIVE_GENERATION_INPUT_INVALID: runtime profiles');
 }
 const projection = {
-  schema: 'core-ui-react-native-theme-projection-v1',
+  schema: 'muxui-react-native-theme-projection-v1',
   package: manifest.name,
   componentSupportClaim: 'none',
   source: {
@@ -38,7 +38,7 @@ const projection = {
     tokenId: tokenArtifact.id,
     tokenSourceRevision: tokenArtifact.contentRevision,
     tokenContractVersion: tokenArtifact.record.tokenContractVersion,
-    transformOwner: '@core-ui/tokens#compileNativeTheme',
+    transformOwner: '@muxui/tokens#compileNativeTheme',
   },
   profiles: Object.fromEntries(profiles.map(({ id, platform }) => {
     const theme = compileNativeTheme(tokenArtifact.record, { profile: id });
@@ -53,13 +53,13 @@ const projection = {
 const safetySets = Object.fromEntries(Object.entries(runtimeProfiles).map(([profile]) => {
   const key = `native.react-native:${profile === 'native.react-native-web' ? profile : profile}`;
   const set = component.platformSafetyRequirementSets[key];
-  if (!set) throw new Error(`CORE_REACT_NATIVE_GENERATION_INPUT_MISSING: ${key}`);
+  if (!set) throw new Error(`MUXUI_REACT_NATIVE_GENERATION_INPUT_MISSING: ${key}`);
   return [profile, set];
 }));
 const contractDigests = new Set(Object.values(safetySets).map(({ contractDigest }) => contractDigest));
-if (contractDigests.size !== 1) throw new Error('CORE_REACT_NATIVE_GENERATION_INPUT_INVALID: platform safety contract');
+if (contractDigests.size !== 1) throw new Error('MUXUI_REACT_NATIVE_GENERATION_INPUT_INVALID: platform safety contract');
 const nativeProfileProjection = {
-  schema: 'core-ui-react-native-profile-projection-v1',
+  schema: 'muxui-react-native-profile-projection-v1',
   package: manifest.name,
   componentId: component.id,
   bindingRef: `${component.id}#native.react-native`,
@@ -77,7 +77,7 @@ const nativeProfileProjection = {
 };
 if (Object.entries(nativeProfileProjection.profiles).some(([profile, value]) => (
   profile !== 'native.react-native-web' && !value.tokenRequirementSetDigest
-))) throw new Error('CORE_REACT_NATIVE_GENERATION_INPUT_MISSING: native token requirement set');
+))) throw new Error('MUXUI_REACT_NATIVE_GENERATION_INPUT_MISSING: native token requirement set');
 
 const moduleBody = [
   'function deepFreeze(value) {',
@@ -125,10 +125,10 @@ const profileTypesBody = [
   profileTypeCases,
   '>;',
   'export interface NativeProfileProjection {',
-  "  readonly schema: 'core-ui-react-native-profile-projection-v1';",
-  "  readonly package: '@core-ui/react-native';",
-  "  readonly componentId: 'core:component:button';",
-  "  readonly bindingRef: 'core:component:button#native.react-native';",
+  "  readonly schema: 'muxui-react-native-profile-projection-v1';",
+  "  readonly package: '@muxui/react-native';",
+  "  readonly componentId: 'muxui:component:button';",
+  "  readonly bindingRef: 'muxui:component:button#native.react-native';",
   `  readonly bindingContentRevision: ${JSON.stringify(nativeProfileProjection.bindingContentRevision)};`,
   `  readonly bindingSpecRevision: ${JSON.stringify(nativeProfileProjection.bindingSpecRevision)};`,
   "  readonly componentSupportClaim: 'none';",
@@ -141,7 +141,7 @@ const profileTypesBody = [
 ].join('\n');
 
 const provenance = {
-  schema: 'core-ui-react-native-theme-provenance-v1',
+  schema: 'muxui-react-native-theme-provenance-v1',
   projectionDigest: canonicalDigest(projection),
   sourcePath,
   packagePath: 'packages/react-native/package.json',
@@ -150,7 +150,7 @@ const provenance = {
     catalogSourceRevision: bundle.sourceRevision,
     tokenSourceRevision: tokenArtifact.contentRevision,
     tokenContractVersion: tokenArtifact.record.tokenContractVersion,
-    transformOwner: '@core-ui/tokens#compileNativeTheme',
+    transformOwner: '@muxui/tokens#compileNativeTheme',
   },
 };
 const provenanceBody = `${canonicalJson(provenance)}\n`;
@@ -171,7 +171,7 @@ for (const output of outputs) {
   if (process.argv.includes('--check')) {
     const actual = await readFile(output.path, 'utf8').catch(() => null);
     if (actual !== output.expected) {
-      console.error(`CORE_REACT_NATIVE_GENERATED_DRIFT: ${output.path.slice(repositoryRoot.length + 1)} must be regenerated`);
+      console.error(`MUXUI_REACT_NATIVE_GENERATED_DRIFT: ${output.path.slice(repositoryRoot.length + 1)} must be regenerated`);
       process.exitCode = 1;
     }
   } else {

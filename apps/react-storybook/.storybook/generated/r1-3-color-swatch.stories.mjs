@@ -1,6 +1,6 @@
 // @generated-from: apps/react-storybook/src/generate-stories.mjs
-// @generated-content-sha256: sha256:f97b7ccc57893fc0a428c00547ad3145cdd02451dfc37878982d2841c1cb40ed
-import * as Core from '@core-ui/react';
+// @generated-content-sha256: sha256:d28f0b83cc1fe8265a3633d91c2666e922116f0ed29a38678a867d6b484b18d5
+import * as MuxUI from '@muxui/react';
 import { argTypesForBinding, createStory } from '../../src/storybook-factory.mjs';
 
 const binding = {
@@ -17,12 +17,12 @@ const binding = {
       "disabled"
     ]
   },
-  "binding": "core:component:color-swatch#web.react",
+  "binding": "muxui:component:color-swatch#web.react",
   "export": "ColorSwatch",
   "lifecycle": "experimental",
   "module": ".",
   "runtimeProfile": "web.react",
-  "selector": ".core-color-swatch",
+  "selector": ".muxui-color-swatch",
   "states": [
     "idle",
     "disabled"
@@ -32,8 +32,9 @@ const binding = {
 const record = { family: 'ColorSwatch', tranche: 'R1.3', binding };
 
 export default {
-  title: 'Core React/R1.3/ColorSwatch',
-  component: Core.ColorSwatch,
+  title: 'Mux UI React/R1.3/ColorSwatch',
+  id: 'muxui-react-r1-3-color-swatch',
+  component: MuxUI.ColorSwatch,
   tags: ['autodocs'],
   parameters: {
     controls: {
@@ -41,7 +42,7 @@ export default {
     },
     docs: {
       description: {
-        component: 'Private development showcase for the Core-owned ColorSwatch family.',
+        component: 'Private development showcase for the Mux UI-owned ColorSwatch family.',
       },
     },
   },

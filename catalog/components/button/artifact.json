@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "id": "core:component:button",
+  "id": "muxui:component:button",
   "kind": "component",
   "name": "Button",
   "summary": "Triggers an immediate action.",
@@ -29,7 +29,7 @@
       "behavior": ["Activation requests one immediate action"],
       "accessibility": ["Expose accessible name and disabled state"],
       "tokenRecipe": {
-        "source": "core:token:default-theme",
+        "source": "muxui:token:default-theme",
         "requirements": [
           { "token": "component.button.background", "requirement": "required" },
           { "token": "component.button.foreground", "requirement": "required" },
@@ -66,7 +66,7 @@
       "behavior": ["Activation requests one immediate action", "Pending suppresses activation while retaining focusability"],
       "accessibility": ["Expose accessible name, disabled state, and busy state"],
       "tokenRecipe": {
-        "source": "core:token:default-theme",
+        "source": "muxui:token:default-theme",
         "requirements": [
           { "token": "component.button.background", "requirement": "required" },
           { "token": "component.button.foreground", "requirement": "required" },
@@ -103,7 +103,7 @@
       "behavior": ["Activation requests one immediate action"],
       "accessibility": ["Expose accessible name and disabled state"],
       "tokenRecipe": {
-        "source": "core:token:default-theme",
+        "source": "muxui:token:default-theme",
         "requirements": [
           { "token": "component.button.background", "requirement": "required", "profiles": ["native.ios", "native.android"] },
           { "token": "component.button.foreground", "requirement": "required", "profiles": ["native.ios", "native.android"] },

@@ -15,8 +15,8 @@ test('E-G1.1-03 vanilla reconnect is idempotent and mixed ownership is rejected'
   const first = connectRoot(a, { token });
   assert.equal(connectRoot(a, { token }), first);
   assert.equal(inspectRuntime(a).owner, 'vanilla');
-  assert.throws(() => connectRoot(a, { token: {} }), /CORE_WEB_ROOT_OWNED/);
-  assert.throws(() => claimRoot(a, { integration: 'react', token: {} }), /CORE_WEB_ROOT_OWNED/);
+  assert.throws(() => connectRoot(a, { token: {} }), /MUXUI_WEB_ROOT_OWNED/);
+  assert.throws(() => claimRoot(a, { integration: 'react', token: {} }), /MUXUI_WEB_ROOT_OWNED/);
   first.destroy();
   first.destroy();
   assert.equal(inspectRuntime(a).owner, 'unclaimed');
@@ -99,7 +99,7 @@ test('E-G1.1-03 duplicate package module identities share the realm coordinator'
   const { dom, a } = fixture();
   const duplicate = await import(`../src/runtime-implementation.mjs?duplicate=${Date.now()}`);
   const owner = connectRoot(a, { token: {} });
-  assert.throws(() => duplicate.claimRoot(a, { integration: 'react', token: {} }), /CORE_WEB_ROOT_OWNED/);
+  assert.throws(() => duplicate.claimRoot(a, { integration: 'react', token: {} }), /MUXUI_WEB_ROOT_OWNED/);
   owner.destroy();
   dom.window.close();
 });

@@ -22,12 +22,21 @@ function familySlug(name) {
   return name.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
 }
 
+function storyId(record) {
+  return `muxui-react-${record.tranche.replaceAll('.', '-').toLowerCase()}-${familySlug(record.family)}`;
+}
+
 const bindings = descriptor.bindings;
-if (bindings.length !== 53) fail(`expected 53 Core bindings, found ${bindings.length}`);
-if (new Set(bindings.map(({ export: name }) => name)).size !== bindings.length) fail('duplicate Core binding export');
+if (bindings.length !== 53) fail(`expected 53 MuxUI bindings, found ${bindings.length}`);
+if (new Set(bindings.map(({ export: name }) => name)).size !== bindings.length) fail('duplicate MuxUI binding export');
 if (bindings.some((binding) => binding.runtimeProfile !== 'web.react')) fail('non-web.react binding in React showcase');
 
-const snapshotFamilies = new Map(snapshot.families.map((family) => [family.corePublicFamily, family]));
+// R1.0's pinned snapshot retains its historical field name; current
+// descriptors use the Mux UI projection of the same family inventory.
+const snapshotFamilies = new Map(snapshot.families.map((family) => [
+  family.muxuiPublicFamily ?? family.corePublicFamily,
+  family,
+]));
 const records = bindings.map((binding) => {
   const family = snapshotFamilies.get(binding.export);
   if (!family) fail(`missing canonical tranche for ${binding.export}`);
@@ -41,15 +50,16 @@ if (missingAdapters.length) fail(`missing explicit adapters: ${missingAdapters.j
 if (unknownAdapters.length) fail(`unknown explicit adapters: ${unknownAdapters.join(', ')}`);
 
 function storySource(record) {
-  return `import * as Core from '@core-ui/react';
+  return `import * as MuxUI from '@muxui/react';
 import { argTypesForBinding, createStory } from '../../src/storybook-factory.mjs';
 
 const binding = ${JSON.stringify(record.binding, null, 2)};
 const record = { family: '${record.family}', tranche: '${record.tranche}', binding };
 
 export default {
-  title: 'Core React/${record.tranche}/${record.family}',
-  component: Core.${record.family},
+  title: 'Mux UI React/${record.tranche}/${record.family}',
+  id: '${storyId(record)}',
+  component: MuxUI.${record.family},
   tags: ['autodocs'],
   parameters: {
     controls: {
@@ -57,7 +67,7 @@ export default {
     },
     docs: {
       description: {
-        component: 'Private development showcase for the Core-owned ${record.family} family.',
+        component: 'Private development showcase for the Mux UI-owned ${record.family} family.',
       },
     },
   },
@@ -73,7 +83,7 @@ const outputs = new Map(records.map((record) => [
   generatedText({ source: generatedSource, body: storySource(record), policy }),
 ]));
 const manifest = {
-  schema: 'core-ui-react-storybook-manifest-v1',
+  schema: 'muxui-react-storybook-manifest-v1',
   generatedFrom: [
     'packages/react/generated/descriptor.json',
     'catalog/react-r1-0/react-aria-1.20.0-family-evaluation.snapshot.json',

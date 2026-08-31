@@ -1,6 +1,6 @@
 // @generated-from: apps/react-storybook/src/generate-stories.mjs
-// @generated-content-sha256: sha256:1add83b1f824a2ddbfbbcce451cda82ba1651a34c9f21e673610a21c17e25800
-import * as Core from '@core-ui/react';
+// @generated-content-sha256: sha256:2beb24d328ffda14967d08d3e06742a7cfb22f50fd0eec2172500c4d329c7fa9
+import * as MuxUI from '@muxui/react';
 import { argTypesForBinding, createStory } from '../../src/storybook-factory.mjs';
 
 const binding = {
@@ -31,12 +31,12 @@ const binding = {
       "orientation"
     ]
   },
-  "binding": "core:component:color-slider#web.react",
+  "binding": "muxui:component:color-slider#web.react",
   "export": "ColorSlider",
   "lifecycle": "experimental",
   "module": ".",
   "runtimeProfile": "web.react",
-  "selector": ".core-color-slider",
+  "selector": ".muxui-color-slider",
   "states": [
     "idle",
     "focused",
@@ -48,8 +48,9 @@ const binding = {
 const record = { family: 'ColorSlider', tranche: 'R1.3', binding };
 
 export default {
-  title: 'Core React/R1.3/ColorSlider',
-  component: Core.ColorSlider,
+  title: 'Mux UI React/R1.3/ColorSlider',
+  id: 'muxui-react-r1-3-color-slider',
+  component: MuxUI.ColorSlider,
   tags: ['autodocs'],
   parameters: {
     controls: {
@@ -57,7 +58,7 @@ export default {
     },
     docs: {
       description: {
-        component: 'Private development showcase for the Core-owned ColorSlider family.',
+        component: 'Private development showcase for the Mux UI-owned ColorSlider family.',
       },
     },
   },

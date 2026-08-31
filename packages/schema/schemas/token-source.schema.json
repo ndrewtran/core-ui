@@ -1,13 +1,13 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://core-ui.dev/schema/token-source.schema.json",
-  "title": "Core UI token source and default theme",
+  "$id": "https://muxui.dev/schema/token-source.schema.json",
+  "title": "Mux UI token source and default theme",
   "type": "object",
   "additionalProperties": false,
   "required": ["schemaVersion", "id", "kind", "name", "summary", "lifecycle", "tokenContractVersion", "theme", "tokens"],
   "properties": {
     "schemaVersion": { "const": "2.1.0" },
-    "id": { "type": "string", "pattern": "^core:token:[a-z0-9]+(?:-[a-z0-9]+)*$" },
+    "id": { "type": "string", "pattern": "^muxui:token:[a-z0-9]+(?:-[a-z0-9]+)*$" },
     "kind": { "const": "token" },
     "name": { "type": "string", "minLength": 1 },
     "summary": { "type": "string", "minLength": 1 },
@@ -53,7 +53,7 @@
       "additionalProperties": { "$ref": "#/$defs/token" }
     },
     "sourceCrosswalk": { "$ref": "#/$defs/sourceCrosswalk" },
-    "extensions": { "type": "object", "propertyNames": { "pattern": "^core\\.experimental\\.[a-z0-9]+(?:-[a-z0-9]+)*$" }, "additionalProperties": true }
+    "extensions": { "type": "object", "propertyNames": { "pattern": "^muxui\\.experimental\\.[a-z0-9]+(?:-[a-z0-9]+)*$" }, "additionalProperties": true }
   },
   "$defs": {
     "digest": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
@@ -101,11 +101,11 @@
     "admittedCrosswalkEntry": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["occurrence", "disposition", "coreTokenId", "reason", "targets"],
+      "required": ["occurrence", "disposition", "muxuiTokenId", "reason", "targets"],
       "properties": {
         "occurrence": { "$ref": "#/$defs/crosswalkOccurrence" },
         "disposition": { "enum": ["adopt", "adapt"] },
-        "coreTokenId": { "$ref": "#/$defs/tokenId" },
+        "muxuiTokenId": { "$ref": "#/$defs/tokenId" },
         "groupId": { "type": "string", "minLength": 1, "maxLength": 256 },
         "reason": { "type": "string", "minLength": 1, "maxLength": 2048 },
         "targets": { "$ref": "#/$defs/crosswalkTargets" }
@@ -140,7 +140,7 @@
       "properties": {
         "id": { "type": "string", "minLength": 1, "maxLength": 256 },
         "relationship": { "enum": ["equivalent-source-values", "mode-variants", "selector-variants"] },
-        "coreTokenId": { "$ref": "#/$defs/tokenId" },
+        "muxuiTokenId": { "$ref": "#/$defs/tokenId" },
         "members": { "type": "array", "minItems": 2, "maxItems": 100, "items": { "$ref": "#/$defs/crosswalkGroupMember" } }
       }
     },

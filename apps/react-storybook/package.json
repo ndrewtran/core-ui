@@ -1,5 +1,5 @@
 {
-  "name": "@core-ui/react-storybook",
+  "name": "@muxui/react-storybook",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -14,7 +14,7 @@
     "update:visual:migration": "node test/run-visual-migration.mjs --update"
   },
   "dependencies": {
-    "@core-ui/react": "workspace:*"
+    "@muxui/react": "workspace:*"
   },
   "devDependencies": {
     "@storybook/addon-a11y": "10.5.10",

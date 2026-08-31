@@ -3,28 +3,28 @@ import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 import { webCompatibility, webSurfaces } from '../src/index.mjs';
 import { compileWebSurface } from '../src/compile-surface.mjs';
-import { catalogJson } from '@core-ui/catalog/bundle';
+import { catalogJson } from '@muxui/catalog/bundle';
 
 const bundle = JSON.parse(catalogJson);
-const button = bundle.artifacts.find(({ id }) => id === 'core:component:button');
-const tokenSource = bundle.artifacts.find(({ id }) => id === 'core:token:default-theme').record;
+const button = bundle.artifacts.find(({ id }) => id === 'muxui:component:button');
+const tokenSource = bundle.artifacts.find(({ id }) => id === 'muxui:token:default-theme').record;
 
 test('E-G1.1-02 machine-enumerates only binding and token-policy derived hooks', () => {
   const html = webSurfaces['web.html'].surface;
   const react = webSurfaces['web.react'].surface;
   for (const surface of [html, react]) {
-    assert.equal(surface.rootClass, '.core-button');
-    assert.deepEqual(surface.slots, ['[data-core-slot="label"]']);
+    assert.equal(surface.rootClass, '.muxui-button');
+    assert.deepEqual(surface.slots, ['[data-muxui-slot="label"]']);
     assert.deepEqual(surface.states, surface === html
-      ? ['data-core-state-disabled']
-      : ['data-core-state-disabled', 'data-core-state-pending']);
-    assert.deepEqual(surface.events, ['core:activate']);
+      ? ['data-muxui-state-disabled']
+      : ['data-muxui-state-disabled', 'data-muxui-state-pending']);
+    assert.deepEqual(surface.events, ['muxui:activate']);
     assert.deepEqual(surface.publicCustomProperties, [
-      '--core-component-button-background',
-      '--core-component-button-foreground',
+      '--muxui-component-button-background',
+      '--muxui-component-button-foreground',
     ]);
-    assert.deepEqual(surface.cascadeLayers, ['core.tokens', 'core.components', 'core.utilities']);
-    assert.equal(surface.styleExport, '@core-ui/web/button.css');
+    assert.deepEqual(surface.cascadeLayers, ['muxui.tokens', 'muxui.components', 'muxui.utilities']);
+    assert.equal(surface.styleExport, '@muxui/web/button.css');
     assert.ok(!JSON.stringify(surface).includes('wrapper'));
   }
   assert.deepEqual(
@@ -51,15 +51,15 @@ test('E-G1.1-02 framework-free web output does not inherit React-only pending', 
 test('E-G1.1-02 refuses nonexistent exports and non-component identities', () => {
   assert.throws(
     () => compileWebSurface({ artifact: button, bindingId: 'web.html', packageExports: [], tokenSource }),
-    /CORE_WEB_SURFACE_EXPORT_MISSING/,
+    /MUXUI_WEB_SURFACE_EXPORT_MISSING/,
   );
   assert.throws(
     () => compileWebSurface({
-      artifact: { ...button, id: 'core:guide:button' },
+      artifact: { ...button, id: 'muxui:guide:button' },
       bindingId: 'web.html',
       packageExports: ['./button.css'],
       tokenSource,
     }),
-    /CORE_WEB_SURFACE_ARTIFACT_INVALID/,
+    /MUXUI_WEB_SURFACE_ARTIFACT_INVALID/,
   );
 });

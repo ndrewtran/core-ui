@@ -1,12 +1,12 @@
 {
   "schemaVersion": "1.0.0",
-  "id": "core:example:group-basic-react",
+  "id": "muxui:example:group-basic-react",
   "kind": "example",
   "name": "Basic React Group",
   "summary": "The minimum React Group example.",
   "lifecycle": "experimental",
   "binding": {
-    "ref": "core:component:group#web.react",
+    "ref": "muxui:component:group#web.react",
     "guidanceImpact": "normative",
     "purposes": [
       "generation",

@@ -8,13 +8,13 @@ importers:
 
   .:
     devDependencies:
-      '@core-ui/catalog':
+      '@muxui/catalog':
         specifier: workspace:*
         version: link:packages/catalog
 
   apps/react-playground:
     dependencies:
-      '@core-ui/react':
+      '@muxui/react':
         specifier: workspace:*
         version: link:../../packages/react
     devDependencies:
@@ -36,7 +36,7 @@ importers:
 
   apps/react-storybook:
     dependencies:
-      '@core-ui/react':
+      '@muxui/react':
         specifier: workspace:*
         version: link:../../packages/react
     devDependencies:
@@ -76,10 +76,10 @@ importers:
 
   packages/catalog:
     dependencies:
-      '@core-ui/schema':
+      '@muxui/schema':
         specifier: workspace:*
         version: link:../schema
-      '@core-ui/tokens':
+      '@muxui/tokens':
         specifier: workspace:*
         version: link:../tokens
 
@@ -97,13 +97,13 @@ importers:
         specifier: 1.20.0
         version: 1.20.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
     devDependencies:
-      '@core-ui/catalog':
+      '@muxui/catalog':
         specifier: workspace:*
         version: link:../catalog
-      '@core-ui/schema':
+      '@muxui/schema':
         specifier: workspace:*
         version: link:../schema
-      '@core-ui/tokens':
+      '@muxui/tokens':
         specifier: workspace:*
         version: link:../tokens
       '@types/jsdom':
@@ -130,17 +130,17 @@ importers:
 
   packages/react-native:
     dependencies:
-      '@core-ui/foundation':
+      '@muxui/foundation':
         specifier: workspace:*
         version: link:../foundation
     devDependencies:
-      '@core-ui/catalog':
+      '@muxui/catalog':
         specifier: workspace:*
         version: link:../catalog
-      '@core-ui/schema':
+      '@muxui/schema':
         specifier: workspace:*
         version: link:../schema
-      '@core-ui/tokens':
+      '@muxui/tokens':
         specifier: workspace:*
         version: link:../tokens
       '@react-native/babel-preset':
@@ -172,16 +172,16 @@ importers:
 
   packages/tokens:
     dependencies:
-      '@core-ui/schema':
+      '@muxui/schema':
         specifier: workspace:*
         version: link:../schema
 
   packages/tooling:
     dependencies:
-      '@core-ui/catalog':
+      '@muxui/catalog':
         specifier: workspace:*
         version: link:../catalog
-      '@core-ui/schema':
+      '@muxui/schema':
         specifier: workspace:*
         version: link:../schema
       semver:
@@ -190,13 +190,13 @@ importers:
 
   packages/web:
     devDependencies:
-      '@core-ui/catalog':
+      '@muxui/catalog':
         specifier: workspace:*
         version: link:../catalog
-      '@core-ui/schema':
+      '@muxui/schema':
         specifier: workspace:*
         version: link:../schema
-      '@core-ui/tokens':
+      '@muxui/tokens':
         specifier: workspace:*
         version: link:../tokens
       axe-core:
@@ -211,13 +211,13 @@ importers:
 
   tooling/audits/repository-policy:
     dependencies:
-      '@core-ui/schema':
+      '@muxui/schema':
         specifier: workspace:*
         version: link:../../../packages/schema
-      '@core-ui/tokens':
+      '@muxui/tokens':
         specifier: workspace:*
         version: link:../../../packages/tokens
-      '@core-ui/tooling':
+      '@muxui/tooling':
         specifier: workspace:*
         version: link:../../../packages/tooling
 

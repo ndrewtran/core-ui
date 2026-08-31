@@ -1,14 +1,21 @@
-# Core UI milestone roadmap
+# Mux UI milestone roadmap
 
 - Status: Execution baseline
-- Product: Core UI
+- Product: Mux UI
 - Architecture authority: [`monorepo-architecture.md`](./monorepo-architecture.md)
 - Scope: implementation milestones, entry conditions, deliverables, acceptance
   evidence, dependencies, and scope controls
 
 ## Purpose and authority
 
-This roadmap turns the Core UI architecture into evidence-bearing delivery
+Decision 0012 and Product Scope `7.0.0` reset only the current product and
+machine identity to Mux UI / `muxui` / `@muxui/*`. Existing milestone states,
+the 53-family R1 allocation, accepted proof meaning, platform deferrals, and
+release stops do not change. Historical evidence and locators remain under
+their original predecessor identities; current and future delivery uses Mux UI
+identities.
+
+This roadmap turns the Mux UI architecture into evidence-bearing delivery
 milestones. It does not replace or reinterpret the architecture. If this
 roadmap conflicts with the architecture, the architecture wins and the roadmap
 must be corrected before work continues.
@@ -248,7 +255,7 @@ milestone explicitly binds the exact reusable fact and its applicability.
 | Gate | Outcome | Release boundary | Gate must not include |
 | --- | --- | --- | --- |
 | Gate 0 | One canonical artifact compiles and is retrieved locally through deterministic API, human, JSON, and dense CLI surfaces. | Internal foundation; no public product claim. | Broad catalog, public MCP, docs application, planner, project mutation, migration, semantic search. |
-| R1 | A standalone React package delivers accepted component tranches and disposition-complete coverage of the applicable pinned React Aria surface. | Package-only `@core-ui/react` prereleases under `next`; no stable or secondary-renderer claim. | Framework-free/native counterparts, public CLI/catalog product, stable lifecycle, cross-platform equivalence. |
+| R1 | A standalone React package delivers accepted component tranches and disposition-complete coverage of the applicable pinned React Aria surface. | Package-only `@muxui/react` prereleases under `next`; no stable or secondary-renderer claim. | Framework-free/native counterparts, public CLI/catalog product, stable lifecycle, cross-platform equivalence. |
 | P2 | Compatible catalog/tooling, exact installed-local guidance, consumer validation, React docs/explorer/local MCP, and enabled safe operations are productized. | React Productization release candidate; stable only through S1. | Secondary renderer completion, hosted write access, arbitrary agent patches, unproved extensions. |
 | Gate 3 | Operational scale and independently justified integrations are enabled without changing kernel authority. | Capability-specific releases. | Any capability lacking observed demand, owner, bounded protocol, proof, and lifecycle. |
 
@@ -318,7 +325,7 @@ compile one real component without pre-building the full ontology.
 
 **Primary ownership**
 
-- `@core-ui/schema`
+- `@muxui/schema`
 - Canonical serialization and revision policy
 - Minimal relation registry
 
@@ -385,7 +392,7 @@ query it through a side-effect-free API.
 
 **Primary ownership**
 
-- `@core-ui/catalog`
+- `@muxui/catalog`
 - Catalog compiler and search-index builder
 
 **Deliverables**
@@ -439,17 +446,17 @@ surface over the query kernel.
 **Entry conditions**
 
 - G0.2 is complete.
-- Success and error envelope schemas are published by `@core-ui/schema`.
+- Success and error envelope schemas are published by `@muxui/schema`.
 - A token budget exists for each baseline command and detail level.
 
 **Primary ownership**
 
-- `@core-ui/tooling`
+- `@muxui/tooling`
 - Declarative command registry and output renderers
 
 **Deliverables**
 
-- `core manifest`, `core list`, `core search`, and `core get`.
+- `muxui manifest`, `muxui list`, `muxui search`, and `muxui get`.
 - One declarative command registry generating parser metadata, `--help`, shell
   completion, manifest, response types, and future MCP schemas.
 - Human, JSON, and dense renderers over the same response object.
@@ -457,7 +464,7 @@ surface over the query kernel.
 - One JSON value on stdout; progress and diagnostics on stderr.
 - Versioned query envelopes, append-only codes, meaningful exit statuses, and
   safe `nextCommand` objects with effect and confirmation metadata.
-- `core manifest --json` as cold-start discovery; bare `core --json` recovery.
+- `muxui manifest --json` as cold-start discovery; bare `muxui --json` recovery.
 - Dense golden snapshots and per-command token budgets.
 - Generated `section`, `limit`, and `cursor` request/response types and help for
   `tokens` / `source-crosswalk`, including query API v1.2 deprecation guidance
@@ -499,8 +506,8 @@ data.
 
 **Primary ownership**
 
-- `@core-ui/catalog` package format
-- `@core-ui/tooling` local resolver
+- `@muxui/catalog` package format
+- `@muxui/tooling` local resolver
 
 **Deliverables**
 
@@ -532,7 +539,7 @@ data.
 
 **Scope controls**
 
-- Do not invent `core-ui.lock`; package manifests and the package-manager
+- Do not invent `muxui.lock`; package manifests and the package-manager
   lockfile remain dependency authority.
 - A global CLI is bootstrap convenience only.
 - Hosted discovery remains unavailable and cannot repair a local resolution
@@ -554,8 +561,8 @@ informal projection patch from the first artifact onward.
 
 **Primary ownership**
 
-- `@core-ui/schema` authoring metadata
-- `@core-ui/tooling` maintainer-only authoring helpers
+- `@muxui/schema` authoring metadata
+- `@muxui/tooling` maintainer-only authoring helpers
 
 **Deliverables**
 
@@ -611,7 +618,7 @@ stability.
 
 #### Accepted G1.0 token-correction sequence
 
-The Tale-to-Core default-theme correction reactivates G0.1 through G0.5 and
+The Tale-to-Mux UI default-theme correction reactivates G0.1 through G0.5 and
 this integration exit in three exact-source generations. A later generation
 expires the applicability of the prior generation without rewriting or
 deleting its immutable historical evidence.
@@ -628,7 +635,7 @@ assertion.
 
 Before Phase A implementation, a separate human-accepted classification and
 compatibility annex enumerates every planned occurrence disposition, the exact
-Core token additions, final page-profile constants, token-contract/catalog/
+Mux UI token additions, final page-profile constants, token-contract/catalog/
 command-registry/package version effects, migration support, and rollback.
 Accepting the architecture direction does not accept that annex by implication.
 
@@ -643,12 +650,12 @@ or waive behavior assigned to a later phase.
 | --- | --- |
 | `TALE-TOKEN-A` | Token-source schema `2.0.0`; query API v1.1/v1.2 negotiation; v1.2 inline-token deprecation and notice diagnostics; bounded `tokens` and `source-crosswalk` sections; typed derived crosswalk absence for the pre-crosswalk 2.0 source; v1.2 cursor, page-profile, dense-page, oversize, and parity proof. Explicitly requested v1.1/v1.2 inline compatibility responses remain deterministic and parity-proved but are exempt from sectional page budgets. Schema 2.1 and query v2 are not yet asserted. |
 | `TALE-TOKEN-B` | Everything in Phase A plus token-source schema 2.1 migration/omission/typed-absence behavior, query v2 inline removal, complete v1.1/v1.2/v2 negotiation, v2 cursor/page-budget/oversize proof, and omitted or synthetic crosswalk fixtures only. Historical inline responses remain available solely through explicit v1.1/v1.2 negotiation. |
-| `TALE-TOKEN-C` | The complete Phase B contract repeated at the exact final G1.0 source/catalog identity with the real occurrence-complete crosswalk and admitted Core token inventory; no synthetic crosswalk can satisfy this profile. |
+| `TALE-TOKEN-C` | The complete Phase B contract repeated at the exact final G1.0 source/catalog identity with the real occurrence-complete crosswalk and admitted Mux UI token inventory; no synthetic crosswalk can satisfy this profile. |
 
 1. **Phase A — query API `1.2.0` notice.** Against the pre-crosswalk token
    source, retain v1.1 inline `tokens`; add bounded `tokens` and
    `source-crosswalk` sections, `limit`/`cursor`, generated types/help,
-   `CORE_QUERY_INLINE_TOKENS_DEPRECATED`, replacement guidance, historical
+   `MUXUI_QUERY_INLINE_TOKENS_DEPRECATED`, replacement guidance, historical
    negotiation, and response/dense-budget/oversize proof. Produce and
    human-accept a complete fresh `TALE-TOKEN-A` generation of `E-G0.1-01`
    through `E-G0.1-05`,
@@ -664,7 +671,7 @@ or waive behavior assigned to a later phase.
    then produce and human-accept a second complete G0.1–G0.5 and Gate 0
    `TALE-TOKEN-B` generation at the exact Phase B source.
 3. **Phase C — final G1.0 source correlation.** After Phase B acceptance, G1.0
-   authors the real Tale classification, crosswalk, accepted Core reference
+   authors the real Tale classification, crosswalk, accepted Mux UI reference
    inventory, transforms, and requirement identities. That source/catalog
    change expires and preserves Phase B. Before G1.0 evidence is captured or
    accepted, produce and human-accept a third complete G0.1–G0.5 and Gate 0
@@ -701,10 +708,10 @@ required. Button is the first visible R1.1 component.
 
 The approved R1 target package graph also includes the single resolved
 `@internationalized/date@3.12.3` instance as a direct internal runtime
-dependency of `@core-ui/react`, used only for Core value adapters in exactly
+dependency of `@muxui/react`, used only for Mux UI value adapters in exactly
 `DateField`, `DatePicker`, `DateRangePicker`, `TimeField`, `Calendar`, and
-`RangeCalendar`. Core public values remain ISO dates `YYYY-MM-DD`, local times
-`HH:mm[:ss[.fraction]]`, and Core-owned `{start,end}` ranges; no upstream
+`RangeCalendar`. Mux UI public values remain ISO dates `YYYY-MM-DD`, local times
+`HH:mm[:ss[.fraction]]`, and Mux UI-owned `{start,end}` ranges; no upstream
 temporal or React Aria public type, value, import path, export, lifecycle, or
 ownership may leak. Decision 0011 amendment 01's manifest/lockfile, adapter,
 derived-guidance, release-prepare, and packed-consumer assertions are later
@@ -722,20 +729,20 @@ triggers; `Calendar`/`RangeCalendar` previous/next; `ComboBox`/`Select` and
 check/indeterminate; `TagGroup` remove; and `Dialog`/`Toast` close. No Lucide
 export, type, name, prop, import path, public Icon API/catalog/package,
 component, or new decorative affordance is admitted. Breadcrumb separators
-remain text and no Search icon is added; Core-owned labels and decorative
+remain text and no Search icon is added; Mux UI-owned labels and decorative
 semantics remain binding.
 
 Each bounded pull request changes the earliest canonical owners, regenerates
 projections, keeps React Aria internal, migrates applicable Tale styling into
-Core-owned CSS and token hooks, and runs focused checks proportional to the
+Mux UI-owned CSS and token hooks, and runs focused checks proportional to the
 exported behavior. Protected CI and normal review-bot coverage remain required.
 
 The shared baseline also pins Tale UI commit
 `94bf62a26c02605c8928dfeb24f0ddc4be1c92fd` and its component-style,
 React-source, and CSS-foundation trees as one-time donor inputs. Each locked
-component records an exact styling disposition and complete donor-to-Core
+component records an exact styling disposition and complete donor-to-Mux UI
 token/style crosswalk. Tale is never a dependency or live source. Components
-without an applicable donor record `no-applicable-donor`; Core contracts and
+without an applicable donor record `no-applicable-donor`; Mux UI contracts and
 responsible accessibility/platform corrections override byte copying.
 
 An applicable donor closes routinely only as `adopt` or `adapt`. `defer` or
@@ -767,16 +774,16 @@ registry, checks, release manifest, rollback, and human authorization.
   acceptance is required for ordinary R1 implementation.
 - Exact reusable G1.0 token/theme facts are selected and rebound; no historical
   result is accepted by ancestry or name alone.
-- `core:component:button#web.react` is the named first renderer slice.
+- `muxui:component:button#web.react` is the named first renderer slice.
 
 **Deliverables**
 
-- standalone `@core-ui/react` package graph with React Aria Components `1.20.0`,
+- standalone `@muxui/react` package graph with React Aria Components `1.20.0`,
   React/React DOM peer ranges, compiled CSS/assets, generated package guidance,
-  and no Core workspace runtime dependency;
+  and no Mux UI workspace runtime dependency;
 - exact upstream evaluation snapshot and disposition grammar;
 - exact Tale styling donor snapshot, shared-primitive inventory, per-component
-  disposition grammar, and closed donor-to-Core token/style crosswalk;
+  disposition grammar, and closed donor-to-Mux UI token/style crosswalk;
 - exact donor license/attribution classification and the package notice
   required for every copied or adapted substantial portion;
 - shared styling, SSR/hydration, accessibility-test, compatibility,
@@ -787,7 +794,7 @@ registry, checks, release manifest, rollback, and human authorization.
 - the first Button implementation fixture and complete React-only proof.
 
 **Evidence:** `E-R1.0-01` package/substrate and pinned donor identity;
-`E-R1.0-02` Core-owned contract/export/donor-crosswalk/license-notice boundary;
+`E-R1.0-02` Mux UI-owned contract/export/donor-crosswalk/license-notice boundary;
 `E-R1.0-03` CSS/SSR/hydration/private-playground baseline plus Button donor
 comparison;
 `E-R1.0-04` accessibility/compatibility baseline; `E-R1.0-05` packed clean-
@@ -802,11 +809,11 @@ begin. No component publication or support claim follows.
 
 **Deliverables:** Button first, then the remaining low/medium-risk foundation,
 action, and disclosure components; one tranche implementation sequence,
-exception ledger, exact donor-style dispositions/crosswalks, Core-owned CSS,
+exception ledger, exact donor-style dispositions/crosswalks, Mux UI-owned CSS,
 generated package surfaces, and packed proof.
 
 **Evidence:** `E-R1.1-01` canonical/binding/donor-disposition closure;
-`E-R1.1-02` React behavior, types, Core-owned CSS, donor visual comparison,
+`E-R1.1-02` React behavior, types, Mux UI-owned CSS, donor visual comparison,
 SSR/hydration, and automated accessibility; `E-R1.1-03` generated
 descriptor/guidance/export parity and packed consumer; `E-R1.1-04` risk-
 selected browser/manual results, advisories, exceptions, and release manifest.
@@ -821,7 +828,7 @@ an exact `0.1.0-alpha.N` publication may be proposed.
 **Deliverables:** TextField, Switch, Form, and other form/field
 components with value, state, label, description, error, validation,
 submission, and composition contracts, including migrated Tale field-family
-primitives under Core-owned hooks and tokens.
+primitives under Mux UI-owned hooks and tokens.
 
 **Evidence:** `E-R1.2-01` canonical/binding closure; `E-R1.2-02` form/input/
 label/error behavior and types; `E-R1.2-03` browser and required accessibility
@@ -871,12 +878,12 @@ equivalence claim follows.
 release proof; it does not introduce another implementation inventory.
 
 **Deliverables:** an exact `53/53` committed-family reconciliation: every
-documented family in the pinned React Aria snapshot maps to a committed Core
+documented family in the pinned React Aria snapshot maps to a committed Mux UI
 family root, contract, export, lifecycle ledger, evidence/support record, and
 packed prerelease graph. A `defer`, `exclude`, or `not-a-component` disposition
 outside the fixed 53 families cannot alter an R1.5 family outcome. Every
 committed family maps the pinned Tale style to exportable `adopt`/`adapt` or
-valid absence `no-applicable-donor`, with complete Core token/style ownership;
+valid absence `no-applicable-donor`, with complete Mux UI token/style ownership;
 all 53 remain export-ready at R1 exit.
 
 **Evidence:** `E-R1.5-01` upstream and donor-style disposition completeness;
@@ -888,7 +895,7 @@ advisory closure.
 
 **Exit:** the exact committed-family reconciliation is `53/53`; no defer,
 exclude, or not-a-component completion path remains; and
-`@core-ui/react@0.1.0-rc.1` may be proposed.
+`@muxui/react@0.1.0-rc.1` may be proposed.
 
 ### R1 exit — React prerelease publication
 
@@ -899,13 +906,13 @@ registry control, checks, rollback plan, and human publish authorization.
 `E-R1-EXIT-02` registry/provenance/integrity; `E-R1-EXIT-03` published clean-
 consumer verification; `E-R1-EXIT-04` dist-tag and rollback verification.
 
-**Exit:** only `@core-ui/react@0.1.0-rc.1` is published to `next`. No `latest`,
+**Exit:** only `@muxui/react@0.1.0-rc.1` is published to `next`. No `latest`,
 stable, framework-free, native, React Native Web, parity, or equivalence claim
 is made.
 
 The R1 exit package graph includes the same exact internal,
 replaceable `lucide-react@1.37.0` edge and its ISC plus Feather-derived MIT
-notices. Exit proof must retain the Core-only public surface and verify exact
+notices. Exit proof must retain the Mux UI-only public surface and verify exact
 SSR/hydration, tree-shaking, packed-consumer resolution, accessible labels and
 decorative semantics, and visual-migration invalidation. This does not add a
 publication authorization or change the final R1-exit merge stop.
@@ -965,7 +972,7 @@ retrieval parity at the same record revision.
 
 **Objective:** Establish the cross-renderer semantics, token transforms, and
 pure logic required by the fixed slices, with the pinned Tale UI non-semantic
-foundation baseline classified into a Core-owned default-theme reference
+foundation baseline classified into a Mux UI-owned default-theme reference
 inventory.
 
 **Entry conditions**
@@ -981,14 +988,14 @@ inventory.
 
 **Primary ownership**
 
-- `@core-ui/schema` for the closed platform-safety contract grammar
+- `@muxui/schema` for the closed platform-safety contract grammar
 - Canonical binding specs for per-binding/runtime-profile safety declarations
-- `@core-ui/tokens` for canonical token/theme data, transforms, and validated
+- `@muxui/tokens` for canonical token/theme data, transforms, and validated
   token-requirement-set compilation
-- `@core-ui/catalog` for derived contract/query projection
-- `@core-ui/foundation/semantic`
-- `@core-ui/foundation/logic`
-- Optional `@core-ui/foundation/interaction` only where proved portable
+- `@muxui/catalog` for derived contract/query projection
+- `@muxui/foundation/semantic`
+- `@muxui/foundation/logic`
+- Optional `@muxui/foundation/interaction` only where proved portable
 
 **Deliverables**
 
@@ -999,10 +1006,10 @@ inventory.
   names, and one ordinary declaration—with explicit logical-token/mode
   grouping and one `adopt`, `adapt`, `defer`, or `reject` disposition and reason
   per occurrence.
-- The human-accepted `adopt`/`adapt` subset materialized as Core-owned reference
-  tokens with stable Core IDs, types/units, meanings, modes, override policies,
+- The human-accepted `adopt`/`adapt` subset materialized as Mux UI-owned reference
+  tokens with stable Mux UI IDs, types/units, meanings, modes, override policies,
   web/native dispositions, and pinned Tale provenance. Tale names and file
-  groupings remain migration inputs rather than Core public API.
+  groupings remain migration inputs rather than Mux UI public API.
 - First-party default theme and typed mode axes for color scheme, contrast,
   motion, density, and direction where applicable.
 - Deterministic web CSS and native theme-object transforms from the same
@@ -1041,7 +1048,7 @@ inventory.
 | `E-G1.0-05` | Foundation dependency direction is enforced and a portable machine is available only on profiles with materially distinct retained proof. | Import-boundary and portability matrix. |
 | `E-G1.0-06` | Static theme output works without runtime switching; any runtime switch is separately declared and proved. | Web/native theme smoke fixtures. |
 | `E-G1.0-07` | Closed platform-safety declarations enter binding-spec revisions and compile into separate per-binding/profile `PlatformSafetyRequirementSet` digests plus query/package projections; unknown, missing, duplicate, wrong-profile, consumer-weakened, or prematurely fulfilled requirements fail deterministically. This assertion produces no CSS/native adaptation, support, accessibility, or availability result. | Safety-contract closure and negative corpus. |
-| `E-G1.0-08` | The pinned Tale baseline is occurrence-complete; every occurrence has exactly one reviewed disposition and non-empty reason, grouping/cardinality/mode mapping is valid and unique, adopt/adapt entries require one Core identity while defer/reject entries forbid one and make no runtime claim, all Tale provenance and derived digests trace to the sole crosswalk preimage, CSS-only values have explicit native adaptation or reasoned deferral/rejection, and generated CSS/native output derives only from admitted Core facts. | Crosswalk coverage, classification, provenance, target-disposition, and generated-output corpus. |
+| `E-G1.0-08` | The pinned Tale baseline is occurrence-complete; every occurrence has exactly one reviewed disposition and non-empty reason, grouping/cardinality/mode mapping is valid and unique, adopt/adapt entries require one Mux UI identity while defer/reject entries forbid one and make no runtime claim, all Tale provenance and derived digests trace to the sole crosswalk preimage, CSS-only values have explicit native adaptation or reasoned deferral/rejection, and generated CSS/native output derives only from admitted Mux UI facts. | Crosswalk coverage, classification, provenance, target-disposition, and generated-output corpus. |
 
 **Scope controls**
 
@@ -1051,12 +1058,12 @@ inventory.
 - Do not add a component token unless a fixed slice needs a stable
   customization point.
 - Do not admit every Tale declaration automatically, preserve Tale variable
-  names as Core API, keep Tale as a live owner, or bulk-create speculative
+  names as Mux UI API, keep Tale as a live owner, or bulk-create speculative
   semantic/component tokens.
 - Additional themes and design-tool interchange remain Gate 3.
 
 **Exit condition:** The fixed slices have the complete classified Tale-derived
-Core reference baseline plus the smallest sufficient semantic, component,
+Mux UI reference baseline plus the smallest sufficient semantic, component,
 logic, and optional portable-interaction substrate, with cross-target
 provenance and fallback denial. Phase C Gate 0 evidence and all eight G1.0
 assertions are human-accepted at the same final source. The platform-safety
@@ -1079,8 +1086,8 @@ canonical inventory or duplicating styles and runtime ownership.
 
 **Primary ownership**
 
-- `@core-ui/web`
-- `@core-ui/react`
+- `@muxui/web`
+- `@muxui/react`
 
 **Deliverables**
 
@@ -1095,9 +1102,9 @@ canonical inventory or duplicating styles and runtime ownership.
   restoration, dismissal, portals, inert/background behavior, and scroll-lock
   leases.
 - Public events and observable DOM hooks derived from binding specs.
-- Host TypeScript refinements validated against generated Core-owned binding
+- Host TypeScript refinements validated against generated Mux UI-owned binding
   types without exporting an upstream primitive library as public API.
-- `@core-ui/web`-owned forced-colors and system-high-contrast behavior that
+- `@muxui/web`-owned forced-colors and system-high-contrast behavior that
   consumers cannot disable through theme or instance values. `web.html` proves
   the behavior directly; `web.react` proves it consumes the same web source and
   cannot bypass it with a copied React safety implementation.
@@ -1139,7 +1146,7 @@ tokens without importing web implementation accidents.
 
 **Primary ownership**
 
-- `@core-ui/react-native`
+- `@muxui/react-native`
 - Native explorer host as test infrastructure, not package runtime
 
 **Deliverables**
@@ -1288,7 +1295,7 @@ controlled/uncontrolled ergonomics.
 - No general form engine, schema validator, masking framework, or rich-text
   editor.
 - Host input props remain renderer-owned refinements and cannot introduce
-  undocumented Core UI semantics.
+  undocumented Mux UI semantics.
 
 **Exit condition:** TextField proves value, validation, accessible relation,
 and form integration semantics across direct and adapted renderers.
@@ -1435,7 +1442,7 @@ inputs without enabling the public planner.
 - Example purpose, complexity, prerequisites, profile applicability, risk/rule
   coverage, and binding-owned preference.
 - Internal deterministic planning fixture that selects the pattern and binds
-  only declared parameters; no public `core plan` yet.
+  only declared parameters; no public `muxui plan` yet.
 
 **Acceptance evidence**
 
@@ -1445,7 +1452,7 @@ inputs without enabling the public planner.
 | `E-G1.8-02` | Normative example edits change the pattern/binding closure; editorial-only teaching order does not change renderer compatibility. | Normative example closure fixture. |
 | `E-G1.8-03` | Exact profile/purpose filtering chooses one example deterministically; ambiguity, bad preference, missing prerequisite, and model/search override fail. | Curriculum selection matrix. |
 | `E-G1.8-04` | The internal planner returns a known pattern, constraints, alternatives, and missing requirements; it never invents a component or step. | Grounded-plan golden corpus. |
-| `E-G1.8-05` | Structural validation is confined to Core UI-owned examples and does not claim arbitrary consumer-tree correctness. | Enforcement-boundary test. |
+| `E-G1.8-05` | Structural validation is confined to Mux UI-owned examples and does not claim arbitrary consumer-tree correctness. | Enforcement-boundary test. |
 
 **Scope controls**
 
@@ -1490,7 +1497,7 @@ the Gate 1 cross-cutting architecture fixtures.
 - Structured `EvidenceAdvisory` withdrawal/supersession and
   `OperationalExceptionRecord` enforcement, including disclosure-safe query
   status and release-manifest projection.
-- `core validate` for Core UI-owned catalog and canonical example sources, with
+- `muxui validate` for Mux UI-owned catalog and canonical example sources, with
   stable diagnostics and no consumer-project claim.
 - Minimal local MCP adapter used only to compare query parity.
 - Informational cold-start and generation evaluations over canonical example
@@ -1514,7 +1521,7 @@ the Gate 1 cross-cutting architecture fixtures.
 
 - The docs site is not a Gate 1 acceptance dependency.
 - Internal MCP is not advertised as a mature product.
-- Gate 1 validation is confined to Core UI-owned catalog/example sources.
+- Gate 1 validation is confined to Mux UI-owned catalog/example sources.
 - Agent evaluation misses inform diagnosis but do not override deterministic
   results or block `0.1` absent a separately stable threshold.
 - Tabs, Toast, component breadth, hosted services, and public mutation cannot
@@ -1611,7 +1618,7 @@ catalog, renderer, schema, token, export, and evidence tuple they install.
 
 **Deliverables**
 
-- Publishable `@core-ui/schema`, `tokens`, `foundation`, `web`, `react`,
+- Publishable `@muxui/schema`, `tokens`, `foundation`, `web`, `react`,
   `react-native`, `catalog`, and `tooling` packages as applicable.
 - Compact renderer descriptors generated after packing from actual exports,
   binding-spec revisions, lifecycle/strategy, schema/token ranges, token
@@ -1660,7 +1667,7 @@ validates only what the installed renderer graph can implement.
 
 **Primary ownership**
 
-- `@core-ui/tooling` local resolver and validator
+- `@muxui/tooling` local resolver and validator
 - `tests/consumers`
 
 **Deliverables**
@@ -1668,7 +1675,7 @@ validates only what the installed renderer graph can implement.
 - Official installation profiles including renderer packages plus project-local
   tooling and catalog dependencies.
 - Production resolver over real packed descriptors and package-manager graphs.
-- `core validate` for canonical catalog/examples first, then bounded
+- `muxui validate` for canonical catalog/examples first, then bounded
   consumer-project analysis with declared language/framework/version support.
 - Project/root detection, installed tuple reporting, drift/integrity diagnosis,
   and safe inspection/install next commands.
@@ -1756,7 +1763,7 @@ documentation or operation system.
 
 ### G2.4 Grounded composition planning
 
-**Objective:** Enable `core plan` only when the pattern catalog can return
+**Objective:** Enable `muxui plan` only when the pattern catalog can return
 deterministic, non-invented composition plans.
 
 **Entry conditions**
@@ -1768,12 +1775,12 @@ deterministic, non-invented composition plans.
 
 **Primary ownership**
 
-- `@core-ui/catalog` pure `planComposition`
-- `@core-ui/tooling` CLI adapter
+- `@muxui/catalog` pure `planComposition`
+- `@muxui/tooling` CLI adapter
 
 **Deliverables**
 
-- Public `core plan` over known `PatternRecord` data.
+- Public `muxui plan` over known `PatternRecord` data.
 - Parameter binding limited to the pattern’s closed schema.
 - Returned components, examples, constraints, alternatives, preconditions,
   unsupported cases, and match reasons.
@@ -1791,7 +1798,7 @@ deterministic, non-invented composition plans.
 
 **Scope controls**
 
-- `core plan` is read-only and is not a change-intent or repository-mutation
+- `muxui plan` is read-only and is not a change-intent or repository-mutation
   command.
 - It cannot invent product architecture, business flows, components, props, or
   unrecorded implementation steps.
@@ -1815,12 +1822,12 @@ detection, preview, confinement, atomicity, and recovery are proved.
 
 **Primary ownership**
 
-- `@core-ui/tooling` local project operations
+- `@muxui/tooling` local project operations
 
 **Deliverables**
 
-- Read-only `core doctor` before any mutating command.
-- `core init` only after doctor’s project model, dry-run, merge, and recovery
+- Read-only `muxui doctor` before any mutating command.
+- `muxui init` only after doctor’s project model, dry-run, merge, and recovery
   paths pass.
 - Exact `ChangeIntentEnvelope` with project/lockfile/worktree preconditions,
   proposed writes, effects, affected closure, checks, and confirmation.
@@ -1865,7 +1872,7 @@ creating an arbitrary model-driven patch path.
 
 **Primary ownership**
 
-- Maintainer-only `@core-ui/tooling` proposal engine
+- Maintainer-only `@muxui/tooling` proposal engine
 - Existing canonical owners; the proposal engine owns no product decisions
 
 **Initial allowlist**
@@ -2006,7 +2013,7 @@ weakening ownership, renderer priority, retrieval quality, or evidence.
 
 ### G3.2 Declarative migrations and reviewed codemods
 
-**Objective:** Enable `core migrate` only for version-bounded changes that can
+**Objective:** Enable `muxui migrate` only for version-bounded changes that can
 be transformed deterministically and recovered safely.
 
 **Entry conditions**
@@ -2020,13 +2027,13 @@ be transformed deterministically and recovered safely.
 **Primary ownership**
 
 - `MigrationRecord` canonical sources
-- `@core-ui/tooling` local migration engine
+- `@muxui/tooling` local migration engine
 
 **Deliverables**
 
 - Version-bounded migration records with prerequisites, replacements or
   no-replacement reasons, transformations, unsupported cases, and validation.
-- `core migrate` dry-run, change-intent envelope, semantic diff, journal,
+- `muxui migrate` dry-run, change-intent envelope, semantic diff, journal,
   confirmation, atomic apply, idempotency, rollback, and recovery.
 - Declarative transforms first; reviewed codemods only when syntax/version
   support and safety can be bounded.
@@ -2166,7 +2173,7 @@ identities.
 **Deliverables**
 
 - Versioned interchange profile mapping design-tool variables/styles/nodes to
-  stable Core token IDs, `ArtifactRef` values, binding/part IDs, modes, and
+  stable Mux UI token IDs, `ArtifactRef` values, binding/part IDs, modes, and
   adapter versions.
 - Deterministic export with provenance, catalog/token digests, mapping coverage,
   and unsupported/lossy-field report.
@@ -2280,7 +2287,7 @@ moving beyond v1’s closed first-party catalog.
 - Explicit local installation and scoped authorization for executable
   validators, codemods, or adapters.
 - Overlay identity/collision policy if consumer catalog overlays are separately
-  admitted; `core:*` IDs cannot be shadowed.
+  admitted; `muxui:*` IDs cannot be shadowed.
 - Promotion path from first-party experimental extension to stable schema field
   through ADR, migrator, fixtures, and query/compiler support.
 
@@ -2338,7 +2345,7 @@ patterns plus guides demonstrably cannot serve repeated agent workflows.
 
 - No kind is required merely because a reviewer can name a plausible category.
 - Product-specific screens, routes, analytics, content, and business state stay
-  outside Core UI.
+  outside Mux UI.
 - If patterns/guides meet the observed need, this milestone closes with no new
   kind.
 
@@ -2356,7 +2363,7 @@ general multi-framework abstraction.
   contracts are stable, and the applicable Productization surfaces are
   enabled.
 - Demonstrated consumer demand selects one framework.
-- The framework can bind to `web.html` and `@core-ui/web` without forking
+- The framework can bind to `web.html` and `@muxui/web` without forking
   component identity, guidance, or styles.
 
 **Deliverables**
@@ -2418,11 +2425,11 @@ integration, never as the definition of AI-first or a kernel dependency.
 **Scope controls**
 
 - No protocol-specific component registry or canonical IDs.
-- No claim that protocol support is required for Core UI to be AI-first.
+- No claim that protocol support is required for Mux UI to be AI-first.
 - Mutation and external-action authority require separate explicit protocols.
 
 **Exit condition:** The selected protocol is an optional, compatibility-aware
-adapter over Core UI rather than a new source or kernel.
+adapter over Mux UI rather than a new source or kernel.
 
 ### G3.11 Optional consumer pattern validation and scaffolds
 
@@ -2479,10 +2486,10 @@ valid outcomes and do not make the core product incomplete.
 | ID | Milestone | Hard dependencies | Blocks |
 | --- | --- | --- | --- |
 | R1.0 | React package/substrate and Tale styling-donor baseline | Gate 0; accepted Product Scope 6.0.2, Decision 0010 amendments 01–03, and the accepted Stage 1 snapshot through the immutable committed-source route | R1.1–R1.5 |
-| R1.1 | Foundation and simple controls | Fixed R1.0 baseline, Product Scope 6.0.4 icon-affordance clarification, and the fixed 53-family R1.1 allocation | R1.5, eligible alpha |
-| R1.2 | Forms and field controls | Fixed R1.0 baseline, Product Scope 6.0.4 temporal-adapter/icon-affordance clarifications, and the fixed 53-family R1.2 allocation | R1.5, eligible alpha |
-| R1.3 | Collections and composites | Fixed R1.0 baseline, Product Scope 6.0.4 temporal-adapter/icon-affordance clarifications, and the fixed 53-family R1.3 allocation | R1.5, eligible alpha |
-| R1.4 | Overlays and temporal interactions | Fixed R1.0 baseline, Product Scope 6.0.4 icon-affordance clarification, and the fixed 53-family R1.4 allocation | R1.5, eligible alpha |
+| R1.1 | Foundation and simple controls | Fixed R1.0 baseline, Product Scope 7.0.0 carrying forward the 6.0.4 icon-affordance clarification, and the fixed 53-family R1.1 allocation | R1.5, eligible alpha |
+| R1.2 | Forms and field controls | Fixed R1.0 baseline, Product Scope 7.0.0 carrying forward the 6.0.4 temporal-adapter/icon-affordance clarifications, and the fixed 53-family R1.2 allocation | R1.5, eligible alpha |
+| R1.3 | Collections and composites | Fixed R1.0 baseline, Product Scope 7.0.0 carrying forward the 6.0.4 temporal-adapter/icon-affordance clarifications, and the fixed 53-family R1.3 allocation | R1.5, eligible alpha |
+| R1.4 | Overlays and temporal interactions | Fixed R1.0 baseline, Product Scope 7.0.0 carrying forward the 6.0.4 icon-affordance clarification, and the fixed 53-family R1.4 allocation | R1.5, eligible alpha |
 | R1.5 | React breadth closure | R1.1–R1.4 and the fixed 53-family 53/53 closure | R1 exit |
 | R1 exit | React prerelease publication | R1.5 and exact publish authorization | P2.1; optional W1/N1/S1 activation reviews |
 | P2.1 | React packages, catalog, CLI, compatibility | R1 exit and accepted public package graph | P2.2, P2.3, P2 exit |
@@ -2556,7 +2563,7 @@ reusable-proof binding.
 | Change-intent closure | R1.5, then enabled Productization operations | `E-R1.5-04`; later operation evidence |
 | Packed descriptor derivation | R1.0 baseline, every tranche, R1 exit, then P2.1 | `E-R1.0-05`, tranche packed proof, `E-R1-EXIT-01`, P2.1 release proof |
 | Token fallback denial | Historical G1.0 facts explicitly rebound at R1.0 | `E-G1.0-03` plus `E-R1.0-01` reusable-proof binding |
-| Tale-to-Core token crosswalk | Historical G1.0 fact explicitly rebound at R1.0 | `E-G1.0-08` plus `E-R1.0-01` reusable-proof binding |
+| Tale-to-Mux UI token crosswalk | Historical G1.0 fact explicitly rebound at R1.0 | `E-G1.0-08` plus `E-R1.0-01` reusable-proof binding |
 | Platform theme safety and accessibility | R1.0 React baseline; each tranche's exact binding/profile risk proof; R1.5 correlation; later W1/N1 profiles independently | Applicable `E-R1.0-*` through `E-R1.5-*` |
 | Evidence advisory propagation | R1.5 and every publication candidate | `E-R1.5-05`; `E-R1-EXIT-01` |
 | Operational exception enforcement | Every R1 tranche and publication candidate | Tranche exception ledger; `E-R1-EXIT-01` |
@@ -2659,8 +2666,8 @@ tracking, not this long-lived roadmap.
 
 ## Recommended first execution sequence
 
-1. Use Product Scope `6.0.4`, Decision 0010 amendments 01–03, Decision 0011
-   amendments 01–02, the accepted Stage 1 snapshot, and the React-primary/
+1. Use Product Scope `7.0.0`, Decision 0012, Decision 0010 amendments 01–03,
+   Decision 0011 amendments 01–02, the accepted Stage 1 snapshot, and the React-primary/
    Tale-donor Architecture/Roadmap
    authority as the existing R1 baseline. Do not interpret superseded G-series
    status or historical evidence as current R1 readiness.
@@ -2714,16 +2721,18 @@ failure.
 
 R1.0 remains the baseline milestone. The accepted fixed 53-family table,
 immutable Stage 1 snapshot, and R1.0 package/substrate baseline are the existing
-lock for all four implementation tranches. Product Scope 6.0.4 carries forward
-the 6.0.2 clarification that ordinary R1 implementation does not require
+lock for all four implementation tranches. Product Scope 7.0.0 carries forward
+the 6.0.4 and 6.0.2 clarifications that ordinary R1 implementation does not require
 another scope lock, digest acceptance, or human evidence-acceptance gate.
 Earlier Product Scope 5.0.1 or
 Decision 0010 amendment 01–02 wording retained elsewhere in this roadmap is a
 historical audit locator only; it is not a current R1 entry or completion rule.
 R1.0 remains historically complete against Product Scope 6.0.2; Product Scope
 6.0.3 remains the successor input for the approved temporal dependency, and
-Product Scope 6.0.4 adds the approved icon dependency for the affected R1.1–R1.4
-affordances. Neither clarification retroactively changes R1.0 evidence.
+Product Scope 6.0.4 added the approved icon dependency for the affected R1.1–R1.4
+affordances, and Product Scope 7.0.0 carries it forward under the Mux UI
+identity. Neither clarification nor the identity reset retroactively changes
+R1.0 evidence.
 
 The immutable tranche family sets are:
 
@@ -2738,16 +2747,16 @@ The immutable tranche family sets are:
   `GridList`, `ListBox`, `Menu`, `RadioGroup`, `RangeCalendar`, `Select`,
   `Slider`, `Table`, `Tabs`, `TagGroup`, `ToggleButtonGroup`, `TokenField`,
   `Toolbar`, `Tree`, `Virtualizer`.
-- R1.4, 7 families: `DropZone`, `FileTrigger`, `Modal`/Core `Dialog`,
+- R1.4, 7 families: `DropZone`, `FileTrigger`, `Modal`/Mux UI `Dialog`,
   `Popover`, `PreviewTrigger`, `Toast`, `Tooltip`.
 - R1.5 adds no family implementation. It closes the exact `53/53` committed
-  family reconciliation, public export manifest, Core contract and lifecycle
+  family reconciliation, public export manifest, Mux UI contract and lifecycle
   ledger, styling-donor disposition, evidence and support matrix, packed
   prerelease graph, generated guidance, and React `0.1` release candidate.
 
 After the common R1.0 baseline, R1.1 through R1.4 may proceed independently in
 Roadmap order; none may change another tranche or the 53-set. Each tranche
-freezes its Core-owned public contracts and uses shared proof from the common
+freezes its Mux UI-owned public contracts and uses shared proof from the common
 baseline. Each retains focused deterministic proof, risk-selected review,
 applicable manual browser/AT proof before export, packed-consumer validation,
 and failure evidence. R1.5 begins only after R1.1 through R1.4 are complete.
@@ -2758,7 +2767,7 @@ reproved per family. A failed family blocks only its tranche until a shared
 baseline failure is established; a shared baseline failure invalidates every
 affected tranche.
 
-R1 exit remains an exact prerelease of only `@core-ui/react` under `next`, with
+R1 exit remains an exact prerelease of only `@muxui/react` under `next`, with
 the already-authorized React/React DOM peer boundary and exact internal runtime
 dependencies `react-aria-components@1.20.0`, `@internationalized/date@3.12.3`
 limited to the six named value-adapter families above, and
@@ -2786,9 +2795,9 @@ plus/minus, and `DatePicker`/`DateRangePicker` calendar triggers; R1.3
 `Calendar`/`RangeCalendar` previous/next, `ComboBox`/`Select` and `Tree`
 chevrons, and `TagGroup` remove; and R1.4 `Dialog`/`Toast` close. Breadcrumb
 separators remain text and no Search icon is added. No new component or
-decorative affordance is admitted. Core-owned labels, states, roles,
+decorative affordance is admitted. Mux UI-owned labels, states, roles,
 relationships, keyboard behavior, and focus remain binding obligations; these
-icons are decorative/non-focusable unless an existing Core binding requires
+icons are decorative/non-focusable unless an existing Mux UI binding requires
 another explicit semantic.
 
 The affected existing Scope IDs remain `committed` with no new IDs or

@@ -21,8 +21,8 @@ import {
   resultFilePath,
   sha256,
   baselineRootDirectory,
-  coreCaptureProvenancePath,
-  coreCaptureRunnerSourcePath,
+  muxuiCaptureProvenancePath,
+  muxuiCaptureRunnerSourcePath,
   fixtureMapSourcePath,
   expectedCaptureInventory,
   materializeSnapshotDirectory,
@@ -33,6 +33,7 @@ import {
   validateManifest,
   validateSnapshotFiles,
   expectedSettling,
+  expectedCaptureClock,
 } from '../src/visual-migration.mjs';
 import { migrationCases } from '../src/visual-migration-contract.mjs';
 
@@ -43,7 +44,7 @@ const execFileAsync = promisify(execFile);
 
 function browserCandidates() {
   return [
-    process.env.CORE_UI_CHROME_EXECUTABLE,
+    process.env.MUXUI_CHROME_EXECUTABLE,
     process.env.CHROME_BIN,
     process.env.CHROME_PATH,
     '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
@@ -98,6 +99,7 @@ async function currentCaptureEnvironment(executablePath) {
     architecture: process.arch,
     osVersion,
     osBuildVersion,
+    clock: expectedCaptureClock,
   };
 }
 
@@ -179,7 +181,7 @@ async function startStorybook(port, runToken) {
     env: {
       ...process.env,
       BROWSER: 'none',
-      VITE_CORE_UI_MIGRATION_RUN_TOKEN: runToken,
+      VITE_MUXUI_MIGRATION_RUN_TOKEN: runToken,
     },
     stdio: ['ignore', 'pipe', 'pipe'],
   });
@@ -202,8 +204,8 @@ async function startStorybook(port, runToken) {
 
   try {
     while (Date.now() < deadline) {
-      if (spawnError) throw new Error(`could not start Core Storybook: ${spawnError.message}`);
-      if (exit) throw new Error(`Core Storybook exited before readiness (code ${exit.code ?? 'null'}, signal ${exit.signal ?? 'null'})`);
+      if (spawnError) throw new Error(`could not start Mux UI Storybook: ${spawnError.message}`);
+      if (exit) throw new Error(`Mux UI Storybook exited before readiness (code ${exit.code ?? 'null'}, signal ${exit.signal ?? 'null'})`);
       try {
         const response = await fetch(`${baseUrl}/index.json`, { signal: AbortSignal.timeout(1_000) });
         if (response.ok) {
@@ -218,7 +220,7 @@ async function startStorybook(port, runToken) {
         exited,
       ]);
     }
-    throw new Error(`Core Storybook did not become ready within ${serverTimeoutMs}ms\n${stderr.read()}\n${stdout.read()}`);
+    throw new Error(`Mux UI Storybook did not become ready within ${serverTimeoutMs}ms\n${stderr.read()}\n${stdout.read()}`);
   } catch (error) {
     await terminateProcess(child);
     throw error;
@@ -227,8 +229,8 @@ async function startStorybook(port, runToken) {
 
 export function visualMigrationStoryReady({ expectedScheme, expectedToken, expectedCaseSelector, documentRoot = document }) {
   const root = documentRoot.querySelector('#storybook-root');
-  const surface = documentRoot.querySelector('.core-storybook-surface');
-  const migrationRoot = documentRoot.querySelector('[data-core-migration-run-token]');
+  const surface = documentRoot.querySelector('.muxui-storybook-surface');
+  const migrationRoot = documentRoot.querySelector('[data-muxui-migration-run-token]');
   const error = documentRoot.querySelector('.sb-errordisplay');
   const preparing = documentRoot.querySelector('.sb-preparing-story');
   const visible = (element) => {
@@ -238,8 +240,8 @@ export function visualMigrationStoryReady({ expectedScheme, expectedToken, expec
   };
   return Boolean(root?.firstElementChild)
     && Boolean(surface)
-    && migrationRoot?.getAttribute('data-core-migration-run-token') === expectedToken
-    && documentRoot.documentElement.getAttribute('data-core-color-scheme') === expectedScheme
+    && migrationRoot?.getAttribute('data-muxui-migration-run-token') === expectedToken
+    && documentRoot.documentElement.getAttribute('data-muxui-color-scheme') === expectedScheme
     && documentRoot.querySelectorAll(expectedCaseSelector).length === 1
     && !visible(error)
     && !visible(preparing);
@@ -254,10 +256,10 @@ async function waitForStory(page, scheme, runToken, caseSelector) {
     }, { timeout: storyTimeoutMs });
   } catch (error) {
     const diagnostic = await page.evaluate((expectedCaseSelector) => ({
-      token: document.querySelector('[data-core-migration-run-token]')?.getAttribute('data-core-migration-run-token'),
-      scheme: document.documentElement.getAttribute('data-core-color-scheme'),
+      token: document.querySelector('[data-muxui-migration-run-token]')?.getAttribute('data-muxui-migration-run-token'),
+      scheme: document.documentElement.getAttribute('data-muxui-color-scheme'),
       caseCount: document.querySelectorAll(expectedCaseSelector).length,
-      cases: [...document.querySelectorAll('[data-core-migration-case]')].map((element) => element.getAttribute('data-core-migration-case')),
+      cases: [...document.querySelectorAll('[data-muxui-migration-case]')].map((element) => element.getAttribute('data-muxui-migration-case')),
       error: document.querySelector('#error-message')?.textContent,
       stack: document.querySelector('#error-stack')?.textContent,
     }), caseSelector).catch(() => ({}));
@@ -277,7 +279,7 @@ async function settleAnimations(page) {
 async function applyAction(page, scope, entry) {
   if (!entry.action) return () => {};
   const target = entry.action.type === 'drop-target'
-    ? scope.locator('.core-drop-zone')
+    ? scope.locator('.muxui-drop-zone')
     : entry.action.selector === '.migration-component'
     ? scope.locator('button:not([tabindex="-1"]):not([disabled]), a[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [role="button"]:not([tabindex="-1"]):not([aria-disabled="true"]), [tabindex]:not([tabindex="-1"]):not([aria-disabled="true"])').first()
     : scope.locator(entry.action.selector);
@@ -338,12 +340,12 @@ async function assertStateReached(page, scope, entry) {
         return has((element) => attributeTrue(element, 'data-pressed') || element.getAttribute('aria-pressed') === 'true' || element.matches(':active'));
       case 'selected':
         return has((element) => attributeTrue(element, 'data-selected') || element.getAttribute('aria-selected') === 'true' || element.getAttribute('aria-checked') === 'true' || element.checked === true)
-          || Boolean(root.querySelector('input[role="combobox"]')?.value || root.querySelector('.core-select-value')?.textContent?.trim());
+          || Boolean(root.querySelector('input[role="combobox"]')?.value || root.querySelector('.muxui-select-value')?.textContent?.trim());
       case 'invalid':
         return has((element) => attributeTrue(element, 'data-invalid') || element.getAttribute('aria-invalid') === 'true');
       case 'open':
         return has((element) => attributeTrue(element, 'data-open') || element.getAttribute('aria-expanded') === 'true')
-          || Boolean(document.querySelector('.core-dialog, .core-popover, .core-preview-trigger, .core-tooltip, .core-date-popover, .core-combo-box-popover, .core-select-popover'));
+          || Boolean(document.querySelector('.muxui-dialog, .muxui-popover, .muxui-preview-trigger, .muxui-tooltip, .muxui-date-popover, .muxui-combo-box-popover, .muxui-select-popover'));
       case 'expanded':
         return has((element) => attributeTrue(element, 'data-expanded') || element.getAttribute('aria-expanded') === 'true');
       case 'drop-target':
@@ -377,7 +379,7 @@ function storyUrl(baseUrl, storyId, storyQuery, colorScheme, caseId) {
   url.searchParams.set('viewMode', 'story');
   url.searchParams.set('globals', `colorScheme:${colorScheme}`);
   for (const [key, value] of Object.entries(storyQuery)) url.searchParams.set(key, value);
-  url.searchParams.set('core-ui-migration-case', caseId);
+  url.searchParams.set('muxui-migration-case', caseId);
   return url;
 }
 
@@ -397,8 +399,8 @@ async function captureCase(page, baseUrl, manifest, entry, mode, runToken) {
   });
   await page.evaluate(({ scheme, frame }) => {
     document.documentElement.setAttribute('data-reduced-motion', 'true');
-    document.documentElement.setAttribute('data-core-color-scheme', scheme);
-    document.documentElement.style.setProperty('--core-migration-frame-background', scheme === 'dark' ? '#000000' : '#ffffff');
+    document.documentElement.setAttribute('data-muxui-color-scheme', scheme);
+    document.documentElement.style.setProperty('--muxui-migration-frame-background', scheme === 'dark' ? '#000000' : '#ffffff');
     document.documentElement.style.fontFamily = frame.fontFamily;
     document.body.style.fontFamily = frame.fontFamily;
     document.body.style.backgroundColor = frame.background[scheme];
@@ -415,7 +417,7 @@ async function captureCase(page, baseUrl, manifest, entry, mode, runToken) {
     await page.evaluate(() => {
       document.body.style.margin = '0';
       document.body.style.padding = '0';
-      for (const element of document.querySelectorAll('#storybook-root, .core-storybook-surface, .sb-main-padded')) {
+      for (const element of document.querySelectorAll('#storybook-root, .muxui-storybook-surface, .sb-main-padded')) {
         element.style.margin = '0';
         element.style.padding = '0';
       }
@@ -432,18 +434,18 @@ async function captureCase(page, baseUrl, manifest, entry, mode, runToken) {
     if (entry.region.capture === 'viewport') actualBytes = await page.screenshot({ animations: 'disabled' });
     else {
       const box = await scope.boundingBox();
-      if (!box) throw new Error(`${entry.id}: Core semantic region has no bounds`);
+      if (!box) throw new Error(`${entry.id}: Mux UI semantic region has no bounds`);
       if (entry.component === 'Virtualizer') {
         const viewport = manifest.fixtureContract.frame.virtualizer;
         if (!viewport || Math.round(box.width) !== viewport.width || Math.round(box.height) !== viewport.height) {
-          throw new Error(`${entry.id}: Core Virtualizer semantic region must match the fixed migration viewport`);
+          throw new Error(`${entry.id}: Mux UI Virtualizer semantic region must match the fixed migration viewport`);
         }
       }
       actualBytes = await page.screenshot({ animations: 'disabled', clip: { x: Math.floor(box.x), y: Math.floor(box.y), width: Math.ceil(box.width), height: Math.ceil(box.height) } });
     }
     const actualStyleFacts = await readStyleFacts(scope, entry.styleFacts);
     const equivalentRoot = entry.region.capture === 'viewport' ? page.locator('body') : scope;
-    const actualEquivalentPartFacts = await readStyleFacts(equivalentRoot, entry.equivalentPartFacts.core);
+    const actualEquivalentPartFacts = await readStyleFacts(equivalentRoot, entry.equivalentPartFacts.muxui);
     return { actualBytes, actualStyleFacts, actualEquivalentPartFacts };
   } finally {
     await release();
@@ -455,7 +457,7 @@ async function compareCase(page, baseUrl, manifest, entry, mode, runToken, diagn
   const expectedBytes = await readFile(resolve(appRoot, entry.baseline[mode].path));
   const pixels = comparePngs(expectedBytes, actualBytes, manifest.thresholds);
   const styleMismatches = compareStyleFacts(actualStyleFacts, entry.styleFacts);
-  const equivalentPartMismatches = compareStyleFacts(actualEquivalentPartFacts, entry.equivalentPartFacts.core);
+  const equivalentPartMismatches = compareStyleFacts(actualEquivalentPartFacts, entry.equivalentPartFacts.muxui);
   if (!pixels.pass || styleMismatches.length > 0 || equivalentPartMismatches.length > 0) {
     const reason = [
       !pixels.pass && `${pixels.mismatchedPixels} pixels differ (${(pixels.diffPixelRatio * 100).toFixed(3)}%)`,
@@ -467,14 +469,14 @@ async function compareCase(page, baseUrl, manifest, entry, mode, runToken, diagn
       expected: entry.styleFacts,
       actual: actualStyleFacts,
       mismatches: styleMismatches,
-      equivalentPart: { expected: entry.equivalentPartFacts.core, actual: actualEquivalentPartFacts, mismatches: equivalentPartMismatches },
+      equivalentPart: { expected: entry.equivalentPartFacts.muxui, actual: actualEquivalentPartFacts, mismatches: equivalentPartMismatches },
     }, diagnosticRoot);
     return { pass: false, message: reason };
   }
   return { pass: true, message: `${pixels.mismatchedPixels} differing pixels` };
 }
 
-async function prepareUpdatedSnapshot(manifest, captures, captureEnvironment, coreCaptureRunnerSourceSha256) {
+async function prepareUpdatedSnapshot(manifest, captures, captureEnvironment, muxuiCaptureRunnerSourceSha256) {
   const hashes = [];
   for (const entry of manifest.cases) {
     for (const mode of manifest.capture.modes) {
@@ -489,7 +491,7 @@ async function prepareUpdatedSnapshot(manifest, captures, captureEnvironment, co
   const nextManifest = updateManifestIdentity(manifest, {
     baselineSha256: hashes,
     capture: captureEnvironment,
-    coreCaptureRunnerSourceSha256,
+    muxuiCaptureRunnerSourceSha256,
   });
   nextManifest.baselineDirectory = snapshotDirectory;
   nextManifest.cases = nextManifest.cases.map((entry) => ({
@@ -547,17 +549,17 @@ async function prepareUpdatedSnapshot(manifest, captures, captureEnvironment, co
   }
 }
 
-async function buildCoreCaptureProvenance(manifest, captures) {
-  const fixtureSourceSha256 = sha256(await readFile(resolve(appRoot, 'src/migration-visual.fixture.mjs')));
-  const factorySourceSha256 = sha256(await readFile(resolve(appRoot, 'src/storybook-factory.mjs')));
-  const fixtureMapSourceSha256 = sha256(await readFile(resolve(appRoot, fixtureMapSourcePath)));
-  const coreCaptureRunnerSourceSha256 = sha256(await readFile(resolve(appRoot, coreCaptureRunnerSourcePath)));
+async function buildMuxuiCaptureProvenance(manifest, captures) {
+  const muxuiFixtureSourceSha256 = sha256(await readFile(resolve(appRoot, 'src/migration-visual.fixture.mjs')));
+  const muxuiFactorySourceSha256 = sha256(await readFile(resolve(appRoot, 'src/storybook-factory.mjs')));
+  const muxuiFixtureMapSourceSha256 = sha256(await readFile(resolve(appRoot, fixtureMapSourcePath)));
+  const muxuiCaptureRunnerSourceSha256 = sha256(await readFile(resolve(appRoot, muxuiCaptureRunnerSourcePath)));
   const captureRecords = expectedCaptureInventory.map(([captureId, caseId, component, state, mode]) => {
     const entry = manifest.cases.find(({ id }) => id === caseId);
     const captured = captures.get(`${caseId}--${mode}`);
-    if (!captured) throw new Error(`Core capture provenance is missing ${captureId}`);
+    if (!captured) throw new Error(`Mux UI capture provenance is missing ${captureId}`);
     const styleFacts = (entry.styleFactsByMode ?? { light: entry.styleFacts, dark: entry.styleFacts })[mode];
-    const equivalentPart = entry.equivalentPartFacts.coreByMode[mode];
+    const equivalentPart = entry.equivalentPartFacts.muxuiByMode[mode];
     return {
       captureId,
       caseId,
@@ -588,24 +590,24 @@ async function buildCoreCaptureProvenance(manifest, captures) {
     };
   });
   return {
-    schema: 'core-ui-react-visual-migration-core-capture-v1',
+    schema: 'muxui-react-visual-migration-muxui-capture-v1',
     directory: manifest.baselineDirectory,
     caseCount: migrationCases.length,
     captureCount: captureRecords.length,
     fixtureContractSha256: manifest.fixtureContract.caseSha256,
-    coreFixtureSourceSha256: fixtureSourceSha256,
-    coreFactorySourceSha256: factorySourceSha256,
-    coreFixtureMapSourceSha256: fixtureMapSourceSha256,
-    coreCaptureRunnerSourceSha256,
+    muxuiFixtureSourceSha256,
+    muxuiFactorySourceSha256,
+    muxuiFixtureMapSourceSha256,
+    muxuiCaptureRunnerSourceSha256,
     settling: expectedSettling,
     captureEnvironment: manifest.capture,
     captures: captureRecords,
   };
 }
 
-async function activateUpdatedManifest(manifest, prepared, coreCaptureProvenance) {
+async function activateUpdatedManifest(manifest, prepared, muxuiCaptureProvenance) {
   const report = await buildComparisonReport(prepared.nextManifest);
-  await activateVisualMigrationArtifacts(manifest, { nextManifest: prepared.nextManifest, report, prepared, coreCaptureProvenance });
+  await activateVisualMigrationArtifacts(manifest, { nextManifest: prepared.nextManifest, report, prepared, muxuiCaptureProvenance });
   return report;
 }
 
@@ -617,13 +619,13 @@ async function updateBaselines(page, baseUrl, manifest, captureEnvironment, runT
       captures.set(`${entry.id}--${mode}`, captured);
     }
   }
-  const coreCaptureRunnerSourceSha256 = sha256(await readFile(resolve(appRoot, coreCaptureRunnerSourcePath)));
-  const prepared = await prepareUpdatedSnapshot(manifest, captures, captureEnvironment, coreCaptureRunnerSourceSha256);
+  const muxuiCaptureRunnerSourceSha256 = sha256(await readFile(resolve(appRoot, muxuiCaptureRunnerSourcePath)));
+  const prepared = await prepareUpdatedSnapshot(manifest, captures, captureEnvironment, muxuiCaptureRunnerSourceSha256);
   prepared.nextManifest.cases = prepared.nextManifest.cases.map((entry) => {
     const light = captures.get(`${entry.id}--light`);
     const dark = captures.get(`${entry.id}--dark`);
-    if (!light || !dark) throw new Error(`update did not retain Core style facts for ${entry.id}`);
-    if (JSON.stringify(light.actualEquivalentPartFacts) !== JSON.stringify(dark.actualEquivalentPartFacts)) throw new Error(`${entry.id}: Core mapped-part style facts differ between light and dark captures`);
+    if (!light || !dark) throw new Error(`update did not retain Mux UI style facts for ${entry.id}`);
+    if (JSON.stringify(light.actualEquivalentPartFacts) !== JSON.stringify(dark.actualEquivalentPartFacts)) throw new Error(`${entry.id}: Mux UI mapped-part style facts differ between light and dark captures`);
     return {
       ...entry,
       styleFacts: { ...entry.styleFacts, properties: light.actualStyleFacts },
@@ -632,24 +634,25 @@ async function updateBaselines(page, baseUrl, manifest, captureEnvironment, runT
         dark: { ...(entry.styleFactsByMode?.dark ?? entry.styleFacts), properties: dark.actualStyleFacts },
       },
       equivalentPartFacts: {
-        ...entry.equivalentPartFacts,
-        core: { ...entry.equivalentPartFacts.core, properties: light.actualEquivalentPartFacts },
-        coreByMode: {
-          light: { ...entry.equivalentPartFacts.coreByMode.light, properties: light.actualEquivalentPartFacts },
-          dark: { ...entry.equivalentPartFacts.coreByMode.dark, properties: dark.actualEquivalentPartFacts },
+        donor: entry.equivalentPartFacts.donor,
+        adaptation: entry.equivalentPartFacts.adaptation,
+        muxui: { ...entry.equivalentPartFacts.muxui, properties: light.actualEquivalentPartFacts },
+        muxuiByMode: {
+          light: { ...entry.equivalentPartFacts.muxuiByMode.light, properties: light.actualEquivalentPartFacts },
+          dark: { ...entry.equivalentPartFacts.muxuiByMode.dark, properties: dark.actualEquivalentPartFacts },
         },
       },
     };
   });
-  const coreCaptureProvenance = await buildCoreCaptureProvenance(prepared.nextManifest, captures);
+  const muxuiCaptureProvenance = await buildMuxuiCaptureProvenance(prepared.nextManifest, captures);
   prepared.nextManifest.bootstrap = {
     ...prepared.nextManifest.bootstrap,
-    coreCaptureProvenance: {
-      path: coreCaptureProvenancePath,
-      sha256: jsonSha256(coreCaptureProvenance),
+    muxuiCaptureProvenance: {
+      path: muxuiCaptureProvenancePath,
+      sha256: jsonSha256(muxuiCaptureProvenance),
     },
   };
-  await activateUpdatedManifest(manifest, prepared, coreCaptureProvenance);
+  await activateUpdatedManifest(manifest, prepared, muxuiCaptureProvenance);
   await validateManifest(prepared.nextManifest);
   return prepared.nextManifest;
 }
@@ -661,12 +664,12 @@ async function main() {
   await recoverVisualMigrationActivation();
   const manifest = await readManifest();
   await validateManifest(manifest, {
-    allowMissingCoreCaptureProvenance: updateMode,
-    allowCoreCaptureRunnerSourceDrift: updateMode,
+    allowMissingMuxuiCaptureProvenance: updateMode,
+    allowMuxuiCaptureRunnerSourceDrift: updateMode,
   });
   if (!updateMode) await validateSealedComparison(manifest);
   const executablePath = await findBrowser();
-  if (!executablePath) throw new Error('Chrome or Chromium is required (set CORE_UI_CHROME_EXECUTABLE to override)');
+  if (!executablePath) throw new Error('Chrome or Chromium is required (set MUXUI_CHROME_EXECUTABLE to override)');
   const captureEnvironment = await currentCaptureEnvironment(executablePath);
   if (!updateMode) assertCaptureEnvironment(captureEnvironment, manifest.capture);
   else {
@@ -674,7 +677,7 @@ async function main() {
     if (mismatches.length > 0) console.log(`Updating capture environment: ${mismatches.join('; ')}`);
   }
 
-  const diagnosticRoot = await mkdtemp(join(tmpdir(), 'core-ui-visual-migration-diagnostics-'));
+  const diagnosticRoot = await mkdtemp(join(tmpdir(), 'muxui-visual-migration-diagnostics-'));
   let storybook;
   let baseUrl;
   let browser;
@@ -688,7 +691,9 @@ async function main() {
       viewport: manifest.capture.viewport,
       deviceScaleFactor: manifest.capture.deviceScaleFactor,
       colorScheme: 'light',
+      timezoneId: manifest.capture.clock.timezone,
     });
+    await context.clock.install({ time: manifest.capture.clock.time });
     const page = await context.newPage();
     await context.route('**/*', async (route) => {
       const requestUrl = new URL(route.request().url());
@@ -701,7 +706,7 @@ async function main() {
     await page.emulateMedia({ reducedMotion: manifest.capture.reducedMotion ? 'reduce' : 'no-preference' });
     if (updateMode) {
       const nextManifest = await updateBaselines(page, baseUrl, manifest, captureEnvironment, runToken);
-      console.log(`Updated ${nextManifest.cases.length} Core visual migration baselines; review the Core-owned diff before merging.`);
+      console.log(`Updated ${nextManifest.cases.length} Mux UI visual migration baselines; review the Mux UI-owned diff before merging.`);
       return;
     }
     const results = [];
@@ -724,7 +729,7 @@ async function main() {
     if (failures.length > 0) {
       throw new Error(`${failures.length}/${results.length} visual migration cases drifted; diagnostics: ${diagnosticRoot}`);
     }
-    console.log(`Visual migration check passed: ${results.length} Core light/dark captures.`);
+    console.log(`Visual migration check passed: ${results.length} Mux UI light/dark captures.`);
   } finally {
     await browser?.close();
     await terminateProcess(storybook);
@@ -737,7 +742,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1]
     await main();
   } catch (error) {
     console.error(`Visual migration check failed: ${error instanceof Error ? error.message : String(error)}`);
-    if (process.env.CORE_UI_VISUAL_DEBUG && error instanceof Error) console.error(error.stack);
+    if (process.env.MUXUI_VISUAL_DEBUG && error instanceof Error) console.error(error.stack);
     if (error?.cause) console.error(error.cause);
     process.exitCode = 1;
   }

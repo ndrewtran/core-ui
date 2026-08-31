@@ -1,1 +1,1 @@
-{"schemaVersion":"1.0.0","id":"core:guide:popover-usage","kind":"guide","name":"Popover usage","summary":"Portable usage guidance for Popover.","lifecycle":"experimental","keywords":["popover","overlay","react"],"platforms":["web.react"],"source":"catalog/guides/popover-usage.md"}
+{"schemaVersion":"1.0.0","id":"muxui:guide:popover-usage","kind":"guide","name":"Popover usage","summary":"Portable usage guidance for Popover.","lifecycle":"experimental","keywords":["popover","overlay","react"],"platforms":["web.react"],"source":"catalog/guides/popover-usage.md"}

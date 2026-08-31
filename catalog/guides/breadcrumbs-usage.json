@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "id": "core:guide:breadcrumbs-usage",
+  "id": "muxui:guide:breadcrumbs-usage",
   "kind": "guide",
   "name": "Breadcrumbs usage",
   "summary": "Portable usage guidance for Breadcrumbs.",

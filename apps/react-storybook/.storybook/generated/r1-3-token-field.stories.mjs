@@ -1,6 +1,6 @@
 // @generated-from: apps/react-storybook/src/generate-stories.mjs
-// @generated-content-sha256: sha256:d1b2ca475dc905ef9ef04f6cbb40290582213e05b7c7e59c06569c00d60a1973
-import * as Core from '@core-ui/react';
+// @generated-content-sha256: sha256:e00f964888f074001e9791c715ab2a26435c88bdaa425a4faed508b6c33c7c9d
+import * as MuxUI from '@muxui/react';
 import { argTypesForBinding, createStory } from '../../src/storybook-factory.mjs';
 
 const binding = {
@@ -30,12 +30,12 @@ const binding = {
       "placeholder"
     ]
   },
-  "binding": "core:component:token-field#web.react",
+  "binding": "muxui:component:token-field#web.react",
   "export": "TokenField",
   "lifecycle": "experimental",
   "module": ".",
   "runtimeProfile": "web.react",
-  "selector": ".core-token-field",
+  "selector": ".muxui-token-field",
   "states": [
     "idle",
     "focused",
@@ -48,8 +48,9 @@ const binding = {
 const record = { family: 'TokenField', tranche: 'R1.3', binding };
 
 export default {
-  title: 'Core React/R1.3/TokenField',
-  component: Core.TokenField,
+  title: 'Mux UI React/R1.3/TokenField',
+  id: 'muxui-react-r1-3-token-field',
+  component: MuxUI.TokenField,
   tags: ['autodocs'],
   parameters: {
     controls: {
@@ -57,7 +58,7 @@ export default {
     },
     docs: {
       description: {
-        component: 'Private development showcase for the Core-owned TokenField family.',
+        component: 'Private development showcase for the Mux UI-owned TokenField family.',
       },
     },
   },

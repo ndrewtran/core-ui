@@ -1,6 +1,6 @@
 // @generated-from: apps/react-storybook/src/generate-stories.mjs
-// @generated-content-sha256: sha256:1819db2310eaee04a61874f141bb835999bc6105f22a35589bad9cff3e55b121
-import * as Core from '@core-ui/react';
+// @generated-content-sha256: sha256:fc4ae80cdb08468638b0e390b65e6ef772fbe1f9a3dddaa0283ae1d7c625b2a2
+import * as MuxUI from '@muxui/react';
 import { argTypesForBinding, createStory } from '../../src/storybook-factory.mjs';
 
 const binding = {
@@ -27,12 +27,12 @@ const binding = {
       "disabled"
     ]
   },
-  "binding": "core:component:tag-group#web.react",
+  "binding": "muxui:component:tag-group#web.react",
   "export": "TagGroup",
   "lifecycle": "experimental",
   "module": ".",
   "runtimeProfile": "web.react",
-  "selector": ".core-tag-group",
+  "selector": ".muxui-tag-group",
   "states": [
     "idle",
     "focused",
@@ -45,8 +45,9 @@ const binding = {
 const record = { family: 'TagGroup', tranche: 'R1.3', binding };
 
 export default {
-  title: 'Core React/R1.3/TagGroup',
-  component: Core.TagGroup,
+  title: 'Mux UI React/R1.3/TagGroup',
+  id: 'muxui-react-r1-3-tag-group',
+  component: MuxUI.TagGroup,
   tags: ['autodocs'],
   parameters: {
     controls: {
@@ -54,7 +55,7 @@ export default {
     },
     docs: {
       description: {
-        component: 'Private development showcase for the Core-owned TagGroup family.',
+        component: 'Private development showcase for the Mux UI-owned TagGroup family.',
       },
     },
   },

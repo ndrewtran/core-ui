@@ -1,6 +1,6 @@
 // @generated-from: apps/react-storybook/src/generate-stories.mjs
-// @generated-content-sha256: sha256:a5cc7732029832e078cf9922577658b90ea5fd71384a84a9e36e53d2bb6b4744
-import * as Core from '@core-ui/react';
+// @generated-content-sha256: sha256:451598800446fd3377808eed94c093014f300554a2bc10242590fe2aaeb484ce
+import * as MuxUI from '@muxui/react';
 import { argTypesForBinding, createStory } from '../../src/storybook-factory.mjs';
 
 const binding = {
@@ -21,12 +21,12 @@ const binding = {
       "disabled"
     ]
   },
-  "binding": "core:component:toolbar#web.react",
+  "binding": "muxui:component:toolbar#web.react",
   "export": "Toolbar",
   "lifecycle": "experimental",
   "module": ".",
   "runtimeProfile": "web.react",
-  "selector": ".core-toolbar",
+  "selector": ".muxui-toolbar",
   "states": [
     "idle",
     "focused",
@@ -37,8 +37,9 @@ const binding = {
 const record = { family: 'Toolbar', tranche: 'R1.3', binding };
 
 export default {
-  title: 'Core React/R1.3/Toolbar',
-  component: Core.Toolbar,
+  title: 'Mux UI React/R1.3/Toolbar',
+  id: 'muxui-react-r1-3-toolbar',
+  component: MuxUI.Toolbar,
   tags: ['autodocs'],
   parameters: {
     controls: {
@@ -46,7 +47,7 @@ export default {
     },
     docs: {
       description: {
-        component: 'Private development showcase for the Core-owned Toolbar family.',
+        component: 'Private development showcase for the Mux UI-owned Toolbar family.',
       },
     },
   },

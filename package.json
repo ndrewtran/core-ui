@@ -1,8 +1,8 @@
 {
-  "name": "@core-ui/workspace",
+  "name": "@muxui/workspace",
   "version": "0.0.0",
   "private": true,
-  "description": "Core UI monorepo workspace",
+  "description": "Mux UI monorepo workspace",
   "engines": {
     "node": ">=24.19.0 <25",
     "pnpm": "10.33.0"
@@ -17,6 +17,6 @@
     "release:prepare": "pnpm check:all && pnpm generate:check && node tooling/audits/repository-policy/src/release-prepare.mjs"
   },
   "devDependencies": {
-    "@core-ui/catalog": "workspace:*"
+    "@muxui/catalog": "workspace:*"
   }
 }

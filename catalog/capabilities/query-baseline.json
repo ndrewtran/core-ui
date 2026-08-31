@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "id": "core:capability:query-baseline",
+  "id": "muxui:capability:query-baseline",
   "kind": "capability",
   "name": "Query baseline",
   "summary": "Pure API and CLI manifest, list, search, and get operations.",

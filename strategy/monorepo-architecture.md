@@ -1,14 +1,21 @@
-# Core UI monorepo architecture
+# Mux UI monorepo architecture
 
 - Status: Final architecture
-- Product: Core UI
+- Product: Mux UI
 - Scope: monorepo, public packages, documentation, CLI, MCP, and agent workflows
 
 ## Executive decision
 
-Core UI is built as:
+Decision 0012 resets the current pre-publication product identity to Mux UI,
+with machine identity `muxui`, package scope `@muxui/*`, active artifact and
+schema namespace `muxui:`, CLI `muxui`, and public styling hooks rooted in
+`.muxui-*`, `--muxui-*`, and `data-muxui-*`. No compatibility alias is required
+because no public npm release exists. Historical records retain their original
+predecessor identities and bytes.
 
-> Core UI is a versioned design-system knowledge graph whose primary component
+Mux UI is built as:
+
+> Mux UI is a versioned design-system knowledge graph whose primary component
 > product is React. Framework-free web and React Native are separately
 > activated secondary renderers. Package guidance, and later the CLI, MCP,
 > docs site, and agent context, are projections of the same canonical sources.
@@ -18,7 +25,7 @@ The architecture has one central rule:
 > Author a public fact once, expose it everywhere, and prove every renderer
 > still agrees with it.
 
-At the first public component boundary, the published `@core-ui/react`
+At the first public component boundary, the published `@muxui/react`
 prerelease contains deterministic, version-bound package guidance generated
 from canonical component records and `web.react` binding specs. The CLI becomes
 the primary exact-version documentation and discovery interface at the later
@@ -26,25 +33,25 @@ Productization boundary. It is never a second authoring system: it reads an
 immutable catalog compiled from canonical artifact sources, and the docs site
 and MCP server use the same query library and responses.
 
-Core UI delivers React first:
+Mux UI delivers React first:
 
 - **Primary React track:** typed React bindings, DOM/CSS behavior, styling
   hooks, SSR/hydration, and accessibility fulfillment owned by `web.react`
-  binding specs and `@core-ui/react` source.
+  binding specs and `@muxui/react` source.
 - **Later framework-free web track:** separately activated `web.html` binding
-  specs and `@core-ui/web` HTML/CSS/controller implementation.
+  specs and `@muxui/web` HTML/CSS/controller implementation.
 - **Later native track:** separately activated `native.react-native` binding
-  specs and `@core-ui/react-native` implementations built from native
+  specs and `@muxui/react-native` implementations built from native
   primitives and renderer-neutral component records, never from React source,
   React Aria, DOM behavior, or React types.
 
 React Aria Components is the default internal substrate for the React track.
-It does not own Core UI identity, inventory, semantics, API, types, lifecycle,
+It does not own Mux UI identity, inventory, semantics, API, types, lifecycle,
 accessibility requirements, styling hooks, compatibility, support, guidance,
 or platform claims. Other renderers and frameworks remain deferred until their
 own activation and proof boundaries pass.
 
-Core UI is a product system first. The catalog and tooling exist to make the
+Mux UI is a product system first. The catalog and tooling exist to make the
 renderer system understandable, operable, and provable; they do not compete
 with it for product priority. Canonical schema and discovery primitives precede
 component breadth so that operability is structural rather than retrofitted.
@@ -59,9 +66,9 @@ consistently:
 
 | Term | Exact meaning |
 | --- | --- |
-| `ArtifactRef` | Immutable logical identity in the form `core:<kind>:<slug>`; it is neither a version nor a content digest. |
+| `ArtifactRef` | Immutable logical identity in the form `muxui:<kind>:<slug>`; it is neither a version nor a content digest. |
 | Concept record | Canonical shared semantics, lifecycle, guidance, relations, and platform dispositions for a component or pattern. |
-| Binding spec | Platform-specific Core UI API, behavior, accessibility obligations, strategy, examples, and proof requirements. |
+| Binding spec | Platform-specific Mux UI API, behavior, accessibility obligations, strategy, examples, and proof requirements. |
 | Decision context | Bounded rationale attached to an existing concept, pattern, or guide: the problem, constraints, preferred approach, alternatives, and trade-offs. It explains owned facts but is not a second source of product behavior. |
 | Guidance impact | `normative` content enters a binding-spec compatibility closure; `editorial` content may explain an already-owned fact but cannot define implementation behavior. |
 | Content revision | Digest of the complete canonical record, including editorial fields and inert extensions. It proves source identity, not renderer compatibility. |
@@ -75,7 +82,7 @@ consistently:
 | Platform safety requirement set | A derived per-binding/profile projection of the platform safety contract, bound to the registry and declaration revisions and consumed by renderer evidence and compatibility descriptors. |
 | Token contract version | SemVer for public token identity, type, layer, and semantic meaning. |
 | Evidence record | Produced proof metadata and references for one artifact, binding, revision, environment, and result. |
-| Catalog release | One immutable `@core-ui/catalog` package version and digest containing a compatible compiled knowledge/query projection. |
+| Catalog release | One immutable `@muxui/catalog` package version and digest containing a compatible compiled knowledge/query projection. |
 | Release manifest | Immutable aggregate of package versions, catalog/schema/token versions, binding-spec revisions, evidence and active-exception digests, and provenance. |
 | Runtime profile | A concrete environment inside a binding, such as iOS, Android, or React Native Web, with inherited or overridden lifecycle/strategy and evidence. |
 | Lifecycle | Maturity axis: `experimental`, `stable`, `deprecated`, or `removed`. |
@@ -92,7 +99,7 @@ the terms above.
 
 ## What “AI-first” means
 
-AI-first is an architectural property, not a documentation label. Core UI is
+AI-first is an architectural property, not a documentation label. Mux UI is
 AI-operable only when all of the following are true.
 
 ### At the system and tooling level
@@ -119,7 +126,7 @@ AI-operable only when all of the following are true.
 
 - Components use consistent names, parts, states, defaults, event semantics,
   and controlled/uncontrolled conventions.
-- Core UI-owned props are finite and explicit. Aliases, polymorphic overloads,
+- Mux UI-owned props are finite and explicit. Aliases, polymorphic overloads,
   implicit modes, and stringly typed escape hatches are exceptional.
 - Composition is visible in the API. Required parents, children, labels, and
   providers are machine-readable.
@@ -232,7 +239,7 @@ Each kind uses a dedicated schema or a deliberately shared schema family:
 This preserves one graph for discovery and relations without flattening design
 data, prose, executable fixtures, and tooling metadata into false sameness.
 
-IDs use `core:<kind>:<slug>`, for example `core:component:button`. IDs are
+IDs use `muxui:<kind>:<slug>`, for example `muxui:component:button`. IDs are
 immutable once released. Display names, package paths, and URLs may change
 without destroying history.
 
@@ -266,7 +273,7 @@ A component record owns shared intent before renderer details:
 - lifecycle and ownership; and
 - a binding record for every declared platform.
 
-Each platform binding spec owns its exact Core UI API, lifecycle, strategy,
+Each platform binding spec owns its exact Mux UI API, lifecycle, strategy,
 deviations, validation profile, and relations to compatible examples. The
 compiler derives source locations, package exports, and package versions from
 the repository and package manifests.
@@ -277,7 +284,7 @@ An abbreviated source record looks like this:
 {
   "$schema": "../../../packages/schema/schemas/component.schema.json",
   "schemaVersion": "1.0.0",
-  "id": "core:component:button",
+  "id": "muxui:component:button",
   "kind": "component",
   "name": "Button",
   "summary": "Triggers an immediate action.",
@@ -299,7 +306,7 @@ An abbreviated source record looks like this:
       "spec": "bindings/web.json",
       "examples": [
         {
-          "id": "core:example:button-basic-html",
+          "id": "muxui:example:button-basic-html",
           "guidanceImpact": "normative"
         }
       ]
@@ -310,7 +317,7 @@ An abbreviated source record looks like this:
       "spec": "bindings/react.json",
       "examples": [
         {
-          "id": "core:example:button-basic-react",
+          "id": "muxui:example:button-basic-react",
           "guidanceImpact": "normative"
         }
       ]
@@ -321,7 +328,7 @@ An abbreviated source record looks like this:
       "spec": "bindings/react-native.json",
       "examples": [
         {
-          "id": "core:example:button-basic-react-native",
+          "id": "muxui:example:button-basic-react-native",
           "guidanceImpact": "normative"
         }
       ],
@@ -341,7 +348,7 @@ An abbreviated source record looks like this:
       }
     }
   },
-  "pitfalls": ["core:pitfall:button-is-not-navigation"]
+  "pitfalls": ["muxui:pitfall:button-is-not-navigation"]
 }
 ```
 
@@ -398,7 +405,7 @@ The source hierarchy is explicit:
 
 1. Concept records own product semantics, artifact lifecycle, guidance,
    relations, renderer-neutral risk, and renderer-neutral alternatives.
-2. Platform binding specs own Core UI-defined API fields, binding and
+2. Platform binding specs own Mux UI-defined API fields, binding and
    supported-profile lifecycle, strategy, deviations, validation profiles,
    platform dispositions, and canonical-example relations.
 3. Token sources own design values and semantic aliases.
@@ -418,8 +425,8 @@ fact.
 | --- | --- | --- | --- |
 | Product semantics | Intent, use/avoid guidance, decision context, artifact lifecycle | Artifact source | Author once. |
 | Portable semantics | Semantic parts, conceptual states, accessibility obligations | Concept record or foundation semantic source | Author once. |
-| Binding API | Core-owned props, attributes, events, slots, defaults, deviations | Binding spec | Author the stable semantic surface; generate serializable types and reference output. |
-| Host type ergonomics | Passthrough props, generic constraints, refs, narrowed platform events, JSX inference | Renderer TypeScript | Hand-author and validate; never introduce undocumented Core UI semantics. |
+| Binding API | Mux UI-owned props, attributes, events, slots, defaults, deviations | Binding spec | Author the stable semantic surface; generate serializable types and reference output. |
+| Host type ergonomics | Passthrough props, generic constraints, refs, narrowed platform events, JSX inference | Renderer TypeScript | Hand-author and validate; never introduce undocumented Mux UI semantics. |
 | Runtime implementation | CSS, DOM controller, React code, React Native code | Renderer package | Author and prove against the binding spec. |
 | Mechanical metadata | Package version, export/source path, source/content/spec revision | Package and build graph | Derive by convention, canonical serialization, or compiler inspection. |
 | Executable guidance | Examples and fixtures | Example source file | Author once; reference by stable ID. |
@@ -453,16 +460,16 @@ to independently evolving editorial content would recreate whole-catalog
 coupling. The catalog and query provenance still identify the exact content
 returned.
 
-Binding specs describe only the stable Core UI surface: component-owned
+Binding specs describe only the stable Mux UI surface: component-owned
 props, variants, defaults, parts, events, conceptual controlled/uncontrolled
 modes, and accessibility or composition obligations. They do not attempt to
 encode all of TypeScript, JSX, DOM, or React Native's host type systems.
 
-Serializable Core UI types may be generated from the binding spec.
+Serializable Mux UI types may be generated from the binding spec.
 Hand-authored renderer TypeScript owns host-element passthrough, generic
 constraints, ref precision, event narrowing, platform-owned props, overloads,
 and framework inference. Spec-to-code checks verify that these refinements
-satisfy the Core UI surface without adding undocumented Core UI variants,
+satisfy the Mux UI surface without adding undocumented Mux UI variants,
 defaults, events, or behavior. Standard passthrough surfaces are named profiles
 such as `html.button` or `react-native.pressable`; they are not duplicated as
 thousands of catalog properties.
@@ -507,7 +514,7 @@ supports the request, it returns a typed unsupported result with missing
 requirements rather than plausible prose. Consumer templates and scaffolds
 remain a later, separately gated capability.
 
-V1 enforcement is confined to Core UI-owned sources. The compiler validates a
+V1 enforcement is confined to Mux UI-owned sources. The compiler validates a
 pattern's references and constraints against the artifact graph and binding
 specs, verifies that every canonical example declares the applicable
 pattern revision, and may run narrow structural AST checks over those
@@ -555,7 +562,7 @@ people and agents. The site consumes the same documentation, every command
 supports JSON, a capability manifest describes the command surface, and
 `--dense` reduces token cost.
 
-Core UI enforces this through a strict internal separation:
+Mux UI enforces this through a strict internal separation:
 
 ```text
 artifact sources -> catalog compiler -> query engine -> output renderer
@@ -570,15 +577,15 @@ cannot become tangled.
 Keep the ontology small and stable:
 
 ```text
-core manifest
-core list [kind]
-core search <query>
-core get <id-or-alias>
-core plan <request>
-core validate <path... | --stdin>
-core doctor
-core init
-core migrate
+muxui manifest
+muxui list [kind]
+muxui search <query>
+muxui get <id-or-alias>
+muxui plan <request>
+muxui validate <path... | --stdin>
+muxui doctor
+muxui init
+muxui migrate
 ```
 
 This is the stable namespace, not a promise that every command ships in the
@@ -597,7 +604,7 @@ modules and release gates even though one CLI exposes them. Mutation cannot
 shape or delay the catalog query API.
 
 `list`, `search`, `get`, and `plan` query the same mixed artifact graph. Human
-aliases such as `core component Button` may exist, but they resolve to the same
+aliases such as `muxui component Button` may exist, but they resolve to the same
 `get` operation and response type rather than creating another component data
 path.
 
@@ -632,7 +639,7 @@ stderr. A success response has this shape:
   "type": "artifact.detail",
   "data": {},
   "meta": {
-    "coreVersion": "1.0.0",
+    "muxuiVersion": "1.0.0",
     "catalogVersion": "1.0.0",
     "catalogDigest": "sha256:...",
     "resolution": {
@@ -645,8 +652,8 @@ stderr. A success response has this shape:
         "bindingSpec": "sha256:..."
       },
       "targetPackages": {
-        "@core-ui/react": "1.0.0",
-        "@core-ui/web": "1.0.0"
+        "@muxui/react": "1.0.0",
+        "@muxui/web": "1.0.0"
       }
     },
     "platform": "web.react",
@@ -665,7 +672,7 @@ Errors use append-only codes:
   "apiVersion": "1.0.0",
   "type": "error",
   "error": {
-    "code": "CORE_ARTIFACT_NOT_FOUND",
+    "code": "MUXUI_ARTIFACT_NOT_FOUND",
     "ruleId": "artifact.resolve.exists",
     "message": "No artifact matched 'Buttn'.",
     "retryable": true,
@@ -673,14 +680,14 @@ Errors use append-only codes:
       "query": "Buttn"
     },
     "nextCommand": {
-      "command": "core search button --json",
+      "command": "muxui search button --json",
       "effect": "read-only",
       "requiresConfirmation": false
     },
     "suggestions": [
       {
-        "id": "core:component:button",
-        "command": "core get core:component:button --platform web.react --dense"
+        "id": "muxui:component:button",
+        "command": "muxui get muxui:component:button --platform web.react --dense"
       }
     ]
   }
@@ -714,14 +721,14 @@ Dense mode is a designed format, not minified prose. It must be:
 An illustrative response might be:
 
 ```text
-component core:component:button@1 platform=web.react lifecycle=stable strategy=direct
-import=@core-ui/react/button export=Button
+component muxui:component:button@1 platform=web.react lifecycle=stable strategy=direct
+import=@muxui/react/button export=Button
 intent=action; not-navigation
 props variant=primary|neutral|danger default:primary; size=sm|md|lg default:md
 states=disabled,pending,pressed,focus-visible
 a11y=name-required; exposes:disabled,busy; pending-retains-focus
-examples=core:example:button-basic-react
-pitfalls=core:pitfall:button-is-not-navigation
+examples=muxui:example:button-basic-react
+pitfalls=muxui:pitfall:button-is-not-navigation
 source=packages/react/src/components/button
 ```
 
@@ -730,7 +737,7 @@ silently doubles common retrieval cost fails CI.
 
 ### Self-describing manifest
 
-`core manifest --json` is the agent's cold-start entry point. It describes:
+`muxui manifest --json` is the agent's cold-start entry point. It describes:
 
 - CLI name and version;
 - command and subcommand grammar;
@@ -746,12 +753,12 @@ The manifest, parser, `--help`, completion data, JSON types, and MCP tool input
 schemas are generated from one declarative command registry. Adding a command
 without response types, schemas, examples, and capability policy fails CI.
 
-Bare `core --json` may embed the manifest for recovery when an agent does not
+Bare `muxui --json` may embed the manifest for recovery when an agent does not
 yet know the `manifest` command.
 
 ## One query engine, several surfaces
 
-`@core-ui/catalog` exposes pure, side-effect-free operations:
+`@muxui/catalog` exposes pure, side-effect-free operations:
 
 ```ts
 getManifest()
@@ -812,7 +819,7 @@ page is a rendering of `artifact.detail`; it does not maintain a second prop
 table, example, or pitfall list.
 
 `AGENTS.md`, `CLAUDE.md`, editor rules, and `llms.txt` are small generated
-bootstrap files. They teach the discovery loop and record the installed Core
+bootstrap files. They teach the discovery loop and record the installed Mux UI
 UI version. They do not contain the complete component catalog.
 
 `llms-full.txt` may be offered as a versioned offline export for environments
@@ -876,7 +883,7 @@ exists only when a capability relation explicitly claims it. A
 `native-alternative` can therefore conform fully without copying a web feature
 set.
 
-### `@core-ui/foundation` internal boundaries
+### `@muxui/foundation` internal boundaries
 
 The foundation is one package only while that remains the smallest coherent
 distribution unit, but its source has three enforced sub-boundaries:
@@ -900,7 +907,7 @@ set does not inherit the claim. Promotion to a broadly shared machine requires
 evidence from materially different renderer mechanisms, not multiple wrappers
 over the same implementation.
 
-### `@core-ui/web`
+### `@muxui/web`
 
 The web package is the later, separately activated framework-free web product.
 It does not block React admission, implementation, merge, prerelease
@@ -926,8 +933,8 @@ default. Public events are typed and named by intent. Progressive enhancement
 is preferred whenever native HTML can carry the base behavior.
 
 The documented CSS surface is a public API. Component roots use a predictable
-class such as `.core-button`; named descendants use stable slots such as
-`[data-core-slot="label"]`; interaction state uses documented data attributes.
+class such as `.muxui-button`; named descendants use stable slots such as
+`[data-muxui-slot="label"]`; interaction state uses documented data attributes.
 Raw palette values are not consumed directly by component CSS: components use
 semantic or component tokens that can be compiled for both web and native.
 
@@ -947,36 +954,36 @@ deprecated hooks as aliases for their declared notice window. This preserves a
 useful framework-free API without making every refactor a compatibility
 commitment.
 
-### `@core-ui/react`
+### `@muxui/react`
 
 React is the primary component implementation and first public component
-package. Each `web.react` binding spec owns the Core React DOM, public API and
+package. Each `web.react` binding spec owns the Mux UI React DOM, public API and
 types, observable behavior, accessibility fulfillment and deviations, events,
 slots, styling hooks, defaults, lifecycle, strategy, validation profile,
 canonical-example relations, platform-safety declarations, and compatibility
-promises. `@core-ui/react` source owns React rendering, controlled and
+promises. `@muxui/react` source owns React rendering, controlled and
 uncontrolled state, runtime and effect lifecycle, portals, refs, host
 passthrough refinements, DOM implementation, compiled CSS implementation,
 SSR, hydration, and cleanup.
 
-`@core-ui/react` does not consume `@core-ui/web` at runtime. Canonical tokens,
+`@muxui/react` does not consume `@muxui/web` at runtime. Canonical tokens,
 component records, binding specs, compatibility data, descriptors, and package
 guidance may be deterministically compiled into its tarball by private build
 authorities without becoming runtime workspace dependencies or duplicate
 owners.
 
-For Core value adapters, `@core-ui/react` is approved to directly use
+For Mux UI value adapters, `@muxui/react` is approved to directly use
 `@internationalized/date@3.12.3` as an internal runtime dependency only for
 `DateField`, `DatePicker`, `DateRangePicker`, `TimeField`, `Calendar`, and
 `RangeCalendar`. It is the single resolved `3.12.3` instance already present
 in the pinned `react-aria-components@1.20.0` closure, so the direct declaration
-adds no installed package or version. Core public values remain ISO dates
-`YYYY-MM-DD`, local times `HH:mm[:ss[.fraction]]`, and Core-owned `{start,end}`
+adds no installed package or version. Mux UI public values remain ISO dates
+`YYYY-MM-DD`, local times `HH:mm[:ss[.fraction]]`, and Mux UI-owned `{start,end}`
 ranges. No `@internationalized/date` or React Aria public type, value, import
 path, export, lifecycle, or ownership path may leak through the package; this
 is an internal, replaceable adapter dependency only.
 
-For existing R1 control affordances, `@core-ui/react` is also approved to
+For existing R1 control affordances, `@muxui/react` is also approved to
 directly use `lucide-react@1.37.0` as an exact internal, replaceable runtime
 dependency. Its npm integrity is
 `sha512-LPsB4rD1TD6wZu1djKOf9vUnS1jTNaHbolXebXDgiTdb6jeA1agIJhJsIybCmjKmQClcOaal1o1OaiYahEftyQ==`;
@@ -986,7 +993,7 @@ DOM peer boundary. Use is limited to `DatePicker`/`DateRangePicker` calendar
 triggers; `Calendar`/`RangeCalendar` previous/next controls;
 `ComboBox`/`Select` and `Tree` chevrons; `SearchField` clear;
 `NumberField` plus/minus; `Checkbox` check/indeterminate; `TagGroup` remove;
-and `Dialog`/`Toast` close. Core owns all labels and public contracts. No
+and `Dialog`/`Toast` close. Mux UI owns all labels and public contracts. No
 Lucide export, type, name, prop, or import path, and no public Icon API,
 catalog, or package, may cross the package boundary. Breadcrumb separators are
 text and no Search icon is added.
@@ -995,7 +1002,7 @@ text and no Search icon is added.
 
 The initial React visual implementation uses the matching component styling
 from Tale UI commit `94bf62a26c02605c8928dfeb24f0ddc4be1c92fd` as a pinned,
-one-time donor whenever an admitted Core React component has an applicable Tale
+one-time donor whenever an admitted Mux UI React component has an applicable Tale
 counterpart. The donor snapshot includes `packages/styles/src` tree
 `aea4eadffe226656ef0ab012409ed39070975a76`, the related React source tree
 `d93f7c0a555066d8abbaff75cb8bd216938bcb2f`, and the CSS foundation tree
@@ -1004,13 +1011,13 @@ counterpart. The donor snapshot includes `packages/styles/src` tree
 Tale supplies visual and structural input only. It is not a runtime, build,
 development, generated-source, or synchronization dependency; Tale package
 names, `.tale-*` selectors, custom-property names, component APIs, registry
-records, and story files do not become Core public contracts by copying. The
+records, and story files do not become Mux UI public contracts by copying. The
 fixed 53-family table maps applicable donor CSS and shared primitive rules to
-the Core-owned `web.react` styling-hook contract and token requirements, then
+the Mux UI-owned `web.react` styling-hook contract and token requirements, then
 records `adopt`, `adapt`, or `no-applicable-donor` with a reason for each
 committed family. `defer` and `reject` apply only to documented upstream
 material outside that committed family table. The resulting CSS is owned
-solely by `@core-ui/react` source.
+solely by `@muxui/react` source.
 
 For an applicable donor in the fixed 53 table, delivered/exportable closure is
 limited to `adopt` or `adapt`; `no-applicable-donor` is valid only when the
@@ -1019,15 +1026,15 @@ the committed family table remains a fail-closed upstream disposition and
 does not remove or postpone a committed family.
 
 Every consumed donor custom property resolves through an exact crosswalk to an
-existing Core token, a separately admitted Core semantic/component token, or a
+existing Mux UI token, a separately admitted Mux UI semantic/component token, or a
 reasoned non-token adaptation. A permanent Tale compatibility-token layer,
 ambient donor checkout, or second style registry is forbidden. Visual donor
-comparison proves the intended starting point; the Core binding contract,
+comparison proves the intended starting point; the Mux UI binding contract,
 accessibility obligations, platform-safety rules, and responsible fixes take
-precedence when exact copying would violate Core authority.
+precedence when exact copying would violate Mux UI authority.
 
 A private R1 React playground may render generated adapters over canonical
-Core examples for component development, state/theme/mode coverage, automated
+Mux UI examples for component development, state/theme/mode coverage, automated
 accessibility checks, and visual donor comparison. It owns no example,
 component, token, styling-hook, lifecycle, support, or release fact and is not a
 public documentation surface. Public React documentation and explorer delivery
@@ -1038,8 +1045,8 @@ theme outputs but does not port, publish, or depend on Scale.
 R1.0 also owns a license and attribution audit for every copied or adapted
 donor input. Any distributed substantial portion must preserve the applicable
 Tale MIT notice, including its stated third-party portions, in the exact
-`@core-ui/react` package and release artifacts. Provenance and notice files are
-Core-owned release inputs; they do not create a Tale dependency or live owner.
+`@muxui/react` package and release artifacts. Provenance and notice files are
+Mux UI-owned release inputs; they do not create a Tale dependency or live owner.
 
 Exactly one integration owns a mounted component root at runtime. A React
 binding does not attach the lifecycle-bearing vanilla controller to DOM it
@@ -1062,9 +1069,9 @@ therefore either pure, or explicitly constructed and disposed by React—it does
 not start autonomous global lifecycle work on import.
 
 React Aria Components is the default internal React substrate and is pinned as
-an exact runtime dependency for each accepted baseline. Core UI owns its public
-contract. React Aria types and exports are not re-exported as Core UI API, and
-an upstream export does not become a Core UI component without a canonical
+an exact runtime dependency for each accepted baseline. Mux UI owns its public
+contract. React Aria types and exports are not re-exported as Mux UI API, and
+an upstream export does not become a Mux UI component without a canonical
 component mapping. `defer`, `exclude`, or `not-a-component` dispositions are
 for documented upstream material outside the fixed 53 committed families.
 
@@ -1076,12 +1083,12 @@ React must not become the source for:
 - React Native parity; or
 - documentation content.
 
-### `@core-ui/react-native`
+### `@muxui/react-native`
 
 React Native is a later, separately activated secondary product. It implements
 or adapts renderer-neutral component contracts through each component's
 `native.react-native` binding spec and depends on renderer-neutral foundation
-and token outputs, never on `@core-ui/web`, `@core-ui/react`, React Aria,
+and token outputs, never on `@muxui/web`, `@muxui/react`, React Aria,
 React DOM, CSS, browser globals, Expo, or Storybook.
 
 It owns:
@@ -1094,7 +1101,7 @@ It owns:
 - explicit iOS, Android, and React Native Web implementation files when
   needed.
 
-The binding spec, rather than React source, owns the native Core API,
+The binding spec, rather than React source, owns the native Mux UI API,
 observable platform behavior, accessibility fulfillment and deviations,
 binding and supported-profile lifecycle, strategy, validation profiles,
 canonical-example relations, platform-safety declarations, and compatibility
@@ -1117,7 +1124,7 @@ API or ownership divergence makes that distinction real.
 ### Later framework bindings
 
 A future Vue, Svelte, Web Components, or other framework package binds to the
-existing `web.html` binding spec and `@core-ui/web` styles/controllers. It adds a
+existing `web.html` binding spec and `@muxui/web` styles/controllers. It adds a
 new platform binding record and framework examples to existing component IDs.
 It does not fork shared guidance or create a parallel component registry.
 
@@ -1129,13 +1136,13 @@ framework bindings demonstrate the repeated shape.
 ```mermaid
 flowchart TD
   canonical["private canonical/build authorities\nschema, tokens, foundation, catalog, tooling"]
-  react["@core-ui/react@0.1.0-alpha.N\nfirst public component package"]
+  react["@muxui/react@0.1.0-alpha.N\nfirst public component package"]
   aria["react-aria-components@1.20.0\nexact internal runtime dependency"]
   temporal["@internationalized/date@3.12.3\napproved internal temporal adapter dependency"]
   lucide["lucide-react@1.37.0\ninternal R1 control affordances only"]
   peers["react + react-dom\n>=19.2.0 <20 peers"]
-  web["@core-ui/web\nlater W1 track"]
-  native["@core-ui/react-native\nlater N1 track"]
+  web["@muxui/web\nlater W1 track"]
+  native["@muxui/react-native\nlater N1 track"]
 
   canonical -. deterministic compilation .-> react
   aria --> react
@@ -1146,21 +1153,21 @@ flowchart TD
   canonical -. later activation .-> native
 ```
 
-The React-primary prerelease publishes exactly `@core-ui/react`. It has no
-runtime dependency on another Core UI workspace package or `@core-ui/web`.
+The React-primary prerelease publishes exactly `@muxui/react`. It has no
+runtime dependency on another Mux UI workspace package or `@muxui/web`.
 React and React DOM are peers at `>=19.2.0 <20`; React Aria Components is the
 exact `1.20.0` runtime dependency for the accepted baseline, and
 `@internationalized/date@3.12.3` is the approved direct internal runtime
 dependency for
-Core value adapters in exactly `DateField`, `DatePicker`, `DateRangePicker`,
+Mux UI value adapters in exactly `DateField`, `DatePicker`, `DateRangePicker`,
 `TimeField`, `Calendar`, and `RangeCalendar`. The latter is already the single
 resolved `3.12.3` instance in the React Aria closure, so direct declaration
-adds no installed package or version. Core public values remain ISO dates
-`YYYY-MM-DD`, local times `HH:mm[:ss[.fraction]]`, and Core-owned `{start,end}`
+adds no installed package or version. Mux UI public values remain ISO dates
+`YYYY-MM-DD`, local times `HH:mm[:ss[.fraction]]`, and Mux UI-owned `{start,end}`
 ranges; neither `@internationalized/date` nor React Aria public type, value,
 import path, export, lifecycle, or ownership may leak. The packed tarball must
 contain no unresolved `workspace:` dependency, repository-only or source-tree
-import, undeclared file dependency, or `@core-ui/web` import.
+import, undeclared file dependency, or `@muxui/web` import.
 
 The same graph includes the exact direct internal runtime dependency
 `lucide-react@1.37.0` for the existing R1 control affordances only. Its npm
@@ -1168,18 +1175,18 @@ integrity is
 `sha512-LPsB4rD1TD6wZu1djKOf9vUnS1jTNaHbolXebXDgiTdb6jeA1agIJhJsIybCmjKmQClcOaal1o1OaiYahEftyQ==`;
 the package is ISC with the Feather-derived MIT notice, and React
 peer-compatible. No Lucide export, type, name, prop, import path, or public
-Icon API/catalog/package is part of the Core surface.
+Icon API/catalog/package is part of the Mux UI surface.
 
 | Package | Responsibility | Must not own |
 | --- | --- | --- |
-| `@core-ui/schema` | Versioned source and response schemas, generated types, platform IDs, and authoring helpers. A later admitted capability may add a `ChangeIntentEnvelope` grammar. | Product semantics, components, renderers, or site code. |
-| `@core-ui/tokens` | Canonical tokens and deterministic web/native/design-tool transforms. | Component behavior or docs rendering. |
-| `@core-ui/foundation` | Enforced `semantic`, pure `logic`, and optional portable `interaction` sub-boundaries. | Selectors, React hooks, browser globals, native views, or mandatory cross-platform transitions. |
-| `@core-ui/web` | Later W1 HTML/CSS/controller implementation for `web.html` binding specs. | React or native implementation; a React prerequisite, shared React runtime, or shared React CSS owner. |
-| `@core-ui/react` | React rendering, CSS, SSR/hydration, effects, host refinements, package guidance, and exports for `web.react` contracts. | Canonical component metadata, React Aria public API, or another renderer's contract. |
-| `@core-ui/react-native` | Later N1 native primitive/runtime implementation and explicit platform files for native binding specs. | React/React Aria authority, CSS parsing, DOM, Expo, or Storybook hosts. |
-| `@core-ui/catalog` | Compiled catalog assets and pure discovery/query/planning API. | CLI parsing, MCP transport, project mutation. |
-| `@core-ui/tooling` | Self-describing CLI, MCP adapters, local validation, maintainer scaffolds, semantic diffs, and (when separately admitted) safe project operations. | A second artifact index, product decisions, or renderer implementation. |
+| `@muxui/schema` | Versioned source and response schemas, generated types, platform IDs, and authoring helpers. A later admitted capability may add a `ChangeIntentEnvelope` grammar. | Product semantics, components, renderers, or site code. |
+| `@muxui/tokens` | Canonical tokens and deterministic web/native/design-tool transforms. | Component behavior or docs rendering. |
+| `@muxui/foundation` | Enforced `semantic`, pure `logic`, and optional portable `interaction` sub-boundaries. | Selectors, React hooks, browser globals, native views, or mandatory cross-platform transitions. |
+| `@muxui/web` | Later W1 HTML/CSS/controller implementation for `web.html` binding specs. | React or native implementation; a React prerequisite, shared React runtime, or shared React CSS owner. |
+| `@muxui/react` | React rendering, CSS, SSR/hydration, effects, host refinements, package guidance, and exports for `web.react` contracts. | Canonical component metadata, React Aria public API, or another renderer's contract. |
+| `@muxui/react-native` | Later N1 native primitive/runtime implementation and explicit platform files for native binding specs. | React/React Aria authority, CSS parsing, DOM, Expo, or Storybook hosts. |
+| `@muxui/catalog` | Compiled catalog assets and pure discovery/query/planning API. | CLI parsing, MCP transport, project mutation. |
+| `@muxui/tooling` | Self-describing CLI, MCP adapters, local validation, maintainer scaffolds, semantic diffs, and (when separately admitted) safe project operations. | A second artifact index, product decisions, or renderer implementation. |
 
 At the React package-only boundary, schema, tokens, foundation, catalog, and
 tooling remain private authoring/build/proof authorities. Productization later
@@ -1190,14 +1197,14 @@ catalog digest.
 
 ### Catalog distribution and resolution
 
-`@core-ui/catalog` is a published, versioned data/query package. It contains the
+`@muxui/catalog` is a published, versioned data/query package. It contains the
 immutable compiled catalog, search index, and pure query engine; it consumes
-the schemas owned by `@core-ui/schema` rather than copying them. Renderer
+the schemas owned by `@muxui/schema` rather than copying them. Renderer
 packages do not carry the catalog and do not depend on it at runtime. Renderer
 consumers install it as a development dependency, while tooling and the docs
 application consume its query API. Official installation profiles add
-compatible renderer packages plus project-local `@core-ui/tooling` and
-`@core-ui/catalog`, so discovery remains offline, deterministic, and
+compatible renderer packages plus project-local `@muxui/tooling` and
+`@muxui/catalog`, so discovery remains offline, deterministic, and
 project-correct.
 
 The published package version equals `catalogVersion`, and its manifest records
@@ -1219,14 +1226,14 @@ For example:
 ```json
 {
   "descriptorVersion": "1.0.0",
-  "package": "@core-ui/react",
+  "package": "@muxui/react",
   "version": "1.4.0",
   "bindingSchemaRange": "^1.0.0",
   "tokenContractRange": "^1.2.0",
   "bindings": {
-    "core:component:button#web.react": {
+    "muxui:component:button#web.react": {
       "specRevision": "sha256:...",
-      "export": "@core-ui/react/button",
+      "export": "@muxui/react/button",
       "lifecycle": "stable",
       "strategy": "direct",
       "tokenRequirementsDigest": "sha256:..."
@@ -1249,9 +1256,9 @@ incompatibility.
 
 The local resolver follows one deterministic algorithm:
 
-1. Locate the project/workspace root and read the installed Core UI package
+1. Locate the project/workspace root and read the installed Mux UI package
    graph; lockfile declarations alone are not proof that a package is usable.
-2. Resolve the directly declared project-local `@core-ui/catalog` from that
+2. Resolve the directly declared project-local `@muxui/catalog` from that
    exact workspace using the active package manager's resolution semantics. Do
    not scan sibling workspaces or ancestors for a higher version.
 3. Read renderer compatibility descriptors and compare the resolved catalog
@@ -1278,8 +1285,8 @@ authority over a project-local tool and catalog.
 
 The `package.json` range is the authored dependency request; the package-manager
 lockfile is its generated exact version/integrity resolution. Together they are
-the sole project dependency authority. A separate `core-ui.lock` would
-duplicate that authority and create a new drift source, so Core UI does not
+the sole project dependency authority. A separate `muxui.lock` would
+duplicate that authority and create a new drift source, so Mux UI does not
 invent one. Manifest and doctor output report the resolved workspace root,
 catalog version/digest, package path relative to that root, and declaration
 drift. An explicitly cached catalog is eligible only when the invocation names
@@ -1295,13 +1302,13 @@ details; filesystem traversal order never chooses the code.
 
 | Precedence | Code | Exact condition |
 | --- | --- | --- |
-| 1 | `CORE_PROJECT_NOT_FOUND` | The selected `--project` or current directory does not resolve to a supported project/workspace manifest. |
-| 2 | `CORE_CATALOG_NOT_DECLARED` | The selected workspace does not directly declare `@core-ui/catalog`. |
-| 3 | `CORE_CATALOG_NOT_INSTALLED` | A declaration exists, but the package manager cannot resolve an installed catalog from that workspace. |
-| 4 | `CORE_CATALOG_DECLARATION_DRIFT` | Manifest range, lockfile resolution, and installed version do not describe the same dependency state. |
-| 5 | `CORE_CATALOG_INTEGRITY_MISMATCH` | Package integrity, catalog digest, signature/provenance, or release manifest does not match the resolved bytes. |
-| 6 | `CORE_CATALOG_RESOLUTION_AMBIGUOUS` | The selected project/package-manager context yields more than one valid resolution and cannot choose by declared semantics. |
-| 7 | `CORE_CATALOG_INCOMPATIBLE` | One catalog resolves uniquely, but schema, tooling API, binding-spec, renderer-package, export, or token requirements do not match. |
+| 1 | `MUXUI_PROJECT_NOT_FOUND` | The selected `--project` or current directory does not resolve to a supported project/workspace manifest. |
+| 2 | `MUXUI_CATALOG_NOT_DECLARED` | The selected workspace does not directly declare `@muxui/catalog`. |
+| 3 | `MUXUI_CATALOG_NOT_INSTALLED` | A declaration exists, but the package manager cannot resolve an installed catalog from that workspace. |
+| 4 | `MUXUI_CATALOG_DECLARATION_DRIFT` | Manifest range, lockfile resolution, and installed version do not describe the same dependency state. |
+| 5 | `MUXUI_CATALOG_INTEGRITY_MISMATCH` | Package integrity, catalog digest, signature/provenance, or release manifest does not match the resolved bytes. |
+| 6 | `MUXUI_CATALOG_RESOLUTION_AMBIGUOUS` | The selected project/package-manager context yields more than one valid resolution and cannot choose by declared semantics. |
+| 7 | `MUXUI_CATALOG_INCOMPATIBLE` | One catalog resolves uniquely, but schema, tooling API, binding-spec, renderer-package, export, or token requirements do not match. |
 
 The error schema includes, where applicable:
 
@@ -1325,7 +1332,7 @@ local filesystem diagnostics.
 ## Repository layout
 
 ```text
-core-ui/
+muxui/
 ├── AGENTS.md                         # short route map and agent workflow
 ├── README.md                         # product entry point
 ├── monorepo-architecture.md          # this architecture
@@ -1396,7 +1403,7 @@ predict every relevant location without repository-wide search.
 - Generated files contain a source pointer and are never mixed beside hand-
   authored files unless packaging requires it.
 - Public artifact records contain exact source, test, and example pointers so
-  `core get ... --section source` is the authoritative locator.
+  `muxui get ... --section source` is the authoritative locator.
 - Package and catalog slugs use the same spelling. Exceptions require an alias
   in the artifact record and a deterministic audit.
 
@@ -1445,12 +1452,12 @@ package that owns them or to a declarative task graph.
 
 - Components consume semantic and component tokens, not raw palette values.
 - Stable web classes, slots, states, and cascade layers are public contracts.
-- `@core-ui/react` owns its component CSS implementation, compiled from the
+- `@muxui/react` owns its component CSS implementation, compiled from the
   canonical `web.react` styling-hook contract and token requirements. It does
   not duplicate or become the owner of framework-free or native styles.
 - The pinned Tale styling snapshot is a donor input with an exact per-component
-  disposition and token/style crosswalk; Core selectors, tokens, CSS, and
-  compatibility remain Core-owned outputs with no Tale dependency or live
+  disposition and token/style crosswalk; Mux UI selectors, tokens, CSS, and
+  compatibility remain Mux UI-owned outputs with no Tale dependency or live
   synchronization.
 - Native resolves the same semantic recipe to native values at build or
   runtime without parsing CSS.
@@ -1518,7 +1525,7 @@ governance growth to usable maintainer workflows.
 
 `ChangeIntentEnvelope` is a later, separately admitted read-only authoring
 capability. It is not materialized as an active repository-wide delivery gate
-or R1 ingress. `core plan` remains a read-only composition operation over
+or R1 ingress. `muxui plan` remains a read-only composition operation over
 `PatternRecord`; it does not authorize writes.
 
 The envelope contains:
@@ -1589,7 +1596,7 @@ Deterministic proof runs before model-based evaluation.
 | Layer | Question answered |
 | --- | --- |
 | Schema | Is every artifact valid, versioned, uniquely identified, and relationally complete? |
-| Spec conformance | Do generated Core types, validated hand-authored type refinements, package exports, CSS hooks, examples, and renderer declarations match the concept records and binding specs? |
+| Spec conformance | Do generated Mux UI types, validated hand-authored type refinements, package exports, CSS hooks, examples, and renderer declarations match the concept records and binding specs? |
 | Unit and state | Do declared portable machines and renderer-owned behavior implement their respective transitions? |
 | Browser | Does the HTML/React implementation handle layout, focus, events, SSR, hydration, and browser APIs? |
 | Native | Do iOS, Android, and declared React Native Web runtime profiles satisfy their binding behavior and accessibility obligations? |
@@ -1830,7 +1837,7 @@ Each release publishes:
 
 ### Version units and compatibility
 
-Core UI uses a small number of explicit version units rather than independently
+Mux UI uses a small number of explicit version units rather than independently
 SemVer-versioning every component:
 
 - `schemaVersion` versions the shape and interpretation of source and response
@@ -1913,7 +1920,7 @@ meaning from them.
 | Remove a field | Deprecate in a minor, remove in the next major at earliest | Preserve replacement/no-replacement guidance and migrate canonical sources. |
 
 Experiments live only under an explicit `extensions` object with namespaced
-keys such as `core.experimental.<adr-id>`. The compiler preserves extension
+keys such as `muxui.experimental.<adr-id>`. The compiler preserves extension
 data but stable query behavior ignores it unless a declared capability owns its
 schema and semantics. In v1, third-party namespaces are inert data because
 consumer catalog overlays remain deferred. A first-party experiment can appear
@@ -1928,15 +1935,15 @@ tools never rewrite source records silently while reading or querying them.
 Deprecated fields remain readable for their declared compatibility window and
 cannot be repurposed with new meaning.
 
-Query-response deprecation follows the same rule. `@core-ui/schema` owns each
-versioned request/response grammar. `@core-ui/catalog` owns response-version
+Query-response deprecation follows the same rule. `@muxui/schema` owns each
+versioned request/response grammar. `@muxui/catalog` owns response-version
 negotiation and historical query semantics; adapters cannot reinterpret them.
 Query API `1.2.0` is the
 required additive notice release for moving large token-source payloads out of
 the `artifact.detail` full-response `tokens` member. It retains the complete
 query API `1.1.0` inline member, adds the bounded `tokens` and
 `source-crosswalk` sections, and emits
-`CORE_QUERY_INLINE_TOKENS_DEPRECATED` with replacement guidance. Only after
+`MUXUI_QUERY_INLINE_TOKENS_DEPRECATED` with replacement guidance. Only after
 that exact release has complete retained Gate 0 evidence and human acceptance
 may query API `2.0.0` remove inline `tokens`. The catalog retains and negotiates
 historical v1.1, v1.2, and v2 behavior. Tooling selects a compatible installed
@@ -1966,7 +1973,7 @@ schema/capability with the required version and migration effects.
 
 ### Theme and token policy
 
-Core UI is brand-agnostic infrastructure with a first-party default theme, not
+Mux UI is brand-agnostic infrastructure with a first-party default theme, not
 a single-product skin. Public tokens use three explicit layers, followed by a
 target transform rather than a fourth shared platform-token namespace:
 
@@ -1991,7 +1998,7 @@ A closed default-theme exception permits the fixed reference families
 `reference.color.success-*` when an accepted authority decision pins their
 exclusive system-status family meaning and exact source values. These remain
 reference palette values, not component states or permission to introduce
-other role-named reference families. Core UI components and binding token
+other role-named reference families. Mux UI components and binding token
 recipes never consume them directly; component styling and behavior reach them
 only through semantic or component aliases. Target compilers may intentionally
 emit their admitted typed public reference values. That emission does not prove
@@ -2007,10 +2014,10 @@ baseline is Tale UI commit
 `83b72fc79b34932ae1afa44d21f74460a23fa693407bc319fdfafb3a2bb64a86`.
 It contains 693 declaration occurrences: 692 custom-property occurrences, 644
 unique custom-property names, and one ordinary `html { font-size: 100% }`
-declaration. Those occurrences are candidates, not automatically Core tokens.
+declaration. Those occurrences are candidates, not automatically Mux UI tokens.
 
-The canonical Core token source under `catalog/tokens/` owns the complete
-Tale-to-Core classification. Token-source schema `2.1.0` adds one optional,
+The canonical Mux UI token source under `catalog/tokens/` owns the complete
+Tale-to-Mux UI classification. Token-source schema `2.1.0` adds one optional,
 closed `sourceCrosswalk` field; it is mandatory for the corrected default-theme
 source. A source with no migration baseline omits the authored field, while the
 query projection returns a typed derived `absent` status. Each Tale occurrence
@@ -2020,9 +2027,9 @@ source-order ordinal and appears exactly once. Every entry has exactly one
 Repeated names become one logical token or mode only through an explicit group;
 an occurrence belongs to at most one group, every group has at least two
 members, and its mode/member mapping is complete and duplicate-free. `adopt`
-and `adapt` require exactly one resulting Core reference-token ID; `defer` and
-`reject` forbid a Core token ID and make no runtime-token claim. Every admitted
-Core token owns its stable Core ID, type, unit, meaning, mode applicability, and
+and `adapt` require exactly one resulting Mux UI reference-token ID; `defer` and
+`reject` forbid a Mux UI token ID and make no runtime-token claim. Every admitted
+Mux UI token owns its stable Mux UI ID, type, unit, meaning, mode applicability, and
 override policy. Tale provenance is authored only by `sourceCrosswalk`.
 
 `sourceCrosswalk` is the sole authored Tale provenance and migration metadata.
@@ -2036,10 +2043,10 @@ The field does not enter token IDs, semantic
 dependency closure, requirement sets, search ranking, default summaries, or
 runtime CSS/native values. Package and catalog metadata may expose the derived
 digest without copying its entries. CSS variable names and
-Tale file groupings are migration inputs, not permanent Core public API, a
+Tale file groupings are migration inputs, not permanent Mux UI public API, a
 fourth token layer, or an ongoing synchronization promise. Web CSS and native
-theme objects continue to derive only from admitted Core token facts; native
-never parses Tale or Core CSS.
+theme objects continue to derive only from admitted Mux UI token facts; native
+never parses Tale or Mux UI CSS.
 
 The optional field is a token-source schema minor from `2.0.0` to `2.1.0`.
 Existing sources remain valid, corrected sources migrate through an explicit,
@@ -2050,16 +2057,16 @@ preserved historical retrieval.
 
 Under current query API v2 behavior, complete token and crosswalk populations
 are retrieved only through the versioned `tokens` and `source-crosswalk`
-sections of `getArtifact` / `core get`. Explicit version negotiation may still
+sections of `getArtifact` / `muxui get`. Explicit version negotiation may still
 retrieve the retained v1.1/v1.2 inline compatibility members described above;
 those historical responses cannot become the default or be represented as
-section-budget proof. `@core-ui/schema` owns the closed
+section-budget proof. `@muxui/schema` owns the closed
 `TokenSectionPageBudgetProfile` grammar;
 the catalog owns the canonical profile values and page selection. The profile
-contains the query API version, Core lexer version, canonical entry-order/cost
+contains the query API version, Mux UI lexer version, canonical entry-order/cost
 rules, normalized worst-case envelope preimage and reserve, default and maximum
 item limits, minimum-progress rule, 2,048-token dense-page budget, and stable
-oversize code `CORE_QUERY_PAGE_ENTRY_TOO_LARGE`. Its canonical JSON enters the
+oversize code `MUXUI_QUERY_PAGE_ENTRY_TOO_LARGE`. Its canonical JSON enters the
 catalog digest, so it adds no independent revision axis. Section entries use
 stable canonical ordering. A cursor binds the query
 API version, catalog digest, token-source `contentRevision`, section, selector
@@ -2095,12 +2102,12 @@ ID meanings live in
 [`platform-safety-contract.json`](./platform-safety-contract.json), a protected
 child of this architecture. Its initial contract version is `1.0.0`. The
 registry digest is `sha256:` plus SHA-256 of the entire registry document
-serialized as UTF-8 Core UI canonical JSON: object keys sorted recursively,
+serialized as UTF-8 Mux UI canonical JSON: object keys sorted recursively,
 declared array order preserved, LF text, and no insignificant whitespace.
 Schema enums, generated types, compiler validation, and catalog/query/package
 projections derive from that source; none re-author its IDs or meanings.
 
-`@core-ui/schema` owns only the closed declaration/projection grammar. A
+`@muxui/schema` owns only the closed declaration/projection grammar. A
 binding with no nested runtime profiles declares all six registry IDs against
 its binding ID, which is also its profile identity. A binding with nested
 runtime profiles declares all six IDs only for each concrete nested profile;
@@ -2149,17 +2156,17 @@ values never become the native source of truth.
 
 Every semantic and component token declares one override policy:
 
-- `fixed`: only Core UI's canonical theme/compiler may assign it;
+- `fixed`: only Mux UI's canonical theme/compiler may assign it;
 - `theme`: first-party and consumer themes may assign it; or
 - `instance`: theme assignment plus a documented component-local hook is
   supported.
 
 Consumer themes may supply values only for existing IDs whose policy permits
 it. They cannot change a token's identity, type, allowed units, semantic role,
-required mode coverage, or canonical Core alias topology, and they cannot add
-new `core:*` semantic/component IDs. Products may define private reference
+required mode coverage, or canonical Mux UI alias topology, and they cannot add
+new `muxui:*` semantic/component IDs. Products may define private reference
 values and tokens in their own namespace, but these resolve before assignment
-to a permitted Core UI role and create no Core UI compatibility promise.
+to a permitted Mux UI role and create no Mux UI compatibility promise.
 Component-local overrides exist only for tokens marked `instance`; internal
 component tokens remain inaccessible.
 
@@ -2195,7 +2202,7 @@ changing its semantic role is not hidden inside a platform transform.
   rule is satisfied.
 - The first-party catalog is closed in v1. Consumer catalog overlays and
   executable extensions are deferred; installed custom components remain
-  consumer code and cannot shadow `core:*` IDs.
+  consumer code and cannot shadow `muxui:*` IDs.
 - Native navigation, routes, and host-level overlay policy remain
   application-owned. A component may provide an adapted dialog, sheet, or
   alert binding, but it cannot disguise a navigation flow as cross-platform
@@ -2230,9 +2237,9 @@ canonical ownership, focused proof, protected CI, and protected pull requests.
 3. Add the `web.react` binding spec and canonical executable examples for its
    exact React contract.
 4. Resolve the component's exact pinned Tale styling donor disposition and
-   token/style crosswalk, then implement Core-owned `@core-ui/react` CSS without
+   token/style crosswalk, then implement Mux UI-owned `@muxui/react` CSS without
    carrying Tale selectors, package dependencies, or a live donor input.
-5. Implement `@core-ui/react` without creating a web or native counterpart
+5. Implement `@muxui/react` without creating a web or native counterpart
    unless a later track separately admits one.
 6. Add deterministic and risk-proportionate behavior, accessibility, visual
    donor-comparison, descriptor, generation, and packed-package proof.
@@ -2252,7 +2259,7 @@ agent snippet is updated manually.
 
 1. Change the binding spec and lifecycle/migration data.
 2. Update the implementation and the canonical examples that exercise it.
-3. Regenerate serializable Core binding-spec types, validate hand-authored renderer
+3. Regenerate serializable Mux UI binding-spec types, validate hand-authored renderer
    refinements, and regenerate exports, catalog, and rendered documentation.
 4. Run cross-surface parity and consumer validation.
 5. Re-evaluate prompts tagged with the affected artifact ID.
@@ -2283,7 +2290,7 @@ agent snippet is updated manually.
 
 ## Build order
 
-Core UI should build a thin operability spine before breadth, then prove it
+Mux UI should build a thin operability spine before breadth, then prove it
 through difficult renderer slices. These are dependency-based capability gates,
 not calendar phases or one global project status. A workstream may have Gate 2
 catalog resolution while native overlays remain at Gate 1, but no capability
@@ -2304,7 +2311,7 @@ delivery.
 - Minimal schema-aware scaffold, source-linked validation, semantic diff, and
   revision explanation for that record
 - Catalog compiler and pure `manifest`, `list`, `search`, and `get` query engine
-- Workspace `@core-ui/catalog` package format and no-network local resolution
+- Workspace `@muxui/catalog` package format and no-network local resolution
   protocol
 - CLI JSON, human, and dense renderers with schema and token-budget tests
 - Generation identity and API/CLI parity
@@ -2337,7 +2344,7 @@ through the fixed R1 family allocation rather than a simultaneous renderer matri
    the fixed 53 committed families. Deferral, exclusion, or
    `not-a-component` dispositions apply only to documented upstream material
    outside those committed families; they cannot remove a committed family.
-7. `R1 exit` may publish only `@core-ui/react@0.1.0-rc.1` under `next` after
+7. `R1 exit` may publish only `@muxui/react@0.1.0-rc.1` under `next` after
    exact tarball, provenance, registry, rollback, checks, and human publish
    authorization pass.
 
@@ -2414,7 +2421,7 @@ kernel.
 
 ## Non-negotiable invariants
 
-Core UI is architecturally healthy only while these statements remain true for
+Mux UI is architecturally healthy only while these statements remain true for
 every enabled projection:
 
 ```text
@@ -2473,13 +2480,13 @@ digest acceptance, or per-component authorization is required.
 
 React Aria Components `1.20.0` remains an internal replaceable substrate and
 Tale UI commit `94bf62a26c02605c8928dfeb24f0ddc4be1c92fd` remains a one-time
-styling donor, never a dependency or live owner. Core UI owns every public
+styling donor, never a dependency or live owner. Mux UI owns every public
 component contract and every committed family remains export-ready at R1 exit.
 Button is the first R1.1 component; R1.5 is breadth and release closure, not
 another implementation inventory.
 
 Each bounded component pull request changes the earliest canonical owners,
-regenerates projections, preserves the Core-owned public boundary, runs focused
+regenerates projections, preserves the Mux UI-owned public boundary, runs focused
 type, unit, render, CSS, accessibility, generation, and packed-consumer checks,
 and uses the normal protected CI and review-bot workflow. Proof is proportional
 to the exported behavior; required evidence is retained from the tests and
@@ -2494,7 +2501,7 @@ R1-exit pull-request merge remain separate exact human stops.
 ## R1 icon affordance dependency boundary
 
 Decision 0011 amendment 02 accepts `lucide-react@1.37.0` as an exact direct
-internal runtime dependency of `@core-ui/react`. Its npm integrity is
+internal runtime dependency of `@muxui/react`. Its npm integrity is
 `sha512-LPsB4rD1TD6wZu1djKOf9vUnS1jTNaHbolXebXDgiTdb6jeA1agIJhJsIybCmjKmQClcOaal1o1OaiYahEftyQ==`,
 its package license is ISC, its included Feather-derived artwork carries the
 MIT notice, and it is React peer-compatible with the existing React and React
@@ -2503,9 +2510,9 @@ DOM peer boundary. The dependency is internal and replaceable only.
 The exact R1 dependency graph is:
 
 ```text
-@core-ui/react@0.1.0-alpha.N
+@muxui/react@0.1.0-alpha.N
 ├── dependency: react-aria-components@1.20.0
-├── dependency: @internationalized/date@3.12.3 (Core value adapters only)
+├── dependency: @internationalized/date@3.12.3 (Mux UI value adapters only)
 ├── dependency: lucide-react@1.37.0 (internal control affordances only; ISC + Feather-derived MIT notices; exact npm integrity above)
 ├── peer: react >=19.2.0 <20
 └── peer: react-dom >=19.2.0 <20
@@ -2516,16 +2523,16 @@ Lucide is permitted only for these existing R1 control affordances: the
 previous/next controls; `ComboBox`/`Select` and `Tree` chevrons;
 `SearchField` clear; `NumberField` plus/minus; `Checkbox` check/indeterminate;
 `TagGroup` remove; and `Dialog`/`Toast` close. Breadcrumb separators remain
-text, and no Search icon is added. Core owns every public contract. No Lucide
+text, and no Search icon is added. Mux UI owns every public contract. No Lucide
 export, type, name, prop, or import path may cross the package boundary, and
 there is no public Icon API, icon catalog, or icon package. This adds no
 component and no new decorative affordance.
 
 Accessible names, roles, states, relationships, keyboard behavior, and focus
-remain the Core binding obligations. Icons used in these affordances are
-decorative and non-focusable unless a Core binding explicitly requires a
+remain the Mux UI binding obligations. Icons used in these affordances are
+decorative and non-focusable unless a Mux UI binding explicitly requires a
 different semantic; an icon never supplies an undocumented accessible name.
-Icon-bearing controls retain their Core-owned accessible label and state
+Icon-bearing controls retain their Mux UI-owned accessible label and state
 semantics, including the check/indeterminate and close affordances.
 
 R1 proof must assert the exact direct dependency name, version, npm integrity,

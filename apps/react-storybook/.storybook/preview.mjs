@@ -1,8 +1,8 @@
 import React from 'react';
-import * as Core from '@core-ui/react';
+import * as MuxUI from '@muxui/react';
 import { isMigrationFixtureRequest } from '../src/visual-migration-contract.mjs';
 import { MigrationFixture } from '../src/migration-visual.fixture.mjs';
-import '@core-ui/react/styles.css';
+import '@muxui/react/styles.css';
 import './preview.css';
 
 const colorSchemeItems = [
@@ -12,15 +12,15 @@ const colorSchemeItems = [
 
 function applyColorScheme(scheme) {
   if (typeof document !== 'undefined') {
-    document.documentElement.setAttribute('data-core-color-scheme', scheme);
-    document.documentElement.style.setProperty('--core-migration-frame-background', scheme === 'dark' ? '#000000' : '#ffffff');
+    document.documentElement.setAttribute('data-muxui-color-scheme', scheme);
+    document.documentElement.style.setProperty('--muxui-migration-frame-background', scheme === 'dark' ? '#000000' : '#ffffff');
   }
 }
 
 function applyMigrationHost(migration) {
   if (typeof document === 'undefined' || !document.body) return;
-  if (migration) document.body.setAttribute('data-core-migration-host', 'true');
-  else document.body.removeAttribute('data-core-migration-host');
+  if (migration) document.body.setAttribute('data-muxui-migration-host', 'true');
+  else document.body.removeAttribute('data-muxui-migration-host');
 }
 
 function StorySurface({ children, scheme, viewMode, migration }) {
@@ -32,8 +32,8 @@ function StorySurface({ children, scheme, viewMode, migration }) {
     const isOverlayHost = (element) => element instanceof HTMLElement
       && (element.style.display === 'contents'
         || element.hasAttribute('data-overlay-container')
-        || element.classList.contains('core-dialog-backdrop')
-        || element.classList.contains('core-toast-region'));
+        || element.classList.contains('muxui-dialog-backdrop')
+        || element.classList.contains('muxui-toast-region'));
     const annotateOverlayHosts = () => {
       for (const child of document.body.children) {
         if (!isOverlayHost(child) || managed.has(child)) continue;
@@ -41,7 +41,7 @@ function StorySurface({ children, scheme, viewMode, migration }) {
         const originalLabel = child.getAttribute('aria-label');
         if (!originalRole) child.setAttribute('role', 'region');
         if (!originalLabel && !child.hasAttribute('aria-labelledby')) {
-          child.setAttribute('aria-label', 'Core UI overlay');
+          child.setAttribute('aria-label', 'Mux UI overlay');
         }
         managed.set(child, { originalRole, originalLabel });
       }
@@ -58,8 +58,8 @@ function StorySurface({ children, scheme, viewMode, migration }) {
           element.setAttribute('role', originalRole);
         }
         if (originalLabel === null) {
-          if (element.getAttribute('aria-label') === 'Core UI overlay') element.removeAttribute('aria-label');
-        } else if (element.getAttribute('aria-label') === 'Core UI overlay') {
+          if (element.getAttribute('aria-label') === 'Mux UI overlay') element.removeAttribute('aria-label');
+        } else if (element.getAttribute('aria-label') === 'Mux UI overlay') {
           element.setAttribute('aria-label', originalLabel);
         }
       }
@@ -71,20 +71,20 @@ function StorySurface({ children, scheme, viewMode, migration }) {
     surfaceElement,
     {
       ref: surfaceRef,
-      className: 'core-storybook-surface',
-      'data-core-color-scheme': scheme,
-      'data-core-migration-host': migration ? 'true' : undefined,
+      className: 'muxui-storybook-surface',
+      'data-muxui-color-scheme': scheme,
+      'data-muxui-migration-host': migration ? 'true' : undefined,
     },
     children,
   );
 }
 
-/** Keep every story inside the Core toast context so the Toast family is interactive. */
+/** Keep every story inside the MuxUI toast context so the Toast family is interactive. */
 export default {
   globalTypes: {
     colorScheme: {
       name: 'Color scheme',
-      description: 'Choose the Core light or dark theme.',
+      description: 'Choose the MuxUI light or dark theme.',
       defaultValue: 'light',
       toolbar: {
         icon: 'contrast',
@@ -101,13 +101,13 @@ export default {
       applyMigrationHost(migration);
       const story = migration
         ? React.createElement(MigrationFixture, {
-          runToken: import.meta.env.VITE_CORE_UI_MIGRATION_RUN_TOKEN,
+          runToken: import.meta.env.VITE_MUXUI_MIGRATION_RUN_TOKEN,
         })
         : React.createElement(Story);
       return React.createElement(
         StorySurface,
         { scheme, viewMode: context.viewMode, migration },
-        React.createElement(Core.ToastProvider, { placement: migration ? 'bottom-end' : undefined }, story),
+        React.createElement(MuxUI.ToastProvider, { placement: migration ? 'bottom-end' : undefined }, story),
       );
     },
   ],

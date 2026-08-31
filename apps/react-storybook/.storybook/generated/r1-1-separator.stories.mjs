@@ -1,6 +1,6 @@
 // @generated-from: apps/react-storybook/src/generate-stories.mjs
-// @generated-content-sha256: sha256:0900aef2e657cd24628044c729eeb9177a708da6c695e88750545269f42a7b90
-import * as Core from '@core-ui/react';
+// @generated-content-sha256: sha256:8bf21bce8487432790391d30671e19ed4f86e6f55d204cb87793b9bff1f3a4cd
+import * as MuxUI from '@muxui/react';
 import { argTypesForBinding, createStory } from '../../src/storybook-factory.mjs';
 
 const binding = {
@@ -16,12 +16,12 @@ const binding = {
       "orientation"
     ]
   },
-  "binding": "core:component:separator#web.react",
+  "binding": "muxui:component:separator#web.react",
   "export": "Separator",
   "lifecycle": "experimental",
   "module": ".",
   "runtimeProfile": "web.react",
-  "selector": ".core-separator",
+  "selector": ".muxui-separator",
   "states": [
     "horizontal",
     "vertical"
@@ -31,8 +31,9 @@ const binding = {
 const record = { family: 'Separator', tranche: 'R1.1', binding };
 
 export default {
-  title: 'Core React/R1.1/Separator',
-  component: Core.Separator,
+  title: 'Mux UI React/R1.1/Separator',
+  id: 'muxui-react-r1-1-separator',
+  component: MuxUI.Separator,
   tags: ['autodocs'],
   parameters: {
     controls: {
@@ -40,7 +41,7 @@ export default {
     },
     docs: {
       description: {
-        component: 'Private development showcase for the Core-owned Separator family.',
+        component: 'Private development showcase for the Mux UI-owned Separator family.',
       },
     },
   },

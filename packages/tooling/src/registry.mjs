@@ -4,8 +4,8 @@ import {
   QUERY_ENVELOPE_SCHEMA_ID,
   QUERY_SELECTORS,
   canonicalJson,
-} from '@core-ui/schema';
-import { getManifest } from '@core-ui/catalog';
+} from '@muxui/schema';
+import { getManifest } from '@muxui/catalog';
 
 const BASELINE_COMMANDS = ['get', 'list', 'manifest', 'search'];
 const BASELINE_GLOBAL_OPTIONS = [
@@ -19,7 +19,7 @@ const DETAILS = ['brief', 'compact', 'full'];
 const CATALOG_MANIFEST = getManifest({ detail: 'full' });
 const CATALOG_OPERATIONS = CATALOG_MANIFEST.data.operations;
 const CLI_AVAILABLE = CATALOG_MANIFEST.data.capabilities
-  .find(({ id }) => id === 'core:capability:query-baseline')
+  .find(({ id }) => id === 'muxui:capability:query-baseline')
   .availableOn.includes('cli');
 
 function assertKeys(value, allowed, context) {
@@ -67,7 +67,7 @@ export function validateCommandRegistry(registry) {
   ], 'registry');
   assertKeys(registry.cli, ['name', 'version', 'description'], 'registry.cli');
   assertKeys(registry.tokenizer, ['id', 'description'], 'registry.tokenizer');
-  assert(registry.cli?.name === 'core', 'CLI_REGISTRY_INVALID', 'CLI name must be core');
+  assert(registry.cli?.name === 'muxui', 'CLI_REGISTRY_INVALID', 'CLI name must be muxui');
   assert(
     typeof registry.cli.version === 'string'
       && typeof registry.cli.description === 'string'
@@ -76,11 +76,11 @@ export function validateCommandRegistry(registry) {
     'CLI version and description must be non-empty strings',
   );
   assert(
-    registry.tokenizer.id === 'core-ui-lexeme-v1'
+    registry.tokenizer.id === 'muxui-lexeme-v1'
       && typeof registry.tokenizer.description === 'string'
       && registry.tokenizer.description.length > 0,
     'CLI_TOKENIZER_INVALID',
-    'tokenizer must declare the locked core-ui-lexeme-v1 contract',
+    'tokenizer must declare the locked muxui-lexeme-v1 contract',
   );
   assert(
     canonicalJson(registry.outputModes) === canonicalJson(['human', 'json', 'dense']),
@@ -135,14 +135,14 @@ export function validateCommandRegistry(registry) {
       assert(
         canonicalJson(selector.choices) === canonicalJson(QUERY_SELECTORS[selector.name]),
         'CLI_SELECTOR_SCHEMA_DRIFT',
-        `${selector.name} choices must come from @core-ui/schema`,
+        `${selector.name} choices must come from @muxui/schema`,
       );
     }
     if (selector.name === 'query-api-version') {
       assert(
         canonicalJson(selector.choices) === canonicalJson(QUERY_API_VERSIONS),
         'CLI_SELECTOR_SCHEMA_DRIFT',
-        'query-api-version choices must come from @core-ui/schema',
+        'query-api-version choices must come from @muxui/schema',
       );
     }
     assert(
@@ -332,7 +332,7 @@ function helpFor(registry) {
     `${registry.cli.name} ${registry.cli.version}`,
     registry.cli.description,
     '',
-    'Usage: core <command> [arguments] [options]',
+    'Usage: muxui <command> [arguments] [options]',
     '',
     'Commands:',
   ];
@@ -342,7 +342,7 @@ function helpFor(registry) {
       .join(' ');
     lines.push(`  ${command.name}${argumentsText ? ` ${argumentsText}` : ''}  ${command.summary}`);
   }
-  lines.push('', 'Output: --json | --dense (human is the default)', 'Recovery: core --json');
+  lines.push('', 'Output: --json | --dense (human is the default)', 'Recovery: muxui --json');
   return `${lines.join('\n')}\n`;
 }
 
@@ -351,7 +351,7 @@ function commandHelp(registry, command, optionsByName) {
     .map((argument) => argument.required ? `<${argument.name}>` : `[${argument.name}]`)
     .join(' ');
   const lines = [
-    `Usage: core ${command.name}${argumentsText ? ` ${argumentsText}` : ''} [options]`,
+    `Usage: muxui ${command.name}${argumentsText ? ` ${argumentsText}` : ''} [options]`,
     '',
     command.summary,
     '',
@@ -431,16 +431,16 @@ export function buildCommandProjections(input) {
     inputSchema: inputSchema(command, optionsByName),
   }));
   const completionScript = [
-    '# generated from the Core UI command registry',
-    '_core_complete() {',
+    '# generated from the Mux UI command registry',
+    '_muxui_complete() {',
     `  local commands="${registry.commands.map(({ name }) => name).join(' ')}"`,
     '  COMPREPLY=( $(compgen -W "$commands" -- "${COMP_WORDS[1]}") )',
     '}',
-    'complete -F _core_complete core',
+    'complete -F _muxui_complete muxui',
     '',
   ].join('\n');
   const responseTypes = [
-    "import type { QueryResponseType } from '@core-ui/schema/types';",
+    "import type { QueryResponseType } from '@muxui/schema/types';",
     '',
     ...registry.commands.map((command) => (
       `export type ${command.name[0].toUpperCase()}${command.name.slice(1)}ResponseType = Extract<QueryResponseType, ${JSON.stringify(command.responseType)}>;`

@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
-import { canonicalJson, parseJsonStrict } from '@core-ui/schema';
+import { canonicalJson, parseJsonStrict } from '@muxui/schema';
 import {
   projectTaleBaselineOccurrences,
   TALE_TOKEN_MATERIALIZATION_IDENTITIES,
@@ -15,7 +15,7 @@ const sourcePath = TALE_TOKEN_MATERIALIZATION_PATHS.parentDecision;
 const parentBytes = await readFile(resolve(repositoryRoot, sourcePath), 'utf8');
 const digest = `sha256:${createHash('sha256').update(parentBytes).digest('hex')}`;
 if (digest !== TALE_TOKEN_MATERIALIZATION_IDENTITIES.parentDecision) {
-  throw new Error('CORE_TALE_RESET_DECISION_MISMATCH: parent decision digest');
+  throw new Error('MUXUI_TALE_RESET_DECISION_MISMATCH: parent decision digest');
 }
 const occurrences = projectTaleBaselineOccurrences(parseJsonStrict(parentBytes));
 const expected = `${canonicalJson(occurrences)}\n`;
@@ -35,7 +35,7 @@ for (const output of outputs) {
   if (process.argv.includes('--check')) {
     const actual = await readFile(output.path, 'utf8').catch(() => null);
     if (actual !== output.expected) {
-      console.error(`CORE_TALE_OCCURRENCE_PROJECTION_DRIFT: ${output.label}`);
+      console.error(`MUXUI_TALE_OCCURRENCE_PROJECTION_DRIFT: ${output.label}`);
       process.exitCode = 1;
     }
   } else {

@@ -2,7 +2,7 @@ import { SchemaValidationError, validateFamily } from './validation.mjs';
 import { canonicalJson } from './canonical.mjs';
 
 function migrationError(path, message) {
-  throw new SchemaValidationError('CORE_SCHEMA_MIGRATION_REQUIRED', [{ path, message }]);
+  throw new SchemaValidationError('MUXUI_SCHEMA_MIGRATION_REQUIRED', [{ path, message }]);
 }
 
 function assertPlainObject(value, path) {

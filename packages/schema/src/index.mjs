@@ -4,19 +4,19 @@ const artifactRefSchema = loadJsonDocument('artifact-ref.schema.json');
 const errorCodeSchema = loadJsonDocument('error-code.schema.json');
 const queryEnvelopeSchema = loadJsonDocument('query-envelope.schema.json');
 
-export const ARTIFACT_KINDS = Object.freeze([...artifactRefSchema['x-core-ui-kinds']]);
+export const ARTIFACT_KINDS = Object.freeze([...artifactRefSchema['x-muxui-kinds']]);
 export const ENABLED_RECORD_KINDS = Object.freeze([
-  ...artifactRefSchema['x-core-ui-enabled-record-kinds'],
+  ...artifactRefSchema['x-muxui-enabled-record-kinds'],
 ]);
 export const ARTIFACT_REF_PATTERN = artifactRefSchema.pattern;
 export const ERROR_CODES = Object.freeze([...errorCodeSchema.enum]);
 export const QUERY_RESPONSE_TYPES = Object.freeze([
-  ...queryEnvelopeSchema['x-core-ui-response-types'],
+  ...queryEnvelopeSchema['x-muxui-response-types'],
 ]);
 export const QUERY_ENVELOPE_SCHEMA_ID = queryEnvelopeSchema.$id;
 export const QUERY_SELECTORS = Object.freeze(
   Object.fromEntries(
-    Object.entries(queryEnvelopeSchema['x-core-ui-selectors'])
+    Object.entries(queryEnvelopeSchema['x-muxui-selectors'])
       .map(([key, values]) => [key, Object.freeze([...values])]),
   ),
 );
@@ -29,10 +29,10 @@ export const PHASE_B_QUERY_API_VERSIONS = QUERY_API_VERSIONS;
 
 export function parseArtifactRef(value, { requireEnabledRecordKind = false } = {}) {
   const match = new RegExp(ARTIFACT_REF_PATTERN).exec(value);
-  if (!match) throw new Error(`CORE_ARTIFACT_ID_INVALID: ${value}`);
-  const [, kind, slug] = /^core:([^:]+):(.+)$/.exec(value);
+  if (!match) throw new Error(`MUXUI_ARTIFACT_ID_INVALID: ${value}`);
+  const [, kind, slug] = /^muxui:([^:]+):(.+)$/.exec(value);
   if (requireEnabledRecordKind && !ENABLED_RECORD_KINDS.includes(kind)) {
-    throw new Error(`CORE_SCHEMA_INVALID: ${kind} record behavior is unavailable in G0.1`);
+    throw new Error(`MUXUI_SCHEMA_INVALID: ${kind} record behavior is unavailable in G0.1`);
   }
   return { value, kind, slug };
 }

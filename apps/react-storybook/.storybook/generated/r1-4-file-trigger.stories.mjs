@@ -1,6 +1,6 @@
 // @generated-from: apps/react-storybook/src/generate-stories.mjs
-// @generated-content-sha256: sha256:733ae15ff8f4c8a29b37311c13fb1c91bc5753e08981ee656d642e9acae497db
-import * as Core from '@core-ui/react';
+// @generated-content-sha256: sha256:a0e2b89f04bf33d88da87fe5be552e2ea5d674f8338960c3edfefd1abf8f29f0
+import * as MuxUI from '@muxui/react';
 import { argTypesForBinding, createStory } from '../../src/storybook-factory.mjs';
 
 const binding = {
@@ -28,12 +28,12 @@ const binding = {
       "className"
     ]
   },
-  "binding": "core:component:file-trigger#web.react",
+  "binding": "muxui:component:file-trigger#web.react",
   "export": "FileTrigger",
   "lifecycle": "experimental",
   "module": ".",
   "runtimeProfile": "web.react",
-  "selector": ".core-file-trigger",
+  "selector": ".muxui-file-trigger",
   "states": [
     "idle",
     "focused",
@@ -44,8 +44,9 @@ const binding = {
 const record = { family: 'FileTrigger', tranche: 'R1.4', binding };
 
 export default {
-  title: 'Core React/R1.4/FileTrigger',
-  component: Core.FileTrigger,
+  title: 'Mux UI React/R1.4/FileTrigger',
+  id: 'muxui-react-r1-4-file-trigger',
+  component: MuxUI.FileTrigger,
   tags: ['autodocs'],
   parameters: {
     controls: {
@@ -53,7 +54,7 @@ export default {
     },
     docs: {
       description: {
-        component: 'Private development showcase for the Core-owned FileTrigger family.',
+        component: 'Private development showcase for the Mux UI-owned FileTrigger family.',
       },
     },
   },

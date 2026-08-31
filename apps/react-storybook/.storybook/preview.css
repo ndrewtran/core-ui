@@ -3,12 +3,12 @@
   font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
-:root[data-core-color-scheme='light'] {
+:root[data-muxui-color-scheme='light'] {
   background: #fff;
   color: #171717;
 }
 
-:root[data-core-color-scheme='dark'] {
+:root[data-muxui-color-scheme='dark'] {
   color-scheme: dark;
   background: #000;
   color: #fff;
@@ -23,13 +23,13 @@ body {
 }
 
 #storybook-root,
-.core-storybook-surface {
+.muxui-storybook-surface {
   min-height: 100vh;
   background: inherit;
   color: inherit;
 }
 
-.core-storybook-surface {
+.muxui-storybook-surface {
   box-sizing: border-box;
   padding: 1.5rem;
 }
@@ -37,15 +37,15 @@ body {
 /* The migration comparator captures a single case at a time. Remove the
    Storybook chrome and scrollbar from that private capture host so portal
    geometry uses the same 1000px viewport as the pinned donor. */
-.core-storybook-surface[data-core-migration-host='true'] {
+.muxui-storybook-surface[data-muxui-migration-host='true'] {
   padding: 0;
   overflow: hidden;
 }
 
-body[data-core-migration-host='true'],
-body[data-core-migration-host='true'] #storybook-root,
-body[data-core-migration-host='true'] .sb-main-padded,
-body[data-core-migration-host='true'] .core-storybook-surface {
+body[data-muxui-migration-host='true'],
+body[data-muxui-migration-host='true'] #storybook-root,
+body[data-muxui-migration-host='true'] .sb-main-padded,
+body[data-muxui-migration-host='true'] .muxui-storybook-surface {
   margin: 0 !important;
   padding: 0 !important;
 }

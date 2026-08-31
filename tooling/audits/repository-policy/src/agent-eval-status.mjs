@@ -75,7 +75,7 @@ const families = await Promise.all(snapshot.families.map(async (familyEntry) => 
         binding: bindingId,
         export: artifact.name,
         runtimeProfile: 'web.react',
-        selector: `.core-${slug}`,
+        selector: `.muxui-${slug}`,
       },
     },
   };

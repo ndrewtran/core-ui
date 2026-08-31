@@ -1,12 +1,12 @@
 {
   "schemaVersion": "1.0.0",
-  "id": "core:example:toggle-button-basic-react",
+  "id": "muxui:example:toggle-button-basic-react",
   "kind": "example",
   "name": "Basic React ToggleButton",
   "summary": "The minimum React ToggleButton example.",
   "lifecycle": "experimental",
   "binding": {
-    "ref": "core:component:toggle-button#web.react",
+    "ref": "muxui:component:toggle-button#web.react",
     "guidanceImpact": "normative",
     "purposes": [
       "generation",

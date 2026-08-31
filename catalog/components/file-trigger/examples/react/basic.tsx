@@ -1,2 +1,2 @@
-import { FileTrigger } from '@core-ui/react';
+import { FileTrigger } from '@muxui/react';
 export function BasicFileTriggerExample() { return <FileTrigger onSelect={(files) => console.log(files)}>Choose a file</FileTrigger>; }

@@ -1,21 +1,21 @@
-import { createCatalogDiagnostic } from '@core-ui/catalog';
+import { createCatalogDiagnostic } from '@muxui/catalog';
 import {
   API_VERSION,
   QUERY_API_VERSIONS,
   SCHEMA_VERSION,
   canonicalJson,
-} from '@core-ui/schema';
+} from '@muxui/schema';
 import { satisfies, valid, validRange } from 'semver';
 
 export const RESOLVER_ERROR_PRECEDENCE = Object.freeze([
-  'CORE_PROJECT_NOT_FOUND',
-  'CORE_CATALOG_NOT_DECLARED',
-  'CORE_CATALOG_NOT_INSTALLED',
-  'CORE_CATALOG_DECLARATION_DRIFT',
-  'CORE_CATALOG_INTEGRITY_MISMATCH',
-  'CORE_CATALOG_RESOLUTION_AMBIGUOUS',
-  'CORE_QUERY_API_VERSION_UNSUPPORTED',
-  'CORE_CATALOG_INCOMPATIBLE',
+  'MUXUI_PROJECT_NOT_FOUND',
+  'MUXUI_CATALOG_NOT_DECLARED',
+  'MUXUI_CATALOG_NOT_INSTALLED',
+  'MUXUI_CATALOG_DECLARATION_DRIFT',
+  'MUXUI_CATALOG_INTEGRITY_MISMATCH',
+  'MUXUI_CATALOG_RESOLUTION_AMBIGUOUS',
+  'MUXUI_QUERY_API_VERSION_UNSUPPORTED',
+  'MUXUI_CATALOG_INCOMPATIBLE',
 ]);
 
 const TOOLING_API_VERSION = API_VERSION;
@@ -39,7 +39,7 @@ function isRelativePath(value) {
     && !value.split('/').includes('..');
 }
 
-function safePackageName(value, fallback = '@core-ui/catalog') {
+function safePackageName(value, fallback = '@muxui/catalog') {
   return /^(?:@[a-z0-9-]+\/)?[a-z0-9-]+$/u.test(value ?? '')
     ? value
     : fallback;
@@ -66,7 +66,7 @@ function safeSpecifier(value) {
 }
 
 function inputError(message) {
-  throw new Error(`CORE_RESOLVER_INPUT_INVALID: ${message}`);
+  throw new Error(`MUXUI_RESOLVER_INPUT_INVALID: ${message}`);
 }
 
 function assertClosed(value, allowed, context) {
@@ -287,7 +287,7 @@ function compatibilityFor({
   requestedQueryApiVersion,
 }) {
   const failures = [];
-  let failingPackage = '@core-ui/catalog';
+  let failingPackage = '@muxui/catalog';
   const supportedQueryApiVersions = catalog.supportedQueryApiVersions;
   const selectedQueryApiVersion = requestedQueryApiVersion ?? catalog.queryApiVersion;
   if (
@@ -337,7 +337,7 @@ function compatibilityFor({
         required: expected?.package ?? binding,
         actual: installed.length === 0 ? 'missing' : `ambiguous:${installed.length}`,
       });
-      failingPackage = expected?.package ?? '@core-ui/catalog';
+      failingPackage = expected?.package ?? '@muxui/catalog';
       continue;
     }
     failingPackage = expected.package;
@@ -455,35 +455,35 @@ function compatibilityFor({
 
 function diagnosticSpec(code) {
   return {
-    CORE_PROJECT_NOT_FOUND: {
+    MUXUI_PROJECT_NOT_FOUND: {
       ruleId: 'resolver.project.exists',
       message: 'The selected project does not resolve to a supported workspace manifest.',
     },
-    CORE_CATALOG_NOT_DECLARED: {
+    MUXUI_CATALOG_NOT_DECLARED: {
       ruleId: 'resolver.catalog.declared',
-      message: 'The selected workspace does not directly declare @core-ui/catalog.',
+      message: 'The selected workspace does not directly declare @muxui/catalog.',
     },
-    CORE_CATALOG_NOT_INSTALLED: {
+    MUXUI_CATALOG_NOT_INSTALLED: {
       ruleId: 'resolver.catalog.installed',
       message: 'The declared catalog is not installed for the selected workspace.',
     },
-    CORE_CATALOG_DECLARATION_DRIFT: {
+    MUXUI_CATALOG_DECLARATION_DRIFT: {
       ruleId: 'resolver.catalog.declaration-drift',
       message: 'The manifest, lockfile, and installed catalog do not describe one state.',
     },
-    CORE_CATALOG_INTEGRITY_MISMATCH: {
+    MUXUI_CATALOG_INTEGRITY_MISMATCH: {
       ruleId: 'resolver.catalog.integrity',
       message: 'The resolved catalog bytes do not match their package identity.',
     },
-    CORE_CATALOG_RESOLUTION_AMBIGUOUS: {
+    MUXUI_CATALOG_RESOLUTION_AMBIGUOUS: {
       ruleId: 'resolver.catalog.ambiguous',
       message: 'The selected workspace yields more than one valid catalog resolution.',
     },
-    CORE_CATALOG_INCOMPATIBLE: {
+    MUXUI_CATALOG_INCOMPATIBLE: {
       ruleId: 'resolver.catalog.compatibility',
       message: 'The resolved catalog is incompatible with the requested local binding graph.',
     },
-    CORE_QUERY_API_VERSION_UNSUPPORTED: {
+    MUXUI_QUERY_API_VERSION_UNSUPPORTED: {
       ruleId: 'resolver.query-api.supported',
       message: 'The selected catalog does not support the requested query API version.',
     },
@@ -526,7 +526,7 @@ export function resolveCatalogGraph(input) {
   const selectedPathIsSafe = isRelativePath(graph?.selectedWorkspace);
   const rootPathIsSafe = isRelativePath(graph?.workspaceRoot);
   if (!selectedPathIsSafe || !rootPathIsSafe) {
-    const failures = [{ code: 'CORE_PROJECT_NOT_FOUND', reason: 'workspace path is not relative' }];
+    const failures = [{ code: 'MUXUI_PROJECT_NOT_FOUND', reason: 'workspace path is not relative' }];
     return resolverError(
       failures[0].code,
       {
@@ -554,7 +554,7 @@ export function resolveCatalogGraph(input) {
   };
   const failures = [];
   if (!selected || !packageManagerId.startsWith('pnpm@')) {
-    failures.push({ code: 'CORE_PROJECT_NOT_FOUND', reason: 'workspace manifest was not found' });
+    failures.push({ code: 'MUXUI_PROJECT_NOT_FOUND', reason: 'workspace manifest was not found' });
     return resolverError(
       failures[0].code,
       baseDetails,
@@ -566,21 +566,21 @@ export function resolveCatalogGraph(input) {
   const declaredRange = safeSpecifier(selected.catalogRange);
   const declaredDetails = { ...baseDetails, declaredRange };
   if (declaredRange === null) {
-    failures.push({ code: 'CORE_CATALOG_NOT_DECLARED', reason: 'direct dependency is absent' });
+    failures.push({ code: 'MUXUI_CATALOG_NOT_DECLARED', reason: 'direct dependency is absent' });
     return resolverError(
       failures[0].code,
       declaredDetails,
-      `pnpm --dir ${graph.selectedWorkspace} why @core-ui/catalog`,
+      `pnpm --dir ${graph.selectedWorkspace} why @muxui/catalog`,
       failures,
     );
   }
 
   const locks = graph.lockfile.filter((item) => (
-    item.workspace === graph.selectedWorkspace && item.name === '@core-ui/catalog'
+    item.workspace === graph.selectedWorkspace && item.name === '@muxui/catalog'
   ));
   const installedCatalogs = graph.installed.filter((item) => (
     item.workspace === graph.selectedWorkspace
-    && item.name === '@core-ui/catalog'
+    && item.name === '@muxui/catalog'
     && item.kind === 'catalog'
   ));
   const explicitCache = graph.request.cache;
@@ -610,11 +610,11 @@ export function resolveCatalogGraph(input) {
     installedVersions: uniqueSorted(installedCatalogs.map(({ version }) => safeVersion(version))),
   };
   if (candidates.length === 0) {
-    failures.push({ code: 'CORE_CATALOG_NOT_INSTALLED', reason: 'no usable local candidate exists' });
+    failures.push({ code: 'MUXUI_CATALOG_NOT_INSTALLED', reason: 'no usable local candidate exists' });
     return resolverError(
       failures[0].code,
       versionDetails,
-      `pnpm --dir ${graph.selectedWorkspace} why @core-ui/catalog`,
+      `pnpm --dir ${graph.selectedWorkspace} why @muxui/catalog`,
       failures,
     );
   }
@@ -657,7 +657,7 @@ export function resolveCatalogGraph(input) {
     );
   if (directStateDrifts) {
     failures.push({
-      code: 'CORE_CATALOG_DECLARATION_DRIFT',
+      code: 'MUXUI_CATALOG_DECLARATION_DRIFT',
       reason: explicitCache
         ? 'explicit cache, declaration, lockfile, and present installed catalog differ'
         : 'declared, locked, and installed versions differ',
@@ -672,16 +672,16 @@ export function resolveCatalogGraph(input) {
   });
   const valid = evaluated.filter(({ rejectionReasons }) => rejectionReasons.length === 0);
   if (valid.length !== evaluated.length) {
-    failures.push({ code: 'CORE_CATALOG_INTEGRITY_MISMATCH', reason: 'candidate identity is invalid' });
+    failures.push({ code: 'MUXUI_CATALOG_INTEGRITY_MISMATCH', reason: 'candidate identity is invalid' });
   }
   if (valid.length > 1) {
     failures.push({
-      code: 'CORE_CATALOG_RESOLUTION_AMBIGUOUS',
+      code: 'MUXUI_CATALOG_RESOLUTION_AMBIGUOUS',
       reason: `${valid.length} candidates remain valid`,
     });
   }
 
-  let compatibility = { failures: [], failingPackage: '@core-ui/catalog' };
+  let compatibility = { failures: [], failingPackage: '@muxui/catalog' };
   if (valid.length === 1) {
     compatibility = compatibilityFor({
       catalog: valid[0].catalog,
@@ -697,8 +697,8 @@ export function resolveCatalogGraph(input) {
     if (compatibility.failures.length > 0) {
       failures.push({
         code: compatibility.failures.some(({ dimension }) => dimension === 'query-api')
-          ? 'CORE_QUERY_API_VERSION_UNSUPPORTED'
-          : 'CORE_CATALOG_INCOMPATIBLE',
+          ? 'MUXUI_QUERY_API_VERSION_UNSUPPORTED'
+          : 'MUXUI_CATALOG_INCOMPATIBLE',
         reason: compatibility.failures.map(({ dimension }) => dimension).join(', '),
       });
     }
@@ -726,9 +726,9 @@ export function resolveCatalogGraph(input) {
       })).sort((left, right) => compareText(left.relativePath, right.relativePath)),
       compatibilityFailures: compatibility.failures,
     };
-    const inspectedPackage = ['CORE_CATALOG_INCOMPATIBLE', 'CORE_QUERY_API_VERSION_UNSUPPORTED'].includes(primary)
+    const inspectedPackage = ['MUXUI_CATALOG_INCOMPATIBLE', 'MUXUI_QUERY_API_VERSION_UNSUPPORTED'].includes(primary)
       ? safePackageName(compatibility.failingPackage)
-      : '@core-ui/catalog';
+      : '@muxui/catalog';
     return resolverError(
       primary,
       details,
@@ -739,7 +739,7 @@ export function resolveCatalogGraph(input) {
 
   const [{ catalog, release }] = valid;
   const targetPackages = Object.fromEntries([
-    ['@core-ui/catalog', catalog.version],
+    ['@muxui/catalog', catalog.version],
     ...release.bindings
       .filter(({ binding }) => graph.request.bindings.includes(binding))
       .map(({ package: name, version }) => [name, version]),
@@ -754,7 +754,7 @@ export function resolveCatalogGraph(input) {
       catalogSource,
       sourceRevision: catalog.sourceRevision,
       targetPackages,
-      coreVersion: TOOLING_VERSION,
+      muxuiVersion: TOOLING_VERSION,
     }),
   });
 }

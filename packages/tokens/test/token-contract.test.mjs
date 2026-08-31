@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
-import { parseJsonStrict } from '@core-ui/schema';
+import { parseJsonStrict } from '@muxui/schema';
 import {
   TokenContractError,
   compileNativeTheme,
@@ -77,7 +77,7 @@ function crosswalkFixture() {
     entries: occurrences.map((occurrence) => ({
       occurrence,
       disposition: 'adopt',
-      coreTokenId: 'reference.color.neutral-90',
+      muxuiTokenId: 'reference.color.neutral-90',
       groupId: 'source.action-dark-equivalence',
       reason: 'Both source occurrences are exactly the canonical dark action reference value.',
       targets: directTargets,
@@ -85,7 +85,7 @@ function crosswalkFixture() {
     groups: [{
       id: 'source.action-dark-equivalence',
       relationship: 'equivalent-source-values',
-      coreTokenId: 'reference.color.neutral-90',
+      muxuiTokenId: 'reference.color.neutral-90',
       members: occurrences.map(({ ordinal }) => ({ ordinal, role: 'equivalent-source-value' })),
     }],
   };
@@ -106,7 +106,7 @@ function selectorCrosswalkFixture() {
     },
     entries: [
       {
-        occurrence: occurrences[0], disposition: 'adapt', coreTokenId: 'reference.dimension.space-xs',
+        occurrence: occurrences[0], disposition: 'adapt', muxuiTokenId: 'reference.dimension.space-xs',
         groupId: 'source.space-m-responsive', reason: 'The base value is portable.',
         targets: { 'web.html': 'direct', 'web.react': 'direct', 'native.ios': 'direct', 'native.android': 'direct', 'native.react-native-web': 'deferred' },
       },
@@ -118,7 +118,7 @@ function selectorCrosswalkFixture() {
     ],
     groups: [{
       id: 'source.space-m-responsive', relationship: 'selector-variants',
-      coreTokenId: 'reference.dimension.space-xs',
+      muxuiTokenId: 'reference.dimension.space-xs',
       members: [{ ordinal: 1, role: 'base' }, { ordinal: 2, role: 'web-responsive' }],
     }],
   };
@@ -158,14 +158,14 @@ function modeCrosswalkFixture() {
 function expectCrosswalkInvalid(value) {
   assert.throws(
     () => validateSourceCrosswalk(value.candidate, { baselineOccurrences: value.occurrences }),
-    (error) => error instanceof TokenContractError && error.code.startsWith('CORE_TOKEN_CROSSWALK_'),
+    (error) => error instanceof TokenContractError && error.code.startsWith('MUXUI_TOKEN_CROSSWALK_'),
   );
 }
 
 test('TALE-TOKEN-C source-crosswalk validation binds coverage, reference targets, groups, and digest', () => {
   const canonical = validateSourceCrosswalk(source, { baselineOccurrences });
   assert.equal(canonical.status, 'available');
-  assert.equal(canonical.digest, 'sha256:7835e06c02297e667b4fd2cf9076d5c604de5a37bb64a7d587b4a0fa7cd5e45e');
+  assert.equal(canonical.digest, 'sha256:5189cd61005c0e8d733465034d7252238bfffbc517aee4d1cdbf072ee400fd8d');
   const { candidate, occurrences } = crosswalkFixture();
   const validated = validateSourceCrosswalk(candidate, { baselineOccurrences: occurrences });
   assert.equal(validated.status, 'available');
@@ -174,7 +174,7 @@ test('TALE-TOKEN-C source-crosswalk validation binds coverage, reference targets
 
   for (const mutate of [
     (value) => { value.occurrences[1].value = '#000001'; },
-    (value) => { value.candidate.sourceCrosswalk.entries[0].coreTokenId = 'semantic.action.background'; },
+    (value) => { value.candidate.sourceCrosswalk.entries[0].muxuiTokenId = 'semantic.action.background'; },
     (value) => { value.candidate.sourceCrosswalk.entries[1].groupId = 'source.other'; },
     (value) => { value.candidate.sourceCrosswalk.groups[0].members[1].role = 'base'; },
     (value) => { value.candidate.sourceCrosswalk.entries[0].targets['native.ios'] = 'rejected'; },
@@ -185,8 +185,8 @@ test('TALE-TOKEN-C source-crosswalk validation binds coverage, reference targets
     (value) => { value.candidate.sourceCrosswalk.baseline.uniqueCustomPropertyNames = 3; },
     (value) => { value.candidate.sourceCrosswalk.entries[1].occurrence.value = '#000001'; value.occurrences[1].value = '#000001'; },
     (value) => { value.candidate.sourceCrosswalk.entries[1].disposition = 'adapt'; },
-    (value) => { delete value.candidate.sourceCrosswalk.groups[0].coreTokenId; },
-    (value) => { value.candidate.sourceCrosswalk.groups[0].coreTokenId = 'reference.color.neutral-5'; },
+    (value) => { delete value.candidate.sourceCrosswalk.groups[0].muxuiTokenId; },
+    (value) => { value.candidate.sourceCrosswalk.groups[0].muxuiTokenId = 'reference.color.neutral-5'; },
     (value) => { value.candidate.sourceCrosswalk.groups.push({ ...structuredClone(value.candidate.sourceCrosswalk.groups[0]), id: 'source.second' }); },
     (value) => { delete value.candidate.sourceCrosswalk.entries[0].groupId; delete value.candidate.sourceCrosswalk.entries[1].groupId; value.candidate.sourceCrosswalk.groups = []; },
   ]) {
@@ -208,7 +208,7 @@ test('TALE-TOKEN-C source-crosswalk validation binds coverage, reference targets
         value.candidate.sourceCrosswalk.entries[1].targets[target] = 'rejected';
       }
     },
-    (value) => { delete value.candidate.sourceCrosswalk.groups[0].coreTokenId; },
+    (value) => { delete value.candidate.sourceCrosswalk.groups[0].muxuiTokenId; },
   ]) {
     const invalid = selectorCrosswalkFixture();
     mutate(invalid);
@@ -218,7 +218,7 @@ test('TALE-TOKEN-C source-crosswalk validation binds coverage, reference targets
   for (const mutate of [
     (value) => { value.candidate.sourceCrosswalk.groups[0].members[1].role = 'default'; value.candidate.sourceCrosswalk.groups[0].members[1].mode = 'motion.full'; },
     (value) => { value.candidate.sourceCrosswalk.groups[0].members.pop(); value.candidate.sourceCrosswalk.entries.pop(); value.occurrences.pop(); value.candidate.sourceCrosswalk.baseline.declarationOccurrences = 2; value.candidate.sourceCrosswalk.baseline.customPropertyOccurrences = 2; },
-    (value) => { value.candidate.sourceCrosswalk.groups[0].coreTokenId = 'reference.duration.fast'; },
+    (value) => { value.candidate.sourceCrosswalk.groups[0].muxuiTokenId = 'reference.duration.fast'; },
     (value) => {
       value.candidate.sourceCrosswalk.entries[1].disposition = 'reject';
       for (const target of Object.keys(value.candidate.sourceCrosswalk.entries[1].targets)) {
@@ -243,7 +243,7 @@ test('TALE-TOKEN-C source-crosswalk validation binds coverage, reference targets
   wrongGroupOrder.candidate.sourceCrosswalk.entries.push(...extraOccurrences.map((occurrence) => ({
     occurrence,
     disposition: 'adapt',
-    coreTokenId: 'reference.dimension.space-xs',
+    muxuiTokenId: 'reference.dimension.space-xs',
     groupId: 'source.aaa-out-of-order',
     reason: 'Equivalent source values share one Core reference.',
     targets: { 'web.html': 'direct', 'web.react': 'direct', 'native.ios': 'direct', 'native.android': 'direct', 'native.react-native-web': 'deferred' },
@@ -251,7 +251,7 @@ test('TALE-TOKEN-C source-crosswalk validation binds coverage, reference targets
   wrongGroupOrder.candidate.sourceCrosswalk.groups.push({
     id: 'source.aaa-out-of-order',
     relationship: 'equivalent-source-values',
-    coreTokenId: 'reference.dimension.space-xs',
+    muxuiTokenId: 'reference.dimension.space-xs',
     members: [{ ordinal: 4, role: 'equivalent-source-value' }, { ordinal: 5, role: 'equivalent-source-value' }],
   });
   expectCrosswalkInvalid(wrongGroupOrder);
@@ -267,18 +267,18 @@ test('E-G1.0-01 rejects cycles, reverse layers, incompatible units, and override
     layer: 'semantic', type: 'color', unit: 'hex', meaning: 'Cycle B.', overridePolicy: 'fixed',
     alias: 'semantic.test.a', equivalence: 'semantic-equivalence',
   };
-  expectCode('CORE_TOKEN_ALIAS_CYCLE', () => compileTokenGraph(cycle));
+  expectCode('MUXUI_TOKEN_ALIAS_CYCLE', () => compileTokenGraph(cycle));
 
   const reverse = structuredClone(source);
   delete reverse.tokens['reference.color.neutral-90'].value;
   reverse.tokens['reference.color.neutral-90'].alias = 'semantic.action.background';
-  expectCode('CORE_TOKEN_LAYER_DIRECTION', () => compileTokenGraph(reverse));
+  expectCode('MUXUI_TOKEN_LAYER_DIRECTION', () => compileTokenGraph(reverse));
 
   const incompatible = structuredClone(source);
   incompatible.tokens['semantic.action.background'].unit = 'px';
-  expectCode('CORE_TOKEN_TYPE_MISMATCH', () => compileTokenGraph(incompatible));
+  expectCode('MUXUI_TOKEN_TYPE_MISMATCH', () => compileTokenGraph(incompatible));
 
-  expectCode('CORE_TOKEN_OVERRIDE_UNAUTHORIZED', () => compileTokenGraph(source, {
+  expectCode('MUXUI_TOKEN_OVERRIDE_UNAUTHORIZED', () => compileTokenGraph(source, {
     overrides: {
       'reference.color.neutral-90': { type: 'color', unit: 'hex', value: '#000000' },
     },
@@ -291,7 +291,7 @@ test('E-G1.0-02 web and native transforms retain canonical provenance without cr
   const ios = compileNativeTheme(source, { profile: 'native.ios' });
   const android = compileNativeTheme(source, { profile: 'native.android' });
   assert.equal(web.css, react.css);
-  assert.equal((web.css.match(/--core-reference-/gu) ?? []).length, 296);
+  assert.equal((web.css.match(/--muxui-reference-/gu) ?? []).length, 296);
   assert.equal(Object.keys(ios.theme).filter((id) => id.startsWith('reference.')).length, 296);
   assert.equal(Object.keys(ios.theme).filter((id) => id.startsWith('semantic.')).length, 56);
   assert.equal(Object.keys(ios.theme).filter((id) => id.startsWith('component.')).length, 5);
@@ -307,13 +307,13 @@ test('E-G1.0-02 web and native transforms retain canonical provenance without cr
   consumeButtonStaticNativeTransform(android, { profile: 'native.android' });
   for (const profile of ['native.ios', 'native.android']) {
     for (const field of ['css', 'cssSource']) {
-      expectCode('CORE_TOKEN_OPTIONS_INVALID', () => compileNativeTheme(source, {
+      expectCode('MUXUI_TOKEN_OPTIONS_INVALID', () => compileNativeTheme(source, {
         profile,
         [field]: ':root {}',
       }));
     }
   }
-  expectCode('CORE_TOKEN_PROFILE_INVALID', () => compileNativeTheme(source, {
+  expectCode('MUXUI_TOKEN_PROFILE_INVALID', () => compileNativeTheme(source, {
     profile: 'native.react-native-web',
   }));
 });
@@ -343,7 +343,7 @@ test('default theme link and invalid semantic colors meet contrast in both color
 
 test('Decision 0005 changes only renderer source and provenance identity', () => {
   const decision0004 = structuredClone(source);
-  decision0004.id = 'core:token:button-minimum';
+  decision0004.id = 'muxui:token:button-minimum';
   const beforeWeb = compileWebTheme(decision0004);
   const afterWeb = compileWebTheme(source);
   const beforeIos = compileNativeTheme(decision0004, { profile: 'native.ios' });
@@ -368,7 +368,7 @@ test('Decision 0005 changes only renderer source and provenance identity', () =>
 test('E-G1.0-03 missing required tokens fail per profile and exact proved fallbacks diagnose use', () => {
   for (const profile of ['web.html', 'web.react', 'native.ios', 'native.android']) {
     const set = compileTokenRequirementSet({ source, recipe, bindingId: 'button', profile });
-    expectCode('CORE_TOKEN_REQUIRED_MISSING', () => validateThemeForRequirementSet({
+    expectCode('MUXUI_TOKEN_REQUIRED_MISSING', () => validateThemeForRequirementSet({
       requirementSet: set,
       values: {},
     }));
@@ -393,7 +393,7 @@ test('E-G1.0-03 missing required tokens fail per profile and exact proved fallba
     requirementSet: set,
     values: { 'component.button.foreground': '#ffffff' },
   });
-  assert.equal(result.diagnostics[0].code, 'CORE_TOKEN_FALLBACK_USED');
+  assert.equal(result.diagnostics[0].code, 'MUXUI_TOKEN_FALLBACK_USED');
   assert.equal(result.diagnostics[0].profile, 'web.html');
 
   const otherProfile = compileTokenRequirementSet({
@@ -402,7 +402,7 @@ test('E-G1.0-03 missing required tokens fail per profile and exact proved fallba
     bindingId: 'web.react',
     profile: 'web.react',
   });
-  expectCode('CORE_TOKEN_REQUIRED_MISSING', () => validateThemeForRequirementSet({
+  expectCode('MUXUI_TOKEN_REQUIRED_MISSING', () => validateThemeForRequirementSet({
     requirementSet: otherProfile,
     values: { 'component.button.foreground': '#ffffff' },
   }));
@@ -421,7 +421,7 @@ test('E-G1.0-03 missing required tokens fail per profile and exact proved fallba
     profile: 'web.html',
   });
   assert.ok(tokenFallbackSet.closure.some(({ token }) => token === 'semantic.action.background'));
-  expectCode('CORE_TOKEN_REQUIRED_MISSING', () => validateThemeForRequirementSet({
+  expectCode('MUXUI_TOKEN_REQUIRED_MISSING', () => validateThemeForRequirementSet({
     requirementSet: tokenFallbackSet,
     values: { 'component.button.foreground': '#ffffff' },
   }));
@@ -431,7 +431,7 @@ test('E-G1.0-03 missing required tokens fail per profile and exact proved fallba
       'component.button.foreground': '#ffffff',
       'semantic.action.background': '#000000',
     },
-  }).diagnostics[0].code, 'CORE_TOKEN_FALLBACK_USED');
+  }).diagnostics[0].code, 'MUXUI_TOKEN_FALLBACK_USED');
 });
 
 test('E-G1.0-04 requirement digests track exact semantic closure only', () => {

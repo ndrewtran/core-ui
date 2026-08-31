@@ -1,13 +1,13 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://core-ui.dev/schema/guide.schema.json",
-  "title": "Core UI guide",
+  "$id": "https://muxui.dev/schema/guide.schema.json",
+  "title": "Mux UI guide",
   "type": "object",
   "additionalProperties": false,
   "required": ["schemaVersion", "id", "kind", "name", "summary", "lifecycle", "keywords", "platforms", "source"],
   "properties": {
     "schemaVersion": { "const": "1.0.0" },
-    "id": { "type": "string", "pattern": "^core:guide:[a-z0-9]+(?:-[a-z0-9]+)*$" },
+    "id": { "type": "string", "pattern": "^muxui:guide:[a-z0-9]+(?:-[a-z0-9]+)*$" },
     "kind": { "const": "guide" },
     "name": { "type": "string", "minLength": 1 },
     "summary": { "type": "string", "minLength": 1 },
@@ -15,6 +15,6 @@
     "keywords": { "type": "array", "items": { "type": "string", "minLength": 1 }, "uniqueItems": true },
     "platforms": { "type": "array", "items": { "enum": ["web.html", "web.react", "native.react-native", "native.react-native-web"] }, "uniqueItems": true },
     "source": { "type": "string", "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$))[a-zA-Z0-9._/-]+$" },
-    "extensions": { "type": "object", "propertyNames": { "pattern": "^core\\.experimental\\.[a-z0-9]+(?:-[a-z0-9]+)*$" }, "additionalProperties": true }
+    "extensions": { "type": "object", "propertyNames": { "pattern": "^muxui\\.experimental\\.[a-z0-9]+(?:-[a-z0-9]+)*$" }, "additionalProperties": true }
   }
 }

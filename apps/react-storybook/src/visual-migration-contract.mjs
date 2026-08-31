@@ -6,8 +6,8 @@ import r13Crosswalk from '../../../catalog/react-r1-3/donor-crosswalk.json' with
 import r14Crosswalk from '../../../catalog/react-r1-4/donor-crosswalk.json' with { type: 'json' };
 
 /** Shared browser/Node contract for the one-time donor comparison fixture. */
-export const migrationStoryId = 'core-react-r1-1-button--default';
-export const migrationQuery = Object.freeze({ 'core-ui-migration': '1' });
+export const migrationStoryId = 'muxui-react-r1-1-button--default';
+export const migrationQuery = Object.freeze({ 'muxui-migration': '1' });
 export const migrationFrame = Object.freeze({
   viewport: Object.freeze({ width: 1000, height: 700 }),
   // The Virtualizer's layout measures its host during mount. Keep that host
@@ -22,14 +22,14 @@ export const migrationFrame = Object.freeze({
 // A non-enumerable symbol lets the private fixture pass the canonical contract
 // through the existing Storybook adapters without forwarding migration-only
 // fields to a public component or DOM node.
-export const migrationFixtureSymbol = Symbol.for('core-ui.visual-migration.fixture');
+export const migrationFixtureSymbol = Symbol.for('muxui.visual-migration.fixture');
 
 const crosswalks = [r10Crosswalk, r12Crosswalk, r13Crosswalk, r14Crosswalk];
 const donorDisposition = new Map(crosswalks.flatMap(({ components, button }) => [
   ...Object.entries(components),
   ...(button ? [['button', button]] : []),
 ]));
-const snapshotFamilies = new Map(familySnapshot.families.map((family) => [family.corePublicFamily, family]));
+const snapshotFamilies = new Map(familySnapshot.families.map((family) => [family.muxuiPublicFamily, family]));
 
 function slug(name) {
   return name.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
@@ -92,7 +92,7 @@ const familyCopy = Object.freeze({
   Tooltip: 'Keyboard shortcut: ⌘K', Tree: 'Files', Virtualizer: 'Results', TimeField: 'Start time', TextField: 'Name', Toast: 'Saved',
 });
 
-/** The semantic copy/data contract is shared by the Core and donor adapters. */
+/** The semantic copy/data contract is shared by the MuxUI and donor adapters. */
 export function fixtureContractFor(record, state = 'idle') {
   const { family } = record;
   const breadcrumbItems = state === 'disabled'
@@ -117,19 +117,19 @@ const openPortalFamilies = new Set(['DatePicker', 'DateRangePicker', 'ComboBox',
 const behaviorOnlyStates = new Set(['pressed', 'dismissed', 'submitting', 'opening', 'closing', 'entering', 'exiting']);
 
 // These states are intentionally not rasterized: they are transient or have
-// no public Core state prop. Keep the proof target explicit so a future state
+// no public MuxUI state prop. Keep the proof target explicit so a future state
 // cannot silently fall back to a generic unsupported claim.
 const behaviorStateEvidence = Object.freeze({
-  'Link/pressed': { selector: '.core-link', interaction: 'press', assertion: 'The focused Link is pressed through the existing Storybook interaction harness.' },
-  'ToggleButton/pressed': { selector: '.core-toggle-button', interaction: 'press', assertion: 'The focused ToggleButton is pressed through the existing Storybook interaction harness.' },
-  'Form/submitting': { selector: '.core-form', interaction: 'submit', assertion: 'The Form submit event is exercised by the existing Storybook interaction harness.' },
-  'Dialog/dismissed': { selector: '.core-dialog', interaction: 'dismiss', assertion: 'The open Dialog is dismissed through its close button or Escape interaction in the existing Storybook harness.' },
-  'Popover/dismissed': { selector: '.core-popover', interaction: 'dismiss', assertion: 'The open Popover is dismissed through outside or Escape interaction in the existing Storybook harness.' },
-  'PreviewTrigger/opening': { selector: '.core-preview-trigger', interaction: 'lifecycle', assertion: 'PreviewTrigger opening is observed by the existing lifecycle harness.' },
-  'PreviewTrigger/closing': { selector: '.core-preview-trigger', interaction: 'lifecycle', assertion: 'PreviewTrigger closing is observed by the existing lifecycle harness.' },
-  'Toast/dismissed': { selector: '.core-toast-dismiss', interaction: 'dismiss', assertion: 'The Toast dismiss control and timeout lifecycle are exercised by the existing Storybook harness.' },
-  'Tooltip/opening': { selector: '.core-tooltip', interaction: 'lifecycle', assertion: 'Tooltip opening is observed by the existing lifecycle harness.' },
-  'Tooltip/closing': { selector: '.core-tooltip', interaction: 'lifecycle', assertion: 'Tooltip closing is observed by the existing lifecycle harness.' },
+  'Link/pressed': { selector: '.muxui-link', interaction: 'press', assertion: 'The focused Link is pressed through the existing Storybook interaction harness.' },
+  'ToggleButton/pressed': { selector: '.muxui-toggle-button', interaction: 'press', assertion: 'The focused ToggleButton is pressed through the existing Storybook interaction harness.' },
+  'Form/submitting': { selector: '.muxui-form', interaction: 'submit', assertion: 'The Form submit event is exercised by the existing Storybook interaction harness.' },
+  'Dialog/dismissed': { selector: '.muxui-dialog', interaction: 'dismiss', assertion: 'The open Dialog is dismissed through its close button or Escape interaction in the existing Storybook harness.' },
+  'Popover/dismissed': { selector: '.muxui-popover', interaction: 'dismiss', assertion: 'The open Popover is dismissed through outside or Escape interaction in the existing Storybook harness.' },
+  'PreviewTrigger/opening': { selector: '.muxui-preview-trigger', interaction: 'lifecycle', assertion: 'PreviewTrigger opening is observed by the existing lifecycle harness.' },
+  'PreviewTrigger/closing': { selector: '.muxui-preview-trigger', interaction: 'lifecycle', assertion: 'PreviewTrigger closing is observed by the existing lifecycle harness.' },
+  'Toast/dismissed': { selector: '.muxui-toast-dismiss', interaction: 'dismiss', assertion: 'The Toast dismiss control and timeout lifecycle are exercised by the existing Storybook harness.' },
+  'Tooltip/opening': { selector: '.muxui-tooltip', interaction: 'lifecycle', assertion: 'Tooltip opening is observed by the existing lifecycle harness.' },
+  'Tooltip/closing': { selector: '.muxui-tooltip', interaction: 'lifecycle', assertion: 'Tooltip closing is observed by the existing lifecycle harness.' },
 });
 
 const unsupportedStateRationales = Object.freeze({
@@ -140,7 +140,7 @@ const unsupportedStateRationales = Object.freeze({
   'Menu/open': 'The public Menu API is the already-mounted collection surface and has no open prop; overlay ownership is covered by Select, ComboBox, and the overlay families.',
   'Slider/read-only': 'The public Slider API has no readOnly prop; its value, focus, and disabled states remain covered visually.',
   'Slider/selected': 'The public Slider API has no selected prop; its value state is represented by the canonical idle/focused visual cases.',
-  'TagGroup/selected': 'The public TagGroup API has no selection prop; removable anatomy is separately recorded as Core-only because the pinned Tale donor has no remove part.',
+  'TagGroup/selected': 'The public TagGroup API has no selection prop; removable anatomy is separately recorded as Mux UI-only because the pinned Tale donor has no remove part.',
 });
 
 function normalizedState(state) {
@@ -156,15 +156,15 @@ export function semanticRegionFor(family, state) {
     };
   }
   const requiredSelectors = {
-    Dialog: state === 'open' ? ['.core-dialog-backdrop', '.core-dialog', '.core-button'] : ['.core-button'],
-    Popover: state === 'open' ? ['.core-popover-positioner', '.core-popover', '.core-button'] : ['.core-button'],
-    PreviewTrigger: state === 'open' ? ['.core-preview-trigger', '.core-button'] : ['.core-button'],
-    Toast: ['.core-toast-region', '.core-toast'],
-    Tooltip: state === 'open' ? ['.core-tooltip', '.core-button'] : ['.core-button'],
-    DatePicker: ['.core-date-trigger', '.core-date-popover', '.core-date-dialog', '.core-calendar'],
-    DateRangePicker: ['.core-date-trigger', '.core-date-popover', '.core-date-dialog', '.core-calendar'],
-    ComboBox: ['.core-combo-box-trigger', '.core-combo-box-popover', '.core-combo-box-option'],
-    Select: ['.core-select-trigger', '.core-select-popover', '.core-select-option'],
+    Dialog: state === 'open' ? ['.muxui-dialog-backdrop', '.muxui-dialog', '.muxui-button'] : ['.muxui-button'],
+    Popover: state === 'open' ? ['.muxui-popover-positioner', '.muxui-popover', '.muxui-button'] : ['.muxui-button'],
+    PreviewTrigger: state === 'open' ? ['.muxui-preview-trigger', '.muxui-button'] : ['.muxui-button'],
+    Toast: ['.muxui-toast-region', '.muxui-toast'],
+    Tooltip: state === 'open' ? ['.muxui-tooltip', '.muxui-button'] : ['.muxui-button'],
+    DatePicker: ['.muxui-date-trigger', '.muxui-date-popover', '.muxui-date-dialog', '.muxui-calendar'],
+    DateRangePicker: ['.muxui-date-trigger', '.muxui-date-popover', '.muxui-date-dialog', '.muxui-calendar'],
+    ComboBox: ['.muxui-combo-box-trigger', '.muxui-combo-box-popover', '.muxui-combo-box-option'],
+    Select: ['.muxui-select-trigger', '.muxui-select-popover', '.muxui-select-option'],
   }[family];
   return {
     capture: 'viewport',
@@ -203,8 +203,8 @@ function hasState(record, state) {
 function actionFor(family, state) {
   if (state === 'open') {
     const selector = {
-      DatePicker: '.core-date-trigger', DateRangePicker: '.core-date-trigger',
-      ComboBox: '.core-combo-box-trigger', Select: '.core-select-trigger',
+      DatePicker: '.muxui-date-trigger', DateRangePicker: '.muxui-date-trigger',
+      ComboBox: '.muxui-combo-box-trigger', Select: '.muxui-select-trigger',
     }[family];
     return selector ? { type: 'open', selector } : undefined;
   }
@@ -216,15 +216,15 @@ function actionFor(family, state) {
 
 function stateDisposition(record, state) {
   if (record.disposition === 'no-applicable-donor') return 'no-applicable-donor';
-  if (record.family === 'TagGroup' && state === 'removable') return 'core-only';
+  if (record.family === 'TagGroup' && state === 'removable') return 'muxui-only';
   if (behaviorOnlyStates.has(normalizedState(state))) return 'behavior-only';
   return hasState(record, state) ? 'visual' : 'unsupported';
 }
 
 function stateCheck(record, state, disposition) {
-  if (disposition === 'visual') return { type: 'visual', assertion: 'paired Tale/Core semantic-region PNG comparison' };
-  if (disposition === 'no-applicable-donor') return { type: 'evidence', assertion: 'Core-owned behavior is covered by the canonical Storybook state and has no pinned Tale family donor.' };
-  if (disposition === 'core-only') return { type: 'dom', selector: '.core-tag-remove', assertion: 'Core removable TagGroup anatomy is checked in the Core DOM; pinned Tale TagGroup exposes no remove part.' };
+  if (disposition === 'visual') return { type: 'visual', assertion: 'paired Tale/Mux UI semantic-region PNG comparison' };
+  if (disposition === 'no-applicable-donor') return { type: 'evidence', assertion: 'Mux UI-owned behavior is covered by the canonical Storybook state and has no pinned Tale family donor.' };
+  if (disposition === 'muxui-only') return { type: 'dom', selector: '.muxui-tag-remove', assertion: 'Mux UI removable TagGroup anatomy is checked in the Mux UI DOM; pinned Tale TagGroup exposes no remove part.' };
   if (disposition === 'behavior-only') {
     const evidence = behaviorStateEvidence[`${record.family}/${state}`];
     if (!evidence) throw new Error(`missing focused behavior evidence for ${record.family}/${state}`);
@@ -232,7 +232,7 @@ function stateCheck(record, state, disposition) {
   }
   const rationale = unsupportedStateRationales[`${record.family}/${state}`];
   if (!rationale) throw new Error(`missing public-API rationale for unsupported ${record.family}/${state}`);
-  return { type: 'dom', rationale, assertion: `The ${record.family} ${state} state has no supported Core prop or deterministic interaction in this contract.` };
+  return { type: 'dom', rationale, assertion: `The ${record.family} ${state} state has no supported Mux UI prop or deterministic interaction in this contract.` };
 }
 
 const canonicalCoverageRecords = Object.freeze(allRecords.flatMap((record) => record.binding.states.map((state) => {
@@ -260,7 +260,7 @@ const compatibilityCoverageRecords = Object.freeze(allRecords
       check: { type: 'visual', assertion: 'retained compatibility comparison for the pre-expansion high-signal fixture' },
     }));
   }));
-const extraCoverageRecords = Object.freeze([{ family: 'TagGroup', slug: 'tag-group', state: 'removable', disposition: 'core-only', check: stateCheck({ family: 'TagGroup' }, 'removable', 'core-only') }]);
+const extraCoverageRecords = Object.freeze([{ family: 'TagGroup', slug: 'tag-group', state: 'removable', disposition: 'muxui-only', check: stateCheck({ family: 'TagGroup' }, 'removable', 'muxui-only') }]);
 export const canonicalStateCoverage = canonicalCoverageRecords;
 export const compatibilityStateCoverage = compatibilityCoverageRecords;
 export const supplementalStateCoverage = extraCoverageRecords;
@@ -275,7 +275,7 @@ export const migrationCases = Object.freeze(applicableMigrationRecords.flatMap((
     slug: record.slug,
     tranche: record.tranche,
     state,
-    selector: `[data-core-migration-case="${record.slug}-${state}"]`,
+    selector: `[data-muxui-migration-case="${record.slug}-${state}"]`,
     action: actionFor(record.family, state),
     fixture: fixtureContractFor(record, state),
     region: semanticRegionFor(record.family, state),
@@ -283,7 +283,7 @@ export const migrationCases = Object.freeze(applicableMigrationRecords.flatMap((
 }));
 
 /**
- * Return the only fixture object that may cross the Core/Tale adapter boundary.
+ * Return the only fixture object that may cross the MuxUI/Tale adapter boundary.
  * Both adapters call this function at runtime; neither adapter may substitute
  * copy, data, state, or frame values from its own renderer defaults.
  */
@@ -305,57 +305,57 @@ export function sharedFixtureInput(entry) {
 }
 
 const rootPartSelectors = Object.freeze({
-  Button: ['.core-button', '.tale-button'],
-  Breadcrumbs: ['.core-breadcrumbs', '.tale-breadcrumbs'],
-  Checkbox: ['.core-checkbox', '.tale-checkbox'],
-  Disclosure: ['.core-disclosure', '.tale-disclosure'],
-  DisclosureGroup: ['.core-disclosure-group', '.tale-disclosure'],
-  Link: ['.core-link', '.tale-link'],
-  Meter: ['.core-meter', '.tale-meter'],
-  ProgressBar: ['.core-progress-bar', '.tale-progress-bar'],
-  Separator: ['.core-separator', '.tale-separator'],
-  ToggleButton: ['.core-toggle-button', '.tale-toggle-button'],
-  Autocomplete: ['.core-autocomplete-search', '.tale-autocomplete__search-field'],
-  CheckboxGroup: ['.core-checkbox-group', '.tale-checkbox-group'],
-  DateField: ['.core-date-field', '.tale-date-field'],
-  DatePicker: ['.core-date-picker', '.tale-date-picker'],
-  DateRangePicker: ['.core-date-range-picker', '.tale-date-range-picker'],
-  Form: ['.core-form', '.tale-form'],
-  NumberField: ['.core-number-field', '.tale-number-field'],
-  SearchField: ['.core-search-field', '.tale-search-field'],
-  Switch: ['.core-switch', '.tale-switch'],
-  TextField: ['.core-text-field', '.tale-text-field'],
-  TimeField: ['.core-time-field', '.tale-time-field'],
-  Calendar: ['.core-calendar', '.tale-calendar'],
-  ColorArea: ['.core-color-area', '.tale-color-area'],
-  ColorField: ['.core-color-field', '.tale-color-field'],
-  ColorPicker: ['.core-color-picker', '.tale-color-area'],
-  ColorSlider: ['.core-color-slider', '.tale-color-slider'],
-  ColorSwatch: ['.core-color-swatch', '.tale-color-swatch'],
-  ColorSwatchPicker: ['.core-color-swatch-picker-item', '.tale-color-swatch-picker__item'],
-  ColorWheel: ['.core-color-wheel', '.tale-color-wheel'],
-  ComboBox: ['.core-combo-box', '.tale-combobox'],
-  GridList: ['.core-grid-list', '.tale-grid-list'],
-  ListBox: ['.core-list-box', '.tale-list-box'],
-  Menu: ['.core-menu-item', '.tale-menu__item'],
-  RadioGroup: ['.core-radio-group', '.tale-radio-group'],
-  RangeCalendar: ['.core-range-calendar', '.tale-range-calendar'],
-  Select: ['.core-select', '.tale-select'],
-  Slider: ['.core-slider', '.tale-slider'],
-  Table: ['.core-table', '.tale-table'],
-  Tabs: ['.core-tabs', '.tale-tabs'],
-  TagGroup: ['.core-tag-group', '.tale-tag-group'],
-  ToggleButtonGroup: ['.core-toggle-button-group', '.tale-toggle-button-group'],
-  Toolbar: ['.core-toolbar', '.tale-toolbar'],
-  Tree: ['.core-tree', '.tale-tree'],
-  Virtualizer: ['.core-virtualizer', '.tale-virtualizer'],
-  DropZone: ['.core-drop-zone', '.tale-drop-zone'],
-  FileTrigger: ['.core-button', '.tale-button'],
-  Dialog: ['.core-dialog', '.tale-dialog__popup'],
-  Popover: ['.core-popover', '.tale-popover__popup'],
-  PreviewTrigger: ['.core-preview-trigger', '.tale-preview-card__trigger'],
-  Toast: ['.core-toast', '.tale-toast'],
-  Tooltip: ['.core-tooltip', '.tale-tooltip__popup'],
+  Button: ['.muxui-button', '.tale-button'],
+  Breadcrumbs: ['.muxui-breadcrumbs', '.tale-breadcrumbs'],
+  Checkbox: ['.muxui-checkbox', '.tale-checkbox'],
+  Disclosure: ['.muxui-disclosure', '.tale-disclosure'],
+  DisclosureGroup: ['.muxui-disclosure-group', '.tale-disclosure'],
+  Link: ['.muxui-link', '.tale-link'],
+  Meter: ['.muxui-meter', '.tale-meter'],
+  ProgressBar: ['.muxui-progress-bar', '.tale-progress-bar'],
+  Separator: ['.muxui-separator', '.tale-separator'],
+  ToggleButton: ['.muxui-toggle-button', '.tale-toggle-button'],
+  Autocomplete: ['.muxui-autocomplete-search', '.tale-autocomplete__search-field'],
+  CheckboxGroup: ['.muxui-checkbox-group', '.tale-checkbox-group'],
+  DateField: ['.muxui-date-field', '.tale-date-field'],
+  DatePicker: ['.muxui-date-picker', '.tale-date-picker'],
+  DateRangePicker: ['.muxui-date-range-picker', '.tale-date-range-picker'],
+  Form: ['.muxui-form', '.tale-form'],
+  NumberField: ['.muxui-number-field', '.tale-number-field'],
+  SearchField: ['.muxui-search-field', '.tale-search-field'],
+  Switch: ['.muxui-switch', '.tale-switch'],
+  TextField: ['.muxui-text-field', '.tale-text-field'],
+  TimeField: ['.muxui-time-field', '.tale-time-field'],
+  Calendar: ['.muxui-calendar', '.tale-calendar'],
+  ColorArea: ['.muxui-color-area', '.tale-color-area'],
+  ColorField: ['.muxui-color-field', '.tale-color-field'],
+  ColorPicker: ['.muxui-color-picker', '.tale-color-area'],
+  ColorSlider: ['.muxui-color-slider', '.tale-color-slider'],
+  ColorSwatch: ['.muxui-color-swatch', '.tale-color-swatch'],
+  ColorSwatchPicker: ['.muxui-color-swatch-picker-item', '.tale-color-swatch-picker__item'],
+  ColorWheel: ['.muxui-color-wheel', '.tale-color-wheel'],
+  ComboBox: ['.muxui-combo-box', '.tale-combobox'],
+  GridList: ['.muxui-grid-list', '.tale-grid-list'],
+  ListBox: ['.muxui-list-box', '.tale-list-box'],
+  Menu: ['.muxui-menu-item', '.tale-menu__item'],
+  RadioGroup: ['.muxui-radio-group', '.tale-radio-group'],
+  RangeCalendar: ['.muxui-range-calendar', '.tale-range-calendar'],
+  Select: ['.muxui-select', '.tale-select'],
+  Slider: ['.muxui-slider', '.tale-slider'],
+  Table: ['.muxui-table', '.tale-table'],
+  Tabs: ['.muxui-tabs', '.tale-tabs'],
+  TagGroup: ['.muxui-tag-group', '.tale-tag-group'],
+  ToggleButtonGroup: ['.muxui-toggle-button-group', '.tale-toggle-button-group'],
+  Toolbar: ['.muxui-toolbar', '.tale-toolbar'],
+  Tree: ['.muxui-tree', '.tale-tree'],
+  Virtualizer: ['.muxui-virtualizer', '.tale-virtualizer'],
+  DropZone: ['.muxui-drop-zone', '.tale-drop-zone'],
+  FileTrigger: ['.muxui-button', '.tale-button'],
+  Dialog: ['.muxui-dialog', '.tale-dialog__popup'],
+  Popover: ['.muxui-popover', '.tale-popover__popup'],
+  PreviewTrigger: ['.muxui-preview-trigger', '.tale-preview-card__trigger'],
+  Toast: ['.muxui-toast', '.tale-toast'],
+  Tooltip: ['.muxui-tooltip', '.tale-tooltip__popup'],
 });
 
 /** Selectors identify mapped renderer parts, not the artificial fixture frame. */
@@ -365,15 +365,15 @@ export function equivalentPartSelectorsFor(family, state = 'idle') {
   const triggerFamilies = new Set(['DatePicker', 'DateRangePicker', 'ComboBox', 'Select', 'PreviewTrigger', 'Tooltip']);
   if (state !== 'open' && (triggerFamilies.has(family) || ['Dialog', 'Popover'].includes(family))) {
     return family === 'PreviewTrigger'
-      ? ['.core-button', '.tale-preview-card__trigger']
+      ? ['.muxui-button', '.tale-preview-card__trigger']
       : family === 'Tooltip'
-        ? ['.core-button', '.tale-tooltip__trigger']
+        ? ['.muxui-button', '.tale-tooltip__trigger']
         : family === 'Dialog'
-          ? ['.core-button', '.tale-button']
-        : family === 'Popover' ? ['.core-button', '.tale-button']
-      : family === 'ComboBox' ? ['.core-combo-box-trigger', '.tale-combobox__trigger']
-        : family === 'Select' ? ['.core-select-trigger', '.tale-select__trigger']
-          : ['.core-date-trigger', `.tale-${family === 'DatePicker' ? 'date-picker' : 'date-range-picker'}__trigger`];
+          ? ['.muxui-button', '.tale-button']
+        : family === 'Popover' ? ['.muxui-button', '.tale-button']
+      : family === 'ComboBox' ? ['.muxui-combo-box-trigger', '.tale-combobox__trigger']
+        : family === 'Select' ? ['.muxui-select-trigger', '.tale-select__trigger']
+          : ['.muxui-date-trigger', `.tale-${family === 'DatePicker' ? 'date-picker' : 'date-range-picker'}__trigger`];
   }
   return selectors;
 }
@@ -383,6 +383,6 @@ export const migrationStateNames = Object.freeze([...new Set(migrationCases.map(
 
 export function isMigrationFixtureRequest(storyId, search) {
   if (storyId !== migrationStoryId) return false;
-  const values = new URLSearchParams(search).getAll('core-ui-migration');
-  return values.length === 1 && values[0] === migrationQuery['core-ui-migration'];
+  const values = new URLSearchParams(search).getAll('muxui-migration');
+  return values.length === 1 && values[0] === migrationQuery['muxui-migration'];
 }

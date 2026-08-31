@@ -1,21 +1,21 @@
-const COORDINATOR = Symbol.for('core-ui.web.runtime-coordinator.v1');
+const COORDINATOR = Symbol.for('muxui.web.runtime-coordinator.v1');
 
-export class CoreWebOwnershipError extends Error {
+export class MuxUIWebOwnershipError extends Error {
   constructor(code, message, details = {}) {
     super(`${code}: ${message}`);
-    this.name = 'CoreWebOwnershipError';
+    this.name = 'MuxUIWebOwnershipError';
     this.code = code;
     this.details = Object.freeze({ ...details });
   }
 }
 
 function fail(code, message, details) {
-  throw new CoreWebOwnershipError(code, message, details);
+  throw new MuxUIWebOwnershipError(code, message, details);
 }
 
 function realmFor(root) {
   const document = root?.ownerDocument;
-  if (!document) fail('CORE_WEB_ROOT_INVALID', 'root must belong to a document');
+  if (!document) fail('MUXUI_WEB_ROOT_INVALID', 'root must belong to a document');
   return { document, realm: document.defaultView ?? globalThis };
 }
 
@@ -58,7 +58,7 @@ function acquireListener(document, state, type, listener, options) {
     state.listeners.set(type, entry);
     document.addEventListener(type, physical, options);
   } else if (entry.options !== options && JSON.stringify(entry.options) !== JSON.stringify(options)) {
-    fail('CORE_WEB_LISTENER_OPTIONS_CONFLICT', `${type} listener options conflict`);
+    fail('MUXUI_WEB_LISTENER_OPTIONS_CONFLICT', `${type} listener options conflict`);
   }
   entry.logical.add(listener);
   return () => {
@@ -104,14 +104,14 @@ function acquireInert(state, element) {
 
 export function claimRoot(root, { integration, token, setup = () => undefined } = {}) {
   if (!['vanilla', 'react'].includes(integration) || (typeof token !== 'object' && typeof token !== 'function')) {
-    fail('CORE_WEB_CLAIM_INVALID', 'claim requires an integration and stable object token');
+    fail('MUXUI_WEB_CLAIM_INVALID', 'claim requires an integration and stable object token');
   }
   const { document, realm } = realmFor(root);
   const coordinator = coordinatorFor(realm);
   const current = coordinator.roots.get(root);
   if (current) {
     if (current.integration === integration && current.token === token) return current.handle;
-    fail('CORE_WEB_ROOT_OWNED', 'root already has a lifecycle owner', {
+    fail('MUXUI_WEB_ROOT_OWNED', 'root already has a lifecycle owner', {
       actual: current.integration, requested: integration,
     });
   }
@@ -163,7 +163,7 @@ export function claimRoot(root, { integration, token, setup = () => undefined } 
   try {
     const result = setup(resources);
     if (result !== undefined && typeof result !== 'function') {
-      fail('CORE_WEB_SETUP_INVALID', 'setup must return a cleanup function or undefined');
+      fail('MUXUI_WEB_SETUP_INVALID', 'setup must return a cleanup function or undefined');
     }
     cleanup = result;
     return handle;

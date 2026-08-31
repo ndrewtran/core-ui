@@ -1,13 +1,13 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://core-ui.dev/schema/example.schema.json",
-  "title": "Core UI example",
+  "$id": "https://muxui.dev/schema/example.schema.json",
+  "title": "Mux UI example",
   "type": "object",
   "additionalProperties": false,
   "required": ["schemaVersion", "id", "kind", "name", "summary", "lifecycle", "binding", "complexity", "prerequisites", "source"],
   "properties": {
     "schemaVersion": { "const": "1.0.0" },
-    "id": { "type": "string", "pattern": "^core:example:[a-z0-9]+(?:-[a-z0-9]+)*$" },
+    "id": { "type": "string", "pattern": "^muxui:example:[a-z0-9]+(?:-[a-z0-9]+)*$" },
     "kind": { "const": "example" },
     "name": { "type": "string", "minLength": 1 },
     "summary": { "type": "string", "minLength": 1 },
@@ -17,7 +17,7 @@
       "additionalProperties": false,
       "required": ["ref", "guidanceImpact", "purposes"],
       "properties": {
-        "ref": { "type": "string", "pattern": "^core:component:[a-z0-9]+(?:-[a-z0-9]+)*#(?:web\\.html|web\\.react|native\\.react-native)$" },
+        "ref": { "type": "string", "pattern": "^muxui:component:[a-z0-9]+(?:-[a-z0-9]+)*#(?:web\\.html|web\\.react|native\\.react-native)$" },
         "guidanceImpact": { "enum": ["normative", "editorial"] },
         "purposes": { "type": "array", "minItems": 1, "items": { "enum": ["generation", "explanation", "validation", "migration"] }, "uniqueItems": true },
         "preference": { "type": "integer", "minimum": 0 },
@@ -27,6 +27,6 @@
     "complexity": { "enum": ["minimal", "representative", "advanced", "edge-case"] },
     "prerequisites": { "type": "array", "items": { "$ref": "artifact-ref.schema.json" }, "uniqueItems": true },
     "source": { "type": "string", "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$))[a-zA-Z0-9._/-]+$" },
-    "extensions": { "type": "object", "propertyNames": { "pattern": "^core\\.experimental\\.[a-z0-9]+(?:-[a-z0-9]+)*$" }, "additionalProperties": true }
+    "extensions": { "type": "object", "propertyNames": { "pattern": "^muxui\\.experimental\\.[a-z0-9]+(?:-[a-z0-9]+)*$" }, "additionalProperties": true }
   }
 }

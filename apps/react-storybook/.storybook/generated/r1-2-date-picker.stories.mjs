@@ -1,6 +1,6 @@
 // @generated-from: apps/react-storybook/src/generate-stories.mjs
-// @generated-content-sha256: sha256:fdb63318f370ae3a645e4e9d67a702bfba53cc4779d481af9137cd77b534b591
-import * as Core from '@core-ui/react';
+// @generated-content-sha256: sha256:b2a7cd03dad8d4221f95d49fbb4257c66e68ac878aa73abd2367730777ad12e3
+import * as MuxUI from '@muxui/react';
 import { argTypesForBinding, createStory } from '../../src/storybook-factory.mjs';
 
 const binding = {
@@ -40,12 +40,12 @@ const binding = {
       "name"
     ]
   },
-  "binding": "core:component:date-picker#web.react",
+  "binding": "muxui:component:date-picker#web.react",
   "export": "DatePicker",
   "lifecycle": "experimental",
   "module": ".",
   "runtimeProfile": "web.react",
-  "selector": ".core-date-picker",
+  "selector": ".muxui-date-picker",
   "states": [
     "idle",
     "open",
@@ -59,8 +59,9 @@ const binding = {
 const record = { family: 'DatePicker', tranche: 'R1.2', binding };
 
 export default {
-  title: 'Core React/R1.2/DatePicker',
-  component: Core.DatePicker,
+  title: 'Mux UI React/R1.2/DatePicker',
+  id: 'muxui-react-r1-2-date-picker',
+  component: MuxUI.DatePicker,
   tags: ['autodocs'],
   parameters: {
     controls: {
@@ -68,7 +69,7 @@ export default {
     },
     docs: {
       description: {
-        component: 'Private development showcase for the Core-owned DatePicker family.',
+        component: 'Private development showcase for the Mux UI-owned DatePicker family.',
       },
     },
   },

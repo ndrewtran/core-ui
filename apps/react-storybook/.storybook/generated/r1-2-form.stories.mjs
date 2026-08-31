@@ -1,6 +1,6 @@
 // @generated-from: apps/react-storybook/src/generate-stories.mjs
-// @generated-content-sha256: sha256:df82f61bddeae8b0baaabba3cbbc6d6b7db400958f98449735add4b7c8a74481
-import * as Core from '@core-ui/react';
+// @generated-content-sha256: sha256:a4bc1d21f3c01668fa2d0315211fabfe67ea29327e6a81484fde9d19358a3f9a
+import * as MuxUI from '@muxui/react';
 import { argTypesForBinding, createStory } from '../../src/storybook-factory.mjs';
 
 const binding = {
@@ -25,12 +25,12 @@ const binding = {
       "onReset"
     ]
   },
-  "binding": "core:component:form#web.react",
+  "binding": "muxui:component:form#web.react",
   "export": "Form",
   "lifecycle": "experimental",
   "module": ".",
   "runtimeProfile": "web.react",
-  "selector": ".core-form",
+  "selector": ".muxui-form",
   "states": [
     "idle",
     "submitting",
@@ -41,8 +41,9 @@ const binding = {
 const record = { family: 'Form', tranche: 'R1.2', binding };
 
 export default {
-  title: 'Core React/R1.2/Form',
-  component: Core.Form,
+  title: 'Mux UI React/R1.2/Form',
+  id: 'muxui-react-r1-2-form',
+  component: MuxUI.Form,
   tags: ['autodocs'],
   parameters: {
     controls: {
@@ -50,7 +51,7 @@ export default {
     },
     docs: {
       description: {
-        component: 'Private development showcase for the Core-owned Form family.',
+        component: 'Private development showcase for the Mux UI-owned Form family.',
       },
     },
   },

@@ -1,1 +1,1 @@
-{"schemaVersion":"1.0.0","id":"core:guide:table-usage","kind":"guide","name":"Table usage","summary":"Portable usage guidance for Table.","lifecycle":"experimental","keywords":["table","react","accessibility"],"platforms":["web.react"],"source":"catalog/guides/table-usage.md"}
+{"schemaVersion":"1.0.0","id":"muxui:guide:table-usage","kind":"guide","name":"Table usage","summary":"Portable usage guidance for Table.","lifecycle":"experimental","keywords":["table","react","accessibility"],"platforms":["web.react"],"source":"catalog/guides/table-usage.md"}

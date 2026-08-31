@@ -1,6 +1,6 @@
 // @generated-from: apps/react-storybook/src/generate-stories.mjs
-// @generated-content-sha256: sha256:27d75e5cc5176d675c7ee23f6e5e2f9d063bfee41f9a44e58100501d6bf74511
-import * as Core from '@core-ui/react';
+// @generated-content-sha256: sha256:ccfc1e1da43676b6c4862bb7ad891aad5f1d618e5b56703b247471592079e0cd
+import * as MuxUI from '@muxui/react';
 import { argTypesForBinding, createStory } from '../../src/storybook-factory.mjs';
 
 const binding = {
@@ -37,12 +37,12 @@ const binding = {
       "name"
     ]
   },
-  "binding": "core:component:date-field#web.react",
+  "binding": "muxui:component:date-field#web.react",
   "export": "DateField",
   "lifecycle": "experimental",
   "module": ".",
   "runtimeProfile": "web.react",
-  "selector": ".core-date-field",
+  "selector": ".muxui-date-field",
   "states": [
     "idle",
     "disabled",
@@ -55,8 +55,9 @@ const binding = {
 const record = { family: 'DateField', tranche: 'R1.2', binding };
 
 export default {
-  title: 'Core React/R1.2/DateField',
-  component: Core.DateField,
+  title: 'Mux UI React/R1.2/DateField',
+  id: 'muxui-react-r1-2-date-field',
+  component: MuxUI.DateField,
   tags: ['autodocs'],
   parameters: {
     controls: {
@@ -64,7 +65,7 @@ export default {
     },
     docs: {
       description: {
-        component: 'Private development showcase for the Core-owned DateField family.',
+        component: 'Private development showcase for the Mux UI-owned DateField family.',
       },
     },
   },

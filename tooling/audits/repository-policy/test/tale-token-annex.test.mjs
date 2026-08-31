@@ -4,7 +4,7 @@ import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { promisify } from 'node:util';
 import test from 'node:test';
-import { canonicalJson } from '@core-ui/schema';
+import { canonicalJson } from '@muxui/schema';
 import { sha256 } from '../src/policy.mjs';
 import {
   acceptanceCommentBody,

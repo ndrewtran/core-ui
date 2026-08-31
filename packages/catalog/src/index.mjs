@@ -11,8 +11,9 @@ import {
   canonicalJson,
   parseJsonStrict,
   sha256Digest,
+  validateCatalogRecords,
   validateFamily,
-} from '@core-ui/schema';
+} from '@muxui/schema';
 import { catalogJson } from '../generated/catalog.mjs';
 
 const DEFAULT_LIMIT = 20;
@@ -61,12 +62,16 @@ function deepFreeze(value) {
 
 function assertBundle(bundle) {
   if (!bundle || typeof bundle !== 'object' || Array.isArray(bundle)) {
-    throw new Error('CORE_CATALOG_INTEGRITY_MISMATCH: catalog bundle must be an object');
+    throw new Error('MUXUI_CATALOG_INTEGRITY_MISMATCH: catalog bundle must be an object');
   }
   const { catalogDigest, ...preimage } = bundle;
   if (catalogDigest !== canonicalDigest(preimage)) {
-    throw new Error('CORE_CATALOG_INTEGRITY_MISMATCH: catalog digest does not match bundle');
+    throw new Error('MUXUI_CATALOG_INTEGRITY_MISMATCH: catalog digest does not match bundle');
   }
+  if (!Array.isArray(bundle.artifacts)) {
+    throw new Error('MUXUI_CATALOG_INTEGRITY_MISMATCH: catalog artifacts must be an array');
+  }
+  validateCatalogRecords(bundle.artifacts.map(({ record }) => record));
   if (
     !QUERY_API_VERSIONS.includes(bundle.apiVersion)
     || !Array.isArray(bundle.supportedQueryApiVersions)
@@ -75,7 +80,7 @@ function assertBundle(bundle) {
     || new Set(bundle.supportedQueryApiVersions).size !== bundle.supportedQueryApiVersions.length
     || !bundle.supportedQueryApiVersions.includes(bundle.apiVersion)
   ) {
-    throw new Error('CORE_CATALOG_INTEGRITY_MISMATCH: invalid selected query descriptor');
+    throw new Error('MUXUI_CATALOG_INTEGRITY_MISMATCH: invalid selected query descriptor');
   }
   for (const artifact of bundle.artifacts ?? []) {
     if (artifact.kind !== 'token') continue;
@@ -84,7 +89,7 @@ function assertBundle(bundle) {
       ? null
       : canonicalDigest(artifact.record.sourceCrosswalk);
     if (artifact.sourceCrosswalkDigest !== expectedCrosswalkDigest) {
-      throw new Error('CORE_CATALOG_INTEGRITY_MISMATCH: token crosswalk digest does not match its sole canonical field');
+      throw new Error('MUXUI_CATALOG_INTEGRITY_MISMATCH: token crosswalk digest does not match its sole canonical field');
     }
   }
   validateFamily('token-section-page-budget-profile', bundle.pageBudgetProfile);
@@ -133,7 +138,7 @@ export function validateTokenDetailSummary({ responseArtifact, selectedArtifact 
     || !selectedArtifact
     || selectedArtifact.kind !== 'token'
   ) {
-    throw new Error('CORE_CATALOG_INTEGRITY_MISMATCH: token summary requires one selected token artifact');
+    throw new Error('MUXUI_CATALOG_INTEGRITY_MISMATCH: token summary requires one selected token artifact');
   }
   const expected = {
     availableSections: ['tokens', 'source-crosswalk'],
@@ -143,7 +148,7 @@ export function validateTokenDetailSummary({ responseArtifact, selectedArtifact 
   };
   for (const [field, value] of Object.entries(expected)) {
     if (canonicalJson(responseArtifact[field]) !== canonicalJson(value)) {
-      throw new Error(`CORE_CATALOG_INTEGRITY_MISMATCH: token summary ${field} does not match the selected artifact`);
+      throw new Error(`MUXUI_CATALOG_INTEGRITY_MISMATCH: token summary ${field} does not match the selected artifact`);
     }
   }
   return true;
@@ -155,7 +160,7 @@ function normalizeRequest(request, operation, bundle) {
   if (request === undefined) request = {};
   if (request === null || typeof request !== 'object' || Array.isArray(request)) {
     return { error: queryError(
-      'CORE_QUERY_INVALID',
+      'MUXUI_QUERY_INVALID',
       'query.request.object',
       `${operation} request must be an object.`,
       { operation },
@@ -168,7 +173,7 @@ function normalizeRequest(request, operation, bundle) {
   const unknown = Object.keys(request).filter((key) => !allowed.has(key)).sort(compareText);
   if (unknown.length > 0) {
     return { error: queryError(
-      'CORE_QUERY_INVALID',
+      'MUXUI_QUERY_INVALID',
       'query.request.unknown-field',
       `${operation} request contains unknown fields.`,
       { operation, fields: unknown },
@@ -214,7 +219,7 @@ function normalizeRequest(request, operation, bundle) {
   if (normalized.cursor !== null && typeof normalized.cursor !== 'string') failures.push('cursor');
   if (failures.length > 0) {
     return { error: queryError(
-      'CORE_QUERY_INVALID',
+      'MUXUI_QUERY_INVALID',
       'query.request.selector',
       `${operation} request has invalid selectors.`,
       { operation, fields: failures.sort(compareText) },
@@ -234,7 +239,7 @@ function normalizeRequest(request, operation, bundle) {
 
 function unsupportedQueryVersion(version, supported, currentQueryApiVersion = API_VERSION) {
   return queryError(
-    'CORE_QUERY_API_VERSION_UNSUPPORTED',
+    'MUXUI_QUERY_API_VERSION_UNSUPPORTED',
     'query.api-version.supported',
     `Query API ${version} is not supported by the selected catalog.`,
     { queryApiVersion: version, supportedQueryApiVersions: supported },
@@ -257,13 +262,15 @@ function countLexemes(value) {
 
 function encodeSectionCursor(payload, profile) {
   const bytes = canonicalJson(payload);
-  if (profile.cursorProfile !== 'core-ui-section-cursor-v1') throw new Error('invalid cursor profile');
+  if (profile.cursorProfile !== 'muxui-section-cursor-v1') {
+    throw new Error('invalid cursor profile');
+  }
   return `c1.${Buffer.from(bytes, 'utf8').toString('base64url')}.${sha256Digest(bytes).slice(7)}`;
 }
 
 function decodeSectionCursor(value, profile) {
   if (
-    profile.cursorProfile !== 'core-ui-section-cursor-v1'
+    profile.cursorProfile !== 'muxui-section-cursor-v1'
     || typeof value !== 'string'
     || Buffer.byteLength(value, 'utf8') > profile.cursorMaximumBytes
   ) throw new Error('invalid cursor');
@@ -287,7 +294,7 @@ function sectionPage(bundle, artifact, request) {
   const profile = bundle.pageBudgetProfile;
   if (!['1.2.0', '2.0.0'].includes(request.queryApiVersion)) {
     return { error: queryError(
-      'CORE_QUERY_INVALID',
+      'MUXUI_QUERY_INVALID',
       'query.section.version',
       'Sectional token retrieval requires query API 1.2.0 or 2.0.0.',
       { queryApiVersion: request.queryApiVersion, section: request.section },
@@ -297,7 +304,7 @@ function sectionPage(bundle, artifact, request) {
   }
   if (artifact.kind !== 'token') {
     return { error: queryError(
-      'CORE_QUERY_INVALID',
+      'MUXUI_QUERY_INVALID',
       'query.section.artifact-kind',
       'Token sections require a token artifact.',
       { id: artifact.id, section: request.section },
@@ -349,14 +356,14 @@ function sectionPage(bundle, artifact, request) {
         if (request.queryApiVersion !== '2.0.0' || entry.groupId === undefined) return entry;
         const match = groupByOrdinal.get(entry.occurrence.ordinal);
         if (!match || match.group.id !== entry.groupId) {
-          throw new Error('CORE_CATALOG_INTEGRITY_MISMATCH: validated crosswalk group projection is incomplete');
+          throw new Error('MUXUI_CATALOG_INTEGRITY_MISMATCH: validated crosswalk group projection is incomplete');
         }
         return {
           ...entry,
           group: {
             id: match.group.id,
             relationship: match.group.relationship,
-            ...(match.group.coreTokenId === undefined ? {} : { coreTokenId: match.group.coreTokenId }),
+            ...(match.group.muxuiTokenId === undefined ? {} : { muxuiTokenId: match.group.muxuiTokenId }),
             member: match.member,
           },
         };
@@ -383,7 +390,7 @@ function sectionPage(bundle, artifact, request) {
       position = payload.nextPosition;
     } catch {
       return { error: queryError(
-        'CORE_CURSOR_INVALID',
+        'MUXUI_CURSOR_INVALID',
         'query.section.cursor.identity',
         'The section cursor does not belong to this catalog, source, version, and selector.',
         { artifactId: artifact.id, section: request.section },
@@ -427,7 +434,7 @@ function sectionPage(bundle, artifact, request) {
   const remaining = values.length - nextPosition;
   if (remaining > 0 && nextPosition >= profile.cursorPositionMaximum) {
     return { error: queryError(
-      'CORE_CURSOR_INVALID',
+      'MUXUI_CURSOR_INVALID',
       'query.section.cursor.position-overflow',
       'The next section position exceeds the cursor profile.',
       { artifactId: artifact.id, section: request.section, position: nextPosition },
@@ -523,7 +530,7 @@ function paginate(values, operation, request, catalogDigest) {
       offset = decoded.offset;
     } catch {
       return { error: queryError(
-        'CORE_CURSOR_INVALID',
+        'MUXUI_CURSOR_INVALID',
         'query.cursor.identity',
         'The cursor does not belong to this catalog and request.',
         { operation, catalogDigest },
@@ -673,12 +680,12 @@ function assertResolutionContext(bundle, input) {
       catalogSource: 'package',
       sourceRevision: bundle.sourceRevision,
       targetPackages: {},
-      coreVersion: '0.0.0',
+      muxuiVersion: '0.0.0',
     });
   }
   const allowed = [
     'authority', 'compatibility', 'catalogSource', 'sourceRevision',
-    'targetPackages', 'coreVersion',
+    'targetPackages', 'muxuiVersion',
   ];
   if (
     input === null
@@ -695,11 +702,11 @@ function assertResolutionContext(bundle, input) {
     || Object.values(input.targetPackages).some((version) => (
       typeof version !== 'string' || version.length === 0
     ))
-    || input.targetPackages['@core-ui/catalog'] !== bundle.catalogVersion
-    || typeof input.coreVersion !== 'string'
+    || input.targetPackages['@muxui/catalog'] !== bundle.catalogVersion
+    || typeof input.muxuiVersion !== 'string'
   ) {
     throw new Error(
-      'CORE_CATALOG_RESOLUTION_CONTEXT_INVALID: expected one verified installed-local context',
+      'MUXUI_CATALOG_RESOLUTION_CONTEXT_INVALID: expected one verified installed-local context',
     );
   }
   return deepFreeze(structuredClone(input));
@@ -710,7 +717,7 @@ function baseMeta(bundle, resolutionContext, request = {}, revisions = {}) {
     schemaVersion: request.queryApiVersion ?? QUERY_SCHEMA_VERSION,
     authority: resolutionContext.authority,
     revisions,
-    coreVersion: resolutionContext.coreVersion,
+    muxuiVersion: resolutionContext.muxuiVersion,
     catalogVersion: bundle.catalogVersion,
     catalogDigest: bundle.catalogDigest,
     sourceRevision: bundle.sourceRevision,
@@ -732,7 +739,7 @@ function baseMeta(bundle, resolutionContext, request = {}, revisions = {}) {
 function resolvedCliRegistry(bundle) {
   const registry = structuredClone(bundle.commandRegistry);
   const available = bundle.artifacts
-    .find(({ id }) => id === 'core:capability:query-baseline')
+    .find(({ kind }) => kind === 'capability')
     .record.availableOn.includes('cli');
   const capability = {
     available,
@@ -789,7 +796,7 @@ export function createCatalogApi(inputBundle, options = {}) {
     || Array.isArray(options)
     || Object.keys(options).some((key) => !['availableBindings', 'resolution'].includes(key))
   ) {
-    throw new Error('CORE_CATALOG_API_OPTIONS_INVALID: options must be a closed object');
+    throw new Error('MUXUI_CATALOG_API_OPTIONS_INVALID: options must be a closed object');
   }
   const resolutionContext = assertResolutionContext(bundle, options.resolution);
   if (
@@ -800,7 +807,7 @@ export function createCatalogApi(inputBundle, options = {}) {
       || new Set(options.availableBindings).size !== options.availableBindings.length
     )
   ) {
-    throw new Error('CORE_CATALOG_AVAILABLE_BINDINGS_INVALID: bindings must be unique strings');
+    throw new Error('MUXUI_CATALOG_AVAILABLE_BINDINGS_INVALID: bindings must be unique strings');
   }
   const availableBindings = options.availableBindings === undefined
     ? null
@@ -847,7 +854,7 @@ export function createCatalogApi(inputBundle, options = {}) {
     const { normalized } = parsed;
     if (normalized.kind !== null && !ARTIFACT_KINDS.includes(normalized.kind)) {
       return queryError(
-        'CORE_QUERY_INVALID',
+        'MUXUI_QUERY_INVALID',
         'query.list.kind',
         'listArtifacts kind must be an enabled ArtifactKind.',
         { kind: normalized.kind },
@@ -882,7 +889,7 @@ export function createCatalogApi(inputBundle, options = {}) {
       || normalized.query.length > MAX_QUERY_LENGTH
     ) {
       return queryError(
-        'CORE_QUERY_INVALID',
+        'MUXUI_QUERY_INVALID',
         'query.search.text',
         `searchArtifacts query must contain 1-${MAX_QUERY_LENGTH} characters.`,
         { query: normalized.query },
@@ -895,7 +902,7 @@ export function createCatalogApi(inputBundle, options = {}) {
     )].slice(0, MAX_QUERY_TERMS);
     if (queryTerms.length === 0) {
       return queryError(
-        'CORE_QUERY_INVALID',
+        'MUXUI_QUERY_INVALID',
         'query.search.terms',
         'searchArtifacts query must contain an ASCII letter or number.',
         { query: normalized.query },
@@ -966,7 +973,7 @@ export function createCatalogApi(inputBundle, options = {}) {
       || !new RegExp(ARTIFACT_REF_PATTERN).test(normalized.id)
     ) {
       return queryError(
-        'CORE_QUERY_INVALID',
+        'MUXUI_QUERY_INVALID',
         'query.get.id',
         'getArtifact id must be an ArtifactRef string.',
         { id: normalized.id },
@@ -982,7 +989,7 @@ export function createCatalogApi(inputBundle, options = {}) {
       || !appliesToPurpose(artifact, normalized.purpose)
     ) {
       return queryError(
-        'CORE_ARTIFACT_NOT_FOUND',
+        'MUXUI_ARTIFACT_NOT_FOUND',
         'artifact.resolve.exists',
         `No artifact matched ${JSON.stringify(normalized.id)}.`,
         { id: normalized.id, platform: normalized.platform },
@@ -996,7 +1003,7 @@ export function createCatalogApi(inputBundle, options = {}) {
     }
     if (normalized.cursor !== null) {
       return queryError(
-        'CORE_QUERY_INVALID',
+        'MUXUI_QUERY_INVALID',
         'query.get.cursor-section',
         'getArtifact cursor requires section=tokens or section=source-crosswalk.',
         { section: normalized.section },
@@ -1074,7 +1081,7 @@ export function createCatalogApi(inputBundle, options = {}) {
       && normalized.detail === 'full'
       && artifact.kind === 'token'
       ? [{
-        code: 'CORE_QUERY_INLINE_TOKENS_DEPRECATED',
+        code: 'MUXUI_QUERY_INLINE_TOKENS_DEPRECATED',
         ruleId: 'query.inline-tokens.deprecated',
         message: 'Inline token retrieval is deprecated and is removed in query API 2.0.0.',
         retryable: false,
@@ -1114,21 +1121,21 @@ export const getArtifact = defaultApi.getArtifact;
 
 export function migrateCatalogPackageV1ToV2(input) {
   if (input === null || typeof input !== 'object' || Array.isArray(input)) {
-    throw new Error('CORE_CATALOG_PACKAGE_INVALID: descriptor must be an object');
+    throw new Error('MUXUI_CATALOG_PACKAGE_INVALID: descriptor must be an object');
   }
-  if (input.schema === 'core-ui-catalog-package-v2') {
+  if (input.schema === 'muxui-catalog-package-v2') {
     if (
       !Array.isArray(input.supportedQueryApiVersions)
       || !input.supportedQueryApiVersions.includes(input.queryApiVersion)
-    ) throw new Error('CORE_CATALOG_PACKAGE_INVALID: v2 query versions are inconsistent');
+    ) throw new Error('MUXUI_CATALOG_PACKAGE_INVALID: v2 query versions are inconsistent');
     return deepFreeze(structuredClone(input));
   }
-  if (input.schema !== 'core-ui-catalog-package-v1' || typeof input.queryApiVersion !== 'string') {
-    throw new Error('CORE_CATALOG_PACKAGE_INVALID: expected a v1 or v2 descriptor');
+  if (input.schema !== 'muxui-catalog-package-v1' || typeof input.queryApiVersion !== 'string') {
+    throw new Error('MUXUI_CATALOG_PACKAGE_INVALID: expected a v1 or v2 descriptor');
   }
   return deepFreeze({
     ...structuredClone(input),
-    schema: 'core-ui-catalog-package-v2',
+    schema: 'muxui-catalog-package-v2',
     supportedQueryApiVersions: [input.queryApiVersion],
   });
 }

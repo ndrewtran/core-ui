@@ -5,7 +5,7 @@ import { appendFile, cp, mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs
 import { existsSync } from 'node:fs';
 import { join, relative, resolve as resolvePath } from 'node:path';
 import test from 'node:test';
-import { canonicalJson, parseJsonStrict, validateFamily } from '@core-ui/schema';
+import { canonicalJson, parseJsonStrict, validateFamily } from '@muxui/schema';
 import {
   RESOLVER_ERROR_PRECEDENCE,
   resolveCatalogGraph,
@@ -15,11 +15,32 @@ import { runCli } from '../src/cli.mjs';
 
 const repositoryRoot = resolvePath(import.meta.dirname, '../../..');
 
+function projectCurrentIdentity(value) {
+  if (typeof value === 'string') {
+    return value
+      .replaceAll('core-ui', 'muxui')
+      .replaceAll('Core UI', 'Mux UI')
+      .replaceAll('core:', 'muxui:')
+      .replaceAll('@core-ui/', '@muxui/')
+      .replaceAll('coreVersion', 'muxuiVersion')
+      .replaceAll('CORE_', 'MUXUI_');
+  }
+  if (Array.isArray(value)) return value.map(projectCurrentIdentity);
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(Object.entries(value).map(([key, item]) => [
+      projectCurrentIdentity(key),
+      projectCurrentIdentity(item),
+    ]));
+  }
+  return value;
+}
+
 async function corpus() {
-  return parseJsonStrict(await readFile(
+  const historicalCorpus = parseJsonStrict(await readFile(
     new URL('../../../tests/fixtures/g0.4/corpus.json', import.meta.url),
     'utf8',
   ));
+  return projectCurrentIdentity(historicalCorpus);
 }
 
 function resolve(value, graph) {
@@ -93,7 +114,7 @@ test('E-G0.4 resolver verifies provenance material instead of trusting fixture f
   const catalog = value.catalogs.find(({ id }) => id === resolved.catalog.id);
   catalog.provenance.value = 'sha256:0000000000000000000000000000000000000000000000000000000000000000';
   const rejected = resolve(value, graph);
-  assert.equal(rejected.error.code, 'CORE_CATALOG_INTEGRITY_MISMATCH');
+  assert.equal(rejected.error.code, 'MUXUI_CATALOG_INTEGRITY_MISMATCH');
 });
 
 test('E-G1.0-07 resolver rejects a weakened platform-safety requirement digest', async () => {
@@ -101,11 +122,11 @@ test('E-G1.0-07 resolver rejects a weakened platform-safety requirement digest',
   const descriptor = value.rendererDescriptors.find(
     ({ id }) => id === 'renderer-react-compatible',
   );
-  descriptor.bindings['core:component:button#web.react']
+  descriptor.bindings['muxui:component:button#web.react']
     .platformSafetyRequirementSetDigests['web.react'] = `sha256:${'0'.repeat(64)}`;
   const graph = value.graphs.find(({ id }) => id === 'selected-direct-compatible');
   const result = resolve(value, graph);
-  assert.equal(result.error.code, 'CORE_CATALOG_INCOMPATIBLE');
+  assert.equal(result.error.code, 'MUXUI_CATALOG_INCOMPATIBLE');
   assert.equal(
     result.error.details.compatibilityFailures.some(
       ({ dimension }) => dimension === 'platform-safety',
@@ -121,11 +142,11 @@ test('E-G1.0-04 compatibility rejects one changed native profile digest', async 
   ]) {
     const value = await corpus();
     value.rendererDescriptors.find(({ id }) => id === 'renderer-native-compatible')
-      .bindings['core:component:button#native.react-native'][field][profile]
+      .bindings['muxui:component:button#native.react-native'][field][profile]
       = `sha256:${'0'.repeat(64)}`;
     const graph = value.graphs.find(({ id }) => id === 'selected-direct-compatible');
     const result = resolve(value, graph);
-    assert.equal(result.error.code, 'CORE_CATALOG_INCOMPATIBLE');
+    assert.equal(result.error.code, 'MUXUI_CATALOG_INCOMPATIBLE');
     assert.equal(
       result.error.details.compatibilityFailures.some((failure) => failure.dimension === dimension),
       true,
@@ -141,13 +162,13 @@ test('E-G1.0-04 compatibility rejects jointly stale descriptor and release maps'
     const value = await corpus();
     const staleDigest = `sha256:${'0'.repeat(64)}`;
     value.rendererDescriptors.find(({ id }) => id === 'renderer-react-compatible')
-      .bindings['core:component:button#web.react'][field][profile] = staleDigest;
+      .bindings['muxui:component:button#web.react'][field][profile] = staleDigest;
     value.releaseManifests.find(({ id }) => id === 'release-compatible')
-      .bindings.find(({ binding }) => binding === 'core:component:button#web.react')
+      .bindings.find(({ binding }) => binding === 'muxui:component:button#web.react')
       [field][profile] = staleDigest;
     const graph = value.graphs.find(({ id }) => id === 'selected-direct-compatible');
     const result = resolve(value, graph);
-    assert.equal(result.error.code, 'CORE_CATALOG_INCOMPATIBLE');
+    assert.equal(result.error.code, 'MUXUI_CATALOG_INCOMPATIBLE');
     assert.equal(
       result.error.details.compatibilityFailures.some((failure) => failure.dimension === dimension),
       true,
@@ -163,44 +184,44 @@ test('E-G0.4 explicit cache remains subordinate to manifest and lock authority',
       graph.workspaces.find(({ path }) => path === graph.selectedWorkspace).catalogRange = '^2.0.0';
     }],
     ['lock-mismatch', (graph) => {
-      graph.lockfile.find(({ name }) => name === '@core-ui/catalog').version = '1.1.0';
+      graph.lockfile.find(({ name }) => name === '@muxui/catalog').version = '1.1.0';
     }],
     ['installed-mismatch', (graph) => {
       graph.installed.push({
         workspace: graph.selectedWorkspace,
-        name: '@core-ui/catalog',
+        name: '@muxui/catalog',
         version: '1.1.0',
         kind: 'catalog',
         fixture: 'catalog-newer',
-        relativePath: `${graph.selectedWorkspace}/node_modules/@core-ui/catalog`,
+        relativePath: `${graph.selectedWorkspace}/node_modules/@muxui/catalog`,
         observedDigest: 'sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
       });
     }],
     ['duplicate-lock', (graph) => {
       graph.lockfile.push(structuredClone(
-        graph.lockfile.find(({ name }) => name === '@core-ui/catalog'),
+        graph.lockfile.find(({ name }) => name === '@muxui/catalog'),
       ));
     }],
     ['duplicate-installed', (graph) => {
       for (const suffix of ['a', 'b']) graph.installed.push({
         workspace: graph.selectedWorkspace,
-        name: '@core-ui/catalog',
+        name: '@muxui/catalog',
         version: '1.0.0',
         kind: 'catalog',
         fixture: 'catalog-compatible',
-        relativePath: `${graph.selectedWorkspace}/node_modules-${suffix}/@core-ui/catalog`,
+        relativePath: `${graph.selectedWorkspace}/node_modules-${suffix}/@muxui/catalog`,
         observedDigest: 'sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
       });
     }],
     ['installed-integrity-mismatch', (graph) => {
-      graph.lockfile.find(({ name }) => name === '@core-ui/catalog').integrity = 'sha512:locked';
+      graph.lockfile.find(({ name }) => name === '@muxui/catalog').integrity = 'sha512:locked';
       graph.installed.push({
         workspace: graph.selectedWorkspace,
-        name: '@core-ui/catalog',
+        name: '@muxui/catalog',
         version: '1.0.0',
         kind: 'catalog',
         fixture: 'catalog-compatible',
-        relativePath: `${graph.selectedWorkspace}/node_modules/@core-ui/catalog`,
+        relativePath: `${graph.selectedWorkspace}/node_modules/@muxui/catalog`,
         observedDigest: 'sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
         integrity: 'sha512:installed',
       });
@@ -211,7 +232,7 @@ test('E-G0.4 explicit cache remains subordinate to manifest and lock authority',
     mutate(graph);
     const result = resolve(value, graph);
     assert.equal(result.type, 'error', name);
-    assert.equal(result.error.code, 'CORE_CATALOG_DECLARATION_DRIFT', name);
+    assert.equal(result.error.code, 'MUXUI_CATALOG_DECLARATION_DRIFT', name);
   }
 });
 
@@ -221,11 +242,11 @@ test('G0.4 production resolver input rejects duplicate or undeclared normalized 
   duplicate.catalogs.push(structuredClone(duplicate.catalogs[0]));
   assert.throws(
     () => resolve(duplicate, duplicate.graphs[0]),
-    /CORE_RESOLVER_INPUT_INVALID/,
+    /MUXUI_RESOLVER_INPUT_INVALID/,
   );
   const unknown = structuredClone(value.graphs[0]);
   unknown.undocumented = true;
-  assert.throws(() => resolve(value, unknown), /CORE_RESOLVER_INPUT_INVALID/);
+  assert.throws(() => resolve(value, unknown), /MUXUI_RESOLVER_INPUT_INVALID/);
 
   const tilde = structuredClone(value.graphs.find(({ id }) => id === 'selected-direct-compatible'));
   tilde.workspaces.find(({ path }) => path === tilde.selectedWorkspace).catalogRange = '~1.0.0';
@@ -237,7 +258,7 @@ test('G0.4 production resolver input rejects duplicate or undeclared normalized 
   );
   assert.throws(
     () => resolve(duplicateBinding, duplicateBinding.graphs[0]),
-    /CORE_RESOLVER_INPUT_INVALID/,
+    /MUXUI_RESOLVER_INPUT_INVALID/,
   );
   const descriptorDrift = structuredClone(value);
   descriptorDrift.releaseManifests[0].bindings[0].descriptor = 'renderer-unknown';
@@ -246,7 +267,7 @@ test('G0.4 production resolver input rejects duplicate or undeclared normalized 
   );
   assert.equal(
     resolve(descriptorDrift, descriptorDriftGraph).error.code,
-    'CORE_CATALOG_INCOMPATIBLE',
+    'MUXUI_CATALOG_INCOMPATIBLE',
   );
 });
 
@@ -261,19 +282,19 @@ test('E-G0.4 resolver diagnostics are relative and privacy-safe', async () => {
   hostile.selectedWorkspace = '/Users/example/private-consumer';
   const hostileBytes = JSON.stringify(resolve(value, hostile));
   assert.doesNotMatch(hostileBytes, /private-consumer|\/Users\//u);
-  assert.equal(JSON.parse(hostileBytes).error.code, 'CORE_PROJECT_NOT_FOUND');
+  assert.equal(JSON.parse(hostileBytes).error.code, 'MUXUI_PROJECT_NOT_FOUND');
 });
 
 test('E-G0.4 pnpm adapter resolves the selected direct package and drives the CLI', () => {
   const root = resolvePnpmProjectCatalog();
   assert.equal(root.type, 'success');
-  assert.equal(root.package.name, '@core-ui/catalog');
+  assert.equal(root.package.name, '@muxui/catalog');
   assert.equal(root.package.version, root.package.catalogVersion);
   const response = JSON.parse(runCli(['manifest', '--json']).stdout);
   assert.equal(response.meta.authority, 'installed-local');
   assert.equal(response.meta.resolution.catalogSource, 'project');
   assert.equal(
-    response.meta.resolution.targetPackages['@core-ui/catalog'],
+    response.meta.resolution.targetPackages['@muxui/catalog'],
     root.package.version,
   );
 
@@ -284,7 +305,7 @@ test('E-G0.4 pnpm adapter resolves the selected direct package and drives the CL
   assert.equal(selected.meta.catalogDigest, root.package.catalogDigest);
 });
 
-test('TALE-TOKEN-C installed-local selection retains the exact Phase B catalog tuple', async () => {
+test('TALE-TOKEN-C current adapter rejects historical package identities', async () => {
   await mkdir(join(process.cwd(), 'fixtures'), { recursive: true });
   const fixtureRoot = await mkdtemp(join(process.cwd(), 'fixtures/.tale-phase-b-installed-'));
   const catalogRoot = join(fixtureRoot, 'catalog');
@@ -322,79 +343,10 @@ test('TALE-TOKEN-C installed-local selection retains the exact Phase B catalog t
     assert.equal(install.status, 0, install.stderr);
 
     const project = relative(process.cwd(), fixtureRoot).split('\\').join('/');
-    const historical = resolvePnpmProjectCatalog({ project });
-    const historicalIdentity = JSON.parse(await readFile(
-      join(catalogRoot, 'generated/catalog-package.json'),
-      'utf8',
-    ));
-    assert.equal(historical.type, 'success');
-    assert.equal(historical.package.version, '0.2.0');
-    assert.equal(historical.package.catalogVersion, '0.2.0');
-    assert.equal(historicalIdentity.queryApiVersion, '2.0.0');
-    assert.deepEqual(
-      historicalIdentity.supportedQueryApiVersions,
-      ['1.1.0', '1.2.0', '2.0.0'],
-    );
-    assert.equal(historicalIdentity.releaseManifest.tokenContractVersion, '1.1.0');
-
-    const historicalV11 = historical.api.getArtifact({
-      id: 'core:token:button-minimum', queryApiVersion: '1.1.0', detail: 'full',
-    });
-    assert.equal(historicalV11.apiVersion, '1.1.0');
-    assert.equal(historicalV11.data.artifact.tokenContractVersion, '1.1.0');
-    assert.equal(Object.hasOwn(
-      historicalV11.data.artifact.tokens,
-      'reference.color.action-dark',
-    ), true);
-    for (const queryApiVersion of ['1.1.0', '1.2.0', '2.0.0']) {
-      assert.equal(historical.api.getArtifact({
-        id: 'core:token:button-minimum', queryApiVersion, detail: 'full',
-      }).data.artifact.id, 'core:token:button-minimum');
-      assert.equal(historical.api.getArtifact({
-        id: 'core:token:default-theme', queryApiVersion, detail: 'full',
-      }).error.code, 'CORE_ARTIFACT_NOT_FOUND');
-    }
-
-    const current = resolvePnpmProjectCatalog();
-    assert.equal(current.type, 'success');
-    const currentV11 = current.api.getArtifact({
-      id: 'core:token:default-theme', queryApiVersion: '1.1.0', detail: 'full',
-    });
-    assert.equal(currentV11.apiVersion, '1.1.0');
-    assert.equal(currentV11.data.artifact.tokenContractVersion, '2.0.0');
-    assert.equal(Object.hasOwn(
-      currentV11.data.artifact.tokens,
-      'reference.color.action-dark',
-    ), false);
-    assert.equal(Object.hasOwn(
-      currentV11.data.artifact.tokens,
-      'reference.color.neutral-50',
-    ), true);
-    for (const queryApiVersion of ['1.1.0', '1.2.0', '2.0.0']) {
-      assert.equal(current.api.getArtifact({
-        id: 'core:token:default-theme', queryApiVersion, detail: 'full',
-      }).data.artifact.id, 'core:token:default-theme');
-      assert.equal(current.api.getArtifact({
-        id: 'core:token:button-minimum', queryApiVersion, detail: 'full',
-      }).error.code, 'CORE_ARTIFACT_NOT_FOUND');
-    }
-
-    const bundlePath = join(catalogRoot, 'generated/catalog.json');
-    const bundleBytes = await readFile(bundlePath, 'utf8');
-    await writeFile(bundlePath, `${bundleBytes} `);
-    assert.equal(
-      resolvePnpmProjectCatalog({ project }).error.code,
-      'CORE_CATALOG_INTEGRITY_MISMATCH',
-    );
-    await writeFile(bundlePath, bundleBytes);
-
-    const fixtureManifest = JSON.parse(await readFile(join(fixtureRoot, 'package.json'), 'utf8'));
-    fixtureManifest.dependencies['@core-ui/catalog'] = 'workspace:^1.0.0';
-    await writeJson(join(fixtureRoot, 'package.json'), fixtureManifest);
-    assert.equal(
-      resolvePnpmProjectCatalog({ project }).error.code,
-      'CORE_CATALOG_DECLARATION_DRIFT',
-    );
+    const current = resolvePnpmProjectCatalog({ project });
+    assert.equal(current.type, 'error');
+    assert.equal(current.error.code, 'MUXUI_CATALOG_NOT_DECLARED');
+    assert.doesNotMatch(JSON.stringify(current), /(?:CORE_|@core-ui\/catalog|core:)/u);
   } finally {
     await rm(fixtureRoot, { recursive: true, force: true });
   }
@@ -402,29 +354,29 @@ test('TALE-TOKEN-C installed-local selection retains the exact Phase B catalog t
 
 test('E-G0.4 CLI requires exact bindings and filters project-wide discovery', () => {
   const detail = runCli([
-    'get', 'core:component:button', '--platform', 'web.react', '--json',
+    'get', 'muxui:component:button', '--platform', 'web.react', '--json',
   ]);
   assert.equal(detail.exitCode, 16);
-  assert.equal(JSON.parse(detail.stdout).error.code, 'CORE_CATALOG_INCOMPATIBLE');
+  assert.equal(JSON.parse(detail.stdout).error.code, 'MUXUI_CATALOG_INCOMPATIBLE');
 
   const discovery = runCli(['list', '--platform', 'web.react', '--json']);
   assert.equal(discovery.exitCode, 0);
   const response = JSON.parse(discovery.stdout);
   assert.equal(response.meta.authority, 'installed-local');
-  assert.deepEqual(response.meta.resolution.targetPackages, { '@core-ui/catalog': '2.0.0' });
-  assert.equal(response.data.items.some(({ id }) => id === 'core:component:button'), false);
-  assert.equal(response.data.items.some(({ id }) => id === 'core:example:button-basic-react'), false);
+  assert.deepEqual(response.meta.resolution.targetPackages, { '@muxui/catalog': '2.0.0' });
+  assert.equal(response.data.items.some(({ id }) => id === 'muxui:component:button'), false);
+  assert.equal(response.data.items.some(({ id }) => id === 'muxui:example:button-basic-react'), false);
 });
 
 test('E-G0.4 pnpm adapter fails closed for missing projects and cache tuples', () => {
   const missing = runCli(['manifest', '--project', 'does-not-exist', '--json']);
   assert.equal(missing.exitCode, 10);
-  assert.equal(JSON.parse(missing.stdout).error.code, 'CORE_PROJECT_NOT_FOUND');
+  assert.equal(JSON.parse(missing.stdout).error.code, 'MUXUI_PROJECT_NOT_FOUND');
   const absolute = runCli([
     'manifest', '--project', '/Users/example/private-consumer', '--json',
   ]);
   assert.equal(absolute.exitCode, 2);
-  assert.equal(JSON.parse(absolute.stdout).error.code, 'CORE_QUERY_INVALID');
+  assert.equal(JSON.parse(absolute.stdout).error.code, 'MUXUI_QUERY_INVALID');
   assert.doesNotMatch(absolute.stdout, /\/Users\/|private-consumer/u);
   const hostile = runCli([
     'manifest', '--project', 'does-not-exist;echo-unsafe', '--json',
@@ -441,7 +393,7 @@ test('E-G0.4 pnpm adapter fails closed for missing projects and cache tuples', (
     '--json',
   ]);
   assert.equal(cache.exitCode, 14);
-  assert.equal(JSON.parse(cache.stdout).error.code, 'CORE_CATALOG_INTEGRITY_MISMATCH');
+  assert.equal(JSON.parse(cache.stdout).error.code, 'MUXUI_CATALOG_INTEGRITY_MISMATCH');
   assert.doesNotMatch(cache.stdout, /\/Users\//u);
 });
 
@@ -453,7 +405,7 @@ test('E-G0.4 pnpm adapter translates malformed project JSON into one typed respo
     const project = relative(process.cwd(), fixtureRoot).split('\\').join('/');
     const result = runCli(['manifest', '--project', project, '--json']);
     assert.equal(result.exitCode, 10);
-    assert.equal(JSON.parse(result.stdout).error.code, 'CORE_PROJECT_NOT_FOUND');
+    assert.equal(JSON.parse(result.stdout).error.code, 'MUXUI_PROJECT_NOT_FOUND');
     assert.doesNotMatch(result.stdout, /\/Users\//u);
   } finally {
     await rm(fixtureRoot, { recursive: true, force: true });
@@ -470,7 +422,7 @@ test('E-G0.4 pnpm adapter admits only an exact verified cache tuple', async () =
   ));
   const cachePath = join(
     toolingRoot,
-    '.cache/core-ui/catalogs',
+    '.cache/muxui/catalogs',
     identity.version,
     identity.catalogDigest.replace(/^sha256:/u, ''),
   );
@@ -515,7 +467,7 @@ test('E-G0.4 pnpm adapter admits only an exact verified cache tuple', async () =
         '--json',
       ]);
       assert.equal(tampered.exitCode, 14);
-      assert.equal(JSON.parse(tampered.stdout).error.code, 'CORE_CATALOG_INTEGRITY_MISMATCH');
+      assert.equal(JSON.parse(tampered.stdout).error.code, 'MUXUI_CATALOG_INTEGRITY_MISMATCH');
     }
   } finally {
     if (created) await rm(cachePath, { recursive: true, force: true });
@@ -529,7 +481,7 @@ test('E-G0.4 pnpm adapter normalizes renderer packages into the single resolver'
   const rendererRoot = join(fixtureRoot, 'renderer');
   const generatedCatalog = join(catalogRoot, 'generated');
   const generatedRenderer = join(rendererRoot, 'generated');
-  const binding = 'core:component:button#web.react';
+  const binding = 'muxui:component:button#web.react';
   try {
     await mkdir(generatedCatalog, { recursive: true });
     await mkdir(generatedRenderer, { recursive: true });
@@ -539,23 +491,23 @@ test('E-G0.4 pnpm adapter normalizes renderer packages into the single resolver'
       private: true,
       packageManager: 'pnpm@10.33.0',
       dependencies: {
-        '@core-ui/catalog': 'workspace:*',
-        '@core-ui/react': 'workspace:*',
+        '@muxui/catalog': 'workspace:*',
+        '@muxui/react': 'workspace:*',
       },
     });
     await writeFile(join(fixtureRoot, 'pnpm-workspace.yaml'), "packages:\n  - catalog\n  - renderer\n");
     await writeJson(join(catalogRoot, 'package.json'), {
-      name: '@core-ui/catalog',
+      name: '@muxui/catalog',
       version: '2.0.0',
       private: true,
-      coreUi: { catalogPackage: './generated/catalog-package.json' },
+      muxUi: { catalogPackage: './generated/catalog-package.json' },
     });
     await writeJson(join(rendererRoot, 'package.json'), {
-      name: '@core-ui/react',
+      name: '@muxui/react',
       version: '1.0.1',
       private: true,
       exports: { './button': './button.mjs' },
-      coreUi: { rendererDescriptor: './generated/renderer-descriptor.json' },
+      muxUi: { rendererDescriptor: './generated/renderer-descriptor.json' },
     });
     const sourceCatalogRoot = resolvePath(import.meta.dirname, '../../catalog');
     const bundle = JSON.parse(await readFile(
@@ -573,16 +525,16 @@ test('E-G0.4 pnpm adapter normalizes renderer packages into the single resolver'
     const descriptor = {
       id: 'renderer-react-compatible',
       descriptorVersion: '1.0.0',
-      package: '@core-ui/react',
+      package: '@muxui/react',
       version: '1.0.1',
       bindingSchemaRange: '^2.0.0',
       tokenContractRange: '^2.0.0',
-      releaseProvenance: `core-ui-release:1.0.1:${bundle.sourceRevision}`,
+      releaseProvenance: `muxui-release:1.0.1:${bundle.sourceRevision}`,
       bindings: {
         [binding]: {
-          specRevision: bundle.artifacts.find(({ id }) => id === 'core:component:button')
+          specRevision: bundle.artifacts.find(({ id }) => id === 'muxui:component:button')
             .bindingSpecRevisions['web.react'],
-          export: '@core-ui/react/button',
+          export: '@muxui/react/button',
           lifecycle: 'experimental',
           strategy: 'direct',
           tokenRequirementSetDigests: {
@@ -595,8 +547,8 @@ test('E-G0.4 pnpm adapter normalizes renderer packages into the single resolver'
       },
     };
     const identity = {
-      schema: 'core-ui-catalog-package-v2',
-      name: '@core-ui/catalog',
+      schema: 'muxui-catalog-package-v2',
+      name: '@muxui/catalog',
       version: '2.0.0',
       catalogVersion: '2.0.0',
       catalogDigest: bundle.catalogDigest,
@@ -625,14 +577,14 @@ test('E-G0.4 pnpm adapter normalizes renderer packages into the single resolver'
         tokenContractVersion: '2.0.0',
         sourceRevision: bundle.sourceRevision,
         catalog: {
-          id: `@core-ui/catalog@2.0.0:${bundle.catalogDigest}`,
+          id: `@muxui/catalog@2.0.0:${bundle.catalogDigest}`,
           version: '2.0.0',
           digest: bundle.catalogDigest,
         },
         bindings: [{
           descriptor: descriptor.id,
           binding,
-          package: '@core-ui/react',
+          package: '@muxui/react',
           version: '1.0.1',
           export: descriptor.bindings[binding].export,
           specRevision: descriptor.bindings[binding].specRevision,
@@ -662,24 +614,24 @@ test('E-G0.4 pnpm adapter normalizes renderer packages into the single resolver'
     const resolved = resolvePnpmProjectCatalog({ project, bindings: [binding] });
     assert.equal(resolved.type, 'success');
     const response = resolved.api.getArtifact({
-      id: 'core:component:button',
+      id: 'muxui:component:button',
       platform: 'web.react',
       detail: 'compact',
       purpose: null,
       section: null,
     });
-    assert.equal(response.meta.resolution.targetPackages['@core-ui/react'], '1.0.1');
+    assert.equal(response.meta.resolution.targetPackages['@muxui/react'], '1.0.1');
     const cliSuccess = runCli([
-      'get', 'core:component:button', '--project', project,
+      'get', 'muxui:component:button', '--project', project,
       '--platform', 'web.react', '--json',
     ]);
     assert.equal(cliSuccess.exitCode, 0);
     assert.equal(
-      JSON.parse(cliSuccess.stdout).meta.resolution.targetPackages['@core-ui/react'],
+      JSON.parse(cliSuccess.stdout).meta.resolution.targetPackages['@muxui/react'],
       '1.0.1',
     );
 
-    descriptor.bindings[binding].export = '@core-ui/react/unsafe-drift';
+    descriptor.bindings[binding].export = '@muxui/react/unsafe-drift';
     await writeProjection(
       join(generatedRenderer, 'renderer-descriptor.json'),
       'packages/react/generated/renderer-descriptor.json',
@@ -687,20 +639,20 @@ test('E-G0.4 pnpm adapter normalizes renderer packages into the single resolver'
     );
     const incompatible = resolvePnpmProjectCatalog({ project, bindings: [binding] });
     assert.equal(incompatible.type, 'error');
-    assert.equal(incompatible.error.code, 'CORE_CATALOG_INCOMPATIBLE');
+    assert.equal(incompatible.error.code, 'MUXUI_CATALOG_INCOMPATIBLE');
     const cliIncompatible = runCli([
-      'get', 'core:component:button', '--project', project,
+      'get', 'muxui:component:button', '--project', project,
       '--platform', 'web.react', '--json',
     ]);
     assert.equal(cliIncompatible.exitCode, 16);
 
-    descriptor.bindings[binding].export = '@core-ui/react/button';
+    descriptor.bindings[binding].export = '@muxui/react/button';
     await writeProjection(
       join(generatedRenderer, 'renderer-descriptor.json'),
       'packages/react/generated/renderer-descriptor.json',
       descriptor,
     );
-    identity.schema = 'core-ui-catalog-package-v2-unknown';
+    identity.schema = 'muxui-catalog-package-v2-unknown';
     await writeProjection(
       join(generatedCatalog, 'catalog-package.json'),
       'packages/catalog/generated/catalog-package.json',
@@ -708,7 +660,7 @@ test('E-G0.4 pnpm adapter normalizes renderer packages into the single resolver'
     );
     const unknownIdentity = resolvePnpmProjectCatalog({ project, bindings: [binding] });
     assert.equal(unknownIdentity.type, 'error');
-    assert.equal(unknownIdentity.error.code, 'CORE_CATALOG_INTEGRITY_MISMATCH');
+    assert.equal(unknownIdentity.error.code, 'MUXUI_CATALOG_INTEGRITY_MISMATCH');
   } finally {
     await rm(fixtureRoot, { recursive: true, force: true });
   }

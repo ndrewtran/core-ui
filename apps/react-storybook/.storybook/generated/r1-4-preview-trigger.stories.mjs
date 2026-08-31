@@ -1,6 +1,6 @@
 // @generated-from: apps/react-storybook/src/generate-stories.mjs
-// @generated-content-sha256: sha256:650b319a41fe0db99068f26b4046c456a35e85a63e790e98d5e7ead3cc197275
-import * as Core from '@core-ui/react';
+// @generated-content-sha256: sha256:aad7e8f7db81bf8625bd7f3e2aaccf58cce29dfe58a5c770a9ceb1fc547a913e
+import * as MuxUI from '@muxui/react';
 import { argTypesForBinding, createStory } from '../../src/storybook-factory.mjs';
 
 const binding = {
@@ -33,12 +33,12 @@ const binding = {
       "aria-labelledby"
     ]
   },
-  "binding": "core:component:preview-trigger#web.react",
+  "binding": "muxui:component:preview-trigger#web.react",
   "export": "PreviewTrigger",
   "lifecycle": "experimental",
   "module": ".",
   "runtimeProfile": "web.react",
-  "selector": ".core-preview-trigger",
+  "selector": ".muxui-preview-trigger",
   "states": [
     "closed",
     "opening",
@@ -50,8 +50,9 @@ const binding = {
 const record = { family: 'PreviewTrigger', tranche: 'R1.4', binding };
 
 export default {
-  title: 'Core React/R1.4/PreviewTrigger',
-  component: Core.PreviewTrigger,
+  title: 'Mux UI React/R1.4/PreviewTrigger',
+  id: 'muxui-react-r1-4-preview-trigger',
+  component: MuxUI.PreviewTrigger,
   tags: ['autodocs'],
   parameters: {
     controls: {
@@ -59,7 +60,7 @@ export default {
     },
     docs: {
       description: {
-        component: 'Private development showcase for the Core-owned PreviewTrigger family.',
+        component: 'Private development showcase for the Mux UI-owned PreviewTrigger family.',
       },
     },
   },

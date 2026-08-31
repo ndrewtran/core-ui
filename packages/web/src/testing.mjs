@@ -1,11 +1,11 @@
 import { createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
-import { catalogJson } from '@core-ui/catalog/bundle';
+import { catalogJson } from '@muxui/catalog/bundle';
 import { inspectRuntime } from './runtime-implementation.mjs';
 
 const bundle = JSON.parse(catalogJson);
-const button = bundle.artifacts.find(({ id }) => id === 'core:component:button');
+const button = bundle.artifacts.find(({ id }) => id === 'muxui:component:button');
 const stylesheet = await readFile(resolve(import.meta.dirname, '../generated/button.css'), 'utf8');
 const stylesheetDigest = `sha256:${createHash('sha256').update(stylesheet).digest('hex')}`;
 const fixtureSource = JSON.parse(await readFile(

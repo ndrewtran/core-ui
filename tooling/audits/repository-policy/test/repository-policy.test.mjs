@@ -6,6 +6,7 @@ import test from 'node:test';
 import {
   PolicyError,
   auditAliases,
+  auditCurrentIdentity,
   auditRepository,
   classifyPath,
   generatedText,
@@ -24,8 +25,55 @@ test('E-G0.0-01: a cold root navigation audit reaches every major owner', async 
   assert.equal(result.owners, 7);
 });
 
+test('identity reset audit rejects stale current names but permits explicit history', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'muxui-identity-'));
+  await mkdir(join(root, 'src'), { recursive: true });
+  await mkdir(join(root, 'history'), { recursive: true });
+  await writeFile(
+    join(root, 'src/current.txt'),
+    [
+      "cli: 'core'",
+      '_core_complete() {}',
+      'core.experimental.g01-proof',
+      'coreFixtureSourceSha256',
+      'const record = { coreSource: "historical" };',
+      'use @core-ui/react',
+    ].join('\n'),
+  );
+  await writeFile(
+    join(root, 'history/retained.txt'),
+    'core-ui-react-r1-0-donor-crosswalk-v1 coreFixtureSourceSha256 coreSource\n',
+  );
+  const identityPolicy = {
+    identityReset: {
+      current: {
+        display: 'Mux UI',
+        machine: 'muxui',
+        repository: 'ndrewtran/muxui',
+        packageScope: '@muxui/',
+        artifactPrefix: 'muxui:',
+        cli: 'muxui',
+        publicRoots: ['.muxui-', '--muxui-', 'data-muxui-'],
+        diagnosticsPrefix: 'MUXUI_',
+        environmentPrefix: 'MUXUI_',
+      },
+      allowlistedPaths: ['history/'],
+    },
+  };
+
+  await assert.rejects(
+    auditCurrentIdentity(root, identityPolicy, ['src/current.txt', 'history/retained.txt']),
+    (error) => error instanceof PolicyError
+      && error.code === 'STALE_CURRENT_IDENTITY'
+      && error.message.includes('src/current.txt:1'),
+  );
+  await writeFile(join(root, 'src/current.txt'), 'use @muxui/react\nconst record = { muxuiSource: "current" };\n');
+  const result = await auditCurrentIdentity(root, identityPolicy, ['src/current.txt', 'history/retained.txt']);
+  assert.deepEqual(result, { scanned: 1, allowlisted: 1 });
+});
+
 test('E-G0.0-03: generated output validates against its source and digest', async () => {
-  const root = await mkdtemp(join(tmpdir(), 'core-ui-policy-'));
+  const root = await mkdtemp(join(tmpdir(), 'muxui-policy-'));
   await mkdir(join(root, 'catalog'), { recursive: true });
   await mkdir(join(root, 'tooling/generated'), { recursive: true });
   await writeFile(join(root, 'catalog/source.txt'), 'canonical input\n');
@@ -58,21 +106,21 @@ test('TALE-TOKEN-C retained installed catalogs remain proof fixtures, not live p
 });
 
 test('TALE-TOKEN-C runtime catalog caches cannot become workspace package owners', async () => {
-  const root = await mkdtemp(join(tmpdir(), 'core-ui-workspace-cache-'));
+  const root = await mkdtemp(join(tmpdir(), 'muxui-workspace-cache-'));
   await mkdir(join(root, 'packages/live/.cache/catalog'), { recursive: true });
-  await writeFile(join(root, 'packages/live/package.json'), '{"name":"@core-ui/live"}\n');
+  await writeFile(join(root, 'packages/live/package.json'), '{"name":"@muxui/live"}\n');
   await writeFile(
     join(root, 'packages/live/.cache/catalog/package.json'),
-    '{"name":"@core-ui/catalog"}\n',
+    '{"name":"@muxui/catalog"}\n',
   );
   assert.deepEqual(
     (await discoverWorkspacePackages(root)).map(({ name }) => name),
-    ['@core-ui/live'],
+    ['@muxui/live'],
   );
 });
 
 test('E-G0.0-03 negative: a direct projection edit is rejected with its owner', async () => {
-  const root = await mkdtemp(join(tmpdir(), 'core-ui-policy-'));
+  const root = await mkdtemp(join(tmpdir(), 'muxui-policy-'));
   await mkdir(join(root, 'catalog'), { recursive: true });
   await mkdir(join(root, 'tooling/generated'), { recursive: true });
   await writeFile(join(root, 'catalog/source.txt'), 'canonical input\n');
@@ -100,7 +148,7 @@ test('E-G0.0-03 negative: a direct projection edit is rejected with its owner', 
 });
 
 test('G0.4 strict JSON projections use governed digest sidecars', async () => {
-  const root = await mkdtemp(join(tmpdir(), 'core-ui-policy-json-'));
+  const root = await mkdtemp(join(tmpdir(), 'muxui-policy-json-'));
   await mkdir(join(root, 'catalog'), { recursive: true });
   await mkdir(join(root, 'tooling/generated'), { recursive: true });
   await writeFile(join(root, 'catalog/source.json'), '{"version":1}\n');
@@ -126,23 +174,23 @@ test('G0.4 strict JSON projections use governed digest sidecars', async () => {
 });
 
 test('E-G0.0-03 negative: duplicate aliases fail deterministically', async () => {
-  const root = await mkdtemp(join(tmpdir(), 'core-ui-alias-'));
+  const root = await mkdtemp(join(tmpdir(), 'muxui-alias-'));
   await mkdir(join(root, 'catalog/components/button'), { recursive: true });
   await mkdir(join(root, 'catalog/patterns/form'), { recursive: true });
   await writeFile(
     join(root, 'catalog/components/button/artifact.json'),
-    JSON.stringify({ id: 'core:component:button', aliases: ['action'] }),
+    JSON.stringify({ id: 'muxui:component:button', aliases: ['action'] }),
   );
   await writeFile(
     join(root, 'catalog/patterns/form/artifact.json'),
-    JSON.stringify({ id: 'core:pattern:form', aliases: ['action'] }),
+    JSON.stringify({ id: 'muxui:pattern:form', aliases: ['action'] }),
   );
 
   await assert.rejects(auditAliases(root, policy), (error) => {
     assert.ok(error instanceof PolicyError);
     assert.equal(error.code, 'ALIAS_COLLISION');
-    assert.match(error.message, /core:component:button/);
-    assert.match(error.message, /core:pattern:form/);
+    assert.match(error.message, /muxui:component:button/);
+    assert.match(error.message, /muxui:pattern:form/);
     return true;
   });
 });

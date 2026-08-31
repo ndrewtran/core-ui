@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://core-ui.dev/schema/query-envelope.schema.json",
-  "title": "Core UI query envelope",
-  "x-core-ui-response-types": [
+  "$id": "https://muxui.dev/schema/query-envelope.schema.json",
+  "title": "Mux UI query envelope",
+  "x-muxui-response-types": [
     "catalog.manifest",
     "artifact.list",
     "artifact.search",
@@ -10,7 +10,7 @@
     "artifact.detail.section-page",
     "error"
   ],
-  "x-core-ui-selectors": {
+  "x-muxui-selectors": {
     "platform": ["web.html", "web.react", "native.react-native", "native.react-native-web"],
     "detail": ["brief", "compact", "full"],
     "section": ["api", "examples", "guidance", "decision-context", "accessibility", "styling", "source", "tokens", "source-crosswalk"],
@@ -67,7 +67,7 @@
         "schemaVersion",
         "authority",
         "revisions",
-        "coreVersion",
+        "muxuiVersion",
         "catalogVersion",
         "catalogDigest",
         "sourceRevision",
@@ -81,7 +81,7 @@
         "schemaVersion": { "enum": ["1.1.0", "1.2.0", "2.0.0"] },
         "authority": { "enum": ["installed-local", "advisory"] },
         "revisions": { "$ref": "#/$defs/revisionSet" },
-        "coreVersion": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(?:-[0-9A-Za-z.-]+)?$" },
+        "muxuiVersion": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(?:-[0-9A-Za-z.-]+)?$" },
         "catalogVersion": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(?:-[0-9A-Za-z.-]+)?$" },
         "catalogDigest": { "$ref": "#/$defs/digest" },
         "sourceRevision": { "$ref": "#/$defs/digest" },
@@ -181,7 +181,7 @@
       "additionalProperties": false,
       "required": ["name", "version", "description"],
       "properties": {
-        "name": { "const": "core" },
+        "name": { "const": "muxui" },
         "version": { "type": "string", "minLength": 1 },
         "description": { "type": "string", "minLength": 1 }
       }
@@ -290,7 +290,7 @@
       "additionalProperties": false,
       "required": ["name", "version", "commands"],
       "properties": {
-        "name": { "const": "core" },
+        "name": { "const": "muxui" },
         "version": { "type": "string", "minLength": 1 },
         "commands": { "type": "array", "minItems": 1, "items": { "type": "string" }, "uniqueItems": true }
       }
@@ -452,7 +452,7 @@
         "schemaVersion": { "const": "1.0.0" },
         "bindingId": { "type": "string", "minLength": 1 },
         "profile": { "enum": ["web.html", "web.react", "native.ios", "native.android", "native.react-native-web"] },
-        "source": { "type": "string", "pattern": "^core:token:" },
+        "source": { "type": "string", "pattern": "^muxui:token:" },
         "sourceRevision": { "$ref": "#/$defs/digest" },
         "tokenContractVersion": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
         "requirements": { "type": "array", "items": { "$ref": "#/$defs/tokenRequirement" } },

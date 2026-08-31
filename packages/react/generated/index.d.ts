@@ -1,5 +1,5 @@
 // @generated-from: packages/react/src/generate.mjs
-// @generated-content-sha256: sha256:50f7cae7ca75e3c149ad804828578b7f0c2b605d93706d75dd2164dd09b62950
+// @generated-content-sha256: sha256:dbf2fad24863fd8601ed3240f74b818a5ba411c9d3dedf2d31f79b9587480c3e
 import type * as React from 'react';
 
 export type ButtonPointerType = 'mouse' | 'pen' | 'touch' | 'keyboard' | 'virtual' | undefined;
@@ -43,18 +43,18 @@ export interface ToggleButtonProps extends Omit<React.ButtonHTMLAttributes<HTMLB
 export declare const ToggleButton: React.ForwardRefExoticComponent<ToggleButtonProps & React.RefAttributes<HTMLButtonElement>>;
 export const reactCompatibility: Readonly<Record<string, unknown>>;
 
-export type CoreDateValue = string;
-export interface CoreDateRange { start: CoreDateValue; end: CoreDateValue; }
+export type MuxUIDateValue = string;
+export interface MuxUIDateRange { start: MuxUIDateValue; end: MuxUIDateValue; }
 export interface FieldValidationProps { description?: React.ReactNode; errorMessage?: React.ReactNode; disabled?: boolean; readOnly?: boolean; required?: boolean; invalid?: boolean; className?: string; }
-export type CoreAccessibleName =
+export type MuxUIAccessibleName =
   | { label: Exclude<React.ReactNode, null | undefined | boolean>; 'aria-label'?: never; 'aria-labelledby'?: never }
   | { label?: never; 'aria-label': string; 'aria-labelledby'?: never }
   | { label?: never; 'aria-label'?: never; 'aria-labelledby': string };
-export type CoreAriaAccessibleName =
+export type MuxUIAriaAccessibleName =
   | { 'aria-label': string; 'aria-labelledby'?: never }
   | { 'aria-label'?: never; 'aria-labelledby': string };
-export type CoreAriaLabel = { 'aria-label': string };
-export type NamedFieldProps = FieldValidationProps & CoreAccessibleName;
+export type MuxUIAriaLabel = { 'aria-label': string };
+export type NamedFieldProps = FieldValidationProps & MuxUIAccessibleName;
 export type TextFieldProps = NamedFieldProps & { value?: string; defaultValue?: string; onChange?: (value: string) => void; name?: string; placeholder?: string; type?: 'text' | 'email' | 'password' | 'url' | 'tel'; };
 export declare const TextField: React.ForwardRefExoticComponent<TextFieldProps & React.RefAttributes<HTMLDivElement>>;
 export type SearchFieldProps = NamedFieldProps & { value?: string; defaultValue?: string; onChange?: (value: string) => void; onSubmit?: (value: string) => void; onClear?: () => void; name?: string; placeholder?: string; };
@@ -63,89 +63,89 @@ export type NumberFieldProps = NamedFieldProps & { value?: number; defaultValue?
 export declare const NumberField: React.ForwardRefExoticComponent<NumberFieldProps & React.RefAttributes<HTMLDivElement>>;
 export type CheckboxGroupProps = NamedFieldProps & { value?: string[]; defaultValue?: string[]; onChange?: (value: string[]) => void; name?: string; children?: React.ReactNode; };
 export declare const CheckboxGroup: React.ForwardRefExoticComponent<CheckboxGroupProps & React.RefAttributes<HTMLDivElement>>;
-export type SwitchProps = CoreAccessibleName & { description?: React.ReactNode; errorMessage?: React.ReactNode; disabled?: boolean; readOnly?: boolean; className?: string; children?: React.ReactNode; selected?: boolean; defaultSelected?: boolean; onChange?: (selected: boolean) => void; name?: string; value?: string; };
+export type SwitchProps = MuxUIAccessibleName & { description?: React.ReactNode; errorMessage?: React.ReactNode; disabled?: boolean; readOnly?: boolean; className?: string; children?: React.ReactNode; selected?: boolean; defaultSelected?: boolean; onChange?: (selected: boolean) => void; name?: string; value?: string; };
 export declare const Switch: React.ForwardRefExoticComponent<SwitchProps & React.RefAttributes<HTMLDivElement>>;
 export interface FormProps extends Omit<React.FormHTMLAttributes<HTMLFormElement>, 'children' | 'className' | 'onSubmit' | 'onReset'> { children?: React.ReactNode; className?: string; validationBehavior?: 'aria' | 'native'; onSubmit?: React.FormEventHandler<HTMLFormElement>; onReset?: React.FormEventHandler<HTMLFormElement>; }
 export declare const Form: React.ForwardRefExoticComponent<FormProps & React.RefAttributes<HTMLFormElement>>;
-export type DateFieldProps = NamedFieldProps & { value?: CoreDateValue; defaultValue?: CoreDateValue; onChange?: (value?: CoreDateValue) => void; name?: string; };
+export type DateFieldProps = NamedFieldProps & { value?: MuxUIDateValue; defaultValue?: MuxUIDateValue; onChange?: (value?: MuxUIDateValue) => void; name?: string; };
 export declare const DateField: React.ForwardRefExoticComponent<DateFieldProps & React.RefAttributes<HTMLDivElement>>;
 export type TimeFieldProps = NamedFieldProps & { value?: string; defaultValue?: string; onChange?: (value?: string) => void; name?: string; };
 export declare const TimeField: React.ForwardRefExoticComponent<TimeFieldProps & React.RefAttributes<HTMLDivElement>>;
 export type DatePickerProps = DateFieldProps & { onOpenChange?: (isOpen: boolean) => void; };
 export declare const DatePicker: React.ForwardRefExoticComponent<DatePickerProps & React.RefAttributes<HTMLDivElement>>;
-export type DateRangePickerProps = NamedFieldProps & { value?: CoreDateRange; defaultValue?: CoreDateRange; onChange?: (value?: CoreDateRange) => void; startName?: string; endName?: string; onOpenChange?: (isOpen: boolean) => void; };
+export type DateRangePickerProps = NamedFieldProps & { value?: MuxUIDateRange; defaultValue?: MuxUIDateRange; onChange?: (value?: MuxUIDateRange) => void; startName?: string; endName?: string; onOpenChange?: (isOpen: boolean) => void; };
 export declare const DateRangePicker: React.ForwardRefExoticComponent<DateRangePickerProps & React.RefAttributes<HTMLDivElement>>;
 export interface AutocompleteItem { id?: string; label?: React.ReactNode; value?: string; }
 export interface AutocompleteSelectionItem { id: string; label: React.ReactNode; value: string; }
 export type AutocompleteProps = NamedFieldProps & { items?: Array<AutocompleteItem | string>; value?: string; defaultValue?: string; onChange?: (value: string) => void; onSelect?: (item?: AutocompleteSelectionItem) => void; name?: string; placeholder?: string; };
 export declare const Autocomplete: React.ForwardRefExoticComponent<AutocompleteProps & React.RefAttributes<HTMLDivElement>>;
 
-export type CoreColorValue = string;
-export interface CoreCollectionItem { id?: string; key?: string; label?: React.ReactNode; value?: string; textValue?: string; disabled?: boolean; [key: string]: unknown; }
-export type CoreSelection = string[] | 'all';
-export type CoreItems = Array<CoreCollectionItem | string>;
-export type CalendarProps = CoreAccessibleName & { value?: CoreDateValue; defaultValue?: CoreDateValue; focusedValue?: CoreDateValue; minValue?: CoreDateValue; maxValue?: CoreDateValue; onChange?: (value?: CoreDateValue) => void; onFocusChange?: (value?: CoreDateValue) => void; disabled?: boolean; readOnly?: boolean; required?: boolean; invalid?: boolean; className?: string; };
+export type MuxUIColorValue = string;
+export interface MuxUICollectionItem { id?: string; key?: string; label?: React.ReactNode; value?: string; textValue?: string; disabled?: boolean; [key: string]: unknown; }
+export type MuxUISelection = string[] | 'all';
+export type MuxUIItems = Array<MuxUICollectionItem | string>;
+export type CalendarProps = MuxUIAccessibleName & { value?: MuxUIDateValue; defaultValue?: MuxUIDateValue; focusedValue?: MuxUIDateValue; minValue?: MuxUIDateValue; maxValue?: MuxUIDateValue; onChange?: (value?: MuxUIDateValue) => void; onFocusChange?: (value?: MuxUIDateValue) => void; disabled?: boolean; readOnly?: boolean; required?: boolean; invalid?: boolean; className?: string; };
 export declare const Calendar: React.ForwardRefExoticComponent<CalendarProps & React.RefAttributes<HTMLDivElement>>;
-export type RangeCalendarProps = CoreAccessibleName & { value?: CoreDateRange; defaultValue?: CoreDateRange; minValue?: CoreDateValue; maxValue?: CoreDateValue; onChange?: (value?: CoreDateRange) => void; disabled?: boolean; readOnly?: boolean; required?: boolean; invalid?: boolean; className?: string; };
+export type RangeCalendarProps = MuxUIAccessibleName & { value?: MuxUIDateRange; defaultValue?: MuxUIDateRange; minValue?: MuxUIDateValue; maxValue?: MuxUIDateValue; onChange?: (value?: MuxUIDateRange) => void; disabled?: boolean; readOnly?: boolean; required?: boolean; invalid?: boolean; className?: string; };
 export declare const RangeCalendar: React.ForwardRefExoticComponent<RangeCalendarProps & React.RefAttributes<HTMLDivElement>>;
-export type ColorAreaProps = CoreAccessibleName & { value?: CoreColorValue; defaultValue?: CoreColorValue; disabled?: boolean; readOnly?: boolean; onChange?: (value: CoreColorValue) => void; className?: string; };
+export type ColorAreaProps = MuxUIAccessibleName & { value?: MuxUIColorValue; defaultValue?: MuxUIColorValue; disabled?: boolean; readOnly?: boolean; onChange?: (value: MuxUIColorValue) => void; className?: string; };
 export declare const ColorArea: React.ForwardRefExoticComponent<ColorAreaProps & React.RefAttributes<HTMLDivElement>>;
-export type ColorFieldProps = NamedFieldProps & { value?: CoreColorValue; defaultValue?: CoreColorValue; onChange?: (value: CoreColorValue) => void; name?: string; };
+export type ColorFieldProps = NamedFieldProps & { value?: MuxUIColorValue; defaultValue?: MuxUIColorValue; onChange?: (value: MuxUIColorValue) => void; name?: string; };
 export declare const ColorField: React.ForwardRefExoticComponent<ColorFieldProps & React.RefAttributes<HTMLDivElement>>;
-export type ColorPickerProps = { value?: CoreColorValue; defaultValue?: CoreColorValue; disabled?: boolean; readOnly?: boolean; onChange?: (value: CoreColorValue) => void; children?: React.ReactNode; className?: string; };
+export type ColorPickerProps = { value?: MuxUIColorValue; defaultValue?: MuxUIColorValue; disabled?: boolean; readOnly?: boolean; onChange?: (value: MuxUIColorValue) => void; children?: React.ReactNode; className?: string; };
 export declare const ColorPicker: React.ForwardRefExoticComponent<ColorPickerProps & React.RefAttributes<HTMLDivElement>>;
-export type ColorSliderProps = CoreAccessibleName & { value?: CoreColorValue; defaultValue?: CoreColorValue; channel?: string; colorSpace?: string; disabled?: boolean; orientation?: 'horizontal' | 'vertical'; onChange?: (value: CoreColorValue) => void; className?: string; };
+export type ColorSliderProps = MuxUIAccessibleName & { value?: MuxUIColorValue; defaultValue?: MuxUIColorValue; channel?: string; colorSpace?: string; disabled?: boolean; orientation?: 'horizontal' | 'vertical'; onChange?: (value: MuxUIColorValue) => void; className?: string; };
 export declare const ColorSlider: React.ForwardRefExoticComponent<ColorSliderProps & React.RefAttributes<HTMLDivElement>>;
-export type ColorSwatchProps = { color: CoreColorValue; disabled?: boolean; className?: string; };
+export type ColorSwatchProps = { color: MuxUIColorValue; disabled?: boolean; className?: string; };
 export declare const ColorSwatch: React.ForwardRefExoticComponent<ColorSwatchProps & React.RefAttributes<HTMLDivElement>>;
-export type ColorSwatchPickerProps = CoreAriaAccessibleName & { items?: CoreItems; value?: CoreColorValue; defaultValue?: CoreColorValue; disabled?: boolean; onChange?: (value: CoreColorValue) => void; className?: string; };
+export type ColorSwatchPickerProps = MuxUIAriaAccessibleName & { items?: MuxUIItems; value?: MuxUIColorValue; defaultValue?: MuxUIColorValue; disabled?: boolean; onChange?: (value: MuxUIColorValue) => void; className?: string; };
 export declare const ColorSwatchPicker: React.ForwardRefExoticComponent<ColorSwatchPickerProps & React.RefAttributes<HTMLDivElement>>;
-export type ColorWheelProps = CoreAriaAccessibleName & { value?: CoreColorValue; defaultValue?: CoreColorValue; disabled?: boolean; onChange?: (value: CoreColorValue) => void; className?: string; };
+export type ColorWheelProps = MuxUIAriaAccessibleName & { value?: MuxUIColorValue; defaultValue?: MuxUIColorValue; disabled?: boolean; onChange?: (value: MuxUIColorValue) => void; className?: string; };
 export declare const ColorWheel: React.ForwardRefExoticComponent<ColorWheelProps & React.RefAttributes<HTMLDivElement>>;
-export type CollectionProps = CoreAriaAccessibleName & { items?: CoreItems; selectedIds?: CoreSelection; defaultSelectedIds?: CoreSelection; disabled?: boolean; selectionMode?: 'none' | 'single' | 'multiple'; onSelectionChange?: (ids: CoreSelection) => void; onAction?: (item?: CoreCollectionItem) => void; className?: string; };
+export type CollectionProps = MuxUIAriaAccessibleName & { items?: MuxUIItems; selectedIds?: MuxUISelection; defaultSelectedIds?: MuxUISelection; disabled?: boolean; selectionMode?: 'none' | 'single' | 'multiple'; onSelectionChange?: (ids: MuxUISelection) => void; onAction?: (item?: MuxUICollectionItem) => void; className?: string; };
 export type GridListProps = CollectionProps;
 export declare const GridList: React.ForwardRefExoticComponent<GridListProps & React.RefAttributes<HTMLDivElement>>;
 export type ListBoxProps = CollectionProps;
 export declare const ListBox: React.ForwardRefExoticComponent<ListBoxProps & React.RefAttributes<HTMLDivElement>>;
-export type MenuProps = CoreAriaAccessibleName & { items?: CoreItems; disabled?: boolean; shouldCloseOnSelect?: boolean; onAction?: (item?: CoreCollectionItem) => void; onSelect?: (item?: CoreCollectionItem) => void; className?: string; };
+export type MenuProps = MuxUIAriaAccessibleName & { items?: MuxUIItems; disabled?: boolean; shouldCloseOnSelect?: boolean; onAction?: (item?: MuxUICollectionItem) => void; onSelect?: (item?: MuxUICollectionItem) => void; className?: string; };
 export declare const Menu: React.ForwardRefExoticComponent<MenuProps & React.RefAttributes<HTMLDivElement>>;
 export type RadioOption = { id?: string; value: string; label?: React.ReactNode; disabled?: boolean; };
-export type RadioGroupProps = CoreAccessibleName & { options?: RadioOption[]; value?: string; defaultValue?: string; disabled?: boolean; readOnly?: boolean; required?: boolean; invalid?: boolean; onChange?: (value: string) => void; className?: string; };
+export type RadioGroupProps = MuxUIAccessibleName & { options?: RadioOption[]; value?: string; defaultValue?: string; disabled?: boolean; readOnly?: boolean; required?: boolean; invalid?: boolean; onChange?: (value: string) => void; className?: string; };
 export declare const RadioGroup: React.ForwardRefExoticComponent<RadioGroupProps & React.RefAttributes<HTMLDivElement>>;
-export type SelectProps = NamedFieldProps & { items?: CoreItems; value?: string; defaultValue?: string; disabled?: boolean; readOnly?: boolean; required?: boolean; invalid?: boolean; name?: string; placeholder?: string; onChange?: (value?: string) => void; };
+export type SelectProps = NamedFieldProps & { items?: MuxUIItems; value?: string; defaultValue?: string; disabled?: boolean; readOnly?: boolean; required?: boolean; invalid?: boolean; name?: string; placeholder?: string; onChange?: (value?: string) => void; };
 export declare const Select: React.ForwardRefExoticComponent<SelectProps & React.RefAttributes<HTMLDivElement>>;
-export type ComboBoxProps = NamedFieldProps & { items?: CoreItems; value?: string; defaultValue?: string; selectedId?: string; defaultSelectedId?: string; disabled?: boolean; readOnly?: boolean; required?: boolean; invalid?: boolean; name?: string; placeholder?: string; onChange?: (value: string) => void; onSelect?: (item?: CoreCollectionItem) => void; };
+export type ComboBoxProps = NamedFieldProps & { items?: MuxUIItems; value?: string; defaultValue?: string; selectedId?: string; defaultSelectedId?: string; disabled?: boolean; readOnly?: boolean; required?: boolean; invalid?: boolean; name?: string; placeholder?: string; onChange?: (value: string) => void; onSelect?: (item?: MuxUICollectionItem) => void; };
 export declare const ComboBox: React.ForwardRefExoticComponent<ComboBoxProps & React.RefAttributes<HTMLDivElement>>;
-export type SliderProps = CoreAccessibleName & { value?: number; defaultValue?: number; min?: number; max?: number; step?: number; disabled?: boolean; orientation?: 'horizontal' | 'vertical'; onChange?: (value: number) => void; className?: string; };
+export type SliderProps = MuxUIAccessibleName & { value?: number; defaultValue?: number; min?: number; max?: number; step?: number; disabled?: boolean; orientation?: 'horizontal' | 'vertical'; onChange?: (value: number) => void; className?: string; };
 export declare const Slider: React.ForwardRefExoticComponent<SliderProps & React.RefAttributes<HTMLDivElement>>;
-export interface CoreTableColumn extends CoreCollectionItem { isRowHeader?: boolean; sortable?: boolean; }
-export interface CoreTableRow extends CoreCollectionItem { values?: Record<string, React.ReactNode>; }
-export type TableProps = CoreAriaLabel & { columns?: CoreTableColumn[]; rows?: CoreTableRow[]; selectedIds?: CoreSelection; defaultSelectedIds?: CoreSelection; disabled?: boolean; selectionMode?: 'none' | 'single' | 'multiple'; onSelectionChange?: (ids: CoreSelection) => void; onRowAction?: (row?: CoreTableRow) => void; className?: string; };
+export interface MuxUITableColumn extends MuxUICollectionItem { isRowHeader?: boolean; sortable?: boolean; }
+export interface MuxUITableRow extends MuxUICollectionItem { values?: Record<string, React.ReactNode>; }
+export type TableProps = MuxUIAriaLabel & { columns?: MuxUITableColumn[]; rows?: MuxUITableRow[]; selectedIds?: MuxUISelection; defaultSelectedIds?: MuxUISelection; disabled?: boolean; selectionMode?: 'none' | 'single' | 'multiple'; onSelectionChange?: (ids: MuxUISelection) => void; onRowAction?: (row?: MuxUITableRow) => void; className?: string; };
 export declare const Table: React.ForwardRefExoticComponent<TableProps & React.RefAttributes<HTMLTableElement>>;
-export type TabsProps = CoreAriaAccessibleName & { items?: CoreItems; value?: string; defaultValue?: string; disabled?: boolean; orientation?: 'horizontal' | 'vertical'; onChange?: (value: string) => void; className?: string; };
+export type TabsProps = MuxUIAriaAccessibleName & { items?: MuxUIItems; value?: string; defaultValue?: string; disabled?: boolean; orientation?: 'horizontal' | 'vertical'; onChange?: (value: string) => void; className?: string; };
 export declare const Tabs: React.ForwardRefExoticComponent<TabsProps & React.RefAttributes<HTMLDivElement>>;
-export type TagGroupProps = CoreAccessibleName & { items?: CoreItems; disabled?: boolean; onRemove?: (items: CoreCollectionItem[]) => void; onAction?: (item?: CoreCollectionItem) => void; className?: string; };
+export type TagGroupProps = MuxUIAccessibleName & { items?: MuxUIItems; disabled?: boolean; onRemove?: (items: MuxUICollectionItem[]) => void; onAction?: (item?: MuxUICollectionItem) => void; className?: string; };
 export declare const TagGroup: React.ForwardRefExoticComponent<TagGroupProps & React.RefAttributes<HTMLDivElement>>;
-export type ToggleButtonGroupProps = CoreAriaAccessibleName & { selectedIds?: CoreSelection; defaultSelectedIds?: CoreSelection; disabled?: boolean; orientation?: 'horizontal' | 'vertical'; onSelectionChange?: (ids: CoreSelection) => void; children?: React.ReactNode; className?: string; };
+export type ToggleButtonGroupProps = MuxUIAriaAccessibleName & { selectedIds?: MuxUISelection; defaultSelectedIds?: MuxUISelection; disabled?: boolean; orientation?: 'horizontal' | 'vertical'; onSelectionChange?: (ids: MuxUISelection) => void; children?: React.ReactNode; className?: string; };
 export declare const ToggleButtonGroup: React.ForwardRefExoticComponent<ToggleButtonGroupProps & React.RefAttributes<HTMLDivElement>>;
-export type TokenFieldProps = CoreAccessibleName & { value?: string[]; defaultValue?: string[]; disabled?: boolean; readOnly?: boolean; name?: string; placeholder?: string; onChange?: (value: string[]) => void; className?: string; };
+export type TokenFieldProps = MuxUIAccessibleName & { value?: string[]; defaultValue?: string[]; disabled?: boolean; readOnly?: boolean; name?: string; placeholder?: string; onChange?: (value: string[]) => void; className?: string; };
 export declare const TokenField: React.ForwardRefExoticComponent<TokenFieldProps & React.RefAttributes<HTMLDivElement>>;
-export type ToolbarProps = CoreAriaAccessibleName & { orientation?: 'horizontal' | 'vertical'; disabled?: boolean; children?: React.ReactNode; className?: string; };
+export type ToolbarProps = MuxUIAriaAccessibleName & { orientation?: 'horizontal' | 'vertical'; disabled?: boolean; children?: React.ReactNode; className?: string; };
 export declare const Toolbar: React.ForwardRefExoticComponent<ToolbarProps & React.RefAttributes<HTMLDivElement>>;
-export interface CoreTreeItem extends CoreCollectionItem { children?: CoreTreeItem[]; items?: CoreTreeItem[]; }
-export type TreeProps = CoreAriaAccessibleName & { items?: CoreTreeItem[]; selectedIds?: CoreSelection; defaultSelectedIds?: CoreSelection; expandedIds?: CoreSelection; defaultExpandedIds?: CoreSelection; disabled?: boolean; selectionMode?: 'none' | 'single' | 'multiple'; onSelectionChange?: (ids: CoreSelection) => void; onExpandedChange?: (ids: CoreSelection) => void; onAction?: (item?: CoreTreeItem) => void; className?: string; };
+export interface MuxUITreeItem extends MuxUICollectionItem { children?: MuxUITreeItem[]; items?: MuxUITreeItem[]; }
+export type TreeProps = MuxUIAriaAccessibleName & { items?: MuxUITreeItem[]; selectedIds?: MuxUISelection; defaultSelectedIds?: MuxUISelection; expandedIds?: MuxUISelection; defaultExpandedIds?: MuxUISelection; disabled?: boolean; selectionMode?: 'none' | 'single' | 'multiple'; onSelectionChange?: (ids: MuxUISelection) => void; onExpandedChange?: (ids: MuxUISelection) => void; onAction?: (item?: MuxUITreeItem) => void; className?: string; };
 export declare const Tree: React.ForwardRefExoticComponent<TreeProps & React.RefAttributes<HTMLDivElement>>;
-export type VirtualizerProps = CoreAriaLabel & { items?: CoreItems; height?: number; itemHeight?: number; overscan?: number; disabled?: boolean; onScroll?: React.UIEventHandler<HTMLDivElement>; className?: string; style?: React.CSSProperties; };
+export type VirtualizerProps = MuxUIAriaLabel & { items?: MuxUIItems; height?: number; itemHeight?: number; overscan?: number; disabled?: boolean; onScroll?: React.UIEventHandler<HTMLDivElement>; className?: string; style?: React.CSSProperties; };
 export declare const Virtualizer: React.ForwardRefExoticComponent<VirtualizerProps & React.RefAttributes<HTMLDivElement>>;
 
-export type CoreDropOperation = 'copy' | 'link' | 'move' | 'cancel';
-export interface CoreFileDropItem { readonly kind: 'file'; readonly type: string; readonly name: string; readonly getFile: () => Promise<File>; readonly getText: () => Promise<string>; }
-export interface CoreDirectoryDropItem { readonly kind: 'directory'; readonly name: string; readonly getEntries: () => AsyncIterable<CoreDropItem>; }
-export interface CoreTextDropItem { readonly kind: 'text'; readonly types: ReadonlySet<string>; readonly getText: (type: string) => Promise<string>; }
-export type CoreDropItem = CoreFileDropItem | CoreDirectoryDropItem | CoreTextDropItem;
-export interface CoreDropEvent { readonly type: 'drop'; readonly x: number; readonly y: number; readonly dropOperation: CoreDropOperation; readonly items: CoreDropItem[]; }
-export interface CoreDropActivateEvent { readonly type: 'activate'; readonly x: number; readonly y: number; }
-export interface DropZoneProps { children?: React.ReactNode; disabled?: boolean; className?: string; 'aria-label'?: string; 'aria-labelledby'?: string; onDrop?: (event: CoreDropEvent) => void; onActivate?: (event: CoreDropActivateEvent) => void; }
+export type MuxUIDropOperation = 'copy' | 'link' | 'move' | 'cancel';
+export interface MuxUIFileDropItem { readonly kind: 'file'; readonly type: string; readonly name: string; readonly getFile: () => Promise<File>; readonly getText: () => Promise<string>; }
+export interface MuxUIDirectoryDropItem { readonly kind: 'directory'; readonly name: string; readonly getEntries: () => AsyncIterable<MuxUIDropItem>; }
+export interface MuxUITextDropItem { readonly kind: 'text'; readonly types: ReadonlySet<string>; readonly getText: (type: string) => Promise<string>; }
+export type MuxUIDropItem = MuxUIFileDropItem | MuxUIDirectoryDropItem | MuxUITextDropItem;
+export interface MuxUIDropEvent { readonly type: 'drop'; readonly x: number; readonly y: number; readonly dropOperation: MuxUIDropOperation; readonly items: MuxUIDropItem[]; }
+export interface MuxUIDropActivateEvent { readonly type: 'activate'; readonly x: number; readonly y: number; }
+export interface DropZoneProps { children?: React.ReactNode; disabled?: boolean; className?: string; 'aria-label'?: string; 'aria-labelledby'?: string; onDrop?: (event: MuxUIDropEvent) => void; onActivate?: (event: MuxUIDropActivateEvent) => void; }
 export declare const DropZone: React.ForwardRefExoticComponent<DropZoneProps & React.RefAttributes<HTMLDivElement>>;
 export interface FileTriggerProps { children?: React.ReactNode; acceptedFileTypes?: readonly string[]; allowsMultiple?: boolean; acceptDirectory?: boolean; defaultCamera?: 'user' | 'environment'; disabled?: boolean; className?: string; onSelect?: (files: File[]) => void; }
 export declare const FileTrigger: React.ForwardRefExoticComponent<FileTriggerProps & React.RefAttributes<HTMLInputElement>>;

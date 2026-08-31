@@ -1,6 +1,6 @@
 // @generated-from: apps/react-storybook/src/generate-stories.mjs
-// @generated-content-sha256: sha256:11ac0a9ae13247167b579e4164b77bcc7b65d43678d20df057359a88e0bf125b
-import * as Core from '@core-ui/react';
+// @generated-content-sha256: sha256:c970d4304c08617aeb3b089e740969824041350289138137f81397a367f8bed3
+import * as MuxUI from '@muxui/react';
 import { argTypesForBinding, createStory } from '../../src/storybook-factory.mjs';
 
 const binding = {
@@ -40,12 +40,12 @@ const binding = {
       "placeholder"
     ]
   },
-  "binding": "core:component:search-field#web.react",
+  "binding": "muxui:component:search-field#web.react",
   "export": "SearchField",
   "lifecycle": "experimental",
   "module": ".",
   "runtimeProfile": "web.react",
-  "selector": ".core-search-field",
+  "selector": ".muxui-search-field",
   "states": [
     "idle",
     "filled",
@@ -59,8 +59,9 @@ const binding = {
 const record = { family: 'SearchField', tranche: 'R1.2', binding };
 
 export default {
-  title: 'Core React/R1.2/SearchField',
-  component: Core.SearchField,
+  title: 'Mux UI React/R1.2/SearchField',
+  id: 'muxui-react-r1-2-search-field',
+  component: MuxUI.SearchField,
   tags: ['autodocs'],
   parameters: {
     controls: {
@@ -68,7 +69,7 @@ export default {
     },
     docs: {
       description: {
-        component: 'Private development showcase for the Core-owned SearchField family.',
+        component: 'Private development showcase for the Mux UI-owned SearchField family.',
       },
     },
   },

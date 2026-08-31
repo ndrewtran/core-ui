@@ -3,7 +3,7 @@ import { promisify } from 'node:util';
 import { cp, mkdtemp, mkdir, readFile, rm, stat, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { tmpdir } from 'node:os';
-import { parseJsonStrict } from '@core-ui/schema';
+import { parseJsonStrict } from '@muxui/schema';
 
 const execFile = promisify(execFileCallback);
 

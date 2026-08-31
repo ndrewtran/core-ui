@@ -141,7 +141,7 @@ test('E-G0.5-02: corrected identity and runtime-profile fields change observed s
   });
 
   const renamed = structuredClone(baseline);
-  renamed.id = 'core:component:button-renamed';
+  renamed.id = 'muxui:component:button-renamed';
   assert.notEqual(digest(baseline, 'web.react'), digest(renamed, 'web.react'));
   assert.deepEqual(
     resolveAuthoringField('component', '$/id').revisionAxes,
@@ -204,13 +204,13 @@ test('E-G0.5-04 negative: a new stable field cannot bypass authoring and ownersh
     }),
     (error) => {
       assert.ok(error instanceof SchemaValidationError);
-      assert.equal(error.code, 'CORE_SCHEMA_INVALID');
-      assert.match(error.message, /missing x-core-ui-authoring metadata/u);
+      assert.equal(error.code, 'MUXUI_SCHEMA_INVALID');
+      assert.match(error.message, /missing x-muxui-authoring metadata/u);
       return true;
     },
   );
 
-  componentSchema.properties.newStableField['x-core-ui-authoring'] = {
+  componentSchema.properties.newStableField['x-muxui-authoring'] = {
     effect: 'incompatible',
     revisionAxes: ['content'],
   };
@@ -281,8 +281,8 @@ test('E-G0.5-04 negative: schema-bearing keywords and references cannot hide aut
         ownership,
       }),
       (error) => error instanceof SchemaValidationError
-        && error.code === 'CORE_SCHEMA_INVALID'
-        && error.message.includes('missing x-core-ui-authoring metadata'),
+        && error.code === 'MUXUI_SCHEMA_INVALID'
+        && error.message.includes('missing x-muxui-authoring metadata'),
       keyword,
     );
   }
@@ -299,6 +299,6 @@ test('E-G0.5-04 negative: schema-bearing keywords and references cannot hide aut
       ownership,
     }),
     (error) => error instanceof SchemaValidationError
-      && error.message.includes('missing x-core-ui-authoring metadata'),
+      && error.message.includes('missing x-muxui-authoring metadata'),
   );
 });

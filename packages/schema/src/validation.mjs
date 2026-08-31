@@ -606,8 +606,8 @@ function semanticIssues(family, value, ownership) {
   }
   if (family === 'token-section-page-budget-profile') {
     const expectedProfileId = {
-      '1.2.0': 'core-ui-token-section-page-budget-1-2-0',
-      '2.0.0': 'core-ui-token-section-page-budget-2-0-0',
+      '1.2.0': 'muxui-token-section-page-budget-1-2-0',
+      '2.0.0': 'muxui-token-section-page-budget-2-0-0',
     }[value.queryApiVersion];
     if (expectedProfileId !== value.id) {
       issues.push({ path: '$/id', message: 'must identify the exact queryApiVersion budget profile' });
@@ -707,7 +707,7 @@ export function validateFamily(family, value, { schemas, ownership } = {}) {
   const issues = [];
   evaluate(schema, value, '$', fileName, issues, schemas);
   issues.push(...semanticIssues(family, value, ownership));
-  if (issues.length > 0) throw new SchemaValidationError('CORE_SCHEMA_INVALID', issues);
+  if (issues.length > 0) throw new SchemaValidationError('MUXUI_SCHEMA_INVALID', issues);
   return value;
 }
 
@@ -716,7 +716,7 @@ export function validateContractDocument(fileName, value, { schemas } = {}) {
   const schema = schemas?.[fileName] ?? loadJsonDocument(fileName);
   const issues = [];
   evaluate(schema, value, '$', fileName, issues, schemas);
-  if (issues.length > 0) throw new SchemaValidationError('CORE_SCHEMA_INVALID', issues);
+  if (issues.length > 0) throw new SchemaValidationError('MUXUI_SCHEMA_INVALID', issues);
   return value;
 }
 
@@ -754,7 +754,7 @@ export function validateFieldOwnershipRegistry(
   { schemas } = {},
 ) {
   if (!Array.isArray(registry.classes) || !Array.isArray(registry.fields)) {
-    throw new SchemaValidationError('CORE_FIELD_OWNERSHIP_INVALID', [
+    throw new SchemaValidationError('MUXUI_FIELD_OWNERSHIP_INVALID', [
       { path: '$', message: 'must declare classes and contextual fields' },
     ]);
   }
@@ -771,7 +771,7 @@ export function validateFieldOwnershipRegistry(
       || governed.class !== requiredContext?.class
       || governed.owner !== requiredContext?.owner
     ) {
-      throw new SchemaValidationError('CORE_FIELD_OWNERSHIP_INVALID', [
+      throw new SchemaValidationError('MUXUI_FIELD_OWNERSHIP_INVALID', [
         {
           path: `$/governedSchemas/${governed.file}`,
           message: 'must match the locked canonical class and owner',
@@ -784,7 +784,7 @@ export function validateFieldOwnershipRegistry(
     contexts.size !== requiredFieldOwnershipContexts.length
     || requiredFieldOwnershipContexts.some(({ file }) => !contexts.has(file))
   ) {
-    throw new SchemaValidationError('CORE_FIELD_OWNERSHIP_INVALID', [
+    throw new SchemaValidationError('MUXUI_FIELD_OWNERSHIP_INVALID', [
       {
         path: '$/governedSchemas',
         message: `must cover the locked schemas: ${requiredFieldOwnershipContexts
@@ -807,7 +807,7 @@ export function validateFieldOwnershipRegistry(
     const key = `${field.schema}${field.schemaPointer}`;
     const context = expected.get(key);
     if (declared.has(key)) {
-      throw new SchemaValidationError('CORE_FIELD_OWNERSHIP_INVALID', [
+      throw new SchemaValidationError('MUXUI_FIELD_OWNERSHIP_INVALID', [
         { path: `$/fields/${key}`, message: 'has more than one owner declaration' },
       ]);
     }
@@ -818,7 +818,7 @@ export function validateFieldOwnershipRegistry(
       || field.class !== context.class
       || field.owner !== context.owner
     ) {
-      throw new SchemaValidationError('CORE_FIELD_OWNERSHIP_INVALID', [
+      throw new SchemaValidationError('MUXUI_FIELD_OWNERSHIP_INVALID', [
         {
           path: `$/fields/${key}`,
           message: 'must match one governed schema field, class, and canonical owner',
@@ -828,7 +828,7 @@ export function validateFieldOwnershipRegistry(
   }
   for (const key of expected.keys()) {
     if (!declared.has(key)) {
-      throw new SchemaValidationError('CORE_FIELD_OWNERSHIP_INVALID', [
+      throw new SchemaValidationError('MUXUI_FIELD_OWNERSHIP_INVALID', [
         { path: `$/fields/${key}`, message: 'is missing an ownership declaration' },
       ]);
     }
@@ -847,7 +847,7 @@ export function validateFieldOwnershipRegistry(
       || field.owner !== requiredField?.owner
       || field.forbiddenInAuthoredSource !== requiredField?.forbiddenInAuthoredSource
     ) {
-      throw new SchemaValidationError('CORE_FIELD_OWNERSHIP_INVALID', [
+      throw new SchemaValidationError('MUXUI_FIELD_OWNERSHIP_INVALID', [
         {
           path: `$/reservedFields/${field.name}`,
           message: 'must match one locked reserved class, owner, and authored-source prohibition',
@@ -860,7 +860,7 @@ export function validateFieldOwnershipRegistry(
     reservedNames.size !== requiredReservedFields.length
     || requiredReservedFields.some(({ name }) => !reservedNames.has(name))
   ) {
-    throw new SchemaValidationError('CORE_FIELD_OWNERSHIP_INVALID', [
+    throw new SchemaValidationError('MUXUI_FIELD_OWNERSHIP_INVALID', [
       {
         path: '$/reservedFields',
         message: `must cover the locked reserved fields: ${requiredReservedFields
@@ -876,11 +876,11 @@ export function validateRelationRegistry() {
   const registrySchema = loadJsonDocument('relation.schema.json');
   const registry = {
     schemaVersion: registrySchema.schemaVersion,
-    relations: registrySchema['x-core-ui-registry'],
+    relations: registrySchema['x-muxui-registry'],
   };
   const issues = [];
   evaluate(registrySchema, registry, '$', 'relation.schema.json', issues);
-  if (issues.length > 0) throw new SchemaValidationError('CORE_RELATION_INVALID', issues);
+  if (issues.length > 0) throw new SchemaValidationError('MUXUI_RELATION_INVALID', issues);
   return registry;
 }
 
@@ -926,13 +926,13 @@ export function validateCatalogRecords(records, { schemas, ownership } = {}) {
       ? kindFamilies[record.kind]
       : undefined;
     if (!family) {
-      throw new SchemaValidationError('CORE_SCHEMA_INVALID', [
+      throw new SchemaValidationError('MUXUI_SCHEMA_INVALID', [
         { path: '$/kind', message: `${record.kind} record behavior is unavailable in G0.1` },
       ]);
     }
     validateFamily(family, record, { schemas, ownership });
     if (ids.has(record.id)) {
-      throw new SchemaValidationError('CORE_ARTIFACT_ID_INVALID', [
+      throw new SchemaValidationError('MUXUI_ARTIFACT_ID_INVALID', [
         { path: '$/id', message: `${record.id} is duplicated` },
       ]);
     }
@@ -1004,14 +1004,14 @@ export function validateCatalogRecords(records, { schemas, ownership } = {}) {
       issues.push({ path: '$/tokenRecipe/source', message: `${edge.target} does not exist` });
     }
   }
-  if (issues.length > 0) throw new SchemaValidationError('CORE_RELATION_INVALID', issues);
+  if (issues.length > 0) throw new SchemaValidationError('MUXUI_RELATION_INVALID', issues);
   return { records, edges: relationEdges(records) };
 }
 
 export function assertAppendOnlyErrorCodes(previousCodes, nextCodes) {
   const missing = previousCodes.filter((code) => !nextCodes.includes(code));
   if (missing.length > 0) {
-    throw new SchemaValidationError('CORE_SCHEMA_VERSION_UNSUPPORTED', [
+    throw new SchemaValidationError('MUXUI_SCHEMA_VERSION_UNSUPPORTED', [
       { path: '$/errorCodes', message: `removed append-only codes: ${missing.join(', ')}` },
     ]);
   }

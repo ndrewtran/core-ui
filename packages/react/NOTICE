@@ -1,4 +1,4 @@
-@core-ui/react R1.0 donor notice
+@muxui/react R1.0 donor notice
 
 The adapted styling baseline is from Tale UI commit
 94bf62a26c02605c8928dfeb24f0ddc4be1c92fd. Tale UI is not a dependency.

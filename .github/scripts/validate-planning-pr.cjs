@@ -13,8 +13,8 @@ const AUTHORITY_LABELS = new Set([
 ]);
 
 const PLANNING_CONTROL_FILES = new Set([
-  '.agents/skills/core-ui-delivery/SKILL.md',
-  '.agents/skills/core-ui-delivery/agents/openai.yaml',
+  '.agents/skills/muxui-delivery/SKILL.md',
+  '.agents/skills/muxui-delivery/agents/openai.yaml',
   '.github/CODEOWNERS',
   '.github/pull_request_template.md',
   '.github/workflows/repository-planning-policy.yml',

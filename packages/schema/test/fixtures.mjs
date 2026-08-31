@@ -1,7 +1,7 @@
 export function tokenSource() {
   return {
     schemaVersion: '2.1.0',
-    id: 'core:token:default-theme',
+    id: 'muxui:token:default-theme',
     kind: 'token',
     name: 'Button minimum tokens',
     summary: 'The minimum token source used by the G0.1 proof artifact.',
@@ -113,7 +113,7 @@ function webBinding(profile = 'web.react') {
     behavior: ['Activation requests one immediate action'],
     accessibility: ['Expose accessible name and disabled state'],
     tokenRecipe: {
-      source: 'core:token:default-theme',
+      source: 'muxui:token:default-theme',
       requirements: [{ token: 'semantic.action.background', requirement: 'required' }],
     },
     platformSafety: webPlatformSafety(profile),
@@ -124,7 +124,7 @@ function webBinding(profile = 'web.react') {
 export function component() {
   return {
     schemaVersion: '1.0.0',
-    id: 'core:component:button',
+    id: 'muxui:component:button',
     kind: 'component',
     name: 'Button',
     summary: 'Triggers an immediate action.',
@@ -170,13 +170,13 @@ export function component() {
 export function example({ guidanceImpact = 'normative', purposes = ['generation'] } = {}) {
   return {
     schemaVersion: '1.0.0',
-    id: 'core:example:button-basic-react',
+    id: 'muxui:example:button-basic-react',
     kind: 'example',
     name: 'Basic React Button',
     summary: 'The minimum React Button example.',
     lifecycle: 'experimental',
     binding: {
-      ref: 'core:component:button#web.react',
+      ref: 'muxui:component:button#web.react',
       guidanceImpact,
       purposes,
       preference: 0,
@@ -190,7 +190,7 @@ export function example({ guidanceImpact = 'normative', purposes = ['generation'
 export function guide() {
   return {
     schemaVersion: '1.0.0',
-    id: 'core:guide:button-usage',
+    id: 'muxui:guide:button-usage',
     kind: 'guide',
     name: 'Button usage',
     summary: 'Portable usage guidance for Button.',
@@ -204,7 +204,7 @@ export function guide() {
 export function capability() {
   return {
     schemaVersion: '1.0.0',
-    id: 'core:capability:query-baseline',
+    id: 'muxui:capability:query-baseline',
     kind: 'capability',
     name: 'Query baseline',
     summary: 'Schema-only declaration; query behavior remains unavailable.',

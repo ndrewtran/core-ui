@@ -1,8 +1,8 @@
 // @generated-from: packages/react/src/overlays.mjs
-// @generated-content-sha256: sha256:29472ed08c1b16b1651b54ac47bb3be933d795d3444f6c12b13b6ab383b1ca96
+// @generated-content-sha256: sha256:77bba905c0c9f58cd8bd0575d5739c834e9037d191502efef8e333de258112d7
 import React from 'react';
 import XIcon from 'lucide-react/dist/esm/icons/x.mjs';
-import { Button as CoreButton } from './button.mjs';
+import { Button as MuxUIButton } from './button.mjs';
 import {
   Button as AriaButton,
   Dialog as AriaDialog,
@@ -86,7 +86,7 @@ function pressableTrigger(trigger, disabled = false, className) {
   const normalizedTrigger = className
     ? React.cloneElement(trigger, { className: classNames(trigger.props.className, className) })
     : trigger;
-  // RAC trigger components (including Core Button) consume DialogTrigger's
+  // RAC trigger components (including MuxUI Button) consume DialogTrigger's
   // PressResponder context directly. Wrapping them in a second Pressable
   // shadows that context and prevents keyboard-triggered opening.
   if (typeof trigger.type !== 'string') return normalizedTrigger;
@@ -94,7 +94,7 @@ function pressableTrigger(trigger, disabled = false, className) {
 }
 
 /**
- * Core owns the public callback shape while RAC owns drop, clipboard, hover, and focus semantics.
+ * MuxUI owns the public callback shape while RAC owns drop, clipboard, hover, and focus semantics.
  */
 export const DropZone = React.forwardRef(function DropZone({
   children = 'Drop files here',
@@ -124,7 +124,7 @@ export const DropZone = React.forwardRef(function DropZone({
     isDisabled: disabled,
     onDrop: handleDrop,
     onDropActivate: handleDropActivate,
-    className: classNames('core-drop-zone', className),
+    className: classNames('muxui-drop-zone', className),
   }, children);
 });
 
@@ -143,8 +143,8 @@ export const FileTrigger = React.forwardRef(function FileTrigger({
   ...props
 }, ref) {
   const trigger = React.isValidElement(children)
-    ? React.cloneElement(children, { className: classNames('core-file-trigger', classNames(children.props.className, className)), disabled: disabled || children.props.disabled, 'aria-disabled': disabled || undefined })
-    : React.createElement(CoreButton, { className: classNames('core-file-trigger', className), disabled }, children);
+    ? React.cloneElement(children, { className: classNames('muxui-file-trigger', classNames(children.props.className, className)), disabled: disabled || children.props.disabled, 'aria-disabled': disabled || undefined })
+    : React.createElement(MuxUIButton, { className: classNames('muxui-file-trigger', className), disabled }, children);
   return React.createElement(AriaFileTrigger, {
     ...props,
     ref,
@@ -159,10 +159,10 @@ export const FileTrigger = React.forwardRef(function FileTrigger({
 FileTrigger.displayName = 'FileTrigger';
 
 function DialogContent({ title, children, ariaLabel, dismissable, className, contentRef, ...props }) {
-  return React.createElement(AriaDialog, { ...props, ref: contentRef, className: classNames('core-dialog', className), 'aria-label': ariaLabel, 'aria-modal': 'true' },
-    hasRenderableLabel(title) ? React.createElement(AriaHeading, { slot: 'title', className: 'core-dialog-title' }, title) : null,
-    React.createElement('div', { className: 'core-dialog-content' }, children),
-    dismissable ? React.createElement(AriaButton, { slot: 'close', className: 'core-dialog-close', 'aria-label': 'Close dialog' }, React.createElement(XIcon, { 'aria-hidden': 'true', focusable: 'false', size: 16 })) : null);
+  return React.createElement(AriaDialog, { ...props, ref: contentRef, className: classNames('muxui-dialog', className), 'aria-label': ariaLabel, 'aria-modal': 'true' },
+    hasRenderableLabel(title) ? React.createElement(AriaHeading, { slot: 'title', className: 'muxui-dialog-title' }, title) : null,
+    React.createElement('div', { className: 'muxui-dialog-content' }, children),
+    dismissable ? React.createElement(AriaButton, { slot: 'close', className: 'muxui-dialog-close', 'aria-label': 'Close dialog' }, React.createElement(XIcon, { 'aria-hidden': 'true', focusable: 'false', size: 16 })) : null);
 }
 
 function DialogOverlay({ dismissable, children, ...props }) {
@@ -170,8 +170,8 @@ function DialogOverlay({ dismissable, children, ...props }) {
     ...props,
     isDismissable: dismissable,
     isKeyboardDismissDisabled: !dismissable,
-    className: 'core-dialog-backdrop',
-  }, React.createElement(AriaModal, { className: 'core-dialog-modal' }, children));
+    className: 'muxui-dialog-backdrop',
+  }, React.createElement(AriaModal, { className: 'muxui-dialog-modal' }, children));
 }
 
 /** RAC Modal/ModalOverlay provide topmost overlay arbitration, inertness, focus scope, and portal lifecycle. */
@@ -192,7 +192,7 @@ export const Dialog = React.forwardRef(function Dialog({
   const content = React.createElement(DialogOverlay, { dismissable },
     React.createElement(DialogContent, { ...props, contentRef: ref, title, ariaLabel, dismissable, className }, children));
   if (React.isValidElement(trigger)) {
-    return React.createElement(AriaDialogTrigger, { isOpen: open, defaultOpen, onOpenChange }, pressableTrigger(trigger, false, 'core-dialog-trigger'), content);
+    return React.createElement(AriaDialogTrigger, { isOpen: open, defaultOpen, onOpenChange }, pressableTrigger(trigger, false, 'muxui-dialog-trigger'), content);
   }
   return React.createElement(AriaModalOverlay, {
     isOpen: open,
@@ -200,8 +200,8 @@ export const Dialog = React.forwardRef(function Dialog({
     onOpenChange,
     isDismissable: dismissable,
     isKeyboardDismissDisabled: !dismissable,
-    className: 'core-dialog-backdrop',
-  }, React.createElement(AriaModal, { className: 'core-dialog-modal' }, React.createElement(DialogContent, { ...props, contentRef: ref, title, ariaLabel, dismissable, className }, children)));
+    className: 'muxui-dialog-backdrop',
+  }, React.createElement(AriaModal, { className: 'muxui-dialog-modal' }, React.createElement(DialogContent, { ...props, contentRef: ref, title, ariaLabel, dismissable, className }, children)));
 });
 
 Dialog.displayName = 'Dialog';
@@ -211,13 +211,13 @@ const PopupContent = React.forwardRef(function PopupContent({ children, classNam
     ...props,
     ref,
     placement,
-    className: 'core-popover-positioner',
+    className: 'muxui-popover-positioner',
     isKeyboardDismissDisabled: !dismissable,
     shouldCloseOnInteractOutside: dismissable ? undefined : () => false,
   }, React.createElement(AriaDialog, {
     'aria-label': ariaLabel,
     'aria-labelledby': ariaLabelledby,
-    className: classNames('core-popover', className),
+    className: classNames('muxui-popover', className),
   }, children));
 });
 
@@ -236,7 +236,7 @@ export const Popover = React.forwardRef(function Popover({
   if (!React.isValidElement(trigger)) throw new Error('Popover requires a focusable React element as trigger');
   if (!hasAccessibleName(props['aria-label']) && !hasAccessibleName(props['aria-labelledby'])) throw new Error('Popover requires an accessible name');
   const content = React.createElement(PopupContent, { ...props, ref, placement, className, dismissable }, children);
-  return React.createElement(AriaDialogTrigger, { isOpen: open, defaultOpen, onOpenChange }, pressableTrigger(trigger, false, 'core-overlay-pop-trigger'), content);
+  return React.createElement(AriaDialogTrigger, { isOpen: open, defaultOpen, onOpenChange }, pressableTrigger(trigger, false, 'muxui-overlay-pop-trigger'), content);
 });
 
 Popover.displayName = 'Popover';
@@ -244,7 +244,7 @@ Popover.displayName = 'Popover';
 const PreviewContent = React.forwardRef(function PreviewContent({ children, 'aria-label': ariaLabel, 'aria-labelledby': ariaLabelledby }, ref) {
   return React.createElement(AriaDialog, {
     ref,
-    className: 'core-preview-content',
+    className: 'muxui-preview-content',
     'aria-label': ariaLabel,
     'aria-labelledby': ariaLabelledby,
   }, children);
@@ -269,7 +269,7 @@ export const PreviewTrigger = React.forwardRef(function PreviewTrigger({
   if (!hasAccessibleName(ariaLabel) && !hasAccessibleName(ariaLabelledby)) throw new Error('PreviewTrigger requires an accessible name');
   return React.createElement(AriaPreviewTrigger, { delay, closeDelay, isOpen: open, defaultOpen, onOpenChange },
     pressableTrigger(trigger),
-    React.createElement(AriaPopover, { ...props, ref, isNonModal: true, trigger: 'PreviewTrigger', placement, className: classNames('core-preview-trigger', className) },
+    React.createElement(AriaPopover, { ...props, ref, isNonModal: true, trigger: 'PreviewTrigger', placement, className: classNames('muxui-preview-trigger', className) },
       React.createElement(PreviewContent, { 'aria-label': ariaLabel, 'aria-labelledby': ariaLabelledby }, children)));
 });
 
@@ -296,7 +296,7 @@ export const Tooltip = React.forwardRef(function Tooltip({
     isOpen: open,
     defaultOpen,
     onOpenChange,
-  }, pressableTrigger(trigger), React.createElement(AriaTooltip, { ...props, ref, placement, className: classNames('core-tooltip', className) }, content));
+  }, pressableTrigger(trigger), React.createElement(AriaTooltip, { ...props, ref, placement, className: classNames('muxui-tooltip', className) }, content));
 });
 
 Tooltip.displayName = 'Tooltip';
@@ -307,14 +307,14 @@ const TOAST_FALLBACK_TITLE = 'Notification';
 function ToastView({ toast }) {
   const value = toast.content;
   const hasTitle = hasRenderableLabel(value.title);
-  return React.createElement(AriaToast, { toast, className: classNames('core-toast', value.className), 'data-variant': value.variant },
-    React.createElement(AriaToastContent, { className: 'core-toast-content' },
-      React.createElement(AriaText, { slot: 'title', className: classNames('core-toast-title', !hasTitle && 'core-toast-title-fallback') }, hasTitle ? value.title : TOAST_FALLBACK_TITLE),
-      React.createElement(AriaText, { slot: 'description', className: 'core-toast-message' }, value.message)),
-    React.createElement(AriaButton, { slot: 'close', className: 'core-toast-dismiss', 'aria-label': 'Dismiss notification' }, React.createElement(XIcon, { 'aria-hidden': 'true', focusable: 'false', size: 16 })));
+  return React.createElement(AriaToast, { toast, className: classNames('muxui-toast', value.className), 'data-variant': value.variant },
+    React.createElement(AriaToastContent, { className: 'muxui-toast-content' },
+      React.createElement(AriaText, { slot: 'title', className: classNames('muxui-toast-title', !hasTitle && 'muxui-toast-title-fallback') }, hasTitle ? value.title : TOAST_FALLBACK_TITLE),
+      React.createElement(AriaText, { slot: 'description', className: 'muxui-toast-message' }, value.message)),
+    React.createElement(AriaButton, { slot: 'close', className: 'muxui-toast-dismiss', 'aria-label': 'Dismiss notification' }, React.createElement(XIcon, { 'aria-hidden': 'true', focusable: 'false', size: 16 })));
 }
 
-/** Stable Core facade over RAC's unstable queue/region implementation. */
+/** Stable MuxUI facade over RAC's unstable queue/region implementation. */
 export const ToastProvider = function ToastProvider({ children, maxVisible = 5, className, placement = 'top-end' }) {
   const queueRef = React.useRef(null);
   if (!queueRef.current) queueRef.current = new UNSTABLE_ToastQueue({ maxVisibleToasts: normalizeMaxVisible(maxVisible) });
@@ -358,7 +358,7 @@ export const ToastProvider = function ToastProvider({ children, maxVisible = 5, 
   const manager = React.useMemo(() => ({ add, remove }), [add, remove]);
   const value = React.useMemo(() => ({ manager, dispose }), [dispose, manager]);
   return React.createElement(ToastContext.Provider, { value }, children,
-    React.createElement(UNSTABLE_ToastRegion, { queue, placement, className: classNames('core-toast-region', className), 'aria-label': 'Notifications', 'data-placement': placement },
+    React.createElement(UNSTABLE_ToastRegion, { queue, placement, className: classNames('muxui-toast-region', className), 'aria-label': 'Notifications', 'data-placement': placement },
       ({ toast }) => React.createElement(ToastView, { toast })));
 };
 

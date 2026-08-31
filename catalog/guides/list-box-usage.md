@@ -1,3 +1,3 @@
 # ListBox usage
 
-Use the Core ListBox contract and provide an accessible name.
+Use the Mux UI ListBox contract and provide an accessible name.

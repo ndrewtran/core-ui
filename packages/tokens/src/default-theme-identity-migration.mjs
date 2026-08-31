@@ -3,7 +3,7 @@ import { execFile as execFileCallback } from 'node:child_process';
 import { promisify } from 'node:util';
 import { readFile, readdir, stat, unlink, writeFile } from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
-import { canonicalDigest, canonicalJson, parseJsonStrict, validateFamily } from '@core-ui/schema';
+import { canonicalDigest, canonicalJson, parseJsonStrict, validateFamily } from '@muxui/schema';
 import {
   assertDefaultThemeRepositoryState,
   hasReactR1PackageBaseline,
@@ -92,6 +92,33 @@ function sha256(value) {
   return `sha256:${createHash('sha256').update(value).digest('hex')}`;
 }
 
+// Decision 0005 validates a sealed Core-era source. The active schema uses
+// Mux UI field names, so validate only a transient projection and retain the
+// historical value, bytes, and digest as the authority.
+function currentValidationSource(source) {
+  const current = structuredClone(source);
+  if (typeof current.id === 'string' && current.id.startsWith('core:')) {
+    current.id = `muxui:${current.id.slice('core:'.length)}`;
+  }
+  if (current.sourceCrosswalk) {
+    current.sourceCrosswalk.entries = current.sourceCrosswalk.entries.map((entry) => {
+      const { coreTokenId, ...rest } = entry;
+      return {
+        ...rest,
+        ...(coreTokenId === undefined ? {} : { muxuiTokenId: coreTokenId }),
+      };
+    });
+    current.sourceCrosswalk.groups = current.sourceCrosswalk.groups.map((group) => {
+      const { coreTokenId, ...rest } = group;
+      return {
+        ...rest,
+        ...(coreTokenId === undefined ? {} : { muxuiTokenId: coreTokenId }),
+      };
+    });
+  }
+  return current;
+}
+
 function strict(bytes, label) {
   try {
     return parseJsonStrict(bytes);
@@ -116,7 +143,7 @@ function assertExact(bytes, expected, label) {
     || canonicalDigest(value) !== expected.canonicalSha256
     || value.id !== expected.artifactId
   ) fail('CORE_TOKEN_IDENTITY_SOURCE_DRIFT', label);
-  validateFamily('token-source', value);
+  validateFamily('token-source', currentValidationSource(value));
   return value;
 }
 
@@ -787,7 +814,7 @@ export function migrateDefaultThemeIdentityValue(preMigrationSource) {
     || canonicalDigest(source) !== DEFAULT_THEME_IDENTITY.preMigration.canonicalSha256
   ) fail('CORE_TOKEN_IDENTITY_SOURCE_DRIFT', 'pre-migration token source');
   source.id = DEFAULT_THEME_IDENTITY.postMigration.artifactId;
-  validateFamily('token-source', source);
+  validateFamily('token-source', currentValidationSource(source));
   if (canonicalDigest(source) !== DEFAULT_THEME_IDENTITY.postMigration.canonicalSha256) {
     fail('CORE_TOKEN_IDENTITY_SOURCE_DRIFT', 'post-migration token source');
   }

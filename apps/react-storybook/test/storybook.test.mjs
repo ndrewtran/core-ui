@@ -8,7 +8,7 @@ import React, { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { renderToStaticMarkup } from 'react-dom/server';
 import test from 'node:test';
-import { ToastProvider } from '@core-ui/react';
+import { ToastProvider } from '@muxui/react';
 import {
   argTypesForBinding,
   adapterNames,
@@ -119,15 +119,15 @@ function installRuntimeDom() {
   };
 }
 
-test('private host and exact Core React family projection', async () => {
+test('private host and exact Mux UI React family projection', async () => {
   const packageManifest = JSON.parse(await readFile(resolve(appRoot, 'package.json'), 'utf8'));
   assert.equal(packageManifest.private, true);
-  assert.equal(manifest.schema, 'core-ui-react-storybook-manifest-v1');
+  assert.equal(manifest.schema, 'muxui-react-storybook-manifest-v1');
   assert.equal(manifest.count, 53);
   assert.deepEqual(manifest.families.map(({ family }) => family), descriptor.bindings.map(({ export: name }) => name));
   assert.equal(new Set(manifest.families.map(({ family }) => family)).size, 53);
   assert.deepEqual(adapterNames.slice().sort(), descriptor.bindings.map(({ export: name }) => name).sort());
-  assert.deepEqual(manifest.families.map(({ family }) => family).sort(), snapshot.families.map(({ corePublicFamily }) => corePublicFamily).sort());
+  assert.deepEqual(manifest.families.map(({ family }) => family).sort(), snapshot.families.map(({ muxuiPublicFamily, corePublicFamily }) => muxuiPublicFamily ?? corePublicFamily).sort());
 });
 
 test('uses standard generation scripts and check mode preserves drift for diagnosis', async () => {
@@ -157,14 +157,14 @@ test('uses standard generation scripts and check mode preserves drift for diagno
   }
 });
 
-test('every story exposes exactly its canonical Core-owned properties', () => {
+test('every story exposes exactly its canonical Mux UI-owned properties', () => {
   const byFamily = new Map(descriptor.bindings.map((binding) => [binding.export, binding]));
   for (const record of manifest.families) {
     const binding = byFamily.get(record.family);
     assert.ok(binding, `unknown manifest family ${record.family}`);
     assert.deepEqual(Object.keys(argTypesForBinding(binding)).sort(), binding.api.props.slice().sort(), record.family);
     assert.deepEqual(record.props, binding.api.props, record.family);
-    assert.equal(record.tranche, snapshot.families.find(({ corePublicFamily }) => corePublicFamily === record.family).tranche, record.family);
+    assert.equal(record.tranche, snapshot.families.find(({ muxuiPublicFamily, corePublicFamily }) => (muxuiPublicFamily ?? corePublicFamily) === record.family).tranche, record.family);
   }
 });
 
@@ -293,10 +293,10 @@ test('state coverage metadata exposes isolated supported states with canonical a
     assert.deepEqual(coverage.slice(0, record.states.length).map(({ name }) => name), record.states, record.family);
     for (const { name, args } of coverage) {
       assert.ok(Object.keys(args).every((prop) => binding.api.props.includes(prop)
-        || record.family === 'TagGroup' && name === 'removable' && prop === 'onRemove'), `${record.family}/${name} leaked a non-Core prop`);
+        || record.family === 'TagGroup' && name === 'removable' && prop === 'onRemove'), `${record.family}/${name} leaked a non-Mux UI prop`);
     }
     const story = createStory({ family: record.family, tranche: record.tranche, binding }, 'states');
-    assert.deepEqual(comparableCoverage(story.parameters.coreStateCoverage), comparableCoverage(coverage), `${record.family} metadata`);
+    assert.deepEqual(comparableCoverage(story.parameters.muxuiStateCoverage), comparableCoverage(coverage), `${record.family} metadata`);
     assert.deepEqual(Object.keys(story.argTypes).sort(), binding.api.props.slice().sort(), `${record.family} controls`);
   }
 
@@ -318,7 +318,7 @@ test('state coverage metadata exposes isolated supported states with canonical a
 
   const rendered = renderStateCoverage({ family: 'Button', tranche: 'R1.1', binding: binding('Button') });
   assert.equal(rendered.type, 'div');
-  assert.equal(rendered.props.className, 'core-storybook-states');
+  assert.equal(rendered.props.className, 'muxui-storybook-states');
   assert.equal(rendered.props.children.length, binding('Button').states.length);
 });
 
@@ -341,10 +341,10 @@ test('unsupported state coverage is explicit while supported state args remain o
     const binding = byFamily.get(family);
     const markup = renderToStaticMarkup(renderStateCoverage({ family, tranche: 'R1.5', binding }));
     const dom = new JSDOM(`<!doctype html>${markup}`);
-    const section = [...dom.window.document.querySelectorAll('.core-storybook-state')]
+    const section = [...dom.window.document.querySelectorAll('.muxui-storybook-state')]
       .find((candidate) => candidate.querySelector('h3')?.textContent === state);
     assert.ok(section, `${family}/${state} section`);
-    const stateBody = section.querySelector('[data-core-storybook-state="unavailable"]');
+    const stateBody = section.querySelector('[data-muxui-storybook-state="unavailable"]');
     assert.ok(stateBody, `${family}/${state}`);
     assert.match(stateBody.textContent, /Unavailable:/u, `${family}/${state}`);
     dom.window.close();
@@ -356,7 +356,7 @@ test('unsupported state coverage is explicit while supported state args remain o
   assert.match(toggle, /aria-pressed="true"/u);
 });
 
-test('behavior-only state evidence executes the focused Core interactions', async () => {
+test('behavior-only state evidence executes the focused Mux UI interactions', async () => {
   const env = installRuntimeDom();
   const host = document.querySelector('#root');
   const root = createRoot(host);
@@ -366,7 +366,7 @@ test('behavior-only state evidence executes the focused Core interactions', asyn
   try {
     let linkActivations = 0;
     await act(async () => root.render(renderFamily('Link', { href: '#', onActivate: () => { linkActivations += 1; } })));
-    const link = host.querySelector('.core-link');
+    const link = host.querySelector('.muxui-link');
     assert.ok(link, 'Link behavior target');
     await act(async () => link.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, button: 0, pointerType: 'mouse' })));
     assert.equal(link.hasAttribute('data-pressed'), true, 'Link exposes the pressed interaction state');
@@ -376,7 +376,7 @@ test('behavior-only state evidence executes the focused Core interactions', asyn
 
     let toggleActivations = 0;
     await act(async () => root.render(renderFamily('ToggleButton', { onActivate: () => { toggleActivations += 1; } })));
-    const toggle = host.querySelector('.core-toggle-button');
+    const toggle = host.querySelector('.muxui-toggle-button');
     assert.ok(toggle, 'ToggleButton behavior target');
     await act(async () => toggle.click());
     assert.equal(toggle.getAttribute('aria-pressed'), 'true', 'ToggleButton pressed state');
@@ -384,7 +384,7 @@ test('behavior-only state evidence executes the focused Core interactions', asyn
 
     let formSubmissions = 0;
     await act(async () => root.render(renderFamily('Form', { onSubmit: () => { formSubmissions += 1; } })));
-    const form = host.querySelector('.core-form');
+    const form = host.querySelector('.muxui-form');
     assert.ok(form, 'Form behavior target');
     await act(async () => form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true })));
     assert.equal(formSubmissions, 1, 'Form submit callback');
@@ -392,7 +392,7 @@ test('behavior-only state evidence executes the focused Core interactions', asyn
     const dialogDismissals = [];
     await act(async () => root.render(renderFamily('Dialog', { open: true, title: 'Delete draft', onOpenChange: (open) => dialogDismissals.push(open) })));
     await settle(20);
-    const dialogClose = document.querySelector('.core-dialog-close');
+    const dialogClose = document.querySelector('.muxui-dialog-close');
     assert.ok(dialogClose, 'Dialog dismiss target');
     await act(async () => dialogClose.click());
     assert.deepEqual(dialogDismissals, [false], 'Dialog dismissal callback');
@@ -400,20 +400,20 @@ test('behavior-only state evidence executes the focused Core interactions', asyn
     const popoverDismissals = [];
     await act(async () => root.render(renderFamily('Popover', { open: true, onOpenChange: (open) => popoverDismissals.push(open) })));
     await settle(20);
-    const popoverTrigger = host.querySelector('.core-button');
-    assert.ok(document.querySelector('.core-popover'), 'Popover behavior target');
+    const popoverTrigger = host.querySelector('.muxui-button');
+    assert.ok(document.querySelector('.muxui-popover'), 'Popover behavior target');
     await act(async () => popoverTrigger.click());
     assert.deepEqual(popoverDismissals, [false], 'Popover dismissal callback');
 
     let toastDismissals = 0;
     await act(async () => root.render(React.createElement(ToastProvider, null, renderFamily('Toast', { onDismiss: () => { toastDismissals += 1; } }))));
     await settle(100);
-    const toastClose = document.querySelector('.core-toast-dismiss');
+    const toastClose = document.querySelector('.muxui-toast-dismiss');
     assert.ok(toastClose, 'Toast dismiss target');
     await act(async () => toastClose.click());
     await settle(40);
     assert.equal(toastDismissals, 1, 'Toast dismissal callback');
-    assert.equal(document.querySelector('.core-toast'), null, 'Toast leaves the DOM after dismissal');
+    assert.equal(document.querySelector('.muxui-toast'), null, 'Toast leaves the DOM after dismissal');
   } finally {
     await act(async () => root.unmount());
     env.resolveAnimations();
@@ -424,10 +424,10 @@ test('behavior-only state evidence executes the focused Core interactions', asyn
 test('interaction-open coverage opens the public field and collection triggers', async () => {
   const bindings = new Map(descriptor.bindings.map((binding) => [binding.export, binding]));
   const families = [
-    ['DatePicker', '.core-date-popover', '.core-date-trigger'],
-    ['DateRangePicker', '.core-date-popover', '.core-date-trigger'],
-    ['ComboBox', '.core-combo-box-popover', '.core-combo-box-trigger'],
-    ['Select', '.core-select-popover', '.core-select-trigger'],
+    ['DatePicker', '.muxui-date-popover', '.muxui-date-trigger'],
+    ['DateRangePicker', '.muxui-date-popover', '.muxui-date-trigger'],
+    ['ComboBox', '.muxui-combo-box-popover', '.muxui-combo-box-trigger'],
+    ['Select', '.muxui-select-popover', '.muxui-select-trigger'],
   ];
   for (const [family, overlaySelector, triggerSelector] of families) {
     const env = installRuntimeDom();
@@ -439,10 +439,10 @@ test('interaction-open coverage opens the public field and collection triggers',
       await act(async () => root.render(React.createElement(React.StrictMode, null, renderStateCoverage(record))));
       await act(async () => new Promise((resolvePromise) => setTimeout(resolvePromise, 50)));
 
-      const section = [...host.querySelectorAll('.core-storybook-state')]
+      const section = [...host.querySelectorAll('.muxui-storybook-state')]
         .find((candidate) => candidate.querySelector('h3')?.textContent === 'open');
       assert.ok(section, `${family}/open section`);
-      assert.equal(section.querySelector('[data-core-storybook-state="unavailable"]'), null, `${family}/open should be supported`);
+      assert.equal(section.querySelector('[data-muxui-storybook-state="unavailable"]'), null, `${family}/open should be supported`);
       const trigger = section.querySelector(triggerSelector);
       assert.ok(trigger, `${family}/open trigger`);
       assert.equal(trigger.getAttribute('aria-expanded'), 'true', `${family}/open trigger state`);
@@ -456,7 +456,7 @@ test('interaction-open coverage opens the public field and collection triggers',
 });
 
 function markerForTest(family, state) {
-  return `core-storybook-lifecycle-${family}-${state}`.replaceAll(/[^a-z0-9-]/gi, '-').toLowerCase();
+  return `muxui-storybook-lifecycle-${family}-${state}`.replaceAll(/[^a-z0-9-]/gi, '-').toLowerCase();
 }
 
 function isInspectableOverlay(marker) {
@@ -498,7 +498,7 @@ function observeInitialOverlay(marker) {
   };
 }
 
-test('lifecycle state coverage drives observable Core transitions', async () => {
+test('lifecycle state coverage drives observable Mux UI transitions', async () => {
   const env = installRuntimeDom();
   const host = document.querySelector('#root');
   const root = createRoot(host);
@@ -525,14 +525,14 @@ test('lifecycle state coverage drives observable Core transitions', async () => 
         .filter((name) => lifecycleAttributes[name]);
       const transitionObserver = new MutationObserver((records) => {
         for (const { target, attributeName, oldValue } of records) {
-          if (attributeName !== 'data-core-storybook-transition') continue;
+          if (attributeName !== 'data-muxui-storybook-transition') continue;
           transitionHistory.push({ oldValue, newValue: target.getAttribute(attributeName) });
         }
       });
       const recordRacAttribute = (target, attributeName) => {
-        const markedOverlay = target.matches('[class*="core-storybook-lifecycle-"]')
+        const markedOverlay = target.matches('[class*="muxui-storybook-lifecycle-"]')
           ? target
-          : target.querySelector('[class*="core-storybook-lifecycle-"]');
+          : target.querySelector('[class*="muxui-storybook-lifecycle-"]');
         if (markedOverlay) racLifecycleRecords.push({ marker: markedOverlay.className, attributeName });
       };
       const racObserver = new MutationObserver((records) => {
@@ -558,7 +558,7 @@ test('lifecycle state coverage drives observable Core transitions', async () => 
       racObserver.observe(document.body, { attributes: true, subtree: true });
       await act(async () => root.render(React.createElement(ToastProvider, null, coverage)));
       assert.ok(lifecycleStates.length > 0, `${family} has lifecycle coverage`);
-      const lifecycleSelect = document.querySelector(`[data-core-storybook-lifecycle-select="${family}"]`);
+      const lifecycleSelect = document.querySelector(`[data-muxui-storybook-lifecycle-select="${family}"]`);
       assert.ok(lifecycleSelect, `${family} lifecycle selector`);
       for (const state of lifecycleStates) {
         const marker = markerForTest(family, state);
@@ -600,7 +600,7 @@ test('lifecycle state coverage drives observable Core transitions', async () => 
           overlayHistory.push(isInspectableOverlay(marker));
           recordCurrentRacAttributes();
         }
-        const section = document.querySelector(`[data-core-storybook-lifecycle="${state}"]`);
+        const section = document.querySelector(`[data-muxui-storybook-lifecycle="${state}"]`);
         assert.ok(section, `${family}/${state} section`);
         const overlay = document.querySelector(`.${marker}`);
         assert.ok(overlay, `${family}/${state} overlay`);
@@ -639,7 +639,7 @@ test('lifecycle state coverage drives observable Core transitions', async () => 
             );
           }
         }
-        assert.equal(section.querySelector('[data-core-storybook-transition="open"]')?.textContent, `${state}: open`);
+        assert.equal(section.querySelector('[data-muxui-storybook-transition="open"]')?.textContent, `${state}: open`);
       }
       transitionObserver.disconnect();
       racObserver.disconnect();
@@ -686,7 +686,7 @@ test('generated stories are stock CSF modules with default and state coverage', 
 
 test('showcase does not expose React Aria or Tale UI as a public import', async () => {
   const packageManifest = JSON.parse(await readFile(resolve(appRoot, 'package.json'), 'utf8'));
-  assert.equal(packageManifest.dependencies['@core-ui/react'], 'workspace:*');
+  assert.equal(packageManifest.dependencies['@muxui/react'], 'workspace:*');
   assert.equal(packageManifest.devDependencies['react-aria-components'], undefined);
   assert.equal(packageManifest.devDependencies['@tale-ui/react'], undefined);
   assert.equal(packageManifest.devDependencies['@storybook/addon-docs'], '10.5.10');
@@ -696,11 +696,11 @@ test('showcase does not expose React Aria or Tale UI as a public import', async 
   assert.match(main, /@storybook\/addon-docs/);
   assert.match(main, /reactDocgen: false/);
   const preview = await readFile(resolve(appRoot, '.storybook/preview.mjs'), 'utf8');
-  assert.match(preview, /@core-ui\/react/);
+  assert.match(preview, /@muxui\/react/);
   assert.doesNotMatch(preview, /react-aria-components|@tale-ui/);
 });
 
-test('preview exposes the Core light/dark host theme contract', async () => {
+test('preview exposes the Mux UI light/dark host theme contract', async () => {
   const preview = await readFile(resolve(appRoot, '.storybook/preview.mjs'), 'utf8');
   const previewCss = await readFile(resolve(appRoot, '.storybook/preview.css'), 'utf8');
 
@@ -708,8 +708,8 @@ test('preview exposes the Core light/dark host theme contract', async () => {
   assert.match(preview, /colorScheme/);
   assert.match(preview, /value: 'light'/);
   assert.match(preview, /value: 'dark'/);
-  assert.match(preview, /document\.documentElement\.setAttribute\('data-core-color-scheme'/);
-  assert.match(preview, /className: 'core-storybook-surface'/);
+  assert.match(preview, /document\.documentElement\.setAttribute\('data-muxui-color-scheme'/);
+  assert.match(preview, /className: 'muxui-storybook-surface'/);
   assert.match(preview, /viewMode === 'story'/);
   assert.match(preview, /const surfaceElement = viewMode === 'story' \? 'main' : 'div'/);
   assert.match(preview, /React\.createElement\(\s*surfaceElement/u);
@@ -717,20 +717,20 @@ test('preview exposes the Core light/dark host theme contract', async () => {
   assert.match(preview, /observer\.observe\(document\.body, \{ childList: true \}\)/);
   assert.match(preview, /element\.style\.display === 'contents'/);
   assert.match(preview, /element\.hasAttribute\('data-overlay-container'\)/);
-  assert.match(preview, /element\.classList\.contains\('core-dialog-backdrop'\)/);
-  assert.match(preview, /element\.classList\.contains\('core-toast-region'\)/);
+  assert.match(preview, /element\.classList\.contains\('muxui-dialog-backdrop'\)/);
+  assert.match(preview, /element\.classList\.contains\('muxui-toast-region'\)/);
   assert.match(preview, /child\.setAttribute\('role', 'region'\)/);
-  assert.match(preview, /child\.setAttribute\('aria-label', 'Core UI overlay'\)/);
+  assert.match(preview, /child\.setAttribute\('aria-label', 'Mux UI overlay'\)/);
   assert.match(preview, /element\.removeAttribute\('role'\)/);
   assert.match(preview, /element\.removeAttribute\('aria-label'\)/);
   assert.doesNotMatch(preview, /\.append\(/u);
-  assert.match(preview, /'data-core-color-scheme': scheme/);
+  assert.match(preview, /'data-muxui-color-scheme': scheme/);
   assert.match(preview, /test: 'error'/);
   const packageManifest = JSON.parse(await readFile(resolve(appRoot, 'package.json'), 'utf8'));
   assert.equal(packageManifest.devDependencies['axe-core'], '4.13.0');
   assert.equal(packageManifest.devDependencies['playwright-core'], '1.62.1');
 
-  assert.match(previewCss, /:root\[data-core-color-scheme='dark'\]/);
+  assert.match(previewCss, /:root\[data-muxui-color-scheme='dark'\]/);
   assert.match(previewCss, /background: #000/);
   assert.match(previewCss, /color: #fff/);
   assert.match(previewCss, /font-family: ui-sans-serif, system-ui/);

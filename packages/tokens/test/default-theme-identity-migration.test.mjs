@@ -3,7 +3,7 @@ import { spawnSync } from 'node:child_process';
 import { cp, mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import test from 'node:test';
-import { parseJsonStrict } from '@core-ui/schema';
+import { parseJsonStrict } from '@muxui/schema';
 import { materializeDefaultThemeTokenSource, TALE_TOKEN_MATERIALIZATION_PATHS } from '../src/tale-token-materialization.mjs';
 import {
   DEFAULT_THEME_IDENTITY,
