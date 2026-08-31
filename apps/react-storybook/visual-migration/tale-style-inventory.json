@@ -1,5 +1,5 @@
 {
-  "schema": "core-ui-tale-style-inventory-v1",
+  "schema": "muxui-tale-style-inventory-v1",
   "donor": {
     "repository": "tale-ui/tale-ui",
     "commit": "94bf62a26c02605c8928dfeb24f0ddc4be1c92fd",
@@ -95,7 +95,7 @@
       "fixtureConsumers": [
         "all donor fixtures"
       ],
-      "coreSupportClaim": false
+      "muxuiSupportClaim": false
     },
     {
       "path": "packages/styles/src/_primitives.css",
@@ -106,7 +106,7 @@
       "fixtureConsumers": [
         "all donor fixtures"
       ],
-      "coreSupportClaim": true
+      "muxuiSupportClaim": true
     },
     {
       "path": "packages/styles/src/accordion.css",
@@ -117,7 +117,7 @@
       "fixtureConsumers": [
         "DisclosureGroup"
       ],
-      "coreSupportClaim": true
+      "muxuiSupportClaim": true
     },
     {
       "path": "packages/styles/src/alert-dialog.css",
@@ -126,7 +126,7 @@
       "disposition": "donor-only-no-fixed-family",
       "reason": "Pinned Tale stylesheet has no selector or import used by the 51-family fixture closure; it makes no Core support claim.",
       "fixtureConsumers": [],
-      "coreSupportClaim": false
+      "muxuiSupportClaim": false
     },
     {
       "path": "packages/styles/src/app-shell.css",
@@ -135,7 +135,7 @@
       "disposition": "donor-only-no-fixed-family",
       "reason": "Pinned Tale stylesheet has no selector or import used by the 51-family fixture closure; it makes no Core support claim.",
       "fixtureConsumers": [],
-      "coreSupportClaim": false
+      "muxuiSupportClaim": false
     },
     {
       "path": "packages/styles/src/app-store-button.css",
@@ -144,7 +144,7 @@
       "disposition": "donor-only-no-fixed-family",
       "reason": "Pinned Tale stylesheet has no selector or import used by the 51-family fixture closure; it makes no Core support claim.",
       "fixtureConsumers": [],
-      "coreSupportClaim": false
+      "muxuiSupportClaim": false
     },
     {
       "path": "packages/styles/src/aspect-ratio.css",
@@ -153,7 +153,7 @@
       "disposition": "donor-only-no-fixed-family",
       "reason": "Pinned Tale stylesheet has no selector or import used by the 51-family fixture closure; it makes no Core support claim.",
       "fixtureConsumers": [],
-      "coreSupportClaim": false
+      "muxuiSupportClaim": false
     },
     {
       "path": "packages/styles/src/autocomplete.css",
@@ -164,7 +164,7 @@
       "fixtureConsumers": [
         "Autocomplete"
       ],
-      "coreSupportClaim": true
+      "muxuiSupportClaim": true
     },
     {
       "path": "packages/styles/src/avatar.css",
@@ -173,7 +173,7 @@
       "disposition": "donor-only-no-fixed-family",
       "reason": "Pinned Tale stylesheet has no selector or import used by the 51-family fixture closure; it makes no Core support claim.",
       "fixtureConsumers": [],
-      "coreSupportClaim": false
+      "muxuiSupportClaim": false
     },
     {
       "path": "packages/styles/src/background-pattern.css",
@@ -182,7 +182,7 @@
       "disposition": "donor-only-no-fixed-family",
       "reason": "Pinned Tale stylesheet has no selector or import used by the 51-family fixture closure; it makes no Core support claim.",
       "fixtureConsumers": [],
-      "coreSupportClaim": false
+      "muxuiSupportClaim": false
     },
     {
       "path": "packages/styles/src/badge-group.css",
@@ -191,7 +191,7 @@
       "disposition": "donor-only-no-fixed-family",
       "reason": "Pinned Tale stylesheet has no selector or import used by the 51-family fixture closure; it makes no Core support claim.",
       "fixtureConsumers": [],
-      "coreSupportClaim": false
+      "muxuiSupportClaim": false
     },
     {
       "path": "packages/styles/src/badge.css",
@@ -200,7 +200,7 @@
       "disposition": "donor-only-no-fixed-family",
       "reason": "Pinned Tale stylesheet has no selector or import used by the 51-family fixture closure; it makes no Core support claim.",
       "fixtureConsumers": [],
-      "coreSupportClaim": false
+      "muxuiSupportClaim": false
     },
     {
       "path": "packages/styles/src/banner.css",
@@ -209,7 +209,7 @@
       "disposition": "donor-only-no-fixed-family",
       "reason": "Pinned Tale stylesheet has no selector or import used by the 51-family fixture closure; it makes no Core support claim.",
       "fixtureConsumers": [],
-      "coreSupportClaim": false
+      "muxuiSupportClaim": false
     },
     {
       "path": "packages/styles/src/blockquote.css",
@@ -218,7 +218,7 @@
       "disposition": "donor-only-no-fixed-family",
       "reason": "Pinned Tale stylesheet has no selector or import used by the 51-family fixture closure; it makes no Core support claim.",
       "fixtureConsumers": [],
-      "coreSupportClaim": false
+      "muxuiSupportClaim": false
     },
     {
       "path": "packages/styles/src/breadcrumbs.css",
@@ -229,7 +229,7 @@
       "fixtureConsumers": [
         "Breadcrumbs"
       ],
-      "coreSupportClaim": true
+      "muxuiSupportClaim": true
     },
     {
       "path": "packages/styles/src/button-group.css",
@@ -238,7 +238,7 @@
       "disposition": "donor-only-no-fixed-family",
       "reason": "Pinned Tale stylesheet has no selector or import used by the 51-family fixture closure; it makes no Core support claim.",
       "fixtureConsumers": [],
-      "coreSupportClaim": false
+      "muxuiSupportClaim": false
     },
     {
       "path": "packages/styles/src/button.css",
@@ -256,7 +256,7 @@
         "Tooltip",
         "Toolbar"
       ],
-      "coreSupportClaim": true
+      "muxuiSupportClaim": true
     },
     {
       "path": "packages/styles/src/calendar.css",
@@ -267,7 +267,7 @@
       "fixtureConsumers": [
         "Calendar"
       ],
-      "coreSupportClaim": true
+      "muxuiSupportClaim": true
     },
     {
       "path": "packages/styles/src/card.css",
@@ -276,7 +276,7 @@
       "disposition": "donor-only-no-fixed-family",
       "reason": "Pinned Tale stylesheet has no selector or import used by the 51-family fixture closure; it makes no Core support claim.",
       "fixtureConsumers": [],
-      "coreSupportClaim": false
+      "muxuiSupportClaim": false
     },
     {
       "path": "packages/styles/src/carousel.css",
@@ -285,7 +285,7 @@
       "disposition": "donor-only-no-fixed-family",
       "reason": "Pinned Tale stylesheet has no selector or import used by the 51-family fixture closure; it makes no Core support claim.",
       "fixtureConsumers": [],
-      "coreSupportClaim": false
+      "muxuiSupportClaim": false
     },
     {
       "path": "packages/styles/src/chat.css",
@@ -294,7 +294,7 @@
       "disposition": "donor-only-no-fixed-family",
       "reason": "Pinned Tale stylesheet has no selector or import used by the 51-family fixture closure; it makes no Core support claim.",
       "fixtureConsumers": [],
-      "coreSupportClaim": false
+      "muxuiSupportClaim": false
     },
     {
       "path": "packages/styles/src/checkbox-field.css",
@@ -303,7 +303,7 @@
       "disposition": "donor-only-no-fixed-family",
       "reason": "Pinned Tale stylesheet has no selector or import used by the 51-family fixture closure; it makes no Core support claim.",
       "fixtureConsumers": [],
-      "coreSupportClaim": false
+      "muxuiSupportClaim": false
     },
     {
       "path": "packages/styles/src/checkbox.css",
@@ -315,7 +315,7 @@
         "Checkbox",
         "CheckboxGroup"
       ],
-      "coreSupportClaim": true
+      "muxuiSupportClaim": true
     },
     {
       "path": "packages/styles/src/citation.css",
@@ -324,7 +324,7 @@
       "disposition": "donor-only-no-fixed-family",
       "reason": "Pinned Tale stylesheet has no selector or import used by the 51-family fixture closure; it makes no Core support claim.",
       "fixtureConsumers": [],
-      "coreSupportClaim": false
+      "muxuiSupportClaim": false
     },
     {
       "path": "packages/styles/src/code-block.css",
@@ -333,7 +333,7 @@
       "disposition": "donor-only-no-fixed-family",
       "reason": "Pinned Tale stylesheet has no selector or import used by the 51-family fixture closure; it makes no Core support claim.",
       "fixtureConsumers": [],
-      "coreSupportClaim": false
+      "muxuiSupportClaim": false
     },
     {
       "path": "packages/styles/src/code.css",
@@ -342,7 +342,7 @@
       "disposition": "donor-only-no-fixed-family",
       "reason": "Pinned Tale stylesheet has no selector or import used by the 51-family fixture closure; it makes no Core support claim.",
       "fixtureConsumers": [],
-      "coreSupportClaim": false
+      "muxuiSupportClaim": false
     },
     {
       "path": "packages/styles/src/color-area.css",
@@ -353,7 +353,7 @@
       "fixtureConsumers": [
         "ColorArea"
       ],
-      "coreSupportClaim": true
+      "muxuiSupportClaim": true
     },
     {
       "path": "packages/styles/src/color-field.css",
@@ -364,7 +364,7 @@
       "fixtureConsumers": [
         "ColorField"
       ],
-      "coreSupportClaim": true
+      "muxuiSupportClaim": true
     },
     {
       "path": "packages/styles/src/color-mode-toggle.css",
@@ -373,7 +373,7 @@
       "disposition": "donor-only-no-fixed-family",
       "reason": "Pinned Tale stylesheet has no selector or import used by the 51-family fixture closure; it makes no Core support claim.",
       "fixtureConsumers": [],
-      "coreSupportClaim": false
+      "muxuiSupportClaim": false
     },
     {
       "path": "packages/styles/src/color-picker.css",
@@ -384,7 +384,7 @@
       "fixtureConsumers": [
         "ColorPicker"
       ],
-      "coreSupportClaim": true
+      "muxuiSupportClaim": true
     },
     {
       "path": "packages/styles/src/color-slider.css",
@@ -395,7 +395,7 @@
       "fixtureConsumers": [
         "ColorSlider"
       ],
-      "coreSupportClaim": true
+      "muxuiSupportClaim": true
     },
     {
       "path": "packages/styles/src/color-swatch-picker.css",
@@ -406,7 +406,7 @@
       "fixtureConsumers": [
         "ColorSwatchPicker"
       ],
-      "coreSupportClaim": true
+      "muxuiSupportClaim": true
     },
     {
       "path": "packages/styles/src/color-swatch.css",
@@ -417,7 +417,7 @@
       "fixtureConsumers": [
         "ColorSwatch"
       ],
-      "coreSupportClaim": true
+      "muxuiSupportClaim": true
     },
     {
       "path": "packages/styles/src/color-wheel.css",
@@ -428,7 +428,7 @@
       "fixtureConsumers": [
         "ColorWheel"
       ],
-      "coreSupportClaim": true
+      "muxuiSupportClaim": true
     },
     {
       "path": "packages/styles/src/column.css",
@@ -437,7 +437,7 @@
       "disposition": "donor-only-no-fixed-family",
       "reason": "Pinned Tale stylesheet has no selector or import used by the 51-family fixture closure; it makes no Core support claim.",
       "fixtureConsumers": [],
-      "coreSupportClaim": false
+      "muxuiSupportClaim": false
     },
     {
       "path": "packages/styles/src/combobox.css",
@@ -448,7 +448,7 @@
       "fixtureConsumers": [
         "ComboBox"
       ],
-      "coreSupportClaim": true
+      "muxuiSupportClaim": true
     },
     {
       "path": "packages/styles/src/command-palette.css",
@@ -457,7 +457,7 @@
       "disposition": "donor-only-no-fixed-family",
       "reason": "Pinned Tale stylesheet has no selector or import used by the 51-family fixture closure; it makes no Core support claim.",
       "fixtureConsumers": [],
-      "coreSupportClaim": false
+      "muxuiSupportClaim": false
     },
     {
       "path": "packages/styles/src/credit-card.css",
@@ -466,7 +466,7 @@
       "disposition": "donor-only-no-fixed-family",
       "reason": "Pinned Tale stylesheet has no selector or import used by the 51-family fixture closure; it makes no Core support claim.",
       "fixtureConsumers": [],
-      "coreSupportClaim": false
+      "muxuiSupportClaim": false
     },
     {
       "path": "packages/styles/src/date-field.css",
@@ -477,7 +477,7 @@
       "fixtureConsumers": [
         "DateField"
       ],
-      "coreSupportClaim": true
+      "muxuiSupportClaim": true
     },
     {
       "path": "packages/styles/src/date-picker.css",
@@ -488,7 +488,7 @@
       "fixtureConsumers": [
         "DatePicker"
       ],
-      "coreSupportClaim": true
+      "muxuiSupportClaim": true
     },
     {
       "path": "packages/styles/src/date-range-picker.css",
@@ -499,7 +499,7 @@
       "fixtureConsumers": [
         "DateRangePicker"
       ],
-      "coreSupportClaim": true
+      "muxuiSupportClaim": true
     },
     {
       "path": "packages/styles/src/dialog.css",
@@ -510,7 +510,7 @@
       "fixtureConsumers": [
         "Dialog"
       ],
-      "coreSupportClaim": true
+      "muxuiSupportClaim": true
     },
     {
       "path": "packages/styles/src/disclosure.css",
@@ -521,7 +521,7 @@
       "fixtureConsumers": [
         "Disclosure"
       ],
-      "coreSupportClaim": true
+      "muxuiSupportClaim": true
     },
     {
       "path": "packages/styles/src/dot-icon.css",
@@ -530,7 +530,7 @@
       "disposition": "donor-only-no-fixed-family",
       "reason": "Pinned Tale stylesheet has no selector or import used by the 51-family fixture closure; it makes no Core support claim.",
       "fixtureConsumers": [],
-      "coreSupportClaim": false
+      "muxuiSupportClaim": false
     },
     {
       "path": "packages/styles/src/drawer.css",
@@ -539,7 +539,7 @@
       "disposition": "donor-only-no-fixed-family",
       "reason": "Pinned Tale stylesheet has no selector or import used by the 51-family fixture closure; it makes no Core support claim.",
       "fixtureConsumers": [],
-      "coreSupportClaim": false
+      "muxuiSupportClaim": false
     },
     {
       "path": "packages/styles/src/drop-zone.css",
@@ -550,7 +550,7 @@
       "fixtureConsumers": [
         "DropZone"
       ],
-      "coreSupportClaim": true
+      "muxuiSupportClaim": true
     },
     {
       "path": "packages/styles/src/empty-state.css",
@@ -559,7 +559,7 @@
       "disposition": "donor-only-no-fixed-family",
       "reason": "Pinned Tale stylesheet has no selector or import used by the 51-family fixture closure; it makes no Core support claim.",
       "fixtureConsumers": [],
-      "coreSupportClaim": false
+      "muxuiSupportClaim": false
     },
     {
       "path": "packages/styles/src/featured-icon.css",
@@ -568,7 +568,7 @@
       "disposition": "donor-only-no-fixed-family",
       "reason": "Pinned Tale stylesheet has no selector or import used by the 51-family fixture closure; it makes no Core support claim.",
       "fixtureConsumers": [],
-      "coreSupportClaim": false
+      "muxuiSupportClaim": false
     },
     {
       "path": "packages/styles/src/field.css",
@@ -580,7 +580,7 @@
         "CheckboxGroup",
         "RadioGroup"
       ],
-      "coreSupportClaim": true
+      "muxuiSupportClaim": true
     },
     {
       "path": "packages/styles/src/fieldset.css",
@@ -589,7 +589,7 @@
       "disposition": "donor-only-no-fixed-family",
       "reason": "Pinned Tale stylesheet has no selector or import used by the 51-family fixture closure; it makes no Core support claim.",
       "fixtureConsumers": [],
-      "coreSupportClaim": false
+      "muxuiSupportClaim": false
     },
     {
       "path": "packages/styles/src/file-trigger.css",
@@ -600,7 +600,7 @@
       "fixtureConsumers": [
         "FileTrigger"
       ],
-      "coreSupportClaim": true
+      "muxuiSupportClaim": true
     },
     {
       "path": "packages/styles/src/file-upload.css",
@@ -609,7 +609,7 @@
       "disposition": "donor-only-no-fixed-family",
       "reason": "Pinned Tale stylesheet has no selector or import used by the 51-family fixture closure; it makes no Core support claim.",
       "fixtureConsumers": [],
-      "coreSupportClaim": false
+      "muxuiSupportClaim": false
     },
     {
       "path": "packages/styles/src/form.css",
@@ -620,7 +620,7 @@
       "fixtureConsumers": [
         "Form"
       ],
-      "coreSupportClaim": true
+      "muxuiSupportClaim": true
     },
     {
       "path": "packages/styles/src/grid-list.css",
@@ -631,7 +631,7 @@
       "fixtureConsumers": [
         "GridList"
       ],
-      "coreSupportClaim": true
+      "muxuiSupportClaim": true
     },
     {
       "path": "packages/styles/src/header-nav.css",
@@ -640,7 +640,7 @@
       "disposition": "donor-only-no-fixed-family",
       "reason": "Pinned Tale stylesheet has no selector or import used by the 51-family fixture closure; it makes no Core support claim.",
       "fixtureConsumers": [],
-      "coreSupportClaim": false
+      "muxuiSupportClaim": false
     },
     {
       "path": "packages/styles/src/icon-button.css",
@@ -655,7 +655,7 @@
         "NumberField",
         "RangeCalendar"
       ],
-      "coreSupportClaim": true
+      "muxuiSupportClaim": true
     },
     {
       "path": "packages/styles/src/icon.css",
@@ -669,7 +669,7 @@
         "NumberField",
         "SearchField"
       ],
-      "coreSupportClaim": true
+      "muxuiSupportClaim": true
     },
     {
       "path": "packages/styles/src/illustration.css",
@@ -678,7 +678,7 @@
       "disposition": "donor-only-no-fixed-family",
       "reason": "Pinned Tale stylesheet has no selector or import used by the 51-family fixture closure; it makes no Core support claim.",
       "fixtureConsumers": [],
-      "coreSupportClaim": false
+      "muxuiSupportClaim": false
     },
     {
       "path": "packages/styles/src/image-cropper.css",
@@ -687,7 +687,7 @@
       "disposition": "donor-only-no-fixed-family",
       "reason": "Pinned Tale stylesheet has no selector or import used by the 51-family fixture closure; it makes no Core support claim.",
       "fixtureConsumers": [],
-      "coreSupportClaim": false
+      "muxuiSupportClaim": false
     },
     {
       "path": "packages/styles/src/image.css",
@@ -696,7 +696,7 @@
       "disposition": "donor-only-no-fixed-family",
       "reason": "Pinned Tale stylesheet has no selector or import used by the 51-family fixture closure; it makes no Core support claim.",
       "fixtureConsumers": [],
-      "coreSupportClaim": false
+      "muxuiSupportClaim": false
     },
     {
       "path": "packages/styles/src/index.css",
@@ -707,7 +707,7 @@
       "fixtureConsumers": [
         "all donor fixtures"
       ],
-      "coreSupportClaim": false
+      "muxuiSupportClaim": false
     },
     {
       "path": "packages/styles/src/input-group.css",
@@ -716,7 +716,7 @@
       "disposition": "donor-only-no-fixed-family",
       "reason": "Pinned Tale stylesheet has no selector or import used by the 51-family fixture closure; it makes no Core support claim.",
       "fixtureConsumers": [],
-      "coreSupportClaim": false
+      "muxuiSupportClaim": false
     },
     {
       "path": "packages/styles/src/input-tags.css",
@@ -725,7 +725,7 @@
       "disposition": "donor-only-no-fixed-family",
       "reason": "Pinned Tale stylesheet has no selector or import used by the 51-family fixture closure; it makes no Core support claim.",
       "fixtureConsumers": [],
-      "coreSupportClaim": false
+      "muxuiSupportClaim": false
     },
     {
       "path": "packages/styles/src/input.css",
@@ -734,7 +734,7 @@
       "disposition": "donor-only-no-fixed-family",
       "reason": "Pinned Tale stylesheet has no selector or import used by the 51-family fixture closure; it makes no Core support claim.",
       "fixtureConsumers": [],
-      "coreSupportClaim": false
+      "muxuiSupportClaim": false
     },
     {
       "path": "packages/styles/src/iphone-mockup.css",
@@ -743,7 +743,7 @@
       "disposition": "donor-only-no-fixed-family",
       "reason": "Pinned Tale stylesheet has no selector or import used by the 51-family fixture closure; it makes no Core support claim.",
       "fixtureConsumers": [],
-      "coreSupportClaim": false
+      "muxuiSupportClaim": false
     },
     {
       "path": "packages/styles/src/kbd.css",
@@ -752,7 +752,7 @@
       "disposition": "donor-only-no-fixed-family",
       "reason": "Pinned Tale stylesheet has no selector or import used by the 51-family fixture closure; it makes no Core support claim.",
       "fixtureConsumers": [],
-      "coreSupportClaim": false
+      "muxuiSupportClaim": false
     },
     {
       "path": "packages/styles/src/key-value-pairs.css",
@@ -761,7 +761,7 @@
       "disposition": "donor-only-no-fixed-family",
       "reason": "Pinned Tale stylesheet has no selector or import used by the 51-family fixture closure; it makes no Core support claim.",
       "fixtureConsumers": [],
-      "coreSupportClaim": false
+      "muxuiSupportClaim": false
     },
     {
       "path": "packages/styles/src/lightbox.css",
@@ -770,7 +770,7 @@
       "disposition": "donor-only-no-fixed-family",
       "reason": "Pinned Tale stylesheet has no selector or import used by the 51-family fixture closure; it makes no Core support claim.",
       "fixtureConsumers": [],
-      "coreSupportClaim": false
+      "muxuiSupportClaim": false
     },
     {
       "path": "packages/styles/src/link.css",
@@ -781,7 +781,7 @@
       "fixtureConsumers": [
         "Link"
       ],
-      "coreSupportClaim": true
+      "muxuiSupportClaim": true
     },
     {
       "path": "packages/styles/src/list-box.css",
@@ -792,7 +792,7 @@
       "fixtureConsumers": [
         "ListBox"
       ],
-      "coreSupportClaim": true
+      "muxuiSupportClaim": true
     },
     {
       "path": "packages/styles/src/list.css",
@@ -801,7 +801,7 @@
       "disposition": "donor-only-no-fixed-family",
       "reason": "Pinned Tale stylesheet has no selector or import used by the 51-family fixture closure; it makes no Core support claim.",
       "fixtureConsumers": [],
-      "coreSupportClaim": false
+      "muxuiSupportClaim": false
     },
     {
       "path": "packages/styles/src/markdown.css",
@@ -810,7 +810,7 @@
       "disposition": "donor-only-no-fixed-family",
       "reason": "Pinned Tale stylesheet has no selector or import used by the 51-family fixture closure; it makes no Core support claim.",
       "fixtureConsumers": [],
-      "coreSupportClaim": false
+      "muxuiSupportClaim": false
     },
     {
       "path": "packages/styles/src/menu.css",
@@ -821,7 +821,7 @@
       "fixtureConsumers": [
         "Menu"
       ],
-      "coreSupportClaim": true
+      "muxuiSupportClaim": true
     },
     {
       "path": "packages/styles/src/meter.css",
@@ -832,7 +832,7 @@
       "fixtureConsumers": [
         "Meter"
       ],
-      "coreSupportClaim": true
+      "muxuiSupportClaim": true
     },
     {
       "path": "packages/styles/src/multi-select.css",
@@ -841,7 +841,7 @@
       "disposition": "donor-only-no-fixed-family",
       "reason": "Pinned Tale stylesheet has no selector or import used by the 51-family fixture closure; it makes no Core support claim.",
       "fixtureConsumers": [],
-      "coreSupportClaim": false
+      "muxuiSupportClaim": false
     },
     {
       "path": "packages/styles/src/navigation-menu.css",
@@ -850,7 +850,7 @@
       "disposition": "donor-only-no-fixed-family",
       "reason": "Pinned Tale stylesheet has no selector or import used by the 51-family fixture closure; it makes no Core support claim.",
       "fixtureConsumers": [],
-      "coreSupportClaim": false
+      "muxuiSupportClaim": false
     },
     {
       "path": "packages/styles/src/number-field.css",
@@ -861,7 +861,7 @@
       "fixtureConsumers": [
         "NumberField"
       ],
-      "coreSupportClaim": true
+      "muxuiSupportClaim": true
     },
     {
       "path": "packages/styles/src/outline.css",
@@ -870,7 +870,7 @@
       "disposition": "donor-only-no-fixed-family",
       "reason": "Pinned Tale stylesheet has no selector or import used by the 51-family fixture closure; it makes no Core support claim.",
       "fixtureConsumers": [],
-      "coreSupportClaim": false
+      "muxuiSupportClaim": false
     },
     {
       "path": "packages/styles/src/overflow-list.css",
@@ -879,7 +879,7 @@
       "disposition": "donor-only-no-fixed-family",
       "reason": "Pinned Tale stylesheet has no selector or import used by the 51-family fixture closure; it makes no Core support claim.",
       "fixtureConsumers": [],
-      "coreSupportClaim": false
+      "muxuiSupportClaim": false
     },
     {
       "path": "packages/styles/src/pagination-dot.css",
@@ -888,7 +888,7 @@
       "disposition": "donor-only-no-fixed-family",
       "reason": "Pinned Tale stylesheet has no selector or import used by the 51-family fixture closure; it makes no Core support claim.",
       "fixtureConsumers": [],
-      "coreSupportClaim": false
+      "muxuiSupportClaim": false
     },
     {
       "path": "packages/styles/src/pagination-line.css",
@@ -897,7 +897,7 @@
       "disposition": "donor-only-no-fixed-family",
       "reason": "Pinned Tale stylesheet has no selector or import used by the 51-family fixture closure; it makes no Core support claim.",
       "fixtureConsumers": [],
-      "coreSupportClaim": false
+      "muxuiSupportClaim": false
     },
     {
       "path": "packages/styles/src/pagination.css",
@@ -906,7 +906,7 @@
       "disposition": "donor-only-no-fixed-family",
       "reason": "Pinned Tale stylesheet has no selector or import used by the 51-family fixture closure; it makes no Core support claim.",
       "fixtureConsumers": [],
-      "coreSupportClaim": false
+      "muxuiSupportClaim": false
     },
     {
       "path": "packages/styles/src/payment-input.css",
@@ -915,7 +915,7 @@
       "disposition": "donor-only-no-fixed-family",
       "reason": "Pinned Tale stylesheet has no selector or import used by the 51-family fixture closure; it makes no Core support claim.",
       "fixtureConsumers": [],
-      "coreSupportClaim": false
+      "muxuiSupportClaim": false
     },
     {
       "path": "packages/styles/src/pin-input.css",
@@ -924,7 +924,7 @@
       "disposition": "donor-only-no-fixed-family",
       "reason": "Pinned Tale stylesheet has no selector or import used by the 51-family fixture closure; it makes no Core support claim.",
       "fixtureConsumers": [],
-      "coreSupportClaim": false
+      "muxuiSupportClaim": false
     },
     {
       "path": "packages/styles/src/popover.css",
@@ -935,7 +935,7 @@
       "fixtureConsumers": [
         "Popover"
       ],
-      "coreSupportClaim": true
+      "muxuiSupportClaim": true
     },
     {
       "path": "packages/styles/src/preview-card.css",
@@ -946,7 +946,7 @@
       "fixtureConsumers": [
         "PreviewTrigger"
       ],
-      "coreSupportClaim": true
+      "muxuiSupportClaim": true
     },
     {
       "path": "packages/styles/src/progress-bar.css",
@@ -957,7 +957,7 @@
       "fixtureConsumers": [
         "ProgressBar"
       ],
-      "coreSupportClaim": true
+      "muxuiSupportClaim": true
     },
     {
       "path": "packages/styles/src/progress-circle.css",
@@ -966,7 +966,7 @@
       "disposition": "donor-only-no-fixed-family",
       "reason": "Pinned Tale stylesheet has no selector or import used by the 51-family fixture closure; it makes no Core support claim.",
       "fixtureConsumers": [],
-      "coreSupportClaim": false
+      "muxuiSupportClaim": false
     },
     {
       "path": "packages/styles/src/qr-code.css",
@@ -975,7 +975,7 @@
       "disposition": "donor-only-no-fixed-family",
       "reason": "Pinned Tale stylesheet has no selector or import used by the 51-family fixture closure; it makes no Core support claim.",
       "fixtureConsumers": [],
-      "coreSupportClaim": false
+      "muxuiSupportClaim": false
     },
     {
       "path": "packages/styles/src/radio-field.css",
@@ -984,7 +984,7 @@
       "disposition": "donor-only-no-fixed-family",
       "reason": "Pinned Tale stylesheet has no selector or import used by the 51-family fixture closure; it makes no Core support claim.",
       "fixtureConsumers": [],
-      "coreSupportClaim": false
+      "muxuiSupportClaim": false
     },
     {
       "path": "packages/styles/src/radio.css",
@@ -995,7 +995,7 @@
       "fixtureConsumers": [
         "RadioGroup"
       ],
-      "coreSupportClaim": true
+      "muxuiSupportClaim": true
     },
     {
       "path": "packages/styles/src/range-calendar.css",
@@ -1006,7 +1006,7 @@
       "fixtureConsumers": [
         "RangeCalendar"
       ],
-      "coreSupportClaim": true
+      "muxuiSupportClaim": true
     },
     {
       "path": "packages/styles/src/rating-badge.css",
@@ -1015,7 +1015,7 @@
       "disposition": "donor-only-no-fixed-family",
       "reason": "Pinned Tale stylesheet has no selector or import used by the 51-family fixture closure; it makes no Core support claim.",
       "fixtureConsumers": [],
-      "coreSupportClaim": false
+      "muxuiSupportClaim": false
     },
     {
       "path": "packages/styles/src/rating-stars.css",
@@ -1024,7 +1024,7 @@
       "disposition": "donor-only-no-fixed-family",
       "reason": "Pinned Tale stylesheet has no selector or import used by the 51-family fixture closure; it makes no Core support claim.",
       "fixtureConsumers": [],
-      "coreSupportClaim": false
+      "muxuiSupportClaim": false
     },
     {
       "path": "packages/styles/src/resizable.css",
@@ -1033,7 +1033,7 @@
       "disposition": "donor-only-no-fixed-family",
       "reason": "Pinned Tale stylesheet has no selector or import used by the 51-family fixture closure; it makes no Core support claim.",
       "fixtureConsumers": [],
-      "coreSupportClaim": false
+      "muxuiSupportClaim": false
     },
     {
       "path": "packages/styles/src/row.css",
@@ -1042,7 +1042,7 @@
       "disposition": "donor-only-no-fixed-family",
       "reason": "Pinned Tale stylesheet has no selector or import used by the 51-family fixture closure; it makes no Core support claim.",
       "fixtureConsumers": [],
-      "coreSupportClaim": false
+      "muxuiSupportClaim": false
     },
     {
       "path": "packages/styles/src/scroll-area.css",
@@ -1051,7 +1051,7 @@
       "disposition": "donor-only-no-fixed-family",
       "reason": "Pinned Tale stylesheet has no selector or import used by the 51-family fixture closure; it makes no Core support claim.",
       "fixtureConsumers": [],
-      "coreSupportClaim": false
+      "muxuiSupportClaim": false
     },
     {
       "path": "packages/styles/src/search-field.css",
@@ -1062,7 +1062,7 @@
       "fixtureConsumers": [
         "SearchField"
       ],
-      "coreSupportClaim": true
+      "muxuiSupportClaim": true
     },
     {
       "path": "packages/styles/src/section-divider.css",
@@ -1071,7 +1071,7 @@
       "disposition": "donor-only-no-fixed-family",
       "reason": "Pinned Tale stylesheet has no selector or import used by the 51-family fixture closure; it makes no Core support claim.",
       "fixtureConsumers": [],
-      "coreSupportClaim": false
+      "muxuiSupportClaim": false
     },
     {
       "path": "packages/styles/src/select-native.css",
@@ -1080,7 +1080,7 @@
       "disposition": "donor-only-no-fixed-family",
       "reason": "Pinned Tale stylesheet has no selector or import used by the 51-family fixture closure; it makes no Core support claim.",
       "fixtureConsumers": [],
-      "coreSupportClaim": false
+      "muxuiSupportClaim": false
     },
     {
       "path": "packages/styles/src/select.css",
@@ -1091,7 +1091,7 @@
       "fixtureConsumers": [
         "Select"
       ],
-      "coreSupportClaim": true
+      "muxuiSupportClaim": true
     },
     {
       "path": "packages/styles/src/separator.css",
@@ -1102,7 +1102,7 @@
       "fixtureConsumers": [
         "Separator"
       ],
-      "coreSupportClaim": true
+      "muxuiSupportClaim": true
     },
     {
       "path": "packages/styles/src/sidebar.css",
@@ -1111,7 +1111,7 @@
       "disposition": "donor-only-no-fixed-family",
       "reason": "Pinned Tale stylesheet has no selector or import used by the 51-family fixture closure; it makes no Core support claim.",
       "fixtureConsumers": [],
-      "coreSupportClaim": false
+      "muxuiSupportClaim": false
     },
     {
       "path": "packages/styles/src/skeleton.css",
@@ -1120,7 +1120,7 @@
       "disposition": "donor-only-no-fixed-family",
       "reason": "Pinned Tale stylesheet has no selector or import used by the 51-family fixture closure; it makes no Core support claim.",
       "fixtureConsumers": [],
-      "coreSupportClaim": false
+      "muxuiSupportClaim": false
     },
     {
       "path": "packages/styles/src/slider.css",
@@ -1131,7 +1131,7 @@
       "fixtureConsumers": [
         "Slider"
       ],
-      "coreSupportClaim": true
+      "muxuiSupportClaim": true
     },
     {
       "path": "packages/styles/src/social-button.css",
@@ -1140,7 +1140,7 @@
       "disposition": "donor-only-no-fixed-family",
       "reason": "Pinned Tale stylesheet has no selector or import used by the 51-family fixture closure; it makes no Core support claim.",
       "fixtureConsumers": [],
-      "coreSupportClaim": false
+      "muxuiSupportClaim": false
     },
     {
       "path": "packages/styles/src/spinner.css",
@@ -1151,7 +1151,7 @@
       "fixtureConsumers": [
         "Button"
       ],
-      "coreSupportClaim": true
+      "muxuiSupportClaim": true
     },
     {
       "path": "packages/styles/src/switch-field.css",
@@ -1160,7 +1160,7 @@
       "disposition": "donor-only-no-fixed-family",
       "reason": "Pinned Tale stylesheet has no selector or import used by the 51-family fixture closure; it makes no Core support claim.",
       "fixtureConsumers": [],
-      "coreSupportClaim": false
+      "muxuiSupportClaim": false
     },
     {
       "path": "packages/styles/src/switch.css",
@@ -1171,7 +1171,7 @@
       "fixtureConsumers": [
         "Switch"
       ],
-      "coreSupportClaim": true
+      "muxuiSupportClaim": true
     },
     {
       "path": "packages/styles/src/table.css",
@@ -1182,7 +1182,7 @@
       "fixtureConsumers": [
         "Table"
       ],
-      "coreSupportClaim": true
+      "muxuiSupportClaim": true
     },
     {
       "path": "packages/styles/src/tabs.css",
@@ -1193,7 +1193,7 @@
       "fixtureConsumers": [
         "Tabs"
       ],
-      "coreSupportClaim": true
+      "muxuiSupportClaim": true
     },
     {
       "path": "packages/styles/src/tag-group.css",
@@ -1204,7 +1204,7 @@
       "fixtureConsumers": [
         "TagGroup"
       ],
-      "coreSupportClaim": true
+      "muxuiSupportClaim": true
     },
     {
       "path": "packages/styles/src/tag-select.css",
@@ -1213,7 +1213,7 @@
       "disposition": "donor-only-no-fixed-family",
       "reason": "Pinned Tale stylesheet has no selector or import used by the 51-family fixture closure; it makes no Core support claim.",
       "fixtureConsumers": [],
-      "coreSupportClaim": false
+      "muxuiSupportClaim": false
     },
     {
       "path": "packages/styles/src/text-area.css",
@@ -1222,7 +1222,7 @@
       "disposition": "donor-only-no-fixed-family",
       "reason": "Pinned Tale stylesheet has no selector or import used by the 51-family fixture closure; it makes no Core support claim.",
       "fixtureConsumers": [],
-      "coreSupportClaim": false
+      "muxuiSupportClaim": false
     },
     {
       "path": "packages/styles/src/text-editor.css",
@@ -1231,7 +1231,7 @@
       "disposition": "donor-only-no-fixed-family",
       "reason": "Pinned Tale stylesheet has no selector or import used by the 51-family fixture closure; it makes no Core support claim.",
       "fixtureConsumers": [],
-      "coreSupportClaim": false
+      "muxuiSupportClaim": false
     },
     {
       "path": "packages/styles/src/text-field.css",
@@ -1242,7 +1242,7 @@
       "fixtureConsumers": [
         "TextField"
       ],
-      "coreSupportClaim": true
+      "muxuiSupportClaim": true
     },
     {
       "path": "packages/styles/src/text.css",
@@ -1251,7 +1251,7 @@
       "disposition": "donor-only-no-fixed-family",
       "reason": "Pinned Tale stylesheet has no selector or import used by the 51-family fixture closure; it makes no Core support claim.",
       "fixtureConsumers": [],
-      "coreSupportClaim": false
+      "muxuiSupportClaim": false
     },
     {
       "path": "packages/styles/src/time-field.css",
@@ -1262,7 +1262,7 @@
       "fixtureConsumers": [
         "TimeField"
       ],
-      "coreSupportClaim": true
+      "muxuiSupportClaim": true
     },
     {
       "path": "packages/styles/src/timestamp.css",
@@ -1271,7 +1271,7 @@
       "disposition": "donor-only-no-fixed-family",
       "reason": "Pinned Tale stylesheet has no selector or import used by the 51-family fixture closure; it makes no Core support claim.",
       "fixtureConsumers": [],
-      "coreSupportClaim": false
+      "muxuiSupportClaim": false
     },
     {
       "path": "packages/styles/src/toast.css",
@@ -1282,7 +1282,7 @@
       "fixtureConsumers": [
         "Toast"
       ],
-      "coreSupportClaim": true
+      "muxuiSupportClaim": true
     },
     {
       "path": "packages/styles/src/toggle-button.css",
@@ -1294,7 +1294,7 @@
         "ToggleButton",
         "ToggleButtonGroup"
       ],
-      "coreSupportClaim": true
+      "muxuiSupportClaim": true
     },
     {
       "path": "packages/styles/src/toolbar.css",
@@ -1305,7 +1305,7 @@
       "fixtureConsumers": [
         "Toolbar"
       ],
-      "coreSupportClaim": true
+      "muxuiSupportClaim": true
     },
     {
       "path": "packages/styles/src/tooltip.css",
@@ -1316,7 +1316,7 @@
       "fixtureConsumers": [
         "Tooltip"
       ],
-      "coreSupportClaim": true
+      "muxuiSupportClaim": true
     },
     {
       "path": "packages/styles/src/tree.css",
@@ -1327,7 +1327,7 @@
       "fixtureConsumers": [
         "Tree"
       ],
-      "coreSupportClaim": true
+      "muxuiSupportClaim": true
     },
     {
       "path": "packages/styles/src/video-player.css",
@@ -1336,7 +1336,7 @@
       "disposition": "donor-only-no-fixed-family",
       "reason": "Pinned Tale stylesheet has no selector or import used by the 51-family fixture closure; it makes no Core support claim.",
       "fixtureConsumers": [],
-      "coreSupportClaim": false
+      "muxuiSupportClaim": false
     }
   ]
 }

@@ -76,8 +76,8 @@ export class EvidenceIntegrityError extends Error {
 
 export function hasUnsanitizedEvidenceOutput(text, repositoryRoot) {
   const withoutPublicTokenIds = text.replace(
-    /"core:token:[a-z0-9]+(?:-[a-z0-9]+)*"/gu,
-    '"core:<public-token-id>"',
+    /"muxui:token:[a-z0-9]+(?:-[a-z0-9]+)*"/gu,
+    '"muxui:<public-token-id>"',
   );
   return (
     withoutPublicTokenIds.includes(repositoryRoot)
@@ -93,7 +93,7 @@ async function readCanonicalJson(path) {
   if (bytes !== canonicalJson(value)) {
     throw new EvidenceIntegrityError(
       'EVIDENCE_NOT_CANONICAL',
-      `${path} must use core-ui-evidence-json-v1 canonical bytes`,
+      `${path} must use muxui-evidence-json-v1 canonical bytes`,
     );
   }
   return { bytes, value };

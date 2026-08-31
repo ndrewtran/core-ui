@@ -4,7 +4,7 @@ import { loadPolicy, normalizePath } from './policy.mjs';
 import { discoverWorkspacePackages } from './workspace-packages.mjs';
 
 const repositoryRoot = resolve(
-  process.env.CORE_UI_TASK_REPOSITORY_ROOT ?? resolve(import.meta.dirname, '../../../..'),
+  process.env.MUXUI_TASK_REPOSITORY_ROOT ?? resolve(import.meta.dirname, '../../../..'),
 );
 const task = process.argv[2];
 const affected = process.argv.includes('--affected');
@@ -29,7 +29,7 @@ let selected = packages;
 let mode = 'all';
 
 if (affected) {
-  const base = process.env.CORE_UI_BASE_REF || 'origin/main';
+  const base = process.env.MUXUI_BASE_REF || 'origin/main';
   const changed = new Set([
     ...gitLines(['diff', '--name-only', `${base}...HEAD`]),
     ...gitLines(['diff', '--name-only']),

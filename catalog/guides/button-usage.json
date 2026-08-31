@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "id": "core:guide:button-usage",
+  "id": "muxui:guide:button-usage",
   "kind": "guide",
   "name": "Button usage",
   "summary": "Portable usage guidance for Button.",

@@ -24,7 +24,7 @@ function run(command, args, options) {
 }
 
 test('E-G0.0-02: affected selection runs a changed package before every dependent', async () => {
-  const root = await mkdtemp(join(tmpdir(), 'core-ui-task-graph-'));
+  const root = await mkdtemp(join(tmpdir(), 'muxui-task-graph-'));
   await mkdir(join(root, 'packages/leaf'), { recursive: true });
   await mkdir(join(root, 'packages/middle'), { recursive: true });
   await mkdir(join(root, 'packages/app'), { recursive: true });
@@ -37,7 +37,7 @@ test('E-G0.0-02: affected selection runs a changed package before every dependen
   );
   await writeFile(
     join(root, 'record.mjs'),
-    "import { appendFileSync } from 'node:fs';\nappendFileSync(process.env.CORE_UI_TASK_LOG, `${process.argv[2]}\\n`);\n",
+    "import { appendFileSync } from 'node:fs';\nappendFileSync(process.env.MUXUI_TASK_LOG, `${process.argv[2]}\\n`);\n",
   );
 
   const packages = [
@@ -59,7 +59,7 @@ test('E-G0.0-02: affected selection runs a changed package before every dependen
   }
 
   run('git', ['init', '--quiet'], { cwd: root });
-  run('git', ['config', 'user.name', 'Core UI fixture'], { cwd: root });
+  run('git', ['config', 'user.name', 'Mux UI fixture'], { cwd: root });
   run('git', ['config', 'user.email', 'fixture@example.invalid'], { cwd: root });
   run('git', ['add', '.'], { cwd: root });
   run('git', ['commit', '--quiet', '-m', 'fixture base'], { cwd: root });
@@ -75,9 +75,9 @@ test('E-G0.0-02: affected selection runs a changed package before every dependen
       cwd: root,
       env: {
         ...process.env,
-        CORE_UI_BASE_REF: 'HEAD~1',
-        CORE_UI_TASK_LOG: logPath,
-        CORE_UI_TASK_REPOSITORY_ROOT: root,
+        MUXUI_BASE_REF: 'HEAD~1',
+        MUXUI_TASK_LOG: logPath,
+        MUXUI_TASK_REPOSITORY_ROOT: root,
       },
     },
   );

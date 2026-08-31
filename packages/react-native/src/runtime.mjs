@@ -5,7 +5,7 @@ import {
   Text,
   View,
 } from 'react-native';
-import { deriveControlState } from '@core-ui/foundation/logic';
+import { deriveControlState } from '@muxui/foundation/logic';
 
 const PRIMITIVES = Object.freeze({ pressable: Pressable, text: Text, view: View });
 const PASSTHROUGH = new Set([
@@ -21,7 +21,7 @@ const PASSTHROUGH = new Set([
 
 function closedObject(value, label) {
   if (!value || typeof value !== 'object' || Array.isArray(value)) {
-    throw new TypeError(`CORE_REACT_NATIVE_INPUT_INVALID: ${label}`);
+    throw new TypeError(`MUXUI_REACT_NATIVE_INPUT_INVALID: ${label}`);
   }
   return value;
 }
@@ -31,7 +31,7 @@ export function filterNativePassthrough(value = {}) {
   const result = {};
   for (const key of Object.keys(value).sort()) {
     if (!PASSTHROUGH.has(key)) {
-      throw new TypeError(`CORE_REACT_NATIVE_PASSTHROUGH_INVALID: ${key}`);
+      throw new TypeError(`MUXUI_REACT_NATIVE_PASSTHROUGH_INVALID: ${key}`);
     }
     result[key] = value[key];
   }
@@ -47,17 +47,17 @@ export function createNativeAccessibilityProps({
 } = {}) {
   if (typeof role !== 'string' || role.length === 0 || typeof disabled !== 'boolean'
     || !Array.isArray(actions)) {
-    throw new TypeError('CORE_REACT_NATIVE_ACCESSIBILITY_INVALID');
+    throw new TypeError('MUXUI_REACT_NATIVE_ACCESSIBILITY_INVALID');
   }
   if (actions.some((action) => !action || typeof action !== 'object' || Array.isArray(action)
     || typeof action.name !== 'string' || action.name.length === 0
     || (action.label !== undefined && typeof action.label !== 'string'))
     || new Set(actions.map(({ name }) => name)).size !== actions.length) {
-    throw new TypeError('CORE_REACT_NATIVE_ACCESSIBILITY_INVALID: actions');
+    throw new TypeError('MUXUI_REACT_NATIVE_ACCESSIBILITY_INVALID: actions');
   }
   if ((actions.length > 0 && typeof onAction !== 'function')
     || (actions.length === 0 && onAction !== undefined)) {
-    throw new TypeError('CORE_REACT_NATIVE_ACCESSIBILITY_INVALID: action handler');
+    throw new TypeError('MUXUI_REACT_NATIVE_ACCESSIBILITY_INVALID: action handler');
   }
   const state = deriveControlState({ intent: 'action', disabled });
   const actionNames = new Set(actions.map(({ name }) => name));
@@ -70,7 +70,7 @@ export function createNativeAccessibilityProps({
       onAccessibilityAction(event) {
         const actionName = event?.nativeEvent?.actionName;
         if (typeof actionName !== 'string' || !actionNames.has(actionName)) {
-          throw new TypeError('CORE_REACT_NATIVE_ACCESSIBILITY_INVALID: unknown action');
+          throw new TypeError('MUXUI_REACT_NATIVE_ACCESSIBILITY_INVALID: unknown action');
         }
         onAction(actionName, event);
       },
@@ -80,10 +80,10 @@ export function createNativeAccessibilityProps({
 
 export function createNativeResponderProps({ onGrant, onRelease } = {}) {
   if (onGrant !== undefined && typeof onGrant !== 'function') {
-    throw new TypeError('CORE_REACT_NATIVE_RESPONDER_INVALID: onGrant');
+    throw new TypeError('MUXUI_REACT_NATIVE_RESPONDER_INVALID: onGrant');
   }
   if (onRelease !== undefined && typeof onRelease !== 'function') {
-    throw new TypeError('CORE_REACT_NATIVE_RESPONDER_INVALID: onRelease');
+    throw new TypeError('MUXUI_REACT_NATIVE_RESPONDER_INVALID: onRelease');
   }
   let owner = false;
   return Object.freeze({
@@ -92,7 +92,7 @@ export function createNativeResponderProps({ onGrant, onRelease } = {}) {
       onGrant?.(event);
     },
     onResponderRelease(event) {
-      if (!owner) throw new TypeError('CORE_REACT_NATIVE_RESPONDER_INVALID: release without ownership');
+      if (!owner) throw new TypeError('MUXUI_REACT_NATIVE_RESPONDER_INVALID: release without ownership');
       owner = false;
       onRelease?.(event);
     },
@@ -110,7 +110,7 @@ export function composeNativePrimitive({
   children,
 } = {}) {
   const Component = PRIMITIVES[primitive];
-  if (!Component) throw new TypeError(`CORE_REACT_NATIVE_PRIMITIVE_INVALID: ${primitive}`);
+  if (!Component) throw new TypeError(`MUXUI_REACT_NATIVE_PRIMITIVE_INVALID: ${primitive}`);
   closedObject(accessibility, 'accessibility must be an object');
   closedObject(responder, 'responder must be an object');
   return createElement(
@@ -122,14 +122,14 @@ export function composeNativePrimitive({
 
 export function announceNative(message) {
   if (typeof message !== 'string' || message.trim().length === 0) {
-    throw new TypeError('CORE_REACT_NATIVE_ANNOUNCEMENT_INVALID');
+    throw new TypeError('MUXUI_REACT_NATIVE_ANNOUNCEMENT_INVALID');
   }
   AccessibilityInfo.announceForAccessibility(message);
 }
 
 export function focusNative(ref) {
   if (!ref || typeof ref.focus !== 'function') {
-    throw new TypeError('CORE_REACT_NATIVE_FOCUS_INVALID');
+    throw new TypeError('MUXUI_REACT_NATIVE_FOCUS_INVALID');
   }
   ref.focus();
 }

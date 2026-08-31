@@ -101,7 +101,7 @@ function closedOverlayTree() {
       React.createElement(Toast, { message: 'Queued after hydration' })));
 }
 
-test('R1.4 overlay owners use RAC lifecycle primitives and expose Core names only', async () => {
+test('R1.4 overlay owners use RAC lifecycle primitives and expose MuxUI names only', async () => {
   const packageRoot = resolve(import.meta.dirname, '..');
   const source = await readFile(resolve(packageRoot, 'src/overlays.mjs'), 'utf8');
   const index = await readFile(resolve(packageRoot, 'generated/index.mjs'), 'utf8');
@@ -118,9 +118,9 @@ test('R1.4 overlay owners use RAC lifecycle primitives and expose Core names onl
 
 test('R1.4 families are SSR and hydration safe and reject missing accessible content', async () => {
   const server = renderToString(closedOverlayTree());
-  assert.match(server, /core-drop-zone/u);
-  assert.match(server, /core-file-trigger/u);
-  assert.doesNotMatch(server, /core-dialog-backdrop|core-popover|core-preview-trigger|core-tooltip|core-toast/u);
+  assert.match(server, /muxui-drop-zone/u);
+  assert.match(server, /muxui-file-trigger/u);
+  assert.doesNotMatch(server, /muxui-dialog-backdrop|muxui-popover|muxui-preview-trigger|muxui-tooltip|muxui-toast/u);
   assert.throws(() => renderToString(React.createElement(Dialog, { title: ' ' })), /Dialog requires a title or accessible name/u);
   assert.throws(() => renderToString(React.createElement(Popover, { 'aria-label': ' ', trigger: React.createElement('button', null, 'Open') }, 'Body')), /Popover requires an accessible name/u);
   assert.throws(() => renderToString(React.createElement(PreviewTrigger, { trigger: React.createElement('button', null, 'Preview') }, 'Body')), /PreviewTrigger requires an accessible name/u);
@@ -134,7 +134,7 @@ test('R1.4 families are SSR and hydration safe and reject missing accessible con
     assert.match(document.body.textContent, /Queued after hydration/u);
     await act(async () => root.unmount());
     await Promise.resolve();
-    assert.equal(document.querySelector('.core-toast'), null);
+    assert.equal(document.querySelector('.muxui-toast'), null);
   } finally {
     env.restore();
   }
@@ -154,13 +154,13 @@ test('PreviewTrigger keeps naming on one non-modal inner dialog and cleans up it
       trigger: React.createElement('button', null, 'Show preview'),
     }, 'Preview body')));
 
-    const outer = document.body.querySelector('.core-preview-trigger');
+    const outer = document.body.querySelector('.muxui-preview-trigger');
     assert.ok(outer);
     assert.equal(outerRef.current, outer);
     assert.equal(outer.classList.contains('custom-preview'), true);
     const dialogs = document.body.querySelectorAll('[role="dialog"]');
     assert.equal(dialogs.length, 1);
-    assert.equal(dialogs[0].classList.contains('core-preview-content'), true);
+    assert.equal(dialogs[0].classList.contains('muxui-preview-content'), true);
     assert.equal(dialogs[0].getAttribute('aria-label'), 'Preview details');
     assert.equal(outer.hasAttribute('aria-label'), false);
     assert.equal(dialogs[0].hasAttribute('aria-modal'), false);
@@ -171,13 +171,13 @@ test('PreviewTrigger keeps naming on one non-modal inner dialog and cleans up it
       defaultOpen: true,
       trigger: React.createElement('button', null, 'Show preview'),
     }, React.createElement('h2', { id: 'preview-heading' }, 'Preview heading'))));
-    const labelledDialog = document.body.querySelector('.core-preview-content');
+    const labelledDialog = document.body.querySelector('.muxui-preview-content');
     assert.equal(labelledDialog.getAttribute('aria-labelledby'), 'preview-heading');
     assert.equal(labelledDialog.hasAttribute('aria-label'), false);
-    assert.equal(document.body.querySelector('.core-preview-trigger').hasAttribute('aria-labelledby'), false);
+    assert.equal(document.body.querySelector('.muxui-preview-trigger').hasAttribute('aria-labelledby'), false);
 
     await act(async () => root.unmount());
-    assert.equal(document.body.querySelector('.core-preview-trigger'), null);
+    assert.equal(document.body.querySelector('.muxui-preview-trigger'), null);
     assert.equal(document.body.querySelector('[role="dialog"]'), null);
   } finally {
     if (host.isConnected && host.hasChildNodes()) await act(async () => root.unmount());
@@ -198,7 +198,7 @@ test('Dialog and Toast close controls use decorative Lucide X icons', async () =
     await act(async () => root.render(React.createElement(ToastProvider, null,
       React.createElement(CaptureManager),
       React.createElement(Dialog, { title: 'Details', defaultOpen: true }, 'Dialog body'))));
-    const dialogClose = document.body.querySelector('.core-dialog-close');
+    const dialogClose = document.body.querySelector('.muxui-dialog-close');
     assert.ok(dialogClose);
     assert.equal(dialogClose.getAttribute('aria-label'), 'Close dialog');
     assert.equal(dialogClose.querySelector('svg')?.classList.contains('lucide-x'), true);
@@ -206,7 +206,7 @@ test('Dialog and Toast close controls use decorative Lucide X icons', async () =
     assert.equal(dialogClose.querySelector('svg')?.getAttribute('focusable'), 'false');
 
     await act(async () => manager.add('Saved', { duration: 60000 }));
-    const toastDismiss = document.body.querySelector('.core-toast-dismiss');
+    const toastDismiss = document.body.querySelector('.muxui-toast-dismiss');
     assert.ok(toastDismiss);
     assert.equal(toastDismiss.getAttribute('aria-label'), 'Dismiss notification');
     assert.equal(toastDismiss.querySelector('svg')?.classList.contains('lucide-x'), true);
@@ -230,7 +230,7 @@ test('R1.4 label guards reject empty hosts, fragments, and arrays while preservi
   assert.doesNotThrow(() => renderToString(React.createElement(Dialog, { title: React.createElement(CustomTitle) })));
 });
 
-test('DropZone and FileTrigger normalize browser inputs to Core-owned values', async () => {
+test('DropZone and FileTrigger normalize browser inputs to Mux UI-owned values', async () => {
   const env = installDom();
   const host = document.querySelector('#root');
   const root = createRoot(host);
@@ -238,14 +238,14 @@ test('DropZone and FileTrigger normalize browser inputs to Core-owned values', a
   const selections = [];
   try {
     await act(async () => root.render(React.createElement(DropZone, { 'aria-label': 'Upload', onDrop: (event) => drops.push(event) }, 'Drop here')));
-    const pasteTarget = host.querySelector('.core-drop-zone button');
+    const pasteTarget = host.querySelector('.muxui-drop-zone button');
     await act(async () => pasteTarget.focus());
     const pasteEvent = new Event('paste', { bubbles: true, cancelable: true });
     Object.defineProperty(pasteEvent, 'clipboardData', {
       value: {
         types: ['text/plain'],
         items: [{ kind: 'string', type: 'text/plain' }],
-        getData: (type) => type === 'text/plain' ? 'Core clipboard text' : '',
+        getData: (type) => type === 'text/plain' ? 'MuxUI clipboard text' : '',
       },
     });
     await act(async () => document.dispatchEvent(pasteEvent));
@@ -255,7 +255,7 @@ test('DropZone and FileTrigger normalize browser inputs to Core-owned values', a
     assert.deepEqual({ type: drops[0].type, x: drops[0].x, y: drops[0].y, dropOperation: drops[0].dropOperation }, { type: 'drop', x: 0, y: 0, dropOperation: 'copy' });
     assert.equal(drops[0].items[0].kind, 'text');
     assert.deepEqual([...drops[0].items[0].types], ['text/plain']);
-    assert.equal(await drops[0].items[0].getText('text/plain'), 'Core clipboard text');
+    assert.equal(await drops[0].items[0].getText('text/plain'), 'MuxUI clipboard text');
 
     await act(async () => root.render(React.createElement(FileTrigger, {
       acceptedFileTypes: ['.txt', 'text/plain'],
@@ -267,7 +267,7 @@ test('DropZone and FileTrigger normalize browser inputs to Core-owned values', a
     assert.equal(input.getAttribute('accept'), '.txt,text/plain');
     assert.equal(input.multiple, true);
     assert.equal(input.getAttribute('webkitdirectory'), '');
-    assert.ok(host.querySelector('.core-file-trigger'));
+    assert.ok(host.querySelector('.muxui-file-trigger'));
     const file = new File(['fixture'], 'fixture.txt', { type: 'text/plain' });
     Object.defineProperty(input, 'files', { configurable: true, value: [file] });
     await act(async () => input.dispatchEvent(new Event('change', { bubbles: true })));
@@ -288,7 +288,7 @@ test('DropZone mirrors disabled state on its public root for assistive technolog
   const root = createRoot(host);
   try {
     await act(async () => root.render(React.createElement(DropZone, { 'aria-label': 'Upload', disabled: true }, 'Drop here')));
-    const dropZone = host.querySelector('.core-drop-zone');
+    const dropZone = host.querySelector('.muxui-drop-zone');
     assert.ok(dropZone);
     assert.equal(dropZone.getAttribute('data-disabled'), 'true');
     assert.equal(dropZone.getAttribute('aria-disabled'), 'true');
@@ -313,19 +313,19 @@ test('Popover dismissable false prevents Escape and outside-press dismissal', as
       defaultOpen: true,
       dismissable: false,
     }, 'Popover body')));
-    const popover = document.body.querySelector('.core-popover');
+    const popover = document.body.querySelector('.muxui-popover');
     assert.ok(popover);
 
     await act(async () => {
       popover.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }));
     });
-    assert.ok(document.body.querySelector('.core-popover'));
+    assert.ok(document.body.querySelector('.muxui-popover'));
 
     await act(async () => {
       document.body.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, cancelable: true, button: 0 }));
       document.body.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, button: 0 }));
     });
-    assert.ok(document.body.querySelector('.core-popover'));
+    assert.ok(document.body.querySelector('.muxui-popover'));
   } finally {
     await act(async () => root.unmount());
     env.restore();
@@ -355,7 +355,7 @@ test('ToastProvider pauses auto-dismiss timers before clearing on teardown', asy
   try {
     await act(async () => root.render(React.createElement(ToastProvider, null, React.createElement(CaptureManager))));
     await act(async () => manager.add('Pending teardown', { duration: 60000 }));
-    assert.ok(document.body.querySelector('.core-toast'));
+    assert.ok(document.body.querySelector('.muxui-toast'));
     await act(async () => root.unmount());
     await Promise.resolve();
     assert.deepEqual(calls.slice(-2), ['pauseAll', 'clear']);
@@ -380,10 +380,10 @@ test('ToastProvider normalizes zero maxVisible so toasts still auto-dismiss', as
   try {
     await act(async () => root.render(React.createElement(ToastProvider, { maxVisible: 0 }, React.createElement(CaptureManager))));
     await act(async () => manager.add('Visible toast', { duration: 25, onDismiss: () => { dismissed += 1; } }));
-    assert.ok(document.body.querySelector('.core-toast'));
+    assert.ok(document.body.querySelector('.muxui-toast'));
     await act(async () => new Promise((resolve) => setTimeout(resolve, 50)));
     assert.equal(dismissed, 1);
-    assert.equal(document.body.querySelector('.core-toast'), null);
+    assert.equal(document.body.querySelector('.muxui-toast'), null);
   } finally {
     if (host.isConnected && host.hasChildNodes()) await act(async () => root.unmount());
     env.restore();
@@ -402,17 +402,17 @@ test('title-less useToast notifications have an accessible RAC name', async () =
   try {
     await act(async () => root.render(React.createElement(ToastProvider, null, React.createElement(CaptureManager))));
     await act(async () => manager.add('Saved', { duration: 60000 }));
-    const toast = document.body.querySelector('.core-toast');
+    const toast = document.body.querySelector('.muxui-toast');
     assert.ok(toast);
     assert.equal(toast.getAttribute('role'), 'alertdialog');
     const labelledBy = toast.getAttribute('aria-labelledby');
     assert.ok(labelledBy);
     const title = document.getElementById(labelledBy);
     assert.ok(title);
-    assert.equal(title.classList.contains('core-toast-title-fallback'), true);
+    assert.equal(title.classList.contains('muxui-toast-title-fallback'), true);
     assert.equal(title.textContent, 'Notification');
-    const content = toast.querySelector('.core-toast-content');
-    const dismiss = toast.querySelector('.core-toast-dismiss');
+    const content = toast.querySelector('.muxui-toast-content');
+    const dismiss = toast.querySelector('.muxui-toast-dismiss');
     assert.ok(content);
     assert.ok(dismiss);
     assert.equal(content.parentElement, toast);
@@ -423,11 +423,11 @@ test('title-less useToast notifications have an accessible RAC name', async () =
     assert.equal(dismiss.querySelector('svg')?.getAttribute('aria-hidden'), 'true');
     assert.equal(dismiss.querySelector('svg')?.getAttribute('focusable'), 'false');
     const styles = await readFile(resolve(import.meta.dirname, '../generated/styles.css'), 'utf8');
-    assert.match(styles, /:where\([\s\S]*\.core-toast-dismiss[\s\S]*border:\s*1px solid transparent;[\s\S]*appearance:\s*none;/u);
-    assert.match(styles, /\.core-toast-dismiss\s*\{[^}]*aspect-ratio:\s*1;[\s\S]*width:\s*calc\(1rem \+ var\(--core-semantic-layout-tight-inset\) \+ var\(--core-semantic-layout-tight-inset\) \+ 2px\);[\s\S]*height:\s*calc\(1rem \+ var\(--core-semantic-layout-tight-inset\) \+ var\(--core-semantic-layout-tight-inset\) \+ 2px\);[\s\S]*padding:\s*var\(--core-semantic-layout-tight-inset\);[\s\S]*border-radius:\s*var\(--core-semantic-shape-option-radius\)/u);
-    assert.match(styles, /\.core-dialog-close\s*\{[^}]*aspect-ratio:\s*1;[\s\S]*width:\s*calc\(1rem \+ var\(--core-semantic-layout-tight-inset\) \+ var\(--core-semantic-layout-tight-inset\) \+ 2px\);[\s\S]*height:\s*calc\(1rem \+ var\(--core-semantic-layout-tight-inset\) \+ var\(--core-semantic-layout-tight-inset\) \+ 2px\);/u);
-    assert.match(styles, /\.core-toast\s*\{[^}]*grid-template-columns:\s*minmax\(0, 1fr\) auto/u);
-    assert.match(styles, /\.core-toast-content\s*\{[^}]*display:\s*grid/u);
+    assert.match(styles, /:where\([\s\S]*\.muxui-toast-dismiss[\s\S]*border:\s*1px solid transparent;[\s\S]*appearance:\s*none;/u);
+    assert.match(styles, /\.muxui-toast-dismiss\s*\{[^}]*aspect-ratio:\s*1;[\s\S]*width:\s*calc\(1rem \+ var\(--muxui-semantic-layout-tight-inset\) \+ var\(--muxui-semantic-layout-tight-inset\) \+ 2px\);[\s\S]*height:\s*calc\(1rem \+ var\(--muxui-semantic-layout-tight-inset\) \+ var\(--muxui-semantic-layout-tight-inset\) \+ 2px\);[\s\S]*padding:\s*var\(--muxui-semantic-layout-tight-inset\);[\s\S]*border-radius:\s*var\(--muxui-semantic-shape-option-radius\)/u);
+    assert.match(styles, /\.muxui-dialog-close\s*\{[^}]*aspect-ratio:\s*1;[\s\S]*width:\s*calc\(1rem \+ var\(--muxui-semantic-layout-tight-inset\) \+ var\(--muxui-semantic-layout-tight-inset\) \+ 2px\);[\s\S]*height:\s*calc\(1rem \+ var\(--muxui-semantic-layout-tight-inset\) \+ var\(--muxui-semantic-layout-tight-inset\) \+ 2px\);/u);
+    assert.match(styles, /\.muxui-toast\s*\{[^}]*grid-template-columns:\s*minmax\(0, 1fr\) auto/u);
+    assert.match(styles, /\.muxui-toast-content\s*\{[^}]*display:\s*grid/u);
   } finally {
     await act(async () => root.unmount());
     env.restore();
@@ -461,21 +461,21 @@ test('declarative Toast teardown cancels its timer and settles onDismiss once', 
     await Promise.resolve();
     assert.equal(dismissed, 0);
     assert.equal(activeTimers.size, 1);
-    const toast = document.body.querySelector('.core-toast');
+    const toast = document.body.querySelector('.muxui-toast');
     assert.ok(toast);
     assert.equal(toast.getAttribute('role'), 'alertdialog');
     const labelledBy = toast.getAttribute('aria-labelledby');
     assert.ok(labelledBy);
     const title = document.getElementById(labelledBy);
     assert.ok(title);
-    assert.equal(title.classList.contains('core-toast-title-fallback'), true);
+    assert.equal(title.classList.contains('muxui-toast-title-fallback'), true);
     assert.equal(title.textContent, 'Notification');
 
     await act(async () => root.unmount());
     await Promise.resolve();
     assert.equal(activeTimers.size, 0);
     assert.equal(dismissed, 1);
-    assert.equal(document.body.querySelector('.core-toast'), null);
+    assert.equal(document.body.querySelector('.muxui-toast'), null);
   } finally {
     for (const handle of activeTimers) originalClearTimeout(handle);
     globalThis.setTimeout = originalSetTimeout;
@@ -485,7 +485,7 @@ test('declarative Toast teardown cancels its timer and settles onDismiss once', 
   }
 });
 
-test('Toast keeps one stable Core manager and settles dismissal callbacks once', async () => {
+test('Toast keeps one stable MuxUI manager and settles dismissal callbacks once', async () => {
   const env = installDom();
   const host = document.querySelector('#root');
   const root = createRoot(host);
@@ -503,7 +503,7 @@ test('Toast keeps one stable Core manager and settles dismissal callbacks once',
     assert.throws(() => manager.add('   '), /Toast requires a message/u);
     let firstKey;
     await act(async () => { firstKey = manager.add('Saved', { title: 'Complete', duration: 60000, onDismiss: () => { dismissed += 1; } }); });
-    const toast = document.body.querySelector('.core-toast');
+    const toast = document.body.querySelector('.muxui-toast');
     assert.ok(toast);
     assert.equal(toast.getAttribute('role'), 'alertdialog');
     assert.match(toast.textContent, /Complete.*Saved/u);
@@ -516,7 +516,7 @@ test('Toast keeps one stable Core manager and settles dismissal callbacks once',
     await act(async () => { root.unmount(); await Promise.resolve(); });
     await Promise.resolve();
     assert.equal(dismissed, 2);
-    assert.equal(document.body.querySelector('.core-toast'), null);
+    assert.equal(document.body.querySelector('.muxui-toast'), null);
   } finally {
     if (host.isConnected && host.hasChildNodes()) await act(async () => root.unmount());
     env.restore();

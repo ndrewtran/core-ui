@@ -1,6 +1,6 @@
 // @generated-from: apps/react-storybook/src/generate-stories.mjs
-// @generated-content-sha256: sha256:f963946a15861a2d453b55a68d82405691505cb13101c86809f62c84ad4bfbb1
-import * as Core from '@core-ui/react';
+// @generated-content-sha256: sha256:61edea3beffb449503e26052ff5a3ae5fcc166294a110eaec017f85a7bd01667
+import * as MuxUI from '@muxui/react';
 import { argTypesForBinding, createStory } from '../../src/storybook-factory.mjs';
 
 const binding = {
@@ -33,12 +33,12 @@ const binding = {
       "aria-labelledby"
     ]
   },
-  "binding": "core:component:dialog#web.react",
+  "binding": "muxui:component:dialog#web.react",
   "export": "Dialog",
   "lifecycle": "experimental",
   "module": ".",
   "runtimeProfile": "web.react",
-  "selector": ".core-dialog",
+  "selector": ".muxui-dialog",
   "states": [
     "closed",
     "open",
@@ -50,8 +50,9 @@ const binding = {
 const record = { family: 'Dialog', tranche: 'R1.4', binding };
 
 export default {
-  title: 'Core React/R1.4/Dialog',
-  component: Core.Dialog,
+  title: 'Mux UI React/R1.4/Dialog',
+  id: 'muxui-react-r1-4-dialog',
+  component: MuxUI.Dialog,
   tags: ['autodocs'],
   parameters: {
     controls: {
@@ -59,7 +60,7 @@ export default {
     },
     docs: {
       description: {
-        component: 'Private development showcase for the Core-owned Dialog family.',
+        component: 'Private development showcase for the Mux UI-owned Dialog family.',
       },
     },
   },

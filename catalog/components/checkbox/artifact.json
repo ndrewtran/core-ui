@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "id": "core:component:checkbox",
+  "id": "muxui:component:checkbox",
   "kind": "component",
   "name": "Checkbox",
   "summary": "Represents a binary or indeterminate selection.",
@@ -74,7 +74,7 @@
         "Expose checkbox role, checked or mixed state, label, disabled, and invalid state"
       ],
       "tokenRecipe": {
-        "source": "core:token:default-theme",
+        "source": "muxui:token:default-theme",
         "requirements": [
           {
             "token": "semantic.control.min-height",
@@ -169,7 +169,7 @@
         "Expose checkbox role, checked or mixed state, label, disabled, and invalid state"
       ],
       "tokenRecipe": {
-        "source": "core:token:default-theme",
+        "source": "muxui:token:default-theme",
         "requirements": [
           {
             "token": "semantic.control.min-height",

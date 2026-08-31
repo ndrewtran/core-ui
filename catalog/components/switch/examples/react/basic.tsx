@@ -1,4 +1,4 @@
-import { Switch } from '@core-ui/react';
+import { Switch } from '@muxui/react';
 
 export function BasicSwitchExample() {
   return <Switch label="Enable notifications" defaultSelected />;

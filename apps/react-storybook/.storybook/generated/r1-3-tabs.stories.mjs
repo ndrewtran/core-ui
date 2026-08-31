@@ -1,6 +1,6 @@
 // @generated-from: apps/react-storybook/src/generate-stories.mjs
-// @generated-content-sha256: sha256:6d0f730a6312e181294d984eaebd4a18b294f23c1b7abfd9bd73f421d8d95a5a
-import * as Core from '@core-ui/react';
+// @generated-content-sha256: sha256:a774f8afabb298215377b124691e4f5d8bfd02cf4e8384f95149427452f05dff
+import * as MuxUI from '@muxui/react';
 import { argTypesForBinding, createStory } from '../../src/storybook-factory.mjs';
 
 const binding = {
@@ -29,12 +29,12 @@ const binding = {
       "orientation"
     ]
   },
-  "binding": "core:component:tabs#web.react",
+  "binding": "muxui:component:tabs#web.react",
   "export": "Tabs",
   "lifecycle": "experimental",
   "module": ".",
   "runtimeProfile": "web.react",
-  "selector": ".core-tabs",
+  "selector": ".muxui-tabs",
   "states": [
     "idle",
     "focused",
@@ -46,8 +46,9 @@ const binding = {
 const record = { family: 'Tabs', tranche: 'R1.3', binding };
 
 export default {
-  title: 'Core React/R1.3/Tabs',
-  component: Core.Tabs,
+  title: 'Mux UI React/R1.3/Tabs',
+  id: 'muxui-react-r1-3-tabs',
+  component: MuxUI.Tabs,
   tags: ['autodocs'],
   parameters: {
     controls: {
@@ -55,7 +56,7 @@ export default {
     },
     docs: {
       description: {
-        component: 'Private development showcase for the Core-owned Tabs family.',
+        component: 'Private development showcase for the Mux UI-owned Tabs family.',
       },
     },
   },

@@ -1,6 +1,6 @@
 // @generated-from: apps/react-storybook/src/generate-stories.mjs
-// @generated-content-sha256: sha256:bbbade3a99c37c4bbc81b314f6c6c6272e0e7ca42ff539d95ed3a77fb4a01aa7
-import * as Core from '@core-ui/react';
+// @generated-content-sha256: sha256:b7585198890f0ad515327169417f37592bfc5c3a7dd7b6c532235ed125e04c83
+import * as MuxUI from '@muxui/react';
 import { argTypesForBinding, createStory } from '../../src/storybook-factory.mjs';
 
 const binding = {
@@ -32,12 +32,12 @@ const binding = {
       "invalid"
     ]
   },
-  "binding": "core:component:radio-group#web.react",
+  "binding": "muxui:component:radio-group#web.react",
   "export": "RadioGroup",
   "lifecycle": "experimental",
   "module": ".",
   "runtimeProfile": "web.react",
-  "selector": ".core-radio-group",
+  "selector": ".muxui-radio-group",
   "states": [
     "idle",
     "focused",
@@ -51,8 +51,9 @@ const binding = {
 const record = { family: 'RadioGroup', tranche: 'R1.3', binding };
 
 export default {
-  title: 'Core React/R1.3/RadioGroup',
-  component: Core.RadioGroup,
+  title: 'Mux UI React/R1.3/RadioGroup',
+  id: 'muxui-react-r1-3-radio-group',
+  component: MuxUI.RadioGroup,
   tags: ['autodocs'],
   parameters: {
     controls: {
@@ -60,7 +61,7 @@ export default {
     },
     docs: {
       description: {
-        component: 'Private development showcase for the Core-owned RadioGroup family.',
+        component: 'Private development showcase for the Mux UI-owned RadioGroup family.',
       },
     },
   },

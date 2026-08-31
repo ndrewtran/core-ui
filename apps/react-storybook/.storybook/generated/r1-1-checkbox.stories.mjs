@@ -1,6 +1,6 @@
 // @generated-from: apps/react-storybook/src/generate-stories.mjs
-// @generated-content-sha256: sha256:ddfef1738d971ef10670eceb0a82b38831cb53af1239db7a23f0a4ca5f6a8bf1
-import * as Core from '@core-ui/react';
+// @generated-content-sha256: sha256:f9ef0770634932f5dc2a67b0f6d7f701d8561e7b1a38fca2ed7d52ab20917369
+import * as MuxUI from '@muxui/react';
 import { argTypesForBinding, createStory } from '../../src/storybook-factory.mjs';
 
 const binding = {
@@ -32,12 +32,12 @@ const binding = {
       "invalid"
     ]
   },
-  "binding": "core:component:checkbox#web.react",
+  "binding": "muxui:component:checkbox#web.react",
   "export": "Checkbox",
   "lifecycle": "experimental",
   "module": ".",
   "runtimeProfile": "web.react",
-  "selector": ".core-checkbox",
+  "selector": ".muxui-checkbox",
   "states": [
     "idle",
     "selected",
@@ -50,8 +50,9 @@ const binding = {
 const record = { family: 'Checkbox', tranche: 'R1.1', binding };
 
 export default {
-  title: 'Core React/R1.1/Checkbox',
-  component: Core.Checkbox,
+  title: 'Mux UI React/R1.1/Checkbox',
+  id: 'muxui-react-r1-1-checkbox',
+  component: MuxUI.Checkbox,
   tags: ['autodocs'],
   parameters: {
     controls: {
@@ -59,7 +60,7 @@ export default {
     },
     docs: {
       description: {
-        component: 'Private development showcase for the Core-owned Checkbox family.',
+        component: 'Private development showcase for the Mux UI-owned Checkbox family.',
       },
     },
   },

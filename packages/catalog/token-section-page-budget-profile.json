@@ -1,8 +1,8 @@
 {
-  "schema": "core-ui-token-section-page-budget-profile-v1",
-  "id": "core-ui-token-section-page-budget-2-0-0",
+  "schema": "muxui-token-section-page-budget-profile-v1",
+  "id": "muxui-token-section-page-budget-2-0-0",
   "queryApiVersion": "2.0.0",
-  "lexerVersion": "core-ui-lexeme-v1",
+  "lexerVersion": "muxui-lexeme-v1",
   "canonicalEntryOrder": "tokens by Core token ID; source-crosswalk by source ordinal; bytewise ascending UTF-8 for ties",
   "entryCostRule": "Core lexer lexeme count over canonical compact JSON for each complete entry",
   "densePageBudgetTokens": 2048,
@@ -14,8 +14,8 @@
   "maximumItemLimit": 100,
   "minimumProgressEntries": 1,
   "selection": "greatest non-empty canonical-entry prefix within both the item ceiling and remaining token budget",
-  "oversizeCode": "CORE_QUERY_PAGE_ENTRY_TOO_LARGE",
-  "cursorProfile": "core-ui-section-cursor-v1",
+  "oversizeCode": "MUXUI_QUERY_PAGE_ENTRY_TOO_LARGE",
+  "cursorProfile": "muxui-section-cursor-v1",
   "cursorPayloadCanonicalization": "Core canonical JSON UTF-8",
   "cursorEncoding": "c1.<unpadded-base64url-canonical-payload>.<lowercase-sha256-of-canonical-payload>",
   "cursorMaximumBytes": 556,
@@ -33,5 +33,5 @@
   "cursorPositionMaximum": 4294967295,
   "catalogVersionMaximumBytes": 64,
   "catalogVersionMaximumLexemes": 32,
-  "envelopeOversizeCode": "CORE_QUERY_PAGE_ENVELOPE_TOO_LARGE"
+  "envelopeOversizeCode": "MUXUI_QUERY_PAGE_ENVELOPE_TOO_LARGE"
 }

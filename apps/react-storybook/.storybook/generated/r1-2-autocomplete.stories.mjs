@@ -1,6 +1,6 @@
 // @generated-from: apps/react-storybook/src/generate-stories.mjs
-// @generated-content-sha256: sha256:1ca3aad590c459ced04039fd9192c44a08e5009a4226e404854ba79603af4840
-import * as Core from '@core-ui/react';
+// @generated-content-sha256: sha256:93254c1346c8cb379cf2e166f73ac20d6ddf0e08d3fc5950527b59ad597651b3
+import * as MuxUI from '@muxui/react';
 import { argTypesForBinding, createStory } from '../../src/storybook-factory.mjs';
 
 const binding = {
@@ -40,12 +40,12 @@ const binding = {
       "placeholder"
     ]
   },
-  "binding": "core:component:autocomplete#web.react",
+  "binding": "muxui:component:autocomplete#web.react",
   "export": "Autocomplete",
   "lifecycle": "experimental",
   "module": ".",
   "runtimeProfile": "web.react",
-  "selector": ".core-autocomplete",
+  "selector": ".muxui-autocomplete",
   "states": [
     "idle",
     "focused",
@@ -57,8 +57,9 @@ const binding = {
 const record = { family: 'Autocomplete', tranche: 'R1.2', binding };
 
 export default {
-  title: 'Core React/R1.2/Autocomplete',
-  component: Core.Autocomplete,
+  title: 'Mux UI React/R1.2/Autocomplete',
+  id: 'muxui-react-r1-2-autocomplete',
+  component: MuxUI.Autocomplete,
   tags: ['autodocs'],
   parameters: {
     controls: {
@@ -66,7 +67,7 @@ export default {
     },
     docs: {
       description: {
-        component: 'Private development showcase for the Core-owned Autocomplete family.',
+        component: 'Private development showcase for the Mux UI-owned Autocomplete family.',
       },
     },
   },

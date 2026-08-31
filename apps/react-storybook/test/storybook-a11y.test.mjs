@@ -16,7 +16,7 @@ const testTimeoutMs = 180_000;
 
 function browserCandidates() {
   return [
-    process.env.CORE_UI_CHROME_EXECUTABLE,
+    process.env.MUXUI_CHROME_EXECUTABLE,
     process.env.CHROME_BIN,
     process.env.CHROME_PATH,
     '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
@@ -41,10 +41,10 @@ async function findBrowser() {
 }
 
 function configuredPort() {
-  const value = process.env.CORE_UI_STORYBOOK_A11Y_PORT;
+  const value = process.env.MUXUI_STORYBOOK_A11Y_PORT;
   if (value === undefined || value === '') return undefined;
   const port = Number(value);
-  assert.ok(Number.isInteger(port) && port >= 0 && port <= 65_535, `CORE_UI_STORYBOOK_A11Y_PORT must be a valid TCP port (or 0 for an ephemeral port), got ${value}`);
+  assert.ok(Number.isInteger(port) && port >= 0 && port <= 65_535, `MUXUI_STORYBOOK_A11Y_PORT must be a valid TCP port (or 0 for an ephemeral port), got ${value}`);
   return port;
 }
 
@@ -169,10 +169,10 @@ function storyFamily(entry) {
 }
 
 const INTERACTION_OPEN_LOCATORS = Object.freeze({
-  DatePicker: { trigger: '.core-date-trigger', overlay: '.core-date-popover' },
-  DateRangePicker: { trigger: '.core-date-trigger', overlay: '.core-date-popover' },
-  ComboBox: { trigger: '.core-combo-box-trigger', overlay: '.core-combo-box-popover' },
-  Select: { trigger: '.core-select-trigger', overlay: '.core-select-popover' },
+  DatePicker: { trigger: '.muxui-date-trigger', overlay: '.muxui-date-popover' },
+  DateRangePicker: { trigger: '.muxui-date-trigger', overlay: '.muxui-date-popover' },
+  ComboBox: { trigger: '.muxui-combo-box-trigger', overlay: '.muxui-combo-box-popover' },
+  Select: { trigger: '.muxui-select-trigger', overlay: '.muxui-select-popover' },
 });
 
 function formatViolations(violations) {
@@ -195,11 +195,11 @@ async function waitForStory(page, scheme) {
         && bounds.width > 0
         && bounds.height > 0;
     };
-    const surface = document.querySelector('.core-storybook-surface');
+    const surface = document.querySelector('.muxui-storybook-surface');
     const root = document.querySelector('#storybook-root');
     return Boolean(surface)
       && Boolean(root?.firstElementChild)
-      && document.documentElement.getAttribute('data-core-color-scheme') === expectedScheme
+      && document.documentElement.getAttribute('data-muxui-color-scheme') === expectedScheme
       && !isVisible(document.querySelector('.sb-errordisplay'))
       && !isVisible(document.querySelector('.sb-preparing-story'));
   }, scheme, { timeout: storyTimeoutMs });
@@ -235,7 +235,7 @@ async function waitForInteractionOpen(page, family) {
   const locators = INTERACTION_OPEN_LOCATORS[family];
   assert.ok(locators, `missing interaction-open locators for ${family}`);
   await page.waitForFunction(({ triggerSelector, overlaySelector }) => {
-    const section = [...document.querySelectorAll('.core-storybook-state')]
+    const section = [...document.querySelectorAll('.muxui-storybook-state')]
       .find((candidate) => candidate.querySelector('h3')?.textContent === 'open');
     const trigger = section?.querySelector(triggerSelector);
     const overlay = document.querySelector(`${overlaySelector}:not([hidden])`);
@@ -248,19 +248,39 @@ async function waitForInteractionOpen(page, family) {
 async function waitForInteractionClosed(page, family) {
   const locators = INTERACTION_OPEN_LOCATORS[family];
   await page.waitForFunction(({ triggerSelector, overlaySelector }) => {
-    const section = [...document.querySelectorAll('.core-storybook-state')]
+    const section = [...document.querySelectorAll('.muxui-storybook-state')]
       .find((candidate) => candidate.querySelector('h3')?.textContent === 'open');
     const trigger = section?.querySelector(triggerSelector);
     const overlay = document.querySelector(`${overlaySelector}:not([hidden])`);
+    const root = document.querySelector('#storybook-root');
     const overlayHidden = !overlay || ['none', 'hidden'].includes(getComputedStyle(overlay).display)
       || getComputedStyle(overlay).visibility === 'hidden' || overlay.getAttribute('aria-hidden') === 'true';
-    return trigger?.getAttribute('aria-expanded') !== 'true' && overlayHidden;
+    return trigger?.getAttribute('aria-expanded') !== 'true' && overlayHidden && root && !root.hasAttribute('inert');
   }, { triggerSelector: locators.trigger, overlaySelector: locators.overlay }, { timeout: storyTimeoutMs });
 }
 
-test('all Core React Storybook families are axe-clean in light and dark', { timeout: testTimeoutMs }, async () => {
+/** Select can open while focus remains on Storybook's body; move focus into its dialog before Escape. */
+async function focusInteractionOverlayForDismissal(page, family) {
+  if (family !== 'Select') return;
+  const locators = INTERACTION_OPEN_LOCATORS[family];
+  await page.waitForFunction(({ overlaySelector }) => {
+    const overlay = document.querySelector(`${overlaySelector}:not([hidden])`);
+    return overlay instanceof HTMLElement && overlay.isConnected && overlay.getAttribute('tabindex') !== null;
+  }, { overlaySelector: locators.overlay }, { timeout: storyTimeoutMs });
+  await page.evaluate((overlaySelector) => {
+    const overlay = document.querySelector(`${overlaySelector}:not([hidden])`);
+    if (!(overlay instanceof HTMLElement)) throw new Error('Select interaction overlay disappeared before dismissal');
+    overlay.focus({ preventScroll: true });
+  }, locators.overlay);
+  await page.waitForFunction((overlaySelector) => {
+    const overlay = document.querySelector(`${overlaySelector}:not([hidden])`);
+    return overlay instanceof HTMLElement && (overlay === document.activeElement || overlay.contains(document.activeElement));
+  }, locators.overlay, { timeout: storyTimeoutMs });
+}
+
+test('all Mux UI React Storybook families are axe-clean in light and dark', { timeout: testTimeoutMs }, async () => {
   const executablePath = await findBrowser();
-  assert.ok(executablePath, 'Chrome or Chromium is required for the Storybook a11y gate (set CORE_UI_CHROME_EXECUTABLE to override)');
+  assert.ok(executablePath, 'Chrome or Chromium is required for the Storybook a11y gate (set MUXUI_CHROME_EXECUTABLE to override)');
 
   const preferredPort = configuredPort();
   let port;
@@ -319,6 +339,7 @@ test('all Core React Storybook families are axe-clean in light and dark', { time
               0,
               `${scheme} ${story.id} (${family}) open portal has axe violations:\n${formatViolations(portalResult.violations)}`,
             );
+            await focusInteractionOverlayForDismissal(page, family);
             await page.keyboard.press('Escape');
             await waitForInteractionClosed(page, family);
           }
@@ -334,7 +355,7 @@ test('all Core React Storybook families are axe-clean in light and dark', { time
             body: document.body?.innerText?.slice(0, 1_000),
             html: document.documentElement?.outerHTML?.slice(0, 2_000),
             root: document.querySelector('#storybook-root')?.outerHTML?.slice(0, 2_000),
-            surfaceCount: document.querySelectorAll('.core-storybook-surface').length,
+            surfaceCount: document.querySelectorAll('.muxui-storybook-surface').length,
             rootChildCount: document.querySelector('#storybook-root')?.childElementCount,
           })).catch(() => ({ body: '', html: '' }));
           throw new Error(

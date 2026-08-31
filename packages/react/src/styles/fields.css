@@ -1,202 +1,202 @@
-/* Core-owned field parity source. */
-/* Core component source: autocomplete.css */
-.core-field-input {
+/* Mux UI-owned field parity source. */
+/* MuxUI component source: autocomplete.css */
+.muxui-field-input {
   display: block;
   width: 100%;
   transition:
     border-color 0.15s ease,
     box-shadow 0.15s ease;
 }
-.core-field-input:hover {
-  border-color: var(--core-semantic-content-faint);
+.muxui-field-input:hover {
+  border-color: var(--muxui-semantic-content-faint);
 }
 
-.core-autocomplete-search {
+.muxui-autocomplete-search {
   display: block;
   width: 100%;
   line-height: 1.5;
 }
 
-.core-autocomplete {
+.muxui-autocomplete {
   gap: 0;
 }
 
-.core-autocomplete-search > .core-field-label {
+.muxui-autocomplete-search > .muxui-field-label {
   display: inline;
 }
 
-.core-autocomplete-list {
+.muxui-autocomplete-list {
   display: flex;
   flex-direction: column;
-  gap: var(--core-semantic-layout-tight-inset);
-  padding: var(--core-semantic-layout-tight-inset);
+  gap: var(--muxui-semantic-layout-tight-inset);
+  padding: var(--muxui-semantic-layout-tight-inset);
 }
 
 /* Author styles otherwise override the user-agent [hidden] rule. The list is
    a live suggestion region and must stay absent until the input opens it. */
-.core-autocomplete-list[hidden] {
+.muxui-autocomplete-list[hidden] {
   display: none;
 }
 
-.core-autocomplete-option[data-selected] {
-  color: var(--core-semantic-selection-track);
-  font-weight: var(--core-semantic-typography-control-weight);
+.muxui-autocomplete-option[data-selected] {
+  color: var(--muxui-semantic-selection-track);
+  font-weight: var(--muxui-semantic-typography-control-weight);
 }
 
-.core-autocomplete .core-autocomplete-search[data-invalid] .core-field-input:not(:focus, [data-focused]) {
-  border-color: var(--core-field-border-color);
+.muxui-autocomplete .muxui-autocomplete-search[data-invalid] .muxui-field-input:not(:focus, [data-focused]) {
+  border-color: var(--muxui-field-border-color);
   box-shadow: none;
 }
-/* Core component source: date-field.css */
-.core-date-field {
+/* MuxUI component source: date-field.css */
+.muxui-date-field {
   display: flex;
   flex-direction: column;
-  gap: var(--core-semantic-layout-control-gap);
+  gap: var(--muxui-semantic-layout-control-gap);
   width: max-content;
 }
-/* Core component source: date-picker.css */
-.core-date-picker {
+/* MuxUI component source: date-picker.css */
+.muxui-date-picker {
   display: flex;
   flex-direction: column;
-  gap: var(--core-semantic-layout-control-gap);
+  gap: var(--muxui-semantic-layout-control-gap);
   width: max-content;
 }
-/* Core component source: date-range-picker.css */
-.core-date-range-picker {
+/* MuxUI component source: date-range-picker.css */
+.muxui-date-range-picker {
   display: flex;
   flex-direction: column;
-  gap: var(--core-semantic-layout-control-gap);
+  gap: var(--muxui-semantic-layout-control-gap);
   width: max-content;
 }
-/* Core component source: form.css */
-.core-form {
+/* MuxUI component source: form.css */
+.muxui-form {
   display: flex;
   flex-direction: column;
-  gap: var(--core-semantic-layout-section-gap);
+  gap: var(--muxui-semantic-layout-section-gap);
   width: 100%;
 }
 
-.core-form > .core-button {
-  margin-top: var(--core-semantic-control-padding-inline);
+.muxui-form > .muxui-button {
+  margin-top: var(--muxui-semantic-control-padding-inline);
   margin-bottom: -1px;
   height: 38px;
   min-height: 37px;
 }
-/* Core component source: number-field.css */
-.core-number-field {
+/* MuxUI component source: number-field.css */
+.muxui-number-field {
   display: inline-flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: var(--core-semantic-layout-control-gap);
-  width: var(--core-component-number-field-width, fit-content);
+  gap: var(--muxui-semantic-layout-control-gap);
+  width: var(--muxui-component-number-field-width, fit-content);
 }
 
-.core-number-control {
+.muxui-number-control {
   display: inline-flex;
   align-items: stretch;
-  width: var(--core-component-number-field-group-width, 100%);
+  width: var(--muxui-component-number-field-group-width, 100%);
   max-width: 100%;
-  border: 1px solid var(--core-semantic-border-strong);
-  border-radius: var(--core-reference-dimension-radius-m);
+  border: 1px solid var(--muxui-semantic-border-strong);
+  border-radius: var(--muxui-reference-dimension-radius-m);
   overflow: hidden;
   transition:
     border-color 0.15s ease,
     box-shadow 0.15s ease;
 }
 
-.core-number-control:focus-within {
-  border-color: var(--core-semantic-focus-ring);
-  box-shadow: 0 0 0 2px var(--core-semantic-content-inverse), 0 0 0 4px var(--core-semantic-focus-ring);
+.muxui-number-control:focus-within {
+  border-color: var(--muxui-semantic-focus-ring);
+  box-shadow: 0 0 0 2px var(--muxui-semantic-content-inverse), 0 0 0 4px var(--muxui-semantic-focus-ring);
 }
 
-.core-number-control:hover:not(:focus-within) {
-  border-color: var(--core-semantic-content-faint);
+.muxui-number-control:hover:not(:focus-within) {
+  border-color: var(--muxui-semantic-content-faint);
 }
 
-.core-number-control > .core-field-input {
+.muxui-number-control > .muxui-field-input {
   box-sizing: border-box;
 
   flex: 1 1 3.75rem;
   min-width: 0;
   min-height: 2.25rem;
-  padding: var(--core-semantic-layout-control-gap) var(--core-semantic-control-padding-inline);
+  padding: var(--muxui-semantic-layout-control-gap) var(--muxui-semantic-control-padding-inline);
   border: none;
   background-color: transparent;
-  color: var(--core-semantic-content-strong);
+  color: var(--muxui-semantic-content-strong);
   font-family: Inter, sans-serif;
-  font-size: var(--core-semantic-typography-body-size);
+  font-size: var(--muxui-semantic-typography-body-size);
   text-align: center;
   outline: none;
 }
 
-.core-number-control > .core-field-input::placeholder {
-  color: var(--core-semantic-content-muted);
+.muxui-number-control > .muxui-field-input::placeholder {
+  color: var(--muxui-semantic-content-muted);
 }
 
-.core-number-stepper {
+.muxui-number-stepper {
   width: 2rem;
   min-height: 2.25rem;
   border-radius: 0;
-  background-color: var(--core-semantic-surface-raised);
-  color: var(--core-reference-color-neutral-70);
-  font-size: var(--core-semantic-typography-body-size);
+  background-color: var(--muxui-semantic-surface-raised);
+  color: var(--muxui-reference-color-neutral-70);
+  font-size: var(--muxui-semantic-typography-body-size);
   font-family: Inter, sans-serif;
 }
 
-.core-number-stepper > svg {
+.muxui-number-stepper > svg {
   flex-shrink: 0;
 }
 
-.core-number-stepper[data-disabled] {
+.muxui-number-stepper[data-disabled] {
   opacity: 0.45;
 }
 
-.core-number-stepper-decrement {
-  border-right: 1px solid var(--core-reference-color-neutral-22);
-  border-radius: var(--core-reference-dimension-radius-m) 0 0 var(--core-reference-dimension-radius-m);
+.muxui-number-stepper-decrement {
+  border-right: 1px solid var(--muxui-reference-color-neutral-22);
+  border-radius: var(--muxui-reference-dimension-radius-m) 0 0 var(--muxui-reference-dimension-radius-m);
 }
 
-.core-number-stepper-increment {
-  border-left: 1px solid var(--core-reference-color-neutral-22);
-  border-radius: 0 var(--core-reference-dimension-radius-m) var(--core-reference-dimension-radius-m) 0;
+.muxui-number-stepper-increment {
+  border-left: 1px solid var(--muxui-reference-color-neutral-22);
+  border-radius: 0 var(--muxui-reference-dimension-radius-m) var(--muxui-reference-dimension-radius-m) 0;
 }
 
-.core-number-stepper:hover:not(:disabled) {
-  background-color: var(--core-semantic-border-subtle);
-  color: var(--core-semantic-content-strong);
+.muxui-number-stepper:hover:not(:disabled) {
+  background-color: var(--muxui-semantic-border-subtle);
+  color: var(--muxui-semantic-content-strong);
 }
 
-.core-number-stepper:active:not(:disabled) {
-  background-color: var(--core-semantic-border-strong);
+.muxui-number-stepper:active:not(:disabled) {
+  background-color: var(--muxui-semantic-border-strong);
 }
 
-.core-number-field[data-disabled] .core-number-control {
+.muxui-number-field[data-disabled] .muxui-number-control {
   opacity: 0.45;
   cursor: not-allowed;
 }
 
-.core-number-field[data-disabled] .core-number-control > .core-field-input,
-.core-number-field[data-disabled] .core-number-stepper {
+.muxui-number-field[data-disabled] .muxui-number-control > .muxui-field-input,
+.muxui-number-field[data-disabled] .muxui-number-stepper {
   pointer-events: none;
 }
 
-.core-number-field[data-invalid] .core-number-control {
-  border-color: var(--core-semantic-feedback-invalid);
+.muxui-number-field[data-invalid] .muxui-number-control {
+  border-color: var(--muxui-semantic-feedback-invalid);
 }
 
-.core-number-field[data-invalid] .core-number-control:focus-within {
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--core-semantic-feedback-invalid) 20%, transparent);
+.muxui-number-field[data-invalid] .muxui-number-control:focus-within {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--muxui-semantic-feedback-invalid) 20%, transparent);
 }
-/* Core component source: search-field.css */
-.core-search-field {
+/* MuxUI component source: search-field.css */
+.muxui-search-field {
   display: flex;
   flex-direction: column;
-  gap: var(--core-semantic-layout-control-gap);
+  gap: var(--muxui-semantic-layout-control-gap);
   width: 100%;
   position: relative;
 }
 
-.core-field-input {
+.muxui-field-input {
   display: block;
   width: 100%;
   line-height: 1.5;
@@ -206,33 +206,33 @@
     background-color 0.15s ease;
 }
 
-.core-field-input:hover:not(:focus, [data-disabled], [data-invalid]) {
-  border-color: var(--core-semantic-content-faint);
+.muxui-field-input:hover:not(:focus, [data-disabled], [data-invalid]) {
+  border-color: var(--muxui-semantic-content-faint);
 }
 
-.core-field-input[data-invalid] {
-  border-color: var(--core-semantic-feedback-invalid);
+.muxui-field-input[data-invalid] {
+  border-color: var(--muxui-semantic-feedback-invalid);
 }
 
-.core-field-input[data-invalid]:focus,
-.core-field-input[data-invalid][data-focused] {
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--core-semantic-feedback-invalid) 20%, transparent);
+.muxui-field-input[data-invalid]:focus,
+.muxui-field-input[data-invalid][data-focused] {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--muxui-semantic-feedback-invalid) 20%, transparent);
 }
 
-.core-text-field .core-field-input[data-disabled],
-.core-text-field .core-field-input:disabled,
-.core-search-field .core-field-input[data-disabled],
-.core-search-field .core-field-input:disabled {
+.muxui-text-field .muxui-field-input[data-disabled],
+.muxui-text-field .muxui-field-input:disabled,
+.muxui-search-field .muxui-field-input[data-disabled],
+.muxui-search-field .muxui-field-input:disabled {
   opacity: 0.45;
   cursor: not-allowed;
-  background-color: var(--core-semantic-surface-hover);
+  background-color: var(--muxui-semantic-surface-hover);
 }
 
-.core-search-control .core-field-input {
+.muxui-search-control .muxui-field-input {
   padding-inline-end: 2rem;
 }
 
-.core-search-clear {
+.muxui-search-clear {
   position: static;
   grid-column: 2;
   grid-row: 1;
@@ -246,96 +246,96 @@
   border: none;
   border-radius: 50%;
   background: transparent;
-  color: var(--core-semantic-content-muted);
-  font-size: var(--core-semantic-typography-body-size);
+  color: var(--muxui-semantic-content-muted);
+  font-size: var(--muxui-semantic-typography-body-size);
   cursor: pointer;
   outline: none;
   transition:
     background-color 0.15s ease,
     color 0.15s ease;
   flex-shrink: 0;
-  transform: translateX(calc(-1 * var(--core-semantic-layout-tight-inset)));
+  transform: translateX(calc(-1 * var(--muxui-semantic-layout-tight-inset)));
 }
 
-.core-search-clear > svg {
+.muxui-search-clear > svg {
   width: 1rem;
   height: 1rem;
 }
 
-.core-search-clear[data-hovered] {
-  background-color: var(--core-semantic-surface-hover);
-  color: var(--core-semantic-content-default);
+.muxui-search-clear[data-hovered] {
+  background-color: var(--muxui-semantic-surface-hover);
+  color: var(--muxui-semantic-content-default);
 }
 
-.core-search-clear[data-pressed] {
-  background-color: var(--core-semantic-border-subtle);
+.muxui-search-clear[data-pressed] {
+  background-color: var(--muxui-semantic-border-subtle);
 }
 
-.core-search-clear[data-focus-visible] {
+.muxui-search-clear[data-focus-visible] {
   box-shadow:
-    0 0 0 2px var(--core-semantic-content-inverse),
-    0 0 0 4px var(--core-semantic-focus-ring);
+    0 0 0 2px var(--muxui-semantic-content-inverse),
+    0 0 0 4px var(--muxui-semantic-focus-ring);
 }
 
-.core-search-clear[data-disabled] {
+.muxui-search-clear[data-disabled] {
   opacity: 0.45;
   cursor: not-allowed;
   pointer-events: none;
 }
 
-.core-search-field[data-empty] .core-search-clear {
+.muxui-search-field[data-empty] .muxui-search-clear {
   display: none;
 }
 
 /* The clear action shares the input's control grid in the pinned donor. */
-.core-search-control {
+.muxui-search-control {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
 }
 
-.core-search-control .core-field-input {
+.muxui-search-control .muxui-field-input {
   grid-column: 1 / -1;
   grid-row: 1;
   padding-inline-end: 2rem;
 }
 
-.core-field-description {
-  color: var(--core-semantic-content-default);
-  font-weight: var(--core-semantic-typography-body-weight);
+.muxui-field-description {
+  color: var(--muxui-semantic-content-default);
+  font-weight: var(--muxui-semantic-typography-body-weight);
 }
-/* Core component source: switch.css */
-.core-switch {
-  --core-component-switch-track-width: 2.5rem;
-  --core-component-switch-track-height: 1.375rem;
-  --core-component-switch-thumb-size: 0.875rem;
-  --core-component-switch-thumb-offset: 0.25rem;
+/* MuxUI component source: switch.css */
+.muxui-switch {
+  --muxui-component-switch-track-width: 2.5rem;
+  --muxui-component-switch-track-height: 1.375rem;
+  --muxui-component-switch-thumb-size: 0.875rem;
+  --muxui-component-switch-thumb-offset: 0.25rem;
 
   position: relative;
   display: inline-flex;
   align-items: center;
-  gap: var(--core-semantic-layout-control-gap);
-  min-height: var(--core-component-switch-track-height);
-  padding-inline-start: calc(var(--core-component-switch-track-width) + var(--core-semantic-layout-control-gap));
-  color: var(--core-semantic-content-default);
+  gap: var(--muxui-semantic-layout-control-gap);
+  min-height: var(--muxui-component-switch-track-height);
+  padding-inline-start: calc(var(--muxui-component-switch-track-width) + var(--muxui-semantic-layout-control-gap));
+  color: var(--muxui-semantic-content-default);
   font-family: Inter, sans-serif;
-  font-size: var(--core-semantic-typography-body-size);
-  font-weight: var(--core-semantic-typography-control-weight);
+  font-size: var(--muxui-semantic-typography-body-size);
+  font-weight: var(--muxui-semantic-typography-control-weight);
   cursor: pointer;
   outline: none;
   flex-shrink: 0;
 }
 
-.core-switch::before {
+.muxui-switch::before {
   content: '';
   position: absolute;
   inset-inline-start: 0;
   inset-block-start: 50%;
-  width: var(--core-component-switch-track-width);
-  height: var(--core-component-switch-track-height);
-  border-radius: var(--core-semantic-shape-pill-radius);
-  border: 1.5px solid var(--core-semantic-content-faint);
-  background-color: var(--core-semantic-border-subtle);
+  width: var(--muxui-component-switch-track-width);
+  height: var(--muxui-component-switch-track-height);
+  border-radius: var(--muxui-semantic-shape-pill-radius);
+  border: 1.5px solid var(--muxui-semantic-content-faint);
+  background-color: var(--muxui-semantic-border-subtle);
   transform: translateY(-50%);
   transition:
     background-color 0.2s ease,
@@ -343,46 +343,46 @@
     box-shadow 0.2s ease;
 }
 
-.core-switch[data-focus-visible]::before {
+.muxui-switch[data-focus-visible]::before {
   box-shadow:
-    0 0 0 2px var(--core-semantic-content-inverse),
-    0 0 0 4px var(--core-semantic-focus-ring);
+    0 0 0 2px var(--muxui-semantic-content-inverse),
+    0 0 0 4px var(--muxui-semantic-focus-ring);
 }
 
-.core-switch[data-selected]::before {
-  background-color: var(--core-semantic-selection-track);
-  border-color: var(--core-semantic-selection-track);
+.muxui-switch[data-selected]::before {
+  background-color: var(--muxui-semantic-selection-track);
+  border-color: var(--muxui-semantic-selection-track);
 }
 
-.core-switch[data-selected][data-hovered]:not([data-disabled])::before {
-  background-color: var(--core-semantic-action-background-hover);
-  border-color: var(--core-semantic-action-background-hover);
+.muxui-switch[data-selected][data-hovered]:not([data-disabled])::before {
+  background-color: var(--muxui-semantic-action-background-hover);
+  border-color: var(--muxui-semantic-action-background-hover);
 }
 
-.core-switch[data-hovered]:not([data-disabled], [data-selected])::before {
-  border-color: var(--core-semantic-content-muted);
-  background-color: var(--core-semantic-border-strong);
+.muxui-switch[data-hovered]:not([data-disabled], [data-selected])::before {
+  border-color: var(--muxui-semantic-content-muted);
+  background-color: var(--muxui-semantic-border-strong);
 }
 
-.core-switch[data-invalid]::before {
-  border-color: var(--core-semantic-feedback-invalid);
+.muxui-switch[data-invalid]::before {
+  border-color: var(--muxui-semantic-feedback-invalid);
 }
 
-.core-switch[data-disabled] {
+.muxui-switch[data-disabled] {
   opacity: 0.45;
-  color: var(--core-semantic-content-default);
+  color: var(--muxui-semantic-content-default);
   cursor: not-allowed;
 }
 
-.core-switch-indicator {
+.muxui-switch-indicator {
   position: absolute;
-  inset-inline-start: var(--core-component-switch-thumb-offset);
+  inset-inline-start: var(--muxui-component-switch-thumb-offset);
   inset-block-start: 50%;
-  width: var(--core-component-switch-thumb-size);
-  height: var(--core-component-switch-thumb-size);
+  width: var(--muxui-component-switch-thumb-size);
+  height: var(--muxui-component-switch-thumb-size);
   border-radius: 50%;
-  background-color: var(--core-semantic-content-default);
-  box-shadow: var(--core-semantic-elevation-indicator);
+  background-color: var(--muxui-semantic-content-default);
+  box-shadow: var(--muxui-semantic-elevation-indicator);
   transition:
     transform 0.2s ease,
     background-color 0.2s ease;
@@ -392,19 +392,19 @@
   pointer-events: none;
 }
 
-.core-switch[data-selected] .core-switch-indicator,
-.core-switch-indicator[data-selected] {
+.muxui-switch[data-selected] .muxui-switch-indicator,
+.muxui-switch-indicator[data-selected] {
   transform: translate(
     calc(
-      var(--core-component-switch-track-width) - (var(--core-component-switch-thumb-offset) * 1.2) -
-        var(--core-component-switch-thumb-size)
+      var(--muxui-component-switch-track-width) - (var(--muxui-component-switch-thumb-offset) * 1.2) -
+        var(--muxui-component-switch-thumb-size)
     ),
     -50%
   );
-  background-color: var(--core-semantic-action-foreground);
+  background-color: var(--muxui-semantic-action-foreground);
 }
-/* Core component source: text-field.css */
-.core-field-input {
+/* MuxUI component source: text-field.css */
+.muxui-field-input {
   display: block;
   width: 100%;
   line-height: 1.5;
@@ -414,410 +414,410 @@
     background-color 0.15s ease;
 }
 
-.core-field-input:hover:not(:focus, [data-disabled], [data-invalid]) {
-  border-color: var(--core-semantic-content-faint);
+.muxui-field-input:hover:not(:focus, [data-disabled], [data-invalid]) {
+  border-color: var(--muxui-semantic-content-faint);
 }
 
-.core-field-input[data-invalid] {
-  border-color: var(--core-semantic-feedback-invalid);
+.muxui-field-input[data-invalid] {
+  border-color: var(--muxui-semantic-feedback-invalid);
 }
 
-.core-field-input[data-invalid]:focus,
-.core-field-input[data-invalid][data-focused] {
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--core-semantic-feedback-invalid) 20%, transparent);
+.muxui-field-input[data-invalid]:focus,
+.muxui-field-input[data-invalid][data-focused] {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--muxui-semantic-feedback-invalid) 20%, transparent);
 }
 
-.core-text-field .core-field-input[data-disabled],
-.core-text-field .core-field-input:disabled,
-.core-search-field .core-field-input[data-disabled],
-.core-search-field .core-field-input:disabled {
+.muxui-text-field .muxui-field-input[data-disabled],
+.muxui-text-field .muxui-field-input:disabled,
+.muxui-search-field .muxui-field-input[data-disabled],
+.muxui-search-field .muxui-field-input:disabled {
   opacity: 0.45;
   cursor: not-allowed;
-  background-color: var(--core-semantic-surface-hover);
+  background-color: var(--muxui-semantic-surface-hover);
 }
-/* Core component source: time-field.css */
-.core-time-field {
+/* MuxUI component source: time-field.css */
+.muxui-time-field {
   display: flex;
   flex-direction: column;
-  gap: var(--core-semantic-layout-control-gap);
+  gap: var(--muxui-semantic-layout-control-gap);
   width: max-content;
 }
 
 /* Date picker labels use the same neutral roles as Tale's picker recipes;
    keep the override scoped so shared field labels retain their own contract. */
-.core-date-picker:not([data-disabled]):not([data-invalid]) .core-field-label,
-.core-date-range-picker:not([data-disabled]):not([data-invalid]) .core-field-label {
-  color: var(--core-reference-color-neutral-70);
+.muxui-date-picker:not([data-disabled]):not([data-invalid]) .muxui-field-label,
+.muxui-date-range-picker:not([data-disabled]):not([data-invalid]) .muxui-field-label {
+  color: var(--muxui-reference-color-neutral-70);
 }
 
 /* Tale's dark field recipes use a neutral control surface distinct from the
-   Core canvas. These are ordinary component rules so consumers receive the
+   MuxUI canvas. These are ordinary component rules so consumers receive the
    same field treatment as the migration fixture. */
-[data-core-color-scheme='dark'] :where(
-  .core-text-field,
-  .core-number-field,
-  .core-search-field,
-  .core-autocomplete,
-  .core-combo-box,
-  .core-select,
-  .core-date-field,
-  .core-date-picker,
-  .core-date-range-picker,
-  .core-time-field,
-  .core-color-field
-) .core-field-label {
-  color: var(--core-reference-color-neutral-40);
+[data-muxui-color-scheme='dark'] :where(
+  .muxui-text-field,
+  .muxui-number-field,
+  .muxui-search-field,
+  .muxui-autocomplete,
+  .muxui-combo-box,
+  .muxui-select,
+  .muxui-date-field,
+  .muxui-date-picker,
+  .muxui-date-range-picker,
+  .muxui-time-field,
+  .muxui-color-field
+) .muxui-field-label {
+  color: var(--muxui-reference-color-neutral-40);
 }
 
-[data-core-color-scheme='dark'] .core-date-picker:not([data-disabled]):not([data-invalid]) .core-field-label,
-[data-core-color-scheme='dark'] .core-date-range-picker:not([data-disabled]):not([data-invalid]) .core-field-label {
-  color: var(--core-reference-color-neutral-30);
+[data-muxui-color-scheme='dark'] .muxui-date-picker:not([data-disabled]):not([data-invalid]) .muxui-field-label,
+[data-muxui-color-scheme='dark'] .muxui-date-range-picker:not([data-disabled]):not([data-invalid]) .muxui-field-label {
+  color: var(--muxui-reference-color-neutral-30);
 }
 
-[data-core-color-scheme='dark'] .core-field-input {
-  background-color: color-mix(in srgb, var(--core-reference-color-neutral-100) 85%, black);
-  border-color: var(--core-reference-color-neutral-84);
-  color: var(--core-reference-color-neutral-20);
+[data-muxui-color-scheme='dark'] .muxui-field-input {
+  background-color: color-mix(in srgb, var(--muxui-reference-color-neutral-100) 85%, black);
+  border-color: var(--muxui-reference-color-neutral-84);
+  color: var(--muxui-reference-color-neutral-20);
 }
 
-[data-core-color-scheme='dark'] .core-text-field .core-field-input[data-disabled],
-[data-core-color-scheme='dark'] .core-text-field .core-field-input:disabled,
-[data-core-color-scheme='dark'] .core-search-field .core-field-input[data-disabled],
-[data-core-color-scheme='dark'] .core-search-field .core-field-input:disabled {
-  background-color: var(--core-reference-color-neutral-96);
+[data-muxui-color-scheme='dark'] .muxui-text-field .muxui-field-input[data-disabled],
+[data-muxui-color-scheme='dark'] .muxui-text-field .muxui-field-input:disabled,
+[data-muxui-color-scheme='dark'] .muxui-search-field .muxui-field-input[data-disabled],
+[data-muxui-color-scheme='dark'] .muxui-search-field .muxui-field-input:disabled {
+  background-color: var(--muxui-reference-color-neutral-96);
 }
 
-[data-core-color-scheme='dark'] .core-select[data-disabled] > .core-select-trigger[data-disabled] {
-  background-color: color-mix(in srgb, var(--core-reference-color-neutral-100) 85%, black);
-  border-color: var(--core-reference-color-neutral-84);
+[data-muxui-color-scheme='dark'] .muxui-select[data-disabled] > .muxui-select-trigger[data-disabled] {
+  background-color: color-mix(in srgb, var(--muxui-reference-color-neutral-100) 85%, black);
+  border-color: var(--muxui-reference-color-neutral-84);
 }
 
-[data-core-color-scheme='dark'] .core-autocomplete-list {
-  background-color: var(--core-reference-color-neutral-100);
-  border-color: var(--core-reference-color-neutral-90);
+[data-muxui-color-scheme='dark'] .muxui-autocomplete-list {
+  background-color: var(--muxui-reference-color-neutral-100);
+  border-color: var(--muxui-reference-color-neutral-90);
 }
 
-[data-core-color-scheme='dark'] .core-autocomplete-option {
-  color: var(--core-reference-color-neutral-40);
+[data-muxui-color-scheme='dark'] .muxui-autocomplete-option {
+  color: var(--muxui-reference-color-neutral-40);
 }
 
-[data-core-color-scheme='dark'] .core-autocomplete .core-autocomplete-search .core-field-input:is(:focus, [data-focused]) {
-  border-color: var(--core-reference-color-neutral-60);
+[data-muxui-color-scheme='dark'] .muxui-autocomplete .muxui-autocomplete-search .muxui-field-input:is(:focus, [data-focused]) {
+  border-color: var(--muxui-reference-color-neutral-60);
 }
 
-[data-core-color-scheme='dark'] .core-autocomplete .core-autocomplete-search[data-invalid] .core-field-input:not(:focus, [data-focused]) {
-  border-color: var(--core-reference-color-neutral-84);
+[data-muxui-color-scheme='dark'] .muxui-autocomplete .muxui-autocomplete-search[data-invalid] .muxui-field-input:not(:focus, [data-focused]) {
+  border-color: var(--muxui-reference-color-neutral-84);
 }
 
-[data-core-color-scheme='dark'] .core-field-input::placeholder {
-  color: var(--core-reference-color-neutral-60);
+[data-muxui-color-scheme='dark'] .muxui-field-input::placeholder {
+  color: var(--muxui-reference-color-neutral-60);
 }
 
-[data-core-color-scheme='dark'] :where(
-  .core-date-input,
-  .core-number-control > .core-field-input
+[data-muxui-color-scheme='dark'] :where(
+  .muxui-date-input,
+  .muxui-number-control > .muxui-field-input
 ) {
-  color: var(--core-reference-color-neutral-20);
+  color: var(--muxui-reference-color-neutral-20);
 }
 
-[data-core-color-scheme='dark'] .core-date-segment {
-  color: var(--core-reference-color-neutral-20);
+[data-muxui-color-scheme='dark'] .muxui-date-segment {
+  color: var(--muxui-reference-color-neutral-20);
 }
 
-[data-core-color-scheme='dark'] .core-date-segment[data-readonly]:not([data-type='literal']) {
-  color: var(--core-reference-color-neutral-50);
+[data-muxui-color-scheme='dark'] .muxui-date-segment[data-readonly]:not([data-type='literal']) {
+  color: var(--muxui-reference-color-neutral-50);
 }
 
-[data-core-color-scheme='dark'] .core-date-segment[data-type='literal'],
-[data-core-color-scheme='dark'] .core-date-segment[data-placeholder] {
-  color: var(--core-reference-color-neutral-60);
+[data-muxui-color-scheme='dark'] .muxui-date-segment[data-type='literal'],
+[data-muxui-color-scheme='dark'] .muxui-date-segment[data-placeholder] {
+  color: var(--muxui-reference-color-neutral-60);
 }
 
-[data-core-color-scheme='dark'] .core-number-control > .core-field-input::placeholder {
-  color: var(--core-reference-color-neutral-60);
+[data-muxui-color-scheme='dark'] .muxui-number-control > .muxui-field-input::placeholder {
+  color: var(--muxui-reference-color-neutral-60);
 }
 
-[data-core-color-scheme='dark'] .core-number-control {
-  border-color: var(--core-reference-color-neutral-84);
+[data-muxui-color-scheme='dark'] .muxui-number-control {
+  border-color: var(--muxui-reference-color-neutral-84);
 }
 
-[data-core-color-scheme='dark'] .core-number-stepper {
-  background-color: var(--core-reference-color-neutral-100);
-  color: var(--core-reference-color-neutral-40);
+[data-muxui-color-scheme='dark'] .muxui-number-stepper {
+  background-color: var(--muxui-reference-color-neutral-100);
+  color: var(--muxui-reference-color-neutral-40);
 }
 
-[data-core-color-scheme='dark'] .core-number-control > .core-field-input {
+[data-muxui-color-scheme='dark'] .muxui-number-control > .muxui-field-input {
   background-color: transparent;
 }
 
-[data-core-color-scheme='dark'] .core-number-stepper-decrement {
-  border-right-color: var(--core-reference-color-neutral-88);
+[data-muxui-color-scheme='dark'] .muxui-number-stepper-decrement {
+  border-right-color: var(--muxui-reference-color-neutral-88);
 }
 
-[data-core-color-scheme='dark'] .core-number-stepper-increment {
-  border-left-color: var(--core-reference-color-neutral-88);
+[data-muxui-color-scheme='dark'] .muxui-number-stepper-increment {
+  border-left-color: var(--muxui-reference-color-neutral-88);
 }
 
-[data-core-color-scheme='dark'] .core-date-picker[data-disabled] .core-date-control,
-[data-core-color-scheme='dark'] .core-date-range-picker[data-disabled] .core-date-range-control,
-[data-core-color-scheme='dark'] .core-combo-control[data-disabled],
-[data-core-color-scheme='dark'] .core-combo-box[data-disabled] .core-combo-control {
-  background-color: var(--core-reference-color-neutral-96);
+[data-muxui-color-scheme='dark'] .muxui-date-picker[data-disabled] .muxui-date-control,
+[data-muxui-color-scheme='dark'] .muxui-date-range-picker[data-disabled] .muxui-date-range-control,
+[data-muxui-color-scheme='dark'] .muxui-combo-control[data-disabled],
+[data-muxui-color-scheme='dark'] .muxui-combo-box[data-disabled] .muxui-combo-control {
+  background-color: var(--muxui-reference-color-neutral-96);
 }
 
-[data-core-color-scheme='dark'] .core-number-field .core-field-label {
-  color: var(--core-reference-color-neutral-30);
+[data-muxui-color-scheme='dark'] .muxui-number-field .muxui-field-label {
+  color: var(--muxui-reference-color-neutral-30);
 }
 
-[data-core-color-scheme='dark'] .core-form .core-field-input {
-  border-radius: var(--core-reference-dimension-radius-s);
+[data-muxui-color-scheme='dark'] .muxui-form .muxui-field-input {
+  border-radius: var(--muxui-reference-dimension-radius-s);
 }
 
-[data-core-color-scheme='dark'] .core-number-control {
-  border-color: var(--core-reference-color-neutral-84);
-  border-radius: var(--core-reference-dimension-radius-m);
+[data-muxui-color-scheme='dark'] .muxui-number-control {
+  border-color: var(--muxui-reference-color-neutral-84);
+  border-radius: var(--muxui-reference-dimension-radius-m);
 }
 
-[data-core-color-scheme='dark'] .core-number-control > .core-field-input {
-  color: var(--core-reference-color-neutral-18);
+[data-muxui-color-scheme='dark'] .muxui-number-control > .muxui-field-input {
+  color: var(--muxui-reference-color-neutral-18);
 }
 
-[data-core-color-scheme='dark'] .core-number-stepper-decrement {
-  border-right-color: var(--core-reference-color-neutral-88);
+[data-muxui-color-scheme='dark'] .muxui-number-stepper-decrement {
+  border-right-color: var(--muxui-reference-color-neutral-88);
 }
 
-[data-core-color-scheme='dark'] .core-number-stepper-increment {
-  border-left-color: var(--core-reference-color-neutral-88);
+[data-muxui-color-scheme='dark'] .muxui-number-stepper-increment {
+  border-left-color: var(--muxui-reference-color-neutral-88);
 }
 
-[data-core-color-scheme] .core-number-field[data-invalid] .core-number-control {
-  border-color: var(--core-reference-color-red-60);
+[data-muxui-color-scheme] .muxui-number-field[data-invalid] .muxui-number-control {
+  border-color: var(--muxui-reference-color-red-60);
 }
 
-[data-core-color-scheme] .core-number-field :where(.core-number-control[data-invalid], [data-invalid] .core-number-control) {
-  border-color: var(--core-reference-color-red-60);
+[data-muxui-color-scheme] .muxui-number-field :where(.muxui-number-control[data-invalid], [data-invalid] .muxui-number-control) {
+  border-color: var(--muxui-reference-color-red-60);
 }
 
-[data-core-color-scheme] .core-number-field[data-invalid] .core-number-control:focus-within {
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--core-reference-color-red-60) 20%, transparent);
+[data-muxui-color-scheme] .muxui-number-field[data-invalid] .muxui-number-control:focus-within {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--muxui-reference-color-red-60) 20%, transparent);
 }
 
-[data-core-color-scheme] .core-field-input[data-invalid] {
-  border-color: var(--core-reference-color-red-60);
+[data-muxui-color-scheme] .muxui-field-input[data-invalid] {
+  border-color: var(--muxui-reference-color-red-60);
 }
 
 /* Invalid field labels use the same consumer-facing red as Tale, including
    fields whose invalid state is carried by the field root. */
-[data-core-color-scheme] :where(
-  .core-text-field,
-  .core-search-field,
-  .core-number-field,
-  .core-date-field,
-  .core-date-picker,
-  .core-date-range-picker,
-  .core-time-field
-)[data-invalid] .core-field-label {
-  color: var(--core-reference-color-red-60);
+[data-muxui-color-scheme] :where(
+  .muxui-text-field,
+  .muxui-search-field,
+  .muxui-number-field,
+  .muxui-date-field,
+  .muxui-date-picker,
+  .muxui-date-range-picker,
+  .muxui-time-field
+)[data-invalid] .muxui-field-label {
+  color: var(--muxui-reference-color-red-60);
 }
 
-[data-core-color-scheme='dark'] :where(
-  .core-text-field,
-  .core-search-field,
-  .core-number-field,
-  .core-date-field,
-  .core-date-picker,
-  .core-date-range-picker,
-  .core-time-field
-)[data-invalid] .core-field-label {
-  color: var(--core-semantic-feedback-invalid);
+[data-muxui-color-scheme='dark'] :where(
+  .muxui-text-field,
+  .muxui-search-field,
+  .muxui-number-field,
+  .muxui-date-field,
+  .muxui-date-picker,
+  .muxui-date-range-picker,
+  .muxui-time-field
+)[data-invalid] .muxui-field-label {
+  color: var(--muxui-semantic-feedback-invalid);
 }
 
-[data-core-color-scheme='dark'] .core-date-field > .core-date-input,
-[data-core-color-scheme='dark'] .core-time-field > .core-date-input {
-  background-color: color-mix(in srgb, var(--core-reference-color-neutral-100) 85%, black);
-  border-color: var(--core-reference-color-neutral-84);
+[data-muxui-color-scheme='dark'] .muxui-date-field > .muxui-date-input,
+[data-muxui-color-scheme='dark'] .muxui-time-field > .muxui-date-input {
+  background-color: color-mix(in srgb, var(--muxui-reference-color-neutral-100) 85%, black);
+  border-color: var(--muxui-reference-color-neutral-84);
 }
 
-[data-core-color-scheme] :where(
-  .core-date-field,
-  .core-time-field
-) > .core-date-input[data-invalid],
-[data-core-color-scheme] :where(
-  .core-date-field,
-  .core-time-field
-)[data-invalid] > .core-date-input {
-  border-color: var(--core-reference-color-red-60);
+[data-muxui-color-scheme] :where(
+  .muxui-date-field,
+  .muxui-time-field
+) > .muxui-date-input[data-invalid],
+[data-muxui-color-scheme] :where(
+  .muxui-date-field,
+  .muxui-time-field
+)[data-invalid] > .muxui-date-input {
+  border-color: var(--muxui-reference-color-red-60);
 }
 
-.core-number-control {
-  border-radius: var(--core-reference-dimension-radius-m);
+.muxui-number-control {
+  border-radius: var(--muxui-reference-dimension-radius-m);
 }
 
-[data-core-color-scheme] .core-number-control:focus-within {
+[data-muxui-color-scheme] .muxui-number-control:focus-within {
   box-shadow:
-    0 0 0 2px var(--core-focus-ring-inner),
-    0 0 0 4px var(--core-focus-ring-outer);
+    0 0 0 2px var(--muxui-focus-ring-inner),
+    0 0 0 4px var(--muxui-focus-ring-outer);
 }
 
-[data-core-color-scheme='dark'] .core-switch {
-  color: var(--core-reference-color-neutral-28);
+[data-muxui-color-scheme='dark'] .muxui-switch {
+  color: var(--muxui-reference-color-neutral-28);
 }
 
-[data-core-color-scheme='dark'] .core-switch-label {
-  color: var(--core-reference-color-neutral-28);
+[data-muxui-color-scheme='dark'] .muxui-switch-label {
+  color: var(--muxui-reference-color-neutral-28);
 }
 
-[data-core-color-scheme='dark'] .core-switch::before {
-  background-color: var(--core-reference-color-neutral-88);
-  border-color: var(--core-reference-color-neutral-70);
+[data-muxui-color-scheme='dark'] .muxui-switch::before {
+  background-color: var(--muxui-reference-color-neutral-88);
+  border-color: var(--muxui-reference-color-neutral-70);
 }
 
-[data-core-color-scheme='dark'] .core-switch[data-selected]::before {
-  background-color: var(--core-reference-color-bluegreen-40);
-  border-color: var(--core-reference-color-bluegreen-40);
+[data-muxui-color-scheme='dark'] .muxui-switch[data-selected]::before {
+  background-color: var(--muxui-reference-color-bluegreen-40);
+  border-color: var(--muxui-reference-color-bluegreen-40);
 }
 
-[data-core-color-scheme='dark'] .core-switch[data-selected][data-hovered]:not([data-disabled])::before {
-  background-color: var(--core-reference-color-bluegreen-50);
-  border-color: var(--core-reference-color-bluegreen-50);
+[data-muxui-color-scheme='dark'] .muxui-switch[data-selected][data-hovered]:not([data-disabled])::before {
+  background-color: var(--muxui-reference-color-bluegreen-50);
+  border-color: var(--muxui-reference-color-bluegreen-50);
 }
 
-[data-core-color-scheme='dark'] .core-switch[data-hovered]:not([data-disabled], [data-selected])::before {
-  background-color: var(--core-reference-color-neutral-82);
-  border-color: var(--core-reference-color-neutral-50);
+[data-muxui-color-scheme='dark'] .muxui-switch[data-hovered]:not([data-disabled], [data-selected])::before {
+  background-color: var(--muxui-reference-color-neutral-82);
+  border-color: var(--muxui-reference-color-neutral-50);
 }
 
-[data-core-color-scheme='dark'] .core-switch-indicator {
-  background-color: var(--core-reference-color-neutral-28);
+[data-muxui-color-scheme='dark'] .muxui-switch-indicator {
+  background-color: var(--muxui-reference-color-neutral-28);
 }
 
-[data-core-color-scheme='dark'] .core-switch[data-selected] .core-switch-indicator,
-[data-core-color-scheme='dark'] .core-switch-indicator[data-selected] {
-  background-color: var(--core-reference-color-bluegreen-100);
+[data-muxui-color-scheme='dark'] .muxui-switch[data-selected] .muxui-switch-indicator,
+[data-muxui-color-scheme='dark'] .muxui-switch-indicator[data-selected] {
+  background-color: var(--muxui-reference-color-bluegreen-100);
 }
 
-.core-switch[data-focus-visible]::before,
-.core-switch:focus-visible::before {
+.muxui-switch[data-focus-visible]::before,
+.muxui-switch:focus-visible::before {
   box-shadow:
-    0 0 0 2px var(--core-focus-ring-inner),
-    0 0 0 4px var(--core-focus-ring-outer);
+    0 0 0 2px var(--muxui-focus-ring-inner),
+    0 0 0 4px var(--muxui-focus-ring-outer);
 }
 
 /* Picker controls own the field border. Their RAC date inputs are transparent
    inner segments, not standalone fields, and must not add a second minimum
    height, border, radius, or fill. */
-.core-date-control,
-.core-date-range-control {
-  min-height: var(--core-field-min-height);
+.muxui-date-control,
+.muxui-date-range-control {
+  min-height: var(--muxui-field-min-height);
   padding: 0;
   padding-inline-end: 0;
-  border-radius: var(--core-reference-dimension-radius-s);
+  border-radius: var(--muxui-reference-dimension-radius-s);
 }
 
-.core-date-picker .core-date-control,
-.core-date-range-picker .core-date-range-control {
+.muxui-date-picker .muxui-date-control,
+.muxui-date-range-picker .muxui-date-range-control {
   padding-inline-end: 0;
 }
 
-.core-date-control > .core-date-input,
-.core-date-range-control > .core-date-input {
+.muxui-date-control > .muxui-date-input,
+.muxui-date-range-control > .muxui-date-input {
   min-height: 0;
   border: 0;
   border-radius: 0;
   background-color: transparent;
-  padding: var(--core-semantic-layout-control-gap) var(--core-semantic-control-padding-inline);
-  padding-inline-end: var(--core-semantic-control-padding-inline);
+  padding: var(--muxui-semantic-layout-control-gap) var(--muxui-semantic-control-padding-inline);
+  padding-inline-end: var(--muxui-semantic-control-padding-inline);
 }
 
-.core-date-control .core-date-trigger,
-.core-date-range-control .core-date-trigger {
-  min-height: calc(var(--core-field-min-height) + 9px);
-  width: calc(var(--core-field-min-height) + 9px);
+.muxui-date-control .muxui-date-trigger,
+.muxui-date-range-control .muxui-date-trigger {
+  min-height: calc(var(--muxui-field-min-height) + 9px);
+  width: calc(var(--muxui-field-min-height) + 9px);
   border-top: 0;
   border-right: 0;
   border-bottom: 0;
-  border-left: 1px solid var(--core-reference-color-neutral-26);
-  border-radius: 0 calc(var(--core-reference-dimension-radius-m) - 1px) calc(var(--core-reference-dimension-radius-m) - 1px) 0;
-  background-color: var(--core-reference-color-neutral-10);
+  border-left: 1px solid var(--muxui-reference-color-neutral-26);
+  border-radius: 0 calc(var(--muxui-reference-dimension-radius-m) - 1px) calc(var(--muxui-reference-dimension-radius-m) - 1px) 0;
+  background-color: var(--muxui-reference-color-neutral-10);
 }
 
-.core-date-range-control .core-date-trigger {
-  width: calc(var(--core-field-min-height) + 9px);
+.muxui-date-range-control .muxui-date-trigger {
+  width: calc(var(--muxui-field-min-height) + 9px);
 }
 
-.core-date-range-separator {
+.muxui-date-range-separator {
   inline-size: 0;
   flex-basis: 0;
 }
 
-[data-core-color-scheme='light'] .core-date-control,
-[data-core-color-scheme='light'] .core-date-range-control {
-  background-color: var(--core-reference-color-neutral-5);
-  border-color: var(--core-reference-color-neutral-26);
+[data-muxui-color-scheme='light'] .muxui-date-control,
+[data-muxui-color-scheme='light'] .muxui-date-range-control {
+  background-color: var(--muxui-reference-color-neutral-5);
+  border-color: var(--muxui-reference-color-neutral-26);
 }
 
-[data-core-color-scheme='light'] .core-date-control .core-date-trigger,
-[data-core-color-scheme='light'] .core-date-range-control .core-date-trigger {
-  border-left-color: var(--core-reference-color-neutral-26);
-  background-color: var(--core-reference-color-neutral-10);
+[data-muxui-color-scheme='light'] .muxui-date-control .muxui-date-trigger,
+[data-muxui-color-scheme='light'] .muxui-date-range-control .muxui-date-trigger {
+  border-left-color: var(--muxui-reference-color-neutral-26);
+  background-color: var(--muxui-reference-color-neutral-10);
 }
 
-[data-core-color-scheme='light'] .core-date-picker .core-date-trigger > svg,
-[data-core-color-scheme='light'] .core-date-range-picker .core-date-trigger > svg {
-  color: var(--core-reference-color-neutral-70);
+[data-muxui-color-scheme='light'] .muxui-date-picker .muxui-date-trigger > svg,
+[data-muxui-color-scheme='light'] .muxui-date-range-picker .muxui-date-trigger > svg {
+  color: var(--muxui-reference-color-neutral-70);
 }
 
-[data-core-color-scheme='dark'] .core-date-control,
-[data-core-color-scheme='dark'] .core-date-range-control {
-  background-color: color-mix(in srgb, var(--core-reference-color-neutral-100) 85%, black);
-  border-color: var(--core-reference-color-neutral-84);
+[data-muxui-color-scheme='dark'] .muxui-date-control,
+[data-muxui-color-scheme='dark'] .muxui-date-range-control {
+  background-color: color-mix(in srgb, var(--muxui-reference-color-neutral-100) 85%, black);
+  border-color: var(--muxui-reference-color-neutral-84);
 }
 
-[data-core-color-scheme='dark'] .core-date-control .core-date-trigger,
-[data-core-color-scheme='dark'] .core-date-range-control .core-date-trigger {
-  border-left-color: var(--core-reference-color-neutral-84);
-  background-color: var(--core-reference-color-neutral-100);
-  color: var(--core-reference-color-neutral-40);
+[data-muxui-color-scheme='dark'] .muxui-date-control .muxui-date-trigger,
+[data-muxui-color-scheme='dark'] .muxui-date-range-control .muxui-date-trigger {
+  border-left-color: var(--muxui-reference-color-neutral-84);
+  background-color: var(--muxui-reference-color-neutral-100);
+  color: var(--muxui-reference-color-neutral-40);
 }
 
-[data-core-color-scheme='dark'] .core-search-clear {
-  color: var(--core-reference-color-neutral-60);
+[data-muxui-color-scheme='dark'] .muxui-search-clear {
+  color: var(--muxui-reference-color-neutral-60);
 }
 
-[data-core-color-scheme] .core-date-picker[data-invalid] .core-date-control,
-[data-core-color-scheme] .core-date-range-picker[data-invalid] .core-date-range-control {
-  border-color: var(--core-reference-color-red-60);
+[data-muxui-color-scheme] .muxui-date-picker[data-invalid] .muxui-date-control,
+[data-muxui-color-scheme] .muxui-date-range-picker[data-invalid] .muxui-date-range-control {
+  border-color: var(--muxui-reference-color-red-60);
 }
 
 /* Forced colors supplies its own disabled GrayText treatment. Opacity would
    otherwise dim the system colors and reduce their contrast. */
 @media (forced-colors: active) {
-  .core-select-trigger[data-disabled],
-  .core-text-field[data-disabled] .core-field-label,
-  .core-search-field[data-disabled] .core-field-label,
-  .core-number-field[data-disabled] .core-field-label,
-  .core-date-field[data-disabled] .core-field-label,
-  .core-date-picker[data-disabled] .core-field-label,
-  .core-date-range-picker[data-disabled] .core-field-label,
-  .core-time-field[data-disabled] .core-field-label,
-  .core-combo-box[data-disabled] .core-field-label,
-  .core-select[data-disabled] .core-field-label,
-  .core-date-input[data-disabled],
-  .core-date-picker[data-disabled] .core-date-control,
-  .core-date-range-picker[data-disabled] .core-date-range-control,
-  .core-date-segment[data-disabled],
-  .core-combo-control[data-disabled],
-  .core-combo-box[data-disabled] .core-combo-control,
-  .core-number-field[data-disabled] .core-number-control,
-  .core-text-field .core-field-input[data-disabled],
-  .core-text-field .core-field-input:disabled,
-  .core-search-field .core-field-input[data-disabled],
-  .core-search-field .core-field-input:disabled,
-  .core-search-clear[data-disabled] {
+  .muxui-select-trigger[data-disabled],
+  .muxui-text-field[data-disabled] .muxui-field-label,
+  .muxui-search-field[data-disabled] .muxui-field-label,
+  .muxui-number-field[data-disabled] .muxui-field-label,
+  .muxui-date-field[data-disabled] .muxui-field-label,
+  .muxui-date-picker[data-disabled] .muxui-field-label,
+  .muxui-date-range-picker[data-disabled] .muxui-field-label,
+  .muxui-time-field[data-disabled] .muxui-field-label,
+  .muxui-combo-box[data-disabled] .muxui-field-label,
+  .muxui-select[data-disabled] .muxui-field-label,
+  .muxui-date-input[data-disabled],
+  .muxui-date-picker[data-disabled] .muxui-date-control,
+  .muxui-date-range-picker[data-disabled] .muxui-date-range-control,
+  .muxui-date-segment[data-disabled],
+  .muxui-combo-control[data-disabled],
+  .muxui-combo-box[data-disabled] .muxui-combo-control,
+  .muxui-number-field[data-disabled] .muxui-number-control,
+  .muxui-text-field .muxui-field-input[data-disabled],
+  .muxui-text-field .muxui-field-input:disabled,
+  .muxui-search-field .muxui-field-input[data-disabled],
+  .muxui-search-field .muxui-field-input:disabled,
+  .muxui-search-clear[data-disabled] {
     opacity: 1;
   }
 
-  .core-switch[data-disabled] {
+  .muxui-switch[data-disabled] {
     opacity: 1;
   }
 }

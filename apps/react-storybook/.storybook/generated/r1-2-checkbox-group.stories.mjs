@@ -1,6 +1,6 @@
 // @generated-from: apps/react-storybook/src/generate-stories.mjs
-// @generated-content-sha256: sha256:4eb5d69b78a1e80970dfd6000732fbee08d8b5c897c924f92b1ba74548c06feb
-import * as Core from '@core-ui/react';
+// @generated-content-sha256: sha256:a663b1c7575c958f7a40d979b65b8924b96e7d77bc23af6f122d88afe1ffe1b9
+import * as MuxUI from '@muxui/react';
 import { argTypesForBinding, createStory } from '../../src/storybook-factory.mjs';
 
 const binding = {
@@ -36,12 +36,12 @@ const binding = {
       "name"
     ]
   },
-  "binding": "core:component:checkbox-group#web.react",
+  "binding": "muxui:component:checkbox-group#web.react",
   "export": "CheckboxGroup",
   "lifecycle": "experimental",
   "module": ".",
   "runtimeProfile": "web.react",
-  "selector": ".core-checkbox-group",
+  "selector": ".muxui-checkbox-group",
   "states": [
     "idle",
     "disabled",
@@ -54,8 +54,9 @@ const binding = {
 const record = { family: 'CheckboxGroup', tranche: 'R1.2', binding };
 
 export default {
-  title: 'Core React/R1.2/CheckboxGroup',
-  component: Core.CheckboxGroup,
+  title: 'Mux UI React/R1.2/CheckboxGroup',
+  id: 'muxui-react-r1-2-checkbox-group',
+  component: MuxUI.CheckboxGroup,
   tags: ['autodocs'],
   parameters: {
     controls: {
@@ -63,7 +64,7 @@ export default {
     },
     docs: {
       description: {
-        component: 'Private development showcase for the Core-owned CheckboxGroup family.',
+        component: 'Private development showcase for the Mux UI-owned CheckboxGroup family.',
       },
     },
   },

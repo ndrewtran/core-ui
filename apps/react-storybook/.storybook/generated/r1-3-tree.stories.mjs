@@ -1,6 +1,6 @@
 // @generated-from: apps/react-storybook/src/generate-stories.mjs
-// @generated-content-sha256: sha256:1030082398bc37bb183bd46fca6f7893ffdc25ee661c2a163203321215ee7316
-import * as Core from '@core-ui/react';
+// @generated-content-sha256: sha256:1b9d86837e32bbf96693863ce175aed1618babc9fa0691e5e11ff6f52155be3f
+import * as MuxUI from '@muxui/react';
 import { argTypesForBinding, createStory } from '../../src/storybook-factory.mjs';
 
 const binding = {
@@ -31,12 +31,12 @@ const binding = {
       "selectionMode"
     ]
   },
-  "binding": "core:component:tree#web.react",
+  "binding": "muxui:component:tree#web.react",
   "export": "Tree",
   "lifecycle": "experimental",
   "module": ".",
   "runtimeProfile": "web.react",
-  "selector": ".core-tree",
+  "selector": ".muxui-tree",
   "states": [
     "idle",
     "focused",
@@ -50,8 +50,9 @@ const binding = {
 const record = { family: 'Tree', tranche: 'R1.3', binding };
 
 export default {
-  title: 'Core React/R1.3/Tree',
-  component: Core.Tree,
+  title: 'Mux UI React/R1.3/Tree',
+  id: 'muxui-react-r1-3-tree',
+  component: MuxUI.Tree,
   tags: ['autodocs'],
   parameters: {
     controls: {
@@ -59,7 +60,7 @@ export default {
     },
     docs: {
       description: {
-        component: 'Private development showcase for the Core-owned Tree family.',
+        component: 'Private development showcase for the Mux UI-owned Tree family.',
       },
     },
   },

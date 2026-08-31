@@ -33,8 +33,8 @@ const declarations = recipe.projections.map(({ name, source, valueField }) => (
   `export type ${name} = ${union(projectionValues(source, valueField))};`
 ));
 const body = [
-  'export type ArtifactRef = `core:${ArtifactKind}:${string}`;',
-  'export type BindingRef = `${Extract<ArtifactRef, `core:component:${string}`>}#${BindingId}`;',
+  'export type ArtifactRef = `muxui:${ArtifactKind}:${string}`;',
+  'export type BindingRef = `${Extract<ArtifactRef, `muxui:component:${string}`>}#${BindingId}`;',
   ...declarations,
   '',
 ].join('\n');

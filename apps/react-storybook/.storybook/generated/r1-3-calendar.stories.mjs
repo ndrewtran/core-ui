@@ -1,6 +1,6 @@
 // @generated-from: apps/react-storybook/src/generate-stories.mjs
-// @generated-content-sha256: sha256:522d6f3252e3962ff27349e6db44cd074292d78184fd352935d8553d06d0ed9f
-import * as Core from '@core-ui/react';
+// @generated-content-sha256: sha256:1ac3b11349820e2922252bd8aaf691abd8de5f67bf1c53012ae9598d15c1661e
+import * as MuxUI from '@muxui/react';
 import { argTypesForBinding, createStory } from '../../src/storybook-factory.mjs';
 
 const binding = {
@@ -35,12 +35,12 @@ const binding = {
       "invalid"
     ]
   },
-  "binding": "core:component:calendar#web.react",
+  "binding": "muxui:component:calendar#web.react",
   "export": "Calendar",
   "lifecycle": "experimental",
   "module": ".",
   "runtimeProfile": "web.react",
-  "selector": ".core-calendar",
+  "selector": ".muxui-calendar",
   "states": [
     "idle",
     "focused",
@@ -54,8 +54,9 @@ const binding = {
 const record = { family: 'Calendar', tranche: 'R1.3', binding };
 
 export default {
-  title: 'Core React/R1.3/Calendar',
-  component: Core.Calendar,
+  title: 'Mux UI React/R1.3/Calendar',
+  id: 'muxui-react-r1-3-calendar',
+  component: MuxUI.Calendar,
   tags: ['autodocs'],
   parameters: {
     controls: {
@@ -63,7 +64,7 @@ export default {
     },
     docs: {
       description: {
-        component: 'Private development showcase for the Core-owned Calendar family.',
+        component: 'Private development showcase for the Mux UI-owned Calendar family.',
       },
     },
   },

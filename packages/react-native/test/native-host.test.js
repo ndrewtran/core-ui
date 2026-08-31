@@ -81,9 +81,9 @@ describe('E-G1.2-02 production React Native JavaScript substrate', () => {
     props.onAccessibilityAction(event);
     expect(onAction).toHaveBeenCalledWith('activate', event);
     expect(() => props.onAccessibilityAction({ nativeEvent: { actionName: 'escape' } }))
-      .toThrow('CORE_REACT_NATIVE_ACCESSIBILITY_INVALID: unknown action');
+      .toThrow('MUXUI_REACT_NATIVE_ACCESSIBILITY_INVALID: unknown action');
     expect(() => createNativeAccessibilityProps({ role: 'button', actions: [{ name: 'activate' }] }))
-      .toThrow('CORE_REACT_NATIVE_ACCESSIBILITY_INVALID: action handler');
+      .toThrow('MUXUI_REACT_NATIVE_ACCESSIBILITY_INVALID: action handler');
   });
 
   test('observes profile-specific native-module calls without claiming native OS execution', () => {

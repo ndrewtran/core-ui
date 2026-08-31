@@ -2,7 +2,7 @@ import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { canonicalJson, parseJsonStrict } from '@core-ui/schema';
+import { canonicalJson, parseJsonStrict } from '@muxui/schema';
 
 // This module is retained solely to inspect the immutable pre-reset R1
 // materialization. It intentionally exposes no current authority or entry

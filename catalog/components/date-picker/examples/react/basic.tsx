@@ -1,4 +1,4 @@
-import { DatePicker } from '@core-ui/react';
+import { DatePicker } from '@muxui/react';
 
 export function BasicDatePickerExample() {
   return <DatePicker label="Due date" onChange={() => undefined} />;

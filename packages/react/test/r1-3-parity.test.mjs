@@ -28,18 +28,18 @@ function propPattern(prop) {
   return new RegExp(`\\b${prop}\\b`, 'u');
 }
 
-test('R1.3 artifact declarations have a generated Core type and runtime surface', async () => {
+test('R1.3 artifact declarations have a generated MuxUI type and runtime surface', async () => {
   const repositoryRoot = resolve(import.meta.dirname, '../../..');
   const [types, runtime, styles] = await Promise.all([
     readFile(resolve(import.meta.dirname, '../generated/index.d.ts'), 'utf8'),
     readFile(resolve(import.meta.dirname, '../src/collections.mjs'), 'utf8'),
     readFile(resolve(import.meta.dirname, '../generated/styles.css'), 'utf8'),
   ]);
-  assert.match(styles, /\.core-radio-indicator\b/u, 'RadioGroup needs a Core-owned visible indicator');
-  assert.match(styles, /\.core-radio\[data-selected\] \.core-radio-indicator/u, 'RadioGroup needs selected indicator styling');
-  assert.match(styles, /\.core-radio\[data-focus-visible\]/u, 'RadioGroup needs a focus-visible affordance');
-  assert.match(styles, /@media \(forced-colors: active\)[\s\S]*\.core-list-box-item\[data-focus-visible\][\s\S]*outline-color: Highlight/u, 'collection focus needs forced-colors treatment');
-  assert.match(styles, /@media \(prefers-contrast: more\)[\s\S]*\.core-list-box-item\[data-focus-visible\][\s\S]*outline-width: 3px/u, 'collection focus needs high-contrast treatment');
+  assert.match(styles, /\.muxui-radio-indicator\b/u, 'RadioGroup needs a Mux UI-owned visible indicator');
+  assert.match(styles, /\.muxui-radio\[data-selected\] \.muxui-radio-indicator/u, 'RadioGroup needs selected indicator styling');
+  assert.match(styles, /\.muxui-radio\[data-focus-visible\]/u, 'RadioGroup needs a focus-visible affordance');
+  assert.match(styles, /@media \(forced-colors: active\)[\s\S]*\.muxui-list-box-item\[data-focus-visible\][\s\S]*outline-color: Highlight/u, 'collection focus needs forced-colors treatment');
+  assert.match(styles, /@media \(prefers-contrast: more\)[\s\S]*\.muxui-list-box-item\[data-focus-visible\][\s\S]*outline-width: 3px/u, 'collection focus needs high-contrast treatment');
   for (const slug of slugs) {
     const name = componentName(slug);
     const artifact = JSON.parse(await readFile(resolve(repositoryRoot, `catalog/components/${slug}/artifact.json`), 'utf8'));
@@ -48,7 +48,7 @@ test('R1.3 artifact declarations have a generated Core type and runtime surface'
     assert.notEqual(typeStart, -1, `${name}Props is missing from generated public types`);
     const typeEnd = types.indexOf('export declare const', typeStart);
     let typeSurface = types.slice(typeStart, typeEnd === -1 ? undefined : typeEnd);
-    for (const inherited of ['CollectionProps', 'NamedFieldProps', 'FieldValidationProps', 'CoreAccessibleName', 'CoreAriaAccessibleName', 'CoreAriaLabel']) {
+    for (const inherited of ['CollectionProps', 'NamedFieldProps', 'FieldValidationProps', 'MuxUIAccessibleName', 'MuxUIAriaAccessibleName', 'MuxUIAriaLabel']) {
       if (typeSurface.includes(inherited)) {
         const inheritedStart = types.indexOf(inherited, typeStart === -1 ? 0 : 0);
         const inheritedEnd = types.indexOf('\nexport ', inheritedStart + inherited.length);
@@ -83,7 +83,7 @@ test('R1.3 artifact declarations have a generated Core type and runtime surface'
     }
     for (const event of api.events) {
       const callback = events.get(event);
-      assert.ok(callback, `${name}.${event} needs a Core callback mapping`);
+      assert.ok(callback, `${name}.${event} needs a MuxUI callback mapping`);
       assert.match(typeSurface, propPattern(callback), `${name}.${callback} is missing from generated type surface`);
       assert.match(`${runtimeSurface}\n${sharedCollectionSurface}\n${sharedCalendarSurface}`, propPattern(callback), `${name}.${callback} is missing from runtime surface`);
     }
@@ -145,7 +145,7 @@ function installVirtualizerDom() {
   Object.defineProperty(elementPrototype, 'clientWidth', { configurable: true, get: () => 600 });
   Object.defineProperty(elementPrototype, 'clientHeight', {
     configurable: true,
-    get() { return this.classList.contains('core-virtualizer') ? 120 : 40; },
+    get() { return this.classList.contains('muxui-virtualizer') ? 120 : 40; },
   });
   class ResizeObserverMock {
     constructor(callback) { this.callback = callback; }
@@ -189,11 +189,11 @@ function deleteBeforeInput(node) {
 
 test('R1.3 collection source preserves donor glyph alignment state selectors', async () => {
   const styles = await readFile(resolve(import.meta.dirname, '../src/styles/collections.css'), 'utf8');
-  assert.match(styles, /\.core-calendar\[data-disabled\] \.core-calendar-(?:previous|next) > svg[\s\S]*?opacity: 0\.45;/u);
-  assert.match(styles, /\.core-range-calendar\[data-disabled\] \.core-calendar-(?:previous|next) > svg[\s\S]*?opacity: 0\.45;/u);
-  assert.match(styles, /\.core-tab\s*\{[\s\S]*?padding: var\(--core-semantic-layout-group-gap\) var\(--core-reference-dimension-space-m\);/u);
-  assert.match(styles, /\.core-tree-item\[data-expanded\] \.core-tree-toggle::before\s*\{[\s\S]*?inset-inline-start: -0\.25px;/u);
-  assert.match(styles, /\[data-core-color-scheme='dark'\] :where\(\.core-calendar, \.core-range-calendar\) \{\s*background-color: var\(--core-reference-color-neutral-20\);\s*border-color: var\(--core-reference-color-neutral-10\);/u);
+  assert.match(styles, /\.muxui-calendar\[data-disabled\] \.muxui-calendar-(?:previous|next) > svg[\s\S]*?opacity: 0\.45;/u);
+  assert.match(styles, /\.muxui-range-calendar\[data-disabled\] \.muxui-calendar-(?:previous|next) > svg[\s\S]*?opacity: 0\.45;/u);
+  assert.match(styles, /\.muxui-tab\s*\{[\s\S]*?padding: var\(--muxui-semantic-layout-group-gap\) var\(--muxui-reference-dimension-space-m\);/u);
+  assert.match(styles, /\.muxui-tree-item\[data-expanded\] \.muxui-tree-toggle::before\s*\{[\s\S]*?inset-inline-start: -0\.25px;/u);
+  assert.match(styles, /\[data-muxui-color-scheme='dark'\] :where\(\.muxui-calendar, \.muxui-range-calendar\) \{\s*background-color: var\(--muxui-reference-color-neutral-20\);\s*border-color: var\(--muxui-reference-color-neutral-10\);/u);
 });
 
 test('R1.3 temporal adapters preserve ISO values and calendar navigation', async () => {
@@ -214,10 +214,10 @@ test('R1.3 temporal adapters preserve ISO values and calendar navigation', async
   const changes = [];
   try {
     await act(async () => root.render(React.createElement(Calendar, { label: 'Start date', defaultValue: '2025-01-15', onChange: (value) => changes.push(value) })));
-    assert.match(container.querySelector('.core-calendar').textContent, /Start date/u);
-    assert.match(container.querySelector('.core-calendar-heading').textContent, /January 2025/u);
+    assert.match(container.querySelector('.muxui-calendar').textContent, /Start date/u);
+    assert.match(container.querySelector('.muxui-calendar-heading').textContent, /January 2025/u);
     await act(async () => container.querySelector('button[aria-label="Next month"]').click());
-    assert.match(container.querySelector('.core-calendar-heading').textContent, /February 2025/u);
+    assert.match(container.querySelector('.muxui-calendar-heading').textContent, /February 2025/u);
     const dateCell = container.querySelector('[aria-label="Wednesday, February 12, 2025"]');
     await act(async () => dateCell.click());
     assert.deepEqual(changes, ['2025-02-12']);
@@ -237,37 +237,37 @@ test('R1.3 temporal adapters preserve ISO values and calendar navigation', async
     }
     await act(async () => root.render(React.createElement(ReadOnlyControlledCalendar)));
     await act(async () => container.querySelector('button[aria-label="Next month"]').click());
-    assert.match(container.querySelector('.core-calendar-heading').textContent, /February 2025/u);
+    assert.match(container.querySelector('.muxui-calendar-heading').textContent, /February 2025/u);
     assert.ok(focusChanges.length > 0);
     const readOnlyDateCell = container.querySelector('[aria-label="Wednesday, February 12, 2025"]');
     await act(async () => readOnlyDateCell.click());
     assert.deepEqual(readOnlySelections, []);
 
     await act(async () => root.render(React.createElement(RangeCalendar, { label: 'Date range', defaultValue: { start: '2025-01-01', end: '2025-01-04' } })));
-    assert.equal(container.querySelector('.core-range-calendar-cell')?.classList.contains('core-range-calendar-cell'), true);
+    assert.equal(container.querySelector('.muxui-range-calendar-cell')?.classList.contains('muxui-range-calendar-cell'), true);
   } finally {
     await act(async () => root.unmount());
     env.restore();
   }
 });
 
-test('embedded RAC button controls inherit the Core/Tale button chrome reset', async () => {
+test('embedded RAC button controls inherit the MuxUI/Tale button chrome reset', async () => {
   const styles = await readFile(resolve(import.meta.dirname, '../generated/styles.css'), 'utf8');
   const resetStart = styles.indexOf('/* Bare RAC buttons need the same chrome reset as Tale\'s Button base.');
   assert.notEqual(resetStart, -1);
   const reset = styles.slice(resetStart, styles.indexOf('\n}\n', resetStart) + 3);
   for (const className of [
-    'core-date-trigger', 'core-calendar-previous', 'core-calendar-next',
-    'core-combo-box-trigger', 'core-select-trigger', 'core-tag-remove',
-    'core-tree-toggle', 'core-disclosure-trigger', 'core-search-clear',
+    'muxui-date-trigger', 'muxui-calendar-previous', 'muxui-calendar-next',
+    'muxui-combo-box-trigger', 'muxui-select-trigger', 'muxui-tag-remove',
+    'muxui-tree-toggle', 'muxui-disclosure-trigger', 'muxui-search-clear',
   ]) assert.match(reset, new RegExp(`\\.${className}\\b`, 'u'));
   assert.match(reset, /border:\s*1px solid transparent;/u);
   assert.match(reset, /appearance:\s*none;/u);
-  assert.match(styles, /\.core-calendar-previous,\n\.core-calendar-next\s*\{[^}]*padding:\s*0;/u);
-  assert.match(styles, /\.core-combo-box-trigger\s*\{[^}]*border:\s*none;[\s\S]*background:\s*transparent;/u);
+  assert.match(styles, /\.muxui-calendar-previous,\n\.muxui-calendar-next\s*\{[^}]*padding:\s*0;/u);
+  assert.match(styles, /\.muxui-combo-box-trigger\s*\{[^}]*border:\s*none;[\s\S]*background:\s*transparent;/u);
 });
 
-test('R1.3 color controls expose Core color strings, anatomy, and disabled guards', async () => {
+test('R1.3 color controls expose Mux UI color strings, anatomy, and disabled guards', async () => {
   const env = installDom();
   const container = document.querySelector('#root');
   const root = createRoot(container);
@@ -283,18 +283,18 @@ test('R1.3 color controls expose Core color strings, anatomy, and disabled guard
         React.createElement(ColorField, { label: 'Picker color', onChange: (value) => changes.push(['nested', value]) }),
       )),
     )));
-    assert.equal(container.querySelectorAll('.core-color-field').length, 2);
-    assert.ok(container.querySelector('.core-color-area-thumb'));
-    assert.ok(container.querySelector('.core-color-slider-track'));
-    assert.equal(container.querySelectorAll('.core-color-swatch-picker-item').length, 2);
-    assert.ok(container.querySelector('.core-color-wheel-track'));
-    assert.equal(container.querySelector('.core-color-field input').value, '#FF0000');
-    await act(async () => container.querySelectorAll('.core-color-swatch-picker-item')[1].click());
+    assert.equal(container.querySelectorAll('.muxui-color-field').length, 2);
+    assert.ok(container.querySelector('.muxui-color-area-thumb'));
+    assert.ok(container.querySelector('.muxui-color-slider-track'));
+    assert.equal(container.querySelectorAll('.muxui-color-swatch-picker-item').length, 2);
+    assert.ok(container.querySelector('.muxui-color-wheel-track'));
+    assert.equal(container.querySelector('.muxui-color-field input').value, '#FF0000');
+    await act(async () => container.querySelectorAll('.muxui-color-swatch-picker-item')[1].click());
     assert.equal(changes.some(([kind, value]) => kind === 'picker' && typeof value === 'string' && value.includes('0, 0, 255')), true);
 
     const disabledChanges = [];
     await act(async () => root.render(React.createElement(ColorSwatchPicker, { 'aria-label': 'Disabled palette', disabled: true, items: [{ id: 'red', color: '#ff0000' }], onChange: (value) => disabledChanges.push(value) })));
-    const disabledItem = container.querySelector('.core-color-swatch-picker-item');
+    const disabledItem = container.querySelector('.muxui-color-swatch-picker-item');
     assert.equal(disabledItem.getAttribute('aria-disabled'), 'true');
     assert.equal(disabledItem.getAttribute('data-disabled'), 'true');
     await act(async () => disabledItem.click());
@@ -310,16 +310,16 @@ test('R1.3 color controls expose Core color strings, anatomy, and disabled guard
         React.createElement(ColorSwatchPicker, { 'aria-label': 'Disabled nested swatches', items: [{ id: 'red', color: '#ff0000' }], onChange: (value) => pickerChanges.push(['swatches', value]) }),
         React.createElement(ColorSwatch, { color: '#ff0000' }),
       ))));
-    const disabledNestedField = container.querySelector('.core-color-field input');
-    const disabledNestedArea = container.querySelector('.core-color-area');
+    const disabledNestedField = container.querySelector('.muxui-color-field input');
+    const disabledNestedArea = container.querySelector('.muxui-color-area');
     assert.equal(disabledNestedField.disabled, true);
-    const disabledNestedAreaField = disabledNestedArea.closest('.core-color-area-field');
+    const disabledNestedAreaField = disabledNestedArea.closest('.muxui-color-area-field');
     assert.equal(disabledNestedAreaField.getAttribute('aria-disabled'), 'true');
     assert.equal(disabledNestedAreaField.getAttribute('data-disabled'), 'true');
-    assert.equal(container.querySelector('.core-color-slider input')?.disabled, true);
-    assert.equal(container.querySelector('.core-color-wheel input')?.disabled, true);
-    assert.equal(container.querySelector('.core-color-swatch-picker-item')?.getAttribute('aria-disabled'), 'true');
-    assert.equal(container.querySelector('.core-color-swatch')?.getAttribute('data-disabled'), 'true');
+    assert.equal(container.querySelector('.muxui-color-slider input')?.disabled, true);
+    assert.equal(container.querySelector('.muxui-color-wheel input')?.disabled, true);
+    assert.equal(container.querySelector('.muxui-color-swatch-picker-item')?.getAttribute('aria-disabled'), 'true');
+    assert.equal(container.querySelector('.muxui-color-swatch')?.getAttribute('data-disabled'), 'true');
     await act(async () => {
       disabledNestedField.dispatchEvent(new Event('change', { bubbles: true }));
       disabledNestedArea.click();
@@ -335,31 +335,31 @@ test('R1.3 color controls expose Core color strings, anatomy, and disabled guard
         React.createElement(ColorSwatchPicker, { 'aria-label': 'Read-only nested swatches', items: [{ id: 'red', color: '#ff0000' }], onChange: (value) => pickerChanges.push(['swatches', value]) }),
         React.createElement(ColorSwatch, { color: '#ff0000' }),
       ))));
-    const readOnlyNestedField = container.querySelector('.core-color-field input');
-    const readOnlyNestedArea = container.querySelector('.core-color-area');
+    const readOnlyNestedField = container.querySelector('.muxui-color-field input');
+    const readOnlyNestedArea = container.querySelector('.muxui-color-area');
     assert.equal(readOnlyNestedField.readOnly, true);
-    const readOnlyNestedAreaField = readOnlyNestedArea.closest('.core-color-area-field');
+    const readOnlyNestedAreaField = readOnlyNestedArea.closest('.muxui-color-area-field');
     assert.equal(readOnlyNestedAreaField.hasAttribute('aria-readonly'), false);
     assert.equal(readOnlyNestedAreaField.getAttribute('data-readonly'), 'true');
-    const readOnlyPicker = container.querySelector('.core-color-picker');
-    const readOnlySliderWrapper = container.querySelector('.core-color-slider')?.parentElement;
-    const readOnlyWheelWrapper = container.querySelector('.core-color-wheel')?.parentElement;
-    const readOnlySwatchPicker = container.querySelector('.core-color-swatch-picker');
+    const readOnlyPicker = container.querySelector('.muxui-color-picker');
+    const readOnlySliderWrapper = container.querySelector('.muxui-color-slider')?.parentElement;
+    const readOnlyWheelWrapper = container.querySelector('.muxui-color-wheel')?.parentElement;
+    const readOnlySwatchPicker = container.querySelector('.muxui-color-swatch-picker');
     const readOnlySwatchPickerWrapper = readOnlySwatchPicker?.parentElement;
-    const readOnlyColorSwatch = [...container.querySelectorAll('.core-color-swatch')]
+    const readOnlyColorSwatch = [...container.querySelectorAll('.muxui-color-swatch')]
       .find((swatch) => swatch.getAttribute('data-readonly') === 'true');
     for (const wrapper of [readOnlyPicker, readOnlySliderWrapper, readOnlyWheelWrapper, readOnlySwatchPickerWrapper, readOnlyColorSwatch]) {
       assert.ok(wrapper);
       assert.equal(wrapper.hasAttribute('aria-readonly'), false);
       assert.equal(wrapper.getAttribute('data-readonly'), 'true');
     }
-    const readOnlyAreaTargets = [...container.querySelectorAll('.core-color-area input[type="range"]:not([tabindex="-1"])')];
+    const readOnlyAreaTargets = [...container.querySelectorAll('.muxui-color-area input[type="range"]:not([tabindex="-1"])')];
     assert.ok(readOnlyAreaTargets.length > 0);
     assert.equal(readOnlyAreaTargets.every((target) => target.getAttribute('aria-readonly') === 'true'), true);
-    const readOnlySlider = container.querySelector('.core-color-slider input');
-    const readOnlyWheel = container.querySelector('.core-color-wheel input');
-    const readOnlySwatchList = container.querySelector('.core-color-swatch-picker[role="listbox"]');
-    const readOnlySwatch = container.querySelector('.core-color-swatch-picker-item');
+    const readOnlySlider = container.querySelector('.muxui-color-slider input');
+    const readOnlyWheel = container.querySelector('.muxui-color-wheel input');
+    const readOnlySwatchList = container.querySelector('.muxui-color-swatch-picker[role="listbox"]');
+    const readOnlySwatch = container.querySelector('.muxui-color-swatch-picker-item');
     for (const target of [readOnlySlider, readOnlyWheel, readOnlySwatchList]) {
       assert.equal(target?.getAttribute('aria-readonly'), 'true');
     }
@@ -380,10 +380,10 @@ test('R1.3 color controls expose Core color strings, anatomy, and disabled guard
         React.createElement(ColorSwatchPicker, { 'aria-label': 'Editable nested swatches', items: [{ id: 'red', color: '#ff0000' }] }),
       ))));
     const editableTargets = [
-      ...container.querySelectorAll('.core-color-area input[type="range"]:not([tabindex="-1"])'),
-      ...container.querySelectorAll('.core-color-slider input[type="range"]:not([tabindex="-1"])'),
-      ...container.querySelectorAll('.core-color-wheel input[type="range"]:not([tabindex="-1"])'),
-      ...container.querySelectorAll('.core-color-swatch-picker [role="listbox"], .core-color-swatch-picker [role="option"]'),
+      ...container.querySelectorAll('.muxui-color-area input[type="range"]:not([tabindex="-1"])'),
+      ...container.querySelectorAll('.muxui-color-slider input[type="range"]:not([tabindex="-1"])'),
+      ...container.querySelectorAll('.muxui-color-wheel input[type="range"]:not([tabindex="-1"])'),
+      ...container.querySelectorAll('.muxui-color-swatch-picker [role="listbox"], .muxui-color-swatch-picker [role="option"]'),
     ];
     assert.ok(editableTargets.length > 0);
     assert.equal(editableTargets.every((target) => !target.hasAttribute('aria-readonly')), true);
@@ -403,16 +403,16 @@ test('R1.3 scalar composites preserve string and numeric callbacks with disabled
       React.createElement(RadioGroup, { label: 'Plan', value: 'pro', options: [{ value: 'basic', label: 'Basic' }, { value: 'pro', label: 'Pro' }] }),
       React.createElement(Slider, { label: 'Volume', defaultValue: 1, min: 0, max: 3 }),
     )));
-    assert.ok(container.querySelector('.core-combo-box input'));
-    assert.ok(container.querySelector('.core-combo-box-trigger'));
-    const comboArrow = container.querySelector('svg.core-combo-box-arrow');
+    assert.ok(container.querySelector('.muxui-combo-box input'));
+    assert.ok(container.querySelector('.muxui-combo-box-trigger'));
+    const comboArrow = container.querySelector('svg.muxui-combo-box-arrow');
     assert.ok(comboArrow);
     assert.equal(comboArrow.getAttribute('aria-hidden'), 'true');
     assert.equal(comboArrow.querySelector('path')?.getAttribute('d'), 'm6 9 6 6 6-6');
-    assert.equal(container.querySelectorAll('.core-radio').length, 2);
+    assert.equal(container.querySelectorAll('.muxui-radio').length, 2);
     assert.equal(container.querySelector('input[type="range"]').value, '1');
-    assert.equal(container.querySelector('.core-radio input[value="pro"]').checked, true);
-    assert.equal(container.querySelector('.core-combo-box input').value, 'Melbourne');
+    assert.equal(container.querySelector('.muxui-radio input[value="pro"]').checked, true);
+    assert.equal(container.querySelector('.muxui-combo-box input').value, 'Melbourne');
 
     document.activeElement?.blur();
     await act(async () => root.render(null));
@@ -421,9 +421,9 @@ test('R1.3 scalar composites preserve string and numeric callbacks with disabled
       React.createElement(RadioGroup, { label: 'Disabled plan', disabled: true, value: 'pro', options: [{ value: 'basic', label: 'Basic' }, { value: 'pro', label: 'Pro' }] }),
       React.createElement(Slider, { label: 'Disabled volume', disabled: true, defaultValue: 1 }),
     )));
-    const disabledComboInput = container.querySelector('.core-combo-box input');
+    const disabledComboInput = container.querySelector('.muxui-combo-box input');
     assert.equal(disabledComboInput.disabled, true);
-    assert.equal(container.querySelector('.core-radio input').disabled, true);
+    assert.equal(container.querySelector('.muxui-radio input').disabled, true);
     const disabledSlider = container.querySelector('input[type="range"]');
     assert.equal(disabledSlider.disabled, true);
   } finally {
@@ -441,20 +441,20 @@ test('Slider exposes disabled state on its labelled group while preserving thumb
     await act(async () => root.render(React.createElement(Slider, {
       label: 'Disabled volume', disabled: true, defaultValue: 1, min: 0, max: 3,
     })));
-    const slider = container.querySelector('.core-slider');
+    const slider = container.querySelector('.muxui-slider');
     const input = slider?.querySelector('input[type="range"]');
     assert.equal(slider?.getAttribute('role'), 'group');
     assert.equal(slider?.getAttribute('aria-disabled'), 'true');
     assert.equal(slider?.getAttribute('data-disabled'), 'true');
-    assert.equal(slider?.querySelector('.core-field-label')?.textContent, 'Disabled volume');
-    assert.equal(slider?.querySelector('.core-slider-output')?.textContent, '1');
+    assert.equal(slider?.querySelector('.muxui-field-label')?.textContent, 'Disabled volume');
+    assert.equal(slider?.querySelector('.muxui-slider-output')?.textContent, '1');
     assert.equal(input?.disabled, true);
-    assert.equal(input?.getAttribute('aria-labelledby')?.includes(slider?.querySelector('.core-field-label')?.id ?? ''), true);
+    assert.equal(input?.getAttribute('aria-labelledby')?.includes(slider?.querySelector('.muxui-field-label')?.id ?? ''), true);
 
     await act(async () => root.render(React.createElement(Slider, {
       label: 'Enabled volume', defaultValue: 1, min: 0, max: 3,
     })));
-    assert.equal(container.querySelector('.core-slider')?.hasAttribute('aria-disabled'), false);
+    assert.equal(container.querySelector('.muxui-slider')?.hasAttribute('aria-disabled'), false);
     assert.equal(container.querySelector('input[type="range"]')?.disabled, false);
   } finally {
     await act(async () => root.unmount());
@@ -474,11 +474,11 @@ test('R1.3 RadioGroup owns selected indicator and read-only focus semantics', as
         { value: 'legacy', label: 'Legacy', disabled: true },
       ],
     })));
-    const radios = [...container.querySelectorAll('.core-radio')];
+    const radios = [...container.querySelectorAll('.muxui-radio')];
     assert.equal(radios.length, 3);
-    assert.equal(container.querySelectorAll('.core-radio-indicator').length, 3);
+    assert.equal(container.querySelectorAll('.muxui-radio-indicator').length, 3);
     assert.equal(radios[1].getAttribute('data-selected'), 'true');
-    assert.equal(radios[1].querySelector('.core-radio-indicator')?.getAttribute('aria-hidden'), 'true');
+    assert.equal(radios[1].querySelector('.muxui-radio-indicator')?.getAttribute('aria-hidden'), 'true');
     assert.equal(radios[0].querySelector('input').disabled, false);
     assert.equal(radios[2].querySelector('input').disabled, true);
 
@@ -499,7 +499,7 @@ test('R1.3 RadioGroup owns selected indicator and read-only focus semantics', as
       ],
     })));
     const readOnlyGroup = container.querySelector('[role="radiogroup"]');
-    const readOnlyRadios = [...container.querySelectorAll('.core-radio')];
+    const readOnlyRadios = [...container.querySelectorAll('.muxui-radio')];
     const readOnlyInputs = readOnlyRadios.map((radio) => radio.querySelector('input'));
     assert.equal(readOnlyGroup.getAttribute('aria-readonly'), 'true');
     assert.equal(readOnlyRadios.every((radio) => radio.getAttribute('data-readonly') === 'true'), true);
@@ -518,8 +518,8 @@ test('R1.3 RadioGroup owns selected indicator and read-only focus semantics', as
       ],
     })));
     assert.equal(container.querySelector('[role="radiogroup"]').getAttribute('aria-disabled'), 'true');
-    assert.equal([...container.querySelectorAll('.core-radio input')].every((input) => input.disabled), true);
-    assert.equal([...container.querySelectorAll('.core-radio')].every((radio) => radio.getAttribute('data-disabled') === 'true'), true);
+    assert.equal([...container.querySelectorAll('.muxui-radio input')].every((input) => input.disabled), true);
+    assert.equal([...container.querySelectorAll('.muxui-radio')].every((radio) => radio.getAttribute('data-disabled') === 'true'), true);
   } finally {
     document.activeElement?.blur();
     await act(async () => root.unmount());
@@ -532,25 +532,25 @@ test('R1.3 field collections keep unsupported props out of public DOM surfaces',
     label: 'Plan', options: [{ value: 'pro', label: 'Pro' }],
     description: 'RADIO_DESCRIPTION', errorMessage: 'RADIO_ERROR', name: 'RADIO_NAME', 'data-leak': 'RADIO_LEAK',
   }));
-  assert.match(radio, /core-radio-group/u);
+  assert.match(radio, /muxui-radio-group/u);
   assert.doesNotMatch(radio, /RADIO_(?:DESCRIPTION|ERROR|NAME|LEAK)/u);
 
   const tag = renderToString(React.createElement(TagGroup, {
     label: 'Tags', items: [{ id: 'one', label: 'One' }],
     description: 'TAG_DESCRIPTION', errorMessage: 'TAG_ERROR', readOnly: true, required: true, invalid: true, 'data-leak': 'TAG_LEAK',
   }));
-  assert.match(tag, /core-tag-group/u);
+  assert.match(tag, /muxui-tag-group/u);
   assert.doesNotMatch(tag, /TAG_(?:DESCRIPTION|ERROR|LEAK)/u);
 
   const token = renderToString(React.createElement(TokenField, {
     label: 'Tags', defaultValue: ['one'],
     description: 'TOKEN_DESCRIPTION', errorMessage: 'TOKEN_ERROR', required: true, invalid: true, 'data-leak': 'TOKEN_LEAK',
   }));
-  assert.match(token, /core-token-field/u);
+  assert.match(token, /muxui-token-field/u);
   assert.doesNotMatch(token, /TOKEN_(?:DESCRIPTION|ERROR|LEAK)/u);
 });
 
-test('R1.3 menu, table, and tag actions return normalized Core items', async () => {
+test('R1.3 menu, table, and tag actions return normalized MuxUI items', async () => {
   const env = installDom();
   const container = document.querySelector('#root');
   const root = createRoot(container);
@@ -564,12 +564,12 @@ test('R1.3 menu, table, and tag actions return normalized Core items', async () 
     assert.equal(container.querySelectorAll('[role="menuitem"]').length, 1);
     assert.equal(container.querySelector('[role="menuitem"]').textContent, 'Edit');
     assert.equal(container.querySelectorAll('[role="row"]').length, 3);
-    assert.equal(container.querySelectorAll('.core-table-cell').length, 1);
-    assert.equal(container.querySelectorAll('.core-tag').length, 1);
+    assert.equal(container.querySelectorAll('.muxui-table-cell').length, 1);
+    assert.equal(container.querySelectorAll('.muxui-tag').length, 1);
     await act(async () => container.querySelector('[role="menuitem"]').click());
-    await act(async () => container.querySelector('.core-table-row').click());
-    await act(async () => container.querySelector('.core-tag').click());
-    await act(async () => container.querySelector('.core-tag-remove').click());
+    await act(async () => container.querySelector('.muxui-table-row').click());
+    await act(async () => container.querySelector('.muxui-tag').click());
+    await act(async () => container.querySelector('.muxui-tag-remove').click());
     assert.deepEqual(actions, [['menu', 'edit'], ['table', 'ada'], ['tag', 'one'], ['remove', 'one']]);
 
     const disabledActions = [];
@@ -579,9 +579,9 @@ test('R1.3 menu, table, and tag actions return normalized Core items', async () 
       React.createElement(TagGroup, { label: 'Disabled tags', disabled: true, items: [{ id: 'one', label: 'One' }], onAction: (item) => disabledActions.push(['tag', item.id]), onRemove: (items) => disabledActions.push(['remove', items.map((item) => item.id).join(',')]) }),
     )));
     await act(async () => container.querySelector('[role="menuitem"]').click());
-    await act(async () => container.querySelector('.core-table-row').click());
-    await act(async () => container.querySelector('.core-tag').click());
-    await act(async () => container.querySelector('.core-tag-remove').click());
+    await act(async () => container.querySelector('.muxui-table-row').click());
+    await act(async () => container.querySelector('.muxui-tag').click());
+    await act(async () => container.querySelector('.muxui-tag-remove').click());
     assert.deepEqual(disabledActions, []);
   } finally {
     await act(async () => root.unmount());
@@ -634,11 +634,11 @@ test('R1.3 collection items expose keyboard focus-visible state when unselected'
     },
     {
       component: React.createElement(ColorSwatchPicker, { 'aria-label': 'Palette', items: [{ id: 'red', color: '#ff0000' }, { id: 'blue', color: '#0000ff' }] }),
-      selector: '.core-color-swatch-picker-item',
+      selector: '.muxui-color-swatch-picker-item',
     },
     {
       component: React.createElement(Table, { 'aria-label': 'People', selectionMode: 'none', columns: [{ id: 'name', label: 'Name', isRowHeader: true }], rows: [{ id: 'ada', name: 'Ada' }, { id: 'grace', name: 'Grace' }] }),
-      selector: '.core-table-row',
+      selector: '.muxui-table-row',
     },
   ];
   try {
@@ -661,7 +661,7 @@ test('R1.3 collection items expose keyboard focus-visible state when unselected'
   }
 });
 
-test('R1.3 Select renders normalized options and submits the selected Core value', async () => {
+test('R1.3 Select renders normalized options and submits the selected MuxUI value', async () => {
   const env = installDom('<form id="form"><div id="root"></div></form>');
   const container = document.querySelector('#root');
   const root = createRoot(container);
@@ -674,9 +674,9 @@ test('R1.3 Select renders normalized options and submits the selected Core value
       name: 'color',
       onChange: (value) => changes.push(value),
     })));
-    assert.match(container.querySelector('.core-select-value').textContent, /Blue/u);
-    await act(async () => container.querySelector('.core-select-trigger').click());
-    const options = [...document.querySelectorAll('.core-select-option')];
+    assert.match(container.querySelector('.muxui-select-value').textContent, /Blue/u);
+    await act(async () => container.querySelector('.muxui-select-trigger').click());
+    const options = [...document.querySelectorAll('.muxui-select-option')];
     assert.deepEqual(options.map((option) => option.textContent), ['Red', 'Blue']);
     assert.equal(options.find((option) => option.textContent === 'Blue')?.getAttribute('aria-selected'), 'true');
     await act(async () => options[0].click());
@@ -771,7 +771,7 @@ test('R1.3 Virtualizer uses RAC ListLayout to render and scroll a bounded window
       onScroll: (event) => scrolls.push(event.currentTarget.scrollTop),
     })));
     await act(async () => new Promise((resolve) => setTimeout(resolve, 0)));
-    const viewport = container.querySelector('.core-virtualizer');
+    const viewport = container.querySelector('.muxui-virtualizer');
     assert.equal(viewport.getAttribute('data-layout'), 'stack');
     assert.equal(viewport.querySelector('[role="presentation"]').style.height, '4000px');
     assert.equal(container.querySelector('[role="option"]').textContent, 'Item 0');
@@ -799,24 +799,24 @@ test('R1.3 Tree flattens nested items for keyboard collection semantics', async 
       onAction: (item) => actions.push(item?.id),
     })));
     assert.equal(container.querySelectorAll('[role="row"]').length, 2);
-    assert.equal(container.querySelector('[role="row"] .core-tree-item-label').textContent, 'Parent');
+    assert.equal(container.querySelector('[role="row"] .muxui-tree-item-label').textContent, 'Parent');
     const child = [...container.querySelectorAll('[role="row"]')].find((row) => row.getAttribute('aria-label') === 'Child');
     assert.equal(child?.getAttribute('data-disabled'), 'true');
     const parent = [...container.querySelectorAll('[role="row"]')].find((row) => row.getAttribute('aria-label') === 'Parent');
-    const toggle = parent?.querySelector('.core-tree-toggle');
-    const content = parent?.querySelector('.core-tree-item-content');
-    assert.equal(parent?.querySelectorAll('.core-tree-toggle').length, 1);
+    const toggle = parent?.querySelector('.muxui-tree-toggle');
+    const content = parent?.querySelector('.muxui-tree-item-content');
+    assert.equal(parent?.querySelectorAll('.muxui-tree-toggle').length, 1);
     assert.ok(content);
-    assert.equal(content?.querySelector('.core-tree-toggle'), toggle);
-    assert.equal(content?.querySelector('.core-tree-item-label')?.textContent, 'Parent');
+    assert.equal(content?.querySelector('.muxui-tree-toggle'), toggle);
+    assert.equal(content?.querySelector('.muxui-tree-item-label')?.textContent, 'Parent');
     assert.equal(toggle?.getAttribute('slot'), 'chevron');
     assert.equal(toggle?.getAttribute('aria-label'), 'Toggle');
     assert.equal(toggle?.querySelector('svg')?.getAttribute('aria-hidden'), 'true');
     assert.equal(toggle?.querySelector('svg')?.getAttribute('focusable'), 'false');
     assert.equal(toggle?.querySelector('svg')?.classList.contains('lucide-chevron-right'), true);
     const styles = await readFile(resolve(import.meta.dirname, '../generated/styles.css'), 'utf8');
-    assert.doesNotMatch(styles, /\.core-tree-item\[data-has-child-items\].*::before/u);
-    assert.match(styles, /\.core-tree-toggle\s*\{[^}]*transform:|\.core-tree-item\[data-expanded\] \.core-tree-toggle/u);
+    assert.doesNotMatch(styles, /\.muxui-tree-item\[data-has-child-items\].*::before/u);
+    assert.match(styles, /\.muxui-tree-toggle\s*\{[^}]*transform:|\.muxui-tree-item\[data-expanded\] \.muxui-tree-toggle/u);
     await act(async () => child.click());
     assert.deepEqual(actions, []);
   } finally {

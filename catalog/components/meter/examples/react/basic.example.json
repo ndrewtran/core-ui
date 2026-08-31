@@ -1,12 +1,12 @@
 {
   "schemaVersion": "1.0.0",
-  "id": "core:example:meter-basic-react",
+  "id": "muxui:example:meter-basic-react",
   "kind": "example",
   "name": "Basic React Meter",
   "summary": "The minimum React Meter example.",
   "lifecycle": "experimental",
   "binding": {
-    "ref": "core:component:meter#web.react",
+    "ref": "muxui:component:meter#web.react",
     "guidanceImpact": "normative",
     "purposes": [
       "generation",

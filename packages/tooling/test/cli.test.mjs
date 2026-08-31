@@ -8,11 +8,11 @@ import {
   getManifest,
   listArtifacts,
   searchArtifacts,
-} from '@core-ui/catalog';
+} from '@muxui/catalog';
 import {
   QUERY_ENVELOPE_SCHEMA_ID,
   validateFamily,
-} from '@core-ui/schema';
+} from '@muxui/schema';
 import {
   cliManifest,
   commandRegistry,
@@ -42,7 +42,7 @@ const commandCases = {
   manifest: (detail) => ({ args: ['manifest', '--detail', detail], request: { detail } }),
   list: (detail) => ({ args: ['list', '--detail', detail], request: { detail, limit: 20, platform: null, purpose: null, cursor: null, kind: null } }),
   search: (detail) => ({ args: ['search', 'button', '--detail', detail], request: { detail, limit: 20, platform: null, purpose: null, cursor: null, query: 'button' } }),
-  get: (detail) => ({ args: ['get', 'core:component:button', '--detail', detail], request: { detail, platform: null, purpose: null, section: null, 'id-or-alias': 'core:component:button' } }),
+  get: (detail) => ({ args: ['get', 'muxui:component:button', '--detail', detail], request: { detail, platform: null, purpose: null, section: null, 'id-or-alias': 'muxui:component:button' } }),
 };
 
 function jsonResult(args) {
@@ -54,7 +54,7 @@ function jsonResult(args) {
 
 function processJsonResult(args) {
   const result = spawnSync(process.execPath, [
-    fileURLToPath(new URL('../bin/core.mjs', import.meta.url)),
+    fileURLToPath(new URL('../bin/muxui.mjs', import.meta.url)),
     ...args,
     '--json',
   ], { encoding: 'utf8' });
@@ -62,6 +62,11 @@ function processJsonResult(args) {
   assert.equal(result.stderr, '');
   return JSON.parse(result.stdout);
 }
+
+test('public tooling entrypoint keeps project resolution internal', async () => {
+  const tooling = await import('@muxui/tooling');
+  assert.equal(Object.hasOwn(tooling, 'resolvePnpmProjectCatalog'), false);
+});
 
 test('E-G0.3-01 programmatic and CLI JSON surfaces return the same responses', () => {
   const resolution = resolvePnpmProjectCatalog();
@@ -84,13 +89,13 @@ test('E-G0.3-01 programmatic and CLI JSON surfaces return the same responses', (
     resolution.api.searchArtifacts({ query: 'button', detail: 'brief', limit: 20, platform: null, purpose: null, cursor: null }),
   );
   assert.deepEqual(
-    jsonResult(['get', 'core:component:button', '--detail', 'full']),
-    resolution.api.getArtifact({ id: 'core:component:button', platform: null, detail: 'full', purpose: null, section: null }),
+    jsonResult(['get', 'muxui:component:button', '--detail', 'full']),
+    resolution.api.getArtifact({ id: 'muxui:component:button', platform: null, detail: 'full', purpose: null, section: null }),
   );
   for (const undeclaredAlias of ['button', 'Button']) {
     const result = runCli(['get', undeclaredAlias, '--json']);
     assert.equal(result.exitCode, 2);
-    assert.equal(JSON.parse(result.stdout).error.code, 'CORE_QUERY_INVALID');
+    assert.equal(JSON.parse(result.stdout).error.code, 'MUXUI_QUERY_INVALID');
   }
   const manifestDrift = structuredClone(catalogManifest);
   delete manifestDrift.data.cli;
@@ -99,7 +104,7 @@ test('E-G0.3-01 programmatic and CLI JSON surfaces return the same responses', (
 
 test('E-G0.3-02 human, JSON, and dense projections preserve one response object', () => {
   const response = executeCommand('get', {
-    'id-or-alias': 'core:component:button',
+    'id-or-alias': 'muxui:component:button',
     platform: 'web.react',
     detail: 'compact',
     purpose: null,
@@ -108,7 +113,7 @@ test('E-G0.3-02 human, JSON, and dense projections preserve one response object'
   assert.deepEqual(JSON.parse(renderJson(response)), response);
   assert.deepEqual(parseDense(renderDense(response)), response);
   assert.deepEqual(parseHuman(renderHuman(response)), response);
-  assert.equal(response.data.artifact.id, 'core:component:button');
+  assert.equal(response.data.artifact.id, 'muxui:component:button');
   assert.equal(response.meta.platform, 'web.react');
   assert.match(response.meta.revisions.bindingSpec, /^sha256:/);
   assert.equal(response.meta.resolution.authority, 'advisory');
@@ -116,9 +121,9 @@ test('E-G0.3-02 human, JSON, and dense projections preserve one response object'
   assert.equal(response.meta.resolution.catalogSource, 'package');
 });
 
-test('TALE-TOKEN-B core get negotiates 1.1/1.2/2.0 and preserves page parity', () => {
+test('TALE-TOKEN-B muxui get negotiates 1.1/1.2/2.0 and preserves page parity', () => {
   const parsed = parseCliArguments([
-    'get', 'core:token:default-theme', '--query-api-version', '1.2.0',
+    'get', 'muxui:token:default-theme', '--query-api-version', '1.2.0',
     '--section', 'tokens', '--limit', '1', '--json',
   ]);
   assert.equal(parsed.request.queryApiVersion, '1.2.0');
@@ -135,7 +140,7 @@ test('TALE-TOKEN-B core get negotiates 1.1/1.2/2.0 and preserves page parity', (
   assert.ok(countTokens(renderDense(page)) <= 2048);
 
   const sourceCrosswalk = jsonResult([
-    'get', 'core:token:default-theme', '--query-api-version', '1.2.0',
+    'get', 'muxui:token:default-theme', '--query-api-version', '1.2.0',
     '--section', 'source-crosswalk',
   ]);
   assert.equal(sourceCrosswalk.entries.status, 'available');
@@ -143,16 +148,16 @@ test('TALE-TOKEN-B core get negotiates 1.1/1.2/2.0 and preserves page parity', (
   assert.equal(sourceCrosswalk.page.remaining, 673);
 
   const historical = jsonResult([
-    'get', 'core:token:default-theme', '--query-api-version', '1.1.0', '--detail', 'full',
+    'get', 'muxui:token:default-theme', '--query-api-version', '1.1.0', '--detail', 'full',
   ]);
   assert.equal(historical.apiVersion, '1.1.0');
   assert.deepEqual(historical.warnings, []);
   assert.ok(Object.hasOwn(historical.data.artifact, 'tokens'));
 
   for (const args of [
-    ['get', 'core:component:missing', '--query-api-version', '1.1.0', '--json'],
+    ['get', 'muxui:component:missing', '--query-api-version', '1.1.0', '--json'],
     [
-      'get', 'core:token:default-theme', '--query-api-version', '1.1.0',
+      'get', 'muxui:token:default-theme', '--query-api-version', '1.1.0',
       '--cursor', 'not-a-cursor', '--json',
     ],
   ]) {
@@ -162,7 +167,7 @@ test('TALE-TOKEN-B core get negotiates 1.1/1.2/2.0 and preserves page parity', (
   }
 
   const current = runCli([
-    'get', 'core:token:default-theme', '--query-api-version', '2.0.0', '--json',
+    'get', 'muxui:token:default-theme', '--query-api-version', '2.0.0', '--json',
   ]);
   assert.equal(current.exitCode, 0);
   const currentResponse = JSON.parse(current.stdout);
@@ -170,10 +175,10 @@ test('TALE-TOKEN-B core get negotiates 1.1/1.2/2.0 and preserves page parity', (
   assert.equal(Object.hasOwn(currentResponse.data.artifact, 'tokens'), false);
   assert.deepEqual(currentResponse.data.artifact.availableSections, ['tokens', 'source-crosswalk']);
   const removedCurrentIdentity = runCli([
-    'get', 'core:token:button-minimum', '--query-api-version', '2.0.0', '--json',
+    'get', 'muxui:token:button-minimum', '--query-api-version', '2.0.0', '--json',
   ]);
   assert.equal(removedCurrentIdentity.exitCode, 4);
-  assert.equal(JSON.parse(removedCurrentIdentity.stdout).error.code, 'CORE_ARTIFACT_NOT_FOUND');
+  assert.equal(JSON.parse(removedCurrentIdentity.stdout).error.code, 'MUXUI_ARTIFACT_NOT_FOUND');
 });
 
 test('E-G0.3-03 dense outputs round-trip deterministically within every locked budget', () => {
@@ -221,7 +226,7 @@ test('E-G0.3-04 registry generates parser, help, completion, manifest, types, an
   )));
   const catalogCliAvailable = jsonResult(['manifest', '--detail', 'full'])
     .data.capabilities
-    .find(({ id }) => id === 'core:capability:query-baseline')
+    .find(({ id }) => id === 'muxui:capability:query-baseline')
     .availableOn.includes('cli');
   assert.equal(commandRegistry.surfacePolicy.cli.available, catalogCliAvailable);
   for (const name of names) {
@@ -262,7 +267,7 @@ test('E-G0.3-04 registry generates parser, help, completion, manifest, types, an
   ]) {
     const malformed = structuredClone(manifest);
     mutate(malformed);
-    assert.throws(() => validateFamily('query-envelope', malformed), /CORE_SCHEMA_INVALID/);
+    assert.throws(() => validateFamily('query-envelope', malformed), /MUXUI_SCHEMA_INVALID/);
   }
 
   const extra = structuredClone(authoredRegistry);
@@ -324,16 +329,16 @@ test('G0.4 project and cache inputs stay outside query selectors and require an 
     },
   });
   const unpaired = parseCliArguments(['manifest', '--catalog-version', '1.0.0', '--json']);
-  assert.equal(unpaired.error.error.code, 'CORE_QUERY_INVALID');
+  assert.equal(unpaired.error.error.code, 'MUXUI_QUERY_INVALID');
   assert.equal(unpaired.error.error.ruleId, 'cli.resolution.cache-tuple');
 });
 
 test('E-G0.3-05 structured errors have stable codes, safe actions, and meaningful exits', () => {
   const fixtures = [
-    { args: ['unknown', '--json'], code: 'CORE_QUERY_INVALID', exitCode: 2 },
-    { args: ['list', '--detail', 'verbose', '--json'], code: 'CORE_QUERY_INVALID', exitCode: 2 },
-    { args: ['list', '--cursor', 'wrong', '--json'], code: 'CORE_CURSOR_INVALID', exitCode: 3 },
-    { args: ['get', 'core:component:missing', '--json'], code: 'CORE_ARTIFACT_NOT_FOUND', exitCode: 4 },
+    { args: ['unknown', '--json'], code: 'MUXUI_QUERY_INVALID', exitCode: 2 },
+    { args: ['list', '--detail', 'verbose', '--json'], code: 'MUXUI_QUERY_INVALID', exitCode: 2 },
+    { args: ['list', '--cursor', 'wrong', '--json'], code: 'MUXUI_CURSOR_INVALID', exitCode: 3 },
+    { args: ['get', 'muxui:component:missing', '--json'], code: 'MUXUI_ARTIFACT_NOT_FOUND', exitCode: 4 },
   ];
   for (const fixture of fixtures) {
     const result = runCli(fixture.args);
@@ -350,33 +355,33 @@ test('E-G0.3-05 structured errors have stable codes, safe actions, and meaningfu
     apiVersion: '1.1.0',
     type: 'error',
     error: {
-      code: 'CORE_QUERY_INVALID',
+      code: 'MUXUI_QUERY_INVALID',
       ruleId: 'cli.fixture.unsafe',
       message: 'unsafe fixture',
       retryable: false,
       details: {},
       nextCommand: {
-        command: 'core init',
+        command: 'muxui init',
         effect: 'project-write',
         requiresConfirmation: false,
       },
     },
   }), /CLI_UNSAFE_NEXT_COMMAND/);
-  const human = runCli(['get', 'core:component:missing']);
+  const human = runCli(['get', 'muxui:component:missing']);
   assert.equal(human.stdout, '');
-  assert.match(human.stderr, /CORE_ARTIFACT_NOT_FOUND/);
+  assert.match(human.stderr, /MUXUI_ARTIFACT_NOT_FOUND/);
 });
 
 test('E-G0.3-05 process boundary keeps JSON singular and diagnostics off stderr', () => {
   const result = spawnSync(process.execPath, [
-    fileURLToPath(new URL('../bin/core.mjs', import.meta.url)),
+    fileURLToPath(new URL('../bin/muxui.mjs', import.meta.url)),
     'get',
-    'core:component:missing',
+    'muxui:component:missing',
     '--json',
   ], { encoding: 'utf8' });
   assert.equal(result.status, 4);
   assert.equal(result.stderr, '');
-  assert.equal(JSON.parse(result.stdout).error.code, 'CORE_ARTIFACT_NOT_FOUND');
+  assert.equal(JSON.parse(result.stdout).error.code, 'MUXUI_ARTIFACT_NOT_FOUND');
   assert.equal(result.stdout.trim().split('\n').length, 1);
 });
 
@@ -389,12 +394,12 @@ test('E-G0.3-06 bare JSON cold start discovers manifest and retrieves without re
     'manifest', 'list', 'search', 'get',
   ]);
   assert.deepEqual(
-    manifest.data.capabilities.find(({ id }) => id === 'core:capability:query-baseline').availableOn,
+    manifest.data.capabilities.find(({ id }) => id === 'muxui:capability:query-baseline').availableOn,
     ['api', 'cli'],
   );
   const search = jsonResult(['search', 'button', '--detail', 'brief']);
   const id = search.data.items.find(({ name }) => name === 'Button').id;
   const detail = jsonResult(['get', id, '--detail', 'compact']);
-  assert.equal(detail.data.artifact.id, 'core:component:button');
+  assert.equal(detail.data.artifact.id, 'muxui:component:button');
   assert.equal(detail.meta.resolution.catalogSource, 'project');
 });

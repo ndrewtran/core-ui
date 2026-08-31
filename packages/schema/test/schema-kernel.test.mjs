@@ -20,6 +20,7 @@ import {
   relationEdges,
   sha256Digest,
   validateCatalogRecords,
+  validateContractDocument,
   validateFamily,
   validateFieldOwnershipRegistry,
   validateRelationRegistry,
@@ -72,6 +73,31 @@ function countLexemes(value) {
   return canonicalJson(value).match(/[\p{L}\p{N}_]+/gu)?.length ?? 0;
 }
 
+test('R1 contract schema exposes only the current Mux UI identity', async () => {
+  const schema = JSON.parse(await readFile(
+    resolve(import.meta.dirname, '../schemas/react-r1.schema.json'),
+    'utf8',
+  ));
+  assert.doesNotMatch(JSON.stringify(schema), new RegExp(`${['core', 'ui'].join('-')}-react-`, 'u'));
+
+  for (const file of [
+    'upstream-snapshot.json',
+    'upstream-exports.json',
+    'donor-crosswalk.json',
+    'license.json',
+  ]) {
+    const historical = JSON.parse(await readFile(
+      resolve(import.meta.dirname, `../../../catalog/react-r1-0/${file}`),
+      'utf8',
+    ));
+    assert.throws(
+      () => validateContractDocument('react-r1.schema.json', historical),
+      expectCode('MUXUI_SCHEMA_INVALID'),
+      file,
+    );
+  }
+});
+
 test('E-G0.1-01: minimum records, envelopes, diagnostics, ownership, and relations validate', () => {
   const graph = validateCatalogRecords(allRecords());
   assert.equal(graph.records.length, 5);
@@ -83,26 +109,26 @@ test('E-G0.1-01: minimum records, envelopes, diagnostics, ownership, and relatio
   const nestedStrategy = component();
   nestedStrategy.bindings['web.react'].api.defaults.strategy = 'compact';
   nestedStrategy.bindings['web.react'].extensions = {
-    'core.experimental.g01-proof': { strategy: 'memo' },
+    'muxui.experimental.g01-proof': { strategy: 'memo' },
   };
   assert.equal(validateCatalogRecords([nestedStrategy, tokenSource()]).records.length, 2);
   const missingOwnership = structuredClone(ownership);
   missingOwnership.fields.pop();
   assert.throws(
     () => validateFieldOwnershipRegistry(missingOwnership),
-    expectCode('CORE_FIELD_OWNERSHIP_INVALID'),
+    expectCode('MUXUI_FIELD_OWNERSHIP_INVALID'),
   );
   const duplicateOwnership = structuredClone(ownership);
   duplicateOwnership.fields.push(structuredClone(duplicateOwnership.fields[0]));
   assert.throws(
     () => validateFieldOwnershipRegistry(duplicateOwnership),
-    expectCode('CORE_FIELD_OWNERSHIP_INVALID'),
+    expectCode('MUXUI_FIELD_OWNERSHIP_INVALID'),
   );
   const misowned = structuredClone(ownership);
   misowned.fields[0].owner = 'not-the-canonical-owner';
   assert.throws(
     () => validateFieldOwnershipRegistry(misowned),
-    expectCode('CORE_FIELD_OWNERSHIP_INVALID'),
+    expectCode('MUXUI_FIELD_OWNERSHIP_INVALID'),
   );
   for (const schema of [
     'binding.schema.json',
@@ -116,7 +142,7 @@ test('E-G0.1-01: minimum records, envelopes, diagnostics, ownership, and relatio
     missingSchema.fields = missingSchema.fields.filter((field) => field.schema !== schema);
     assert.throws(
       () => validateFieldOwnershipRegistry(missingSchema),
-      expectCode('CORE_FIELD_OWNERSHIP_INVALID'),
+      expectCode('MUXUI_FIELD_OWNERSHIP_INVALID'),
     );
   }
   for (const name of ownership.reservedFields.map((field) => field.name)) {
@@ -126,7 +152,7 @@ test('E-G0.1-01: minimum records, envelopes, diagnostics, ownership, and relatio
     );
     assert.throws(
       () => validateFieldOwnershipRegistry(missingReserved),
-      expectCode('CORE_FIELD_OWNERSHIP_INVALID'),
+      expectCode('MUXUI_FIELD_OWNERSHIP_INVALID'),
     );
     for (const mutation of [
       { owner: 'not-the-canonical-owner' },
@@ -140,7 +166,7 @@ test('E-G0.1-01: minimum records, envelopes, diagnostics, ownership, and relatio
       );
       assert.throws(
         () => validateFieldOwnershipRegistry(mutatedReserved),
-        expectCode('CORE_FIELD_OWNERSHIP_INVALID'),
+        expectCode('MUXUI_FIELD_OWNERSHIP_INVALID'),
       );
     }
   }
@@ -162,17 +188,17 @@ test('E-G0.1-01: minimum records, envelopes, diagnostics, ownership, and relatio
     }
     assert.throws(
       () => validateFieldOwnershipRegistry(coordinatedMutation),
-      expectCode('CORE_FIELD_OWNERSHIP_INVALID'),
+      expectCode('MUXUI_FIELD_OWNERSHIP_INVALID'),
     );
   }
-  assert.deepEqual(parseArtifactRef('core:component:button'), {
-    value: 'core:component:button',
+  assert.deepEqual(parseArtifactRef('muxui:component:button'), {
+    value: 'muxui:component:button',
     kind: 'component',
     slug: 'button',
   });
-  assert.match('core:pattern:form', new RegExp(ARTIFACT_REF_PATTERN));
+  assert.match('muxui:pattern:form', new RegExp(ARTIFACT_REF_PATTERN));
   assert.throws(
-    () => parseArtifactRef('core:pattern:form', { requireEnabledRecordKind: true }),
+    () => parseArtifactRef('muxui:pattern:form', { requireEnabledRecordKind: true }),
     /record behavior is unavailable in G0\.1/,
   );
 
@@ -183,7 +209,7 @@ test('E-G0.1-01: minimum records, envelopes, diagnostics, ownership, and relatio
     type: 'artifact.detail',
     data: {
       artifact: {
-        id: 'core:component:button',
+        id: 'muxui:component:button',
         kind: 'component',
         source: { record: 'catalog/components/button/artifact.json' },
       },
@@ -196,7 +222,7 @@ test('E-G0.1-01: minimum records, envelopes, diagnostics, ownership, and relatio
         bindingContent,
         bindingSpec: `sha256:${'2'.repeat(64)}`,
       },
-      coreVersion: '0.0.0',
+      muxuiVersion: '0.0.0',
       catalogVersion: '0.0.0',
       catalogDigest: `sha256:${'3'.repeat(64)}`,
       sourceRevision: `sha256:${'4'.repeat(64)}`,
@@ -221,7 +247,7 @@ test('E-G0.1-01: minimum records, envelopes, diagnostics, ownership, and relatio
     futureOptionalMember: true,
   });
   validateFamily('diagnostic', {
-    code: 'CORE_SCHEMA_INVALID',
+    code: 'MUXUI_SCHEMA_INVALID',
     ruleId: 'schema.record.valid',
     message: 'The record is invalid.',
     retryable: false,
@@ -232,12 +258,12 @@ test('E-G0.1-01: minimum records, envelopes, diagnostics, ownership, and relatio
 test('E-G0.1-01 negative: unknown, duplicate, invalid-relation, and unowned fields fail closed', () => {
   const unknown = component();
   unknown.unowned = true;
-  assert.throws(() => validateFamily('component', unknown), expectCode('CORE_SCHEMA_INVALID'));
+  assert.throws(() => validateFamily('component', unknown), expectCode('MUXUI_SCHEMA_INVALID'));
 
   const duplicate = component();
   assert.throws(
     () => validateCatalogRecords([duplicate, structuredClone(duplicate), tokenSource()]),
-    expectCode('CORE_ARTIFACT_ID_INVALID'),
+    expectCode('MUXUI_ARTIFACT_ID_INVALID'),
   );
 
   for (const hostileKind of ['toString', 'constructor', '__proto__']) {
@@ -245,42 +271,42 @@ test('E-G0.1-01 negative: unknown, duplicate, invalid-relation, and unowned fiel
     invalidKind.kind = hostileKind;
     assert.throws(
       () => validateCatalogRecords([invalidKind, tokenSource()]),
-      expectCode('CORE_SCHEMA_INVALID'),
+      expectCode('MUXUI_SCHEMA_INVALID'),
     );
   }
 
   const badRelation = example();
-  badRelation.binding.ref = 'core:component:missing#web.react';
+  badRelation.binding.ref = 'muxui:component:missing#web.react';
   assert.throws(
     () => validateCatalogRecords([component(), badRelation, tokenSource()]),
-    expectCode('CORE_RELATION_INVALID'),
+    expectCode('MUXUI_RELATION_INVALID'),
   );
 
   const unowned = component();
   unowned.bindings['web.react'].contentRevision = `sha256:${'0'.repeat(64)}`;
-  assert.throws(() => validateFamily('component', unowned), expectCode('CORE_SCHEMA_INVALID'));
+  assert.throws(() => validateFamily('component', unowned), expectCode('MUXUI_SCHEMA_INVALID'));
 
   const mismatchedValidationProfile = component();
   mismatchedValidationProfile.bindings['native.react-native'].runtimeProfiles.ios.validationProfile =
     'native.android';
   assert.throws(
     () => validateCatalogRecords([mismatchedValidationProfile, tokenSource()]),
-    expectCode('CORE_SCHEMA_INVALID'),
+    expectCode('MUXUI_SCHEMA_INVALID'),
   );
 
   const impossibleApplicability = example();
   impossibleApplicability.binding.runtimeProfiles = ['ios'];
   assert.throws(
     () => validateCatalogRecords([component(), impossibleApplicability, tokenSource()]),
-    expectCode('CORE_RELATION_INVALID'),
+    expectCode('MUXUI_RELATION_INVALID'),
   );
 
   const unsupportedApplicability = example();
-  unsupportedApplicability.binding.ref = 'core:component:button#native.react-native';
+  unsupportedApplicability.binding.ref = 'muxui:component:button#native.react-native';
   unsupportedApplicability.binding.runtimeProfiles = ['native.react-native-web'];
   assert.throws(
     () => validateCatalogRecords([component(), unsupportedApplicability, tokenSource()]),
-    expectCode('CORE_RELATION_INVALID'),
+    expectCode('MUXUI_RELATION_INVALID'),
   );
 
   const crossBindingProfile = component();
@@ -291,14 +317,14 @@ test('E-G0.1-01 negative: unknown, duplicate, invalid-relation, and unowned fiel
   };
   assert.throws(
     () => validateCatalogRecords([crossBindingProfile, tokenSource()]),
-    expectCode('CORE_SCHEMA_INVALID'),
+    expectCode('MUXUI_SCHEMA_INVALID'),
   );
 
   const missingNativeDisposition = component();
   delete missingNativeDisposition.bindings['native.react-native'].runtimeProfiles.android;
   assert.throws(
     () => validateCatalogRecords([missingNativeDisposition, tokenSource()]),
-    expectCode('CORE_SCHEMA_INVALID'),
+    expectCode('MUXUI_SCHEMA_INVALID'),
   );
 
   const unsupportedBinding = {
@@ -327,31 +353,31 @@ test('E-G0.1-01 negative: unknown, duplicate, invalid-relation, and unowned fiel
       example(),
       tokenSource(),
     ]),
-    expectCode('CORE_RELATION_INVALID'),
+    expectCode('MUXUI_RELATION_INVALID'),
   );
   assert.throws(
     () => validateFamily('binding', {
       schemaVersion: '2.0.0',
       strategy: 'unsupported',
-      alternative: 'core:component:button',
+      alternative: 'muxui:component:button',
     }),
-    expectCode('CORE_SCHEMA_INVALID'),
+    expectCode('MUXUI_SCHEMA_INVALID'),
   );
   assert.throws(
     () => validateFamily('binding', { schemaVersion: '2.0.0', strategy: 'unsupported' }),
-    expectCode('CORE_SCHEMA_INVALID'),
+    expectCode('MUXUI_SCHEMA_INVALID'),
   );
   assert.throws(
     () => validateFamily('binding', { ...unsupportedBinding, lifecycle: 'experimental' }),
-    expectCode('CORE_SCHEMA_INVALID'),
+    expectCode('MUXUI_SCHEMA_INVALID'),
   );
   for (const field of ['reason', 'alternative']) {
     assert.throws(
       () => validateFamily('binding', {
         ...component().bindings['web.react'],
-        [field]: field === 'reason' ? 'Not applicable.' : 'core:component:button',
+        [field]: field === 'reason' ? 'Not applicable.' : 'muxui:component:button',
       }),
-      expectCode('CORE_SCHEMA_INVALID'),
+      expectCode('MUXUI_SCHEMA_INVALID'),
     );
     const implementedProfile = component().bindings['native.react-native'].runtimeProfiles.ios;
     assert.throws(
@@ -361,27 +387,27 @@ test('E-G0.1-01 negative: unknown, duplicate, invalid-relation, and unowned fiel
           ...component().bindings['native.react-native'].runtimeProfiles,
           ios: {
             ...implementedProfile,
-            [field]: field === 'reason' ? 'Not applicable.' : 'core:component:button',
+            [field]: field === 'reason' ? 'Not applicable.' : 'muxui:component:button',
           },
         },
       }),
-      expectCode('CORE_SCHEMA_INVALID'),
+      expectCode('MUXUI_SCHEMA_INVALID'),
     );
   }
   const alternativeOnlyProfile = component().bindings['native.react-native'];
   alternativeOnlyProfile.runtimeProfiles['native.react-native-web'] = {
     strategy: 'unsupported',
-    alternative: 'core:component:button',
+    alternative: 'muxui:component:button',
   };
   assert.throws(
     () => validateFamily('binding', alternativeOnlyProfile),
-    expectCode('CORE_SCHEMA_INVALID'),
+    expectCode('MUXUI_SCHEMA_INVALID'),
   );
   const forbiddenUnsupportedFields = {
     api: { props: [], events: [], parts: [], defaults: {} },
     behavior: [],
     accessibility: [],
-    tokenRecipe: { source: 'core:token:default-theme', requirements: [] },
+    tokenRecipe: { source: 'muxui:token:default-theme', requirements: [] },
     runtimeProfiles: {
       ios: {
         strategy: 'adapted',
@@ -393,25 +419,25 @@ test('E-G0.1-01 negative: unknown, duplicate, invalid-relation, and unowned fiel
   for (const [field, fieldValue] of Object.entries(forbiddenUnsupportedFields)) {
     assert.throws(
       () => validateFamily('binding', { ...unsupportedBinding, [field]: fieldValue }),
-      expectCode('CORE_SCHEMA_INVALID'),
+      expectCode('MUXUI_SCHEMA_INVALID'),
     );
   }
 
   const danglingPrerequisite = example();
-  danglingPrerequisite.prerequisites = ['core:component:missing'];
+  danglingPrerequisite.prerequisites = ['muxui:component:missing'];
   assert.throws(
     () => validateCatalogRecords([component(), danglingPrerequisite, tokenSource()]),
-    expectCode('CORE_RELATION_INVALID'),
+    expectCode('MUXUI_RELATION_INVALID'),
   );
 
   const danglingAlternative = component();
   danglingAlternative.bindings['web.react'] = {
     ...unsupportedBinding,
-    alternative: 'core:component:missing',
+    alternative: 'muxui:component:missing',
   };
   assert.throws(
     () => validateCatalogRecords([danglingAlternative, tokenSource()]),
-    expectCode('CORE_RELATION_INVALID'),
+    expectCode('MUXUI_RELATION_INVALID'),
   );
 
   const unsupportedProfileExample = example();
@@ -422,7 +448,7 @@ test('E-G0.1-01 negative: unknown, duplicate, invalid-relation, and unowned fiel
       unsupportedProfileExample,
       tokenSource(),
     ]),
-    expectCode('CORE_RELATION_INVALID'),
+    expectCode('MUXUI_RELATION_INVALID'),
   );
 });
 
@@ -500,7 +526,7 @@ test('E-G0.1-02: canonical bytes ignore key order and whitespace but preserve me
   );
   assert.throws(
     () => validateFamily('component', topLevelPrototype),
-    expectCode('CORE_SCHEMA_INVALID'),
+    expectCode('MUXUI_SCHEMA_INVALID'),
   );
   const nestedPrototype = parseJsonStrict(
     JSON.stringify(component()).replace(
@@ -510,7 +536,7 @@ test('E-G0.1-02: canonical bytes ignore key order and whitespace but preserve me
   );
   assert.throws(
     () => validateFamily('component', nestedPrototype),
-    expectCode('CORE_SCHEMA_INVALID'),
+    expectCode('MUXUI_SCHEMA_INVALID'),
   );
   for (const inheritedKey of [
     'toString',
@@ -524,7 +550,7 @@ test('E-G0.1-02: canonical bytes ignore key order and whitespace but preserve me
     );
     assert.throws(
       () => validateFamily('component', hostileRecord),
-      expectCode('CORE_SCHEMA_INVALID'),
+      expectCode('MUXUI_SCHEMA_INVALID'),
     );
 
     const hostileBinding = component();
@@ -533,7 +559,7 @@ test('E-G0.1-02: canonical bytes ignore key order and whitespace but preserve me
     );
     assert.throws(
       () => validateFamily('component', hostileBinding),
-      expectCode('CORE_SCHEMA_INVALID'),
+      expectCode('MUXUI_SCHEMA_INVALID'),
     );
 
     const hostileRuntimeProfile = component();
@@ -544,7 +570,7 @@ test('E-G0.1-02: canonical bytes ignore key order and whitespace but preserve me
     };
     assert.throws(
       () => validateFamily('component', hostileRuntimeProfile),
-      expectCode('CORE_SCHEMA_INVALID'),
+      expectCode('MUXUI_SCHEMA_INVALID'),
     );
   }
   assert.throws(
@@ -587,7 +613,7 @@ test('E-G0.1-03: editorial content and normative binding closure affect the corr
 
   const inertExtension = structuredClone(concept);
   inertExtension.extensions = {
-    'core.experimental.g01-proof': { note: 'inert', strategy: 'memo' },
+    'muxui.experimental.g01-proof': { note: 'inert', strategy: 'memo' },
   };
   assert.notEqual(contentRevision('component', inertExtension), baseContent);
   assert.equal(bindingSpecRevision({
@@ -691,7 +717,7 @@ test('E-G0.1-04: package/source locations remain derived and generated types ret
     record.sourceLocation = 'packages/incorrect';
     assert.throws(
       () => validateFamily(record.kind === 'token' ? 'token-source' : record.kind, record),
-      expectCode('CORE_SCHEMA_INVALID'),
+      expectCode('MUXUI_SCHEMA_INVALID'),
     );
   }
   const generated = await readFile(resolve(import.meta.dirname, '../generated/types.d.ts'), 'utf8');
@@ -745,11 +771,11 @@ test('TALE-TOKEN-B token-source 2.0 to 2.1 migration is explicit, omission-prese
   assert.deepEqual(migrateTokenSourceV2ToV2_1(migrated, { sourceCrosswalk }), migrated);
   assert.throws(
     () => migrateTokenSourceV2ToV2_1(migrated, { sourceCrosswalk: { ...sourceCrosswalk, extra: true } }),
-    expectCode('CORE_SCHEMA_MIGRATION_REQUIRED'),
+    expectCode('MUXUI_SCHEMA_MIGRATION_REQUIRED'),
   );
   assert.throws(
     () => migrateTokenSourceV2ToV2_1(legacy, { dryRun: 'true' }),
-    expectCode('CORE_SCHEMA_MIGRATION_REQUIRED'),
+    expectCode('MUXUI_SCHEMA_MIGRATION_REQUIRED'),
   );
 });
 
@@ -762,7 +788,7 @@ test('TALE-TOKEN-A section-page grammar is closed, typed, and position-safe', ()
       catalogVersion: '0.1.0',
       catalogDigest: `sha256:${'a'.repeat(64)}`,
       tokenSourceContentRevision: `sha256:${'b'.repeat(64)}`,
-      artifactId: 'core:token:default-theme',
+      artifactId: 'muxui:token:default-theme',
       section: 'tokens',
       selectorDigest: `sha256:${'c'.repeat(64)}`,
     },
@@ -815,12 +841,12 @@ test('TALE-TOKEN-A section-page grammar is closed, typed, and position-safe', ()
     (value) => { value.page.position = 4294967295; value.page.returned = 1; },
     (value) => { value.meta.catalogVersion = '1'.repeat(65); },
     (value) => { value.meta.catalogVersion = 'not-semver'; },
-    (value) => { value.meta.artifactId = `core:token:${'a-'.repeat(130)}a`; },
+    (value) => { value.meta.artifactId = `muxui:token:${'a-'.repeat(130)}a`; },
     (value) => { value.page.remaining = 1; value.page.nextCursor = 'c1.e30.0000000000000000000000000000000000000000000000000000000000000000'; },
   ]) {
     const invalid = structuredClone(page);
     mutate(invalid);
-    assert.throws(() => validateFamily('section-page', invalid), /CORE_SCHEMA_INVALID/);
+    assert.throws(() => validateFamily('section-page', invalid), /MUXUI_SCHEMA_INVALID/);
   }
 
   const terminal = structuredClone(page);
@@ -899,32 +925,32 @@ test('TALE-TOKEN-A section-page grammar is closed, typed, and position-safe', ()
   assert.doesNotThrow(() => validateFamily('section-page', ordinalTie));
   const reversedOrdinalTie = structuredClone(ordinalTie);
   reversedOrdinalTie.entries.items.reverse();
-  assert.throws(() => validateFamily('section-page', reversedOrdinalTie), /CORE_SCHEMA_INVALID/);
+  assert.throws(() => validateFamily('section-page', reversedOrdinalTie), /MUXUI_SCHEMA_INVALID/);
   const duplicateOrdinalTie = structuredClone(ordinalTie);
   duplicateOrdinalTie.entries.items[1] = structuredClone(duplicateOrdinalTie.entries.items[0]);
   duplicateOrdinalTie.page.entryTokens = duplicateOrdinalTie.entries.items.reduce(
     (total, entry) => total + countLexemes(entry),
     0,
   );
-  assert.throws(() => validateFamily('section-page', duplicateOrdinalTie), /CORE_SCHEMA_INVALID/);
+  assert.throws(() => validateFamily('section-page', duplicateOrdinalTie), /MUXUI_SCHEMA_INVALID/);
 
   for (const mutate of [
-    (value) => { value.entries.items[0].coreTokenId = 'reference.color.black'; },
+    (value) => { value.entries.items[0].muxuiTokenId = 'reference.color.black'; },
     (value) => { value.entries.items[0].occurrence.ordinal = 0; },
     (value) => { value.entries.items[0].targets['web.html'] = 'invented'; },
     (value) => { value.meta.section = 'tokens'; },
   ]) {
     const invalid = structuredClone(sourceCrosswalk);
     mutate(invalid);
-    assert.throws(() => validateFamily('section-page', invalid), /CORE_SCHEMA_INVALID/);
+    assert.throws(() => validateFamily('section-page', invalid), /MUXUI_SCHEMA_INVALID/);
   }
 
   const wrongCursorBinding = structuredClone(continued);
   wrongCursorBinding.meta.selectorDigest = `sha256:${'d'.repeat(64)}`;
-  assert.throws(() => validateFamily('section-page', wrongCursorBinding), /CORE_SCHEMA_INVALID/);
+  assert.throws(() => validateFamily('section-page', wrongCursorBinding), /MUXUI_SCHEMA_INVALID/);
   const tamperedCursor = structuredClone(continued);
   tamperedCursor.page.nextCursor = `${continued.page.nextCursor.slice(0, -1)}${continued.page.nextCursor.endsWith('0') ? '1' : '0'}`;
-  assert.throws(() => validateFamily('section-page', tamperedCursor), /CORE_SCHEMA_INVALID/);
+  assert.throws(() => validateFamily('section-page', tamperedCursor), /MUXUI_SCHEMA_INVALID/);
 });
 
 test('TALE-TOKEN-B page budget profile grammar is closed and internally bounded', async () => {
@@ -939,14 +965,14 @@ test('TALE-TOKEN-B page budget profile grammar is closed and internally bounded'
     (value) => { value.maximumEntryTokens -= 1; },
     (value) => { value.defaultItemLimit = value.maximumItemLimit + 1; },
     (value) => { value.normalizedWorstCaseEnvelopeSha256 = 'not-a-digest'; },
-    (value) => { value.id = 'core-ui-token-section-page-budget-1-2-0'; },
+    (value) => { value.id = 'muxui-token-section-page-budget-1-2-0'; },
     (value) => { value.queryApiVersion = '1.2.0'; },
   ]) {
     const invalid = structuredClone(profile);
     mutate(invalid);
     assert.throws(
       () => validateFamily('token-section-page-budget-profile', invalid),
-      /CORE_SCHEMA_INVALID/,
+      /MUXUI_SCHEMA_INVALID/,
     );
   }
 });
@@ -959,7 +985,7 @@ test('E-G0.1-05: schema evolution and append-only response policy enforce declar
   for (const inheritedChangeType of ['toString', 'constructor', '__proto__']) {
     assert.throws(
       () => classifySchemaChange(inheritedChangeType),
-      expectCode('CORE_SCHEMA_VERSION_UNSUPPORTED'),
+      expectCode('MUXUI_SCHEMA_VERSION_UNSUPPORTED'),
     );
   }
   assert.deepEqual(
@@ -968,14 +994,14 @@ test('E-G0.1-05: schema evolution and append-only response policy enforce declar
   );
   assert.throws(
     () => negotiateSchemaVersion('2.0.0', { minimum: '1.0.0', maximumExclusive: '2.0.0' }),
-    expectCode('CORE_SCHEMA_VERSION_UNSUPPORTED'),
+    expectCode('MUXUI_SCHEMA_VERSION_UNSUPPORTED'),
   );
-  assert.deepEqual(assertAppendOnlyErrorCodes(ERROR_CODES, [...ERROR_CODES, 'CORE_NEW_CODE']), [
+  assert.deepEqual(assertAppendOnlyErrorCodes(ERROR_CODES, [...ERROR_CODES, 'MUXUI_NEW_CODE']), [
     ...ERROR_CODES,
-    'CORE_NEW_CODE',
+    'MUXUI_NEW_CODE',
   ]);
   assert.throws(
     () => assertAppendOnlyErrorCodes(ERROR_CODES, ERROR_CODES.slice(1)),
-    expectCode('CORE_SCHEMA_VERSION_UNSUPPORTED'),
+    expectCode('MUXUI_SCHEMA_VERSION_UNSUPPORTED'),
   );
 });

@@ -1,6 +1,6 @@
 // @generated-from: apps/react-storybook/src/generate-stories.mjs
-// @generated-content-sha256: sha256:52701d7449fa5f016ab716b0644a07af088a0c8a47c927da47da95bd159d3aed
-import * as Core from '@core-ui/react';
+// @generated-content-sha256: sha256:ceab6af2a8e3c07c1dc86b8e2a7dd42d37a896324345f89862cf6ad1b04108ec
+import * as MuxUI from '@muxui/react';
 import { argTypesForBinding, createStory } from '../../src/storybook-factory.mjs';
 
 const binding = {
@@ -26,12 +26,12 @@ const binding = {
       "aria-labelledby"
     ]
   },
-  "binding": "core:component:drop-zone#web.react",
+  "binding": "muxui:component:drop-zone#web.react",
   "export": "DropZone",
   "lifecycle": "experimental",
   "module": ".",
   "runtimeProfile": "web.react",
-  "selector": ".core-drop-zone",
+  "selector": ".muxui-drop-zone",
   "states": [
     "idle",
     "drop-target",
@@ -43,8 +43,9 @@ const binding = {
 const record = { family: 'DropZone', tranche: 'R1.4', binding };
 
 export default {
-  title: 'Core React/R1.4/DropZone',
-  component: Core.DropZone,
+  title: 'Mux UI React/R1.4/DropZone',
+  id: 'muxui-react-r1-4-drop-zone',
+  component: MuxUI.DropZone,
   tags: ['autodocs'],
   parameters: {
     controls: {
@@ -52,7 +53,7 @@ export default {
     },
     docs: {
       description: {
-        component: 'Private development showcase for the Core-owned DropZone family.',
+        component: 'Private development showcase for the Mux UI-owned DropZone family.',
       },
     },
   },

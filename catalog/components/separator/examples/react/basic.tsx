@@ -1,4 +1,4 @@
-import { Separator } from '@core-ui/react';
+import { Separator } from '@muxui/react';
 
 export function BasicSeparatorExample() {
   return <Separator orientation="horizontal" />;

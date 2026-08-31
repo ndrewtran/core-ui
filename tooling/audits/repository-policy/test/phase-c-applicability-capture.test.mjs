@@ -60,7 +60,7 @@ test('Decision 0006 authority capture is atomic, recoverable, confined, and chec
   const sourceRevision = fs.existsSync(retainedIndex)
     ? JSON.parse(fs.readFileSync(retainedIndex, 'utf8')).sourceRevision
     : git(['rev-parse', 'HEAD']);
-  const temporary = fs.mkdtempSync(path.join(os.tmpdir(), 'core-ui-phase-c-authority-capture-'));
+  const temporary = fs.mkdtempSync(path.join(os.tmpdir(), 'muxui-phase-c-authority-capture-'));
   const atomicWorktree = addWorktree(temporary, 'atomic', sourceRevision);
   const dirtyWorktree = addWorktree(temporary, 'dirty', sourceRevision);
 

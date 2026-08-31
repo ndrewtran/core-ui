@@ -9,14 +9,14 @@ const caseStyle = {
   alignItems: 'flex-start',
   justifyContent: 'flex-start',
   padding: '12px',
-  background: 'var(--core-migration-frame-background)',
+  background: 'var(--muxui-migration-frame-background)',
 };
 
 function Case({ entry, children }) {
   const wide = ['TextField', 'Autocomplete', 'ComboBox', 'Select'].includes(entry.component);
   const viewport = entry.component === 'Virtualizer' ? entry.fixture.frame.virtualizer : undefined;
   return React.createElement('div', {
-    'data-core-migration-case': `${entry.slug}-${entry.state}`,
+    'data-muxui-migration-case': `${entry.slug}-${entry.state}`,
     className: 'migration-component',
     style: {
       ...caseStyle,
@@ -47,11 +47,11 @@ function renderCase(entry) {
 
 export function MigrationFixture({ runToken }) {
   const selectedCase = typeof window !== 'undefined'
-    ? new URLSearchParams(window.location.search).get('core-ui-migration-case')
+    ? new URLSearchParams(window.location.search).get('muxui-migration-case')
     : undefined;
   const entries = selectedCase ? migrationCases.filter((entry) => entry.id === selectedCase) : migrationCases;
   return React.createElement('div', {
-    'data-core-migration-run-token': runToken ?? '',
+    'data-muxui-migration-run-token': runToken ?? '',
     style: {
       display: 'grid',
       gridTemplateColumns: 'max-content',
@@ -59,7 +59,7 @@ export function MigrationFixture({ runToken }) {
       width: 'max-content',
       padding: 0,
       margin: 0,
-      background: 'var(--core-migration-frame-background)',
+      background: 'var(--muxui-migration-frame-background)',
     },
   }, entries.map((entry) => React.createElement(React.Fragment, { key: entry.id }, renderCase(entry))));
 }

@@ -1,3 +1,3 @@
 # Calendar usage
 
-Give Calendar a label and use Core ISO `YYYY-MM-DD` values.
+Give Calendar a label and use Mux UI ISO `YYYY-MM-DD` values.

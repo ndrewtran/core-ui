@@ -1,12 +1,12 @@
 {
   "schemaVersion": "1.0.0",
-  "id": "core:example:button-basic-react",
+  "id": "muxui:example:button-basic-react",
   "kind": "example",
   "name": "Basic React Button",
   "summary": "The minimum React Button example.",
   "lifecycle": "experimental",
   "binding": {
-    "ref": "core:component:button#web.react",
+    "ref": "muxui:component:button#web.react",
     "guidanceImpact": "normative",
     "purposes": ["generation", "explanation", "validation"],
     "preference": 0

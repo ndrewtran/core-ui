@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "id": "core:component:link",
+  "id": "muxui:component:link",
   "kind": "component",
   "name": "Link",
   "summary": "Navigates to another location or resource.",
@@ -63,7 +63,7 @@
         "Expose link role, destination, current state, and disabled state"
       ],
       "tokenRecipe": {
-        "source": "core:token:default-theme",
+        "source": "muxui:token:default-theme",
         "requirements": [
           {
             "token": "semantic.focus.ring",
@@ -142,7 +142,7 @@
         "Expose link role, destination, current state, and disabled state"
       ],
       "tokenRecipe": {
-        "source": "core:token:default-theme",
+        "source": "muxui:token:default-theme",
         "requirements": [
           {
             "token": "semantic.focus.ring",

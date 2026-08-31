@@ -1,18 +1,18 @@
-import { canonicalJson } from '@core-ui/schema';
+import { canonicalJson } from '@muxui/schema';
 import { valid } from 'semver';
 import {
   helpByCommand,
   helpText,
   parserMetadata,
 } from '../generated/command-surface.mjs';
-import { API_VERSION } from '@core-ui/schema';
+import { API_VERSION } from '@muxui/schema';
 
-function usageError(ruleId, message, details, nextCommand = 'core --json') {
+function usageError(ruleId, message, details, nextCommand = 'muxui --json') {
   return {
     apiVersion: API_VERSION,
     type: 'error',
     error: {
-      code: 'CORE_QUERY_INVALID',
+      code: 'MUXUI_QUERY_INVALID',
       ruleId,
       message,
       retryable: true,
@@ -89,7 +89,7 @@ export function parseCliArguments(args) {
         'cli.option.unknown',
         `${commandName} does not declare option ${JSON.stringify(token)}.`,
         { command: commandName, option: token },
-        `core ${commandName} --help`,
+        `muxui ${commandName} --help`,
       ) };
     }
     if (option.type === 'boolean') {
@@ -102,7 +102,7 @@ export function parseCliArguments(args) {
         'cli.option.value',
         `${option.flag} requires a value.`,
         { command: commandName, option: option.name },
-        `core ${commandName} --help`,
+        `muxui ${commandName} --help`,
       ) };
     }
     index += 1;
@@ -112,7 +112,7 @@ export function parseCliArguments(args) {
         'cli.option.value',
         `${option.flag} received an invalid value.`,
         { command: commandName, option: option.name, value: raw },
-        `core ${commandName} --help`,
+        `muxui ${commandName} --help`,
       ) };
     }
     values[option.name] = parsed.value;
@@ -126,7 +126,7 @@ export function parseCliArguments(args) {
           'cli.option.conflict',
           `${option.flag} conflicts with --${conflict}.`,
           { command: commandName, options: [option.name, conflict].sort() },
-          `core ${commandName} --help`,
+          `muxui ${commandName} --help`,
         ) };
       }
     }
@@ -139,7 +139,7 @@ export function parseCliArguments(args) {
       'cli.resolution.cache-tuple',
       '--catalog-version and --catalog-digest must be provided together.',
       { command: commandName, fields: ['catalog-digest', 'catalog-version'] },
-      `core ${commandName} --help`,
+      `muxui ${commandName} --help`,
     ) };
   }
   if (
@@ -155,7 +155,7 @@ export function parseCliArguments(args) {
       'cli.resolution.project-path',
       '--project must be a shell-safe relative path without parent traversal.',
       { command: commandName, fields: ['project'] },
-      `core ${commandName} --help`,
+      `muxui ${commandName} --help`,
     ) };
   }
   if (
@@ -169,7 +169,7 @@ export function parseCliArguments(args) {
       'cli.resolution.cache-identity',
       'Cached catalog selection requires one exact SemVer and SHA-256 digest.',
       { command: commandName, fields: ['catalog-digest', 'catalog-version'] },
-      `core ${commandName} --help`,
+      `muxui ${commandName} --help`,
     ) };
   }
   const requiredCount = command.arguments.filter(({ required }) => required).length;
@@ -178,7 +178,7 @@ export function parseCliArguments(args) {
       'cli.argument.count',
       `${commandName} received the wrong number of arguments.`,
       { command: commandName, received: positionals.length },
-      `core ${commandName} --help`,
+      `muxui ${commandName} --help`,
     ) };
   }
 

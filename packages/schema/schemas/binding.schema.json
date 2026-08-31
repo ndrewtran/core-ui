@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://core-ui.dev/schema/binding.schema.json",
-  "title": "Core UI platform binding",
+  "$id": "https://muxui.dev/schema/binding.schema.json",
+  "title": "Mux UI platform binding",
   "type": "object",
   "additionalProperties": false,
   "allOf": [{
@@ -10,7 +10,7 @@
       "required": ["schemaVersion", "lifecycle", "strategy", "api", "behavior", "accessibility", "tokenRecipe", "platformSafety", "runtimeProfiles"],
       "properties": { "strategy": {
         "enum": ["direct", "adapted", "native-alternative"],
-        "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
+        "x-muxui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
       } },
       "not": {
         "anyOf": [
@@ -23,7 +23,7 @@
       "required": ["schemaVersion", "strategy", "reason", "platformSafety"],
       "properties": { "strategy": {
         "const": "unsupported",
-        "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
+        "x-muxui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
       } },
       "not": {
         "anyOf": [
@@ -41,36 +41,36 @@
   "properties": {
     "schemaVersion": {
       "const": "2.0.0",
-      "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content"] }
+      "x-muxui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content"] }
     },
     "lifecycle": {
       "enum": ["experimental", "stable", "deprecated", "removed"],
-      "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
+      "x-muxui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
     },
     "strategy": {
       "enum": ["direct", "adapted", "native-alternative", "unsupported"],
-      "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
+      "x-muxui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
     },
     "reason": {
       "type": "string",
       "minLength": 1,
-      "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content"] }
+      "x-muxui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content"] }
     },
     "alternative": {
       "$ref": "artifact-ref.schema.json",
-      "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content"] }
+      "x-muxui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content"] }
     },
     "api": {
       "type": "object",
       "additionalProperties": false,
       "required": ["props", "events", "parts", "defaults"],
-      "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] },
+      "x-muxui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] },
       "properties": {
         "props": {
           "type": "array",
           "items": { "type": "string", "minLength": 1 },
           "uniqueItems": true,
-          "x-core-ui-authoring": {
+          "x-muxui-authoring": {
             "effects": { "add": "compatible", "remove": "incompatible", "replace": "incompatible" },
             "revisionAxes": ["binding-content", "binding-spec"]
           }
@@ -79,7 +79,7 @@
           "type": "array",
           "items": { "type": "string", "minLength": 1 },
           "uniqueItems": true,
-          "x-core-ui-authoring": {
+          "x-muxui-authoring": {
             "effects": { "add": "compatible", "remove": "incompatible", "replace": "incompatible" },
             "revisionAxes": ["binding-content", "binding-spec"]
           }
@@ -88,7 +88,7 @@
           "type": "array",
           "items": { "type": "string", "minLength": 1 },
           "uniqueItems": true,
-          "x-core-ui-authoring": {
+          "x-muxui-authoring": {
             "effects": { "add": "compatible", "remove": "incompatible", "replace": "incompatible" },
             "revisionAxes": ["binding-content", "binding-spec"]
           }
@@ -96,7 +96,7 @@
         "defaults": {
           "type": "object",
           "additionalProperties": true,
-          "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
+          "x-muxui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
         }
       }
     },
@@ -104,7 +104,7 @@
       "type": "array",
       "items": { "type": "string", "minLength": 1 },
       "uniqueItems": true,
-      "x-core-ui-authoring": {
+      "x-muxui-authoring": {
         "effects": { "add": "compatible", "remove": "incompatible", "replace": "incompatible" },
         "revisionAxes": ["binding-content", "binding-spec"]
       }
@@ -113,26 +113,26 @@
       "type": "array",
       "items": { "type": "string", "minLength": 1 },
       "uniqueItems": true,
-      "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
+      "x-muxui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
     },
     "tokenRecipe": {
       "type": "object",
       "additionalProperties": false,
       "required": ["source", "requirements"],
-      "x-core-ui-authoring": {
+      "x-muxui-authoring": {
         "effect": "incompatible",
         "revisionAxes": ["binding-content", "binding-spec"]
       },
       "properties": {
         "source": {
           "type": "string",
-          "pattern": "^core:token:[a-z0-9]+(?:-[a-z0-9]+)*$",
-          "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
+          "pattern": "^muxui:token:[a-z0-9]+(?:-[a-z0-9]+)*$",
+          "x-muxui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
         },
         "requirements": {
           "type": "array",
           "minItems": 1,
-          "x-core-ui-authoring": {
+          "x-muxui-authoring": {
             "effects": { "add": "compatible", "remove": "incompatible", "replace": "incompatible" },
             "revisionAxes": ["binding-content", "binding-spec"]
           },
@@ -143,7 +143,7 @@
     "platformSafety": {
       "type": "array",
       "minItems": 1,
-      "x-core-ui-authoring": {
+      "x-muxui-authoring": {
         "effects": { "add": "compatible", "remove": "incompatible", "replace": "incompatible" },
         "revisionAxes": ["binding-content", "binding-spec"]
       },
@@ -152,13 +152,13 @@
     "runtimeProfiles": {
       "type": "object",
       "additionalProperties": false,
-      "x-core-ui-authoring": {
+      "x-muxui-authoring": {
         "effects": { "add": "compatible", "remove": "incompatible", "replace": "incompatible" },
         "revisionAxes": ["binding-content", "binding-spec"]
       },
       "properties": {
         "ios": {
-          "x-core-ui-authoring": {
+          "x-muxui-authoring": {
             "effects": { "add": "compatible", "remove": "incompatible", "replace": "incompatible" },
             "revisionAxes": ["binding-content", "binding-spec"]
           },
@@ -166,12 +166,12 @@
             { "$ref": "#/$defs/runtimeProfile" },
             { "type": "object", "properties": { "validationProfile": {
               "const": "native.ios",
-              "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
+              "x-muxui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
             } } }
           ]
         },
         "android": {
-          "x-core-ui-authoring": {
+          "x-muxui-authoring": {
             "effects": { "add": "compatible", "remove": "incompatible", "replace": "incompatible" },
             "revisionAxes": ["binding-content", "binding-spec"]
           },
@@ -179,12 +179,12 @@
             { "$ref": "#/$defs/runtimeProfile" },
             { "type": "object", "properties": { "validationProfile": {
               "const": "native.android",
-              "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
+              "x-muxui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
             } } }
           ]
         },
         "native.react-native-web": {
-          "x-core-ui-authoring": {
+          "x-muxui-authoring": {
             "effects": { "add": "compatible", "remove": "incompatible", "replace": "incompatible" },
             "revisionAxes": ["binding-content", "binding-spec"]
           },
@@ -192,7 +192,7 @@
             { "$ref": "#/$defs/runtimeProfile" },
             { "type": "object", "properties": { "validationProfile": {
               "const": "native.react-native-web",
-              "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
+              "x-muxui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
             } } }
           ]
         }
@@ -201,11 +201,11 @@
     "editorialNotes": {
       "type": "array",
       "items": { "type": "string" },
-      "x-core-ui-authoring": { "effect": "editorial", "revisionAxes": ["binding-content"], "autofixes": ["trim-outer-whitespace"] }
+      "x-muxui-authoring": { "effect": "editorial", "revisionAxes": ["binding-content"], "autofixes": ["trim-outer-whitespace"] }
     },
     "extensions": {
       "$ref": "#/$defs/extensions",
-      "x-core-ui-authoring": {
+      "x-muxui-authoring": {
         "effects": { "add": "compatible", "remove": "incompatible", "replace": "incompatible" },
         "revisionAxes": ["binding-content"]
       }
@@ -219,16 +219,16 @@
       "properties": {
         "profile": {
           "enum": ["web.html", "web.react", "ios", "android", "native.react-native-web"],
-          "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
+          "x-muxui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
         },
         "validationProfile": {
           "enum": ["native.ios", "native.android", "native.react-native-web"],
-          "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
+          "x-muxui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
         },
         "requirements": {
           "type": "array",
           "minItems": 1,
-          "x-core-ui-authoring": {
+          "x-muxui-authoring": {
             "effects": { "add": "compatible", "remove": "incompatible", "replace": "incompatible" },
             "revisionAxes": ["binding-content", "binding-spec"]
           },
@@ -244,16 +244,16 @@
         "id": {
           "type": "string",
           "pattern": "^[a-z][a-z0-9-]*(?:\\.[a-z][a-z0-9-]*)+$",
-          "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
+          "x-muxui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
         },
         "disposition": {
           "enum": ["required", "not-applicable"],
-          "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
+          "x-muxui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
         },
         "reason": {
           "type": "string",
           "minLength": 1,
-          "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
+          "x-muxui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
         }
       }
     },
@@ -265,21 +265,21 @@
         "token": {
           "type": "string",
           "pattern": "^(semantic|component)\\.[a-z][a-z0-9]*(?:\\.[a-z][a-z0-9-]*)+$",
-          "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
+          "x-muxui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
         },
         "requirement": {
           "enum": ["required", "optional", "deprecated"],
-          "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
+          "x-muxui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
         },
         "profiles": {
           "type": "array",
           "minItems": 1,
           "uniqueItems": true,
           "items": { "enum": ["web.html", "web.react", "native.ios", "native.android", "native.react-native-web"] },
-          "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
+          "x-muxui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
         },
         "fallback": {
-          "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] },
+          "x-muxui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] },
           "oneOf": [
             { "$ref": "#/$defs/fallbackToken" },
             { "$ref": "#/$defs/fallbackValue" }
@@ -294,21 +294,21 @@
       "properties": {
         "kind": {
           "const": "token",
-          "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
+          "x-muxui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
         },
         "profiles": {
           "type": "array", "minItems": 1, "uniqueItems": true,
           "items": { "enum": ["web.html", "web.react", "native.ios", "native.android", "native.react-native-web"] },
-          "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
+          "x-muxui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
         },
         "evidenceIds": {
           "type": "array", "minItems": 1, "uniqueItems": true,
           "items": { "type": "string", "pattern": "^E-G[0-9]+\\.[0-9]+-[0-9]{2}$" },
-          "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
+          "x-muxui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
         },
         "token": {
           "type": "string", "pattern": "^(semantic|component)\\.[a-z][a-z0-9]*(?:\\.[a-z][a-z0-9-]*)+$",
-          "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
+          "x-muxui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
         }
       }
     },
@@ -319,29 +319,29 @@
       "properties": {
         "kind": {
           "const": "value",
-          "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
+          "x-muxui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
         },
         "profiles": {
           "type": "array", "minItems": 1, "uniqueItems": true,
           "items": { "enum": ["web.html", "web.react", "native.ios", "native.android", "native.react-native-web"] },
-          "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
+          "x-muxui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
         },
         "evidenceIds": {
           "type": "array", "minItems": 1, "uniqueItems": true,
           "items": { "type": "string", "pattern": "^E-G[0-9]+\\.[0-9]+-[0-9]{2}$" },
-          "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
+          "x-muxui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
         },
         "type": {
           "enum": ["color", "dimension", "duration", "number", "string"],
-          "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
+          "x-muxui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
         },
         "unit": {
           "enum": ["hex", "px", "ms", "unitless", "string"],
-          "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
+          "x-muxui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
         },
         "value": {
           "anyOf": [{ "type": "string" }, { "type": "number" }],
-          "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
+          "x-muxui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
         }
       }
     },
@@ -354,7 +354,7 @@
             "required": ["strategy", "lifecycle", "validationProfile"],
             "properties": { "strategy": {
               "enum": ["direct", "adapted", "native-alternative"],
-              "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
+              "x-muxui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
             } },
             "not": {
               "anyOf": [
@@ -367,7 +367,7 @@
             "required": ["strategy", "reason"],
             "properties": { "strategy": {
               "const": "unsupported",
-              "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
+              "x-muxui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
             } },
             "not": {
               "anyOf": [
@@ -381,30 +381,30 @@
       "properties": {
         "strategy": {
           "enum": ["direct", "adapted", "native-alternative", "unsupported"],
-          "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
+          "x-muxui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
         },
         "lifecycle": {
           "enum": ["experimental", "stable", "deprecated", "removed"],
-          "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
+          "x-muxui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
         },
         "validationProfile": {
           "enum": ["native.ios", "native.android", "native.react-native-web"],
-          "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
+          "x-muxui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
         },
         "reason": {
           "type": "string",
           "minLength": 1,
-          "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
+          "x-muxui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
         },
         "alternative": {
           "$ref": "artifact-ref.schema.json",
-          "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
+          "x-muxui-authoring": { "effect": "incompatible", "revisionAxes": ["binding-content", "binding-spec"] }
         }
       }
     },
     "extensions": {
       "type": "object",
-      "propertyNames": { "pattern": "^core\\.experimental\\.[a-z0-9]+(?:-[a-z0-9]+)*$" },
+      "propertyNames": { "pattern": "^muxui\\.experimental\\.[a-z0-9]+(?:-[a-z0-9]+)*$" },
       "additionalProperties": true
     }
   }

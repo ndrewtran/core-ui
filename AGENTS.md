@@ -1,4 +1,4 @@
-# Core UI route map
+# Mux UI route map
 
 ## Routes
 

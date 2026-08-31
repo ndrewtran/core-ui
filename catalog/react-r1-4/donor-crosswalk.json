@@ -1,5 +1,5 @@
 {
-  "schema": "core-ui-react-r1-4-donor-crosswalk-v1",
+  "schema": "muxui-react-r1-4-donor-crosswalk-v1",
   "tranche": "R1.4",
   "donor": {
     "name": "Tale UI",

@@ -1,5 +1,5 @@
 {
-  "name": "@core-ui/tooling",
+  "name": "@muxui/tooling",
   "version": "1.0.0",
   "private": true,
   "type": "module",
@@ -7,7 +7,7 @@
     "node": ">=24.19.0 <25"
   },
   "bin": {
-    "core": "./bin/core.mjs"
+    "muxui": "./bin/muxui.mjs"
   },
   "exports": {
     ".": "./src/index.mjs",
@@ -21,8 +21,8 @@
     "generate:check": "node src/generate.mjs --check"
   },
   "dependencies": {
-    "@core-ui/catalog": "workspace:*",
-    "@core-ui/schema": "workspace:*",
+    "@muxui/catalog": "workspace:*",
+    "@muxui/schema": "workspace:*",
     "semver": "7.8.5"
   }
 }

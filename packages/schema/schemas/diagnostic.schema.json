@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://core-ui.dev/schema/diagnostic.schema.json",
-  "title": "Core UI diagnostic",
+  "$id": "https://muxui.dev/schema/diagnostic.schema.json",
+  "title": "Mux UI diagnostic",
   "type": "object",
   "additionalProperties": true,
   "$defs": {
@@ -13,13 +13,13 @@
       "properties": {
         "code": {
           "enum": [
-            "CORE_CATALOG_NOT_DECLARED",
-            "CORE_CATALOG_NOT_INSTALLED",
-            "CORE_CATALOG_DECLARATION_DRIFT",
-            "CORE_CATALOG_INTEGRITY_MISMATCH",
-            "CORE_CATALOG_RESOLUTION_AMBIGUOUS",
-            "CORE_QUERY_API_VERSION_UNSUPPORTED",
-            "CORE_CATALOG_INCOMPATIBLE"
+            "MUXUI_CATALOG_NOT_DECLARED",
+            "MUXUI_CATALOG_NOT_INSTALLED",
+            "MUXUI_CATALOG_DECLARATION_DRIFT",
+            "MUXUI_CATALOG_INTEGRITY_MISMATCH",
+            "MUXUI_CATALOG_RESOLUTION_AMBIGUOUS",
+            "MUXUI_QUERY_API_VERSION_UNSUPPORTED",
+            "MUXUI_CATALOG_INCOMPATIBLE"
           ]
         },
         "ruleId": { "type": "string", "pattern": "^[a-z][a-z0-9-]*(?:\\.[a-z][a-z0-9-]*)+$" },
@@ -93,61 +93,61 @@
       "properties": {
         "code": {
           "enum": [
-            "CORE_SCHEMA_INVALID",
-            "CORE_ARTIFACT_ID_INVALID",
-            "CORE_RELATION_INVALID",
-            "CORE_FIELD_OWNERSHIP_INVALID",
-            "CORE_SCHEMA_VERSION_UNSUPPORTED",
-            "CORE_QUERY_INVALID",
-            "CORE_QUERY_API_VERSION_UNSUPPORTED",
-            "CORE_QUERY_INLINE_TOKENS_DEPRECATED",
-            "CORE_QUERY_PAGE_ENVELOPE_TOO_LARGE",
-            "CORE_QUERY_PAGE_ENTRY_TOO_LARGE",
-            "CORE_CURSOR_INVALID",
-            "CORE_ARTIFACT_NOT_FOUND"
+            "MUXUI_SCHEMA_INVALID",
+            "MUXUI_ARTIFACT_ID_INVALID",
+            "MUXUI_RELATION_INVALID",
+            "MUXUI_FIELD_OWNERSHIP_INVALID",
+            "MUXUI_SCHEMA_VERSION_UNSUPPORTED",
+            "MUXUI_QUERY_INVALID",
+            "MUXUI_QUERY_API_VERSION_UNSUPPORTED",
+            "MUXUI_QUERY_INLINE_TOKENS_DEPRECATED",
+            "MUXUI_QUERY_PAGE_ENVELOPE_TOO_LARGE",
+            "MUXUI_QUERY_PAGE_ENTRY_TOO_LARGE",
+            "MUXUI_CURSOR_INVALID",
+            "MUXUI_ARTIFACT_NOT_FOUND"
           ]
         }
       }
     },
     {
       "properties": {
-        "code": { "const": "CORE_PROJECT_NOT_FOUND" },
+        "code": { "const": "MUXUI_PROJECT_NOT_FOUND" },
         "details": { "$ref": "#/$defs/resolverDetails" }
       }
     },
     {
       "properties": {
-        "code": { "const": "CORE_CATALOG_NOT_DECLARED" },
+        "code": { "const": "MUXUI_CATALOG_NOT_DECLARED" },
         "details": { "$ref": "#/$defs/resolverDetails" }
       }
     },
     {
       "properties": {
-        "code": { "const": "CORE_CATALOG_NOT_INSTALLED" },
+        "code": { "const": "MUXUI_CATALOG_NOT_INSTALLED" },
         "details": { "$ref": "#/$defs/resolverDetails" }
       }
     },
     {
       "properties": {
-        "code": { "const": "CORE_CATALOG_DECLARATION_DRIFT" },
+        "code": { "const": "MUXUI_CATALOG_DECLARATION_DRIFT" },
         "details": { "$ref": "#/$defs/resolverDetails" }
       }
     },
     {
       "properties": {
-        "code": { "const": "CORE_CATALOG_INTEGRITY_MISMATCH" },
+        "code": { "const": "MUXUI_CATALOG_INTEGRITY_MISMATCH" },
         "details": { "$ref": "#/$defs/resolverDetails" }
       }
     },
     {
       "properties": {
-        "code": { "const": "CORE_CATALOG_RESOLUTION_AMBIGUOUS" },
+        "code": { "const": "MUXUI_CATALOG_RESOLUTION_AMBIGUOUS" },
         "details": { "$ref": "#/$defs/resolverDetails" }
       }
     },
     {
       "properties": {
-        "code": { "const": "CORE_CATALOG_INCOMPATIBLE" },
+        "code": { "const": "MUXUI_CATALOG_INCOMPATIBLE" },
         "details": { "$ref": "#/$defs/resolverDetails" }
       }
     }

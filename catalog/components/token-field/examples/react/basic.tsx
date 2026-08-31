@@ -1,2 +1,2 @@
-import { TokenField } from '@core-ui/react';
+import { TokenField } from '@muxui/react';
 export function BasicTokenFieldExample() { return <TokenField label="Tags" defaultValue={['Core']} />; }

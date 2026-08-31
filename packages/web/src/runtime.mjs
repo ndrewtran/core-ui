@@ -1,1 +1,1 @@
-export { claimRoot, connectRoot, CoreWebOwnershipError } from './runtime-implementation.mjs';
+export { claimRoot, connectRoot, MuxUIWebOwnershipError } from './runtime-implementation.mjs';

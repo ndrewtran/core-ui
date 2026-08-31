@@ -58,14 +58,14 @@ test('E-G1.0-07 compiles closed binding-owned requirement sets without behavior 
 test('E-G1.0-07 rejects unknown, missing, duplicate, and wrong-profile declarations', () => {
   const unknown = webBinding();
   unknown.platformSafety[0].requirements[0].id = 'system.unknown';
-  assert.throws(() => validateFamily('binding', unknown), /CORE_SCHEMA_INVALID/);
-  expectCode('CORE_PLATFORM_SAFETY_REQUIREMENT_UNKNOWN', () => compilePlatformSafetyRequirementSets({
+  assert.throws(() => validateFamily('binding', unknown), /MUXUI_SCHEMA_INVALID/);
+  expectCode('MUXUI_PLATFORM_SAFETY_REQUIREMENT_UNKNOWN', () => compilePlatformSafetyRequirementSets({
     contract, bindingId: 'web.react', binding: unknown,
   }));
 
   const missingRequirement = webBinding();
   missingRequirement.platformSafety[0].requirements.pop();
-  expectCode('CORE_PLATFORM_SAFETY_REQUIREMENT_MISSING', () => compilePlatformSafetyRequirementSets({
+  expectCode('MUXUI_PLATFORM_SAFETY_REQUIREMENT_MISSING', () => compilePlatformSafetyRequirementSets({
     contract, bindingId: 'web.react', binding: missingRequirement,
   }));
 
@@ -73,25 +73,25 @@ test('E-G1.0-07 rejects unknown, missing, duplicate, and wrong-profile declarati
   duplicateRequirement.platformSafety[0].requirements.push(
     structuredClone(duplicateRequirement.platformSafety[0].requirements[0]),
   );
-  expectCode('CORE_PLATFORM_SAFETY_REQUIREMENT_DUPLICATE', () => compilePlatformSafetyRequirementSets({
+  expectCode('MUXUI_PLATFORM_SAFETY_REQUIREMENT_DUPLICATE', () => compilePlatformSafetyRequirementSets({
     contract, bindingId: 'web.react', binding: duplicateRequirement,
   }));
 
   const wrongProfile = webBinding();
   wrongProfile.platformSafety[0].profile = 'web.html';
-  expectCode('CORE_PLATFORM_SAFETY_PROFILE_INVALID', () => compilePlatformSafetyRequirementSets({
+  expectCode('MUXUI_PLATFORM_SAFETY_PROFILE_INVALID', () => compilePlatformSafetyRequirementSets({
     contract, bindingId: 'web.react', binding: wrongProfile,
   }));
 
   const duplicateProfile = webBinding();
   duplicateProfile.platformSafety.push(structuredClone(duplicateProfile.platformSafety[0]));
-  expectCode('CORE_PLATFORM_SAFETY_DECLARATION_DUPLICATE', () => compilePlatformSafetyRequirementSets({
+  expectCode('MUXUI_PLATFORM_SAFETY_DECLARATION_DUPLICATE', () => compilePlatformSafetyRequirementSets({
     contract, bindingId: 'web.react', binding: duplicateProfile,
   }));
 
   const missingProfile = webBinding();
   missingProfile.platformSafety = [];
-  expectCode('CORE_PLATFORM_SAFETY_DECLARATION_MISSING', () => compilePlatformSafetyRequirementSets({
+  expectCode('MUXUI_PLATFORM_SAFETY_DECLARATION_MISSING', () => compilePlatformSafetyRequirementSets({
     contract, bindingId: 'web.react', binding: missingProfile,
   }));
 });
@@ -118,14 +118,14 @@ test('E-G1.0-07 unsupported top-level bindings retain a complete declaration and
 
   const missing = structuredClone(binding);
   delete missing.platformSafety;
-  assert.throws(() => validateFamily('binding', missing), /CORE_SCHEMA_INVALID/);
+  assert.throws(() => validateFamily('binding', missing), /MUXUI_SCHEMA_INVALID/);
 
   const required = structuredClone(binding);
   required.platformSafety[0].requirements[0] = {
     id: required.platformSafety[0].requirements[0].id,
     disposition: 'required',
   };
-  expectCode('CORE_PLATFORM_SAFETY_PREMATURE_FULFILLMENT', () => (
+  expectCode('MUXUI_PLATFORM_SAFETY_PREMATURE_FULFILLMENT', () => (
     compilePlatformSafetyRequirementSets({ contract, bindingId: 'web.react', binding: required })
   ));
 
@@ -159,7 +159,7 @@ test('E-G1.0-07 rejects consumer weakening and premature fulfillment', () => {
   })['web.react'];
   const weakened = structuredClone(set);
   weakened.dispositions.find(({ disposition }) => disposition === 'required').disposition = 'not-applicable';
-  expectCode('CORE_PLATFORM_SAFETY_CONSUMER_WEAKENED', () => assertPlatformSafetyRequirementSet({
+  expectCode('MUXUI_PLATFORM_SAFETY_CONSUMER_WEAKENED', () => assertPlatformSafetyRequirementSet({
     contract,
     bindingId: 'web.react',
     binding,
@@ -169,7 +169,7 @@ test('E-G1.0-07 rejects consumer weakening and premature fulfillment', () => {
 
   const premature = webBinding();
   premature.platformSafety[0].requirements[0].fulfilled = true;
-  expectCode('CORE_PLATFORM_SAFETY_PREMATURE_FULFILLMENT', () => compilePlatformSafetyRequirementSets({
+  expectCode('MUXUI_PLATFORM_SAFETY_PREMATURE_FULFILLMENT', () => compilePlatformSafetyRequirementSets({
     contract, bindingId: 'web.react', binding: premature,
   }));
 
@@ -178,7 +178,7 @@ test('E-G1.0-07 rejects consumer weakening and premature fulfillment', () => {
     .find(({ profile }) => profile === 'native.react-native-web').requirements[0];
   unsupportedRequirement.disposition = 'required';
   delete unsupportedRequirement.reason;
-  expectCode('CORE_PLATFORM_SAFETY_PREMATURE_FULFILLMENT', () => compilePlatformSafetyRequirementSets({
+  expectCode('MUXUI_PLATFORM_SAFETY_PREMATURE_FULFILLMENT', () => compilePlatformSafetyRequirementSets({
     contract, bindingId: 'native.react-native', binding: native,
   }));
 });

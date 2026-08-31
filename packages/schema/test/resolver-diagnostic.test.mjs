@@ -3,13 +3,13 @@ import test from 'node:test';
 import { validateFamily } from '../src/index.mjs';
 
 const CODES = [
-  'CORE_PROJECT_NOT_FOUND',
-  'CORE_CATALOG_NOT_DECLARED',
-  'CORE_CATALOG_NOT_INSTALLED',
-  'CORE_CATALOG_DECLARATION_DRIFT',
-  'CORE_CATALOG_INTEGRITY_MISMATCH',
-  'CORE_CATALOG_RESOLUTION_AMBIGUOUS',
-  'CORE_CATALOG_INCOMPATIBLE',
+  'MUXUI_PROJECT_NOT_FOUND',
+  'MUXUI_CATALOG_NOT_DECLARED',
+  'MUXUI_CATALOG_NOT_INSTALLED',
+  'MUXUI_CATALOG_DECLARATION_DRIFT',
+  'MUXUI_CATALOG_INTEGRITY_MISMATCH',
+  'MUXUI_CATALOG_RESOLUTION_AMBIGUOUS',
+  'MUXUI_CATALOG_INCOMPATIBLE',
 ];
 
 function diagnostic(code) {
@@ -30,7 +30,7 @@ function diagnostic(code) {
       expectedDigest: 'sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
       actualDigest: 'sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
       candidates: [{
-        relativePath: 'node_modules/@core-ui/catalog',
+        relativePath: 'node_modules/@muxui/catalog',
         version: '1.0.0',
         catalogDigest: 'sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
         rejectionReasons: [],
@@ -46,6 +46,6 @@ test('G0.4 resolver codes discriminate closed detail schemas', () => {
     assert.equal(validateFamily('diagnostic', diagnostic(code)).code, code);
     const unknown = diagnostic(code);
     unknown.details.absoluteWorkspaceRoot = '/private/consumer';
-    assert.throws(() => validateFamily('diagnostic', unknown), /CORE_SCHEMA_INVALID/);
+    assert.throws(() => validateFamily('diagnostic', unknown), /MUXUI_SCHEMA_INVALID/);
   }
 });

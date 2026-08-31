@@ -16,7 +16,7 @@ const outputs = [
 ];
 
 async function fixture() {
-  const root = await mkdtemp(join(tmpdir(), 'core-ui-phase-c-publish-'));
+  const root = await mkdtemp(join(tmpdir(), 'muxui-phase-c-publish-'));
   const generated = join(root, 'generated');
   const destination = join(root, 'destination');
   for (const [index, relativePath] of outputs.entries()) {

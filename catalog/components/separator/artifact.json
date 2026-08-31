@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "id": "core:component:separator",
+  "id": "muxui:component:separator",
   "kind": "component",
   "name": "Separator",
   "summary": "Separates content or controls along an axis.",
@@ -52,7 +52,7 @@
         "Expose separator role and orientation for non-decorative separators"
       ],
       "tokenRecipe": {
-        "source": "core:token:default-theme",
+        "source": "muxui:token:default-theme",
         "requirements": [
           {
             "token": "semantic.control.radius",
@@ -123,7 +123,7 @@
         "Expose separator role and orientation for non-decorative separators"
       ],
       "tokenRecipe": {
-        "source": "core:token:default-theme",
+        "source": "muxui:token:default-theme",
         "requirements": [
           {
             "token": "semantic.control.radius",

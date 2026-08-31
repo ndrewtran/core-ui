@@ -1,3 +1,3 @@
 # ColorSwatch usage
 
-Pass a valid Core color string to ColorSwatch.
+Pass a valid Mux UI color string to ColorSwatch.

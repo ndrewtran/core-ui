@@ -48,11 +48,11 @@ export const Breadcrumbs = React.forwardRef(function Breadcrumbs({
   return React.createElement('nav', {
     ...props,
     ref,
-    className: classNames('core-breadcrumbs', className),
+    className: classNames('muxui-breadcrumbs', className),
     'aria-label': resolvedAriaLabel,
   }, React.createElement(AriaBreadcrumbs, {
     items: collectionItems,
-    className: 'core-breadcrumbs-list',
+    className: 'muxui-breadcrumbs-list',
     'aria-label': resolvedAriaLabel,
     onAction: navigate,
     children: (item) => {
@@ -62,10 +62,10 @@ export const Breadcrumbs = React.forwardRef(function Breadcrumbs({
         isDisabled: item.disabled,
         'data-current': current || undefined,
         'data-disabled': item.disabled || undefined,
-        className: 'core-breadcrumbs-item',
+        className: 'muxui-breadcrumbs-item',
       }, item.href && !current
-        ? React.createElement(AriaLink, { href: item.href, isDisabled: item.disabled, 'data-disabled': item.disabled || undefined, className: 'core-breadcrumbs-link' }, item.label)
-        : React.createElement('span', { className: 'core-breadcrumbs-current', 'aria-current': current ? 'page' : undefined, 'data-disabled': item.disabled || undefined }, item.label));
+        ? React.createElement(AriaLink, { href: item.href, isDisabled: item.disabled, 'data-disabled': item.disabled || undefined, className: 'muxui-breadcrumbs-link' }, item.label)
+        : React.createElement('span', { className: 'muxui-breadcrumbs-current', 'aria-current': current ? 'page' : undefined, 'data-disabled': item.disabled || undefined }, item.label));
     },
   }));
 });
@@ -89,7 +89,7 @@ export const Checkbox = React.forwardRef(function Checkbox({
   return React.createElement(AriaCheckbox, {
     ...props,
     ref,
-    className: classNames('core-checkbox', className),
+    className: classNames('muxui-checkbox', className),
     isSelected: checked,
     defaultSelected: defaultChecked,
     isDisabled: disabled,
@@ -101,14 +101,14 @@ export const Checkbox = React.forwardRef(function Checkbox({
     onChange,
   }, ({ isSelected, isIndeterminate }) => React.createElement(React.Fragment, null,
     React.createElement('span', {
-      className: 'core-checkbox-indicator',
+      className: 'muxui-checkbox-indicator',
       'aria-hidden': 'true',
       'data-selected': isSelected || undefined,
       'data-indeterminate': isIndeterminate || undefined,
     }, isIndeterminate || isSelected
       ? React.createElement(isIndeterminate ? MinusIcon : CheckIcon, { 'aria-hidden': 'true', focusable: 'false', size: 12 })
       : null),
-    React.createElement('span', { className: 'core-checkbox-label' }, children)));
+    React.createElement('span', { className: 'muxui-checkbox-label' }, children)));
 });
 
 Checkbox.displayName = 'Checkbox';
@@ -127,7 +127,7 @@ export const DisclosureGroup = React.forwardRef(function DisclosureGroup({
   return React.createElement(AriaDisclosureGroup, {
     ...props,
     ref,
-    className: classNames('core-disclosure-group', className),
+    className: classNames('muxui-disclosure-group', className),
     isDisabled: disabled,
     allowsMultipleExpanded: multiple,
     expandedKeys: expandedIds === undefined ? undefined : mapKeys(expandedIds),
@@ -152,13 +152,13 @@ export const Disclosure = React.forwardRef(function Disclosure({
   return React.createElement(AriaDisclosure, {
     ...props,
     ref,
-    className: classNames('core-disclosure', className),
+    className: classNames('muxui-disclosure', className),
     id,
     isExpanded: expanded,
     defaultExpanded,
     isDisabled: disabled,
     onExpandedChange,
-  }, React.createElement(AriaButton, { slot: 'trigger', className: 'core-disclosure-trigger' }, title), React.createElement(AriaDisclosurePanel, { role: 'region', className: 'core-disclosure-panel' }, children));
+  }, React.createElement(AriaButton, { slot: 'trigger', className: 'muxui-disclosure-trigger' }, title), React.createElement(AriaDisclosurePanel, { role: 'region', className: 'muxui-disclosure-panel' }, children));
 });
 
 Disclosure.displayName = 'Disclosure';
@@ -176,7 +176,7 @@ export const Group = React.forwardRef(function Group({
     ...props,
     ref,
     role,
-    className: classNames('core-group', className),
+    className: classNames('muxui-group', className),
     isDisabled: disabled,
     isInvalid: invalid,
     isReadOnly: readOnly,
@@ -205,7 +205,7 @@ export const Link = React.forwardRef(function Link({
     isDisabled: disabled || !href,
     target,
     rel,
-    className: classNames('core-link', className),
+    className: classNames('muxui-link', className),
     'aria-current': current ? 'page' : undefined,
     onPress: (event) => onActivate?.(activationEvent(event, event.target)),
   }, children);
@@ -233,18 +233,18 @@ export const Meter = React.forwardRef(function Meter({
     ...props,
     ref,
     role: 'meter',
-    className: classNames('core-meter', className),
+    className: classNames('muxui-meter', className),
     'aria-label': externalLabel,
     'aria-labelledby': externalLabelledby ?? (externalLabel ? undefined : labelId),
     'aria-valuenow': boundedValue,
     'aria-valuemin': minValue,
     'aria-valuemax': maxValue,
     'aria-valuetext': valueText,
-  }, React.createElement('div', { className: 'core-meter-header' }, !externalLabel && !externalLabelledby
-    ? React.createElement(AriaLabel, { id: labelId, elementType: 'span', className: 'core-value-label' }, label)
+  }, React.createElement('div', { className: 'muxui-meter-header' }, !externalLabel && !externalLabelledby
+    ? React.createElement(AriaLabel, { id: labelId, elementType: 'span', className: 'muxui-value-label' }, label)
     : null,
-  React.createElement('span', { className: 'core-value-output' }, valueText)),
-  React.createElement('div', { className: 'core-meter-track' }, React.createElement('div', { className: 'core-meter-fill', style: { inlineSize: `${percentage}%` } })),
+  React.createElement('span', { className: 'muxui-value-output' }, valueText)),
+  React.createElement('div', { className: 'muxui-meter-track' }, React.createElement('div', { className: 'muxui-meter-fill', style: { inlineSize: `${percentage}%` } })),
   );
 });
 
@@ -266,10 +266,10 @@ export const ProgressBar = React.forwardRef(function ProgressBar({
     maxValue,
     isIndeterminate: value === undefined,
     'data-indeterminate': value === undefined || undefined,
-    className: classNames('core-progress-bar', className),
+    className: classNames('muxui-progress-bar', className),
     children: ({ percentage }) => React.createElement(React.Fragment, null,
-      React.createElement('div', { className: 'core-progress-bar-header' }, React.createElement(AriaLabel, { className: 'core-value-label' }, label), React.createElement('span', { className: 'core-value-output' }, value === undefined ? 'Loading' : `${percentage}%`)),
-      React.createElement('div', { className: 'core-progress-bar-track' }, React.createElement('div', { className: 'core-progress-bar-fill', style: percentage === undefined ? undefined : { inlineSize: `${percentage}%` } }))),
+      React.createElement('div', { className: 'muxui-progress-bar-header' }, React.createElement(AriaLabel, { className: 'muxui-value-label' }, label), React.createElement('span', { className: 'muxui-value-output' }, value === undefined ? 'Loading' : `${percentage}%`)),
+      React.createElement('div', { className: 'muxui-progress-bar-track' }, React.createElement('div', { className: 'muxui-progress-bar-fill', style: percentage === undefined ? undefined : { inlineSize: `${percentage}%` } }))),
   });
 });
 
@@ -284,7 +284,7 @@ export const Separator = React.forwardRef(function Separator({
     ...props,
     ref,
     orientation,
-    className: classNames(`core-separator core-separator-${orientation}`, className),
+    className: classNames(`muxui-separator muxui-separator-${orientation}`, className),
   });
 });
 
@@ -306,7 +306,7 @@ export const ToggleButton = React.forwardRef(function ToggleButton({
     isSelected: selected,
     defaultSelected,
     isDisabled: disabled,
-    className: classNames('core-toggle-button', className),
+    className: classNames('muxui-toggle-button', className),
     onChange,
     onPress: (event) => onActivate?.(activationEvent(event, event.target)),
   }, children);

@@ -1,6 +1,6 @@
 // @generated-from: apps/react-storybook/src/generate-stories.mjs
-// @generated-content-sha256: sha256:33ecfb862cab0c91a5a1d4998191d44f693b6bf7a102f0bd685d4a17dd6a6d8f
-import * as Core from '@core-ui/react';
+// @generated-content-sha256: sha256:10d870297573d9fd661a5241ac8dd0ab97874ba544603e47d0e038252d068173
+import * as MuxUI from '@muxui/react';
 import { argTypesForBinding, createStory } from '../../src/storybook-factory.mjs';
 
 const binding = {
@@ -43,12 +43,12 @@ const binding = {
       "formatOptions"
     ]
   },
-  "binding": "core:component:number-field#web.react",
+  "binding": "muxui:component:number-field#web.react",
   "export": "NumberField",
   "lifecycle": "experimental",
   "module": ".",
   "runtimeProfile": "web.react",
-  "selector": ".core-number-field",
+  "selector": ".muxui-number-field",
   "states": [
     "idle",
     "disabled",
@@ -61,8 +61,9 @@ const binding = {
 const record = { family: 'NumberField', tranche: 'R1.2', binding };
 
 export default {
-  title: 'Core React/R1.2/NumberField',
-  component: Core.NumberField,
+  title: 'Mux UI React/R1.2/NumberField',
+  id: 'muxui-react-r1-2-number-field',
+  component: MuxUI.NumberField,
   tags: ['autodocs'],
   parameters: {
     controls: {
@@ -70,7 +71,7 @@ export default {
     },
     docs: {
       description: {
-        component: 'Private development showcase for the Core-owned NumberField family.',
+        component: 'Private development showcase for the Mux UI-owned NumberField family.',
       },
     },
   },

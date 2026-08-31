@@ -42,7 +42,7 @@ function crosswalkStyleInputs() {
  * checkout is not available to the local Storybook runner.
  */
 export function validateTaleStyleInventory(value = inventory) {
-  if (value?.schema !== 'core-ui-tale-style-inventory-v1') fail('schema is invalid');
+  if (value?.schema !== 'muxui-tale-style-inventory-v1') fail('schema is invalid');
   if (JSON.stringify(value.donor) !== JSON.stringify({ ...pinnedDonor, path: 'packages/styles/src', fileCount: 125 })) {
     fail('pinned donor identity or path is invalid');
   }
@@ -58,9 +58,9 @@ export function validateTaleStyleInventory(value = inventory) {
     if (!/^[0-9a-f]{40}$/u.test(file.blob) || !/^sha256:[0-9a-f]{64}$/u.test(file.sha256)) fail(`invalid pinned identity for ${file.path}`);
     if (!['direct-family-owner', 'shared-primitives', 'shared-nested-support', 'aggregate', 'scaffold', 'donor-only-no-fixed-family'].includes(file.disposition)) fail(`invalid disposition for ${file.path}`);
     if (typeof file.reason !== 'string' || file.reason.length === 0 || !Array.isArray(file.fixtureConsumers)) fail(`missing explanation for ${file.path}`);
-    if (typeof file.coreSupportClaim !== 'boolean') fail(`missing Core support claim for ${file.path}`);
-    if (file.disposition === 'donor-only-no-fixed-family' && (file.coreSupportClaim || file.fixtureConsumers.length > 0)) fail(`no-fixed-family file ${file.path} claims Core support`);
-    if (['aggregate', 'scaffold'].includes(file.disposition) && file.coreSupportClaim) fail(`${file.path} claims component support despite being ${file.disposition}`);
+    if (typeof file.muxuiSupportClaim !== 'boolean') fail(`missing Mux UI support claim for ${file.path}`);
+    if (file.disposition === 'donor-only-no-fixed-family' && (file.muxuiSupportClaim || file.fixtureConsumers.length > 0)) fail(`no-fixed-family file ${file.path} claims Mux UI support`);
+    if (['aggregate', 'scaffold'].includes(file.disposition) && file.muxuiSupportClaim) fail(`${file.path} claims component support despite being ${file.disposition}`);
     byPath.set(file.path, file);
   }
 
@@ -79,7 +79,7 @@ export function validateTaleStyleInventory(value = inventory) {
     if (!entry) fail(`crosswalk stylesheet is missing from inventory: ${path}`);
     const expectedBlobs = new Set(crosswalk.filter((item) => item.path === path).map(({ blob }) => blob));
     if (expectedBlobs.size !== 1 || !expectedBlobs.has(entry.blob)) fail(`crosswalk blob drift for ${path}`);
-    if (entry.disposition === 'donor-only-no-fixed-family' || !entry.coreSupportClaim) fail(`crosswalk stylesheet has no Core support claim: ${path}`);
+    if (entry.disposition === 'donor-only-no-fixed-family' || !entry.muxuiSupportClaim) fail(`crosswalk stylesheet has no Mux UI support claim: ${path}`);
   }
   for (const entry of value.files) {
     if (entry.disposition === 'direct-family-owner' && !crosswalkPaths.includes(entry.path)) fail(`direct owner is absent from crosswalk: ${entry.path}`);

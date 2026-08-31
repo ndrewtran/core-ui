@@ -73,7 +73,7 @@ const files = paths.map((path) => {
     consumers: owners,
   } : {
     disposition: 'donor-only-no-fixed-family',
-    reason: 'Pinned Tale stylesheet has no selector or import used by the 51-family fixture closure; it makes no Core support claim.',
+    reason: 'Pinned Tale stylesheet has no selector or import used by the 51-family fixture closure; it makes no Mux UI support claim.',
     consumers: [],
   });
   const bytes = execFileSync('git', ['-C', donorRoot, 'show', `${donorCommit}:${path}`]);
@@ -84,7 +84,7 @@ const files = paths.map((path) => {
     disposition: entry.disposition,
     reason: entry.reason,
     fixtureConsumers: entry.consumers,
-    coreSupportClaim: !['donor-only-no-fixed-family', 'aggregate', 'scaffold'].includes(entry.disposition),
+    muxuiSupportClaim: !['donor-only-no-fixed-family', 'aggregate', 'scaffold'].includes(entry.disposition),
   };
 });
 
@@ -100,7 +100,7 @@ const activeCssFoundationImports = activeCssFoundationPaths.sort().map((path) =>
 
 const counts = Object.fromEntries([...new Set(files.map(({ disposition }) => disposition))].sort().map((disposition) => [disposition, files.filter((file) => file.disposition === disposition).length]));
 const inventory = {
-  schema: 'core-ui-tale-style-inventory-v1',
+  schema: 'muxui-tale-style-inventory-v1',
   donor: { repository: 'tale-ui/tale-ui', commit: donorCommit, tree: donorTree, path: 'packages/styles/src', fileCount: files.length },
   closure: { fixtureFamilies: 51, noApplicableDonorFamilies: ['Group', 'TokenField'], basis: 'actual selector/import use in the pinned donor fixture closure' },
   counts,

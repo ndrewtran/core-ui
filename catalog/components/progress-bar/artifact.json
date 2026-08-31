@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "id": "core:component:progress-bar",
+  "id": "muxui:component:progress-bar",
   "kind": "component",
   "name": "ProgressBar",
   "summary": "Communicates task completion or indeterminate progress.",
@@ -64,7 +64,7 @@
         "Expose progressbar role and value semantics without continuous motion"
       ],
       "tokenRecipe": {
-        "source": "core:token:default-theme",
+        "source": "muxui:token:default-theme",
         "requirements": [
           {
             "token": "semantic.control.radius",
@@ -146,7 +146,7 @@
         "Expose progressbar role and value semantics without continuous motion"
       ],
       "tokenRecipe": {
-        "source": "core:token:default-theme",
+        "source": "muxui:token:default-theme",
         "requirements": [
           {
             "token": "semantic.control.radius",

@@ -1,6 +1,6 @@
 // @generated-from: apps/react-storybook/src/generate-stories.mjs
-// @generated-content-sha256: sha256:54532d932ce9d34a9510d1183c495ad6fc212c4742b2e0579a08e7ba4b9b2746
-import * as Core from '@core-ui/react';
+// @generated-content-sha256: sha256:ef82e6e669ed13c958098e7285050170f8d51f155d461f04c93579e94b32111b
+import * as MuxUI from '@muxui/react';
 import { argTypesForBinding, createStory } from '../../src/storybook-factory.mjs';
 
 const binding = {
@@ -37,12 +37,12 @@ const binding = {
       "name"
     ]
   },
-  "binding": "core:component:time-field#web.react",
+  "binding": "muxui:component:time-field#web.react",
   "export": "TimeField",
   "lifecycle": "experimental",
   "module": ".",
   "runtimeProfile": "web.react",
-  "selector": ".core-time-field",
+  "selector": ".muxui-time-field",
   "states": [
     "idle",
     "disabled",
@@ -55,8 +55,9 @@ const binding = {
 const record = { family: 'TimeField', tranche: 'R1.2', binding };
 
 export default {
-  title: 'Core React/R1.2/TimeField',
-  component: Core.TimeField,
+  title: 'Mux UI React/R1.2/TimeField',
+  id: 'muxui-react-r1-2-time-field',
+  component: MuxUI.TimeField,
   tags: ['autodocs'],
   parameters: {
     controls: {
@@ -64,7 +65,7 @@ export default {
     },
     docs: {
       description: {
-        component: 'Private development showcase for the Core-owned TimeField family.',
+        component: 'Private development showcase for the Mux UI-owned TimeField family.',
       },
     },
   },

@@ -58,7 +58,7 @@ function status(cleanRoot) {
 }
 
 const sourceRevision = run('git', ['rev-parse', 'HEAD'], repositoryRoot, 'pipe').trim();
-const temporaryRoot = await mkdtemp(join(tmpdir(), 'core-ui-generation-proof-'));
+const temporaryRoot = await mkdtemp(join(tmpdir(), 'muxui-generation-proof-'));
 const cleanRoot = join(temporaryRoot, 'checkout');
 
 try {

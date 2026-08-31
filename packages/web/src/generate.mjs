@@ -1,17 +1,17 @@
 import { createHash } from 'node:crypto';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
-import { catalogJson } from '@core-ui/catalog/bundle';
-import { canonicalJson } from '@core-ui/schema';
-import { compileTokenGraph, compileWebTheme } from '@core-ui/tokens';
+import { catalogJson } from '@muxui/catalog/bundle';
+import { canonicalJson } from '@muxui/schema';
+import { compileTokenGraph, compileWebTheme } from '@muxui/tokens';
 import { compileWebSurface } from './compile-surface.mjs';
 
 const packageRoot = resolve(import.meta.dirname, '..');
 const manifest = JSON.parse(await readFile(resolve(packageRoot, 'package.json'), 'utf8'));
 const bundle = JSON.parse(catalogJson);
-const button = bundle.artifacts.find(({ id }) => id === 'core:component:button');
-const tokenSource = bundle.artifacts.find(({ id }) => id === 'core:token:default-theme')?.record;
-if (!button || !tokenSource) throw new Error('CORE_WEB_GENERATION_INPUT_MISSING');
+const button = bundle.artifacts.find(({ id }) => id === 'muxui:component:button');
+const tokenSource = bundle.artifacts.find(({ id }) => id === 'muxui:token:default-theme')?.record;
+if (!button || !tokenSource) throw new Error('MUXUI_WEB_GENERATION_INPUT_MISSING');
 const packageExports = Object.keys(manifest.exports);
 const surfaces = Object.fromEntries(['web.html', 'web.react'].map((bindingId) => [
   bindingId,
@@ -27,17 +27,17 @@ const source = 'packages/catalog/catalog-sources.json';
 const cssBody = [
   theme.css.trimEnd(),
   '',
-  '@layer core.tokens, core.components, core.utilities;',
+  '@layer muxui.tokens, muxui.components, muxui.utilities;',
   '',
-  '@layer core.components {',
-  '  .core-button {',
-  `    --core-component-button-background: ${cssValue('component.button.background')};`,
-  `    --core-component-button-foreground: ${cssValue('component.button.foreground')};`,
+  '@layer muxui.components {',
+  '  .muxui-button {',
+  `    --muxui-component-button-background: ${cssValue('component.button.background')};`,
+  `    --muxui-component-button-foreground: ${cssValue('component.button.foreground')};`,
   '    align-items: center;',
-  '    background: var(--core-component-button-background);',
+  '    background: var(--muxui-component-button-background);',
   `    border: 2px solid ${cssValue('component.button.background')};`,
   `    border-radius: ${cssValue('component.button.radius')};`,
-  '    color: var(--core-component-button-foreground);',
+  '    color: var(--muxui-component-button-foreground);',
   '    display: inline-flex;',
   '    font: inherit;',
   '    gap: 0.5em;',
@@ -45,34 +45,34 @@ const cssBody = [
   `    padding-inline: ${cssValue('component.button.padding-inline')};`,
   '    text-align: start;',
   '  }',
-  '  .core-button [data-core-fixture-direction-marker] { margin-inline: 2px 10px; }',
-  '  .core-button[data-core-state-disabled] { cursor: not-allowed; opacity: 0.55; }',
-  '  .core-button:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }',
+  '  .muxui-button [data-muxui-fixture-direction-marker] { margin-inline: 2px 10px; }',
+  '  .muxui-button[data-muxui-state-disabled] { cursor: not-allowed; opacity: 0.55; }',
+  '  .muxui-button:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }',
   '}',
   '',
   '@media (prefers-contrast: more) {',
-  '  @layer core.components {',
-  '    .core-button { border-width: 3px; }',
-  '    .core-button:focus-visible { outline-width: 3px; outline-offset: 3px; }',
+  '  @layer muxui.components {',
+  '    .muxui-button { border-width: 3px; }',
+  '    .muxui-button:focus-visible { outline-width: 3px; outline-offset: 3px; }',
   '  }',
   '}',
   '',
   '@media (forced-colors: active) {',
-  '  @layer core.components {',
-  '    .core-button {',
+  '  @layer muxui.components {',
+  '    .muxui-button {',
   '      background: ButtonFace;',
   '      border-color: ButtonText;',
   '      color: ButtonText;',
   '      forced-color-adjust: auto;',
   '    }',
-  '    .core-button[data-core-state-disabled] { border-style: dashed; color: GrayText; opacity: 1; }',
-  '    .core-button:focus-visible { outline-color: Highlight; }',
+  '    .muxui-button[data-muxui-state-disabled] { border-style: dashed; color: GrayText; opacity: 1; }',
+  '    .muxui-button:focus-visible { outline-color: Highlight; }',
   '  }',
   '}',
   '',
 ].join('\n');
 const compatibility = {
-  schema: 'core-ui-renderer-compatibility-v1',
+  schema: 'muxui-renderer-compatibility-v1',
   package: manifest.name,
   version: manifest.version,
   bindingSchemaRange: '^2.0.0',
@@ -132,7 +132,7 @@ for (const output of outputs) {
   if (process.argv.includes('--check')) {
     const actual = await readFile(output.path, 'utf8').catch(() => null);
     if (actual !== output.expected) {
-      console.error(`CORE_WEB_GENERATED_DRIFT: ${output.path} must be regenerated`);
+      console.error(`MUXUI_WEB_GENERATED_DRIFT: ${output.path} must be regenerated`);
       process.exitCode = 1;
     }
   } else {

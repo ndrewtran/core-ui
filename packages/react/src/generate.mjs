@@ -1,8 +1,8 @@
 import { createHash } from 'node:crypto';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
-import { canonicalJson } from '@core-ui/schema';
-import { compileWebTheme } from '@core-ui/tokens';
+import { canonicalJson } from '@muxui/schema';
+import { compileWebTheme } from '@muxui/tokens';
 import {
   assertReactR10SourceContracts,
   assertReactR11GeneratedContracts,
@@ -22,8 +22,8 @@ const manifest = JSON.parse(await readFile(resolve(packageRoot, 'package.json'),
 const tokenPath = resolve(repositoryRoot, 'catalog/tokens/default-theme.json');
 const tokenRaw = await readFile(tokenPath);
 const tokenSha256 = createHash('sha256').update(tokenRaw).digest('hex');
-const expectedTokenSha256 = 'f40455a3f479bf63daba332d07cf6f8da7ba114a5fd7482d0b1c5050cf1207c5';
-if (tokenSha256 !== expectedTokenSha256) throw new Error('CORE_REACT_TOKEN_SOURCE_DRIFT');
+const expectedTokenSha256 = 'ce714ebe6ffd9dbd29777a7bdf6ac3894a9448c23a9a21360da95721c0fb29a7';
+if (tokenSha256 !== expectedTokenSha256) throw new Error('MUXUI_REACT_TOKEN_SOURCE_DRIFT');
 const tokenSource = JSON.parse(tokenRaw);
 const snapshot = JSON.parse(await readFile(resolve(repositoryRoot, 'catalog/react-r1-0/upstream-snapshot.json'), 'utf8'));
 const familySnapshot = JSON.parse(await readFile(resolve(repositoryRoot, 'catalog/react-r1-0/react-aria-1.20.0-family-evaluation.snapshot.json'), 'utf8'));
@@ -63,7 +63,7 @@ const buttonArtifact = JSON.parse(await readFile(resolve(repositoryRoot, 'catalo
 const buttonBinding = buttonArtifact.bindings['web.react'];
 if (!buttonBinding || !buttonBinding.api.props.includes('pending')
   || buttonBinding.api.props.includes('isPending') || buttonBinding.api.props.includes('isDisabled')) {
-  throw new Error('CORE_REACT_BUTTON_CANONICAL_API_DRIFT');
+  throw new Error('MUXUI_REACT_BUTTON_CANONICAL_API_DRIFT');
 }
 assertReactR10SourceContracts({ snapshot, upstreamExports, upstreamExportsBytes: upstreamExportsRaw, crosswalk, license });
 const componentArtifacts = [
@@ -75,40 +75,40 @@ const componentArtifacts = [
   ].map(async (slug) => JSON.parse(await readFile(resolve(repositoryRoot, `catalog/components/${slug}/artifact.json`), 'utf8')))),
 ];
 if (componentArtifacts.length !== 53 || new Set(componentArtifacts.map(({ id }) => id)).size !== 53) {
-  throw new Error('CORE_REACT_R1_COMPONENT_ALLOCATION_DRIFT');
+  throw new Error('MUXUI_REACT_R1_COMPONENT_ALLOCATION_DRIFT');
 }
 for (const artifact of componentArtifacts) {
   const binding = artifact.bindings['web.react'];
   if (!binding || binding.api.props.some((prop) => /^is[A-Z]/u.test(prop))) {
-    throw new Error(`CORE_REACT_${artifact.name.toUpperCase()}_CANONICAL_API_DRIFT`);
+    throw new Error(`MUXUI_REACT_${artifact.name.toUpperCase()}_CANONICAL_API_DRIFT`);
   }
-  if (artifact.name !== 'Button' && r11Slugs.includes(artifact.id.slice('core:component:'.length))) {
-    const slug = artifact.id.slice('core:component:'.length);
+  if (artifact.name !== 'Button' && r11Slugs.includes(artifact.id.slice('muxui:component:'.length))) {
+    const slug = artifact.id.slice('muxui:component:'.length);
     const componentCrosswalk = crosswalk.components?.[slug];
     if (!componentCrosswalk
       || canonicalJson(componentCrosswalk.consumedRules) !== canonicalJson(componentCrosswalk.rules.map(({ input }) => input))) {
-      throw new Error(`CORE_REACT_${artifact.name.toUpperCase()}_DONOR_CROSSWALK_DRIFT`);
+      throw new Error(`MUXUI_REACT_${artifact.name.toUpperCase()}_DONOR_CROSSWALK_DRIFT`);
     }
-  } else if (r12Slugs.includes(artifact.id.slice('core:component:'.length))) {
-    const slug = artifact.id.slice('core:component:'.length);
+  } else if (r12Slugs.includes(artifact.id.slice('muxui:component:'.length))) {
+    const slug = artifact.id.slice('muxui:component:'.length);
     const componentCrosswalk = r12Crosswalk.components?.[slug];
     if (!componentCrosswalk
       || canonicalJson(componentCrosswalk.consumedRules) !== canonicalJson(componentCrosswalk.rules.map(({ input }) => input))) {
-      throw new Error(`CORE_REACT_${artifact.name.toUpperCase()}_DONOR_CROSSWALK_DRIFT`);
+      throw new Error(`MUXUI_REACT_${artifact.name.toUpperCase()}_DONOR_CROSSWALK_DRIFT`);
     }
-  } else if (r13Slugs.includes(artifact.id.slice('core:component:'.length))) {
-    const slug = artifact.id.slice('core:component:'.length);
+  } else if (r13Slugs.includes(artifact.id.slice('muxui:component:'.length))) {
+    const slug = artifact.id.slice('muxui:component:'.length);
     const componentCrosswalk = r13Crosswalk.components?.[slug];
     if (!componentCrosswalk
       || canonicalJson(componentCrosswalk.consumedRules) !== canonicalJson(componentCrosswalk.rules.map(({ input }) => input))) {
-      throw new Error(`CORE_REACT_${artifact.name.toUpperCase()}_DONOR_CROSSWALK_DRIFT`);
+      throw new Error(`MUXUI_REACT_${artifact.name.toUpperCase()}_DONOR_CROSSWALK_DRIFT`);
     }
-  } else if (r14Slugs.includes(artifact.id.slice('core:component:'.length))) {
-    const slug = artifact.id.slice('core:component:'.length);
+  } else if (r14Slugs.includes(artifact.id.slice('muxui:component:'.length))) {
+    const slug = artifact.id.slice('muxui:component:'.length);
     const componentCrosswalk = r14Crosswalk.components?.[slug];
     if (!componentCrosswalk
       || canonicalJson(componentCrosswalk.consumedRules) !== canonicalJson(componentCrosswalk.rules.map(({ input }) => input))) {
-      throw new Error(`CORE_REACT_${artifact.name.toUpperCase()}_DONOR_CROSSWALK_DRIFT`);
+      throw new Error(`MUXUI_REACT_${artifact.name.toUpperCase()}_DONOR_CROSSWALK_DRIFT`);
     }
   }
 }
@@ -119,10 +119,10 @@ const consumedRules = [
   'donor shadow and opacity details',
 ];
 if (canonicalJson(crosswalk.button.consumedRules) !== canonicalJson(consumedRules)) {
-  throw new Error('CORE_REACT_DONOR_CROSSWALK_DRIFT');
+  throw new Error('MUXUI_REACT_DONOR_CROSSWALK_DRIFT');
 }
 if (canonicalJson(crosswalk.button.rules.map(({ input }) => input)) !== canonicalJson(consumedRules)) {
-  throw new Error('CORE_REACT_DONOR_RULE_UNMAPPED');
+  throw new Error('MUXUI_REACT_DONOR_RULE_UNMAPPED');
 }
 
 function sha256(value) {
@@ -143,9 +143,9 @@ function declarations(css) {
 }
 
 function resolveReferenceTokens(css, tokenDeclarations) {
-  return css.replace(/var\((--core-reference-[^)]+)\)/gu, (_match, name) => {
+  return css.replace(/var\((--muxui-reference-[^)]+)\)/gu, (_match, name) => {
     const value = tokenDeclarations.get(name);
-    if (!value) throw new Error(`CORE_REACT_REFERENCE_TOKEN_MISSING: ${name}`);
+    if (!value) throw new Error(`MUXUI_REACT_REFERENCE_TOKEN_MISSING: ${name}`);
     return value;
   });
 }
@@ -158,14 +158,14 @@ const modeBlocks = axes.map(([axis, value]) => {
   const changed = [...variant].filter(([name, tokenValue]) => baseDeclarations.get(name) !== tokenValue);
   const dataAxis = axis.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`);
   const values = changed.length === 0 ? '  /* canonical mode has no token delta */' : changed.map(([name, tokenValue]) => `  ${name}: ${tokenValue};`).join('\n');
-  return `[data-core-${dataAxis}='${value}'] {\n${values}\n}`;
+  return `[data-muxui-${dataAxis}='${value}'] {\n${values}\n}`;
 });
 
-const cssBody = `${baseTheme.css.trim()}\n\n${modeBlocks.join('\n\n')}\n\n[data-core-direction='rtl'] { direction: rtl; }`;
+const cssBody = `${baseTheme.css.trim()}\n\n${modeBlocks.join('\n\n')}\n\n[data-muxui-direction='rtl'] { direction: rtl; }`;
 const fullCssBody = `${cssBody}\n\n${resolveReferenceTokens(authoredCss, baseDeclarations)}`;
 
 const compatibility = {
-  schema: 'core-ui-react-compatibility-v1',
+  schema: 'muxui-react-compatibility-v1',
   package: manifest.name,
   version: manifest.version,
   upstream: { package: 'react-aria-components', version: '1.20.0', gitHead: '5ecb3333001313e83898cd07644227897e3bae1f' },
@@ -231,18 +231,18 @@ export declare const ToggleButton: React.ForwardRefExoticComponent<ToggleButtonP
 export const reactCompatibility: Readonly<Record<string, unknown>>;
 `;
 const fieldsTypes = `
-export type CoreDateValue = string;
-export interface CoreDateRange { start: CoreDateValue; end: CoreDateValue; }
+export type MuxUIDateValue = string;
+export interface MuxUIDateRange { start: MuxUIDateValue; end: MuxUIDateValue; }
 export interface FieldValidationProps { description?: React.ReactNode; errorMessage?: React.ReactNode; disabled?: boolean; readOnly?: boolean; required?: boolean; invalid?: boolean; className?: string; }
-export type CoreAccessibleName =
+export type MuxUIAccessibleName =
   | { label: Exclude<React.ReactNode, null | undefined | boolean>; 'aria-label'?: never; 'aria-labelledby'?: never }
   | { label?: never; 'aria-label': string; 'aria-labelledby'?: never }
   | { label?: never; 'aria-label'?: never; 'aria-labelledby': string };
-export type CoreAriaAccessibleName =
+export type MuxUIAriaAccessibleName =
   | { 'aria-label': string; 'aria-labelledby'?: never }
   | { 'aria-label'?: never; 'aria-labelledby': string };
-export type CoreAriaLabel = { 'aria-label': string };
-export type NamedFieldProps = FieldValidationProps & CoreAccessibleName;
+export type MuxUIAriaLabel = { 'aria-label': string };
+export type NamedFieldProps = FieldValidationProps & MuxUIAccessibleName;
 export type TextFieldProps = NamedFieldProps & { value?: string; defaultValue?: string; onChange?: (value: string) => void; name?: string; placeholder?: string; type?: 'text' | 'email' | 'password' | 'url' | 'tel'; };
 export declare const TextField: React.ForwardRefExoticComponent<TextFieldProps & React.RefAttributes<HTMLDivElement>>;
 export type SearchFieldProps = NamedFieldProps & { value?: string; defaultValue?: string; onChange?: (value: string) => void; onSubmit?: (value: string) => void; onClear?: () => void; name?: string; placeholder?: string; };
@@ -251,17 +251,17 @@ export type NumberFieldProps = NamedFieldProps & { value?: number; defaultValue?
 export declare const NumberField: React.ForwardRefExoticComponent<NumberFieldProps & React.RefAttributes<HTMLDivElement>>;
 export type CheckboxGroupProps = NamedFieldProps & { value?: string[]; defaultValue?: string[]; onChange?: (value: string[]) => void; name?: string; children?: React.ReactNode; };
 export declare const CheckboxGroup: React.ForwardRefExoticComponent<CheckboxGroupProps & React.RefAttributes<HTMLDivElement>>;
-export type SwitchProps = CoreAccessibleName & { description?: React.ReactNode; errorMessage?: React.ReactNode; disabled?: boolean; readOnly?: boolean; className?: string; children?: React.ReactNode; selected?: boolean; defaultSelected?: boolean; onChange?: (selected: boolean) => void; name?: string; value?: string; };
+export type SwitchProps = MuxUIAccessibleName & { description?: React.ReactNode; errorMessage?: React.ReactNode; disabled?: boolean; readOnly?: boolean; className?: string; children?: React.ReactNode; selected?: boolean; defaultSelected?: boolean; onChange?: (selected: boolean) => void; name?: string; value?: string; };
 export declare const Switch: React.ForwardRefExoticComponent<SwitchProps & React.RefAttributes<HTMLDivElement>>;
 export interface FormProps extends Omit<React.FormHTMLAttributes<HTMLFormElement>, 'children' | 'className' | 'onSubmit' | 'onReset'> { children?: React.ReactNode; className?: string; validationBehavior?: 'aria' | 'native'; onSubmit?: React.FormEventHandler<HTMLFormElement>; onReset?: React.FormEventHandler<HTMLFormElement>; }
 export declare const Form: React.ForwardRefExoticComponent<FormProps & React.RefAttributes<HTMLFormElement>>;
-export type DateFieldProps = NamedFieldProps & { value?: CoreDateValue; defaultValue?: CoreDateValue; onChange?: (value?: CoreDateValue) => void; name?: string; };
+export type DateFieldProps = NamedFieldProps & { value?: MuxUIDateValue; defaultValue?: MuxUIDateValue; onChange?: (value?: MuxUIDateValue) => void; name?: string; };
 export declare const DateField: React.ForwardRefExoticComponent<DateFieldProps & React.RefAttributes<HTMLDivElement>>;
 export type TimeFieldProps = NamedFieldProps & { value?: string; defaultValue?: string; onChange?: (value?: string) => void; name?: string; };
 export declare const TimeField: React.ForwardRefExoticComponent<TimeFieldProps & React.RefAttributes<HTMLDivElement>>;
 export type DatePickerProps = DateFieldProps & { onOpenChange?: (isOpen: boolean) => void; };
 export declare const DatePicker: React.ForwardRefExoticComponent<DatePickerProps & React.RefAttributes<HTMLDivElement>>;
-export type DateRangePickerProps = NamedFieldProps & { value?: CoreDateRange; defaultValue?: CoreDateRange; onChange?: (value?: CoreDateRange) => void; startName?: string; endName?: string; onOpenChange?: (isOpen: boolean) => void; };
+export type DateRangePickerProps = NamedFieldProps & { value?: MuxUIDateRange; defaultValue?: MuxUIDateRange; onChange?: (value?: MuxUIDateRange) => void; startName?: string; endName?: string; onOpenChange?: (isOpen: boolean) => void; };
 export declare const DateRangePicker: React.ForwardRefExoticComponent<DateRangePickerProps & React.RefAttributes<HTMLDivElement>>;
 export interface AutocompleteItem { id?: string; label?: React.ReactNode; value?: string; }
 export interface AutocompleteSelectionItem { id: string; label: React.ReactNode; value: string; }
@@ -269,73 +269,73 @@ export type AutocompleteProps = NamedFieldProps & { items?: Array<AutocompleteIt
 export declare const Autocomplete: React.ForwardRefExoticComponent<AutocompleteProps & React.RefAttributes<HTMLDivElement>>;
 `;
 const collectionsTypes = `
-export type CoreColorValue = string;
-export interface CoreCollectionItem { id?: string; key?: string; label?: React.ReactNode; value?: string; textValue?: string; disabled?: boolean; [key: string]: unknown; }
-export type CoreSelection = string[] | 'all';
-export type CoreItems = Array<CoreCollectionItem | string>;
-export type CalendarProps = CoreAccessibleName & { value?: CoreDateValue; defaultValue?: CoreDateValue; focusedValue?: CoreDateValue; minValue?: CoreDateValue; maxValue?: CoreDateValue; onChange?: (value?: CoreDateValue) => void; onFocusChange?: (value?: CoreDateValue) => void; disabled?: boolean; readOnly?: boolean; required?: boolean; invalid?: boolean; className?: string; };
+export type MuxUIColorValue = string;
+export interface MuxUICollectionItem { id?: string; key?: string; label?: React.ReactNode; value?: string; textValue?: string; disabled?: boolean; [key: string]: unknown; }
+export type MuxUISelection = string[] | 'all';
+export type MuxUIItems = Array<MuxUICollectionItem | string>;
+export type CalendarProps = MuxUIAccessibleName & { value?: MuxUIDateValue; defaultValue?: MuxUIDateValue; focusedValue?: MuxUIDateValue; minValue?: MuxUIDateValue; maxValue?: MuxUIDateValue; onChange?: (value?: MuxUIDateValue) => void; onFocusChange?: (value?: MuxUIDateValue) => void; disabled?: boolean; readOnly?: boolean; required?: boolean; invalid?: boolean; className?: string; };
 export declare const Calendar: React.ForwardRefExoticComponent<CalendarProps & React.RefAttributes<HTMLDivElement>>;
-export type RangeCalendarProps = CoreAccessibleName & { value?: CoreDateRange; defaultValue?: CoreDateRange; minValue?: CoreDateValue; maxValue?: CoreDateValue; onChange?: (value?: CoreDateRange) => void; disabled?: boolean; readOnly?: boolean; required?: boolean; invalid?: boolean; className?: string; };
+export type RangeCalendarProps = MuxUIAccessibleName & { value?: MuxUIDateRange; defaultValue?: MuxUIDateRange; minValue?: MuxUIDateValue; maxValue?: MuxUIDateValue; onChange?: (value?: MuxUIDateRange) => void; disabled?: boolean; readOnly?: boolean; required?: boolean; invalid?: boolean; className?: string; };
 export declare const RangeCalendar: React.ForwardRefExoticComponent<RangeCalendarProps & React.RefAttributes<HTMLDivElement>>;
-export type ColorAreaProps = CoreAccessibleName & { value?: CoreColorValue; defaultValue?: CoreColorValue; disabled?: boolean; readOnly?: boolean; onChange?: (value: CoreColorValue) => void; className?: string; };
+export type ColorAreaProps = MuxUIAccessibleName & { value?: MuxUIColorValue; defaultValue?: MuxUIColorValue; disabled?: boolean; readOnly?: boolean; onChange?: (value: MuxUIColorValue) => void; className?: string; };
 export declare const ColorArea: React.ForwardRefExoticComponent<ColorAreaProps & React.RefAttributes<HTMLDivElement>>;
-export type ColorFieldProps = NamedFieldProps & { value?: CoreColorValue; defaultValue?: CoreColorValue; onChange?: (value: CoreColorValue) => void; name?: string; };
+export type ColorFieldProps = NamedFieldProps & { value?: MuxUIColorValue; defaultValue?: MuxUIColorValue; onChange?: (value: MuxUIColorValue) => void; name?: string; };
 export declare const ColorField: React.ForwardRefExoticComponent<ColorFieldProps & React.RefAttributes<HTMLDivElement>>;
-export type ColorPickerProps = { value?: CoreColorValue; defaultValue?: CoreColorValue; disabled?: boolean; readOnly?: boolean; onChange?: (value: CoreColorValue) => void; children?: React.ReactNode; className?: string; };
+export type ColorPickerProps = { value?: MuxUIColorValue; defaultValue?: MuxUIColorValue; disabled?: boolean; readOnly?: boolean; onChange?: (value: MuxUIColorValue) => void; children?: React.ReactNode; className?: string; };
 export declare const ColorPicker: React.ForwardRefExoticComponent<ColorPickerProps & React.RefAttributes<HTMLDivElement>>;
-export type ColorSliderProps = CoreAccessibleName & { value?: CoreColorValue; defaultValue?: CoreColorValue; channel?: string; colorSpace?: string; disabled?: boolean; orientation?: 'horizontal' | 'vertical'; onChange?: (value: CoreColorValue) => void; className?: string; };
+export type ColorSliderProps = MuxUIAccessibleName & { value?: MuxUIColorValue; defaultValue?: MuxUIColorValue; channel?: string; colorSpace?: string; disabled?: boolean; orientation?: 'horizontal' | 'vertical'; onChange?: (value: MuxUIColorValue) => void; className?: string; };
 export declare const ColorSlider: React.ForwardRefExoticComponent<ColorSliderProps & React.RefAttributes<HTMLDivElement>>;
-export type ColorSwatchProps = { color: CoreColorValue; disabled?: boolean; className?: string; };
+export type ColorSwatchProps = { color: MuxUIColorValue; disabled?: boolean; className?: string; };
 export declare const ColorSwatch: React.ForwardRefExoticComponent<ColorSwatchProps & React.RefAttributes<HTMLDivElement>>;
-export type ColorSwatchPickerProps = CoreAriaAccessibleName & { items?: CoreItems; value?: CoreColorValue; defaultValue?: CoreColorValue; disabled?: boolean; onChange?: (value: CoreColorValue) => void; className?: string; };
+export type ColorSwatchPickerProps = MuxUIAriaAccessibleName & { items?: MuxUIItems; value?: MuxUIColorValue; defaultValue?: MuxUIColorValue; disabled?: boolean; onChange?: (value: MuxUIColorValue) => void; className?: string; };
 export declare const ColorSwatchPicker: React.ForwardRefExoticComponent<ColorSwatchPickerProps & React.RefAttributes<HTMLDivElement>>;
-export type ColorWheelProps = CoreAriaAccessibleName & { value?: CoreColorValue; defaultValue?: CoreColorValue; disabled?: boolean; onChange?: (value: CoreColorValue) => void; className?: string; };
+export type ColorWheelProps = MuxUIAriaAccessibleName & { value?: MuxUIColorValue; defaultValue?: MuxUIColorValue; disabled?: boolean; onChange?: (value: MuxUIColorValue) => void; className?: string; };
 export declare const ColorWheel: React.ForwardRefExoticComponent<ColorWheelProps & React.RefAttributes<HTMLDivElement>>;
-export type CollectionProps = CoreAriaAccessibleName & { items?: CoreItems; selectedIds?: CoreSelection; defaultSelectedIds?: CoreSelection; disabled?: boolean; selectionMode?: 'none' | 'single' | 'multiple'; onSelectionChange?: (ids: CoreSelection) => void; onAction?: (item?: CoreCollectionItem) => void; className?: string; };
+export type CollectionProps = MuxUIAriaAccessibleName & { items?: MuxUIItems; selectedIds?: MuxUISelection; defaultSelectedIds?: MuxUISelection; disabled?: boolean; selectionMode?: 'none' | 'single' | 'multiple'; onSelectionChange?: (ids: MuxUISelection) => void; onAction?: (item?: MuxUICollectionItem) => void; className?: string; };
 export type GridListProps = CollectionProps;
 export declare const GridList: React.ForwardRefExoticComponent<GridListProps & React.RefAttributes<HTMLDivElement>>;
 export type ListBoxProps = CollectionProps;
 export declare const ListBox: React.ForwardRefExoticComponent<ListBoxProps & React.RefAttributes<HTMLDivElement>>;
-export type MenuProps = CoreAriaAccessibleName & { items?: CoreItems; disabled?: boolean; shouldCloseOnSelect?: boolean; onAction?: (item?: CoreCollectionItem) => void; onSelect?: (item?: CoreCollectionItem) => void; className?: string; };
+export type MenuProps = MuxUIAriaAccessibleName & { items?: MuxUIItems; disabled?: boolean; shouldCloseOnSelect?: boolean; onAction?: (item?: MuxUICollectionItem) => void; onSelect?: (item?: MuxUICollectionItem) => void; className?: string; };
 export declare const Menu: React.ForwardRefExoticComponent<MenuProps & React.RefAttributes<HTMLDivElement>>;
 export type RadioOption = { id?: string; value: string; label?: React.ReactNode; disabled?: boolean; };
-export type RadioGroupProps = CoreAccessibleName & { options?: RadioOption[]; value?: string; defaultValue?: string; disabled?: boolean; readOnly?: boolean; required?: boolean; invalid?: boolean; onChange?: (value: string) => void; className?: string; };
+export type RadioGroupProps = MuxUIAccessibleName & { options?: RadioOption[]; value?: string; defaultValue?: string; disabled?: boolean; readOnly?: boolean; required?: boolean; invalid?: boolean; onChange?: (value: string) => void; className?: string; };
 export declare const RadioGroup: React.ForwardRefExoticComponent<RadioGroupProps & React.RefAttributes<HTMLDivElement>>;
-export type SelectProps = NamedFieldProps & { items?: CoreItems; value?: string; defaultValue?: string; disabled?: boolean; readOnly?: boolean; required?: boolean; invalid?: boolean; name?: string; placeholder?: string; onChange?: (value?: string) => void; };
+export type SelectProps = NamedFieldProps & { items?: MuxUIItems; value?: string; defaultValue?: string; disabled?: boolean; readOnly?: boolean; required?: boolean; invalid?: boolean; name?: string; placeholder?: string; onChange?: (value?: string) => void; };
 export declare const Select: React.ForwardRefExoticComponent<SelectProps & React.RefAttributes<HTMLDivElement>>;
-export type ComboBoxProps = NamedFieldProps & { items?: CoreItems; value?: string; defaultValue?: string; selectedId?: string; defaultSelectedId?: string; disabled?: boolean; readOnly?: boolean; required?: boolean; invalid?: boolean; name?: string; placeholder?: string; onChange?: (value: string) => void; onSelect?: (item?: CoreCollectionItem) => void; };
+export type ComboBoxProps = NamedFieldProps & { items?: MuxUIItems; value?: string; defaultValue?: string; selectedId?: string; defaultSelectedId?: string; disabled?: boolean; readOnly?: boolean; required?: boolean; invalid?: boolean; name?: string; placeholder?: string; onChange?: (value: string) => void; onSelect?: (item?: MuxUICollectionItem) => void; };
 export declare const ComboBox: React.ForwardRefExoticComponent<ComboBoxProps & React.RefAttributes<HTMLDivElement>>;
-export type SliderProps = CoreAccessibleName & { value?: number; defaultValue?: number; min?: number; max?: number; step?: number; disabled?: boolean; orientation?: 'horizontal' | 'vertical'; onChange?: (value: number) => void; className?: string; };
+export type SliderProps = MuxUIAccessibleName & { value?: number; defaultValue?: number; min?: number; max?: number; step?: number; disabled?: boolean; orientation?: 'horizontal' | 'vertical'; onChange?: (value: number) => void; className?: string; };
 export declare const Slider: React.ForwardRefExoticComponent<SliderProps & React.RefAttributes<HTMLDivElement>>;
-export interface CoreTableColumn extends CoreCollectionItem { isRowHeader?: boolean; sortable?: boolean; }
-export interface CoreTableRow extends CoreCollectionItem { values?: Record<string, React.ReactNode>; }
-export type TableProps = CoreAriaLabel & { columns?: CoreTableColumn[]; rows?: CoreTableRow[]; selectedIds?: CoreSelection; defaultSelectedIds?: CoreSelection; disabled?: boolean; selectionMode?: 'none' | 'single' | 'multiple'; onSelectionChange?: (ids: CoreSelection) => void; onRowAction?: (row?: CoreTableRow) => void; className?: string; };
+export interface MuxUITableColumn extends MuxUICollectionItem { isRowHeader?: boolean; sortable?: boolean; }
+export interface MuxUITableRow extends MuxUICollectionItem { values?: Record<string, React.ReactNode>; }
+export type TableProps = MuxUIAriaLabel & { columns?: MuxUITableColumn[]; rows?: MuxUITableRow[]; selectedIds?: MuxUISelection; defaultSelectedIds?: MuxUISelection; disabled?: boolean; selectionMode?: 'none' | 'single' | 'multiple'; onSelectionChange?: (ids: MuxUISelection) => void; onRowAction?: (row?: MuxUITableRow) => void; className?: string; };
 export declare const Table: React.ForwardRefExoticComponent<TableProps & React.RefAttributes<HTMLTableElement>>;
-export type TabsProps = CoreAriaAccessibleName & { items?: CoreItems; value?: string; defaultValue?: string; disabled?: boolean; orientation?: 'horizontal' | 'vertical'; onChange?: (value: string) => void; className?: string; };
+export type TabsProps = MuxUIAriaAccessibleName & { items?: MuxUIItems; value?: string; defaultValue?: string; disabled?: boolean; orientation?: 'horizontal' | 'vertical'; onChange?: (value: string) => void; className?: string; };
 export declare const Tabs: React.ForwardRefExoticComponent<TabsProps & React.RefAttributes<HTMLDivElement>>;
-export type TagGroupProps = CoreAccessibleName & { items?: CoreItems; disabled?: boolean; onRemove?: (items: CoreCollectionItem[]) => void; onAction?: (item?: CoreCollectionItem) => void; className?: string; };
+export type TagGroupProps = MuxUIAccessibleName & { items?: MuxUIItems; disabled?: boolean; onRemove?: (items: MuxUICollectionItem[]) => void; onAction?: (item?: MuxUICollectionItem) => void; className?: string; };
 export declare const TagGroup: React.ForwardRefExoticComponent<TagGroupProps & React.RefAttributes<HTMLDivElement>>;
-export type ToggleButtonGroupProps = CoreAriaAccessibleName & { selectedIds?: CoreSelection; defaultSelectedIds?: CoreSelection; disabled?: boolean; orientation?: 'horizontal' | 'vertical'; onSelectionChange?: (ids: CoreSelection) => void; children?: React.ReactNode; className?: string; };
+export type ToggleButtonGroupProps = MuxUIAriaAccessibleName & { selectedIds?: MuxUISelection; defaultSelectedIds?: MuxUISelection; disabled?: boolean; orientation?: 'horizontal' | 'vertical'; onSelectionChange?: (ids: MuxUISelection) => void; children?: React.ReactNode; className?: string; };
 export declare const ToggleButtonGroup: React.ForwardRefExoticComponent<ToggleButtonGroupProps & React.RefAttributes<HTMLDivElement>>;
-export type TokenFieldProps = CoreAccessibleName & { value?: string[]; defaultValue?: string[]; disabled?: boolean; readOnly?: boolean; name?: string; placeholder?: string; onChange?: (value: string[]) => void; className?: string; };
+export type TokenFieldProps = MuxUIAccessibleName & { value?: string[]; defaultValue?: string[]; disabled?: boolean; readOnly?: boolean; name?: string; placeholder?: string; onChange?: (value: string[]) => void; className?: string; };
 export declare const TokenField: React.ForwardRefExoticComponent<TokenFieldProps & React.RefAttributes<HTMLDivElement>>;
-export type ToolbarProps = CoreAriaAccessibleName & { orientation?: 'horizontal' | 'vertical'; disabled?: boolean; children?: React.ReactNode; className?: string; };
+export type ToolbarProps = MuxUIAriaAccessibleName & { orientation?: 'horizontal' | 'vertical'; disabled?: boolean; children?: React.ReactNode; className?: string; };
 export declare const Toolbar: React.ForwardRefExoticComponent<ToolbarProps & React.RefAttributes<HTMLDivElement>>;
-export interface CoreTreeItem extends CoreCollectionItem { children?: CoreTreeItem[]; items?: CoreTreeItem[]; }
-export type TreeProps = CoreAriaAccessibleName & { items?: CoreTreeItem[]; selectedIds?: CoreSelection; defaultSelectedIds?: CoreSelection; expandedIds?: CoreSelection; defaultExpandedIds?: CoreSelection; disabled?: boolean; selectionMode?: 'none' | 'single' | 'multiple'; onSelectionChange?: (ids: CoreSelection) => void; onExpandedChange?: (ids: CoreSelection) => void; onAction?: (item?: CoreTreeItem) => void; className?: string; };
+export interface MuxUITreeItem extends MuxUICollectionItem { children?: MuxUITreeItem[]; items?: MuxUITreeItem[]; }
+export type TreeProps = MuxUIAriaAccessibleName & { items?: MuxUITreeItem[]; selectedIds?: MuxUISelection; defaultSelectedIds?: MuxUISelection; expandedIds?: MuxUISelection; defaultExpandedIds?: MuxUISelection; disabled?: boolean; selectionMode?: 'none' | 'single' | 'multiple'; onSelectionChange?: (ids: MuxUISelection) => void; onExpandedChange?: (ids: MuxUISelection) => void; onAction?: (item?: MuxUITreeItem) => void; className?: string; };
 export declare const Tree: React.ForwardRefExoticComponent<TreeProps & React.RefAttributes<HTMLDivElement>>;
-export type VirtualizerProps = CoreAriaLabel & { items?: CoreItems; height?: number; itemHeight?: number; overscan?: number; disabled?: boolean; onScroll?: React.UIEventHandler<HTMLDivElement>; className?: string; style?: React.CSSProperties; };
+export type VirtualizerProps = MuxUIAriaLabel & { items?: MuxUIItems; height?: number; itemHeight?: number; overscan?: number; disabled?: boolean; onScroll?: React.UIEventHandler<HTMLDivElement>; className?: string; style?: React.CSSProperties; };
 export declare const Virtualizer: React.ForwardRefExoticComponent<VirtualizerProps & React.RefAttributes<HTMLDivElement>>;
 `;
 const overlaysTypes = `
-export type CoreDropOperation = 'copy' | 'link' | 'move' | 'cancel';
-export interface CoreFileDropItem { readonly kind: 'file'; readonly type: string; readonly name: string; readonly getFile: () => Promise<File>; readonly getText: () => Promise<string>; }
-export interface CoreDirectoryDropItem { readonly kind: 'directory'; readonly name: string; readonly getEntries: () => AsyncIterable<CoreDropItem>; }
-export interface CoreTextDropItem { readonly kind: 'text'; readonly types: ReadonlySet<string>; readonly getText: (type: string) => Promise<string>; }
-export type CoreDropItem = CoreFileDropItem | CoreDirectoryDropItem | CoreTextDropItem;
-export interface CoreDropEvent { readonly type: 'drop'; readonly x: number; readonly y: number; readonly dropOperation: CoreDropOperation; readonly items: CoreDropItem[]; }
-export interface CoreDropActivateEvent { readonly type: 'activate'; readonly x: number; readonly y: number; }
-export interface DropZoneProps { children?: React.ReactNode; disabled?: boolean; className?: string; 'aria-label'?: string; 'aria-labelledby'?: string; onDrop?: (event: CoreDropEvent) => void; onActivate?: (event: CoreDropActivateEvent) => void; }
+export type MuxUIDropOperation = 'copy' | 'link' | 'move' | 'cancel';
+export interface MuxUIFileDropItem { readonly kind: 'file'; readonly type: string; readonly name: string; readonly getFile: () => Promise<File>; readonly getText: () => Promise<string>; }
+export interface MuxUIDirectoryDropItem { readonly kind: 'directory'; readonly name: string; readonly getEntries: () => AsyncIterable<MuxUIDropItem>; }
+export interface MuxUITextDropItem { readonly kind: 'text'; readonly types: ReadonlySet<string>; readonly getText: (type: string) => Promise<string>; }
+export type MuxUIDropItem = MuxUIFileDropItem | MuxUIDirectoryDropItem | MuxUITextDropItem;
+export interface MuxUIDropEvent { readonly type: 'drop'; readonly x: number; readonly y: number; readonly dropOperation: MuxUIDropOperation; readonly items: MuxUIDropItem[]; }
+export interface MuxUIDropActivateEvent { readonly type: 'activate'; readonly x: number; readonly y: number; }
+export interface DropZoneProps { children?: React.ReactNode; disabled?: boolean; className?: string; 'aria-label'?: string; 'aria-labelledby'?: string; onDrop?: (event: MuxUIDropEvent) => void; onActivate?: (event: MuxUIDropActivateEvent) => void; }
 export declare const DropZone: React.ForwardRefExoticComponent<DropZoneProps & React.RefAttributes<HTMLDivElement>>;
 export interface FileTriggerProps { children?: React.ReactNode; acceptedFileTypes?: readonly string[]; allowsMultiple?: boolean; acceptDirectory?: boolean; defaultCamera?: 'user' | 'environment'; disabled?: boolean; className?: string; onSelect?: (files: File[]) => void; }
 export declare const FileTrigger: React.ForwardRefExoticComponent<FileTriggerProps & React.RefAttributes<HTMLInputElement>>;
@@ -358,20 +358,20 @@ export declare const Tooltip: React.ForwardRefExoticComponent<TooltipProps & Rea
 `;
 const reactTypesBody = typesBody.replace("export const reactCompatibility: Readonly<Record<string, unknown>>;\n", `export const reactCompatibility: Readonly<Record<string, unknown>>;\n${fieldsTypes}${collectionsTypes}${overlaysTypes}`);
 const testingBody = "export const reactPlatformSafetyFixture = Object.freeze({ componentSupportClaim: 'none', fixture: 'r1.5-react-breadth', discovery: 'informational' });\n";
-const readmeBody = `# @core-ui/react\n\nR1.5 React breadth closure for the standalone Core UI renderer.\n\n- The 53 Core-owned family exports are listed below for the \`web.react\` binding.\n- React Aria Components 1.20.0 is an internal replaceable substrate.\n- Core owns the public APIs, tokens, selectors, styling, accessibility behavior, lifecycle, and prop names.\n- Tale UI is a pinned styling donor; generated styling results are Core-owned and Tale UI is not a dependency.\n`;
+const readmeBody = `# @muxui/react\n\nR1.5 React breadth closure for the standalone Mux UI renderer.\n\n- The 53 Mux UI-owned family exports are listed below for the \`web.react\` binding.\n- React Aria Components 1.20.0 is an internal replaceable substrate.\n- MuxUI owns the public APIs, tokens, selectors, styling, accessibility behavior, lifecycle, and prop names.\n- Tale UI is a pinned styling donor; generated styling results are Mux UI-owned and Tale UI is not a dependency.\n`;
 const markdownCell = (value) => String(value).replaceAll('|', '\\|').replaceAll('\n', ' ');
 const readmeComponentRows = componentArtifacts.map((artifact) => {
-  const slug = artifact.id.slice('core:component:'.length);
+  const slug = artifact.id.slice('muxui:component:'.length);
   const binding = artifact.bindings['web.react'];
-  return `| ${markdownCell(artifact.name)} | ${markdownCell(artifact.lifecycle)} | .core-${slug} | ${markdownCell(binding.api.props.join(', ') || 'none')} |`;
+  return `| ${markdownCell(artifact.name)} | ${markdownCell(artifact.lifecycle)} | .muxui-${slug} | ${markdownCell(binding.api.props.join(', ') || 'none')} |`;
 }).join('\n');
 const readmeGuidance = `
 ## R1 exit publication candidate
 
-The exact R1 exit candidate is \`@core-ui/react@0.1.0-rc.1\`, for the \`next\`
+The exact R1 exit candidate is \`@muxui/react@0.1.0-rc.1\`, for the \`next\`
 dist-tag on the npm registry. The candidate contains only the standalone
 \`web.react\` renderer and its three internal runtime dependencies. All 53
-Core-owned component exports remain experimental; no stable, secondary-renderer,
+Mux UI-owned component exports remain experimental; no stable, secondary-renderer,
 or cross-platform support claim is made. Publication, dist-tag mutation, and
 post-publication verification are separate authorized operations.
 
@@ -380,21 +380,21 @@ post-publication verification are separate authorized operations.
 Install the versioned local candidate from the package directory:
 
 \`\`\`sh
-pnpm add ./core-ui-react-${manifest.version}.tgz
+pnpm add ./muxui-react-${manifest.version}.tgz
 \`\`\`
 
-Import the generated Core styles once, then use the React exports:
+Import the generated MuxUI styles once, then use the React exports:
 
 \`\`\`tsx
-import '@core-ui/react/styles.css';
-import { Button } from '@core-ui/react';
+import '@muxui/react/styles.css';
+import { Button } from '@muxui/react';
 
 export function Example() {
   return <Button onActivate={() => {}}>Save</Button>;
 }
 \`\`\`
 
-The renderer owns the Core selectors, tokens, accessibility behavior, lifecycle, and public prop names. React Aria Components is an internal implementation substrate; this package does not transfer its APIs or styling boundary.
+The renderer owns the MuxUI selectors, tokens, accessibility behavior, lifecycle, and public prop names. React Aria Components is an internal implementation substrate; this package does not transfer its APIs or styling boundary.
 
 Supporting runtime exports: \`ToastProvider\` and \`useToast\` are available alongside \`Toast\` for managed notifications.
 
@@ -403,17 +403,17 @@ Supporting runtime exports: \`ToastProvider\` and \`useToast\` are available alo
 ${readmeComponentRows}
 `;
 const descriptorRecord = {
-  schema: 'core-ui-renderer-descriptor-v1', generatedFrom: 'packages/react/src/generate.mjs',
+  schema: 'muxui-renderer-descriptor-v1', generatedFrom: 'packages/react/src/generate.mjs',
   package: manifest.name, version: manifest.version, support: 'unproved; R1.5 React exports only',
   bindings: componentArtifacts.map((artifact) => ({
     binding: `${artifact.id}#web.react`, export: artifact.name, module: '.',
     lifecycle: 'experimental', strategy: 'direct', runtimeProfile: 'web.react',
-    selector: `.core-${artifact.id.slice('core:component:'.length)}`, states: artifact.states, api: artifact.bindings['web.react'].api,
+    selector: `.muxui-${artifact.id.slice('muxui:component:'.length)}`, states: artifact.states, api: artifact.bindings['web.react'].api,
   })),
   exports: componentArtifacts.map((artifact) => ({ name: artifact.name, kind: 'component', binding: `${artifact.id}#web.react`, module: '.' })),
 };
 const releaseRecord = {
-  schema: 'core-ui-react-release-candidate-v1', generatedFrom: 'packages/react/src/generate.mjs',
+  schema: 'muxui-react-release-candidate-v1', generatedFrom: 'packages/react/src/generate.mjs',
   package: manifest.name, version: manifest.version, lifecycle: 'experimental',
   componentExports: componentArtifacts.map((artifact) => ({ name: artifact.name, export: artifact.name, binding: `${artifact.id}#web.react`, module: '.' })),
   bindings: componentArtifacts.map((artifact) => ({ binding: `${artifact.id}#web.react`, package: manifest.name, export: artifact.name, lifecycle: 'experimental', strategy: 'direct', runtimeProfile: 'web.react' })),
@@ -430,7 +430,7 @@ const releaseRecord = {
   packageExports: manifest.exports,
   packageFiles: manifest.files,
   publicationPreparation: {
-    schema: 'core-ui-r1-exit-publication-preparation-v1',
+    schema: 'muxui-r1-exit-publication-preparation-v1',
     candidateVersion: '0.1.0-rc.1',
     registry: 'https://registry.npmjs.org',
     distTag: 'next',
@@ -462,41 +462,41 @@ const releaseRecord = {
   },
 };
 for (const rule of crosswalk.button.rules) {
-  if (rule.core.includes('.') && !fullCssBody.includes(`--core-${rule.core.replaceAll('.', '-')}`)) throw new Error(`CORE_REACT_DONOR_RESULT_MISSING: ${rule.input}`);
+  if (rule.core.includes('.') && !fullCssBody.includes(`--muxui-${rule.core.replaceAll('.', '-')}`)) throw new Error(`MUXUI_REACT_DONOR_RESULT_MISSING: ${rule.input}`);
 }
 if (!authoredCss.includes('font: inherit') || !authoredCss.includes('box-shadow:') || !authoredCss.includes('[data-disabled]')) {
-  throw new Error('CORE_REACT_DONOR_NON_TOKEN_RESULT_MISSING');
+  throw new Error('MUXUI_REACT_DONOR_NON_TOKEN_RESULT_MISSING');
 }
 const donorComparisonRecord = {
-  schema: 'core-ui-react-button-donor-comparison-v1', generatedFrom: 'packages/react/src/generate.mjs',
+  schema: 'muxui-react-button-donor-comparison-v1', generatedFrom: 'packages/react/src/generate.mjs',
   donor: { commit: crosswalk.donor.commit, tree: crosswalk.donor.tree, buttonBlobs: crosswalk.buttonBlobs },
   disposition: crosswalk.button.disposition, consumedRules: crosswalk.button.rules,
-  result: { cssSha256: `sha256:${sha256(fullCssBody)}`, selector: '.core-button', status: 'adapted-for-r1.1-button' },
+  result: { cssSha256: `sha256:${sha256(fullCssBody)}`, selector: '.muxui-button', status: 'adapted-for-r1.1-button' },
 };
 const componentDonorComparisonRecord = {
-  schema: 'core-ui-react-component-donor-comparison-v1', generatedFrom: 'packages/react/src/generate.mjs',
+  schema: 'muxui-react-component-donor-comparison-v1', generatedFrom: 'packages/react/src/generate.mjs',
   donor: { name: crosswalk.donor.name, commit: crosswalk.donor.commit, tree: crosswalk.donor.tree },
   components: componentArtifacts.map((artifact) => {
-    const slug = artifact.id.slice('core:component:'.length);
+    const slug = artifact.id.slice('muxui:component:'.length);
     const source = artifact.name === 'Button' ? crosswalk.button : crosswalk.components[slug] ?? r12Crosswalk.components[slug] ?? r13Crosswalk.components[slug] ?? r14Crosswalk.components[slug];
-    return { ...(source?.donorInputs ? { donorInputs: source.donorInputs } : {}), component: artifact.name, binding: `${artifact.id}#web.react`, disposition: source.disposition, selector: `.core-${slug}`, rules: source.rules };
+    return { ...(source?.donorInputs ? { donorInputs: source.donorInputs } : {}), component: artifact.name, binding: `${artifact.id}#web.react`, disposition: source.disposition, selector: `.muxui-${slug}`, rules: source.rules };
   }),
 };
 const r11Artifacts = componentArtifacts.filter((artifact) => {
-  const slug = artifact.id.slice('core:component:'.length);
+  const slug = artifact.id.slice('muxui:component:'.length);
   return !r12Slugs.includes(slug) && !r13Slugs.includes(slug) && !r14Slugs.includes(slug);
 });
 const r11DescriptorRecord = {
   ...descriptorRecord,
   support: 'unproved; R1.1 React exports only',
-  bindings: descriptorRecord.bindings.filter(({ binding }) => !r12Slugs.some((slug) => binding === `core:component:${slug}#web.react`) && !r13Slugs.some((slug) => binding === `core:component:${slug}#web.react`) && !r14Slugs.some((slug) => binding === `core:component:${slug}#web.react`)),
-  exports: descriptorRecord.exports.filter(({ binding }) => !r12Slugs.some((slug) => binding === `core:component:${slug}#web.react`) && !r13Slugs.some((slug) => binding === `core:component:${slug}#web.react`) && !r14Slugs.some((slug) => binding === `core:component:${slug}#web.react`)),
+  bindings: descriptorRecord.bindings.filter(({ binding }) => !r12Slugs.some((slug) => binding === `muxui:component:${slug}#web.react`) && !r13Slugs.some((slug) => binding === `muxui:component:${slug}#web.react`) && !r14Slugs.some((slug) => binding === `muxui:component:${slug}#web.react`)),
+  exports: descriptorRecord.exports.filter(({ binding }) => !r12Slugs.some((slug) => binding === `muxui:component:${slug}#web.react`) && !r13Slugs.some((slug) => binding === `muxui:component:${slug}#web.react`) && !r14Slugs.some((slug) => binding === `muxui:component:${slug}#web.react`)),
 };
 const r11ReleaseRecord = {
   ...releaseRecord,
-  componentExports: releaseRecord.componentExports.filter(({ binding }) => !r12Slugs.some((slug) => binding === `core:component:${slug}#web.react`) && !r13Slugs.some((slug) => binding === `core:component:${slug}#web.react`) && !r14Slugs.some((slug) => binding === `core:component:${slug}#web.react`)),
-  bindings: releaseRecord.bindings.filter(({ binding }) => !r12Slugs.some((slug) => binding === `core:component:${slug}#web.react`) && !r13Slugs.some((slug) => binding === `core:component:${slug}#web.react`) && !r14Slugs.some((slug) => binding === `core:component:${slug}#web.react`)),
-  catalog: { ...releaseRecord.catalog, components: releaseRecord.catalog.components.filter(({ component }) => !r12Slugs.includes(component.slice('core:component:'.length)) && !r13Slugs.includes(component.slice('core:component:'.length)) && !r14Slugs.includes(component.slice('core:component:'.length))) },
+  componentExports: releaseRecord.componentExports.filter(({ binding }) => !r12Slugs.some((slug) => binding === `muxui:component:${slug}#web.react`) && !r13Slugs.some((slug) => binding === `muxui:component:${slug}#web.react`) && !r14Slugs.some((slug) => binding === `muxui:component:${slug}#web.react`)),
+  bindings: releaseRecord.bindings.filter(({ binding }) => !r12Slugs.some((slug) => binding === `muxui:component:${slug}#web.react`) && !r13Slugs.some((slug) => binding === `muxui:component:${slug}#web.react`) && !r14Slugs.some((slug) => binding === `muxui:component:${slug}#web.react`)),
+  catalog: { ...releaseRecord.catalog, components: releaseRecord.catalog.components.filter(({ component }) => !r12Slugs.includes(component.slice('muxui:component:'.length)) && !r13Slugs.includes(component.slice('muxui:component:'.length)) && !r14Slugs.includes(component.slice('muxui:component:'.length))) },
   evidence: { status: 'pending', ids: ['E-R1.1-01', 'E-R1.1-02', 'E-R1.1-03', 'E-R1.1-04'] },
 };
 const r11ComponentDonorComparisonRecord = {
@@ -505,104 +505,104 @@ const r11ComponentDonorComparisonRecord = {
 };
 assertReactR11GeneratedContracts({ descriptor: r11DescriptorRecord, release: r11ReleaseRecord, donorComparison: donorComparisonRecord, componentDonorComparison: r11ComponentDonorComparisonRecord, manifest, crosswalk });
 const r12DonorComparisonRecord = {
-  schema: 'core-ui-react-r1-2-donor-comparison-v1',
+  schema: 'muxui-react-r1-2-donor-comparison-v1',
   generatedFrom: 'packages/react/src/generate.mjs',
   donor: r12Crosswalk.donor,
   components: r12Slugs.map((slug) => {
   const source = EXPECTED_R12_DONOR_CONTRACT.components[slug];
-    return { component: componentArtifacts.find(({ id }) => id === `core:component:${slug}`).name, binding: `core:component:${slug}#web.react`, disposition: source.disposition, selector: `.core-${slug}`, donorInputs: source.donorInputs, tokenHooks: source.tokenHooks, rules: source.rules, result: { cssSelector: `.core-${slug}`, status: 'adapted-for-r1.2' } };
+    return { component: componentArtifacts.find(({ id }) => id === `muxui:component:${slug}`).name, binding: `muxui:component:${slug}#web.react`, disposition: source.disposition, selector: `.muxui-${slug}`, donorInputs: source.donorInputs, tokenHooks: source.tokenHooks, rules: source.rules, result: { cssSelector: `.muxui-${slug}`, status: 'adapted-for-r1.2' } };
   }),
 };
 for (const slug of r12Slugs) {
   for (const hook of EXPECTED_R12_DONOR_CONTRACT.components[slug].tokenHooks) {
-    if (!fullCssBody.includes(`--core-${hook.replaceAll('.', '-')}`)) throw new Error(`CORE_REACT_R12_TOKEN_HOOK_UNCONSUMED: ${slug}:${hook}`);
+    if (!fullCssBody.includes(`--muxui-${hook.replaceAll('.', '-')}`)) throw new Error(`MUXUI_REACT_R12_TOKEN_HOOK_UNCONSUMED: ${slug}:${hook}`);
   }
 }
 const r12DescriptorRecord = {
   ...descriptorRecord,
   support: 'unproved; R1.2 React exports only',
-  bindings: descriptorRecord.bindings.filter(({ binding }) => r12Slugs.some((slug) => binding === `core:component:${slug}#web.react`)),
-  exports: descriptorRecord.exports.filter(({ binding }) => r12Slugs.some((slug) => binding === `core:component:${slug}#web.react`)),
+  bindings: descriptorRecord.bindings.filter(({ binding }) => r12Slugs.some((slug) => binding === `muxui:component:${slug}#web.react`)),
+  exports: descriptorRecord.exports.filter(({ binding }) => r12Slugs.some((slug) => binding === `muxui:component:${slug}#web.react`)),
 };
 const r12ReleaseRecord = {
   ...releaseRecord,
-  componentExports: releaseRecord.componentExports.filter(({ binding }) => r12Slugs.some((slug) => binding === `core:component:${slug}#web.react`)),
-  bindings: releaseRecord.bindings.filter(({ binding }) => r12Slugs.some((slug) => binding === `core:component:${slug}#web.react`)),
-  catalog: { ...releaseRecord.catalog, components: releaseRecord.catalog.components.filter(({ component }) => r12Slugs.includes(component.slice('core:component:'.length))) },
+  componentExports: releaseRecord.componentExports.filter(({ binding }) => r12Slugs.some((slug) => binding === `muxui:component:${slug}#web.react`)),
+  bindings: releaseRecord.bindings.filter(({ binding }) => r12Slugs.some((slug) => binding === `muxui:component:${slug}#web.react`)),
+  catalog: { ...releaseRecord.catalog, components: releaseRecord.catalog.components.filter(({ component }) => r12Slugs.includes(component.slice('muxui:component:'.length))) },
   evidence: { status: 'pending', ids: ['E-R1.2-01', 'E-R1.2-02', 'E-R1.2-03', 'E-R1.2-04'] },
 };
-assertReactR12GeneratedContracts({ descriptor: r12DescriptorRecord, release: r12ReleaseRecord, donorComparison: r12DonorComparisonRecord, manifest, componentNames: r12Slugs.map((slug) => componentArtifacts.find(({ id }) => id === `core:component:${slug}`).name), crosswalk: r12Crosswalk });
+assertReactR12GeneratedContracts({ descriptor: r12DescriptorRecord, release: r12ReleaseRecord, donorComparison: r12DonorComparisonRecord, manifest, componentNames: r12Slugs.map((slug) => componentArtifacts.find(({ id }) => id === `muxui:component:${slug}`).name), crosswalk: r12Crosswalk });
 const r13DonorComparisonRecord = {
-  schema: 'core-ui-react-r1-3-donor-comparison-v1',
+  schema: 'muxui-react-r1-3-donor-comparison-v1',
   generatedFrom: 'packages/react/src/generate.mjs',
   donor: r13Crosswalk.donor,
   components: r13Slugs.map((slug) => {
     const source = EXPECTED_R13_DONOR_CONTRACT.components[slug];
-    const artifact = componentArtifacts.find(({ id }) => id === `core:component:${slug}`);
+    const artifact = componentArtifacts.find(({ id }) => id === `muxui:component:${slug}`);
     return {
       component: artifact.name,
       binding: `${artifact.id}#web.react`,
       disposition: source.disposition,
-      selector: `.core-${slug}`,
+      selector: `.muxui-${slug}`,
       donorInputs: source.donorInputs,
       tokenHooks: source.tokenHooks,
       rules: source.rules,
-      result: { cssSelector: `.core-${slug}`, status: source.disposition === 'no-applicable-donor' ? 'no-applicable-donor' : 'adapted-for-r1.3' },
+      result: { cssSelector: `.muxui-${slug}`, status: source.disposition === 'no-applicable-donor' ? 'no-applicable-donor' : 'adapted-for-r1.3' },
     };
   }),
 };
 for (const slug of r13Slugs) {
   const source = EXPECTED_R13_DONOR_CONTRACT.components[slug];
   for (const hook of source.tokenHooks) {
-    if (!fullCssBody.includes(`--core-${hook.replaceAll('.', '-')}`)) throw new Error(`CORE_REACT_R13_TOKEN_HOOK_UNCONSUMED: ${slug}:${hook}`);
+    if (!fullCssBody.includes(`--muxui-${hook.replaceAll('.', '-')}`)) throw new Error(`MUXUI_REACT_R13_TOKEN_HOOK_UNCONSUMED: ${slug}:${hook}`);
   }
 }
 const r13DescriptorRecord = {
   ...descriptorRecord,
   support: 'unproved; R1.3 React exports only',
-  bindings: descriptorRecord.bindings.filter(({ binding }) => !r14Slugs.some((slug) => binding === `core:component:${slug}#web.react`)),
-  exports: descriptorRecord.exports.filter(({ binding }) => !r14Slugs.some((slug) => binding === `core:component:${slug}#web.react`)),
+  bindings: descriptorRecord.bindings.filter(({ binding }) => !r14Slugs.some((slug) => binding === `muxui:component:${slug}#web.react`)),
+  exports: descriptorRecord.exports.filter(({ binding }) => !r14Slugs.some((slug) => binding === `muxui:component:${slug}#web.react`)),
 };
 const r13ReleaseRecord = {
   ...releaseRecord,
-  componentExports: releaseRecord.componentExports.filter(({ binding }) => !r14Slugs.some((slug) => binding === `core:component:${slug}#web.react`)),
-  bindings: releaseRecord.bindings.filter(({ binding }) => !r14Slugs.some((slug) => binding === `core:component:${slug}#web.react`)),
-  catalog: { ...releaseRecord.catalog, components: releaseRecord.catalog.components.filter(({ component }) => !r14Slugs.includes(component.slice('core:component:'.length))) },
+  componentExports: releaseRecord.componentExports.filter(({ binding }) => !r14Slugs.some((slug) => binding === `muxui:component:${slug}#web.react`)),
+  bindings: releaseRecord.bindings.filter(({ binding }) => !r14Slugs.some((slug) => binding === `muxui:component:${slug}#web.react`)),
+  catalog: { ...releaseRecord.catalog, components: releaseRecord.catalog.components.filter(({ component }) => !r14Slugs.includes(component.slice('muxui:component:'.length))) },
   evidence: { status: 'pending', ids: ['E-R1.3-01', 'E-R1.3-02', 'E-R1.3-03', 'E-R1.3-04', 'E-R1.3-05'] },
 };
 assertReactR13GeneratedContracts({ descriptor: r13DescriptorRecord, release: r13ReleaseRecord, donorComparison: r13DonorComparisonRecord, manifest, componentNames: r13DescriptorRecord.exports.map(({ name }) => name), crosswalk: r13Crosswalk, collectionsSource });
 const r14DonorComparisonRecord = {
-  schema: 'core-ui-react-r1-4-donor-comparison-v1',
+  schema: 'muxui-react-r1-4-donor-comparison-v1',
   generatedFrom: 'packages/react/src/generate.mjs',
   donor: r14Crosswalk.donor,
   components: r14Slugs.map((slug) => {
     const source = EXPECTED_R14_DONOR_CONTRACT.components[slug];
-    const artifact = componentArtifacts.find(({ id }) => id === `core:component:${slug}`);
+    const artifact = componentArtifacts.find(({ id }) => id === `muxui:component:${slug}`);
     return {
       component: artifact.name,
       binding: `${artifact.id}#web.react`,
       disposition: source.disposition,
-      selector: `.core-${slug}`,
+      selector: `.muxui-${slug}`,
       donorInputs: source.donorInputs,
       tokenHooks: source.tokenHooks,
       rules: source.rules,
-      result: { cssSelector: `.core-${slug}`, status: 'adapted-for-r1.4' },
+      result: { cssSelector: `.muxui-${slug}`, status: 'adapted-for-r1.4' },
     };
   }),
 };
 for (const slug of r14Slugs) {
   for (const hook of EXPECTED_R14_DONOR_CONTRACT.components[slug].tokenHooks) {
-    if (!fullCssBody.includes(`--core-${hook.replaceAll('.', '-')}`)) throw new Error(`CORE_REACT_R14_TOKEN_HOOK_UNCONSUMED: ${slug}:${hook}`);
+    if (!fullCssBody.includes(`--muxui-${hook.replaceAll('.', '-')}`)) throw new Error(`MUXUI_REACT_R14_TOKEN_HOOK_UNCONSUMED: ${slug}:${hook}`);
   }
 }
 const r14DescriptorRecord = { ...descriptorRecord, support: 'unproved; R1.4 React exports only' };
 const r14ReleaseRecord = { ...releaseRecord, evidence: { status: 'pending', ids: ['E-R1.4-01', 'E-R1.4-02', 'E-R1.4-03', 'E-R1.4-04', 'E-R1.4-05', 'E-R1.4-06'] } };
-assertReactR14GeneratedContracts({ descriptor: r14DescriptorRecord, release: r14ReleaseRecord, donorComparison: r14DonorComparisonRecord, manifest, componentNames: r14Slugs.map((slug) => componentArtifacts.find(({ id }) => id === `core:component:${slug}`).name), crosswalk: r14Crosswalk, overlaysSource });
+assertReactR14GeneratedContracts({ descriptor: r14DescriptorRecord, release: r14ReleaseRecord, donorComparison: r14DonorComparisonRecord, manifest, componentNames: r14Slugs.map((slug) => componentArtifacts.find(({ id }) => id === `muxui:component:${slug}`).name), crosswalk: r14Crosswalk, overlaysSource });
 
 const crosswalkSources = [crosswalk, r12Crosswalk, r13Crosswalk, r14Crosswalk];
 const crosswalkBySlug = new Map(crosswalkSources.flatMap((source) => Object.entries(source.components ?? {})));
 const snapshotByFamily = new Map(familySnapshot.families.map((family) => [family.family, family]));
-const artifactBySlug = new Map(componentArtifacts.map((artifact) => [artifact.id.slice('core:component:'.length), artifact]));
+const artifactBySlug = new Map(componentArtifacts.map((artifact) => [artifact.id.slice('muxui:component:'.length), artifact]));
 const R15_EVIDENCE_IDS = Object.freeze(['E-R1.5-01', 'E-R1.5-02', 'E-R1.5-03', 'E-R1.5-04', 'E-R1.5-05', 'E-R1.5-06']);
 const r15TrancheEvidence = (tranche) => Array.from({ length: tranche === 'R1.3' ? 5 : tranche === 'R1.4' ? 6 : 4 }, (_, index) => `E-${tranche}-${String(index + 1).padStart(2, '0')}`);
 const familySlug = (family) => family === 'Modal'
@@ -614,7 +614,7 @@ const r15Families = familySnapshot.families.map((upstreamFamily) => {
   const slug = familySlug(upstreamFamily.family);
   const artifact = artifactBySlug.get(slug);
   const runtimeSource = runtimeSourceFor(artifact?.name);
-  if (!artifact || !runtimeSource) throw new Error(`CORE_REACT_R15_FAMILY_OWNER_MISSING: ${upstreamFamily.family}`);
+  if (!artifact || !runtimeSource) throw new Error(`MUXUI_REACT_R15_FAMILY_OWNER_MISSING: ${upstreamFamily.family}`);
   return {
     family: upstreamFamily.family,
     slug,
@@ -627,7 +627,7 @@ const r15Families = familySnapshot.families.map((upstreamFamily) => {
   };
 });
 const r15ClosureRecord = {
-  schema: 'core-ui-react-r1-5-closure-v1',
+  schema: 'muxui-react-r1-5-closure-v1',
   generatedFrom: 'catalog/react-r1-5/closure.json',
   package: manifest.name,
   version: manifest.version,
@@ -646,7 +646,7 @@ const r15ClosureRecord = {
     commit: crosswalk.donor.commit,
     tree: crosswalk.donor.tree,
     dependency: false,
-    ownership: 'Core-owned token/style results',
+    ownership: 'Mux UI-owned token/style results',
     sourceCrosswalks: ['catalog/react-r1-0/donor-crosswalk.json', 'catalog/react-r1-2/donor-crosswalk.json', 'catalog/react-r1-3/donor-crosswalk.json', 'catalog/react-r1-4/donor-crosswalk.json'],
   },
   families: r15Families.map((source) => {
@@ -675,8 +675,8 @@ const r15ClosureRecord = {
       export: { name: source.exportName, module: '.', kind: 'component' },
       lifecycle: { artifact: artifact.lifecycle, binding: binding.lifecycle, strategy: binding.strategy },
       evidence: { tranche: r15TrancheEvidence(source.tranche), final: R15_EVIDENCE_IDS, status: 'pending', support: 'unproved; R1.5 React exports only' },
-      packed: { package: manifest.name, version: manifest.version, private: manifest.private, entry: 'generated/index.mjs', types: 'generated/index.d.ts', styles: 'generated/styles.css', binding: `${artifact.id}#web.react`, export: source.exportName, runtimeProfile: 'web.react', selector: `.core-${source.slug}` },
-      donor: { disposition: donor.disposition, donorInputs, rules: donor.rules, tokenHooks, ownership: 'Core-owned token/style results' },
+      packed: { package: manifest.name, version: manifest.version, private: manifest.private, entry: 'generated/index.mjs', types: 'generated/index.d.ts', styles: 'generated/styles.css', binding: `${artifact.id}#web.react`, export: source.exportName, runtimeProfile: 'web.react', selector: `.muxui-${source.slug}` },
+      donor: { disposition: donor.disposition, donorInputs, rules: donor.rules, tokenHooks, ownership: 'Mux UI-owned token/style results' },
     };
   }),
   evidence: { status: 'pending', ids: R15_EVIDENCE_IDS, support: 'unproved; R1.5 React exports only' },
@@ -689,21 +689,21 @@ const r15ClosureRecord = {
   publication: r15ClosureSource.publication,
 };
 const r15DonorComparisonRecord = {
-  schema: 'core-ui-react-r1-5-donor-comparison-v1',
+  schema: 'muxui-react-r1-5-donor-comparison-v1',
   generatedFrom: 'packages/react/src/generate.mjs',
   tranche: 'R1.5',
   donor: r15ClosureRecord.donor,
   components: r15ClosureRecord.families.map(({ slug, export: componentExport, donor }) => ({
     component: componentExport.name,
     family: r15ClosureRecord.families.find(({ slug: value }) => value === slug).family,
-    binding: `core:component:${slug}#web.react`,
+    binding: `muxui:component:${slug}#web.react`,
     disposition: donor.disposition,
-    selector: `.core-${slug}`,
+    selector: `.muxui-${slug}`,
     donorInputs: donor.donorInputs,
     tokenHooks: donor.tokenHooks,
     rules: donor.rules,
     ownership: donor.ownership,
-    result: { cssSelector: `.core-${slug}`, status: donor.disposition === 'no-applicable-donor' ? 'no-applicable-donor' : 'adapted-for-r1.5' },
+    result: { cssSelector: `.muxui-${slug}`, status: donor.disposition === 'no-applicable-donor' ? 'no-applicable-donor' : 'adapted-for-r1.5' },
   })),
 };
 assertReactR15GeneratedContracts({
@@ -786,11 +786,11 @@ const readme = generatedText('packages/react/src/generate.mjs', `${readmeBody}${
 if (process.argv.includes('--check')) {
   for (const [name, expected] of outputs) {
     if (await readFile(resolve(generatedRoot, name), 'utf8').catch(() => null) !== expected) {
-      throw new Error(`CORE_REACT_GENERATED_DRIFT: generated/${name}`);
+      throw new Error(`MUXUI_REACT_GENERATED_DRIFT: generated/${name}`);
     }
   }
   if (await readFile(resolve(packageRoot, 'README.md'), 'utf8').catch(() => null) !== readme) {
-    throw new Error('CORE_REACT_GENERATED_DRIFT: README.md');
+    throw new Error('MUXUI_REACT_GENERATED_DRIFT: README.md');
   }
 } else {
   await mkdir(generatedRoot, { recursive: true });

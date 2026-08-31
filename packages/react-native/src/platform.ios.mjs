@@ -5,7 +5,7 @@ export const iosProfile = assertNativeProfileSupported('ios');
 
 export function createIosAdaptations({ light, dark } = {}) {
   if (typeof light !== 'string' || typeof dark !== 'string') {
-    throw new TypeError('CORE_REACT_NATIVE_DYNAMIC_COLOR_INVALID: ios');
+    throw new TypeError('MUXUI_REACT_NATIVE_DYNAMIC_COLOR_INVALID: ios');
   }
   return Object.freeze({
     direction: I18nManager.isRTL ? 'rtl' : 'ltr',

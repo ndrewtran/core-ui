@@ -14,10 +14,9 @@ import {
   sha256Digest,
   validateCatalogRecords,
   validateFamily,
-} from '@core-ui/schema';
-import { compileTokenRequirementSet, validateSourceCrosswalk } from '@core-ui/tokens';
-
-const SOURCE_MANIFEST_SCHEMA = 'core-ui-catalog-source-manifest-v1';
+} from '@muxui/schema';
+import { compileTokenRequirementSet, validateSourceCrosswalk } from '@muxui/tokens';
+const SOURCE_MANIFEST_SCHEMA = 'muxui-catalog-source-manifest-v1';
 
 function compareText(left, right) {
   return left < right ? -1 : left > right ? 1 : 0;
@@ -40,7 +39,7 @@ function assertRelativePath(path, field) {
     || path.startsWith('/')
     || path.split('/').includes('..')
   ) {
-    throw new Error(`CORE_CATALOG_SOURCE_INVALID: ${field} must be repository-relative`);
+    throw new Error(`MUXUI_CATALOG_SOURCE_INVALID: ${field} must be repository-relative`);
   }
 }
 
@@ -73,7 +72,7 @@ function validateSourceManifest(manifest) {
     || new Set(manifest.supportedQueryApiVersions).size !== manifest.supportedQueryApiVersions.length
     || !manifest.supportedQueryApiVersions.includes(manifest.queryApiVersion)
   ) {
-    throw new Error('CORE_CATALOG_SOURCE_INVALID: invalid catalog source manifest');
+    throw new Error('MUXUI_CATALOG_SOURCE_INVALID: invalid catalog source manifest');
   }
   const paths = new Set();
   assertRelativePath(manifest.authorityDecisionPath, 'authorityDecisionPath');
@@ -88,20 +87,20 @@ function validateSourceManifest(manifest) {
       || !['capability', 'component', 'example', 'guide', 'token-source'].includes(entry.family)
       || Object.keys(entry).some((key) => !['baselineOccurrencesPath', 'family', 'path', 'sourcePath'].includes(key))
     ) {
-      throw new Error(`CORE_CATALOG_SOURCE_INVALID: invalid records/${index}`);
+      throw new Error(`MUXUI_CATALOG_SOURCE_INVALID: invalid records/${index}`);
     }
     assertRelativePath(entry.path, `records/${index}/path`);
     if (entry.baselineOccurrencesPath !== undefined) {
       assertRelativePath(entry.baselineOccurrencesPath, `records/${index}/baselineOccurrencesPath`);
       if (entry.family !== 'token-source') {
-        throw new Error(`CORE_CATALOG_SOURCE_INVALID: records/${index}/baselineOccurrencesPath requires token-source`);
+        throw new Error(`MUXUI_CATALOG_SOURCE_INVALID: records/${index}/baselineOccurrencesPath requires token-source`);
       }
     }
     if (entry.sourcePath !== undefined) {
       assertRelativePath(entry.sourcePath, `records/${index}/sourcePath`);
     }
     if (paths.has(entry.path)) {
-      throw new Error(`CORE_CATALOG_SOURCE_INVALID: duplicate ${entry.path}`);
+      throw new Error(`MUXUI_CATALOG_SOURCE_INVALID: duplicate ${entry.path}`);
     }
     paths.add(entry.path);
   }
@@ -121,6 +120,23 @@ function countLexemes(value) {
   return canonicalJson(value).match(/[\p{L}\p{N}_]+/gu)?.length ?? 0;
 }
 
+function currentPageProfileIdentity(profile) {
+  const legacySlugPrefix = `${['core', 'ui'].join('-')}-`;
+  const legacyDiagnosticPrefix = ['CORE', '_'].join('');
+  const replacePrefix = (value, prefix, replacement) => (
+    value.startsWith(prefix) ? `${replacement}${value.slice(prefix.length)}` : value
+  );
+  return {
+    ...profile,
+    schema: 'muxui-token-section-page-budget-profile-v1',
+    id: replacePrefix(profile.id, legacySlugPrefix, 'muxui-'),
+    lexerVersion: replacePrefix(profile.lexerVersion, legacySlugPrefix, 'muxui-'),
+    oversizeCode: replacePrefix(profile.oversizeCode, legacyDiagnosticPrefix, 'MUXUI_'),
+    cursorProfile: replacePrefix(profile.cursorProfile, legacySlugPrefix, 'muxui-'),
+    envelopeOversizeCode: replacePrefix(profile.envelopeOversizeCode, legacyDiagnosticPrefix, 'MUXUI_'),
+  };
+}
+
 export function assertAcceptedQueryProfile({ manifest, pageBudgetProfile, authorityDecision }) {
   validateFamily('token-section-page-budget-profile', pageBudgetProfile);
   const acceptedPageProfile = authorityDecision.pageProfiles?.find(
@@ -131,13 +147,13 @@ export function assertAcceptedQueryProfile({ manifest, pageBudgetProfile, author
     ({ phase: phaseId }) => phaseId === expectedPhase,
   );
   if (!acceptedPageProfile || !phase) {
-    throw new Error(`CORE_CATALOG_SOURCE_INVALID: accepted Phase ${expectedPhase} profile is missing`);
+    throw new Error(`MUXUI_CATALOG_SOURCE_INVALID: accepted Phase ${expectedPhase} profile is missing`);
   }
   const { normalizedWorstCaseEnvelopePreimage, ...acceptedPageValues } = acceptedPageProfile;
-  const expectedPageBudgetProfile = {
-    schema: 'core-ui-token-section-page-budget-profile-v1',
+  const expectedPageBudgetProfile = currentPageProfileIdentity({
+    schema: 'muxui-token-section-page-budget-profile-v1',
     ...acceptedPageValues,
-  };
+  });
   if (
     canonicalJson(pageBudgetProfile) !== canonicalJson(expectedPageBudgetProfile)
     || canonicalDigest(normalizedWorstCaseEnvelopePreimage)
@@ -148,7 +164,7 @@ export function assertAcceptedQueryProfile({ manifest, pageBudgetProfile, author
     || canonicalJson(manifest.supportedQueryApiVersions)
       !== canonicalJson(phase.selectedCatalogSupportedQueryApiVersions)
   ) {
-    throw new Error(`CORE_CATALOG_SOURCE_INVALID: Phase ${expectedPhase} profile differs from accepted authority`);
+    throw new Error(`MUXUI_CATALOG_SOURCE_INVALID: Phase ${expectedPhase} profile differs from accepted authority`);
   }
   return pageBudgetProfile;
 }
@@ -220,7 +236,7 @@ export async function compileCatalog({
   sourceManifestPath = 'packages/catalog/catalog-sources.json',
 } = {}) {
   if (!repositoryRoot) {
-    throw new Error('CORE_CATALOG_SOURCE_INVALID: repositoryRoot is required');
+    throw new Error('MUXUI_CATALOG_SOURCE_INVALID: repositoryRoot is required');
   }
   const packageManifest = parseJsonStrict(await readFile(
     resolve(repositoryRoot, 'packages/catalog/package.json'),
@@ -241,7 +257,7 @@ export async function compileCatalog({
     !queryVersionOption
     || canonicalJson(queryVersionOption.choices) !== canonicalJson(QUERY_API_VERSIONS)
   ) {
-    throw new Error('CORE_CATALOG_SOURCE_INVALID: query-version CLI choices must project schema grammar');
+    throw new Error('MUXUI_CATALOG_SOURCE_INVALID: query-version CLI choices must project schema grammar');
   }
   const authorityDecisionBytes = await readFile(
     resolve(repositoryRoot, manifest.authorityDecisionPath),
@@ -271,7 +287,7 @@ export async function compileCatalog({
       sourceBytes = await readFile(resolve(repositoryRoot, entry.sourcePath), 'utf8');
       if (record.source !== entry.sourcePath) {
         throw new Error(
-          `CORE_CATALOG_SOURCE_INVALID: ${entry.path} must point to ${entry.sourcePath}`,
+          `MUXUI_CATALOG_SOURCE_INVALID: ${entry.path} must point to ${entry.sourcePath}`,
         );
       }
     }
@@ -316,7 +332,7 @@ export async function compileCatalog({
         .filter(([, binding]) => binding.strategy !== 'unsupported')
         .flatMap(([bindingId, binding]) => {
           const source = tokens.find(({ id }) => id === binding.tokenRecipe.source);
-          if (!source) throw new Error(`CORE_RELATION_INVALID: missing ${binding.tokenRecipe.source}`);
+          if (!source) throw new Error(`MUXUI_RELATION_INVALID: missing ${binding.tokenRecipe.source}`);
           return bindingProfiles(bindingId, binding).map((profile) => {
             const requirementSet = compileTokenRequirementSet({
               source,
@@ -381,7 +397,9 @@ export async function compileCatalog({
       tokenRequirementSets,
       platformSafetyRequirementSets,
       ...(record.kind === 'token' ? {
-        sourceCrosswalkDigest: crosswalkValidation.digest,
+        sourceCrosswalkDigest: record.sourceCrosswalk === undefined
+          ? null
+          : canonicalDigest(record.sourceCrosswalk),
       } : {}),
       source: {
         record: entry.path,

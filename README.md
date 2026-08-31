@@ -1,6 +1,6 @@
-# Core UI
+# Mux UI
 
-Core UI is a versioned design-system knowledge graph with first-class web,
+Mux UI is a versioned design-system knowledge graph with first-class web,
 React, and React Native renderers. The repository is currently building its
 internal Foundation boundary; it makes no public package or component-release
 claim yet.

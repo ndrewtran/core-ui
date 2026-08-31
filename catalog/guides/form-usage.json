@@ -1,1 +1,1 @@
-{"schemaVersion":"1.0.0","id":"core:guide:form-usage","kind":"guide","name":"Form usage","summary":"Use Form through the Core React binding.","lifecycle":"experimental","keywords":["form","react","forms"],"platforms":["web.react"],"source":"catalog/guides/form-usage.md"}
+{"schemaVersion":"1.0.0","id":"muxui:guide:form-usage","kind":"guide","name":"Form usage","summary":"Use Form through the Mux UI React binding.","lifecycle":"experimental","keywords":["form","react","forms"],"platforms":["web.react"],"source":"catalog/guides/form-usage.md"}

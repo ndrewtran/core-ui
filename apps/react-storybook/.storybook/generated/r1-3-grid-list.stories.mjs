@@ -1,6 +1,6 @@
 // @generated-from: apps/react-storybook/src/generate-stories.mjs
-// @generated-content-sha256: sha256:e98a541caabd895ae6fa3506d3ad01af7062391b64e372a35ff143b0c0e22a08
-import * as Core from '@core-ui/react';
+// @generated-content-sha256: sha256:a9c4b9a9f4dc90454276c27c958dbec8ed61b899f794ce4c391a23ad38659222
+import * as MuxUI from '@muxui/react';
 import { argTypesForBinding, createStory } from '../../src/storybook-factory.mjs';
 
 const binding = {
@@ -27,12 +27,12 @@ const binding = {
       "selectionMode"
     ]
   },
-  "binding": "core:component:grid-list#web.react",
+  "binding": "muxui:component:grid-list#web.react",
   "export": "GridList",
   "lifecycle": "experimental",
   "module": ".",
   "runtimeProfile": "web.react",
-  "selector": ".core-grid-list",
+  "selector": ".muxui-grid-list",
   "states": [
     "idle",
     "focused",
@@ -45,8 +45,9 @@ const binding = {
 const record = { family: 'GridList', tranche: 'R1.3', binding };
 
 export default {
-  title: 'Core React/R1.3/GridList',
-  component: Core.GridList,
+  title: 'Mux UI React/R1.3/GridList',
+  id: 'muxui-react-r1-3-grid-list',
+  component: MuxUI.GridList,
   tags: ['autodocs'],
   parameters: {
     controls: {
@@ -54,7 +55,7 @@ export default {
     },
     docs: {
       description: {
-        component: 'Private development showcase for the Core-owned GridList family.',
+        component: 'Private development showcase for the Mux UI-owned GridList family.',
       },
     },
   },

@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://core-ui.dev/schema/section-page.schema.json",
-  "title": "Core UI artifact section page",
+  "$id": "https://muxui.dev/schema/section-page.schema.json",
+  "title": "Mux UI artifact section page",
   "type": "object",
   "additionalProperties": false,
   "required": ["schemaVersion", "responseType", "meta", "entries", "page", "diagnostics"],
@@ -44,11 +44,11 @@
     "admittedCrosswalkEntry": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["occurrence", "disposition", "coreTokenId", "reason", "targets"],
+      "required": ["occurrence", "disposition", "muxuiTokenId", "reason", "targets"],
       "properties": {
         "occurrence": { "$ref": "#/$defs/occurrence" },
         "disposition": { "enum": ["adopt", "adapt"] },
-        "coreTokenId": { "$ref": "#/$defs/tokenId" },
+        "muxuiTokenId": { "$ref": "#/$defs/tokenId" },
         "groupId": { "type": "string", "minLength": 1, "maxLength": 256 },
         "group": { "$ref": "#/$defs/normalizedCrosswalkGroup" },
         "reason": { "type": "string", "minLength": 1, "maxLength": 2048 },
@@ -91,7 +91,7 @@
       "properties": {
         "id": { "type": "string", "minLength": 1, "maxLength": 256 },
         "relationship": { "enum": ["equivalent-source-values", "mode-variants", "selector-variants"] },
-        "coreTokenId": { "$ref": "#/$defs/tokenId" },
+        "muxuiTokenId": { "$ref": "#/$defs/tokenId" },
         "member": { "$ref": "#/$defs/normalizedCrosswalkGroupMember" }
       }
     },

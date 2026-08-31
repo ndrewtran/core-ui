@@ -3,6 +3,26 @@ import { readFile, readdir, stat } from 'node:fs/promises';
 import { dirname, join, relative, resolve, sep } from 'node:path';
 
 const IGNORED_DIRECTORIES = new Set(['.git', 'node_modules', '.pnpm-store']);
+const STALE_IDENTITY_PATTERNS = Object.freeze([
+  { label: 'legacy machine identity', pattern: /\bcore-ui\b/iu },
+  { label: 'legacy display identity', pattern: /\bCore UI\b/iu },
+  { label: 'legacy package scope', pattern: /@core-ui(?:\/|(?=[\s'"`]|$))/iu },
+  { label: 'legacy artifact namespace', pattern: /\bcore:(?:component|pattern|guide|example|token|capability):/iu },
+  { label: 'legacy diagnostics/environment prefix', pattern: /\bCORE_[A-Z0-9_]+\b/u },
+  { label: 'legacy CSS class hook', pattern: /\.core-[a-z0-9-]+\b/iu },
+  { label: 'legacy CSS custom-property hook', pattern: /--core-[a-z0-9-]+\b/iu },
+  { label: 'legacy data hook', pattern: /data-core-[a-z0-9-]+\b/iu },
+  { label: 'legacy ownership wording', pattern: /\bCore-owned\b/iu },
+  { label: 'legacy renderer wording', pattern: /\bCore React\b/iu },
+  { label: 'legacy visual wording', pattern: /\b(?:Tale-to-Core|Tale\/Core|Core-only|Core baselines?)\b/iu },
+  // These are easy to miss in a broad display/package rename because they are
+  // executable tokens or data keys rather than prose identity references.
+  { label: 'legacy bare CLI command', pattern: /(?:complete\s+-F\s+\S+\s+|(?:cli|command|executable|bin)\s*[:=]\s*[\s'"`"]?)core\b/iu },
+  { label: 'legacy shell completion helper', pattern: /\b_core_complete\b/u },
+  { label: 'legacy experimental namespace', pattern: /\bcore\.experimental(?:[./:_-]|$)/u },
+  { label: 'legacy current fixture key', pattern: /\bcoreFixture[A-Za-z0-9_]*\b/u },
+  { label: 'legacy active object key', pattern: /\bcore(?:Source|Input|Commit|Tree|RawClassification|RawExports|PublicFamily|StateCoverage|Tokens?|TokenIds?)\b\s*:/u },
+]);
 
 export function isIgnoredRepositoryEntry(name) {
   return name === '.DS_Store' || IGNORED_DIRECTORIES.has(name);
@@ -174,6 +194,60 @@ export async function walkFiles(root, current = root) {
   return files;
 }
 
+function isAllowlistedIdentityPath(path, allowlistedPaths) {
+  return allowlistedPaths.some((prefix) => {
+    const normalizedPrefix = prefix.replace(/\/+$/u, '');
+    return path === normalizedPrefix || path.startsWith(`${normalizedPrefix}/`);
+  });
+}
+
+export async function auditCurrentIdentity(repositoryRoot, policy, files = null) {
+  const identity = policy.identityReset?.current;
+  if (
+    identity?.display !== 'Mux UI'
+    || identity?.machine !== 'muxui'
+    || identity?.repository !== 'ndrewtran/muxui'
+    || identity?.packageScope !== '@muxui/'
+    || identity?.artifactPrefix !== 'muxui:'
+    || identity?.cli !== 'muxui'
+    || JSON.stringify(identity.publicRoots) !== JSON.stringify(['.muxui-', '--muxui-', 'data-muxui-'])
+    || identity?.diagnosticsPrefix !== 'MUXUI_'
+    || identity?.environmentPrefix !== 'MUXUI_'
+  ) {
+    throw new PolicyError('CURRENT_IDENTITY_POLICY_INVALID', 'repository policy must own the accepted Mux UI identity');
+  }
+
+  const allFiles = files ?? await walkFiles(repositoryRoot);
+  const allowlistedPaths = policy.identityReset.allowlistedPaths ?? [];
+  const violations = [];
+  let scanned = 0;
+  let allowlisted = 0;
+  for (const path of allFiles) {
+    if (isAllowlistedIdentityPath(path, allowlistedPaths)) {
+      allowlisted += 1;
+      continue;
+    }
+    scanned += 1;
+    const content = await readFile(join(repositoryRoot, path), 'utf8');
+    for (const [index, line] of content.split('\n').entries()) {
+      for (const { label, pattern } of STALE_IDENTITY_PATTERNS) {
+        const match = pattern.exec(line);
+        if (match) {
+          violations.push(`${path}:${index + 1} ${label}: ${match[0]}`);
+          break;
+        }
+      }
+    }
+  }
+  if (violations.length > 0) {
+    throw new PolicyError(
+      'STALE_CURRENT_IDENTITY',
+      `current files retain superseded identity (${violations.slice(0, 20).join('; ')}${violations.length > 20 ? `; ... ${violations.length - 20} more` : ''})`,
+    );
+  }
+  return { scanned, allowlisted };
+}
+
 async function auditNavigation(repositoryRoot, policy) {
   const rootAgentsPath = join(repositoryRoot, 'AGENTS.md');
   const rootAgents = await readFile(rootAgentsPath, 'utf8');
@@ -273,6 +347,7 @@ export async function auditRepository(repositoryRoot) {
   await auditRootContract(resolvedRoot, policy);
 
   const files = await walkFiles(resolvedRoot);
+  const identity = await auditCurrentIdentity(resolvedRoot, policy, files);
   const generatedFiles = files.filter((path) => classifyPath(path, policy) === 'projection');
   for (const path of generatedFiles) {
     await validateGeneratedFile(resolvedRoot, path, policy);
@@ -284,5 +359,6 @@ export async function auditRepository(repositoryRoot) {
     generatedFiles: generatedFiles.length,
     artifacts: aliases.artifacts,
     claimedNames: aliases.claimedNames,
+    identity,
   };
 }

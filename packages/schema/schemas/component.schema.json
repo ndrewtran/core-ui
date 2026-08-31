@@ -1,54 +1,54 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://core-ui.dev/schema/component.schema.json",
-  "title": "Core UI component concept",
+  "$id": "https://muxui.dev/schema/component.schema.json",
+  "title": "Mux UI component concept",
   "type": "object",
   "additionalProperties": false,
   "required": ["schemaVersion", "id", "kind", "name", "summary", "lifecycle", "intent", "anatomy", "states", "accessibility", "bindings"],
   "properties": {
     "schemaVersion": {
       "const": "1.0.0",
-      "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["content"] }
+      "x-muxui-authoring": { "effect": "incompatible", "revisionAxes": ["content"] }
     },
     "id": {
       "type": "string",
-      "pattern": "^core:component:[a-z0-9]+(?:-[a-z0-9]+)*$",
-      "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["content", "binding-spec"] }
+      "pattern": "^muxui:component:[a-z0-9]+(?:-[a-z0-9]+)*$",
+      "x-muxui-authoring": { "effect": "incompatible", "revisionAxes": ["content", "binding-spec"] }
     },
     "kind": {
       "const": "component",
-      "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["content"] }
+      "x-muxui-authoring": { "effect": "incompatible", "revisionAxes": ["content"] }
     },
     "name": {
       "type": "string",
       "minLength": 1,
-      "x-core-ui-authoring": { "effect": "editorial", "revisionAxes": ["content"], "autofixes": ["trim-outer-whitespace"] }
+      "x-muxui-authoring": { "effect": "editorial", "revisionAxes": ["content"], "autofixes": ["trim-outer-whitespace"] }
     },
     "summary": {
       "type": "string",
       "minLength": 1,
-      "x-core-ui-authoring": { "effect": "editorial", "revisionAxes": ["content"], "autofixes": ["trim-outer-whitespace"] }
+      "x-muxui-authoring": { "effect": "editorial", "revisionAxes": ["content"], "autofixes": ["trim-outer-whitespace"] }
     },
     "lifecycle": {
       "enum": ["experimental", "stable", "deprecated", "removed"],
-      "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["content", "binding-spec"] }
+      "x-muxui-authoring": { "effect": "incompatible", "revisionAxes": ["content", "binding-spec"] }
     },
     "intent": {
       "type": "object",
       "additionalProperties": false,
       "required": ["useWhen", "avoidWhen"],
-      "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["content", "binding-spec"] },
+      "x-muxui-authoring": { "effect": "incompatible", "revisionAxes": ["content", "binding-spec"] },
       "properties": {
         "useWhen": {
           "type": "array",
           "minItems": 1,
           "items": { "type": "string", "minLength": 1 },
-          "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["content", "binding-spec"] }
+          "x-muxui-authoring": { "effect": "incompatible", "revisionAxes": ["content", "binding-spec"] }
         },
         "avoidWhen": {
           "type": "array",
           "items": { "type": "string", "minLength": 1 },
-          "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["content", "binding-spec"] }
+          "x-muxui-authoring": { "effect": "incompatible", "revisionAxes": ["content", "binding-spec"] }
         }
       }
     },
@@ -57,7 +57,7 @@
       "minItems": 1,
       "items": { "type": "string", "pattern": "^[a-z][a-zA-Z0-9-]*$" },
       "uniqueItems": true,
-      "x-core-ui-authoring": {
+      "x-muxui-authoring": {
         "effects": { "add": "compatible", "remove": "incompatible", "replace": "incompatible" },
         "revisionAxes": ["content", "binding-spec"]
       }
@@ -66,7 +66,7 @@
       "type": "array",
       "items": { "type": "string", "pattern": "^[a-z][a-zA-Z0-9-]*$" },
       "uniqueItems": true,
-      "x-core-ui-authoring": {
+      "x-muxui-authoring": {
         "effects": { "add": "compatible", "remove": "incompatible", "replace": "incompatible" },
         "revisionAxes": ["content", "binding-spec"]
       }
@@ -75,17 +75,17 @@
       "type": "object",
       "additionalProperties": false,
       "required": ["nameRequired", "obligations"],
-      "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["content", "binding-spec"] },
+      "x-muxui-authoring": { "effect": "incompatible", "revisionAxes": ["content", "binding-spec"] },
       "properties": {
         "nameRequired": {
           "type": "boolean",
-          "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["content", "binding-spec"] }
+          "x-muxui-authoring": { "effect": "incompatible", "revisionAxes": ["content", "binding-spec"] }
         },
         "obligations": {
           "type": "array",
           "items": { "type": "string", "minLength": 1 },
           "uniqueItems": true,
-          "x-core-ui-authoring": { "effect": "incompatible", "revisionAxes": ["content", "binding-spec"] }
+          "x-muxui-authoring": { "effect": "incompatible", "revisionAxes": ["content", "binding-spec"] }
         }
       }
     },
@@ -93,28 +93,28 @@
       "type": "object",
       "minProperties": 1,
       "additionalProperties": false,
-      "x-core-ui-authoring": {
+      "x-muxui-authoring": {
         "effects": { "add": "compatible", "remove": "incompatible", "replace": "incompatible" },
         "revisionAxes": ["content", "binding-spec"]
       },
       "properties": {
         "web.html": {
           "$ref": "binding.schema.json",
-          "x-core-ui-authoring": {
+          "x-muxui-authoring": {
             "effects": { "add": "compatible", "remove": "incompatible", "replace": "incompatible" },
             "revisionAxes": ["content", "binding-spec"]
           }
         },
         "web.react": {
           "$ref": "binding.schema.json",
-          "x-core-ui-authoring": {
+          "x-muxui-authoring": {
             "effects": { "add": "compatible", "remove": "incompatible", "replace": "incompatible" },
             "revisionAxes": ["content", "binding-spec"]
           }
         },
         "native.react-native": {
           "$ref": "binding.schema.json",
-          "x-core-ui-authoring": {
+          "x-muxui-authoring": {
             "effects": { "add": "compatible", "remove": "incompatible", "replace": "incompatible" },
             "revisionAxes": ["content", "binding-spec"]
           }
@@ -123,9 +123,9 @@
     },
     "extensions": {
       "type": "object",
-      "propertyNames": { "pattern": "^core\\.experimental\\.[a-z0-9]+(?:-[a-z0-9]+)*$" },
+      "propertyNames": { "pattern": "^muxui\\.experimental\\.[a-z0-9]+(?:-[a-z0-9]+)*$" },
       "additionalProperties": true,
-      "x-core-ui-authoring": {
+      "x-muxui-authoring": {
         "effects": { "add": "compatible", "remove": "incompatible", "replace": "incompatible" },
         "revisionAxes": ["content"]
       }

@@ -3,7 +3,7 @@ import { spawnSync } from 'node:child_process';
 import { cp, mkdir, mkdtemp, readFile, rm, unlink, writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import test from 'node:test';
-import { canonicalDigest, parseJsonStrict } from '@core-ui/schema';
+import { canonicalDigest, parseJsonStrict } from '@muxui/schema';
 import {
   correctTaleTokenClassification,
   loadTaleTokenMaterialization,

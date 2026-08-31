@@ -48,7 +48,7 @@ function completionFor(schema, required) {
 function normalizeAnnotation(annotation, path) {
   const issues = [];
   if (!isObject(annotation)) {
-    issues.push({ path, message: 'is missing x-core-ui-authoring metadata' });
+    issues.push({ path, message: 'is missing x-muxui-authoring metadata' });
   } else {
     const allowed = new Set(['effect', 'effects', 'revisionAxes', 'autofixes']);
     const unknown = Object.keys(annotation).filter((key) => !allowed.has(key));
@@ -82,7 +82,7 @@ function normalizeAnnotation(annotation, path) {
     }
   }
   if (issues.length > 0) {
-    throw new SchemaValidationError('CORE_SCHEMA_INVALID', issues);
+    throw new SchemaValidationError('MUXUI_SCHEMA_INVALID', issues);
   }
   return {
     effects: Object.fromEntries(OPERATIONS.map((operation) => [
@@ -112,8 +112,8 @@ function collectProperties({
     for (const [field, propertySchema] of Object.entries(node.properties)) {
       const schemaPointer = `${pointer}/properties/${escapePointer(field)}`;
       const authoring = normalizeAnnotation(
-        propertySchema['x-core-ui-authoring'],
-        `${schemaPointer}/x-core-ui-authoring`,
+        propertySchema['x-muxui-authoring'],
+        `${schemaPointer}/x-muxui-authoring`,
       );
       declarations.push({
         family,
@@ -192,7 +192,7 @@ function collectProperties({
 
 function declarationsFor(family, schemas) {
   if (!AUTHORING_FAMILIES.includes(family)) {
-    throw new Error(`CORE_SCHEMA_INVALID: authoring metadata unavailable for ${family}`);
+    throw new Error(`MUXUI_SCHEMA_INVALID: authoring metadata unavailable for ${family}`);
   }
   const { fileName, schema } = loadFamilySchema(family, schemas);
   const declarations = [];
@@ -217,7 +217,7 @@ export function validateAuthoringMetadata({ schemas, ownership } = {}) {
   for (const declaration of declarations) {
     const owner = owners.get(`${declaration.schema}${declaration.schemaPointer}`);
     if (!owner) {
-      throw new SchemaValidationError('CORE_FIELD_OWNERSHIP_INVALID', [{
+      throw new SchemaValidationError('MUXUI_FIELD_OWNERSHIP_INVALID', [{
         path: `${declaration.schema}${declaration.schemaPointer}`,
         message: 'authoring metadata must resolve to the existing field owner',
       }]);
@@ -287,7 +287,7 @@ function ownerFor(fileName, schemaPointer, ownership) {
     entry.schema === fileName && entry.schemaPointer === schemaPointer
   ));
   if (!field) {
-    throw new SchemaValidationError('CORE_FIELD_OWNERSHIP_INVALID', [{
+    throw new SchemaValidationError('MUXUI_FIELD_OWNERSHIP_INVALID', [{
       path: `${fileName}${schemaPointer}`,
       message: 'has no canonical field owner',
     }]);
@@ -320,8 +320,8 @@ export function resolveAuthoringField(family, path, { schemas, ownership } = {})
     );
     if (!property) break;
     const authoring = normalizeAnnotation(
-      property.schema['x-core-ui-authoring'],
-      `${property.pointer}/x-core-ui-authoring`,
+      property.schema['x-muxui-authoring'],
+      `${property.pointer}/x-muxui-authoring`,
     );
     resolved = {
       family,
@@ -335,7 +335,7 @@ export function resolveAuthoringField(family, path, { schemas, ownership } = {})
     current = property;
   }
   if (!resolved) {
-    throw new SchemaValidationError('CORE_SCHEMA_INVALID', [{
+    throw new SchemaValidationError('MUXUI_SCHEMA_INVALID', [{
       path,
       message: 'does not resolve to schema-owned authoring metadata',
     }]);

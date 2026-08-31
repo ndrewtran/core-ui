@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
-import { canonicalJson, parseJsonStrict } from '@core-ui/schema';
+import { canonicalJson, parseJsonStrict } from '@muxui/schema';
 
 const repositoryRoot = path.resolve(import.meta.dirname, '../../../..');
 const verifier = path.join(repositoryRoot, 'tooling/audits/repository-policy/src/phase-c-applicability-topology-correction-verify.mjs');
@@ -11,7 +11,7 @@ const scopePath = path.join(repositoryRoot, 'strategy/product-scope.md');
 const acceptancePath = path.join(repositoryRoot, 'decisions/0006-phase-c-applicability-topology-acceptance.json');
 const source = parseJsonStrict(fs.readFileSync(decisionPath, 'utf8'));
 const scope = fs.readFileSync(scopePath, 'utf8');
-const temporary = fs.mkdtempSync(path.join(os.tmpdir(), 'core-ui-phase-c-authority-negative-'));
+const temporary = fs.mkdtempSync(path.join(os.tmpdir(), 'muxui-phase-c-authority-negative-'));
 
 const clone = () => structuredClone(source);
 const cases = [
@@ -44,7 +44,7 @@ const cases = [
   ['seventh Phase C root', (value) => { value.proofTopology.phaseC.rootPaths.push('tests/evidence/tale-token-phase-c-extra/index.json'); value.proofTopology.phaseC.rootCount = 7; }],
   ['maintenance evidence-record claim', (value) => { value.proofTopology.maintenance.evidenceRecords = 'one'; }],
   ['wrong terminal predecessor digest', (value) => { value.proofTopology.authorityStage.targets[0].predecessor.sha256 = 'sha256:' + '0'.repeat(64); }],
-  ['package version effect', (value) => { value.versions.packages['@core-ui/catalog'].to = '2.0.1'; }],
+  ['package version effect', (value) => { value.versions.packages['@muxui/catalog'].to = '2.0.1'; }],
 ];
 
 let passed = 0;

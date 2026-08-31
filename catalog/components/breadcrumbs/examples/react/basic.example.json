@@ -1,12 +1,12 @@
 {
   "schemaVersion": "1.0.0",
-  "id": "core:example:breadcrumbs-basic-react",
+  "id": "muxui:example:breadcrumbs-basic-react",
   "kind": "example",
   "name": "Basic React Breadcrumbs",
   "summary": "The minimum React Breadcrumbs example.",
   "lifecycle": "experimental",
   "binding": {
-    "ref": "core:component:breadcrumbs#web.react",
+    "ref": "muxui:component:breadcrumbs#web.react",
     "guidanceImpact": "normative",
     "purposes": [
       "generation",

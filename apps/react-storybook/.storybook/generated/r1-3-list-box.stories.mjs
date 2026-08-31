@@ -1,6 +1,6 @@
 // @generated-from: apps/react-storybook/src/generate-stories.mjs
-// @generated-content-sha256: sha256:c4efab39c4ec6d6bc8dfb34043e9b6ff303c86c7db83b9269f4afdbec2f41dc4
-import * as Core from '@core-ui/react';
+// @generated-content-sha256: sha256:56da47efcadceb0d2b9d6dd3c09b2acceadf129905f2eb6d699fba64f55e5651
+import * as MuxUI from '@muxui/react';
 import { argTypesForBinding, createStory } from '../../src/storybook-factory.mjs';
 
 const binding = {
@@ -27,12 +27,12 @@ const binding = {
       "selectionMode"
     ]
   },
-  "binding": "core:component:list-box#web.react",
+  "binding": "muxui:component:list-box#web.react",
   "export": "ListBox",
   "lifecycle": "experimental",
   "module": ".",
   "runtimeProfile": "web.react",
-  "selector": ".core-list-box",
+  "selector": ".muxui-list-box",
   "states": [
     "idle",
     "focused",
@@ -45,8 +45,9 @@ const binding = {
 const record = { family: 'ListBox', tranche: 'R1.3', binding };
 
 export default {
-  title: 'Core React/R1.3/ListBox',
-  component: Core.ListBox,
+  title: 'Mux UI React/R1.3/ListBox',
+  id: 'muxui-react-r1-3-list-box',
+  component: MuxUI.ListBox,
   tags: ['autodocs'],
   parameters: {
     controls: {
@@ -54,7 +55,7 @@ export default {
     },
     docs: {
       description: {
-        component: 'Private development showcase for the Core-owned ListBox family.',
+        component: 'Private development showcase for the Mux UI-owned ListBox family.',
       },
     },
   },

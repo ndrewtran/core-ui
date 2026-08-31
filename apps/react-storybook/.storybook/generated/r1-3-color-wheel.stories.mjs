@@ -1,6 +1,6 @@
 // @generated-from: apps/react-storybook/src/generate-stories.mjs
-// @generated-content-sha256: sha256:0d690db817c7a743c97b089e97ab27e23e8dc13467fe28cd4ff3fe02c7f17686
-import * as Core from '@core-ui/react';
+// @generated-content-sha256: sha256:0254e33de8cbdcc0fb0c07bd95e8a10bd17380dc66f4745d7b0c76fbe8449e6d
+import * as MuxUI from '@muxui/react';
 import { argTypesForBinding, createStory } from '../../src/storybook-factory.mjs';
 
 const binding = {
@@ -24,12 +24,12 @@ const binding = {
       "disabled"
     ]
   },
-  "binding": "core:component:color-wheel#web.react",
+  "binding": "muxui:component:color-wheel#web.react",
   "export": "ColorWheel",
   "lifecycle": "experimental",
   "module": ".",
   "runtimeProfile": "web.react",
-  "selector": ".core-color-wheel",
+  "selector": ".muxui-color-wheel",
   "states": [
     "idle",
     "focused",
@@ -41,8 +41,9 @@ const binding = {
 const record = { family: 'ColorWheel', tranche: 'R1.3', binding };
 
 export default {
-  title: 'Core React/R1.3/ColorWheel',
-  component: Core.ColorWheel,
+  title: 'Mux UI React/R1.3/ColorWheel',
+  id: 'muxui-react-r1-3-color-wheel',
+  component: MuxUI.ColorWheel,
   tags: ['autodocs'],
   parameters: {
     controls: {
@@ -50,7 +51,7 @@ export default {
     },
     docs: {
       description: {
-        component: 'Private development showcase for the Core-owned ColorWheel family.',
+        component: 'Private development showcase for the Mux UI-owned ColorWheel family.',
       },
     },
   },

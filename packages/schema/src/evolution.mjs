@@ -7,7 +7,7 @@ export function classifySchemaChange(changeType) {
     ? policy.effects[changeType]
     : undefined;
   if (!result) {
-    throw new SchemaValidationError('CORE_SCHEMA_VERSION_UNSUPPORTED', [
+    throw new SchemaValidationError('MUXUI_SCHEMA_VERSION_UNSUPPORTED', [
       { path: '$/changeType', message: `${changeType} is not declared` },
     ]);
   }
@@ -17,7 +17,7 @@ export function classifySchemaChange(changeType) {
 export function parseSchemaVersion(version) {
   const match = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/.exec(version);
   if (!match) {
-    throw new SchemaValidationError('CORE_SCHEMA_VERSION_UNSUPPORTED', [
+    throw new SchemaValidationError('MUXUI_SCHEMA_VERSION_UNSUPPORTED', [
       { path: '$/schemaVersion', message: `${version} is not SemVer` },
     ]);
   }
@@ -32,7 +32,7 @@ export function negotiateSchemaVersion(version, supported) {
     left[0] - right[0] || left[1] - right[1] || left[2] - right[2]
   );
   if (compare(actual, minimum) < 0 || compare(actual, maximumExclusive) >= 0) {
-    throw new SchemaValidationError('CORE_SCHEMA_VERSION_UNSUPPORTED', [
+    throw new SchemaValidationError('MUXUI_SCHEMA_VERSION_UNSUPPORTED', [
       {
         path: '$/schemaVersion',
         message: `${version} is outside [${supported.minimum}, ${supported.maximumExclusive})`,

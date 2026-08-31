@@ -56,9 +56,9 @@ import {
   ToastProvider,
   Tooltip,
   useToast,
-} from '@core-ui/react';
+} from '@muxui/react';
 import { R1ButtonFixture } from '../../../packages/react/src/button-fixture.mjs';
-import '@core-ui/react/styles.css';
+import '@muxui/react/styles.css';
 
 const profiles = [
   ['light', 'standard', 'full', 'comfortable', 'ltr'],
@@ -70,13 +70,13 @@ const profiles = [
 ];
 
 const profileSurfaceStyle = {
-  backgroundColor: 'var(--core-semantic-surface-canvas)',
-  color: 'var(--core-semantic-content-default)',
+  backgroundColor: 'var(--muxui-semantic-surface-canvas)',
+  color: 'var(--muxui-semantic-content-default)',
 };
 // Keep the dark browser profile on the true-black frame used by retained evidence.
 const darkProfileSurfaceStyle = {
   ...profileSurfaceStyle,
-  '--core-semantic-surface-canvas': '#000000',
+  '--muxui-semantic-surface-canvas': '#000000',
 };
 
 function DropZoneDemo() {
@@ -213,7 +213,7 @@ function ComponentStates() {
       React.createElement(NumberField, { label: 'Quantity', defaultValue: 2, minValue: 0 })),
     React.createElement('article', { 'data-component': 'search-field' },
       React.createElement('h3', null, 'Search field'),
-      React.createElement(SearchField, { label: 'Search', defaultValue: 'Core' })),
+      React.createElement(SearchField, { label: 'Search', defaultValue: 'Mux UI' })),
     React.createElement('article', { 'data-component': 'switch' },
       React.createElement('h3', null, 'Switch'),
       React.createElement(Switch, { label: 'Enabled', description: 'Allow notifications', errorMessage: 'Choose a setting', required: true, invalid: true, defaultSelected: true })),
@@ -330,15 +330,15 @@ function ComponentStates() {
 
 createRoot(document.querySelector('#root')).render(React.createElement(ToastProvider, null,
   React.createElement('main', null,
-    React.createElement('h1', null, 'Core UI React R1.4'),
+    React.createElement('h1', null, 'Mux UI React R1.4'),
     profiles.map(([colorScheme, contrast, motion, density, direction]) => React.createElement('section', {
       key: [colorScheme, contrast, motion, density, direction].join('-'),
       'data-profile': [colorScheme, contrast, motion, density, direction].join('/'),
-      'data-core-color-scheme': colorScheme,
-      'data-core-contrast': contrast,
-      'data-core-motion': motion,
-      'data-core-density': density,
-      'data-core-direction': direction,
+      'data-muxui-color-scheme': colorScheme,
+      'data-muxui-contrast': contrast,
+      'data-muxui-motion': motion,
+      'data-muxui-density': density,
+      'data-muxui-direction': direction,
       style: colorScheme === 'dark' ? darkProfileSurfaceStyle : profileSurfaceStyle,
     },
     React.createElement('h2', null, `${colorScheme} · ${contrast} · ${motion} · ${density} · ${direction}`),

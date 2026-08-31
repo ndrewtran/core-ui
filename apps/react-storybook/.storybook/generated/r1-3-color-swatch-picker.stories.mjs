@@ -1,6 +1,6 @@
 // @generated-from: apps/react-storybook/src/generate-stories.mjs
-// @generated-content-sha256: sha256:88dd696c0b3526ec58ea998cee7afdd3f1c6a2637f5bda0d4c17f84cbfd91456
-import * as Core from '@core-ui/react';
+// @generated-content-sha256: sha256:569509cf471188aeb55640295505ee493fa121cd0b960ae138c2b445172270a8
+import * as MuxUI from '@muxui/react';
 import { argTypesForBinding, createStory } from '../../src/storybook-factory.mjs';
 
 const binding = {
@@ -25,12 +25,12 @@ const binding = {
       "disabled"
     ]
   },
-  "binding": "core:component:color-swatch-picker#web.react",
+  "binding": "muxui:component:color-swatch-picker#web.react",
   "export": "ColorSwatchPicker",
   "lifecycle": "experimental",
   "module": ".",
   "runtimeProfile": "web.react",
-  "selector": ".core-color-swatch-picker",
+  "selector": ".muxui-color-swatch-picker",
   "states": [
     "idle",
     "focused",
@@ -42,8 +42,9 @@ const binding = {
 const record = { family: 'ColorSwatchPicker', tranche: 'R1.3', binding };
 
 export default {
-  title: 'Core React/R1.3/ColorSwatchPicker',
-  component: Core.ColorSwatchPicker,
+  title: 'Mux UI React/R1.3/ColorSwatchPicker',
+  id: 'muxui-react-r1-3-color-swatch-picker',
+  component: MuxUI.ColorSwatchPicker,
   tags: ['autodocs'],
   parameters: {
     controls: {
@@ -51,7 +52,7 @@ export default {
     },
     docs: {
       description: {
-        component: 'Private development showcase for the Core-owned ColorSwatchPicker family.',
+        component: 'Private development showcase for the Mux UI-owned ColorSwatchPicker family.',
       },
     },
   },

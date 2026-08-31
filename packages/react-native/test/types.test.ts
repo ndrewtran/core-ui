@@ -8,11 +8,11 @@ import {
   queryNativeProfile,
   type NativeAccessibilityProps,
   type NativeResponderProps,
-} from '@core-ui/react-native';
-import { androidProfile } from '@core-ui/react-native/android';
-import { iosProfile } from '@core-ui/react-native/ios';
-import { nativeProfileProjection as subpathProjection } from '@core-ui/react-native/profiles';
-import { nativeThemeProjection } from '@core-ui/react-native/theme';
+} from '@muxui/react-native';
+import { androidProfile } from '@muxui/react-native/android';
+import { iosProfile } from '@muxui/react-native/ios';
+import { nativeProfileProjection as subpathProjection } from '@muxui/react-native/profiles';
+import { nativeThemeProjection } from '@muxui/react-native/theme';
 
 const exactAndroid: 'android' = androidProfile.profile;
 const exactIos: 'ios' = iosProfile.profile;
@@ -70,5 +70,5 @@ createNativeAccessibilityProps({ role: 'button', onAction() {} });
 createNativeAccessibilityProps({ role: 'button', actions: [], onAction() {} });
 
 // @ts-expect-error primitive composition is package-internal, not a public consumer API
-import { composeNativePrimitive } from '@core-ui/react-native';
+import { composeNativePrimitive } from '@muxui/react-native';
 void composeNativePrimitive;

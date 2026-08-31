@@ -1,11 +1,11 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://core-ui.dev/schema/artifact-ref.schema.json",
-  "title": "Core UI ArtifactRef",
-  "description": "The sole canonical declaration of immutable Core UI artifact identity.",
+  "$id": "https://muxui.dev/schema/artifact-ref.schema.json",
+  "title": "Mux UI ArtifactRef",
+  "description": "The sole canonical declaration of immutable Mux UI artifact identity.",
   "type": "string",
-  "pattern": "^core:(?:component|pattern|token|foundation|guide|example|pitfall|migration|capability):[a-z0-9]+(?:-[a-z0-9]+)*$",
-  "x-core-ui-kinds": [
+  "pattern": "^muxui:(?:component|pattern|token|foundation|guide|example|pitfall|migration|capability):[a-z0-9]+(?:-[a-z0-9]+)*$",
+  "x-muxui-kinds": [
     "component",
     "pattern",
     "token",
@@ -16,7 +16,7 @@
     "migration",
     "capability"
   ],
-  "x-core-ui-enabled-record-kinds": [
+  "x-muxui-enabled-record-kinds": [
     "component",
     "token",
     "guide",

@@ -1,6 +1,6 @@
 // @generated-from: apps/react-storybook/src/generate-stories.mjs
-// @generated-content-sha256: sha256:ef62197bc7a0804e2e61ac8cf36710d85fc0bb43a85115bd32886b023855f240
-import * as Core from '@core-ui/react';
+// @generated-content-sha256: sha256:190ea22e9d7ca40a2e720555e13438525debfce85faf3ffc7df2cfed536855f2
+import * as MuxUI from '@muxui/react';
 import { argTypesForBinding, createStory } from '../../src/storybook-factory.mjs';
 
 const binding = {
@@ -28,12 +28,12 @@ const binding = {
       "className"
     ]
   },
-  "binding": "core:component:toast#web.react",
+  "binding": "muxui:component:toast#web.react",
   "export": "Toast",
   "lifecycle": "experimental",
   "module": ".",
   "runtimeProfile": "web.react",
-  "selector": ".core-toast",
+  "selector": ".muxui-toast",
   "states": [
     "visible",
     "timed",
@@ -44,8 +44,9 @@ const binding = {
 const record = { family: 'Toast', tranche: 'R1.4', binding };
 
 export default {
-  title: 'Core React/R1.4/Toast',
-  component: Core.Toast,
+  title: 'Mux UI React/R1.4/Toast',
+  id: 'muxui-react-r1-4-toast',
+  component: MuxUI.Toast,
   tags: ['autodocs'],
   parameters: {
     controls: {
@@ -53,7 +54,7 @@ export default {
     },
     docs: {
       description: {
-        component: 'Private development showcase for the Core-owned Toast family.',
+        component: 'Private development showcase for the Mux UI-owned Toast family.',
       },
     },
   },

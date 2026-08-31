@@ -1,6 +1,6 @@
 // @generated-from: apps/react-storybook/src/generate-stories.mjs
-// @generated-content-sha256: sha256:0f4cb6c012ce770c9e9fa85eb105c3ceb3bb0d9bd56818095c39d0de6b3f214e
-import * as Core from '@core-ui/react';
+// @generated-content-sha256: sha256:17bc27e50b8429144070295bce71ba83f5239d8127d5a3c747b9e64b7631d643
+import * as MuxUI from '@muxui/react';
 import { argTypesForBinding, createStory } from '../../src/storybook-factory.mjs';
 
 const binding = {
@@ -25,12 +25,12 @@ const binding = {
       "formatOptions"
     ]
   },
-  "binding": "core:component:meter#web.react",
+  "binding": "muxui:component:meter#web.react",
   "export": "Meter",
   "lifecycle": "experimental",
   "module": ".",
   "runtimeProfile": "web.react",
-  "selector": ".core-meter",
+  "selector": ".muxui-meter",
   "states": [
     "idle",
     "low",
@@ -41,8 +41,9 @@ const binding = {
 const record = { family: 'Meter', tranche: 'R1.1', binding };
 
 export default {
-  title: 'Core React/R1.1/Meter',
-  component: Core.Meter,
+  title: 'Mux UI React/R1.1/Meter',
+  id: 'muxui-react-r1-1-meter',
+  component: MuxUI.Meter,
   tags: ['autodocs'],
   parameters: {
     controls: {
@@ -50,7 +51,7 @@ export default {
     },
     docs: {
       description: {
-        component: 'Private development showcase for the Core-owned Meter family.',
+        component: 'Private development showcase for the Mux UI-owned Meter family.',
       },
     },
   },

@@ -50,7 +50,7 @@ function classNames(base, className) {
 }
 
 function fieldLabel(label) {
-  return label === undefined || label === null ? null : React.createElement(AriaLabel, { className: 'core-field-label' }, label);
+  return label === undefined || label === null ? null : React.createElement(AriaLabel, { className: 'muxui-field-label' }, label);
 }
 
 function assertAccessibleName({ label, ariaLabel, ariaLabelledby }, componentName) {
@@ -60,17 +60,17 @@ function assertAccessibleName({ label, ariaLabel, ariaLabelledby }, componentNam
 }
 
 function fieldDescription(description) {
-  return description === undefined ? null : React.createElement(AriaText, { slot: 'description', className: 'core-field-description' }, description);
+  return description === undefined ? null : React.createElement(AriaText, { slot: 'description', className: 'muxui-field-description' }, description);
 }
 
 function fieldError(errorMessage) {
-  return errorMessage === undefined ? null : React.createElement(AriaFieldError, { className: 'core-field-error' }, errorMessage);
+  return errorMessage === undefined ? null : React.createElement(AriaFieldError, { className: 'muxui-field-error' }, errorMessage);
 }
 
-// Keep the approved Tale-era calendar geometry Core-owned instead of importing the 1.37 glyph.
+// Keep the approved Tale-era calendar geometry Mux UI-owned instead of importing the 1.37 glyph.
 function calendarGlyph() {
   return React.createElement('svg', {
-    className: 'core-icon core-icon--sm',
+    className: 'muxui-icon muxui-icon--sm',
     'aria-hidden': 'true',
     focusable: 'false',
     xmlns: 'http://www.w3.org/2000/svg',
@@ -111,47 +111,47 @@ function validationProps({ disabled, readOnly, required, invalid, errorMessage }
 function dateOrUndefined(value) {
   if (!value) return undefined;
   const text = String(value);
-  if (!ISO_DATE_PATTERN.test(text)) throw new TypeError('Core date values must use YYYY-MM-DD ISO format');
+  if (!ISO_DATE_PATTERN.test(text)) throw new TypeError('Mux UI date values must use YYYY-MM-DD ISO format');
   return parseDate(text);
 }
 
 function timeOrUndefined(value) {
   if (!value) return undefined;
   const text = String(value);
-  if (!ISO_TIME_PATTERN.test(text)) throw new TypeError('Core time values must use HH:mm[:ss[.sss]] ISO format');
+  if (!ISO_TIME_PATTERN.test(text)) throw new TypeError('MuxUI time values must use HH:mm[:ss[.sss]] ISO format');
   return parseTime(text);
 }
 
-function coreDateValue(value) {
+function serializeDateValue(value) {
   return value ? String(value) : undefined;
 }
 
-function calendarChildren(cellClass = 'core-calendar-cell') {
-  return React.createElement(AriaCalendarGrid, { className: 'core-calendar-grid' },
-    React.createElement(AriaCalendarGridHeader, { className: 'core-calendar-grid-header' },
-      (day) => React.createElement(AriaCalendarHeaderCell, { className: 'core-calendar-header-cell' }, day)),
-    React.createElement(AriaCalendarGridBody, { className: 'core-calendar-grid-body' },
+function calendarChildren(cellClass = 'muxui-calendar-cell') {
+  return React.createElement(AriaCalendarGrid, { className: 'muxui-calendar-grid' },
+    React.createElement(AriaCalendarGridHeader, { className: 'muxui-calendar-grid-header' },
+      (day) => React.createElement(AriaCalendarHeaderCell, { className: 'muxui-calendar-header-cell' }, day)),
+    React.createElement(AriaCalendarGridBody, { className: 'muxui-calendar-grid-body' },
       (date) => React.createElement(AriaCalendarCell, { date, className: cellClass })),
   );
 }
 
 function calendarHeader() {
-  return React.createElement('div', { className: 'core-calendar-header' },
-    React.createElement(AriaButton, { slot: 'previous', 'aria-label': 'Previous month', className: 'core-calendar-previous' }, React.createElement(ChevronLeftIcon, { className: 'core-icon core-icon--sm', 'aria-hidden': 'true', focusable: 'false' })),
-    React.createElement(AriaCalendarHeading, { className: 'core-calendar-heading' }),
-    React.createElement(AriaButton, { slot: 'next', 'aria-label': 'Next month', className: 'core-calendar-next' }, React.createElement(ChevronRightIcon, { className: 'core-icon core-icon--sm', 'aria-hidden': 'true', focusable: 'false' })));
+  return React.createElement('div', { className: 'muxui-calendar-header' },
+    React.createElement(AriaButton, { slot: 'previous', 'aria-label': 'Previous month', className: 'muxui-calendar-previous' }, React.createElement(ChevronLeftIcon, { className: 'muxui-icon muxui-icon--sm', 'aria-hidden': 'true', focusable: 'false' })),
+    React.createElement(AriaCalendarHeading, { className: 'muxui-calendar-heading' }),
+    React.createElement(AriaButton, { slot: 'next', 'aria-label': 'Next month', className: 'muxui-calendar-next' }, React.createElement(ChevronRightIcon, { className: 'muxui-icon muxui-icon--sm', 'aria-hidden': 'true', focusable: 'false' })));
 }
 
 function datePopover() {
-  return React.createElement(AriaPopover, { className: 'core-date-popover' }, React.createElement(AriaDialog, { className: 'core-date-dialog' }, React.createElement(AriaCalendar, { className: 'core-calendar' }, calendarHeader(), calendarChildren())));
+  return React.createElement(AriaPopover, { className: 'muxui-date-popover' }, React.createElement(AriaDialog, { className: 'muxui-date-dialog' }, React.createElement(AriaCalendar, { className: 'muxui-calendar' }, calendarHeader(), calendarChildren())));
 }
 
 function rangeDatePopover() {
-  return React.createElement(AriaPopover, { className: 'core-date-popover' }, React.createElement(AriaDialog, { className: 'core-date-dialog' }, React.createElement(AriaRangeCalendar, { className: 'core-calendar' }, calendarHeader(), calendarChildren('core-range-calendar-cell'))));
+  return React.createElement(AriaPopover, { className: 'muxui-date-popover' }, React.createElement(AriaDialog, { className: 'muxui-date-dialog' }, React.createElement(AriaRangeCalendar, { className: 'muxui-calendar' }, calendarHeader(), calendarChildren('muxui-range-calendar-cell'))));
 }
 
 function dateInput() {
-  return React.createElement(AriaDateInput, { className: 'core-date-input' }, (segment) => React.createElement(AriaDateSegment, { segment, className: 'core-date-segment' }));
+  return React.createElement(AriaDateInput, { className: 'muxui-date-input' }, (segment) => React.createElement(AriaDateSegment, { segment, className: 'muxui-date-segment' }));
 }
 
 // RAC 1.20 owns form reset for most fields, but not TimeField and the
@@ -199,7 +199,7 @@ function formResetAnchor(ref) {
     type: 'hidden',
     disabled: true,
     tabIndex: -1,
-    className: 'core-form-reset-anchor',
+    className: 'muxui-form-reset-anchor',
     'aria-hidden': 'true',
   });
 }
@@ -240,7 +240,7 @@ export const TextField = React.forwardRef(function TextField({
     defaultValue,
     onChange,
     name,
-    className: classNames('core-text-field', className),
+    className: classNames('muxui-text-field', className),
     'aria-label': ariaLabel,
     'aria-labelledby': ariaLabelledby,
   }, fieldChildren({
@@ -248,7 +248,7 @@ export const TextField = React.forwardRef(function TextField({
     description,
     errorMessage,
     input: React.createElement(AriaInput, {
-      className: 'core-field-input',
+      className: 'muxui-field-input',
       type,
       placeholder,
       autoComplete,
@@ -295,16 +295,16 @@ export const SearchField = React.forwardRef(function SearchField({
     onChange,
     onSubmit,
     name,
-    className: classNames('core-search-field', className),
+    className: classNames('muxui-search-field', className),
     'aria-label': ariaLabel,
     'aria-labelledby': ariaLabelledby,
   }, fieldChildren({
     label,
     description,
     errorMessage,
-    input: React.createElement('div', { className: 'core-search-control' },
-      React.createElement(AriaInput, { className: 'core-field-input', placeholder }),
-      React.createElement(AriaButton, { slot: 'clear', type: 'button', className: 'core-search-clear', 'aria-label': 'Clear search', onPress: onClear }, React.createElement(XIcon, { 'aria-hidden': 'true', focusable: 'false', size: 14 }))),
+    input: React.createElement('div', { className: 'muxui-search-control' },
+      React.createElement(AriaInput, { className: 'muxui-field-input', placeholder }),
+      React.createElement(AriaButton, { slot: 'clear', type: 'button', className: 'muxui-search-clear', 'aria-label': 'Clear search', onPress: onClear }, React.createElement(XIcon, { 'aria-hidden': 'true', focusable: 'false', size: 14 }))),
   }));
 });
 
@@ -345,17 +345,17 @@ export const NumberField = React.forwardRef(function NumberField({
     maxValue,
     step,
     formatOptions,
-    className: classNames('core-number-field', className),
+    className: classNames('muxui-number-field', className),
     'aria-label': ariaLabel,
     'aria-labelledby': ariaLabelledby,
   }, fieldChildren({
     label,
     description,
     errorMessage,
-    input: React.createElement(AriaGroup, { className: 'core-number-control' },
-      React.createElement(AriaButton, { slot: 'decrement', type: 'button', className: 'core-number-stepper core-number-stepper-decrement' }, React.createElement(MinusIcon, { 'aria-hidden': 'true', focusable: 'false', size: 16 })),
-      React.createElement(AriaInput, { className: 'core-field-input', inputMode: 'decimal' }),
-      React.createElement(AriaButton, { slot: 'increment', type: 'button', className: 'core-number-stepper core-number-stepper-increment' }, React.createElement(PlusIcon, { 'aria-hidden': 'true', focusable: 'false', size: 16 }))),
+    input: React.createElement(AriaGroup, { className: 'muxui-number-control' },
+      React.createElement(AriaButton, { slot: 'decrement', type: 'button', className: 'muxui-number-stepper muxui-number-stepper-decrement' }, React.createElement(MinusIcon, { 'aria-hidden': 'true', focusable: 'false', size: 16 })),
+      React.createElement(AriaInput, { className: 'muxui-field-input', inputMode: 'decimal' }),
+      React.createElement(AriaButton, { slot: 'increment', type: 'button', className: 'muxui-number-stepper muxui-number-stepper-increment' }, React.createElement(PlusIcon, { 'aria-hidden': 'true', focusable: 'false', size: 16 }))),
   }));
 });
 
@@ -391,7 +391,7 @@ export const CheckboxGroup = React.forwardRef(function CheckboxGroup({
     // RAC carries this through CheckboxGroupStateContext to every descendant
     // checkbox, including fragments and wrapper components.
     name,
-    className: classNames('core-checkbox-group', className),
+    className: classNames('muxui-checkbox-group', className),
     'aria-label': ariaLabel,
     'aria-labelledby': ariaLabelledby,
   }, fieldChildren({
@@ -434,14 +434,14 @@ export const Switch = React.forwardRef(function Switch({
     defaultSelected,
     name,
     value,
-    className: classNames('core-switch-field', className),
+    className: classNames('muxui-switch-field', className),
     'aria-label': ariaLabel,
     'aria-labelledby': ariaLabelledby,
     onChange,
-  }, React.createElement(AriaSwitchButton, { className: 'core-switch' }, ({ isSelected }) => React.createElement(React.Fragment, null,
-    React.createElement('span', { className: 'core-switch-indicator', 'aria-hidden': 'true', 'data-selected': isSelected || undefined }),
+  }, React.createElement(AriaSwitchButton, { className: 'muxui-switch' }, ({ isSelected }) => React.createElement(React.Fragment, null,
+    React.createElement('span', { className: 'muxui-switch-indicator', 'aria-hidden': 'true', 'data-selected': isSelected || undefined }),
     visibleLabel !== undefined && visibleLabel !== null
-      ? React.createElement('span', { className: 'core-switch-label' }, visibleLabel)
+      ? React.createElement('span', { className: 'muxui-switch-label' }, visibleLabel)
       : null)),
   fieldDescription(description),
   fieldError(errorMessage));
@@ -460,7 +460,7 @@ export const Form = React.forwardRef(function Form({
   return React.createElement(AriaForm, {
     ...props,
     ref,
-    className: classNames('core-form', className),
+    className: classNames('muxui-form', className),
     validationBehavior,
     onSubmit,
     onReset,
@@ -497,9 +497,9 @@ export const DateField = React.forwardRef(function DateField({
     value: parsedValue,
     defaultValue: parsedDefaultValue,
     placeholderValue: DATE_PLACEHOLDER,
-    onChange: (next) => onChange?.(coreDateValue(next)),
+    onChange: (next) => onChange?.(serializeDateValue(next)),
     name,
-    className: classNames('core-date-field', className),
+    className: classNames('muxui-date-field', className),
     'aria-label': ariaLabel,
     'aria-labelledby': ariaLabelledby,
   }, fieldChildren({ label, description, errorMessage, input: dateInput() }));
@@ -535,7 +535,7 @@ export const TimeField = React.forwardRef(function TimeField({
   }, [value]);
   const handleChange = (next) => {
     if (resettingRef.current) return;
-    const nextValue = coreDateValue(next);
+    const nextValue = serializeDateValue(next);
     setFormValue(nextValue ?? '');
     onChange?.(nextValue);
   };
@@ -552,9 +552,9 @@ export const TimeField = React.forwardRef(function TimeField({
     value: effectiveParsedValue,
     placeholderValue: TIME_PLACEHOLDER,
     onChange: handleChange,
-    // RAC 1.20 does not own a form input for TimeField; Core owns this contract below.
+    // RAC 1.20 does not own a form input for TimeField; MuxUI owns this contract below.
     name: undefined,
-    className: classNames('core-time-field', className),
+    className: classNames('muxui-time-field', className),
     'aria-label': ariaLabel,
     'aria-labelledby': ariaLabelledby,
   }, fieldChildren({
@@ -598,16 +598,16 @@ export const DatePicker = React.forwardRef(function DatePicker({
     value: parsedValue,
     defaultValue: parsedDefaultValue,
     placeholderValue: DATE_PLACEHOLDER,
-    onChange: (next) => onChange?.(coreDateValue(next)),
+    onChange: (next) => onChange?.(serializeDateValue(next)),
     name,
-    className: classNames('core-date-picker', className),
+    className: classNames('muxui-date-picker', className),
     'aria-label': ariaLabel,
     'aria-labelledby': ariaLabelledby,
   }, fieldChildren({
     label,
     description,
     errorMessage,
-    input: React.createElement(AriaGroup, { className: 'core-date-control' }, dateInput(), React.createElement(AriaButton, { slot: 'button', type: 'button', 'aria-label': 'Open calendar', className: 'core-date-trigger' }, calendarGlyph())),
+    input: React.createElement(AriaGroup, { className: 'muxui-date-control' }, dateInput(), React.createElement(AriaButton, { slot: 'button', type: 'button', 'aria-label': 'Open calendar', className: 'muxui-date-trigger' }, calendarGlyph())),
     children: datePopover(),
   }));
 });
@@ -643,7 +643,7 @@ export const DateRangePicker = React.forwardRef(function DateRangePicker({
   }, [value]);
   const handleChange = (next) => {
     if (resettingRef.current) return;
-    const nextValue = next ? { start: coreDateValue(next.start), end: coreDateValue(next.end) } : undefined;
+    const nextValue = next ? { start: serializeDateValue(next.start), end: serializeDateValue(next.end) } : undefined;
     setFormValue(nextValue);
     onChange?.(nextValue);
   };
@@ -661,18 +661,18 @@ export const DateRangePicker = React.forwardRef(function DateRangePicker({
     placeholderValue: DATE_PLACEHOLDER,
     onChange: handleChange,
     name: undefined,
-    className: classNames('core-date-range-picker', className),
+    className: classNames('muxui-date-range-picker', className),
     'aria-label': ariaLabel,
     'aria-labelledby': ariaLabelledby,
   }, fieldChildren({
     label,
     description,
     errorMessage,
-    input: React.createElement(AriaGroup, { className: 'core-date-range-control' },
-      React.createElement(AriaDateInput, { slot: 'start', className: 'core-date-input' }, (segment) => React.createElement(AriaDateSegment, { segment, className: 'core-date-segment' })),
-      React.createElement('span', { className: 'core-date-range-separator', 'aria-hidden': 'true' }, '–'),
-      React.createElement(AriaDateInput, { slot: 'end', className: 'core-date-input' }, (segment) => React.createElement(AriaDateSegment, { segment, className: 'core-date-segment' })),
-      React.createElement(AriaButton, { slot: 'button', type: 'button', 'aria-label': 'Open calendar', className: 'core-date-trigger' }, calendarGlyph())),
+    input: React.createElement(AriaGroup, { className: 'muxui-date-range-control' },
+      React.createElement(AriaDateInput, { slot: 'start', className: 'muxui-date-input' }, (segment) => React.createElement(AriaDateSegment, { segment, className: 'muxui-date-segment' })),
+      React.createElement('span', { className: 'muxui-date-range-separator', 'aria-hidden': 'true' }, '–'),
+      React.createElement(AriaDateInput, { slot: 'end', className: 'muxui-date-input' }, (segment) => React.createElement(AriaDateSegment, { segment, className: 'muxui-date-segment' })),
+      React.createElement(AriaButton, { slot: 'button', type: 'button', 'aria-label': 'Open calendar', className: 'muxui-date-trigger' }, calendarGlyph())),
     children: React.createElement(React.Fragment, null,
       rangeDatePopover(),
       formResetAnchor(resetInputRef),
@@ -764,7 +764,7 @@ export const Autocomplete = React.forwardRef(function Autocomplete({
   };
   return React.createElement('div', {
     ref,
-    className: classNames('core-autocomplete', className),
+    className: classNames('muxui-autocomplete', className),
     onBlurCapture: (event) => {
       if (!event.currentTarget.contains(event.relatedTarget)) setIsOpen(false);
     },
@@ -777,7 +777,7 @@ export const Autocomplete = React.forwardRef(function Autocomplete({
   }, React.createElement(AriaSearchField, {
     ...validationProps({ disabled, readOnly, required, invalid, errorMessage }),
     name,
-    className: 'core-autocomplete-search',
+    className: 'muxui-autocomplete-search',
     'aria-label': ariaLabel,
     'aria-labelledby': ariaLabelledby,
   }, fieldChildren({
@@ -785,7 +785,7 @@ export const Autocomplete = React.forwardRef(function Autocomplete({
     description,
     errorMessage,
     input: React.createElement(AriaInput, {
-      className: 'core-field-input',
+      className: 'muxui-field-input',
       placeholder,
       onFocus: () => setIsOpen(!disabled),
       onKeyDown: (event) => {
@@ -796,11 +796,11 @@ export const Autocomplete = React.forwardRef(function Autocomplete({
   })),
   React.createElement(AriaListBox, {
     items: filteredItems,
-    className: 'core-autocomplete-list',
+    className: 'muxui-autocomplete-list',
     hidden: !isOpen || filteredItems.length === 0,
     selectionMode: readOnly ? 'none' : 'single',
     onAction: handleSelect,
-  }, (item) => React.createElement(AriaListBoxItem, { id: item.id, textValue: autocompleteItemText(item), className: 'core-autocomplete-option' }, item.label))));
+  }, (item) => React.createElement(AriaListBoxItem, { id: item.id, textValue: autocompleteItemText(item), className: 'muxui-autocomplete-option' }, item.label))));
 });
 
 Autocomplete.displayName = 'Autocomplete';

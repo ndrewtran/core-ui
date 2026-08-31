@@ -1,6 +1,6 @@
 // @generated-from: apps/react-storybook/src/generate-stories.mjs
-// @generated-content-sha256: sha256:54699f122a6e1d0378b9e39766add14bbd0aee8b5d1aed15cc76b21b698239e3
-import * as Core from '@core-ui/react';
+// @generated-content-sha256: sha256:dc37cadcbfe879cd5471eee78413f4af2c58e7ec52302088afc2caea1dca2112
+import * as MuxUI from '@muxui/react';
 import { argTypesForBinding, createStory } from '../../src/storybook-factory.mjs';
 
 const binding = {
@@ -25,12 +25,12 @@ const binding = {
       "aria-label"
     ]
   },
-  "binding": "core:component:group#web.react",
+  "binding": "muxui:component:group#web.react",
   "export": "Group",
   "lifecycle": "experimental",
   "module": ".",
   "runtimeProfile": "web.react",
-  "selector": ".core-group",
+  "selector": ".muxui-group",
   "states": [
     "idle",
     "disabled",
@@ -42,8 +42,9 @@ const binding = {
 const record = { family: 'Group', tranche: 'R1.1', binding };
 
 export default {
-  title: 'Core React/R1.1/Group',
-  component: Core.Group,
+  title: 'Mux UI React/R1.1/Group',
+  id: 'muxui-react-r1-1-group',
+  component: MuxUI.Group,
   tags: ['autodocs'],
   parameters: {
     controls: {
@@ -51,7 +52,7 @@ export default {
     },
     docs: {
       description: {
-        component: 'Private development showcase for the Core-owned Group family.',
+        component: 'Private development showcase for the Mux UI-owned Group family.',
       },
     },
   },

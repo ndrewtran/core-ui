@@ -122,19 +122,19 @@ test('the Tale style ledger accounts for every pinned stylesheet and state cover
 });
 
 test('the pinned Storybook fixture requires the canonical story and private query', () => {
-  assert.equal(isMigrationFixtureRequest(expectedStoryId, '?core-ui-migration=1'), true);
-  assert.equal(isMigrationFixtureRequest('core-react-r1-1-checkbox--default', '?core-ui-migration=1'), false);
-  assert.equal(isMigrationFixtureRequest(expectedStoryId, '?core-ui-migration=0'), false);
-  assert.equal(isMigrationFixtureRequest(expectedStoryId, '?core-ui-migration=1&core-ui-migration=0'), false);
+  assert.equal(isMigrationFixtureRequest(expectedStoryId, '?muxui-migration=1'), true);
+  assert.equal(isMigrationFixtureRequest('muxui-react-r1-1-checkbox--default', '?muxui-migration=1'), false);
+  assert.equal(isMigrationFixtureRequest(expectedStoryId, '?muxui-migration=0'), false);
+  assert.equal(isMigrationFixtureRequest(expectedStoryId, '?muxui-migration=1&muxui-migration=0'), false);
   assert.deepEqual(manifest.storyQuery, expectedStoryQuery);
 });
 
 test('migration focus actions establish keyboard modality without donor autofocus', async () => {
   const donorEntry = await readFile(resolve(appRoot, 'visual-migration/bootstrap/donor-entry.mjs'), 'utf8');
   const donorCapture = await readFile(resolve(appRoot, 'visual-migration/bootstrap/capture.mjs'), 'utf8');
-  const coreCapture = await readFile(resolve(appRoot, 'test/run-visual-migration.mjs'), 'utf8');
+  const muxuiCapture = await readFile(resolve(appRoot, 'test/run-visual-migration.mjs'), 'utf8');
   assert.doesNotMatch(donorEntry, /case 'focused':\s*props\.autoFocus/u);
-  for (const source of [donorCapture, coreCapture]) {
+  for (const source of [donorCapture, muxuiCapture]) {
     assert.match(source, /page\.mouse\.click\(0, 0\);\s*await page\.keyboard\.press\('Tab'\);\s*await target\.focus\(\)/u);
   }
 });
@@ -143,17 +143,17 @@ test('migration host resets stay private and expanded triggers are not pressed b
   const buttonStyles = await readFile(resolve(appRoot, '../../packages/react/src/styles/components.css'), 'utf8');
   const previewSource = await readFile(resolve(appRoot, '.storybook/preview.mjs'), 'utf8');
   const previewStyles = await readFile(resolve(appRoot, '.storybook/preview.css'), 'utf8');
-  assert.match(buttonStyles, /\.core-button\[data-pressed\]:not\([^}]*\[aria-expanded='true'\]\)/u);
-  assert.match(buttonStyles, /\.core-button:active:not\(\[data-disabled\], \[data-pending\]\)/u);
-  assert.match(previewSource, /document\.body\.setAttribute\('data-core-migration-host', 'true'\)[\s\S]*document\.body\.removeAttribute\('data-core-migration-host'\)/u);
-  assert.match(previewStyles, /body\[data-core-migration-host='true'\][\s\S]*margin: 0 !important;/u);
+  assert.match(buttonStyles, /\.muxui-button\[data-pressed\]:not\([^}]*\[aria-expanded='true'\]\)/u);
+  assert.match(buttonStyles, /\.muxui-button:active:not\(\[data-disabled\], \[data-pending\]\)/u);
+  assert.match(previewSource, /document\.body\.setAttribute\('data-muxui-migration-host', 'true'\)[\s\S]*document\.body\.removeAttribute\('data-muxui-migration-host'\)/u);
+  assert.match(previewStyles, /body\[data-muxui-migration-host='true'\][\s\S]*margin: 0 !important;/u);
 });
 
 test('disabled tab opacity wins over semantic recoloring and resets in forced colors', async () => {
   const collectionStyles = await readFile(resolve(appRoot, '../../packages/react/src/styles/collections.css'), 'utf8');
-  assert.match(collectionStyles, /\.core-tab\[data-disabled\]\s*\{\s*opacity: 0\.45;/u);
-  assert.doesNotMatch(collectionStyles, /\.core-select-trigger\[aria-disabled='true'\],\s*\.core-tab\[aria-disabled='true'\]/u);
-  assert.match(collectionStyles, /@media \(forced-colors: active\)[\s\S]*\.core-tab\[data-disabled\][\s\S]*opacity: 1;/u);
+  assert.match(collectionStyles, /\.muxui-tab\[data-disabled\]\s*\{\s*opacity: 0\.45;/u);
+  assert.doesNotMatch(collectionStyles, /\.muxui-select-trigger\[aria-disabled='true'\],\s*\.muxui-tab\[aria-disabled='true'\]/u);
+  assert.match(collectionStyles, /@media \(forced-colors: active\)[\s\S]*\.muxui-tab\[data-disabled\][\s\S]*opacity: 1;/u);
 });
 
 test('donor capture accessibility normalization stays bounded to the migration fixture', async () => {
@@ -209,7 +209,7 @@ test('pinned donor binding rejects a coordinated donor artifact, provenance, and
 
 test('manifest validation rejects canonical selector and fixture-data substitution', async () => {
   const selectorSubstitution = structuredClone(manifest);
-  selectorSubstitution.cases[0].selector = '[data-core-migration-case="switch-idle"]';
+  selectorSubstitution.cases[0].selector = '[data-muxui-migration-case="switch-idle"]';
   await assert.rejects(validateManifest(selectorSubstitution), /selector must equal the canonical case selector/);
   const dataSubstitution = structuredClone(manifest);
   dataSubstitution.cases[0].fixture.data.items[0] = 'Substituted';
@@ -346,9 +346,9 @@ test('the retained Tale render plan consumes the complete shared fixture contrac
   assert.equal(planFor('virtualizer-idle').props.style.height, '180px');
 });
 
-test('dark current Link styling covers the Core and donor state markers', async () => {
+test('dark current Link styling covers the Mux UI and donor state markers', async () => {
   const componentStyles = await readFile(resolve(appRoot, '../../packages/react/src/styles/components.css'), 'utf8');
-  assert.match(componentStyles, /\.core-link:not\(\.core-button\):is\(\[aria-current='page'\], \[data-current\]\)\s*\{[\s\S]*?color: var\(--core-reference-color-neutral-20\);/u);
+  assert.match(componentStyles, /\.muxui-link:not\(\.muxui-button\):is\(\[aria-current='page'\], \[data-current\]\)\s*\{[\s\S]*?color: var\(--muxui-reference-color-neutral-20\);/u);
 });
 
 test('disabled Tale donor plans forward disabled state to nested parts and items', () => {
@@ -395,7 +395,7 @@ test('disabled Tale donor plans forward disabled state to nested parts and items
   assert.equal(idleGridItem.props.disabled, undefined);
 });
 
-test('migration adapters pass mutated fixture data into Core runtime props', () => {
+test('migration adapters pass mutated fixture data into Mux UI runtime props', () => {
   const date = mutatedMigrationElement('date-field-idle', (data) => { data.date = '2031-04-05'; });
   assert.equal(date.element.props.defaultValue, '2031-04-05');
   const dateRange = mutatedMigrationElement('date-range-picker-idle', (data) => { data.dateRange = { start: '2031-04-05', end: '2031-04-12' }; });
@@ -445,7 +445,7 @@ test('migration adapters pass mutated fixture data into Core runtime props', () 
     ['select-idle', 'Select'],
   ]) {
     const { element } = mutatedMigrationElement(caseId, (data) => { data.placeholder = `Fixture ${family} placeholder`; });
-    assert.equal(element.props.placeholder, `Fixture ${family} placeholder`, `${family} Core adapter must consume fixture placeholder`);
+    assert.equal(element.props.placeholder, `Fixture ${family} placeholder`, `${family} Mux UI adapter must consume fixture placeholder`);
   }
   const swatches = mutatedMigrationElement('color-swatch-picker-selected', (data) => { data.items = [{ id: 'amber', color: '#f59e0b' }]; });
   assert.deepEqual(swatches.element.props.items, [{ id: 'amber', color: '#f59e0b' }]);
@@ -521,22 +521,22 @@ test('the shared fixture model covers every canonical rendering field and both a
 });
 
 test('activation recovery rejects a poisoned marker before touching an outside sentinel', async () => {
-  const root = await mkdtemp('/tmp/core-ui-visual-activation-poison-');
-  const outsideRoot = await mkdtemp('/tmp/core-ui-visual-activation-sentinel-');
+  const root = await mkdtemp('/tmp/muxui-visual-activation-poison-');
+  const outsideRoot = await mkdtemp('/tmp/muxui-visual-activation-sentinel-');
   const markerPath = join(root, 'visual-migration', '.activation-v2.json');
   const sentinel = join(outsideRoot, 'sentinel.txt');
   try {
     await mkdir(join(root, 'visual-migration'), { recursive: true });
     await writeFile(sentinel, 'must remain');
     const poisoned = {
-      schema: 'core-ui-react-visual-migration-activation-v2',
+      schema: 'muxui-react-visual-migration-activation-v2',
       phase: 'activated',
       manifest: sentinel,
       report: sentinel,
       manifestBackup: sentinel,
       reportBackup: sentinel,
-      coreCaptureProvenance: sentinel,
-      coreCaptureProvenanceBackup: sentinel,
+      muxuiCaptureProvenance: sentinel,
+      muxuiCaptureProvenanceBackup: sentinel,
       previousSnapshot: sentinel,
       nextSnapshot: sentinel,
     };
@@ -552,13 +552,13 @@ test('activation recovery rejects a poisoned marker before touching an outside s
 });
 
 test('activation recovery restores the previous canonical files after a hard interruption', async () => {
-  const root = await mkdtemp('/tmp/core-ui-visual-activation-valid-');
+  const root = await mkdtemp('/tmp/muxui-visual-activation-valid-');
   const visualRoot = join(root, 'visual-migration');
   const oldSnapshot = join(visualRoot, 'baselines', `sha256-${'1'.repeat(64)}`);
   const nextSnapshot = join(visualRoot, 'baselines', `sha256-${'2'.repeat(64)}`);
   const manifest = join(visualRoot, 'manifest.json');
   const report = join(visualRoot, 'results', 'comparison.json');
-  const core = join(visualRoot, 'results', 'core-capture-provenance.json');
+  const muxui = join(visualRoot, 'results', 'muxui-capture-provenance.json');
   const marker = join(visualRoot, '.activation-v2.json');
   try {
     await mkdir(oldSnapshot, { recursive: true });
@@ -567,18 +567,18 @@ test('activation recovery restores the previous canonical files after a hard int
     const files = [
       [manifest, `${manifest}.previous`, 'old manifest'],
       [report, `${report}.previous`, 'old report'],
-      [core, `${core}.previous`, 'old core provenance'],
+      [muxui, `${muxui}.previous`, 'old Mux UI provenance'],
     ];
     for (const [, backup, contents] of files) await writeFile(backup, contents);
     const markerValue = {
-      schema: 'core-ui-react-visual-migration-activation-v2',
+      schema: 'muxui-react-visual-migration-activation-v2',
       phase: 'backed-up',
       manifest,
       report,
       manifestBackup: `${manifest}.previous`,
       reportBackup: `${report}.previous`,
-      coreCaptureProvenance: core,
-      coreCaptureProvenanceBackup: `${core}.previous`,
+      muxuiCaptureProvenance: muxui,
+      muxuiCaptureProvenanceBackup: `${muxui}.previous`,
       previousSnapshot: oldSnapshot,
       nextSnapshot,
     };
@@ -595,8 +595,8 @@ test('activation recovery restores the previous canonical files after a hard int
 });
 
 test('activation path validation rejects symlinked migration roots before touching outside sentinels', async () => {
-  const root = await mkdtemp('/tmp/core-ui-visual-activation-symlink-');
-  const outsideRoot = await mkdtemp('/tmp/core-ui-visual-activation-outside-');
+  const root = await mkdtemp('/tmp/muxui-visual-activation-symlink-');
+  const outsideRoot = await mkdtemp('/tmp/muxui-visual-activation-outside-');
   const visualRoot = join(root, 'visual-migration');
   const sentinel = join(outsideRoot, 'sentinel.txt');
   const active = 'visual-migration/baselines/sha256-1111111111111111111111111111111111111111111111111111111111111111';
@@ -654,7 +654,7 @@ test('every semantic case has explicit fixture, action, adaptation, and light/da
     assert.match(entry.runtimeFixtureSha256, /^sha256:[0-9a-f]{64}$/u);
     assert.ok(entry.styleFactsByMode.light);
     assert.ok(entry.styleFactsByMode.dark);
-    assert.deepEqual(entry.equivalentPartFacts.coreByMode.light, entry.equivalentPartFacts.coreByMode.dark);
+    assert.deepEqual(entry.equivalentPartFacts.muxuiByMode.light, entry.equivalentPartFacts.muxuiByMode.dark);
     for (const mode of ['light', 'dark']) {
       assert.match(entry.baseline[mode].sha256, /^sha256:[0-9a-f]{64}$/u);
       assert.match(entry.donor.artifacts[mode].sha256, /^sha256:[0-9a-f]{64}$/u);
@@ -671,18 +671,18 @@ test('every semantic case has explicit fixture, action, adaptation, and light/da
   assert.equal(comparison.adaptations.some((adaptation) => Object.hasOwn(adaptation, 'excludedFromPixelRegion')), false);
 });
 
-test('Core capture provenance rejects substituted computed styles even after rebuilding the report', async () => {
+test('Mux UI capture provenance rejects substituted computed styles even after rebuilding the report', async () => {
   const substituted = structuredClone(manifest);
   for (const mode of ['light', 'dark']) {
     substituted.cases[0].styleFactsByMode[mode].properties.fontSize = '99px';
   }
   substituted.cases[0].styleFacts.properties.fontSize = '99px';
   for (const mode of ['light', 'dark']) {
-    substituted.cases[0].equivalentPartFacts.coreByMode[mode].properties.fontSize = '99px';
+    substituted.cases[0].equivalentPartFacts.muxuiByMode[mode].properties.fontSize = '99px';
   }
-  substituted.cases[0].equivalentPartFacts.core.properties.fontSize = '99px';
+  substituted.cases[0].equivalentPartFacts.muxui.properties.fontSize = '99px';
   const rebuilt = await buildComparisonReport(substituted);
-  await assert.rejects(validateSealedComparison(substituted, { report: rebuilt }), /Core capture provenance/);
+  await assert.rejects(validateSealedComparison(substituted, { report: rebuilt }), /Mux UI capture provenance/);
 });
 
 test('manifest validation rejects changed baseline identity and weakened thresholds', async () => {
@@ -714,8 +714,8 @@ test('comparison reports are pure and have no retained-tree writer', () => {
 });
 
 test('diagnostic capture never writes through the retained results tree', async () => {
-  const root = await mkdtemp('/tmp/core-ui-visual-diagnostic-symlink-');
-  const outsideRoot = await mkdtemp('/tmp/core-ui-visual-diagnostic-sentinel-');
+  const root = await mkdtemp('/tmp/muxui-visual-diagnostic-symlink-');
+  const outsideRoot = await mkdtemp('/tmp/muxui-visual-diagnostic-sentinel-');
   const retainedResults = join(root, 'visual-migration', 'results');
   const diagnosticRoot = join(root, 'diagnostics');
   const sentinel = join(outsideRoot, 'sentinel.txt');
@@ -743,25 +743,25 @@ test('update identity preserves the expanded case inventory and all donor proven
   assert.throws(() => updateManifestIdentity(manifest, { baselineSha256: hashes.slice(1) }), /one SHA-256 identity/);
 });
 
-test('Core capture runner drift is update-only and update identity binds the current source', async () => {
+test('Mux UI capture runner drift is update-only and update identity binds the current source', async () => {
   const hashes = expectedCaptureInventory.map(([, id, , , mode]) => manifest.cases.find((entry) => entry.id === id).baseline[mode].sha256);
   const currentRunnerSource = await readFile(resolve(appRoot, 'test/run-visual-migration.mjs'));
   const currentRunnerHash = sha256(currentRunnerSource);
   const drifted = structuredClone(manifest);
-  drifted.bootstrap.coreCaptureRunnerSourceSha256 = `sha256:${'0'.repeat(64)}`;
-  await assert.rejects(validateManifest(drifted, { allowMissingCoreCaptureProvenance: true }), /Core capture runner source SHA-256 does not match/);
-  await assert.rejects(validateManifest(drifted, { allowCoreCaptureRunnerSourceDrift: true }), /available only during update-only validation/);
+  drifted.bootstrap.muxuiCaptureRunnerSourceSha256 = `sha256:${'0'.repeat(64)}`;
+  await assert.rejects(validateManifest(drifted, { allowMissingMuxuiCaptureProvenance: true }), /Mux UI capture runner source SHA-256 does not match/);
+  await assert.rejects(validateManifest(drifted, { allowMuxuiCaptureRunnerSourceDrift: true }), /available only during update-only validation/);
   await assert.doesNotReject(validateManifest(drifted, {
-    allowMissingCoreCaptureProvenance: true,
-    allowCoreCaptureRunnerSourceDrift: true,
+    allowMissingMuxuiCaptureProvenance: true,
+    allowMuxuiCaptureRunnerSourceDrift: true,
   }));
-  const rebound = updateManifestIdentity(manifest, { baselineSha256: hashes, coreCaptureRunnerSourceSha256: currentRunnerHash });
-  assert.equal(rebound.bootstrap.coreCaptureRunnerSourceSha256, currentRunnerHash);
+  const rebound = updateManifestIdentity(manifest, { baselineSha256: hashes, muxuiCaptureRunnerSourceSha256: currentRunnerHash });
+  assert.equal(rebound.bootstrap.muxuiCaptureRunnerSourceSha256, currentRunnerHash);
 });
 
 test('semantic negative cases fail closed: portal omission, no-op action, fixture/report substitution, and pixel exclusion', async () => {
   const portalOmission = structuredClone(manifest);
-  portalOmission.cases.find(({ id }) => id === 'dialog-open').region.requiredSelectors = ['.core-dialog'];
+  portalOmission.cases.find(({ id }) => id === 'dialog-open').region.requiredSelectors = ['.muxui-dialog'];
   await assert.rejects(validateManifest(portalOmission), /region must equal the canonical semantic-region contract/);
 
   const noOpAction = structuredClone(manifest);
@@ -782,15 +782,15 @@ test('semantic negative cases fail closed: portal omission, no-op action, fixtur
   await assert.rejects(validateManifest(pixelExclusion), /without excluding component pixels/);
 });
 
-test('interrupted activation preserves the active Core manifest, report, and baseline', async () => {
+test('interrupted activation preserves the active Mux UI manifest, report, and baseline', async () => {
   const manifestBytes = await readFile(resolve(appRoot, 'visual-migration/manifest.json'));
   const reportBytes = await readFile(resolve(appRoot, 'visual-migration/results/comparison.json'));
-  const coreProvenanceBytes = await readFile(resolve(appRoot, manifest.bootstrap.coreCaptureProvenance.path));
+  const muxuiProvenanceBytes = await readFile(resolve(appRoot, manifest.bootstrap.muxuiCaptureProvenance.path));
   const baselineFiles = await readdir(resolve(appRoot, manifest.baselineDirectory));
   await assert.rejects(activateVisualMigrationArtifacts(manifest, { nextManifest: manifest, report: comparison, failureAt: 'after-report' }), /injected visual migration activation interruption/);
   assert.deepEqual(await readFile(resolve(appRoot, 'visual-migration/manifest.json')), manifestBytes);
   assert.deepEqual(await readFile(resolve(appRoot, 'visual-migration/results/comparison.json')), reportBytes);
-  assert.deepEqual(await readFile(resolve(appRoot, manifest.bootstrap.coreCaptureProvenance.path)), coreProvenanceBytes);
+  assert.deepEqual(await readFile(resolve(appRoot, manifest.bootstrap.muxuiCaptureProvenance.path)), muxuiProvenanceBytes);
   assert.deepEqual(await readdir(resolve(appRoot, manifest.baselineDirectory)), baselineFiles);
   await validateManifest(manifest);
 });
@@ -820,8 +820,8 @@ test('capture environment mismatches fail before routine comparison', () => {
   assert.throws(() => assertCaptureEnvironment(actual, manifest.capture), /capture environment mismatch/);
 });
 
-test('Core capture readiness waits for the requested case and fails closed for stale or invalid DOM', () => {
-  const expectedCaseSelector = '[data-core-migration-case="color-swatch-picker-selected"]';
+test('Mux UI capture readiness waits for the requested case and fails closed for stale or invalid DOM', () => {
+  const expectedCaseSelector = '[data-muxui-migration-case="color-swatch-picker-selected"]';
   const expected = {
     expectedScheme: 'light',
     expectedToken: 'run-token',
@@ -838,11 +838,11 @@ test('Core capture readiness waits for the requested case and fails closed for s
     const caseMarkers = Array.from({ length: caseCount }, () => ({}));
     return {
       defaultView: { getComputedStyle: (element) => element.style },
-      documentElement: { getAttribute: (name) => name === 'data-core-color-scheme' ? 'light' : null },
+      documentElement: { getAttribute: (name) => name === 'data-muxui-color-scheme' ? 'light' : null },
       querySelector(selector) {
         if (selector === '#storybook-root') return { firstElementChild: {} };
-        if (selector === '.core-storybook-surface') return {};
-        if (selector === '[data-core-migration-run-token]') return { getAttribute: () => 'run-token' };
+        if (selector === '.muxui-storybook-surface') return {};
+        if (selector === '[data-muxui-migration-run-token]') return { getAttribute: () => 'run-token' };
         if (selector === '.sb-errordisplay') return errorVisible ? visibleElement(true) : null;
         if (selector === '.sb-preparing-story') return preparingVisible ? visibleElement(true) : null;
         return null;
@@ -867,11 +867,11 @@ test('routine checker and fixture contain no Tale runtime, dependency, path, or 
   assert.doesNotMatch(routineSource, /tale-ui|\/Users\/admin\/Projects\/tale-ui/iu);
   assert.doesNotMatch(fixture, /@tale-ui\/react|tale-ui/iu);
   assert.match(routineSource, /startStorybook\(await reservePort\(\), runToken\)/u);
-  assert.match(routineSource, /VITE_CORE_UI_MIGRATION_RUN_TOKEN: runToken/u);
+  assert.match(routineSource, /VITE_MUXUI_MIGRATION_RUN_TOKEN: runToken/u);
   assert.match(contract, /migrationStoryId/u);
   assert.equal(packageJson.scripts['check:visual:migration'], 'node test/run-visual-migration.mjs');
   assert.equal(packageJson.scripts['update:visual:migration'], 'node test/run-visual-migration.mjs --update');
-  assert.doesNotMatch(JSON.stringify(manifest), /VITE_CORE_UI_MIGRATION_RUN_TOKEN|runToken/iu);
+  assert.doesNotMatch(JSON.stringify(manifest), /VITE_MUXUI_MIGRATION_RUN_TOKEN|runToken/iu);
 });
 
 test('generated Storybook projection remains exactly 53 families', async () => {

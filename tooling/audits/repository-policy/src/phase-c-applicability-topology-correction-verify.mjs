@@ -1,7 +1,7 @@
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
-import { canonicalJson, parseJsonStrict } from '@core-ui/schema';
+import { canonicalJson, parseJsonStrict } from '@muxui/schema';
 
 const root = path.resolve(import.meta.dirname, '../../../..');
 const parentPath = path.join(root, 'decisions/0005-default-theme-token-source-identity.json');

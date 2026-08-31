@@ -1,6 +1,6 @@
 // @generated-from: apps/react-storybook/src/generate-stories.mjs
-// @generated-content-sha256: sha256:93a2b6ff875b536a60409e023d45d85f0e0db0163d7561327a4e5e4ade7c5750
-import * as Core from '@core-ui/react';
+// @generated-content-sha256: sha256:1a3d8cc3800ae9ba9bcb118f44d53e3b146a911bb422720e9656bdb2469c492d
+import * as MuxUI from '@muxui/react';
 import { argTypesForBinding, createStory } from '../../src/storybook-factory.mjs';
 
 const binding = {
@@ -36,12 +36,12 @@ const binding = {
       "name"
     ]
   },
-  "binding": "core:component:color-field#web.react",
+  "binding": "muxui:component:color-field#web.react",
   "export": "ColorField",
   "lifecycle": "experimental",
   "module": ".",
   "runtimeProfile": "web.react",
-  "selector": ".core-color-field",
+  "selector": ".muxui-color-field",
   "states": [
     "idle",
     "focused",
@@ -54,8 +54,9 @@ const binding = {
 const record = { family: 'ColorField', tranche: 'R1.3', binding };
 
 export default {
-  title: 'Core React/R1.3/ColorField',
-  component: Core.ColorField,
+  title: 'Mux UI React/R1.3/ColorField',
+  id: 'muxui-react-r1-3-color-field',
+  component: MuxUI.ColorField,
   tags: ['autodocs'],
   parameters: {
     controls: {
@@ -63,7 +64,7 @@ export default {
     },
     docs: {
       description: {
-        component: 'Private development showcase for the Core-owned ColorField family.',
+        component: 'Private development showcase for the Mux UI-owned ColorField family.',
       },
     },
   },

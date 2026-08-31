@@ -1,6 +1,6 @@
 import { canonicalDigest, canonicalJson } from './canonical.mjs';
 
-const CONTRACT_SCHEMA = 'core-ui-platform-safety-contract-v1';
+const CONTRACT_SCHEMA = 'muxui-platform-safety-contract-v1';
 const REQUIREMENT_SET_SCHEMA_VERSION = '1.0.0';
 const VALIDATION_PROFILE_BY_RUNTIME_PROFILE = Object.freeze({
   ios: 'native.ios',
@@ -41,7 +41,7 @@ export function validatePlatformSafetyContract(contract) {
     || !Array.isArray(contract.requirements)
     || contract.requirements.length === 0
   ) {
-    fail('CORE_PLATFORM_SAFETY_CONTRACT_INVALID', 'the architecture registry is malformed');
+    fail('MUXUI_PLATFORM_SAFETY_CONTRACT_INVALID', 'the architecture registry is malformed');
   }
   const ids = new Set();
   for (const [index, requirement] of contract.requirements.entries()) {
@@ -53,10 +53,10 @@ export function validatePlatformSafetyContract(contract) {
       || typeof requirement.boundary !== 'string'
       || requirement.boundary.length === 0
     ) {
-      fail('CORE_PLATFORM_SAFETY_CONTRACT_INVALID', `requirements/${index} is malformed`, { index });
+      fail('MUXUI_PLATFORM_SAFETY_CONTRACT_INVALID', `requirements/${index} is malformed`, { index });
     }
     if (ids.has(requirement.id)) {
-      fail('CORE_PLATFORM_SAFETY_CONTRACT_INVALID', `duplicate registry ID ${requirement.id}`, {
+      fail('MUXUI_PLATFORM_SAFETY_CONTRACT_INVALID', `duplicate registry ID ${requirement.id}`, {
         requirementId: requirement.id,
       });
     }
@@ -85,7 +85,7 @@ function expectedProfiles(bindingId, binding) {
 
 function normalizeDisposition(entry, registryIds, { bindingId, profile, unsupported }) {
   if (!isObject(entry)) {
-    fail('CORE_PLATFORM_SAFETY_DECLARATION_INVALID', 'requirement disposition must be an object', {
+    fail('MUXUI_PLATFORM_SAFETY_DECLARATION_INVALID', 'requirement disposition must be an object', {
       bindingId,
       profile,
     });
@@ -94,27 +94,27 @@ function normalizeDisposition(entry, registryIds, { bindingId, profile, unsuppor
     .filter((field) => Object.hasOwn(entry, field));
   if (prematureFields.length > 0) {
     fail(
-      'CORE_PLATFORM_SAFETY_PREMATURE_FULFILLMENT',
+      'MUXUI_PLATFORM_SAFETY_PREMATURE_FULFILLMENT',
       'G1.0 declarations cannot contain behavior, evidence, support, or availability results',
       { bindingId, profile, fields: prematureFields },
     );
   }
   if (!closedObject(entry, ['id', 'disposition', 'reason'])) {
-    fail('CORE_PLATFORM_SAFETY_DECLARATION_INVALID', 'requirement disposition has unknown fields', {
+    fail('MUXUI_PLATFORM_SAFETY_DECLARATION_INVALID', 'requirement disposition has unknown fields', {
       bindingId,
       profile,
       requirementId: entry.id,
     });
   }
   if (!registryIds.has(entry.id)) {
-    fail('CORE_PLATFORM_SAFETY_REQUIREMENT_UNKNOWN', `unknown requirement ${entry.id}`, {
+    fail('MUXUI_PLATFORM_SAFETY_REQUIREMENT_UNKNOWN', `unknown requirement ${entry.id}`, {
       bindingId,
       profile,
       requirementId: entry.id,
     });
   }
   if (!['required', 'not-applicable'].includes(entry.disposition)) {
-    fail('CORE_PLATFORM_SAFETY_DECLARATION_INVALID', `${entry.id} has an invalid disposition`, {
+    fail('MUXUI_PLATFORM_SAFETY_DECLARATION_INVALID', `${entry.id} has an invalid disposition`, {
       bindingId,
       profile,
       requirementId: entry.id,
@@ -124,14 +124,14 @@ function normalizeDisposition(entry, registryIds, { bindingId, profile, unsuppor
     entry.disposition === 'not-applicable'
     && (typeof entry.reason !== 'string' || entry.reason.length === 0)
   ) {
-    fail('CORE_PLATFORM_SAFETY_DECLARATION_INVALID', `${entry.id} needs a not-applicable reason`, {
+    fail('MUXUI_PLATFORM_SAFETY_DECLARATION_INVALID', `${entry.id} needs a not-applicable reason`, {
       bindingId,
       profile,
       requirementId: entry.id,
     });
   }
   if (entry.disposition === 'required' && entry.reason !== undefined) {
-    fail('CORE_PLATFORM_SAFETY_DECLARATION_INVALID', `${entry.id} required disposition must omit reason`, {
+    fail('MUXUI_PLATFORM_SAFETY_DECLARATION_INVALID', `${entry.id} required disposition must omit reason`, {
       bindingId,
       profile,
       requirementId: entry.id,
@@ -139,7 +139,7 @@ function normalizeDisposition(entry, registryIds, { bindingId, profile, unsuppor
   }
   if (unsupported && entry.disposition !== 'not-applicable') {
     fail(
-      'CORE_PLATFORM_SAFETY_PREMATURE_FULFILLMENT',
+      'MUXUI_PLATFORM_SAFETY_PREMATURE_FULFILLMENT',
       `unsupported profile ${profile} cannot require ${entry.id}`,
       { bindingId, profile, requirementId: entry.id },
     );
@@ -154,7 +154,7 @@ function normalizeDisposition(entry, registryIds, { bindingId, profile, unsuppor
 export function compilePlatformSafetyRequirementSets({ contract, bindingId, binding }) {
   const identity = validatePlatformSafetyContract(contract);
   if (!isObject(binding) || !Array.isArray(binding.platformSafety)) {
-    fail('CORE_PLATFORM_SAFETY_DECLARATION_MISSING', `${bindingId} has no platform-safety declaration`, {
+    fail('MUXUI_PLATFORM_SAFETY_DECLARATION_MISSING', `${bindingId} has no platform-safety declaration`, {
       bindingId,
     });
   }
@@ -163,25 +163,25 @@ export function compilePlatformSafetyRequirementSets({ contract, bindingId, bind
   const declarations = new Map();
   for (const declaration of binding.platformSafety) {
     if (!closedObject(declaration, ['profile', 'validationProfile', 'requirements'])) {
-      fail('CORE_PLATFORM_SAFETY_DECLARATION_INVALID', `${bindingId} has a malformed declaration`, {
+      fail('MUXUI_PLATFORM_SAFETY_DECLARATION_INVALID', `${bindingId} has a malformed declaration`, {
         bindingId,
       });
     }
     if (declarations.has(declaration.profile)) {
-      fail('CORE_PLATFORM_SAFETY_DECLARATION_DUPLICATE', `duplicate profile ${declaration.profile}`, {
+      fail('MUXUI_PLATFORM_SAFETY_DECLARATION_DUPLICATE', `duplicate profile ${declaration.profile}`, {
         bindingId,
         profile: declaration.profile,
       });
     }
     const expected = expectedByProfile.get(declaration.profile);
     if (!expected) {
-      fail('CORE_PLATFORM_SAFETY_PROFILE_INVALID', `wrong profile ${declaration.profile}`, {
+      fail('MUXUI_PLATFORM_SAFETY_PROFILE_INVALID', `wrong profile ${declaration.profile}`, {
         bindingId,
         profile: declaration.profile,
       });
     }
     if (declaration.validationProfile !== expected.validationProfile) {
-      fail('CORE_PLATFORM_SAFETY_PROFILE_INVALID', `wrong validation profile for ${declaration.profile}`, {
+      fail('MUXUI_PLATFORM_SAFETY_PROFILE_INVALID', `wrong validation profile for ${declaration.profile}`, {
         bindingId,
         profile: declaration.profile,
         required: expected.validationProfile ?? null,
@@ -189,7 +189,7 @@ export function compilePlatformSafetyRequirementSets({ contract, bindingId, bind
       });
     }
     if (!Array.isArray(declaration.requirements)) {
-      fail('CORE_PLATFORM_SAFETY_DECLARATION_INVALID', `${declaration.profile} requirements must be an array`, {
+      fail('MUXUI_PLATFORM_SAFETY_DECLARATION_INVALID', `${declaration.profile} requirements must be an array`, {
         bindingId,
         profile: declaration.profile,
       });
@@ -197,7 +197,7 @@ export function compilePlatformSafetyRequirementSets({ contract, bindingId, bind
     const seenIds = new Set();
     const requirements = declaration.requirements.map((entry) => {
       if (seenIds.has(entry?.id)) {
-        fail('CORE_PLATFORM_SAFETY_REQUIREMENT_DUPLICATE', `duplicate requirement ${entry.id}`, {
+        fail('MUXUI_PLATFORM_SAFETY_REQUIREMENT_DUPLICATE', `duplicate requirement ${entry.id}`, {
           bindingId,
           profile: declaration.profile,
           requirementId: entry.id,
@@ -212,7 +212,7 @@ export function compilePlatformSafetyRequirementSets({ contract, bindingId, bind
     });
     const missing = identity.requirementIds.filter((id) => !seenIds.has(id));
     if (missing.length > 0) {
-      fail('CORE_PLATFORM_SAFETY_REQUIREMENT_MISSING', `${declaration.profile} is incomplete`, {
+      fail('MUXUI_PLATFORM_SAFETY_REQUIREMENT_MISSING', `${declaration.profile} is incomplete`, {
         bindingId,
         profile: declaration.profile,
         requirementIds: missing,
@@ -232,7 +232,7 @@ export function compilePlatformSafetyRequirementSets({ contract, bindingId, bind
     .map(({ profile }) => profile)
     .filter((profile) => !declarations.has(profile));
   if (missingProfiles.length > 0) {
-    fail('CORE_PLATFORM_SAFETY_DECLARATION_MISSING', `${bindingId} is missing profile declarations`, {
+    fail('MUXUI_PLATFORM_SAFETY_DECLARATION_MISSING', `${bindingId} is missing profile declarations`, {
       bindingId,
       profiles: missingProfiles,
     });
@@ -267,7 +267,7 @@ export function assertPlatformSafetyRequirementSet({
   const expected = compilePlatformSafetyRequirementSets({ contract, bindingId, binding })[profile];
   if (!expected || canonicalJson(requirementSet) !== canonicalJson(expected)) {
     fail(
-      'CORE_PLATFORM_SAFETY_CONSUMER_WEAKENED',
+      'MUXUI_PLATFORM_SAFETY_CONSUMER_WEAKENED',
       `${bindingId}:${profile} does not match the binding-owned requirement set`,
       {
         bindingId,

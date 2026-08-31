@@ -4,7 +4,7 @@ import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import os from 'node:os';
 import path from 'node:path';
-import { canonicalJson, parseJsonStrict } from '@core-ui/schema';
+import { canonicalJson, parseJsonStrict } from '@muxui/schema';
 import {
   verifyDecision0009Amendment02SkillSuccessor,
   verifyDecision0009ReadmeHistoricalCompatibility,
@@ -82,7 +82,7 @@ const writeR1Acceptance = (fixtureRoot) => {
 };
 
 const makeR1Fixture = (receiptState = 'staged') => {
-  const fixtureRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'core-ui-r1-authority-fixture-'));
+  const fixtureRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'muxui-r1-authority-fixture-'));
   execFileSync('git', ['clone', '--no-local', '--no-tags', '--no-checkout', repositoryRoot, fixtureRoot], {
     stdio: 'ignore',
   });
@@ -90,7 +90,9 @@ const makeR1Fixture = (receiptState = 'staged') => {
   const stagedPaths = execFileSync('git', ['diff', '--cached', '--name-only'], {
     cwd: repositoryRoot,
     encoding: 'utf8',
-  }).trim().split('\n').filter(Boolean);
+  }).trim().split('\n').filter(Boolean).filter((relativePath) => (
+    fs.existsSync(path.join(fixtureRoot, relativePath))
+  ));
   for (const relativePath of stagedPaths) {
     const destination = path.join(fixtureRoot, relativePath);
     fs.mkdirSync(path.dirname(destination), {recursive: true});
@@ -196,11 +198,11 @@ const amendment02AcceptanceSource = fs.readFileSync(
   'utf8',
 );
 const successorSkillSource = fs.readFileSync(
-  path.join(repositoryRoot, '.agents/skills/core-ui-delivery/SKILL.md'),
+  path.join(repositoryRoot, '.agents/skills/muxui-delivery/SKILL.md'),
   'utf8',
 );
 const successorYamlSource = fs.readFileSync(
-  path.join(repositoryRoot, '.agents/skills/core-ui-delivery/agents/openai.yaml'),
+  path.join(repositoryRoot, '.agents/skills/muxui-delivery/agents/openai.yaml'),
   'utf8',
 );
 const rejectAmendment02 = (options, label) => {
@@ -232,7 +234,7 @@ rejectAmendment02({
   reviewSuccessorSkillSource: successorSkillSource.replace('Root implementation and routine', 'Root implementation and routine drift'),
 }, 'successor SKILL identity');
 rejectAmendment02({
-  reviewSuccessorYamlSource: successorYamlSource.replace('Core UI Delivery', 'Core UI Delivery drift'),
+  reviewSuccessorYamlSource: successorYamlSource.replace('Mux UI Delivery', 'Mux UI Delivery drift'),
 }, 'successor interface metadata identity');
 rejectAmendment02({ reviewSuccessorYamlSource: '' }, 'missing successor binding');
 const rejectReview = (options, label) => {

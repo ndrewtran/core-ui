@@ -3,9 +3,9 @@ import { cp, mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import test from 'node:test';
-import { createCatalogApi } from '@core-ui/catalog';
-import { compileCatalog } from '@core-ui/catalog/compiler';
-import { canonicalJson } from '@core-ui/schema';
+import { createCatalogApi } from '@muxui/catalog';
+import { compileCatalog } from '@muxui/catalog/compiler';
+import { canonicalJson } from '@muxui/schema';
 import {
   AuthoringPolicyError,
   affectedClosure,
@@ -34,7 +34,7 @@ async function setup() {
     expectedSourceRevision: compiled.bundle.sourceRevision,
   });
   const component = compiled.bundle.artifacts.find(
-    ({ id }) => id === 'core:component:button',
+    ({ id }) => id === 'muxui:component:button',
   );
   const examples = compiled.bundle.artifacts
     .filter(({ kind }) => kind === 'example')
@@ -64,7 +64,7 @@ async function setup() {
 }
 
 async function temporaryCatalogRepository() {
-  const temporaryRoot = await mkdtemp(join(tmpdir(), 'core-ui-g0-5-'));
+  const temporaryRoot = await mkdtemp(join(tmpdir(), 'muxui-g0-5-'));
   await Promise.all([
     mkdir(resolve(temporaryRoot, 'packages/tooling'), { recursive: true }),
     mkdir(resolve(temporaryRoot, 'packages/tokens'), { recursive: true }),
@@ -440,29 +440,29 @@ test('E-G0.5-04: affected closure is graph-derived and extends through declared 
     sourcePaths: [component.source.record],
   });
   assert.equal(closure.sourceRevision, context.sourceRevision);
-  assert.ok(closure.artifacts.includes('core:component:button'));
-  assert.ok(closure.artifacts.includes('core:example:button-basic-react'));
-  assert.ok(closure.artifacts.includes('core:token:default-theme'));
+  assert.ok(closure.artifacts.includes('muxui:component:button'));
+  assert.ok(closure.artifacts.includes('muxui:example:button-basic-react'));
+  assert.ok(closure.artifacts.includes('muxui:token:default-theme'));
   assert.ok(closure.canonicalSources.includes(component.source.record));
   assert.ok(closure.projections.includes('packages/catalog/generated/catalog.json'));
   assert.deepEqual(closure.packages.map(({ name }) => name), [
-    '@core-ui/react-playground',
-    '@core-ui/react-storybook',
-    '@core-ui/catalog',
-    '@core-ui/react',
-    '@core-ui/react-native',
-    '@core-ui/tooling',
-    '@core-ui/web',
-    '@core-ui/repository-policy',
+    '@muxui/react-playground',
+    '@muxui/react-storybook',
+    '@muxui/catalog',
+    '@muxui/react',
+    '@muxui/react-native',
+    '@muxui/tooling',
+    '@muxui/web',
+    '@muxui/repository-policy',
   ]);
-  assert.ok(closure.requiredChecks.includes('pnpm --filter @core-ui/react-playground check'));
-  assert.ok(closure.requiredChecks.includes('pnpm --filter @core-ui/react-storybook check'));
-  assert.ok(closure.requiredChecks.includes('pnpm --filter @core-ui/catalog check'));
-  assert.ok(closure.requiredChecks.includes('pnpm --filter @core-ui/react check'));
-  assert.ok(closure.requiredChecks.includes('pnpm --filter @core-ui/react-native check'));
-  assert.ok(closure.requiredChecks.includes('pnpm --filter @core-ui/tooling check'));
-  assert.ok(closure.requiredChecks.includes('pnpm --filter @core-ui/web check'));
-  assert.ok(closure.requiredChecks.includes('pnpm --filter @core-ui/repository-policy check'));
+  assert.ok(closure.requiredChecks.includes('pnpm --filter @muxui/react-playground check'));
+  assert.ok(closure.requiredChecks.includes('pnpm --filter @muxui/react-storybook check'));
+  assert.ok(closure.requiredChecks.includes('pnpm --filter @muxui/catalog check'));
+  assert.ok(closure.requiredChecks.includes('pnpm --filter @muxui/react check'));
+  assert.ok(closure.requiredChecks.includes('pnpm --filter @muxui/react-native check'));
+  assert.ok(closure.requiredChecks.includes('pnpm --filter @muxui/tooling check'));
+  assert.ok(closure.requiredChecks.includes('pnpm --filter @muxui/web check'));
+  assert.ok(closure.requiredChecks.includes('pnpm --filter @muxui/repository-policy check'));
   assert.deepEqual(closure.deferred, [{
     capability: 'renderer-proof-evaluation-closure',
     readiness: 'unavailable',
@@ -475,16 +475,16 @@ test('E-G0.5-04: affected closure is graph-derived and extends through declared 
   });
   assert.ok(schemaClosure.projections.includes('packages/schema/generated/types.d.ts'));
   assert.deepEqual(schemaClosure.packages.map(({ name }) => name), [
-    '@core-ui/react-playground',
-    '@core-ui/react-storybook',
-    '@core-ui/catalog',
-    '@core-ui/react',
-    '@core-ui/react-native',
-    '@core-ui/schema',
-    '@core-ui/tokens',
-    '@core-ui/tooling',
-    '@core-ui/web',
-    '@core-ui/repository-policy',
+    '@muxui/react-playground',
+    '@muxui/react-storybook',
+    '@muxui/catalog',
+    '@muxui/react',
+    '@muxui/react-native',
+    '@muxui/schema',
+    '@muxui/tokens',
+    '@muxui/tooling',
+    '@muxui/web',
+    '@muxui/repository-policy',
   ]);
   assert.throws(
     () => affectedClosure({ context, sourcePaths: ['catalog/components/inferred.json'] }),
@@ -522,8 +522,8 @@ test('E-R1.5-04: change intent previews canonical impact without authorizing a w
   assert.equal(intent.versionEffect, 'patch');
   assert.ok(intent.invalidated.artifacts.includes(component.id));
   assert.ok(intent.invalidated.projections.includes('packages/catalog/generated/catalog.json'));
-  assert.ok(intent.invalidated.packages.some(({ name }) => name === '@core-ui/catalog'));
-  assert.ok(intent.invalidated.checks.includes('pnpm --filter @core-ui/catalog check'));
+  assert.ok(intent.invalidated.packages.some(({ name }) => name === '@muxui/catalog'));
+  assert.ok(intent.invalidated.checks.includes('pnpm --filter @muxui/catalog check'));
   assert.equal(intent.proofEffects.status, 'pending');
   assert.equal(intent.readiness.status, 'not-ready');
   assert.equal(intent.confirmationPolicy.requiresConfirmation, false);
@@ -596,7 +596,7 @@ test('E-G0.5-04: an injected stable field must couple scaffold, diff, diagnostic
   componentSchema.properties.newStableField = {
     type: 'string',
     minLength: 1,
-    'x-core-ui-authoring': { effect: 'incompatible', revisionAxes: ['content'] },
+    'x-muxui-authoring': { effect: 'incompatible', revisionAxes: ['content'] },
   };
   ownership.fields.push({
     class: 'authored',

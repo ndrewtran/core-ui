@@ -1,12 +1,12 @@
 {
   "schemaVersion": "1.0.0",
   "cli": {
-    "name": "core",
+    "name": "muxui",
     "version": "1.0.0",
-    "description": "Deterministic Core UI documentation over the local catalog query API."
+    "description": "Deterministic Mux UI documentation over the local catalog query API."
   },
   "tokenizer": {
-    "id": "core-ui-lexeme-v1",
+    "id": "muxui-lexeme-v1",
     "description": "Unicode letter, number, and underscore runs counted as retrieval lexemes."
   },
   "outputModes": ["human", "json", "dense"],
@@ -120,7 +120,7 @@
       "operation": "getManifest",
       "arguments": [],
       "options": ["detail", "json", "dense", "help", "project", "catalog-version", "catalog-digest"],
-      "examples": ["core manifest --json", "core manifest --detail brief --dense"],
+      "examples": ["muxui manifest --json", "muxui manifest --detail brief --dense"],
       "budgetFixture": {},
       "tokenBudgets": { "brief": 256, "compact": 512, "full": 1024 }
     },
@@ -132,7 +132,7 @@
         { "name": "kind", "required": false, "type": "artifact-kind" }
       ],
       "options": ["platform", "detail", "purpose", "limit", "cursor", "json", "dense", "help", "project", "catalog-version", "catalog-digest"],
-      "examples": ["core list component --platform web.react --json", "core list --detail brief --dense"],
+      "examples": ["muxui list component --platform web.react --json", "muxui list --detail brief --dense"],
       "budgetFixture": { "limit": 1 },
       "tokenBudgets": { "brief": 256, "compact": 512, "full": 1024 }
     },
@@ -144,7 +144,7 @@
         { "name": "query", "required": true, "type": "string" }
       ],
       "options": ["platform", "detail", "purpose", "limit", "cursor", "json", "dense", "help", "project", "catalog-version", "catalog-digest"],
-      "examples": ["core search button --platform web.react --json", "core search action --detail brief --dense"],
+      "examples": ["muxui search button --platform web.react --json", "muxui search action --detail brief --dense"],
       "budgetFixture": { "query": "button", "limit": 1 },
       "tokenBudgets": { "brief": 384, "compact": 768, "full": 1536 }
     },
@@ -156,8 +156,8 @@
         { "name": "id-or-alias", "requestKey": "id", "required": true, "type": "string" }
       ],
       "options": ["platform", "detail", "section", "purpose", "limit", "cursor", "query-api-version", "json", "dense", "help", "project", "catalog-version", "catalog-digest"],
-      "examples": ["core get core:component:button --platform web.react --json", "core get core:token:default-theme --query-api-version 1.2.0 --section tokens --limit 20 --dense"],
-      "budgetFixture": { "id-or-alias": "core:component:button" },
+      "examples": ["muxui get muxui:component:button --platform web.react --json", "muxui get muxui:token:default-theme --query-api-version 1.2.0 --section tokens --limit 20 --dense"],
+      "budgetFixture": { "id-or-alias": "muxui:component:button" },
       "tokenBudgets": { "brief": 384, "compact": 1024, "full": 2048 }
     }
   ],

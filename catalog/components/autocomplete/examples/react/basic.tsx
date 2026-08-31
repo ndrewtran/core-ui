@@ -1,4 +1,4 @@
-import { Autocomplete } from '@core-ui/react';
+import { Autocomplete } from '@muxui/react';
 
 export function BasicAutocompleteExample() {
   return <Autocomplete label="City" items={["Melbourne", "Sydney"]} />;

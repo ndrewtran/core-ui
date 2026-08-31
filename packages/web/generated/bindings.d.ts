@@ -1,7 +1,7 @@
 // @generated-from: packages/catalog/catalog-sources.json
-// @generated-content-sha256: sha256:2a93665cf8512274de5d182db5ddb406a6de82bf15b6241e4be7ee3dc7c28e49
+// @generated-content-sha256: sha256:1960c117ccc4dad28807830605cf85fc3ee26eb9a9c3d382d62300dc27e68345
 export interface ButtonWebHtmlBinding {
-  readonly bindingRef: "core:component:button#web.html";
+  readonly bindingRef: "muxui:component:button#web.html";
   readonly props: {
     readonly "disabled"?: boolean;
   };
@@ -12,7 +12,7 @@ export interface ButtonWebHtmlBinding {
 }
 
 export interface ButtonWebReactBinding {
-  readonly bindingRef: "core:component:button#web.react";
+  readonly bindingRef: "muxui:component:button#web.react";
   readonly props: {
     readonly "disabled"?: boolean;
     readonly "pending"?: boolean;

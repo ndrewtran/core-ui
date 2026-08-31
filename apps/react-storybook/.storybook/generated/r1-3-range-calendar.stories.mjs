@@ -1,6 +1,6 @@
 // @generated-from: apps/react-storybook/src/generate-stories.mjs
-// @generated-content-sha256: sha256:4a32d87d8b41464de28087ba648083ccf2f98653f3e7f5de4e82948fdba51ddb
-import * as Core from '@core-ui/react';
+// @generated-content-sha256: sha256:14149e72e057634fb4f6918bd8a8fca4d39b8e5cf0ba280da33388cb3095f2ad
+import * as MuxUI from '@muxui/react';
 import { argTypesForBinding, createStory } from '../../src/storybook-factory.mjs';
 
 const binding = {
@@ -33,12 +33,12 @@ const binding = {
       "invalid"
     ]
   },
-  "binding": "core:component:range-calendar#web.react",
+  "binding": "muxui:component:range-calendar#web.react",
   "export": "RangeCalendar",
   "lifecycle": "experimental",
   "module": ".",
   "runtimeProfile": "web.react",
-  "selector": ".core-range-calendar",
+  "selector": ".muxui-range-calendar",
   "states": [
     "idle",
     "focused",
@@ -52,8 +52,9 @@ const binding = {
 const record = { family: 'RangeCalendar', tranche: 'R1.3', binding };
 
 export default {
-  title: 'Core React/R1.3/RangeCalendar',
-  component: Core.RangeCalendar,
+  title: 'Mux UI React/R1.3/RangeCalendar',
+  id: 'muxui-react-r1-3-range-calendar',
+  component: MuxUI.RangeCalendar,
   tags: ['autodocs'],
   parameters: {
     controls: {
@@ -61,7 +62,7 @@ export default {
     },
     docs: {
       description: {
-        component: 'Private development showcase for the Core-owned RangeCalendar family.',
+        component: 'Private development showcase for the Mux UI-owned RangeCalendar family.',
       },
     },
   },

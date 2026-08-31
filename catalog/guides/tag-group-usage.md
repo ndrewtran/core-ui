@@ -1,3 +1,3 @@
 # TagGroup usage
 
-Use the Core TagGroup contract and provide an accessible name.
+Use the Mux UI TagGroup contract and provide an accessible name.

@@ -1,4 +1,4 @@
-import { ToggleButton } from '@core-ui/react';
+import { ToggleButton } from '@muxui/react';
 
 export function BasicToggleButtonExample() {
   return <ToggleButton>Bold</ToggleButton>;

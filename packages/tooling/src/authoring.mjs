@@ -15,13 +15,13 @@ import {
   parseJsonStrict,
   resolveAuthoringField,
   validateFamily,
-} from '@core-ui/schema';
+} from '@muxui/schema';
 import {
   discoverWorkspacePackages,
 } from '../../../tooling/audits/repository-policy/src/workspace-packages.mjs';
-import { compileCatalog } from '@core-ui/catalog/compiler';
+import { compileCatalog } from '@muxui/catalog/compiler';
 
-const SOURCE_MANIFEST_SCHEMA = 'core-ui-catalog-source-manifest-v1';
+const SOURCE_MANIFEST_SCHEMA = 'muxui-catalog-source-manifest-v1';
 const EFFECT_ORDER = Object.freeze({ editorial: 0, compatible: 1, incompatible: 2 });
 const DERIVED_COMPONENT_FIELDS = new Set(['schemaVersion', 'id', 'kind']);
 
@@ -29,7 +29,7 @@ export class AuthoringPolicyError extends Error {
   constructor(ruleId, message, details = {}) {
     super(`${ruleId}: ${message}`);
     this.name = 'AuthoringPolicyError';
-    this.code = 'CORE_SCHEMA_INVALID';
+    this.code = 'MUXUI_SCHEMA_INVALID';
     this.ruleId = ruleId;
     this.details = details;
   }
@@ -114,7 +114,7 @@ export function scaffoldComponent({ slug, recordPath, decisions, authoring = {} 
   }
   const record = {
     schemaVersion: '1.0.0',
-    id: `core:component:${slug}`,
+    id: `muxui:component:${slug}`,
     kind: 'component',
     ...structuredClone(decisions),
   };
@@ -250,7 +250,7 @@ function sourceEntry(context, recordPath, family) {
 
 function sourceDiagnostic(ruleId, message, { record, recordPath, path = '$', owner = null }) {
   return {
-    code: 'CORE_SCHEMA_INVALID',
+    code: 'MUXUI_SCHEMA_INVALID',
     ruleId,
     message,
     retryable: false,
@@ -260,7 +260,7 @@ function sourceDiagnostic(ruleId, message, { record, recordPath, path = '$', own
       owner,
     },
     nextCommand: {
-      command: 'pnpm --filter @core-ui/schema check',
+      command: 'pnpm --filter @muxui/schema check',
       effect: 'read-only',
       requiresConfirmation: false,
     },

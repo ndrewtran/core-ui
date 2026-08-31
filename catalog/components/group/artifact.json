@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "id": "core:component:group",
+  "id": "muxui:component:group",
   "kind": "component",
   "name": "Group",
   "summary": "Groups related controls under one semantic boundary.",
@@ -65,7 +65,7 @@
         "Expose group or region role and accessible name when supplied"
       ],
       "tokenRecipe": {
-        "source": "core:token:default-theme",
+        "source": "muxui:token:default-theme",
         "requirements": [
           {
             "token": "semantic.control.padding-inline",
@@ -145,7 +145,7 @@
         "Expose group or region role and accessible name when supplied"
       ],
       "tokenRecipe": {
-        "source": "core:token:default-theme",
+        "source": "muxui:token:default-theme",
         "requirements": [
           {
             "token": "semantic.control.padding-inline",

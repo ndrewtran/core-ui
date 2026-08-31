@@ -1,7 +1,7 @@
 import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
-import { canonicalJson, parseJsonStrict } from '@core-ui/schema';
+import { canonicalJson, parseJsonStrict } from '@muxui/schema';
 import { sha256 } from './policy.mjs';
 import { verifyHistoricalR1ContinuousAuthority } from './r1-continuous-authority-compatibility.mjs';
 

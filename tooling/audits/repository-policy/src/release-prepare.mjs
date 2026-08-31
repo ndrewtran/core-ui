@@ -10,8 +10,8 @@ const repositoryRoot = resolve(import.meta.dirname, '../../../..');
 const packages = await discoverWorkspacePackages(repositoryRoot);
 const reactVersionPattern = /^0\.1\.0-alpha\.(?:0|[1-9]\d*)$/u;
 const candidateVersion = '0.1.0-rc.1';
-const candidateArchiveName = `core-ui-react-${candidateVersion}.tgz`;
-const candidateManifestName = `core-ui-react-${candidateVersion}.release-manifest.json`;
+const candidateArchiveName = `muxui-react-${candidateVersion}.tgz`;
+const candidateManifestName = `muxui-react-${candidateVersion}.release-manifest.json`;
 const preparationToolPath = 'tooling/audits/repository-policy/src/release-prepare.mjs';
 const r15Closure = JSON.parse(readFileSync(resolve(repositoryRoot, 'catalog/react-r1-5/closure.json'), 'utf8'));
 const deliveredExports = [
@@ -226,7 +226,7 @@ function deterministicArchive(packageRoot) {
 }
 
 const reactCandidate = packages.filter(({ name, manifest }) => (
-  name === '@core-ui/react' && reactVersionPattern.test(manifest.version)
+  name === '@muxui/react' && reactVersionPattern.test(manifest.version)
 ));
 const publishable = packages.filter(({ manifest }) => manifest.private !== true);
 
@@ -254,7 +254,7 @@ const publicationGuard = spawnSync(process.execPath, ['src/publish-guard.mjs'], 
   cwd: reactPackageRoot,
   encoding: 'utf8',
 });
-if (publicationGuard.status === 0 || !publicationGuard.stderr.includes('CORE_REACT_R15_PUBLISH_FORBIDDEN')) {
+if (publicationGuard.status === 0 || !publicationGuard.stderr.includes('MUXUI_REACT_R15_PUBLISH_FORBIDDEN')) {
   fail('R1_EXIT_PUBLICATION_GUARD_INVALID', 'direct publication must remain fail-closed');
 }
 
@@ -274,7 +274,7 @@ if (sourceStatusResult.stdout.trim() !== '') {
 }
 const sourceRevision = sourceRevisionResult.stdout.trim();
 
-const temp = mkdtempSync(join(tmpdir(), 'core-ui-r1-5-release-'));
+const temp = mkdtempSync(join(tmpdir(), 'muxui-r1-5-release-'));
 try {
   const packed = spawnSync('pnpm', ['pack', '--pack-destination', temp], {
     cwd: reactPackageRoot,
@@ -283,7 +283,7 @@ try {
     env: { ...process.env, npm_config_engine_strict: 'false' },
   });
   if (packed.status !== 0) fail('R1.5_PACK_FAILED', packed.stderr);
-  const sourceArchive = join(temp, `core-ui-react-${manifest.version}.tgz`);
+  const sourceArchive = join(temp, `muxui-react-${manifest.version}.tgz`);
   const sourceListing = spawnSync('tar', ['-tzf', sourceArchive], { encoding: 'utf8' });
   if (sourceListing.status !== 0) fail('R1.5_PACK_ARCHIVE_MISSING', sourceListing.stderr);
   const candidateRoot = join(temp, 'candidate');
@@ -362,7 +362,7 @@ try {
   }
 
   const packedManifest = JSON.parse(readArchiveFile(archive, 'package/package.json'));
-  if (packedManifest.name !== '@core-ui/react'
+  if (packedManifest.name !== '@muxui/react'
     || packedManifest.version !== candidateVersion
     || packedManifest.private !== false
     || stableJson(packedManifest.dependencies) !== stableJson(expectedRuntimeDependencies)
@@ -375,7 +375,7 @@ try {
     fail('R1_EXIT_PACK_MANIFEST_INVALID', 'name, version, privacy, runtime graph, peers, exports, files, lifecycle, or publish config drifted');
   }
   const packedManifestText = JSON.stringify(packedManifest);
-  for (const forbidden of ['workspace:', '@core-ui/web', 'tale-ui']) {
+  for (const forbidden of ['workspace:', '@muxui/web', 'tale-ui']) {
     if (packedManifestText.includes(forbidden)) fail('R1.5_PACK_MANIFEST_INVALID', `forbidden package reference: ${forbidden}`);
   }
 
@@ -427,7 +427,7 @@ try {
     ['peers', stableJson(release.peerDependencies) === stableJson(expectedPeerDependencies)],
     ['exports', stableJson(release.packageExports) === stableJson(manifest.exports)],
     ['files', stableJson(release.packageFiles) === stableJson(manifest.files)],
-    ['schema', release.publicationPreparation?.schema === 'core-ui-r1-exit-publication-preparation-v1'],
+    ['schema', release.publicationPreparation?.schema === 'muxui-r1-exit-publication-preparation-v1'],
     ['candidateVersion', release.publicationPreparation?.candidateVersion === candidateVersion],
     ['registry', release.publicationPreparation?.registry === 'https://registry.npmjs.org'],
     ['distTag', release.publicationPreparation?.distTag === 'next'],
@@ -452,21 +452,21 @@ try {
   const styles = readArchiveFile(archive, 'package/generated/styles.css');
   for (const name of [...deliveredExports, ...supportingExports]) assertIncludes(readme, name, 'R1.5_PACK_GUIDANCE_MISSING');
   assertIncludes(readme, 'web.react', 'R1_EXIT_PACK_GUIDANCE_MISSING');
-  assertIncludes(readme, '@core-ui/react@0.1.0-rc.1', 'R1_EXIT_PACK_GUIDANCE_MISSING');
+  assertIncludes(readme, '@muxui/react@0.1.0-rc.1', 'R1_EXIT_PACK_GUIDANCE_MISSING');
   assertIncludes(readme, 'next', 'R1_EXIT_PACK_GUIDANCE_MISSING');
   assertIncludes(notice, 'Tale UI', 'R1.5_PACK_NOTICE_INVALID');
   assertIncludes(notice, 'Lucide', 'R1.5_PACK_NOTICE_INVALID');
   assertIncludes(notice, 'Copyright (c) 2013-present Cole Bemis', 'R1.5_PACK_NOTICE_INVALID');
   for (const name of deliveredExports) {
     const slug = name.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
-    assertIncludes(styles, `.core-${slug}`, 'R1.5_PACK_STYLE_MISSING');
+    assertIncludes(styles, `.muxui-${slug}`, 'R1.5_PACK_STYLE_MISSING');
   }
 
   const consumer = join(temp, 'consumer');
   mkdirSync(consumer);
   writeFileSync(join(consumer, 'package.json'), `${JSON.stringify({
-    name: 'core-ui-r1-5-clean-consumer', private: true, type: 'module',
-    dependencies: { '@core-ui/react': `file:../core-ui-react-${candidateVersion}.tgz`, react: '19.2.8', 'react-dom': '19.2.8' },
+    name: 'muxui-r1-5-clean-consumer', private: true, type: 'module',
+    dependencies: { '@muxui/react': `file:../muxui-react-${candidateVersion}.tgz`, react: '19.2.8', 'react-dom': '19.2.8' },
   }, null, 2)}\n`);
   const install = spawnSync('pnpm', ['install', '--offline', '--ignore-scripts'], {
     cwd: consumer,
@@ -481,18 +481,18 @@ try {
     import React from 'react';
     import {renderToString} from 'react-dom/server';
     const importStarted = performance.now();
-    const entry = await import('@core-ui/react');
+    const entry = await import('@muxui/react');
     const packedImportMilliseconds = performance.now() - importStarted;
-    const compatibility = await import('@core-ui/react/compatibility');
-    const testing = await import('@core-ui/react/testing');
+    const compatibility = await import('@muxui/react/compatibility');
+    const testing = await import('@muxui/react/testing');
     const expected = ${JSON.stringify(['reactCompatibility', ...deliveredExports, ...supportingExports])};
     if (JSON.stringify(Object.keys(entry).sort()) !== JSON.stringify([...expected].sort())) throw new Error('exact public export surface');
     if (compatibility.reactCompatibility.version !== '${candidateVersion}') throw new Error('compatibility version');
     if (compatibility.reactCompatibility.support !== 'unproved; R1.5 React exports only') throw new Error('compatibility support');
     if (testing.reactPlatformSafetyFixture.componentSupportClaim !== 'none') throw new Error('support claim');
-    const packageEntry = await import.meta.resolve('@core-ui/react');
+    const packageEntry = await import.meta.resolve('@muxui/react');
     await import(new URL('./fields.mjs', packageEntry));
-    if (!import.meta.resolve('@core-ui/react/styles.css').endsWith('/generated/styles.css')) throw new Error('styles resolution');
+    if (!import.meta.resolve('@muxui/react/styles.css').endsWith('/generated/styles.css')) throw new Error('styles resolution');
     const {
       Autocomplete, Breadcrumbs, Button, Calendar, Checkbox, CheckboxGroup, DateField, DatePicker,
       DateRangePicker, Disclosure, DisclosureGroup, Form, Group, Link, Meter, NumberField,
@@ -520,9 +520,9 @@ try {
       React.createElement(DateRangePicker, {label: 'Trip', startName: 'rangeStart', endName: 'rangeEnd', value: {start: '2026-08-26', end: '2026-09-01'}}),
       React.createElement(NumberField, {label: 'Quantity', name: 'quantity', value: 2}),
       React.createElement(RangeCalendar, {label: 'Range calendar', value: {start: '2026-08-26', end: '2026-09-01'}}),
-      React.createElement(SearchField, {label: 'Search', name: 'query', value: 'Core'}),
+      React.createElement(SearchField, {label: 'Search', name: 'query', value: 'MuxUI'}),
       React.createElement(Switch, {label: 'Enabled', name: 'switch'}),
-      React.createElement(TextField, {label: 'Name', name: 'name', value: 'Core'}),
+      React.createElement(TextField, {label: 'Name', name: 'name', value: 'MuxUI'}),
       React.createElement(TimeField, {label: 'Start', name: 'time', value: '09:30'}),
       React.createElement(DropZone, {'aria-label': 'Upload files'}, 'Drop files here'),
       React.createElement(FileTrigger, null, 'Choose files'),
@@ -535,7 +535,7 @@ try {
     const ssrMilliseconds = performance.now() - ssrStarted;
     for (const marker of ['<form', 'Calendar', 'Range calendar', 'August 2026', 'name="date"', 'name="due"', 'name="rangeStart"', 'name="rangeEnd"', 'name="time"', '2026-08-26', '09:30:00']) if (!rendered.includes(marker)) throw new Error('render/form/temporal behavior');
     let rejected = false;
-    try { await import('@core-ui/react/button'); } catch (error) { rejected = error?.code === 'ERR_PACKAGE_PATH_NOT_EXPORTED'; }
+    try { await import('@muxui/react/button'); } catch (error) { rejected = error?.code === 'ERR_PACKAGE_PATH_NOT_EXPORTED'; }
     if (!rejected) throw new Error('undeclared component subpath resolved');
     console.log(JSON.stringify({ packedImportMilliseconds, ssrMilliseconds }));
   `;
@@ -565,13 +565,13 @@ try {
   if (publishDryRun.status !== 0) {
     fail('R1_EXIT_PACK_PUBLISH_DRY_RUN_FAILED', publishDryRun.stderr || publishDryRun.stdout);
   }
-  if (!publishDryRun.stdout.includes(`+ @core-ui/react@${candidateVersion}`)) {
+  if (!publishDryRun.stdout.includes(`+ @muxui/react@${candidateVersion}`)) {
     fail('R1_EXIT_PACK_PUBLISH_DRY_RUN_FAILED', 'npm did not report the exact candidate package tuple');
   }
   console.log('R1 exit npm publish dry-run passed without lifecycle hooks or registry mutation');
 
   const releaseManifest = {
-    schema: 'core-ui-r1-exit-publication-preparation-v1',
+    schema: 'muxui-r1-exit-publication-preparation-v1',
     package: {
       name: packedManifest.name,
       version: packedManifest.version,
@@ -633,17 +633,17 @@ try {
           name: 'namespace ownership',
           command: 'npm whoami --registry=https://registry.npmjs.org',
           status: 'pending',
-          policy: 'the authenticated publisher must be authorized for @core-ui/react',
+          policy: 'the authenticated publisher must be authorized for @muxui/react',
         },
         {
           name: 'version collision',
-          command: 'npm view @core-ui/react@0.1.0-rc.1 version --registry=https://registry.npmjs.org',
+          command: 'npm view @muxui/react@0.1.0-rc.1 version --registry=https://registry.npmjs.org',
           status: 'pending',
           policy: 'an existing version is a hard stop; never overwrite or republish it',
         },
         {
           name: 'next dist-tag collision',
-          command: 'npm view @core-ui/react dist-tags --json --registry=https://registry.npmjs.org',
+          command: 'npm view @muxui/react dist-tags --json --registry=https://registry.npmjs.org',
           status: 'pending',
           policy: 'record the prior next pointer before any separately authorized mutation',
         },
@@ -686,7 +686,7 @@ try {
       forbidden: ['delete or overwrite the immutable package version', 'mutate latest', 'promote stable support'],
     },
   };
-  const outputDirectory = mkdtempSync(join(tmpdir(), 'core-ui-r1-exit-output-'));
+  const outputDirectory = mkdtempSync(join(tmpdir(), 'muxui-r1-exit-output-'));
   writeFileSync(join(outputDirectory, candidateArchiveName), archiveBytes);
   writeFileSync(join(outputDirectory, candidateManifestName), `${JSON.stringify(releaseManifest)}\n`);
   if (statSync(join(outputDirectory, candidateArchiveName)).size !== archiveBytes.length) {
@@ -698,4 +698,4 @@ try {
   rmSync(temp, { recursive: true, force: true });
 }
 
-console.log(`R1 exit release preparation passed for ${candidateVersion}; source @core-ui/react remains private and unpublished.`);
+console.log(`R1 exit release preparation passed for ${candidateVersion}; source @muxui/react remains private and unpublished.`);

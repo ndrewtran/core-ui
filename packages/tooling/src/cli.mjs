@@ -1,24 +1,24 @@
-import * as catalogApi from '@core-ui/catalog';
-import { canonicalJson, validateFamily } from '@core-ui/schema';
+import * as catalogApi from '@muxui/catalog';
+import { canonicalJson, validateFamily } from '@muxui/schema';
 import { commandRegistry } from '../generated/command-surface.mjs';
 import { parseCliArguments } from './parser.mjs';
 import { resolvePnpmProjectCatalog } from './pnpm-adapter.mjs';
 import { renderDense, renderHuman, renderJson } from './renderers.mjs';
 
 const EXIT_CODES = {
-  CORE_QUERY_INVALID: 2,
-  CORE_QUERY_API_VERSION_UNSUPPORTED: 2,
-  CORE_CURSOR_INVALID: 3,
-  CORE_QUERY_PAGE_ENVELOPE_TOO_LARGE: 3,
-  CORE_QUERY_PAGE_ENTRY_TOO_LARGE: 3,
-  CORE_ARTIFACT_NOT_FOUND: 4,
-  CORE_PROJECT_NOT_FOUND: 10,
-  CORE_CATALOG_NOT_DECLARED: 11,
-  CORE_CATALOG_NOT_INSTALLED: 12,
-  CORE_CATALOG_DECLARATION_DRIFT: 13,
-  CORE_CATALOG_INTEGRITY_MISMATCH: 14,
-  CORE_CATALOG_RESOLUTION_AMBIGUOUS: 15,
-  CORE_CATALOG_INCOMPATIBLE: 16,
+  MUXUI_QUERY_INVALID: 2,
+  MUXUI_QUERY_API_VERSION_UNSUPPORTED: 2,
+  MUXUI_CURSOR_INVALID: 3,
+  MUXUI_QUERY_PAGE_ENVELOPE_TOO_LARGE: 3,
+  MUXUI_QUERY_PAGE_ENTRY_TOO_LARGE: 3,
+  MUXUI_ARTIFACT_NOT_FOUND: 4,
+  MUXUI_PROJECT_NOT_FOUND: 10,
+  MUXUI_CATALOG_NOT_DECLARED: 11,
+  MUXUI_CATALOG_NOT_INSTALLED: 12,
+  MUXUI_CATALOG_DECLARATION_DRIFT: 13,
+  MUXUI_CATALOG_INTEGRITY_MISMATCH: 14,
+  MUXUI_CATALOG_RESOLUTION_AMBIGUOUS: 15,
+  MUXUI_CATALOG_INCOMPATIBLE: 16,
 };
 
 function requestWithout(request, keys) {
@@ -70,9 +70,9 @@ export function assertSafeDiagnostics(response) {
 
 function enrichDiagnostic(response, command) {
   if (response.type !== 'error' || response.error.nextCommand) return response;
-  const nextCommand = response.error.code === 'CORE_ARTIFACT_NOT_FOUND'
-    ? `core search ${JSON.stringify(response.error.details.id ?? '')} --json`
-    : `core ${command} --help`;
+  const nextCommand = response.error.code === 'MUXUI_ARTIFACT_NOT_FOUND'
+    ? `muxui search ${JSON.stringify(response.error.details.id ?? '')} --json`
+    : `muxui ${command} --help`;
   const enriched = structuredClone(response);
   enriched.error.nextCommand = {
     command: nextCommand,

@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "id": "core:guide:separator-usage",
+  "id": "muxui:guide:separator-usage",
   "kind": "guide",
   "name": "Separator usage",
   "summary": "Portable usage guidance for Separator.",

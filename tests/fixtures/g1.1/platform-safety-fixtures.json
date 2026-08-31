@@ -1,11 +1,11 @@
 {
-  "schema": "core-ui-g1.1-platform-safety-fixtures-v1",
+  "schema": "muxui-g1.1-platform-safety-fixtures-v1",
   "fixture": "fixture:platform-safety-web",
   "componentSupportClaim": "none",
   "profiles": [
     {
       "id": "fixture:platform-safety-web#web.html",
-      "bindingRef": "core:component:button#web.html",
+      "bindingRef": "muxui:component:button#web.html",
       "profile": "web.html",
       "requiredAssertions": [
         "system.forced-colors",
@@ -15,7 +15,7 @@
     },
     {
       "id": "fixture:platform-safety-web#web.react",
-      "bindingRef": "core:component:button#web.react",
+      "bindingRef": "muxui:component:button#web.react",
       "profile": "web.react",
       "requiredAssertions": [
         "system.forced-colors",

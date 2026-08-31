@@ -1,13 +1,13 @@
 import { access, readFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
-import { canonicalJson, parseJsonStrict, validateFamily } from '@core-ui/schema';
+import { canonicalJson, parseJsonStrict, validateFamily } from '@muxui/schema';
 import {
   correctTaleTokenClassification,
   materializeTaleTokenSource,
   TaleTokenMaterializationError,
-} from '@core-ui/tokens/materialization';
-import { migrateDefaultThemeIdentityValue } from '@core-ui/tokens/identity-migration';
-import { RESOLVER_ERROR_PRECEDENCE } from '@core-ui/tooling/resolver';
+} from '@muxui/tokens/materialization';
+import { migrateDefaultThemeIdentityValue } from '@muxui/tokens/identity-migration';
+import { RESOLVER_ERROR_PRECEDENCE } from '@muxui/tooling/resolver';
 import { verifyDefaultThemeIdentityCorrection } from './default-theme-identity-correction-verify.mjs';
 import { sha256 } from './policy.mjs';
 

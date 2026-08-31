@@ -1,6 +1,6 @@
 // @generated-from: apps/react-storybook/src/generate-stories.mjs
-// @generated-content-sha256: sha256:8d43f46b5136661980cbf1938280c219dc34dfc448dbb38a42af91949760ff00
-import * as Core from '@core-ui/react';
+// @generated-content-sha256: sha256:98648612aeecd9de803d616780ae6d8ce5ec32d1e5e6bddebe589060e42e641b
+import * as MuxUI from '@muxui/react';
 import { argTypesForBinding, createStory } from '../../src/storybook-factory.mjs';
 
 const binding = {
@@ -26,12 +26,12 @@ const binding = {
       "readOnly"
     ]
   },
-  "binding": "core:component:color-picker#web.react",
+  "binding": "muxui:component:color-picker#web.react",
   "export": "ColorPicker",
   "lifecycle": "experimental",
   "module": ".",
   "runtimeProfile": "web.react",
-  "selector": ".core-color-picker",
+  "selector": ".muxui-color-picker",
   "states": [
     "idle",
     "focused",
@@ -43,8 +43,9 @@ const binding = {
 const record = { family: 'ColorPicker', tranche: 'R1.3', binding };
 
 export default {
-  title: 'Core React/R1.3/ColorPicker',
-  component: Core.ColorPicker,
+  title: 'Mux UI React/R1.3/ColorPicker',
+  id: 'muxui-react-r1-3-color-picker',
+  component: MuxUI.ColorPicker,
   tags: ['autodocs'],
   parameters: {
     controls: {
@@ -52,7 +53,7 @@ export default {
     },
     docs: {
       description: {
-        component: 'Private development showcase for the Core-owned ColorPicker family.',
+        component: 'Private development showcase for the Mux UI-owned ColorPicker family.',
       },
     },
   },

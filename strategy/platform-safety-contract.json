@@ -1,5 +1,5 @@
 {
-  "schema": "core-ui-platform-safety-contract-v1",
+  "schema": "muxui-platform-safety-contract-v1",
   "contractVersion": "1.0.0",
   "requirements": [
     {

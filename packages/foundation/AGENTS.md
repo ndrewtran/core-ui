@@ -5,4 +5,4 @@ owns pure derivation only. Platform globals, selectors, framework hooks, native
 views, and mandatory transitions are forbidden. No `interaction` export exists
 until materially distinct profile proof justifies one.
 
-Run `pnpm --filter @core-ui/foundation check`, then the root affected checks.
+Run `pnpm --filter @muxui/foundation check`, then the root affected checks.

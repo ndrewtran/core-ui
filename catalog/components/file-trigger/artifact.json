@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "id": "core:component:file-trigger",
+  "id": "muxui:component:file-trigger",
   "kind": "component",
   "name": "FileTrigger",
   "summary": "Opens a native file picker and reports selected files.",
@@ -22,7 +22,7 @@
       },
       "behavior": ["Use the browser File API through RAC FileTrigger and report selected files as a Core File array.", "Reset the native input before every press so selecting the same file again still emits select."],
       "accessibility": ["Keep activation on the consumer trigger and preserve its accessible name.", "Apply disabled behavior to the trigger while retaining the native input as a hidden implementation detail."],
-      "tokenRecipe": { "source": "core:token:default-theme", "requirements": [
+      "tokenRecipe": { "source": "muxui:token:default-theme", "requirements": [
         { "token": "semantic.focus.ring", "requirement": "optional", "profiles": ["web.react"] }
       ] },
       "platformSafety": [{ "profile": "web.react", "requirements": [

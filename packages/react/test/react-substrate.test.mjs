@@ -6,14 +6,14 @@ import { mkdir, mkdtemp, readFile, readdir, rename, rm, symlink } from 'node:fs/
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { reactCompatibility } from '../generated/index.mjs';
-import { compileTokenGraph, compileTokenRequirementSet, validateThemeForRequirementSet } from '@core-ui/tokens';
+import { compileTokenGraph, compileTokenRequirementSet, validateThemeForRequirementSet } from '@muxui/tokens';
 import {
   assertReactR12GeneratedContracts,
   assertReactR10SourceContracts,
 } from '../src/r1-contracts.mjs';
 
 test('R1.1 package has an exact standalone substrate identity', async () => {
-  assert.equal(reactCompatibility.package, '@core-ui/react');
+  assert.equal(reactCompatibility.package, '@muxui/react');
   assert.equal(reactCompatibility.upstream.version, '1.20.0');
   assert.equal(reactCompatibility.upstream.gitHead, '5ecb3333001313e83898cd07644227897e3bae1f');
   const manifest = JSON.parse(await readFile(resolve(import.meta.dirname, '../package.json'), 'utf8'));
@@ -25,7 +25,7 @@ test('R1.1 package has an exact standalone substrate identity', async () => {
   assert.equal(manifest.dependencies['react-aria-components'], '1.20.0');
   assert.equal(manifest.dependencies['@internationalized/date'], '3.12.3');
   assert.equal(manifest.dependencies['lucide-react'], '1.37.0');
-  assert.equal(manifest.dependencies['@core-ui/web'], undefined);
+  assert.equal(manifest.dependencies['@muxui/web'], undefined);
 });
 
 test('R1.4 is packable but direct publication fails closed', () => {
@@ -35,13 +35,13 @@ test('R1.4 is packable but direct publication fails closed', () => {
     encoding: 'utf8',
   });
   assert.notEqual(result.status, 0);
-  assert.match(result.stderr, /CORE_REACT_R15_PUBLISH_FORBIDDEN/u);
+  assert.match(result.stderr, /MUXUI_REACT_R15_PUBLISH_FORBIDDEN/u);
 });
 
-test('R1.1 packed package exposes a clean Core component surface', async () => {
+test('R1.1 packed package exposes a clean MuxUI component surface', async () => {
   const packageRoot = resolve(import.meta.dirname, '..');
-  const packRoot = await mkdtemp(join(tmpdir(), 'core-ui-react-pack-'));
-  const consumerRoot = await mkdtemp(join(tmpdir(), 'core-ui-react-consumer-'));
+  const packRoot = await mkdtemp(join(tmpdir(), 'muxui-react-pack-'));
+  const consumerRoot = await mkdtemp(join(tmpdir(), 'muxui-react-consumer-'));
   try {
     const packed = spawnSync('pnpm', ['pack', '--pack-destination', packRoot], {
       cwd: packageRoot,
@@ -58,7 +58,7 @@ test('R1.1 packed package exposes a clean Core component surface', async () => {
       assert.match(listing.stdout, new RegExp(`^${entry.replaceAll('.', '\\.')}$`, 'mu'));
     }
 
-    const packageParent = join(consumerRoot, 'node_modules', '@core-ui');
+    const packageParent = join(consumerRoot, 'node_modules', '@muxui');
     await mkdir(packageParent, { recursive: true });
     const extracted = spawnSync('tar', ['-xzf', archive, '-C', packageParent], { encoding: 'utf8' });
     assert.equal(extracted.status, 0, extracted.stderr);
@@ -70,13 +70,13 @@ test('R1.1 packed package exposes a clean Core component surface', async () => {
     const imported = spawnSync(process.execPath, [
       '--input-type=module',
       '-e',
-      "import('@core-ui/react').then((entry) => { if (entry.reactCompatibility.support !== 'unproved; R1.5 React exports only') throw new Error('compatibility support'); for (const name of ['Button', 'Breadcrumbs', 'Checkbox', 'Disclosure', 'DisclosureGroup', 'Group', 'Link', 'Meter', 'ProgressBar', 'Separator', 'ToggleButton', 'Autocomplete', 'CheckboxGroup', 'DateField', 'DatePicker', 'DateRangePicker', 'Form', 'NumberField', 'SearchField', 'Switch', 'TextField', 'TimeField', 'Calendar', 'ColorArea', 'ColorField', 'ColorPicker', 'ColorSlider', 'ColorSwatch', 'ColorSwatchPicker', 'ColorWheel', 'ComboBox', 'GridList', 'ListBox', 'Menu', 'RadioGroup', 'RangeCalendar', 'Select', 'Slider', 'Table', 'Tabs', 'TagGroup', 'ToggleButtonGroup', 'TokenField', 'Toolbar', 'Tree', 'Virtualizer', 'DropZone', 'FileTrigger', 'Dialog', 'Popover', 'PreviewTrigger', 'Toast', 'ToastProvider', 'useToast', 'Tooltip']) if (!entry[name]) throw new Error(`${name} export missing`); })",
+      "import('@muxui/react').then((entry) => { if (entry.reactCompatibility.support !== 'unproved; R1.5 React exports only') throw new Error('compatibility support'); for (const name of ['Button', 'Breadcrumbs', 'Checkbox', 'Disclosure', 'DisclosureGroup', 'Group', 'Link', 'Meter', 'ProgressBar', 'Separator', 'ToggleButton', 'Autocomplete', 'CheckboxGroup', 'DateField', 'DatePicker', 'DateRangePicker', 'Form', 'NumberField', 'SearchField', 'Switch', 'TextField', 'TimeField', 'Calendar', 'ColorArea', 'ColorField', 'ColorPicker', 'ColorSlider', 'ColorSwatch', 'ColorSwatchPicker', 'ColorWheel', 'ComboBox', 'GridList', 'ListBox', 'Menu', 'RadioGroup', 'RangeCalendar', 'Select', 'Slider', 'Table', 'Tabs', 'TagGroup', 'ToggleButtonGroup', 'TokenField', 'Toolbar', 'Tree', 'Virtualizer', 'DropZone', 'FileTrigger', 'Dialog', 'Popover', 'PreviewTrigger', 'Toast', 'ToastProvider', 'useToast', 'Tooltip']) if (!entry[name]) throw new Error(`${name} export missing`); })",
     ], { cwd: consumerRoot, encoding: 'utf8' });
     assert.equal(imported.status, 0, imported.stderr);
     const publicTypes = await readFile(join(consumerPackage, 'generated/index.d.ts'), 'utf8');
     assert.doesNotMatch(publicTypes, /react-aria-components|react-stately|@internationalized\/date|isPending|isDisabled|isSelected|isExpanded|onPress/u);
   assert.match(publicTypes, /export (?:interface|type) (?:ButtonProps|BreadcrumbsProps|CheckboxProps|DisclosureProps|DisclosureGroupProps|GroupProps|LinkProps|MeterProps|ProgressBarProps|SeparatorProps|ToggleButtonProps|AutocompleteProps|CheckboxGroupProps|DateFieldProps|DatePickerProps|DateRangePickerProps|FormProps|NumberFieldProps|SearchFieldProps|SwitchProps|TextFieldProps|TimeFieldProps|CalendarProps|ColorAreaProps|ColorFieldProps|ColorPickerProps|ColorSliderProps|ColorSwatchProps|ColorSwatchPickerProps|ColorWheelProps|ComboBoxProps|GridListProps|ListBoxProps|MenuProps|RadioGroupProps|RangeCalendarProps|SelectProps|SliderProps|TableProps|TabsProps|TagGroupProps|ToggleButtonGroupProps|TokenFieldProps|ToolbarProps|TreeProps|VirtualizerProps)/u);
-    assert.match(await readFile(join(consumerPackage, 'generated/styles.css'), 'utf8'), /\.core-(?:breadcrumbs|checkbox|disclosure|disclosure-group|group|link|meter|progress-bar|separator|toggle-button|autocomplete|checkbox-group|date-field|date-picker|date-range-picker|form|number-field|search-field|switch|text-field|time-field)/u);
+    assert.match(await readFile(join(consumerPackage, 'generated/styles.css'), 'utf8'), /\.muxui-(?:breadcrumbs|checkbox|disclosure|disclosure-group|group|link|meter|progress-bar|separator|toggle-button|autocomplete|checkbox-group|date-field|date-picker|date-range-picker|form|number-field|search-field|switch|text-field|time-field)/u);
     const consumerNotice = await readFile(join(consumerPackage, 'NOTICE'), 'utf8');
     assert.match(consumerNotice, /Tale UI/u);
     assert.match(consumerNotice, /Lucide ISC License/u);
@@ -89,7 +89,7 @@ test('R1.1 packed package exposes a clean Core component surface', async () => {
   }
 });
 
-test('R1.2 public surface exports the Core component slice without upstream types', async () => {
+test('R1.2 public surface exports the MuxUI component slice without upstream types', async () => {
   const packageRoot = resolve(import.meta.dirname, '..');
   const manifest = JSON.parse(await readFile(resolve(packageRoot, 'package.json'), 'utf8'));
   assert.deepEqual(Object.keys(manifest.exports).sort(), ['.', './compatibility', './styles.css', './testing']);
@@ -100,7 +100,7 @@ test('R1.2 public surface exports the Core component slice without upstream type
   assert.equal('ButtonProps' in entry, false);
   const release = JSON.parse(await readFile(resolve(packageRoot, 'generated/release.json'), 'utf8'));
   assert.deepEqual(release.componentExports.map(({ name }) => name), componentNames);
-  assert.deepEqual(release.bindings.map(({ binding }) => binding), componentNames.map((name) => `core:component:${name.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase()}#web.react`));
+  assert.deepEqual(release.bindings.map(({ binding }) => binding), componentNames.map((name) => `muxui:component:${name.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase()}#web.react`));
   assert.deepEqual(release.runtimeProfiles, ['web.react']);
   assert.equal(release.catalog.status, 'bound');
   assert.equal(release.evidence.status, 'pending');
@@ -159,7 +159,7 @@ test('R1.0 upstream and catalog contracts reject complete-surface and shape drif
   const assertSource = (overrides = {}) => assertReactR10SourceContracts({ snapshot, upstreamExports, upstreamExportsBytes, crosswalk, license, ...overrides });
   const changedItem = structuredClone(snapshot);
   changedItem.items[412].source = '../src/Drift';
-  assert.throws(() => assertSource({ snapshot: changedItem }), /CORE_REACT_UPSTREAM_EXPORT_DERIVATION_DRIFT/u);
+  assert.throws(() => assertSource({ snapshot: changedItem }), /MUXUI_REACT_UPSTREAM_EXPORT_DERIVATION_DRIFT/u);
   const synchronizedExports = structuredClone(upstreamExports);
   const synchronizedSnapshot = structuredClone(snapshot);
   synchronizedExports.items[412].source = '../src/SynchronizedDrift';
@@ -171,23 +171,23 @@ test('R1.0 upstream and catalog contracts reject complete-surface and shape drif
     snapshot: synchronizedSnapshot,
     upstreamExports: synchronizedExports,
     upstreamExportsBytes: synchronizedBytes,
-  }), /CORE_REACT_UPSTREAM_EXPORT_TUPLE_DRIFT/u);
+  }), /MUXUI_REACT_UPSTREAM_EXPORT_TUPLE_DRIFT/u);
   const changedClassification = structuredClone(snapshot);
   const candidateIndex = changedClassification.items.findIndex(({ disposition, tranche }) => disposition === 'candidate' && tranche === 'R1.3');
   changedClassification.items[candidateIndex].tranche = 'R1.4';
-  assert.throws(() => assertSource({ snapshot: changedClassification }), /CORE_REACT_UPSTREAM_CLASSIFICATION_DRIFT/u);
+  assert.throws(() => assertSource({ snapshot: changedClassification }), /MUXUI_REACT_UPSTREAM_CLASSIFICATION_DRIFT/u);
   const changedBlob = structuredClone(snapshot);
   changedBlob.inputs[1].blob = '0'.repeat(40);
-  assert.throws(() => assertSource({ snapshot: changedBlob }), /CORE_REACT_UPSTREAM_IDENTITY_DRIFT/u);
+  assert.throws(() => assertSource({ snapshot: changedBlob }), /MUXUI_REACT_UPSTREAM_IDENTITY_DRIFT/u);
   const changedRevision = structuredClone(upstreamExports);
   changedRevision.commit = '0'.repeat(40);
-  assert.throws(() => assertSource({ upstreamExports: changedRevision }), /CORE_REACT_UPSTREAM_IDENTITY_DRIFT/u);
+  assert.throws(() => assertSource({ upstreamExports: changedRevision }), /MUXUI_REACT_UPSTREAM_IDENTITY_DRIFT/u);
   const unknownCrosswalk = structuredClone(crosswalk);
   unknownCrosswalk.unknown = true;
-  assert.throws(() => assertSource({ crosswalk: unknownCrosswalk }), /CORE_SCHEMA_INVALID/u);
+  assert.throws(() => assertSource({ crosswalk: unknownCrosswalk }), /MUXUI_SCHEMA_INVALID/u);
   const missingLicense = structuredClone(license);
   delete missingLicense.notice;
-  assert.throws(() => assertSource({ license: missingLicense }), /CORE_SCHEMA_INVALID/u);
+  assert.throws(() => assertSource({ license: missingLicense }), /MUXUI_SCHEMA_INVALID/u);
 });
 
 test('R1.2 generated contracts reject missing, unknown, and publication drift', async () => {
@@ -199,25 +199,25 @@ test('R1.2 generated contracts reject missing, unknown, and publication drift', 
   const donorComparison = JSON.parse(donorSource.replace(/^\/\/ @generated-from:.*\n\/\/ @generated-content-sha256:.*\n/u, ''));
   const crosswalk = JSON.parse(await readFile(resolve(packageRoot, '../../catalog/react-r1-2/donor-crosswalk.json'), 'utf8'));
   const componentNames = ['Autocomplete', 'CheckboxGroup', 'DateField', 'DatePicker', 'DateRangePicker', 'Form', 'NumberField', 'SearchField', 'Switch', 'TextField', 'TimeField'];
-  const descriptor = { ...descriptorSource, support: 'unproved; R1.2 React exports only', bindings: descriptorSource.bindings.filter(({ binding }) => componentNames.some((name) => binding === `core:component:${name.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase()}#web.react`)), exports: descriptorSource.exports.filter(({ binding }) => componentNames.some((name) => binding === `core:component:${name.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase()}#web.react`)) };
-  const release = { ...releaseSource, componentExports: releaseSource.componentExports.filter(({ name }) => componentNames.includes(name)), bindings: releaseSource.bindings.filter(({ export: name }) => componentNames.includes(name)), catalog: { ...releaseSource.catalog, components: releaseSource.catalog.components.filter(({ component }) => componentNames.some((name) => component === `core:component:${name.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase()}`)) }, evidence: { status: 'pending', ids: ['E-R1.2-01', 'E-R1.2-02', 'E-R1.2-03', 'E-R1.2-04'] } };
+  const descriptor = { ...descriptorSource, support: 'unproved; R1.2 React exports only', bindings: descriptorSource.bindings.filter(({ binding }) => componentNames.some((name) => binding === `muxui:component:${name.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase()}#web.react`)), exports: descriptorSource.exports.filter(({ binding }) => componentNames.some((name) => binding === `muxui:component:${name.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase()}#web.react`)) };
+  const release = { ...releaseSource, componentExports: releaseSource.componentExports.filter(({ name }) => componentNames.includes(name)), bindings: releaseSource.bindings.filter(({ export: name }) => componentNames.includes(name)), catalog: { ...releaseSource.catalog, components: releaseSource.catalog.components.filter(({ component }) => componentNames.some((name) => component === `muxui:component:${name.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase()}`)) }, evidence: { status: 'pending', ids: ['E-R1.2-01', 'E-R1.2-02', 'E-R1.2-03', 'E-R1.2-04'] } };
   const assertGenerated = (overrides = {}) => assertReactR12GeneratedContracts({ descriptor, release, donorComparison, manifest, componentNames, crosswalk, ...overrides });
   assertGenerated();
   const unknownDescriptor = structuredClone(descriptor);
   unknownDescriptor.support = 'drifted support claim';
-  assert.throws(() => assertGenerated({ descriptor: unknownDescriptor }), /CORE_REACT_R12_DESCRIPTOR_INVALID/u);
+  assert.throws(() => assertGenerated({ descriptor: unknownDescriptor }), /MUXUI_REACT_R12_DESCRIPTOR_INVALID/u);
   const missingRelease = structuredClone(release);
   delete missingRelease.publication;
-  assert.throws(() => assertGenerated({ release: missingRelease }), /CORE_REACT_R12_RELEASE_INVALID/u);
+  assert.throws(() => assertGenerated({ release: missingRelease }), /MUXUI_REACT_R12_RELEASE_INVALID/u);
   const publishableManifest = structuredClone(manifest);
   publishableManifest.private = false;
-  assert.throws(() => assertGenerated({ manifest: publishableManifest }), /CORE_REACT_R12_PUBLICATION_GUARD_MISSING/u);
+  assert.throws(() => assertGenerated({ manifest: publishableManifest }), /MUXUI_REACT_R12_PUBLICATION_GUARD_MISSING/u);
   const changedComparison = structuredClone(donorComparison);
   changedComparison.donor.commit = '0'.repeat(40);
-  assert.throws(() => assertGenerated({ donorComparison: changedComparison }), /CORE_REACT_R12_DONOR_COMPARISON_(?:INVALID|DRIFT)/u);
+  assert.throws(() => assertGenerated({ donorComparison: changedComparison }), /MUXUI_REACT_R12_DONOR_COMPARISON_(?:INVALID|DRIFT)/u);
   const changedCrosswalk = structuredClone(crosswalk);
   changedCrosswalk.components['date-field'].rules[0].core = 'semantic.action.background';
-  assert.throws(() => assertGenerated({ crosswalk: changedCrosswalk }), /CORE_REACT_R12_(?:DONOR_PROVENANCE|DONOR_COMPARISON)_DRIFT/u);
+  assert.throws(() => assertGenerated({ crosswalk: changedCrosswalk }), /MUXUI_REACT_R12_(?:DONOR_PROVENANCE|DONOR_COMPARISON)_DRIFT/u);
 });
 
 test('R1.0 donor inputs are exact, fully crosswalked, licensed, and dependency-free', async () => {
@@ -273,8 +273,8 @@ test('R1.0 binds current reusable token facts and keeps historical proof provena
   const recipe = { source: source.id, requirements: requiredTokens.map((token) => ({ token, requirement: 'required' })) };
   const requirementSet = compileTokenRequirementSet({ source, recipe, bindingId: 'r1.0-button-comparison', profile: 'web.react' });
   assert.deepEqual(requirementSet.requirements.map(({ token }) => token), [...requiredTokens].sort());
-  assert.throws(() => validateThemeForRequirementSet({ requirementSet, values: {} }), (error) => error?.code === 'CORE_TOKEN_REQUIRED_MISSING');
-  assert.throws(() => compileTokenGraph(source, { overrides: { 'semantic.focus.ring': { type: 'color', unit: 'hex', value: '#000000' } } }), (error) => error?.code === 'CORE_TOKEN_OVERRIDE_UNAUTHORIZED');
+  assert.throws(() => validateThemeForRequirementSet({ requirementSet, values: {} }), (error) => error?.code === 'MUXUI_TOKEN_REQUIRED_MISSING');
+  assert.throws(() => compileTokenGraph(source, { overrides: { 'semantic.focus.ring': { type: 'color', unit: 'hex', value: '#000000' } } }), (error) => error?.code === 'MUXUI_TOKEN_OVERRIDE_UNAUTHORIZED');
   assert.equal(compileTokenGraph(source, { overrides: { 'semantic.motion.feedback': { type: 'duration', unit: 'ms', value: 80 } } }).tokens['semantic.motion.feedback'].value, 80);
   const historicalIndex = await readFile(resolve(repositoryRoot, 'tests/evidence/default-theme-g1.0-v2/index.json'));
   assert.equal(createHash('sha256').update(historicalIndex).digest('hex'), '38ff3a1e20bc3215737b9e6e4043d394cac0f2a2dbf324b6faae371b832aceba');

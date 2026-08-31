@@ -49,12 +49,12 @@ test('Lucide stays an exact internal, tree-shakeable dependency with no public l
   assert.equal(typeof checkModule.default, 'object');
 });
 
-test('Core affordances render the accepted Lucide glyph mapping as decorative SVGs', () => {
+test('MuxUI affordances render the accepted Lucide glyph mapping as decorative SVGs', () => {
   const markup = renderToString(React.createElement('div', null,
     React.createElement(Breadcrumbs, { 'aria-label': 'Path', items: [{ label: 'Home', href: '/' }, { label: 'Current' }] }),
     React.createElement(Checkbox, { defaultChecked: true }, 'Complete'),
     React.createElement(Checkbox, { indeterminate: true }, 'Mixed'),
-    React.createElement(SearchField, { label: 'Search', defaultValue: 'Core' }),
+    React.createElement(SearchField, { label: 'Search', defaultValue: 'MuxUI' }),
     React.createElement(NumberField, { label: 'Quantity', defaultValue: 2 }),
     React.createElement(DatePicker, { label: 'Due date', defaultValue: '2026-08-26' }),
     React.createElement(DateRangePicker, { label: 'Trip', defaultValue: { start: '2026-08-26', end: '2026-09-01' } }),
@@ -62,23 +62,23 @@ test('Core affordances render the accepted Lucide glyph mapping as decorative SV
     React.createElement(RangeCalendar, { label: 'Range calendar', value: { start: '2026-08-26', end: '2026-09-01' } }),
     React.createElement(ComboBox, { label: 'City', items: ['Melbourne'] }),
     React.createElement(Select, { label: 'Country', items: ['Australia'] }),
-    React.createElement(TagGroup, { label: 'Tags', items: ['Core'], onRemove: () => {} }),
+    React.createElement(TagGroup, { label: 'Tags', items: ['MuxUI'], onRemove: () => {} }),
     React.createElement(Tree, { 'aria-label': 'Navigation', items: [{ id: 'root', label: 'Root', children: [{ id: 'child', label: 'Child' }] }] }),
   ));
   const dom = new JSDOM(`<!doctype html>${markup}`);
   const iconCases = [
-    ['.core-checkbox-indicator[data-selected] svg', 'lucide-check', null],
-    ['.core-checkbox-indicator[data-indeterminate] svg', 'lucide-minus', null],
-    ['.core-search-clear svg', 'lucide-x', 'Clear search'],
-    ['.core-number-stepper-decrement svg', 'lucide-minus', 'Decrease'],
-    ['.core-number-stepper-increment svg', 'lucide-plus', 'Increase'],
-    ['.core-date-trigger svg', 'core-icon--sm', 'Open calendar'],
-    ['.core-calendar-previous svg', 'lucide-chevron-left', 'Previous month'],
-    ['.core-calendar-next svg', 'lucide-chevron-right', 'Next month'],
-    ['.core-combo-box-arrow', 'lucide-chevron-down', 'Show options'],
-    ['.core-select-arrow', 'lucide-chevron-down', null],
-    ['.core-tag-remove svg', 'lucide-x', 'Remove'],
-    ['.core-tree-toggle svg', 'lucide-chevron-right', 'Toggle'],
+    ['.muxui-checkbox-indicator[data-selected] svg', 'lucide-check', null],
+    ['.muxui-checkbox-indicator[data-indeterminate] svg', 'lucide-minus', null],
+    ['.muxui-search-clear svg', 'lucide-x', 'Clear search'],
+    ['.muxui-number-stepper-decrement svg', 'lucide-minus', 'Decrease'],
+    ['.muxui-number-stepper-increment svg', 'lucide-plus', 'Increase'],
+    ['.muxui-date-trigger svg', 'muxui-icon--sm', 'Open calendar'],
+    ['.muxui-calendar-previous svg', 'lucide-chevron-left', 'Previous month'],
+    ['.muxui-calendar-next svg', 'lucide-chevron-right', 'Next month'],
+    ['.muxui-combo-box-arrow', 'lucide-chevron-down', 'Show options'],
+    ['.muxui-select-arrow', 'lucide-chevron-down', null],
+    ['.muxui-tag-remove svg', 'lucide-x', 'Remove'],
+    ['.muxui-tree-toggle svg', 'lucide-chevron-right', 'Toggle'],
   ];
   for (const [selector, className, label] of iconCases) {
     const icon = dom.window.document.querySelector(selector);
@@ -88,15 +88,15 @@ test('Core affordances render the accepted Lucide glyph mapping as decorative SV
     assert.equal(icon.getAttribute('focusable'), 'false');
     if (label !== null) assert.equal(icon.closest('button')?.getAttribute('aria-label'), label);
   }
-  for (const selector of ['.core-calendar-previous svg', '.core-calendar-next svg']) {
+  for (const selector of ['.muxui-calendar-previous svg', '.muxui-calendar-next svg']) {
     const icon = dom.window.document.querySelector(selector);
-    assert.equal(icon?.classList.contains('core-icon'), true);
-    assert.equal(icon?.classList.contains('core-icon--sm'), true);
+    assert.equal(icon?.classList.contains('muxui-icon'), true);
+    assert.equal(icon?.classList.contains('muxui-icon--sm'), true);
   }
-  const treeIcon = dom.window.document.querySelector('.core-tree-toggle svg');
+  const treeIcon = dom.window.document.querySelector('.muxui-tree-toggle svg');
   assert.equal(treeIcon?.getAttribute('fill'), 'currentColor');
   assert.equal(treeIcon?.getAttribute('stroke-width'), '0');
-  const calendarIcons = dom.window.document.querySelectorAll('.core-date-trigger svg');
+  const calendarIcons = dom.window.document.querySelectorAll('.muxui-date-trigger svg');
   assert.equal(calendarIcons.length, 2);
   for (const icon of calendarIcons) {
     assert.equal(icon.classList.contains('lucide-calendar'), false);
@@ -115,7 +115,7 @@ test('Core affordances render the accepted Lucide glyph mapping as decorative SV
       ['path', 'M3 10h18', null, null, null, null, null],
     ]);
   }
-  assert.equal(dom.window.document.querySelector('.core-breadcrumbs svg'), null);
-  assert.equal(dom.window.document.querySelector('.core-search-field .lucide-search'), null);
+  assert.equal(dom.window.document.querySelector('.muxui-breadcrumbs svg'), null);
+  assert.equal(dom.window.document.querySelector('.muxui-search-field .lucide-search'), null);
   dom.window.close();
 });

@@ -1,1 +1,1 @@
-{"schemaVersion":"1.0.0","id":"core:guide:toast-usage","kind":"guide","name":"Toast usage","summary":"Portable usage guidance for Toast.","lifecycle":"experimental","keywords":["toast","status","react"],"platforms":["web.react"],"source":"catalog/guides/toast-usage.md"}
+{"schemaVersion":"1.0.0","id":"muxui:guide:toast-usage","kind":"guide","name":"Toast usage","summary":"Portable usage guidance for Toast.","lifecycle":"experimental","keywords":["toast","status","react"],"platforms":["web.react"],"source":"catalog/guides/toast-usage.md"}

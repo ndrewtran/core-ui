@@ -1,6 +1,6 @@
 // @generated-from: apps/react-storybook/src/generate-stories.mjs
-// @generated-content-sha256: sha256:ecc0493850b740b9c66eda6f5b718449b3724dc1e4fb3967410577cd49242ee8
-import * as Core from '@core-ui/react';
+// @generated-content-sha256: sha256:370f3d89ad817b1a6cb2f676b99906b52fd23df15cc361b209db4b336e04715a
+import * as MuxUI from '@muxui/react';
 import { argTypesForBinding, createStory } from '../../src/storybook-factory.mjs';
 
 const binding = {
@@ -25,12 +25,12 @@ const binding = {
       "orientation"
     ]
   },
-  "binding": "core:component:toggle-button-group#web.react",
+  "binding": "muxui:component:toggle-button-group#web.react",
   "export": "ToggleButtonGroup",
   "lifecycle": "experimental",
   "module": ".",
   "runtimeProfile": "web.react",
-  "selector": ".core-toggle-button-group",
+  "selector": ".muxui-toggle-button-group",
   "states": [
     "idle",
     "focused",
@@ -42,8 +42,9 @@ const binding = {
 const record = { family: 'ToggleButtonGroup', tranche: 'R1.3', binding };
 
 export default {
-  title: 'Core React/R1.3/ToggleButtonGroup',
-  component: Core.ToggleButtonGroup,
+  title: 'Mux UI React/R1.3/ToggleButtonGroup',
+  id: 'muxui-react-r1-3-toggle-button-group',
+  component: MuxUI.ToggleButtonGroup,
   tags: ['autodocs'],
   parameters: {
     controls: {
@@ -51,7 +52,7 @@ export default {
     },
     docs: {
       description: {
-        component: 'Private development showcase for the Core-owned ToggleButtonGroup family.',
+        component: 'Private development showcase for the Mux UI-owned ToggleButtonGroup family.',
       },
     },
   },

@@ -1,1 +1,1 @@
-{"schemaVersion":"1.0.0","id":"core:guide:tooltip-usage","kind":"guide","name":"Tooltip usage","summary":"Portable usage guidance for Tooltip.","lifecycle":"experimental","keywords":["tooltip","help","react"],"platforms":["web.react"],"source":"catalog/guides/tooltip-usage.md"}
+{"schemaVersion":"1.0.0","id":"muxui:guide:tooltip-usage","kind":"guide","name":"Tooltip usage","summary":"Portable usage guidance for Tooltip.","lifecycle":"experimental","keywords":["tooltip","help","react"],"platforms":["web.react"],"source":"catalog/guides/tooltip-usage.md"}

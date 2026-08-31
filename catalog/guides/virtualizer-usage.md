@@ -1,3 +1,3 @@
 # Virtualizer usage
 
-Use the Core Virtualizer contract and provide an accessible name.
+Use the Mux UI Virtualizer contract and provide an accessible name.

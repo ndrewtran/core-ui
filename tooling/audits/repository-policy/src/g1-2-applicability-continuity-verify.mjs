@@ -1,7 +1,7 @@
 import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { basename, join, resolve } from 'node:path';
-import { canonicalJson, parseJsonStrict } from '@core-ui/schema';
+import { canonicalJson, parseJsonStrict } from '@muxui/schema';
 import {
   assertAuthorityDecisionShape,
 } from './evidence-applicability-supersession.mjs';

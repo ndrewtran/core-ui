@@ -1,1 +1,1 @@
-{"schemaVersion":"1.0.0","id":"core:guide:tabs-usage","kind":"guide","name":"Tabs usage","summary":"Portable usage guidance for Tabs.","lifecycle":"experimental","keywords":["tabs","react","accessibility"],"platforms":["web.react"],"source":"catalog/guides/tabs-usage.md"}
+{"schemaVersion":"1.0.0","id":"muxui:guide:tabs-usage","kind":"guide","name":"Tabs usage","summary":"Portable usage guidance for Tabs.","lifecycle":"experimental","keywords":["tabs","react","accessibility"],"platforms":["web.react"],"source":"catalog/guides/tabs-usage.md"}

@@ -1,1 +1,1 @@
-{"schemaVersion":"1.0.0","id":"core:guide:toolbar-usage","kind":"guide","name":"Toolbar usage","summary":"Portable usage guidance for Toolbar.","lifecycle":"experimental","keywords":["toolbar","react","accessibility"],"platforms":["web.react"],"source":"catalog/guides/toolbar-usage.md"}
+{"schemaVersion":"1.0.0","id":"muxui:guide:toolbar-usage","kind":"guide","name":"Toolbar usage","summary":"Portable usage guidance for Toolbar.","lifecycle":"experimental","keywords":["toolbar","react","accessibility"],"platforms":["web.react"],"source":"catalog/guides/toolbar-usage.md"}

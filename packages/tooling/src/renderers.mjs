@@ -1,6 +1,6 @@
-import { canonicalJson } from '@core-ui/schema';
+import { canonicalJson } from '@muxui/schema';
 
-const DENSE_HEADER = '@core-ui/dense=1';
+const DENSE_HEADER = '@muxui/dense=1';
 
 function responseEntries(response) {
   if (response.responseType === 'artifact.detail.section-page') {
@@ -36,14 +36,14 @@ export function parseDense(text) {
 
 export function renderHuman(response) {
   return `${[
-    `Core UI ${response.type ?? response.responseType}`,
+    `Mux UI ${response.type ?? response.responseType}`,
     ...responseEntries(response).map(([key, value]) => `${key}: ${canonicalJson(value)}`),
   ].join('\n')}\n`;
 }
 
 export function parseHuman(text) {
   const lines = text.trimEnd().split('\n');
-  if (!lines.shift()?.startsWith('Core UI ')) throw new Error('CLI_HUMAN_HEADER_INVALID');
+  if (!lines.shift()?.startsWith('Mux UI ')) throw new Error('CLI_HUMAN_HEADER_INVALID');
   return Object.fromEntries(lines.map((line) => {
     const separator = line.indexOf(': ');
     if (separator < 1) throw new Error('CLI_HUMAN_LINE_INVALID');

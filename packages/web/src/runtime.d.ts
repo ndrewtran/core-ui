@@ -1,17 +1,17 @@
-export type CoreWebIntegration = 'vanilla' | 'react';
-export interface CoreWebResources {
+export type MuxUIWebIntegration = 'vanilla' | 'react';
+export interface MuxUIWebResources {
   addDocumentListener(type: string, listener: EventListener, options?: AddEventListenerOptions | boolean): () => void;
   acquireScrollLock(): () => void;
   setInert(element: HTMLElement): () => void;
   appendPortal(node: Node): () => void;
   restoreFocusOnRelease(element: HTMLElement): () => void;
 }
-export interface CoreWebClaim { readonly integration: CoreWebIntegration; destroy(): void; }
-export interface CoreWebClaimOptions {
-  integration: CoreWebIntegration;
+export interface MuxUIWebClaim { readonly integration: MuxUIWebIntegration; destroy(): void; }
+export interface MuxUIWebClaimOptions {
+  integration: MuxUIWebIntegration;
   token: object | Function;
-  setup?: (resources: CoreWebResources) => void | (() => void);
+  setup?: (resources: MuxUIWebResources) => void | (() => void);
 }
-export class CoreWebOwnershipError extends Error { readonly code: string; readonly details: Readonly<Record<string, unknown>>; }
-export function claimRoot(root: Element, options: CoreWebClaimOptions): CoreWebClaim;
-export function connectRoot(root: Element, options: Omit<CoreWebClaimOptions, 'integration'>): CoreWebClaim;
+export class MuxUIWebOwnershipError extends Error { readonly code: string; readonly details: Readonly<Record<string, unknown>>; }
+export function claimRoot(root: Element, options: MuxUIWebClaimOptions): MuxUIWebClaim;
+export function connectRoot(root: Element, options: Omit<MuxUIWebClaimOptions, 'integration'>): MuxUIWebClaim;

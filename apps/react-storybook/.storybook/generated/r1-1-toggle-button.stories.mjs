@@ -1,6 +1,6 @@
 // @generated-from: apps/react-storybook/src/generate-stories.mjs
-// @generated-content-sha256: sha256:0a1b5e367289ac9c848fe08f6069165637c61564663e348b3837eb48c0addecd
-import * as Core from '@core-ui/react';
+// @generated-content-sha256: sha256:0e562f189b91a7917a9ffc910ed7eb1a1489b35ecab7449043e563477157f4e0
+import * as MuxUI from '@muxui/react';
 import { argTypesForBinding, createStory } from '../../src/storybook-factory.mjs';
 
 const binding = {
@@ -24,12 +24,12 @@ const binding = {
       "disabled"
     ]
   },
-  "binding": "core:component:toggle-button#web.react",
+  "binding": "muxui:component:toggle-button#web.react",
   "export": "ToggleButton",
   "lifecycle": "experimental",
   "module": ".",
   "runtimeProfile": "web.react",
-  "selector": ".core-toggle-button",
+  "selector": ".muxui-toggle-button",
   "states": [
     "idle",
     "selected",
@@ -41,8 +41,9 @@ const binding = {
 const record = { family: 'ToggleButton', tranche: 'R1.1', binding };
 
 export default {
-  title: 'Core React/R1.1/ToggleButton',
-  component: Core.ToggleButton,
+  title: 'Mux UI React/R1.1/ToggleButton',
+  id: 'muxui-react-r1-1-toggle-button',
+  component: MuxUI.ToggleButton,
   tags: ['autodocs'],
   parameters: {
     controls: {
@@ -50,7 +51,7 @@ export default {
     },
     docs: {
       description: {
-        component: 'Private development showcase for the Core-owned ToggleButton family.',
+        component: 'Private development showcase for the Mux UI-owned ToggleButton family.',
       },
     },
   },

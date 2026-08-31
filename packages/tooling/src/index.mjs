@@ -6,7 +6,6 @@ export {
 } from './cli.mjs';
 export { parseCliArguments } from './parser.mjs';
 export { RESOLVER_ERROR_PRECEDENCE, resolveCatalogGraph } from './local-resolver.mjs';
-export { resolvePnpmProjectCatalog } from './pnpm-adapter.mjs';
 export {
   AuthoringPolicyError,
   affectedClosure,

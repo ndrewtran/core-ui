@@ -25,7 +25,7 @@ const theme = {
 
 const previousTokenSource = {
   schemaVersion: '1.0.0',
-  id: 'core:token:default-theme',
+  id: 'muxui:token:default-theme',
   kind: 'token',
   name: 'Button minimum tokens',
   summary: 'The previous token source.',
@@ -59,7 +59,7 @@ test('G1.0 token-source v1-to-v2 migration is explicit, deterministic, and idemp
   );
   assert.throws(
     () => migrateTokenSourceV1ToV2(previousTokenSource, { theme, tokenMetadata: {} }),
-    (error) => error instanceof SchemaValidationError && error.code === 'CORE_SCHEMA_MIGRATION_REQUIRED',
+    (error) => error instanceof SchemaValidationError && error.code === 'MUXUI_SCHEMA_MIGRATION_REQUIRED',
   );
 });
 
@@ -71,11 +71,11 @@ test('G1.0 binding v1-to-v2 migration requires the binding-owned token recipe', 
     api: { props: [], events: [], parts: [], defaults: {} },
     behavior: [],
     accessibility: [],
-    tokenSources: ['core:token:default-theme'],
+    tokenSources: ['muxui:token:default-theme'],
     runtimeProfiles: {},
   };
   const tokenRecipe = {
-    source: 'core:token:default-theme',
+    source: 'muxui:token:default-theme',
     requirements: [{ token: 'semantic.action.background', requirement: 'required' }],
   };
   const platformSafety = webPlatformSafety('web.react');
@@ -87,7 +87,7 @@ test('G1.0 binding v1-to-v2 migration requires the binding-owned token recipe', 
   assert.equal(canonicalJson(migrateBindingV1ToV2(migrated)), canonicalJson(migrated));
   assert.throws(
     () => migrateBindingV1ToV2(previous),
-    (error) => error instanceof SchemaValidationError && error.code === 'CORE_SCHEMA_MIGRATION_REQUIRED',
+    (error) => error instanceof SchemaValidationError && error.code === 'MUXUI_SCHEMA_MIGRATION_REQUIRED',
   );
 });
 
@@ -109,6 +109,6 @@ test('G1.0 unsupported binding migration requires its complete platform-safety d
   assert.deepEqual(migrated.platformSafety, platformSafety);
   assert.throws(
     () => migrateBindingV1ToV2(previous),
-    (error) => error instanceof SchemaValidationError && error.code === 'CORE_SCHEMA_MIGRATION_REQUIRED',
+    (error) => error instanceof SchemaValidationError && error.code === 'MUXUI_SCHEMA_MIGRATION_REQUIRED',
   );
 });

@@ -1,6 +1,6 @@
 // @generated-from: apps/react-storybook/src/generate-stories.mjs
-// @generated-content-sha256: sha256:21d0918f5268cdc3035d08d35fe9deb2bce0decd9c4a8ceabea0b980018d8d4f
-import * as Core from '@core-ui/react';
+// @generated-content-sha256: sha256:bd22051e96463957d04abc6cd6dd395a74202fd4d6b2bfff261abed3de95d62d
+import * as MuxUI from '@muxui/react';
 import { argTypesForBinding, createStory } from '../../src/storybook-factory.mjs';
 
 const binding = {
@@ -39,12 +39,12 @@ const binding = {
       "type"
     ]
   },
-  "binding": "core:component:text-field#web.react",
+  "binding": "muxui:component:text-field#web.react",
   "export": "TextField",
   "lifecycle": "experimental",
   "module": ".",
   "runtimeProfile": "web.react",
-  "selector": ".core-text-field",
+  "selector": ".muxui-text-field",
   "states": [
     "idle",
     "disabled",
@@ -57,8 +57,9 @@ const binding = {
 const record = { family: 'TextField', tranche: 'R1.2', binding };
 
 export default {
-  title: 'Core React/R1.2/TextField',
-  component: Core.TextField,
+  title: 'Mux UI React/R1.2/TextField',
+  id: 'muxui-react-r1-2-text-field',
+  component: MuxUI.TextField,
   tags: ['autodocs'],
   parameters: {
     controls: {
@@ -66,7 +67,7 @@ export default {
     },
     docs: {
       description: {
-        component: 'Private development showcase for the Core-owned TextField family.',
+        component: 'Private development showcase for the Mux UI-owned TextField family.',
       },
     },
   },

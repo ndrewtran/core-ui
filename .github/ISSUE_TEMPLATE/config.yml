@@ -1,11 +1,11 @@
 blank_issues_enabled: false
 contact_links:
-  - name: Core UI architecture
-    url: https://github.com/ndrewtran/core-ui/blob/main/strategy/monorepo-architecture.md
+  - name: Mux UI architecture
+    url: https://github.com/ndrewtran/muxui/blob/main/strategy/monorepo-architecture.md
     about: Check architectural authority, invariants, ownership, and capability gates before opening work.
-  - name: Core UI milestone roadmap
-    url: https://github.com/ndrewtran/core-ui/blob/main/strategy/milestone-roadmap.md
+  - name: Mux UI milestone roadmap
+    url: https://github.com/ndrewtran/muxui/blob/main/strategy/milestone-roadmap.md
     about: Check gate entry conditions, deliverables, acceptance evidence, and scope controls.
-  - name: Core UI product scope
-    url: https://github.com/ndrewtran/core-ui/blob/main/strategy/product-scope.md
+  - name: Mux UI product scope
+    url: https://github.com/ndrewtran/muxui/blob/main/strategy/product-scope.md
     about: Check immutable scope IDs, commitments, release boundaries, tracker references, and non-goals.

@@ -1,7 +1,7 @@
 // @generated-from: apps/react-storybook/src/generate-stories.mjs
-// @generated-content-sha256: sha256:df2c00c7b61890802057cdd4d93a12ea8c76214c09aa1774d61d68c295299090
+// @generated-content-sha256: sha256:941f879ebfff214009df4e8e4380a3b88cc5e72951b17ef82d80eebdf5dcb8ab
 export const manifest = Object.freeze({
-  "schema": "core-ui-react-storybook-manifest-v1",
+  "schema": "muxui-react-storybook-manifest-v1",
   "generatedFrom": [
     "packages/react/generated/descriptor.json",
     "catalog/react-r1-0/react-aria-1.20.0-family-evaluation.snapshot.json"

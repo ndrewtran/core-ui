@@ -1,6 +1,6 @@
 // @generated-from: apps/react-storybook/src/generate-stories.mjs
-// @generated-content-sha256: sha256:d758e10f4a28ea94e79b71988f06b2973a58dad51eddbe1b53b380c4be7cef13
-import * as Core from '@core-ui/react';
+// @generated-content-sha256: sha256:605e4a79a0ed5f821c03f73158f093fb8b20a06aa44d478f87d04ad87ac8a644
+import * as MuxUI from '@muxui/react';
 import { argTypesForBinding, createStory } from '../../src/storybook-factory.mjs';
 
 const binding = {
@@ -25,12 +25,12 @@ const binding = {
       "shouldCloseOnSelect"
     ]
   },
-  "binding": "core:component:menu#web.react",
+  "binding": "muxui:component:menu#web.react",
   "export": "Menu",
   "lifecycle": "experimental",
   "module": ".",
   "runtimeProfile": "web.react",
-  "selector": ".core-menu",
+  "selector": ".muxui-menu",
   "states": [
     "idle",
     "focused",
@@ -42,8 +42,9 @@ const binding = {
 const record = { family: 'Menu', tranche: 'R1.3', binding };
 
 export default {
-  title: 'Core React/R1.3/Menu',
-  component: Core.Menu,
+  title: 'Mux UI React/R1.3/Menu',
+  id: 'muxui-react-r1-3-menu',
+  component: MuxUI.Menu,
   tags: ['autodocs'],
   parameters: {
     controls: {
@@ -51,7 +52,7 @@ export default {
     },
     docs: {
       description: {
-        component: 'Private development showcase for the Core-owned Menu family.',
+        component: 'Private development showcase for the Mux UI-owned Menu family.',
       },
     },
   },

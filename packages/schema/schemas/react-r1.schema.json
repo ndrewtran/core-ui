@@ -1,5 +1,5 @@
 {
-  "$id": "core-ui:react-r1-contracts:1.0.0",
+  "$id": "muxui:react-r1-contracts:1.0.0",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$defs": {
     "digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
@@ -60,7 +60,7 @@
         "inputs": { "type": "array", "minItems": 2, "maxItems": 2, "items": { "$ref": "#/$defs/input" } },
         "items": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "$ref": "#/$defs/upstreamExport" } },
         "package": { "const": "react-aria-components" },
-        "schema": { "const": "core-ui-react-upstream-exports-v1" },
+        "schema": { "const": "muxui-react-upstream-exports-v1" },
         "tree": { "$ref": "#/$defs/gitObject" },
         "version": { "const": "1.20.0" }
       }
@@ -87,7 +87,7 @@
           }
         },
         "package": { "const": "react-aria-components" },
-        "schema": { "const": "core-ui-react-upstream-snapshot-v1" },
+        "schema": { "const": "muxui-react-upstream-snapshot-v1" },
         "tree": { "$ref": "#/$defs/gitObject" },
         "version": { "const": "1.20.0" }
       }
@@ -123,7 +123,7 @@
       "additionalProperties": false,
       "required": ["button", "buttonBlobs", "components", "dispositions", "donor", "schema", "sharedPrimitives", "spinner", "subtrees"],
       "properties": {
-        "schema": { "const": "core-ui-react-donor-crosswalk-v1" },
+        "schema": { "const": "muxui-react-donor-crosswalk-v1" },
         "donor": {
           "type": "object", "additionalProperties": false, "required": ["commit", "name", "tree"],
           "properties": { "commit": { "$ref": "#/$defs/gitObject" }, "name": { "const": "Tale UI" }, "tree": { "$ref": "#/$defs/gitObject" } }
@@ -185,12 +185,12 @@
       "required": ["copiedPortion", "dependency", "donor", "license", "licenseBytes", "licenseSha256", "notice", "schema"],
       "properties": {
         "copiedPortion": { "type": "string", "minLength": 1 }, "dependency": { "const": false }, "donor": { "const": "Tale UI" }, "license": { "const": "MIT" },
-        "licenseBytes": { "type": "integer", "minimum": 1 }, "licenseSha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }, "notice": { "type": "string", "minLength": 1 }, "schema": { "const": "core-ui-react-donor-license-v1" }
+        "licenseBytes": { "type": "integer", "minimum": 1 }, "licenseSha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }, "notice": { "type": "string", "minLength": 1 }, "schema": { "const": "muxui-react-donor-license-v1" }
       }
     },
     "descriptor": {
       "type": "object", "additionalProperties": false, "required": ["bindings", "exports", "generatedFrom", "package", "schema", "support", "version"],
-      "properties": { "bindings": { "type": "array", "maxItems": 0 }, "exports": { "type": "array", "maxItems": 0 }, "generatedFrom": { "const": "packages/react/src/generate.mjs" }, "package": { "const": "@core-ui/react" }, "schema": { "const": "core-ui-renderer-descriptor-v1" }, "support": { "const": "none" }, "version": { "const": "0.1.0-alpha.0" } }
+      "properties": { "bindings": { "type": "array", "maxItems": 0 }, "exports": { "type": "array", "maxItems": 0 }, "generatedFrom": { "const": "packages/react/src/generate.mjs" }, "package": { "const": "@muxui/react" }, "schema": { "const": "muxui-renderer-descriptor-v1" }, "support": { "const": "none" }, "version": { "const": "0.1.0-alpha.0" } }
     },
     "release": {
       "type": "object", "additionalProperties": false,
@@ -199,10 +199,10 @@
         "advisories": { "type": "array", "maxItems": 0 }, "bindings": { "type": "array", "maxItems": 0 }, "componentExports": { "type": "array", "maxItems": 0 }, "exceptions": { "type": "array", "maxItems": 0 }, "runtimeProfiles": { "type": "array", "maxItems": 0 },
         "catalog": { "type": "object", "additionalProperties": false, "required": ["reason", "status"], "properties": { "reason": { "type": "string", "minLength": 1 }, "status": { "const": "not-applicable" } } },
         "evidence": { "type": "object", "additionalProperties": false, "required": ["ids", "status"], "properties": { "ids": { "type": "array", "minItems": 5, "maxItems": 5, "uniqueItems": true, "items": { "pattern": "^E-R1\\.0-0[1-5]$", "type": "string" } }, "status": { "const": "pending" } } },
-        "generatedFrom": { "const": "packages/react/src/generate.mjs" }, "lifecycle": { "const": "experimental" }, "package": { "const": "@core-ui/react" }, "packagePrivate": { "const": true },
+        "generatedFrom": { "const": "packages/react/src/generate.mjs" }, "lifecycle": { "const": "experimental" }, "package": { "const": "@muxui/react" }, "packagePrivate": { "const": true },
         "publication": { "type": "object", "additionalProperties": false, "required": ["requires", "status"], "properties": { "requires": { "type": "array", "minItems": 1, "maxItems": 1, "items": { "const": "explicit external publish authorization" } }, "status": { "const": "disabled" } } },
         "rollback": { "type": "object", "additionalProperties": false, "required": ["status"], "properties": { "status": { "const": "candidate-branch-only-before-merge" } } },
-        "schema": { "const": "core-ui-react-release-candidate-v1" },
+        "schema": { "const": "muxui-react-release-candidate-v1" },
         "tokenSource": { "type": "object", "additionalProperties": false, "required": ["path", "sha256"], "properties": { "path": { "const": "catalog/tokens/default-theme.json" }, "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" } } },
         "version": { "const": "0.1.0-alpha.0" }
       }
@@ -214,8 +214,8 @@
         "disposition": { "const": "adapt" },
         "donor": { "type": "object", "additionalProperties": false, "required": ["buttonBlobs", "commit", "tree"], "properties": { "buttonBlobs": { "$ref": "#/$defs/donorCrosswalk/properties/buttonBlobs" }, "commit": { "$ref": "#/$defs/gitObject" }, "tree": { "$ref": "#/$defs/gitObject" } } },
         "generatedFrom": { "const": "packages/react/src/generate.mjs" },
-        "result": { "type": "object", "additionalProperties": false, "required": ["cssSha256", "selector", "status"], "properties": { "cssSha256": { "$ref": "#/$defs/digest" }, "selector": { "const": ".core-r1-button" }, "status": { "const": "adapted-for-private-r1.0-fixture" } } },
-        "schema": { "const": "core-ui-react-button-donor-comparison-v1" }
+        "result": { "type": "object", "additionalProperties": false, "required": ["cssSha256", "selector", "status"], "properties": { "cssSha256": { "$ref": "#/$defs/digest" }, "selector": { "const": ".muxui-r1-button" }, "status": { "const": "adapted-for-private-r1.0-fixture" } } },
+        "schema": { "const": "muxui-react-button-donor-comparison-v1" }
       }
     }
   },

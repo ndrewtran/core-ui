@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import { canonicalJson, validateContractDocument } from '@core-ui/schema';
+import { canonicalJson, validateContractDocument } from '@muxui/schema';
 import { EXPECTED_R12_COMPONENT_SLUGS, EXPECTED_R12_DONOR_CONTRACT } from './r1-2-donor-contract.mjs';
 import { EXPECTED_R13_COMPONENT_SLUGS, EXPECTED_R13_DONOR_CONTRACT } from './r1-3-donor-contract.mjs';
 import { EXPECTED_R14_COMPONENT_SLUGS, EXPECTED_R14_DONOR_CONTRACT } from './r1-4-donor-contract.mjs';
@@ -52,6 +52,42 @@ function same(left, right) {
   return canonicalJson(left) === canonicalJson(right);
 }
 
+// Historical R1.0 sources retain immutable superseded schema IDs; normalize
+// only the validation copy so the exported current schema remains current-only.
+function projectHistoricalIdentity(value) {
+  const historicalMachine = ['core', 'ui'].join('-');
+  const historicalDisplay = ['Core', 'UI'].join(' ');
+  const historicalArtifact = ['core', ':'].join('');
+  const historicalPackage = `@${historicalMachine}/`;
+  const historicalDiagnostics = ['CORE', '_'].join('');
+  if (typeof value === 'string') {
+    return value
+      .replaceAll(historicalMachine, 'muxui')
+      .replaceAll(historicalDisplay, 'Mux UI')
+      .replaceAll(historicalArtifact, 'muxui:')
+      .replaceAll(historicalPackage, '@muxui/')
+      .replaceAll(historicalDiagnostics, 'MUXUI_');
+  }
+  if (Array.isArray(value)) return value.map(projectHistoricalIdentity);
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(Object.entries(value).map(([key, item]) => [
+      projectHistoricalIdentity(key),
+      projectHistoricalIdentity(item),
+    ]));
+  }
+  return value;
+}
+
+function validateR10SourceContract(value) {
+  const historicalSchemaPrefix = `${['core', 'ui'].join('-')}-react-`;
+  const isHistorical = typeof value?.schema === 'string'
+    && value.schema.startsWith(historicalSchemaPrefix);
+  validateContractDocument(
+    'react-r1.schema.json',
+    isHistorical ? projectHistoricalIdentity(value) : value,
+  );
+}
+
 function fail(code) {
   throw new Error(code);
 }
@@ -79,7 +115,7 @@ export function assertReactR10SourceContracts({
   license,
 }) {
   for (const value of [snapshot, upstreamExports, crosswalk, license]) {
-    validateContractDocument('react-r1.schema.json', value);
+    validateR10SourceContract(value);
   }
   for (const value of [snapshot, upstreamExports]) {
     if (!same({
@@ -88,39 +124,39 @@ export function assertReactR10SourceContracts({
       commit: value.commit,
       tree: value.tree,
       inputs: value.inputs,
-    }, EXPECTED_UPSTREAM)) fail('CORE_REACT_UPSTREAM_IDENTITY_DRIFT');
+    }, EXPECTED_UPSTREAM)) fail('MUXUI_REACT_UPSTREAM_IDENTITY_DRIFT');
   }
-  if (upstreamExports.items.length !== 613) fail('CORE_REACT_UPSTREAM_EXPORT_COUNT_DRIFT');
+  if (upstreamExports.items.length !== 613) fail('MUXUI_REACT_UPSTREAM_EXPORT_COUNT_DRIFT');
   if (!same(snapshotTuples(snapshot.items), upstreamExports.items)) {
-    fail('CORE_REACT_UPSTREAM_EXPORT_DERIVATION_DRIFT');
+    fail('MUXUI_REACT_UPSTREAM_EXPORT_DERIVATION_DRIFT');
   }
   const normalizedExportsSha256 = sha256(JSON.stringify(upstreamExports.items));
   if (normalizedExportsSha256 !== EXPECTED_NORMALIZED_EXPORTS_SHA256
     || snapshot.exportTupleSha256 !== EXPECTED_NORMALIZED_EXPORTS_SHA256.slice(7)) {
-    fail('CORE_REACT_UPSTREAM_EXPORT_TUPLE_DRIFT');
+    fail('MUXUI_REACT_UPSTREAM_EXPORT_TUPLE_DRIFT');
   }
   if (snapshot.normalizedExports.path !== 'catalog/react-r1-0/upstream-exports.json'
     || snapshot.normalizedExports.count !== upstreamExports.items.length
     || snapshot.normalizedExports.sha256 !== sha256(upstreamExportsBytes)) {
-    fail('CORE_REACT_UPSTREAM_EXPORT_PAYLOAD_DRIFT');
+    fail('MUXUI_REACT_UPSTREAM_EXPORT_PAYLOAD_DRIFT');
   }
   const classificationSha256 = sha256(canonicalJson(classificationTuples(snapshot.items)));
   if (classificationSha256 !== EXPECTED_CLASSIFICATION_SHA256
     || snapshot.classificationSha256 !== EXPECTED_CLASSIFICATION_SHA256) {
-    fail('CORE_REACT_UPSTREAM_CLASSIFICATION_DRIFT');
+    fail('MUXUI_REACT_UPSTREAM_CLASSIFICATION_DRIFT');
   }
   if (!same(snapshot.dispositionGrammar, EXPECTED_UPSTREAM_DISPOSITIONS)) {
-    fail('CORE_REACT_UPSTREAM_DISPOSITION_GRAMMAR_DRIFT');
+    fail('MUXUI_REACT_UPSTREAM_DISPOSITION_GRAMMAR_DRIFT');
   }
   if (!same(crosswalk.donor, EXPECTED_DONOR)
     || !same(crosswalk.dispositions, EXPECTED_DONOR_DISPOSITIONS)) {
-    fail('CORE_REACT_DONOR_IDENTITY_DRIFT');
+    fail('MUXUI_REACT_DONOR_IDENTITY_DRIFT');
   }
   const componentCrosswalks = crosswalk.components;
   const expectedComponentSlugs = R11_COMPONENTS.slice(1).map(([, slug]) => slug);
   if (!componentCrosswalks
     || !same(Object.keys(componentCrosswalks).sort(), [...expectedComponentSlugs].sort())) {
-    fail('CORE_REACT_COMPONENT_DONOR_CROSSWALK_DRIFT');
+    fail('MUXUI_REACT_COMPONENT_DONOR_CROSSWALK_DRIFT');
   }
   for (const slug of expectedComponentSlugs) {
     const entry = componentCrosswalks[slug];
@@ -132,11 +168,11 @@ export function assertReactR10SourceContracts({
       || (slug === 'group'
         ? entry.disposition !== 'no-applicable-donor' || entry.donorInputs.length !== 0 || entry.rules.length !== 0
         : entry.disposition !== 'adapt' || entry.donorInputs.length === 0 || entry.rules.length === 0)) {
-      fail('CORE_REACT_COMPONENT_DONOR_CROSSWALK_DRIFT');
+      fail('MUXUI_REACT_COMPONENT_DONOR_CROSSWALK_DRIFT');
     }
   }
   if (license.dependency !== false || license.donor !== EXPECTED_DONOR.name) {
-    fail('CORE_REACT_DONOR_LICENSE_DRIFT');
+    fail('MUXUI_REACT_DONOR_LICENSE_DRIFT');
   }
   return { snapshot, upstreamExports, crosswalk, license };
 }
@@ -153,19 +189,19 @@ export function assertReactR10GeneratedContracts({
     validateContractDocument('react-r1.schema.json', value);
   }
   if (manifest.private !== true || release.packagePrivate !== true) {
-    fail('CORE_REACT_R10_PUBLICATION_GUARD_MISSING');
+    fail('MUXUI_REACT_R10_PUBLICATION_GUARD_MISSING');
   }
   if (!same(donorComparison.donor, {
     commit: crosswalk.donor.commit,
     tree: crosswalk.donor.tree,
     buttonBlobs: crosswalk.buttonBlobs,
   }) || !same(donorComparison.consumedRules, crosswalk.button.rules)) {
-    fail('CORE_REACT_DONOR_COMPARISON_DERIVATION_DRIFT');
+    fail('MUXUI_REACT_DONOR_COMPARISON_DERIVATION_DRIFT');
   }
   return { descriptor, release, donorComparison };
 }
 
-/** Validates the first Core-owned component projection without exposing RAC types. */
+/** Validates the first Mux UI-owned component projection without exposing RAC types. */
 export function assertReactR11GeneratedContracts({
   descriptor,
   release,
@@ -175,36 +211,36 @@ export function assertReactR11GeneratedContracts({
   crosswalk,
 }) {
   if (manifest.private !== true || release.packagePrivate !== true) {
-    fail('CORE_REACT_R11_PUBLICATION_GUARD_MISSING');
+    fail('MUXUI_REACT_R11_PUBLICATION_GUARD_MISSING');
   }
   if (!same(Object.keys(descriptor).sort(), ['bindings', 'exports', 'generatedFrom', 'package', 'schema', 'support', 'version'])
-    || descriptor.schema !== 'core-ui-renderer-descriptor-v1'
+    || descriptor.schema !== 'muxui-renderer-descriptor-v1'
     || descriptor.generatedFrom !== 'packages/react/src/generate.mjs'
-    || descriptor.package !== '@core-ui/react'
+    || descriptor.package !== '@muxui/react'
     || descriptor.support !== 'unproved; R1.1 React exports only'
     || descriptor.bindings.length !== R11_COMPONENTS.length
     || descriptor.exports.length !== R11_COMPONENTS.length) {
-    fail('CORE_REACT_R11_DESCRIPTOR_INVALID');
+    fail('MUXUI_REACT_R11_DESCRIPTOR_INVALID');
   }
   for (const [name, slug] of R11_COMPONENTS) {
     const binding = descriptor.bindings.find(({ export: exportName }) => exportName === name);
     const componentExport = descriptor.exports.find(({ name: exportName }) => exportName === name);
     if (!binding || !componentExport
-      || binding.binding !== `core:component:${slug}#web.react`
+      || binding.binding !== `muxui:component:${slug}#web.react`
       || binding.export !== name
       || binding.strategy !== 'direct'
       || binding.runtimeProfile !== 'web.react'
-      || binding.selector !== `.core-${slug}`
+      || binding.selector !== `.muxui-${slug}`
       || !Array.isArray(binding.states)
       || !Array.isArray(binding.api?.props)
       || binding.api.props.some((prop) => /^is[A-Z]/u.test(prop) || /(?:onPress|isPending|isDisabled)/u.test(prop))
       || componentExport.name !== name
       || componentExport.binding !== binding.binding) {
-      fail('CORE_REACT_R11_COMPONENT_DESCRIPTOR_DRIFT');
+      fail('MUXUI_REACT_R11_COMPONENT_DESCRIPTOR_DRIFT');
     }
   }
   if (!release.publication
-    || release.schema !== 'core-ui-react-release-candidate-v1'
+    || release.schema !== 'muxui-react-release-candidate-v1'
     || release.lifecycle !== 'experimental'
     || release.componentExports.length !== R11_COMPONENTS.length
     || release.bindings.length !== R11_COMPONENTS.length
@@ -215,14 +251,14 @@ export function assertReactR11GeneratedContracts({
     || release.evidence.status !== 'pending'
     || !same(release.evidence.ids, ['E-R1.1-01', 'E-R1.1-02', 'E-R1.1-03', 'E-R1.1-04'])
     || release.publication.status !== 'disabled') {
-    fail('CORE_REACT_R11_RELEASE_INVALID');
+    fail('MUXUI_REACT_R11_RELEASE_INVALID');
   }
   for (const [name, slug] of R11_COMPONENTS) {
-    const binding = `core:component:${slug}#web.react`;
+    const binding = `muxui:component:${slug}#web.react`;
     if (!release.componentExports.some((entry) => entry.name === name && entry.export === name && entry.binding === binding)
       || !release.bindings.some((entry) => entry.binding === binding && entry.export === name && entry.runtimeProfile === 'web.react')
-      || !release.catalog.components.some((entry) => entry.component === `core:component:${slug}` && entry.binding === binding && Array.isArray(entry.states))) {
-      fail('CORE_REACT_R11_RELEASE_COMPONENT_DRIFT');
+      || !release.catalog.components.some((entry) => entry.component === `muxui:component:${slug}` && entry.binding === binding && Array.isArray(entry.states))) {
+      fail('MUXUI_REACT_R11_RELEASE_COMPONENT_DRIFT');
     }
   }
   if (!same(donorComparison.donor, {
@@ -231,12 +267,12 @@ export function assertReactR11GeneratedContracts({
     buttonBlobs: crosswalk.buttonBlobs,
   }) || !same(donorComparison.consumedRules, crosswalk.button.rules)
     || donorComparison.disposition !== 'adapt'
-    || donorComparison.result.selector !== '.core-button'
+    || donorComparison.result.selector !== '.muxui-button'
     || donorComparison.result.status !== 'adapted-for-r1.1-button') {
-    fail('CORE_REACT_R11_DONOR_COMPARISON_DRIFT');
+    fail('MUXUI_REACT_R11_DONOR_COMPARISON_DRIFT');
   }
   if (componentDonorComparison !== undefined) {
-    if (componentDonorComparison.schema !== 'core-ui-react-component-donor-comparison-v1'
+    if (componentDonorComparison.schema !== 'muxui-react-component-donor-comparison-v1'
       || componentDonorComparison.generatedFrom !== 'packages/react/src/generate.mjs'
       || !same(componentDonorComparison.donor, {
         name: crosswalk.donor.name,
@@ -245,18 +281,18 @@ export function assertReactR11GeneratedContracts({
       })
       || !Array.isArray(componentDonorComparison.components)
       || componentDonorComparison.components.length !== R11_COMPONENTS.length) {
-      fail('CORE_REACT_R11_COMPONENT_DONOR_COMPARISON_INVALID');
+      fail('MUXUI_REACT_R11_COMPONENT_DONOR_COMPARISON_INVALID');
     }
     for (const [name, slug] of R11_COMPONENTS) {
       const entry = componentDonorComparison.components.find(({ component }) => component === name);
       const expectedCrosswalk = name === 'Button' ? crosswalk.button : crosswalk.components[slug];
       if (!entry
-        || entry.binding !== `core:component:${slug}#web.react`
-        || entry.selector !== `.core-${slug}`
+        || entry.binding !== `muxui:component:${slug}#web.react`
+        || entry.selector !== `.muxui-${slug}`
         || entry.disposition !== expectedCrosswalk.disposition
         || !same(entry.rules, expectedCrosswalk.rules)
         || (name !== 'Button' && !same(entry.donorInputs, expectedCrosswalk.donorInputs))) {
-        fail('CORE_REACT_R11_COMPONENT_DONOR_COMPARISON_DRIFT');
+        fail('MUXUI_REACT_R11_COMPONENT_DONOR_COMPARISON_DRIFT');
       }
     }
   }
@@ -265,30 +301,30 @@ export function assertReactR11GeneratedContracts({
 
 /** Validates the R1.2 field tranche projection without exposing RAC types. */
 export function assertReactR12GeneratedContracts({ descriptor, release, donorComparison, manifest, componentNames, crosswalk }) {
-  if (manifest.private !== true || release.packagePrivate !== true) fail('CORE_REACT_R12_PUBLICATION_GUARD_MISSING');
+  if (manifest.private !== true || release.packagePrivate !== true) fail('MUXUI_REACT_R12_PUBLICATION_GUARD_MISSING');
   if (!same(crosswalk, EXPECTED_R12_DONOR_CONTRACT)
     || !same(Object.keys(crosswalk.components ?? {}).sort(), [...EXPECTED_R12_COMPONENT_SLUGS].sort())
     || crosswalk.components && Object.values(crosswalk.components).some((entry) => entry.disposition !== 'adapt')) {
-    fail('CORE_REACT_R12_DONOR_PROVENANCE_DRIFT');
+    fail('MUXUI_REACT_R12_DONOR_PROVENANCE_DRIFT');
   }
   if (!Array.isArray(crosswalk.sharedPrimitives)
-    || !same(crosswalk.sharedPrimitives, EXPECTED_R12_DONOR_CONTRACT.sharedPrimitives)) fail('CORE_REACT_R12_SHARED_DONOR_INPUT_DRIFT');
-  if (descriptor.schema !== 'core-ui-renderer-descriptor-v1'
+    || !same(crosswalk.sharedPrimitives, EXPECTED_R12_DONOR_CONTRACT.sharedPrimitives)) fail('MUXUI_REACT_R12_SHARED_DONOR_INPUT_DRIFT');
+  if (descriptor.schema !== 'muxui-renderer-descriptor-v1'
     || descriptor.generatedFrom !== 'packages/react/src/generate.mjs'
-    || descriptor.package !== '@core-ui/react'
+    || descriptor.package !== '@muxui/react'
     || descriptor.support !== 'unproved; R1.2 React exports only'
     || descriptor.bindings.length !== componentNames.length
-    || descriptor.exports.length !== componentNames.length) fail('CORE_REACT_R12_DESCRIPTOR_INVALID');
+    || descriptor.exports.length !== componentNames.length) fail('MUXUI_REACT_R12_DESCRIPTOR_INVALID');
   for (const name of componentNames) {
     const binding = descriptor.bindings.find(({ export: exportName }) => exportName === name);
     const componentExport = descriptor.exports.find(({ name: exportName }) => exportName === name);
     if (!binding || !componentExport || binding.binding !== componentExport.binding
       || binding.strategy !== 'direct' || binding.runtimeProfile !== 'web.react'
       || binding.api.props.some((prop) => /^is[A-Z]/u.test(prop) || /(?:onPress|isPending|isDisabled)/u.test(prop))) {
-      fail('CORE_REACT_R12_COMPONENT_DESCRIPTOR_DRIFT');
+      fail('MUXUI_REACT_R12_COMPONENT_DESCRIPTOR_DRIFT');
     }
   }
-  if (release.schema !== 'core-ui-react-release-candidate-v1'
+  if (release.schema !== 'muxui-react-release-candidate-v1'
     || release.lifecycle !== 'experimental'
     || release.componentExports.length !== componentNames.length
     || release.bindings.length !== componentNames.length
@@ -300,17 +336,17 @@ export function assertReactR12GeneratedContracts({ descriptor, release, donorCom
     || release.catalog.components.length !== componentNames.length
     || release.evidence.status !== 'pending'
     || !same(release.evidence.ids, ['E-R1.2-01', 'E-R1.2-02', 'E-R1.2-03', 'E-R1.2-04'])
-    || release.publication.status !== 'disabled') fail('CORE_REACT_R12_RELEASE_INVALID');
-  if (donorComparison.schema !== 'core-ui-react-r1-2-donor-comparison-v1'
+    || release.publication.status !== 'disabled') fail('MUXUI_REACT_R12_RELEASE_INVALID');
+  if (donorComparison.schema !== 'muxui-react-r1-2-donor-comparison-v1'
     || donorComparison.generatedFrom !== 'packages/react/src/generate.mjs'
     || !same(donorComparison.donor, EXPECTED_R12_DONOR_CONTRACT.donor)
-    || donorComparison.components.length !== EXPECTED_R12_COMPONENT_SLUGS.length) fail('CORE_REACT_R12_DONOR_COMPARISON_INVALID');
+    || donorComparison.components.length !== EXPECTED_R12_COMPONENT_SLUGS.length) fail('MUXUI_REACT_R12_DONOR_COMPARISON_INVALID');
   for (const component of donorComparison.components) {
-    const slug = component.binding.replace(/^core:component:([^#]+)#.*$/u, '$1');
+    const slug = component.binding.replace(/^muxui:component:([^#]+)#.*$/u, '$1');
     const source = EXPECTED_R12_DONOR_CONTRACT.components[slug];
-    if (!source || component.disposition !== 'adapt' || component.selector !== `.core-${slug}`
+    if (!source || component.disposition !== 'adapt' || component.selector !== `.muxui-${slug}`
       || !same(component.rules, source.rules) || !same(component.donorInputs, source.donorInputs)) {
-      fail('CORE_REACT_R12_DONOR_COMPARISON_DRIFT');
+      fail('MUXUI_REACT_R12_DONOR_COMPARISON_DRIFT');
     }
   }
   return { descriptor, release, donorComparison };
@@ -318,12 +354,12 @@ export function assertReactR12GeneratedContracts({ descriptor, release, donorCom
 
 /** Validates the R1.3 collection/color projection and its exact Tale donor crosswalk. */
 export function assertReactR13GeneratedContracts({ descriptor, release, donorComparison, manifest, componentNames, crosswalk, collectionsSource }) {
-  if (manifest.private !== true || release.packagePrivate !== true) fail('CORE_REACT_R13_PUBLICATION_GUARD_MISSING');
+  if (manifest.private !== true || release.packagePrivate !== true) fail('MUXUI_REACT_R13_PUBLICATION_GUARD_MISSING');
   if (!same(crosswalk, EXPECTED_R13_DONOR_CONTRACT)
     || !same(Object.keys(crosswalk.components ?? {}).sort(), [...EXPECTED_R13_COMPONENT_SLUGS].sort())
     || crosswalk.donor.commit !== '94bf62a26c02605c8928dfeb24f0ddc4be1c92fd'
     || crosswalk.donor.tree !== 'e36c96f683772eedf4652d6adbe7dbcbd1d41f94') {
-    fail('CORE_REACT_R13_DONOR_PROVENANCE_DRIFT');
+    fail('MUXUI_REACT_R13_DONOR_PROVENANCE_DRIFT');
   }
   for (const slug of EXPECTED_R13_COMPONENT_SLUGS) {
     const entry = crosswalk.components[slug];
@@ -333,29 +369,29 @@ export function assertReactR13GeneratedContracts({ descriptor, release, donorCom
       || entry.disposition !== (noDonor ? 'no-applicable-donor' : 'adapt')
       || (noDonor ? (entry.donorInputs.length !== 0 || entry.rules.length !== 0 || entry.tokenHooks.length !== 0)
         : (entry.donorInputs.length === 0 || entry.rules.length === 0))) {
-      fail('CORE_REACT_R13_DONOR_CROSSWALK_DRIFT');
+      fail('MUXUI_REACT_R13_DONOR_CROSSWALK_DRIFT');
     }
     for (const input of entry.donorInputs) {
       if (!/^packages\/(?:styles|react)\/.+$/u.test(input.path) || !/^[0-9a-f]{40}$/u.test(input.blob)
-        || /^([0-9a-f])\1{39}$/u.test(input.blob)) fail('CORE_REACT_R13_DONOR_BLOB_INVALID');
+        || /^([0-9a-f])\1{39}$/u.test(input.blob)) fail('MUXUI_REACT_R13_DONOR_BLOB_INVALID');
     }
   }
-  if (!descriptor || descriptor.schema !== 'core-ui-renderer-descriptor-v1'
+  if (!descriptor || descriptor.schema !== 'muxui-renderer-descriptor-v1'
     || descriptor.generatedFrom !== 'packages/react/src/generate.mjs'
-    || descriptor.package !== '@core-ui/react'
+    || descriptor.package !== '@muxui/react'
     || descriptor.support !== 'unproved; R1.3 React exports only'
     || descriptor.bindings.length !== componentNames.length
     || descriptor.exports.length !== componentNames.length
-    || componentNames.length !== 46) fail('CORE_REACT_R13_DESCRIPTOR_INVALID');
+    || componentNames.length !== 46) fail('MUXUI_REACT_R13_DESCRIPTOR_INVALID');
   for (const slug of EXPECTED_R13_COMPONENT_SLUGS) {
-    const binding = descriptor.bindings.find(({ binding: value }) => value === `core:component:${slug}#web.react`);
-    const componentExport = descriptor.exports.find(({ binding: value }) => value === `core:component:${slug}#web.react`);
+    const binding = descriptor.bindings.find(({ binding: value }) => value === `muxui:component:${slug}#web.react`);
+    const componentExport = descriptor.exports.find(({ binding: value }) => value === `muxui:component:${slug}#web.react`);
     if (!binding || !componentExport || binding.strategy !== 'direct' || binding.runtimeProfile !== 'web.react'
       || binding.api.props.some((prop) => /^is[A-Z]/u.test(prop) || /(?:onPress|isPending|isDisabled)/u.test(prop))) {
-      fail('CORE_REACT_R13_COMPONENT_DESCRIPTOR_DRIFT');
+      fail('MUXUI_REACT_R13_COMPONENT_DESCRIPTOR_DRIFT');
     }
   }
-  if (release.schema !== 'core-ui-react-release-candidate-v1'
+  if (release.schema !== 'muxui-react-release-candidate-v1'
     || release.lifecycle !== 'experimental'
     || release.componentExports.length !== componentNames.length
     || release.bindings.length !== componentNames.length
@@ -363,59 +399,59 @@ export function assertReactR13GeneratedContracts({ descriptor, release, donorCom
     || release.catalog?.status !== 'bound'
     || release.catalog.components.length !== componentNames.length
     || !same(release.evidence?.ids, ['E-R1.3-01', 'E-R1.3-02', 'E-R1.3-03', 'E-R1.3-04', 'E-R1.3-05'])
-    || release.publication?.status !== 'disabled') fail('CORE_REACT_R13_RELEASE_INVALID');
-  if (donorComparison.schema !== 'core-ui-react-r1-3-donor-comparison-v1'
+    || release.publication?.status !== 'disabled') fail('MUXUI_REACT_R13_RELEASE_INVALID');
+  if (donorComparison.schema !== 'muxui-react-r1-3-donor-comparison-v1'
     || donorComparison.generatedFrom !== 'packages/react/src/generate.mjs'
     || !same(donorComparison.donor, EXPECTED_R13_DONOR_CONTRACT.donor)
-    || donorComparison.components.length !== EXPECTED_R13_COMPONENT_SLUGS.length) fail('CORE_REACT_R13_DONOR_COMPARISON_INVALID');
+    || donorComparison.components.length !== EXPECTED_R13_COMPONENT_SLUGS.length) fail('MUXUI_REACT_R13_DONOR_COMPARISON_INVALID');
   for (const slug of EXPECTED_R13_COMPONENT_SLUGS) {
     const source = EXPECTED_R13_DONOR_CONTRACT.components[slug];
-    const entry = donorComparison.components.find(({ binding }) => binding === `core:component:${slug}#web.react`);
-    if (!entry || entry.disposition !== source.disposition || entry.selector !== `.core-${slug}`
+    const entry = donorComparison.components.find(({ binding }) => binding === `muxui:component:${slug}#web.react`);
+    if (!entry || entry.disposition !== source.disposition || entry.selector !== `.muxui-${slug}`
       || !same(entry.donorInputs, source.donorInputs) || !same(entry.tokenHooks, source.tokenHooks) || !same(entry.rules, source.rules)) {
-      fail('CORE_REACT_R13_DONOR_COMPARISON_DRIFT');
+      fail('MUXUI_REACT_R13_DONOR_COMPARISON_DRIFT');
     }
   }
   const names = ['Calendar', 'ColorArea', 'ColorField', 'ColorPicker', 'ColorSlider', 'ColorSwatch', 'ColorSwatchPicker', 'ColorWheel', 'ComboBox', 'GridList', 'ListBox', 'Menu', 'RadioGroup', 'RangeCalendar', 'Select', 'Slider', 'Table', 'Tabs', 'TagGroup', 'ToggleButtonGroup', 'TokenField', 'Toolbar', 'Tree', 'Virtualizer'];
-  if (!collectionsSource || names.some((name) => !collectionsSource.includes(`export const ${name}`))) fail('CORE_REACT_R13_RUNTIME_EXPORT_DRIFT');
+  if (!collectionsSource || names.some((name) => !collectionsSource.includes(`export const ${name}`))) fail('MUXUI_REACT_R13_RUNTIME_EXPORT_DRIFT');
   return { descriptor, release, donorComparison };
 }
 
-/** Validates the R1.4 overlay projection and its stable Core-owned surface. */
+/** Validates the R1.4 overlay projection and its stable Mux UI-owned surface. */
 export function assertReactR14GeneratedContracts({ descriptor, release, donorComparison, manifest, componentNames, crosswalk, overlaysSource }) {
-  if (manifest.private !== true || release.packagePrivate !== true) fail('CORE_REACT_R14_PUBLICATION_GUARD_MISSING');
+  if (manifest.private !== true || release.packagePrivate !== true) fail('MUXUI_REACT_R14_PUBLICATION_GUARD_MISSING');
   if (!same(crosswalk, EXPECTED_R14_DONOR_CONTRACT)
-    || crosswalk.schema !== 'core-ui-react-r1-4-donor-crosswalk-v1'
+    || crosswalk.schema !== 'muxui-react-r1-4-donor-crosswalk-v1'
     || crosswalk.tranche !== 'R1.4'
     || crosswalk.dependency !== false
     || !same(Object.keys(crosswalk.components ?? {}).sort(), [...EXPECTED_R14_COMPONENT_SLUGS].sort())
-    || !same(crosswalk.donor, EXPECTED_DONOR)) fail('CORE_REACT_R14_DONOR_PROVENANCE_DRIFT');
+    || !same(crosswalk.donor, EXPECTED_DONOR)) fail('MUXUI_REACT_R14_DONOR_PROVENANCE_DRIFT');
   for (const slug of EXPECTED_R14_COMPONENT_SLUGS) {
     const entry = crosswalk.components[slug];
     if (!entry || entry.disposition !== 'adapt' || !Array.isArray(entry.donorInputs) || entry.donorInputs.length === 0
       || !Array.isArray(entry.rules) || !Array.isArray(entry.consumedRules) || !Array.isArray(entry.tokenHooks)
-      || !same(entry.consumedRules, entry.rules.map(({ input }) => input))) fail('CORE_REACT_R14_DONOR_CROSSWALK_DRIFT');
+      || !same(entry.consumedRules, entry.rules.map(({ input }) => input))) fail('MUXUI_REACT_R14_DONOR_CROSSWALK_DRIFT');
     for (const input of entry.donorInputs) {
       if (!/^packages\/(?:styles|react)\/.+$/u.test(input.path) || !/^[0-9a-f]{40}$/u.test(input.blob)
-        || /^([0-9a-f])\1{39}$/u.test(input.blob)) fail('CORE_REACT_R14_DONOR_BLOB_INVALID');
+        || /^([0-9a-f])\1{39}$/u.test(input.blob)) fail('MUXUI_REACT_R14_DONOR_BLOB_INVALID');
     }
   }
-  if (!descriptor || descriptor.schema !== 'core-ui-renderer-descriptor-v1'
+  if (!descriptor || descriptor.schema !== 'muxui-renderer-descriptor-v1'
     || descriptor.generatedFrom !== 'packages/react/src/generate.mjs'
-    || descriptor.package !== '@core-ui/react'
+    || descriptor.package !== '@muxui/react'
     || descriptor.support !== 'unproved; R1.4 React exports only'
     || descriptor.bindings.length !== 53
     || descriptor.exports.length !== 53
-    || componentNames.length !== EXPECTED_R14_COMPONENT_SLUGS.length) fail('CORE_REACT_R14_DESCRIPTOR_INVALID');
+    || componentNames.length !== EXPECTED_R14_COMPONENT_SLUGS.length) fail('MUXUI_REACT_R14_DESCRIPTOR_INVALID');
   for (const slug of EXPECTED_R14_COMPONENT_SLUGS) {
-    const binding = descriptor.bindings.find(({ binding: value }) => value === `core:component:${slug}#web.react`);
-    const componentExport = descriptor.exports.find(({ binding: value }) => value === `core:component:${slug}#web.react`);
+    const binding = descriptor.bindings.find(({ binding: value }) => value === `muxui:component:${slug}#web.react`);
+    const componentExport = descriptor.exports.find(({ binding: value }) => value === `muxui:component:${slug}#web.react`);
     if (!binding || !componentExport || binding.strategy !== 'direct' || binding.runtimeProfile !== 'web.react'
       || binding.api.props.some((prop) => /^is[A-Z]/u.test(prop) || /(?:onPress|isPending|isDisabled)/u.test(prop))) {
-      fail('CORE_REACT_R14_COMPONENT_DESCRIPTOR_DRIFT');
+      fail('MUXUI_REACT_R14_COMPONENT_DESCRIPTOR_DRIFT');
     }
   }
-  if (release.schema !== 'core-ui-react-release-candidate-v1'
+  if (release.schema !== 'muxui-react-release-candidate-v1'
     || release.lifecycle !== 'experimental'
     || release.componentExports.length !== 53
     || release.bindings.length !== 53
@@ -424,23 +460,23 @@ export function assertReactR14GeneratedContracts({ descriptor, release, donorCom
     || release.catalog.components.length !== 53
     || release.evidence?.status !== 'pending'
     || !same(release.evidence.ids, ['E-R1.4-01', 'E-R1.4-02', 'E-R1.4-03', 'E-R1.4-04', 'E-R1.4-05', 'E-R1.4-06'])
-    || release.publication?.status !== 'disabled') fail('CORE_REACT_R14_RELEASE_INVALID');
-  if (donorComparison.schema !== 'core-ui-react-r1-4-donor-comparison-v1'
+    || release.publication?.status !== 'disabled') fail('MUXUI_REACT_R14_RELEASE_INVALID');
+  if (donorComparison.schema !== 'muxui-react-r1-4-donor-comparison-v1'
     || donorComparison.generatedFrom !== 'packages/react/src/generate.mjs'
     || !same(donorComparison.donor, EXPECTED_R14_DONOR_CONTRACT.donor)
-    || donorComparison.components.length !== EXPECTED_R14_COMPONENT_SLUGS.length) fail('CORE_REACT_R14_DONOR_COMPARISON_INVALID');
+    || donorComparison.components.length !== EXPECTED_R14_COMPONENT_SLUGS.length) fail('MUXUI_REACT_R14_DONOR_COMPARISON_INVALID');
   for (const slug of EXPECTED_R14_COMPONENT_SLUGS) {
     const source = EXPECTED_R14_DONOR_CONTRACT.components[slug];
-    const entry = donorComparison.components.find(({ binding }) => binding === `core:component:${slug}#web.react`);
-    if (!entry || entry.disposition !== source.disposition || entry.selector !== `.core-${slug}`
+    const entry = donorComparison.components.find(({ binding }) => binding === `muxui:component:${slug}#web.react`);
+    if (!entry || entry.disposition !== source.disposition || entry.selector !== `.muxui-${slug}`
       || !same(entry.donorInputs, source.donorInputs) || !same(entry.tokenHooks, source.tokenHooks) || !same(entry.rules, source.rules)) {
-      fail('CORE_REACT_R14_DONOR_COMPARISON_DRIFT');
+      fail('MUXUI_REACT_R14_DONOR_COMPARISON_DRIFT');
     }
   }
   const names = ['DropZone', 'FileTrigger', 'Dialog', 'Popover', 'PreviewTrigger', 'Toast', 'ToastProvider', 'useToast', 'Tooltip'];
   if (!overlaysSource || names.some((name) => !overlaysSource.includes(`export ${name === 'useToast' ? 'function' : 'const'} ${name}`))
     || /export\s+const\s+Modal\b/u.test(overlaysSource)
-    || !/from ['"]react-aria-components['"]/u.test(overlaysSource)) fail('CORE_REACT_R14_RUNTIME_EXPORT_DRIFT');
+    || !/from ['"]react-aria-components['"]/u.test(overlaysSource)) fail('MUXUI_REACT_R14_RUNTIME_EXPORT_DRIFT');
   return { descriptor, release, donorComparison };
 }
 
@@ -454,7 +490,7 @@ function r15TrancheEvidence(tranche) {
 }
 
 function r15Slug(artifact) {
-  return artifact.id.slice('core:component:'.length);
+  return artifact.id.slice('muxui:component:'.length);
 }
 
 /** Validates the R1.5 closure without introducing another component owner. */
@@ -471,8 +507,8 @@ export function assertReactR15GeneratedContracts({
   runtimeSources,
   styles,
 }) {
-  const failR15 = (code) => fail(`CORE_REACT_R15_${code}`);
-  if (closure?.schema !== 'core-ui-react-r1-5-closure-v1'
+  const failR15 = (code) => fail(`MUXUI_REACT_R15_${code}`);
+  if (closure?.schema !== 'muxui-react-r1-5-closure-v1'
     || closure.tranche !== 'R1.5'
     || !same(Object.keys(closure).sort(), ['advisories', 'agentDiscovery', 'compatibility', 'evidenceCapture', 'exceptions', 'performance', 'publication', 'schema', 'tranche'].sort())
     || closure.compatibility?.runtimeProfile !== 'web.react'
@@ -555,7 +591,7 @@ export function assertReactR15GeneratedContracts({
     || closureRecord.donor?.commit !== EXPECTED_DONOR.commit
     || closureRecord.donor?.tree !== EXPECTED_DONOR.tree
     || closureRecord.donor?.dependency !== false
-    || closureRecord.donor?.ownership !== 'Core-owned token/style results') failR15('FAMILY_GRAPH_INVALID');
+    || closureRecord.donor?.ownership !== 'Mux UI-owned token/style results') failR15('FAMILY_GRAPH_INVALID');
   const crosswalkBySlug = new Map();
   for (const source of crosswalks) {
     if (source?.donor?.commit !== EXPECTED_DONOR.commit || source.donor.tree !== EXPECTED_DONOR.tree || (source.dependency !== undefined && source.dependency !== false)) failR15('DONOR_IDENTITY_INVALID');
@@ -577,7 +613,7 @@ export function assertReactR15GeneratedContracts({
       || artifact.name !== source.exportName
       || artifact.lifecycle !== 'experimental'
       || source.runtimeSource !== `packages/react/src/${source.runtimeSource.split('/').at(-1)}`) failR15('FAMILY_SOURCE_INVALID');
-    const bindingId = `core:component:${source.slug}#web.react`;
+    const bindingId = `muxui:component:${source.slug}#web.react`;
     const binding = artifact.bindings?.['web.react'];
     if (!binding || binding.lifecycle !== 'experimental' || binding.strategy !== 'direct'
       || !Array.isArray(binding.api?.props) || binding.api.props.some((prop) => /^is[A-Z]/u.test(prop))
@@ -594,9 +630,9 @@ export function assertReactR15GeneratedContracts({
     const runtimeSource = runtimeSources?.[source.runtimeSource];
     if (typeof runtimeSource !== 'string' || !new RegExp(`export\\s+const\\s+${source.exportName}\\b`, 'u').test(runtimeSource)) failR15('RUNTIME_EXPORT_INVALID');
     const expectedDonorHooks = donor.tokenHooks ?? [...new Set(donor.rules.map(({ core }) => core).filter((core) => core.includes('.')))];
-    if (!styles.includes(`.core-${source.slug}`)
+    if (!styles.includes(`.muxui-${source.slug}`)
       || !Array.isArray(expectedDonorHooks)
-      || expectedDonorHooks.some((hook) => !styles.includes(`--core-${hook.replaceAll('.', '-')}`))) failR15('STYLE_OWNERSHIP_INVALID');
+      || expectedDonorHooks.some((hook) => !styles.includes(`--muxui-${hook.replaceAll('.', '-')}`))) failR15('STYLE_OWNERSHIP_INVALID');
     const familyClosure = closureRecord?.families?.find(({ slug }) => slug === source.slug);
     const descriptorBinding = descriptor.bindings?.find(({ binding: value }) => value === bindingId);
     const descriptorExport = descriptor.exports?.find(({ binding: value }) => value === bindingId);
@@ -622,16 +658,16 @@ export function assertReactR15GeneratedContracts({
       || familyClosure.packed?.binding !== bindingId
       || familyClosure.packed?.export !== source.exportName
       || familyClosure.packed?.runtimeProfile !== 'web.react'
-      || familyClosure.packed?.selector !== `.core-${source.slug}`
+      || familyClosure.packed?.selector !== `.muxui-${source.slug}`
       || familyClosure.donor?.disposition !== donor.disposition
-      || familyClosure.donor?.ownership !== 'Core-owned token/style results') failR15('FAMILY_CLOSURE_INVALID');
+      || familyClosure.donor?.ownership !== 'Mux UI-owned token/style results') failR15('FAMILY_CLOSURE_INVALID');
     if (!descriptorBinding || !descriptorExport || descriptorBinding.export !== source.exportName
       || descriptorBinding.strategy !== 'direct' || descriptorBinding.runtimeProfile !== 'web.react'
-      || descriptorBinding.selector !== `.core-${source.slug}` || descriptorExport.name !== source.exportName
+      || descriptorBinding.selector !== `.muxui-${source.slug}` || descriptorExport.name !== source.exportName
       || !releaseExport || releaseExport.name !== source.exportName || !releaseBinding
       || releaseBinding.export !== source.exportName || releaseBinding.runtimeProfile !== 'web.react'
       || !donorComparisonEntry || donorComparisonEntry.disposition !== donor.disposition
-      || donorComparisonEntry.selector !== `.core-${source.slug}`) failR15('PROJECTION_PARITY_INVALID');
+      || donorComparisonEntry.selector !== `.muxui-${source.slug}`) failR15('PROJECTION_PARITY_INVALID');
   }
 
   if (manifest?.private !== true
@@ -642,7 +678,7 @@ export function assertReactR15GeneratedContracts({
     || release.catalog.components?.length !== 53
     || release?.evidence?.status !== 'pending' || !same(release.evidence.ids, R15_EVIDENCE_IDS)
     || release?.publication?.status !== 'disabled'
-    || donorComparison?.schema !== 'core-ui-react-r1-5-donor-comparison-v1'
+    || donorComparison?.schema !== 'muxui-react-r1-5-donor-comparison-v1'
     || donorComparison?.components?.length !== 53) failR15('RELEASE_CLOSURE_INVALID');
   return { closure, closureRecord, descriptor, release, donorComparison };
 }

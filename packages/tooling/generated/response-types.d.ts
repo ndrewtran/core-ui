@@ -1,6 +1,6 @@
 // @generated-from: packages/tooling/command-registry.json
-// @generated-content-sha256: sha256:ba132d949a3a5d60d1ad2f213af5beb9c9bfeb8433fcb589069e3ef04dd08a2d
-import type { QueryResponseType } from '@core-ui/schema/types';
+// @generated-content-sha256: sha256:1064109e15f3c22a9b6d9bef0c87e3462811eeee06fbcf01200be9f819c218e1
+import type { QueryResponseType } from '@muxui/schema/types';
 
 export type ManifestResponseType = Extract<QueryResponseType, "catalog.manifest">;
 export type ListResponseType = Extract<QueryResponseType, "artifact.list">;

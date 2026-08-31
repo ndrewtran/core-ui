@@ -1,6 +1,6 @@
 // @generated-from: apps/react-storybook/src/generate-stories.mjs
-// @generated-content-sha256: sha256:34e45dbd9e4418ef1c14e60d074768193577ee1e477d5cc92db97332064a187e
-import * as Core from '@core-ui/react';
+// @generated-content-sha256: sha256:6181786a10d6eb6f934fbe3c4641fc8e9d054d9295cc33d471cf63c27c762aee
+import * as MuxUI from '@muxui/react';
 import { argTypesForBinding, createStory } from '../../src/storybook-factory.mjs';
 
 const binding = {
@@ -34,12 +34,12 @@ const binding = {
       "orientation"
     ]
   },
-  "binding": "core:component:slider#web.react",
+  "binding": "muxui:component:slider#web.react",
   "export": "Slider",
   "lifecycle": "experimental",
   "module": ".",
   "runtimeProfile": "web.react",
-  "selector": ".core-slider",
+  "selector": ".muxui-slider",
   "states": [
     "idle",
     "focused",
@@ -52,8 +52,9 @@ const binding = {
 const record = { family: 'Slider', tranche: 'R1.3', binding };
 
 export default {
-  title: 'Core React/R1.3/Slider',
-  component: Core.Slider,
+  title: 'Mux UI React/R1.3/Slider',
+  id: 'muxui-react-r1-3-slider',
+  component: MuxUI.Slider,
   tags: ['autodocs'],
   parameters: {
     controls: {
@@ -61,7 +62,7 @@ export default {
     },
     docs: {
       description: {
-        component: 'Private development showcase for the Core-owned Slider family.',
+        component: 'Private development showcase for the Mux UI-owned Slider family.',
       },
     },
   },

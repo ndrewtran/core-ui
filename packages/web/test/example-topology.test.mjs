@@ -27,7 +27,7 @@ function consumedHooks(source) {
   return {
     classes: [...source.matchAll(/(?:class|className)\s*=\s*["']([^"']+)["']/gu)]
       .flatMap((match) => match[1].split(/\s+/u)).filter(Boolean),
-    attributes: [...source.matchAll(/\b(data-core-[a-z0-9-]+)(?:\s*=|\b)/gu)].map((match) => match[1]),
+    attributes: [...source.matchAll(/\b(data-muxui-[a-z0-9-]+)(?:\s*=|\b)/gu)].map((match) => match[1]),
     selectors: [...source.matchAll(/querySelector(?:All)?\s*\(\s*["']([^"']+)["']/gu)].map((match) => match[1]),
   };
 }
@@ -43,7 +43,7 @@ test('E-G1.1-02 canonical examples consume no undocumented topology', async () =
     assert.equal(descriptor.binding.ref, surface.bindingRef);
     assert.equal(descriptor.source, example.source);
     assert.ok(hooks.classes.every((name) => name === surface.rootClass.slice(1)));
-    assert.ok(hooks.attributes.every((name) => surface.states.includes(name) || name === 'data-core-slot'));
+    assert.ok(hooks.attributes.every((name) => surface.states.includes(name) || name === 'data-muxui-slot'));
     assert.deepEqual(hooks.selectors, []);
     assert.ok(!/\b(wrapper|utility|keyframe|nth-child)\b/iu.test(source));
     identities.push({
@@ -56,7 +56,7 @@ test('E-G1.1-02 canonical examples consume no undocumented topology', async () =
     });
   }
   assert.deepEqual(identities.map(({ id }) => id), [
-    'core:example:button-basic-html',
-    'core:example:button-basic-react',
+    'muxui:example:button-basic-html',
+    'muxui:example:button-basic-react',
   ]);
 });

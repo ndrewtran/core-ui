@@ -1,6 +1,6 @@
 import { access, readFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
-import { canonicalJson, parseJsonStrict } from '@core-ui/schema';
+import { canonicalJson, parseJsonStrict } from '@muxui/schema';
 import { sha256 } from './policy.mjs';
 import {
   acceptanceCommentBody,
@@ -302,17 +302,17 @@ function verifyGroups(groups, entries, profile, expectedCount) {
     if (!exact) fail('TALE_ANNEX_GROUP_INCOMPLETE', `${name} has no exact explicit group`);
   }
   const groupsByCoreToken = Map.groupBy(groups.filter((group) => group.coreTokenId), (group) => group.coreTokenId);
-  for (const [coreTokenId, matchingGroups] of groupsByCoreToken) {
-    if (matchingGroups.length !== 1) fail('TALE_ANNEX_GROUP_DUPLICATE', `${coreTokenId} has multiple owning groups`);
+  for (const [muxuiTokenId, matchingGroups] of groupsByCoreToken) {
+    if (matchingGroups.length !== 1) fail('TALE_ANNEX_GROUP_DUPLICATE', `${muxuiTokenId} has multiple owning groups`);
   }
   const entriesByCoreToken = Map.groupBy(entries.filter((entry) => entry.coreTokenId), (entry) => entry.coreTokenId);
-  for (const [coreTokenId, matchingEntries] of entriesByCoreToken) {
+  for (const [muxuiTokenId, matchingEntries] of entriesByCoreToken) {
     if (matchingEntries.length < 2) continue;
     const ordinals = matchingEntries.map((entry) => entry.occurrence.ordinal);
-    const group = groupsByCoreToken.get(coreTokenId)?.[0];
+    const group = groupsByCoreToken.get(muxuiTokenId)?.[0];
     const members = new Set(group?.members.map((member) => member.ordinal) ?? []);
     if (!group || members.size !== ordinals.length || ordinals.some((ordinal) => !members.has(ordinal))) {
-      fail('TALE_ANNEX_GROUP_INCOMPLETE', `${coreTokenId} shared mapping requires one exact explicit group`);
+      fail('TALE_ANNEX_GROUP_INCOMPLETE', `${muxuiTokenId} shared mapping requires one exact explicit group`);
     }
   }
 }
@@ -474,7 +474,10 @@ function verifyTargetProfiles(targets, profile, authority) {
     if (!authority.bindingSchema.includes(identity)) fail('TALE_ANNEX_TARGET_INVALID', `${identity} is absent from canonical binding schema`);
   }
   for (const owner of ['@core-ui/tokens', '@core-ui/web', '@core-ui/react-native']) {
-    if (!authority.architecture.includes(owner)) fail('TALE_ANNEX_TARGET_INVALID', `${owner} is absent from architecture`);
+    const currentOwner = owner.replace('@core-ui/', '@muxui/');
+    if (!authority.architecture.includes(owner) && !authority.architecture.includes(currentOwner)) {
+      fail('TALE_ANNEX_TARGET_INVALID', `${owner} is absent from architecture`);
+    }
   }
   for (const id of ['web.html', 'web.react']) {
     exactKeys(targets[id], ['bindingId', 'runtimeProfile', 'validationProfile', 'transformOwner', 'projectionOwner', 'sharedStyleSource', 'independentTokenProjection'], `targetProfiles.${id}`);

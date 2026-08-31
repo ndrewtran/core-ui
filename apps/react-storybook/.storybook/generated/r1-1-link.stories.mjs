@@ -1,6 +1,6 @@
 // @generated-from: apps/react-storybook/src/generate-stories.mjs
-// @generated-content-sha256: sha256:8fb62dee78446f00475df92d46721499b883019028b6d877d42a45891d9d7682
-import * as Core from '@core-ui/react';
+// @generated-content-sha256: sha256:e1e18f695da69e757a70b316b68956426197768c2c2e0f2ee4abf28a30892c73
+import * as MuxUI from '@muxui/react';
 import { argTypesForBinding, createStory } from '../../src/storybook-factory.mjs';
 
 const binding = {
@@ -24,12 +24,12 @@ const binding = {
       "rel"
     ]
   },
-  "binding": "core:component:link#web.react",
+  "binding": "muxui:component:link#web.react",
   "export": "Link",
   "lifecycle": "experimental",
   "module": ".",
   "runtimeProfile": "web.react",
-  "selector": ".core-link",
+  "selector": ".muxui-link",
   "states": [
     "idle",
     "current",
@@ -41,8 +41,9 @@ const binding = {
 const record = { family: 'Link', tranche: 'R1.1', binding };
 
 export default {
-  title: 'Core React/R1.1/Link',
-  component: Core.Link,
+  title: 'Mux UI React/R1.1/Link',
+  id: 'muxui-react-r1-1-link',
+  component: MuxUI.Link,
   tags: ['autodocs'],
   parameters: {
     controls: {
@@ -50,7 +51,7 @@ export default {
     },
     docs: {
       description: {
-        component: 'Private development showcase for the Core-owned Link family.',
+        component: 'Private development showcase for the Mux UI-owned Link family.',
       },
     },
   },
