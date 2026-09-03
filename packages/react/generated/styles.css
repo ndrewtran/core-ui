@@ -1,5 +1,5 @@
 /* @generated-from: packages/react/src/generate.mjs
- * @generated-content-sha256: sha256:37bfd1f14011d822a97b9984ad765f83551badcc8fafeafe45ec22c83254a6c3
+ * @generated-content-sha256: sha256:bbfabba0ce4920141ea0832219c950805eb6c81e9ba8e3cee5673d56b3f72288
  */
 :root {
   --muxui-component-button-background: #025768;
@@ -1295,7 +1295,6 @@
 .muxui-checkbox-indicator { display: inline-grid; place-items: center; inline-size: 1.125rem; block-size: 1.125rem; flex: 0 0 auto; border: 1.5px solid var(--muxui-semantic-content-faint); border-radius: var(--muxui-semantic-shape-indicator-radius); background: var(--muxui-semantic-surface-raised); color: var(--muxui-semantic-surface-canvas); font-size: var(--muxui-semantic-typography-tiny-size); font-weight: var(--muxui-semantic-typography-heading-weight); line-height: 1; }
 .muxui-checkbox-indicator[data-selected], .muxui-checkbox-indicator[data-indeterminate] { border-color: var(--muxui-semantic-selection-track); background: var(--muxui-semantic-selection-track); color: var(--muxui-semantic-action-foreground); }
 .muxui-checkbox input { accent-color: var(--muxui-semantic-selection-track); }
-.muxui-checkbox:focus-within, .muxui-checkbox[data-focus-visible] { outline: 2px solid var(--muxui-semantic-focus-ring); outline-offset: 2px; }
 .muxui-checkbox[data-invalid] .muxui-checkbox-indicator { border-color: var(--muxui-semantic-feedback-invalid); }
 .muxui-checkbox[data-disabled] { color: var(--muxui-semantic-content-default); cursor: not-allowed; }
 
@@ -1546,8 +1545,8 @@
 
 .muxui-checkbox[data-focus-visible] .muxui-checkbox-indicator {
   box-shadow:
-    0 0 0 2px var(--muxui-semantic-content-inverse),
-    0 0 0 4px var(--muxui-semantic-focus-ring);
+    0 0 0 1px var(--muxui-semantic-content-inverse),
+    0 0 0 3px var(--muxui-semantic-focus-ring);
 }
 
 .muxui-checkbox[data-selected] .muxui-checkbox-indicator {
@@ -1956,8 +1955,8 @@
 .muxui-checkbox[data-focus-visible] .muxui-checkbox-indicator,
 .muxui-checkbox:focus-within .muxui-checkbox-indicator {
   box-shadow:
-    0 0 0 2px var(--muxui-semantic-content-inverse),
-    0 0 0 4px var(--muxui-semantic-focus-ring);
+    0 0 0 1px var(--muxui-semantic-content-inverse),
+    0 0 0 3px var(--muxui-semantic-focus-ring);
 }
 
 /* MuxUI Button has one public visual variant: the pinned primary treatment. */
@@ -3538,8 +3537,8 @@
 
 .muxui-radio[data-focus-visible] .muxui-radio-indicator {
   box-shadow:
-    0 0 0 2px var(--muxui-semantic-content-inverse),
-    0 0 0 4px var(--muxui-semantic-focus-ring);
+    0 0 0 1px var(--muxui-semantic-content-inverse),
+    0 0 0 3px var(--muxui-semantic-focus-ring);
 }
 
 .muxui-radio[data-selected] .muxui-radio-indicator {
@@ -5079,8 +5078,8 @@
 
 .muxui-radio[data-focus-visible] .muxui-radio-indicator {
   box-shadow:
-    0 0 0 2px var(--muxui-focus-ring-inner),
-    0 0 0 4px var(--muxui-focus-ring-outer);
+    0 0 0 1px var(--muxui-focus-ring-inner),
+    0 0 0 3px var(--muxui-focus-ring-outer);
 }
 
 .muxui-radio {

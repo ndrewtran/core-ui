@@ -162,6 +162,29 @@ test('R1.1 MuxUI labels, checkbox indicator states, and breadcrumb current norma
   }
 });
 
+test('Checkbox and Radio focus rings stay on indicators with a 1px keyline gap', async () => {
+  const [components, collections, generated] = await Promise.all([
+    readFile(new URL('../src/styles/components.css', import.meta.url), 'utf8'),
+    readFile(new URL('../src/styles/collections.css', import.meta.url), 'utf8'),
+    readFile(new URL('../generated/styles.css', import.meta.url), 'utf8'),
+  ]);
+  const checkboxRootOutline = /\.muxui-checkbox(?::focus-within|\[data-focus-visible\])[^{}]*\{[^}]*outline:/u;
+  const focusRules = [
+    ['Checkbox focus-visible indicator', /\.muxui-checkbox\[data-focus-visible\] \.muxui-checkbox-indicator\s*\{[^}]*0 0 0 1px var\(--muxui-semantic-content-inverse\),\s*0 0 0 3px var\(--muxui-semantic-focus-ring\)[^}]*\}/u],
+    ['Checkbox focus-within indicator', /\.muxui-checkbox:focus-within \.muxui-checkbox-indicator\s*\{[^}]*0 0 0 1px var\(--muxui-semantic-content-inverse\),\s*0 0 0 3px var\(--muxui-semantic-focus-ring\)[^}]*\}/u],
+    ['Radio semantic focus-visible indicator', /\.muxui-radio\[data-focus-visible\] \.muxui-radio-indicator\s*\{[^}]*0 0 0 1px var\(--muxui-semantic-content-inverse\),\s*0 0 0 3px var\(--muxui-semantic-focus-ring\)[^}]*\}/u],
+    ['Radio mode-aware focus-visible indicator', /\.muxui-radio\[data-focus-visible\] \.muxui-radio-indicator\s*\{[^}]*0 0 0 1px var\(--muxui-focus-ring-inner\),\s*0 0 0 3px var\(--muxui-focus-ring-outer\)[^}]*\}/u],
+  ];
+
+  assert.doesNotMatch(components, checkboxRootOutline);
+  assert.doesNotMatch(generated, checkboxRootOutline);
+  for (const [label, rule] of focusRules) {
+    const source = label.startsWith('Radio') ? collections : components;
+    assert.match(source, rule, `${label} source declaration is missing`);
+    assert.match(generated, rule, `${label} generated declaration is missing`);
+  }
+});
+
 test('DisclosureGroup uses accordion trigger geometry without changing standalone Disclosure sizing', async () => {
   const server = renderToString(React.createElement(React.Fragment, null,
     React.createElement(Disclosure, { title: 'Standalone' }, 'Content'),

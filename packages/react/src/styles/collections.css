@@ -454,8 +454,8 @@
 
 .muxui-radio[data-focus-visible] .muxui-radio-indicator {
   box-shadow:
-    0 0 0 2px var(--muxui-semantic-content-inverse),
-    0 0 0 4px var(--muxui-semantic-focus-ring);
+    0 0 0 1px var(--muxui-semantic-content-inverse),
+    0 0 0 3px var(--muxui-semantic-focus-ring);
 }
 
 .muxui-radio[data-selected] .muxui-radio-indicator {
@@ -1995,8 +1995,8 @@
 
 .muxui-radio[data-focus-visible] .muxui-radio-indicator {
   box-shadow:
-    0 0 0 2px var(--muxui-focus-ring-inner),
-    0 0 0 4px var(--muxui-focus-ring-outer);
+    0 0 0 1px var(--muxui-focus-ring-inner),
+    0 0 0 3px var(--muxui-focus-ring-outer);
 }
 
 .muxui-radio {
