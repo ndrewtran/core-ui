@@ -458,6 +458,11 @@
     0 0 0 3px var(--muxui-semantic-focus-ring);
 }
 
+/* RAC keeps the native input as the focus target; the indicator owns focus paint. */
+.muxui-radio input[type='radio'] {
+  outline: none;
+}
+
 .muxui-radio[data-selected] .muxui-radio-indicator {
   border-color: var(--muxui-semantic-selection-track);
   background-color: var(--muxui-semantic-surface-raised);
@@ -1368,6 +1373,11 @@
   .muxui-list-box-item[data-focus-visible] {
     outline: 2px solid Highlight;
     outline-color: Highlight;
+  }
+
+  .muxui-radio[data-focus-visible] .muxui-radio-indicator {
+    outline: 2px solid Highlight;
+    outline-offset: 1px;
   }
 }
 

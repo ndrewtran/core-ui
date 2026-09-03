@@ -676,6 +676,7 @@
   white-space: nowrap;
   opacity: 0;
   pointer-events: none;
+  outline: none;
 }
 
 .muxui-checkbox[data-focus-visible] .muxui-checkbox-indicator,
@@ -683,6 +684,13 @@
   box-shadow:
     0 0 0 1px var(--muxui-semantic-content-inverse),
     0 0 0 3px var(--muxui-semantic-focus-ring);
+}
+
+@media (forced-colors: active) {
+  .muxui-checkbox[data-focus-visible] .muxui-checkbox-indicator {
+    outline: 2px solid Highlight;
+    outline-offset: 1px;
+  }
 }
 
 /* MuxUI Button has one public visual variant: the pinned primary treatment. */

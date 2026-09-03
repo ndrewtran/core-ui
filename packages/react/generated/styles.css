@@ -1,5 +1,5 @@
 /* @generated-from: packages/react/src/generate.mjs
- * @generated-content-sha256: sha256:bbfabba0ce4920141ea0832219c950805eb6c81e9ba8e3cee5673d56b3f72288
+ * @generated-content-sha256: sha256:f365a0eb69a95cd0bfd6ae8116dbc67baea8315ac071b60a6853bd1805a6b36c
  */
 :root {
   --muxui-component-button-background: #025768;
@@ -1950,6 +1950,7 @@
   white-space: nowrap;
   opacity: 0;
   pointer-events: none;
+  outline: none;
 }
 
 .muxui-checkbox[data-focus-visible] .muxui-checkbox-indicator,
@@ -1957,6 +1958,13 @@
   box-shadow:
     0 0 0 1px var(--muxui-semantic-content-inverse),
     0 0 0 3px var(--muxui-semantic-focus-ring);
+}
+
+@media (forced-colors: active) {
+  .muxui-checkbox[data-focus-visible] .muxui-checkbox-indicator {
+    outline: 2px solid Highlight;
+    outline-offset: 1px;
+  }
 }
 
 /* MuxUI Button has one public visual variant: the pinned primary treatment. */
@@ -3541,6 +3549,11 @@
     0 0 0 3px var(--muxui-semantic-focus-ring);
 }
 
+/* RAC keeps the native input as the focus target; the indicator owns focus paint. */
+.muxui-radio input[type='radio'] {
+  outline: none;
+}
+
 .muxui-radio[data-selected] .muxui-radio-indicator {
   border-color: var(--muxui-semantic-selection-track);
   background-color: var(--muxui-semantic-surface-raised);
@@ -4451,6 +4464,11 @@
   .muxui-list-box-item[data-focus-visible] {
     outline: 2px solid Highlight;
     outline-color: Highlight;
+  }
+
+  .muxui-radio[data-focus-visible] .muxui-radio-indicator {
+    outline: 2px solid Highlight;
+    outline-offset: 1px;
   }
 }
 
