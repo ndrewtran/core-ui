@@ -1,10 +1,12 @@
 // @generated-from: apps/react-storybook/src/generate-stories.mjs
-// @generated-content-sha256: sha256:941f879ebfff214009df4e8e4380a3b88cc5e72951b17ef82d80eebdf5dcb8ab
+// @generated-content-sha256: sha256:8c7235c6abdfa035eb78a621bbee1129fc9bdc00ac34b9e44138f24591b6f7fe
 export const manifest = Object.freeze({
   "schema": "muxui-react-storybook-manifest-v1",
   "generatedFrom": [
     "packages/react/generated/descriptor.json",
-    "catalog/react-r1-0/react-aria-1.20.0-family-evaluation.snapshot.json"
+    "catalog/react-r1-0/react-aria-1.20.0-family-evaluation.snapshot.json",
+    "catalog/components/link/examples/react/icon-composition.tsx",
+    "catalog/components/number-field/examples/react/sizing.tsx"
   ],
   "count": 53,
   "families": [
@@ -13,11 +15,17 @@ export const manifest = Object.freeze({
       "tranche": "R1.1",
       "props": [
         "disabled",
-        "pending"
+        "pending",
+        "variant",
+        "tone",
+        "size"
       ],
       "defaults": {
         "disabled": false,
-        "pending": false
+        "pending": false,
+        "size": "md",
+        "tone": "default",
+        "variant": "primary"
       },
       "states": [
         "idle",
@@ -131,7 +139,7 @@ export const manifest = Object.freeze({
         "idle",
         "disabled",
         "invalid",
-        "readonly"
+        "read-only"
       ]
     },
     {
@@ -171,9 +179,7 @@ export const manifest = Object.freeze({
         "value": 0
       },
       "states": [
-        "idle",
-        "low",
-        "high"
+        "idle"
       ]
     },
     {
@@ -290,7 +296,7 @@ export const manifest = Object.freeze({
       "states": [
         "idle",
         "disabled",
-        "readonly",
+        "read-only",
         "required",
         "invalid"
       ]
@@ -306,6 +312,9 @@ export const manifest = Object.freeze({
         "aria-labelledby",
         "value",
         "defaultValue",
+        "minValue",
+        "maxValue",
+        "unavailableDateMatcher",
         "disabled",
         "readOnly",
         "required",
@@ -321,7 +330,7 @@ export const manifest = Object.freeze({
       "states": [
         "idle",
         "disabled",
-        "readonly",
+        "read-only",
         "required",
         "invalid"
       ]
@@ -337,6 +346,11 @@ export const manifest = Object.freeze({
         "aria-labelledby",
         "value",
         "defaultValue",
+        "minValue",
+        "maxValue",
+        "unavailableDateMatcher",
+        "open",
+        "defaultOpen",
         "disabled",
         "readOnly",
         "required",
@@ -344,6 +358,7 @@ export const manifest = Object.freeze({
         "name"
       ],
       "defaults": {
+        "defaultOpen": false,
         "disabled": false,
         "invalid": false,
         "readOnly": false,
@@ -353,7 +368,7 @@ export const manifest = Object.freeze({
         "idle",
         "open",
         "disabled",
-        "readonly",
+        "read-only",
         "required",
         "invalid"
       ]
@@ -369,6 +384,11 @@ export const manifest = Object.freeze({
         "aria-labelledby",
         "value",
         "defaultValue",
+        "minValue",
+        "maxValue",
+        "unavailableDateMatcher",
+        "open",
+        "defaultOpen",
         "disabled",
         "readOnly",
         "required",
@@ -377,6 +397,7 @@ export const manifest = Object.freeze({
         "endName"
       ],
       "defaults": {
+        "defaultOpen": false,
         "disabled": false,
         "invalid": false,
         "readOnly": false,
@@ -386,7 +407,7 @@ export const manifest = Object.freeze({
         "idle",
         "open",
         "disabled",
-        "readonly",
+        "read-only",
         "required",
         "invalid"
       ]
@@ -396,6 +417,7 @@ export const manifest = Object.freeze({
       "tranche": "R1.2",
       "props": [
         "validationBehavior",
+        "validationErrors",
         "method",
         "action",
         "onSubmit",
@@ -442,7 +464,7 @@ export const manifest = Object.freeze({
       "states": [
         "idle",
         "disabled",
-        "readonly",
+        "read-only",
         "required",
         "invalid"
       ]
@@ -473,9 +495,10 @@ export const manifest = Object.freeze({
       },
       "states": [
         "idle",
+        "empty",
         "filled",
         "disabled",
-        "readonly",
+        "read-only",
         "required",
         "invalid"
       ]
@@ -493,20 +516,26 @@ export const manifest = Object.freeze({
         "defaultSelected",
         "disabled",
         "readOnly",
+        "required",
+        "invalid",
         "name",
         "value"
       ],
       "defaults": {
         "defaultSelected": false,
         "disabled": false,
+        "invalid": false,
         "readOnly": false,
+        "required": false,
         "selected": false
       },
       "states": [
         "idle",
         "selected",
         "disabled",
-        "readonly"
+        "read-only",
+        "required",
+        "invalid"
       ]
     },
     {
@@ -526,7 +555,14 @@ export const manifest = Object.freeze({
         "invalid",
         "name",
         "placeholder",
-        "type"
+        "type",
+        "autoComplete",
+        "autoFocus",
+        "inputMode",
+        "maxLength",
+        "minLength",
+        "pattern",
+        "spellCheck"
       ],
       "defaults": {
         "disabled": false,
@@ -538,7 +574,7 @@ export const manifest = Object.freeze({
       "states": [
         "idle",
         "disabled",
-        "readonly",
+        "read-only",
         "required",
         "invalid"
       ]
@@ -554,6 +590,8 @@ export const manifest = Object.freeze({
         "aria-labelledby",
         "value",
         "defaultValue",
+        "minValue",
+        "maxValue",
         "disabled",
         "readOnly",
         "required",
@@ -569,7 +607,7 @@ export const manifest = Object.freeze({
       "states": [
         "idle",
         "disabled",
-        "readonly",
+        "read-only",
         "required",
         "invalid"
       ]
@@ -586,6 +624,7 @@ export const manifest = Object.freeze({
         "focusedValue",
         "minValue",
         "maxValue",
+        "unavailableDateMatcher",
         "disabled",
         "readOnly",
         "required",
@@ -625,8 +664,7 @@ export const manifest = Object.freeze({
         "idle",
         "focused",
         "disabled",
-        "read-only",
-        "invalid"
+        "read-only"
       ]
     },
     {
@@ -667,7 +705,8 @@ export const manifest = Object.freeze({
         "value",
         "defaultValue",
         "disabled",
-        "readOnly"
+        "readOnly",
+        "children"
       ],
       "defaults": {
         "disabled": false,
@@ -692,12 +731,14 @@ export const manifest = Object.freeze({
         "channel",
         "colorSpace",
         "disabled",
+        "readOnly",
         "orientation"
       ],
       "defaults": {
         "channel": "red",
         "disabled": false,
-        "orientation": "horizontal"
+        "orientation": "horizontal",
+        "readOnly": false
       },
       "states": [
         "idle",
@@ -730,10 +771,12 @@ export const manifest = Object.freeze({
         "items",
         "value",
         "defaultValue",
-        "disabled"
+        "disabled",
+        "readOnly"
       ],
       "defaults": {
-        "disabled": false
+        "disabled": false,
+        "readOnly": false
       },
       "states": [
         "idle",
@@ -750,10 +793,16 @@ export const manifest = Object.freeze({
         "aria-labelledby",
         "value",
         "defaultValue",
+        "outerRadius",
+        "innerRadius",
+        "readOnly",
         "disabled"
       ],
       "defaults": {
-        "disabled": false
+        "disabled": false,
+        "innerRadius": 64,
+        "outerRadius": 96,
+        "readOnly": false
       },
       "states": [
         "idle",
@@ -880,11 +929,13 @@ export const manifest = Object.freeze({
         "disabled",
         "readOnly",
         "required",
-        "invalid"
+        "invalid",
+        "orientation"
       ],
       "defaults": {
         "disabled": false,
         "invalid": false,
+        "orientation": "vertical",
         "readOnly": false,
         "required": false
       },
@@ -906,6 +957,8 @@ export const manifest = Object.freeze({
         "aria-labelledby",
         "value",
         "defaultValue",
+        "focusedValue",
+        "unavailableDateMatcher",
         "minValue",
         "maxValue",
         "disabled",
@@ -939,6 +992,8 @@ export const manifest = Object.freeze({
         "items",
         "value",
         "defaultValue",
+        "open",
+        "defaultOpen",
         "disabled",
         "readOnly",
         "required",
@@ -947,6 +1002,7 @@ export const manifest = Object.freeze({
         "placeholder"
       ],
       "defaults": {
+        "defaultOpen": false,
         "disabled": false,
         "invalid": false,
         "readOnly": false,
@@ -975,6 +1031,7 @@ export const manifest = Object.freeze({
         "max",
         "step",
         "disabled",
+        "readOnly",
         "orientation"
       ],
       "defaults": {
@@ -982,6 +1039,7 @@ export const manifest = Object.freeze({
         "max": 100,
         "min": 0,
         "orientation": "horizontal",
+        "readOnly": false,
         "step": 1
       },
       "states": [
@@ -1001,6 +1059,7 @@ export const manifest = Object.freeze({
         "rows",
         "selectedIds",
         "defaultSelectedIds",
+        "sortDescriptor",
         "disabled",
         "selectionMode"
       ],
@@ -1025,11 +1084,13 @@ export const manifest = Object.freeze({
         "items",
         "value",
         "defaultValue",
+        "keyboardActivation",
         "disabled",
         "orientation"
       ],
       "defaults": {
         "disabled": false,
+        "keyboardActivation": "automatic",
         "orientation": "horizontal"
       },
       "states": [
@@ -1056,7 +1117,6 @@ export const manifest = Object.freeze({
         "idle",
         "focused",
         "disabled",
-        "selected",
         "empty"
       ]
     },
@@ -1068,12 +1128,14 @@ export const manifest = Object.freeze({
         "aria-labelledby",
         "selectedIds",
         "defaultSelectedIds",
+        "selectionMode",
         "disabled",
         "orientation"
       ],
       "defaults": {
         "disabled": false,
-        "orientation": "horizontal"
+        "orientation": "horizontal",
+        "selectionMode": "single"
       },
       "states": [
         "idle",
@@ -1114,17 +1176,14 @@ export const manifest = Object.freeze({
       "props": [
         "aria-label",
         "aria-labelledby",
-        "orientation",
-        "disabled"
+        "orientation"
       ],
       "defaults": {
-        "disabled": false,
         "orientation": "horizontal"
       },
       "states": [
         "idle",
-        "focused",
-        "disabled"
+        "focused"
       ]
     },
     {
@@ -1260,15 +1319,23 @@ export const manifest = Object.freeze({
         "defaultOpen",
         "dismissable",
         "placement",
+        "offset",
+        "crossOffset",
+        "shouldFlip",
+        "containerPadding",
         "onOpenChange",
         "className",
         "aria-label",
         "aria-labelledby"
       ],
       "defaults": {
+        "containerPadding": 12,
+        "crossOffset": 0,
         "defaultOpen": false,
         "dismissable": true,
-        "placement": "bottom"
+        "offset": 8,
+        "placement": "bottom",
+        "shouldFlip": true
       },
       "states": [
         "closed",
@@ -1287,7 +1354,12 @@ export const manifest = Object.freeze({
         "closeDelay",
         "open",
         "defaultOpen",
+        "disabled",
         "placement",
+        "offset",
+        "crossOffset",
+        "shouldFlip",
+        "containerPadding",
         "onOpenChange",
         "className",
         "aria-label",
@@ -1295,9 +1367,14 @@ export const manifest = Object.freeze({
       ],
       "defaults": {
         "closeDelay": 200,
+        "containerPadding": 12,
+        "crossOffset": 0,
         "defaultOpen": false,
         "delay": 600,
-        "placement": "top"
+        "disabled": false,
+        "offset": 8,
+        "placement": "top",
+        "shouldFlip": true
       },
       "states": [
         "closed",
@@ -1336,15 +1413,25 @@ export const manifest = Object.freeze({
         "delay",
         "closeDelay",
         "placement",
+        "offset",
+        "crossOffset",
+        "shouldFlip",
+        "containerPadding",
         "open",
         "defaultOpen",
+        "disabled",
         "onOpenChange",
         "className"
       ],
       "defaults": {
         "closeDelay": 0,
+        "containerPadding": 12,
+        "crossOffset": 0,
         "delay": 500,
-        "placement": "top"
+        "disabled": false,
+        "offset": 0,
+        "placement": "top",
+        "shouldFlip": true
       },
       "states": [
         "closed",

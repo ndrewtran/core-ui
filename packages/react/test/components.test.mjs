@@ -162,6 +162,107 @@ test('R1.1 MuxUI labels, checkbox indicator states, and breadcrumb current norma
   }
 });
 
+test('R1.1 Breadcrumbs disabled items and ProgressBar completion stay within the Mux contract', async () => {
+  const dom = new JSDOM('<!doctype html><div id="root"></div>');
+  const restore = installDom(dom);
+  const navigated = [];
+  try {
+    const root = document.querySelector('#root');
+    await act(async () => createRoot(root).render(React.createElement(React.Fragment, null,
+      React.createElement(Breadcrumbs, {
+        'aria-label': 'Breadcrumb',
+        items: [
+          { id: 'home', label: 'Home', href: '/', disabled: true },
+          { id: 'no-link', label: 'No link', disabled: true },
+          { id: 'docs', label: 'Docs', href: '/docs' },
+          { id: 'current', label: 'Current', disabled: true },
+        ],
+        onNavigate: (item) => navigated.push(item.id),
+      }),
+      React.createElement(ProgressBar, { label: 'Default complete', value: 100 }),
+      React.createElement(ProgressBar, { label: 'Over max', value: 125, minValue: 10, maxValue: 100 }),
+      React.createElement(ProgressBar, { label: 'Infinity complete', value: Infinity }),
+      React.createElement(ProgressBar, { label: 'NaN incomplete', value: NaN }),
+      React.createElement(ProgressBar, { label: 'Below max', value: 99, minValue: 10, maxValue: 100 }),
+      React.createElement(ProgressBar, { label: 'Indeterminate' }),
+      React.createElement(ProgressBar, { label: 'Zero width', value: 20, minValue: 20, maxValue: 20 }),
+    )));
+    const disabledLink = root.querySelector('.muxui-breadcrumbs-link[data-disabled]');
+    assert.ok(disabledLink);
+    assert.equal(disabledLink.getAttribute('aria-disabled'), 'true');
+    await act(async () => disabledLink.click());
+    const disabledSpans = [...root.querySelectorAll('.muxui-breadcrumbs-current[data-disabled]')];
+    assert.equal(disabledSpans.length, 2);
+    assert.deepEqual(disabledSpans.map((item) => item.getAttribute('aria-disabled')), ['true', 'true']);
+    const currentItem = root.querySelector('.muxui-breadcrumbs-current[aria-current="page"]');
+    assert.ok(currentItem);
+    assert.equal(currentItem.getAttribute('aria-disabled'), 'true');
+    await act(async () => disabledSpans.forEach((item) => item.click()));
+    assert.deepEqual(navigated, []);
+
+    const progressBars = [...root.querySelectorAll('.muxui-progress-bar')];
+    assert.equal(progressBars.length, 7);
+    assert.equal(progressBars[0].getAttribute('data-complete'), 'true');
+    assert.equal(progressBars[1].getAttribute('data-complete'), 'true');
+    assert.equal(progressBars[2].getAttribute('data-complete'), 'true');
+    assert.equal(progressBars[3].hasAttribute('data-complete'), false);
+    assert.equal(progressBars[4].hasAttribute('data-complete'), false);
+    assert.equal(progressBars[5].hasAttribute('data-complete'), false);
+    assert.equal(progressBars[6].hasAttribute('data-complete'), false);
+  } finally {
+    restore();
+    dom.window.close();
+  }
+});
+
+test('Checkbox and Radio focus rings stay on indicators with a 1px keyline gap', async () => {
+  const [components, collections, generated] = await Promise.all([
+    readFile(new URL('../src/styles/components.css', import.meta.url), 'utf8'),
+    readFile(new URL('../src/styles/collections.css', import.meta.url), 'utf8'),
+    readFile(new URL('../generated/styles.css', import.meta.url), 'utf8'),
+  ]);
+  const rootFocusOutline = /\.muxui-(?:checkbox|radio)(?::focus-within|\[data-focus-visible\])\s*\{[^}]*outline:/u;
+  const focusRules = [
+    ['Checkbox focus-visible indicator', /\.muxui-checkbox\[data-focus-visible\] \.muxui-checkbox-indicator\s*\{[^}]*0 0 0 1px var\(--muxui-semantic-content-inverse\),\s*0 0 0 3px var\(--muxui-semantic-focus-ring\)[^}]*\}/u],
+    ['Checkbox focus-within indicator', /\.muxui-checkbox:focus-within \.muxui-checkbox-indicator\s*\{[^}]*0 0 0 1px var\(--muxui-semantic-content-inverse\),\s*0 0 0 3px var\(--muxui-semantic-focus-ring\)[^}]*\}/u],
+    ['Radio semantic focus-visible indicator', /\.muxui-radio\[data-focus-visible\] \.muxui-radio-indicator\s*\{[^}]*0 0 0 1px var\(--muxui-semantic-content-inverse\),\s*0 0 0 3px var\(--muxui-semantic-focus-ring\)[^}]*\}/u],
+    ['Radio mode-aware focus-visible indicator', /\.muxui-radio\[data-focus-visible\] \.muxui-radio-indicator\s*\{[^}]*0 0 0 1px var\(--muxui-focus-ring-inner\),\s*0 0 0 3px var\(--muxui-focus-ring-outer\)[^}]*\}/u],
+  ];
+  const forcedColorsFocusRules = [
+    ['Checkbox forced-colors indicator', components, /\.muxui-checkbox\[data-focus-visible\] \.muxui-checkbox-indicator\s*\{[^}]*outline:\s*2px solid Highlight;[^}]*outline-offset:\s*1px;/u],
+    ['Radio forced-colors indicator', collections, /\.muxui-radio\[data-focus-visible\] \.muxui-radio-indicator\s*\{[^}]*outline:\s*2px solid Highlight;[^}]*outline-offset:\s*1px;/u],
+  ];
+
+  assert.doesNotMatch(components, rootFocusOutline);
+  assert.doesNotMatch(generated, rootFocusOutline);
+  for (const [label, rule] of focusRules) {
+    const source = label.startsWith('Radio') ? collections : components;
+    assert.match(source, rule, `${label} source declaration is missing`);
+    assert.match(generated, rule, `${label} generated declaration is missing`);
+  }
+  for (const [label, source, rule] of forcedColorsFocusRules) {
+    assert.match(source, rule, `${label} source declaration is missing`);
+    assert.match(generated, rule, `${label} generated declaration is missing`);
+  }
+});
+
+test('Checkbox and Radio generated CSS suppresses native input outlines', async () => {
+  const [components, collections, generated] = await Promise.all([
+    readFile(new URL('../src/styles/components.css', import.meta.url), 'utf8'),
+    readFile(new URL('../src/styles/collections.css', import.meta.url), 'utf8'),
+    readFile(new URL('../generated/styles.css', import.meta.url), 'utf8'),
+  ]);
+  const inputOutlineRules = [
+    ['Checkbox', components, /\.muxui-checkbox input\[type='checkbox'\]\s*\{[^}]*outline:\s*none;/u],
+    ['Radio', collections, /\.muxui-radio input\[type='radio'\]\s*\{[^}]*outline:\s*none;/u],
+  ];
+
+  for (const [label, source, rule] of inputOutlineRules) {
+    assert.match(source, rule, `${label} source input reset is missing`);
+    assert.match(generated, rule, `${label} generated input reset is missing`);
+  }
+});
+
 test('DisclosureGroup uses accordion trigger geometry without changing standalone Disclosure sizing', async () => {
   const server = renderToString(React.createElement(React.Fragment, null,
     React.createElement(Disclosure, { title: 'Standalone' }, 'Content'),
